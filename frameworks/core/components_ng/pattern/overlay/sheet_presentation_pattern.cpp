@@ -343,16 +343,16 @@ void SheetPresentationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    scale_ = pipelineContext->GetFontScale();
     InitFoldState();
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    auto targetNodeContext = targetNode->GetContext();
+    CHECK_NULL_VOID(targetNodeContext);
+    scale_ = targetNodeContext->GetFontScale();
+    targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
+    targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {

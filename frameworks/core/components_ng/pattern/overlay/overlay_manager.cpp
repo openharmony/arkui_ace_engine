@@ -767,33 +767,35 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
         TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
-void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
+void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& containerNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire auto save enter");
-    CHECK_NULL_VOID(ContainerNode);
-    if (!ContainerNode->NeedRequestAutoSave()) {
+    CHECK_NULL_VOID(containerNode);
+    if (!containerNode->NeedRequestAutoSave()) {
         return;
     }
     auto container = Container::Current();
-    auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-
-    const auto& nodeTag = ContainerNode->GetTag();
+    if (container->IsSubContainer()) {
+        auto partentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container->RequestAutoSave(containerNode, nullptr, nullptr, true, partentContainerId);
+        return;
+    }
+    auto containerId = Container::CurrentId();
+    const auto& nodeTag = containerNode->GetTag();
     if (nodeTag == V2::SHEET_PAGE_TAG) {
         // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
-        auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
+        auto layoutProperty = containerNode->GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto currentStyle = layoutProperty->GetSheetStyleValue();
+        auto currentStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (currentStyle.instanceId.has_value()) {
-            auto pattern = ContainerNode->GetPattern<SheetPresentationPattern>();
+            auto pattern = containerNode->GetPattern<SheetPresentationPattern>();
             auto targetNode = FrameNode::GetFrameNode(pattern->GetTargetTag(), pattern->GetTargetId());
             CHECK_NULL_VOID(targetNode);
-            currentId = targetNode->GetInstanceId();
+            containerId = targetNode->GetInstanceId();
         }
-    } else if (container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
     }
-    container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
+    container->RequestAutoSave(containerNode, nullptr, nullptr, true, containerId);
 }
 
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)

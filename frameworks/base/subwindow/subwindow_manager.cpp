@@ -603,7 +603,6 @@ void SubwindowManager::HideSheetSubWindow(int32_t containerId)
         subwindow->HideSubWindowNG();
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "fail to hide sheet subwindow, instanceId is %{public}d.", containerId);
 }
 
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
