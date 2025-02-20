@@ -33,33 +33,35 @@ public:
 
 class TapGestureModelImpl : public OHOS::Ace::TapGestureModel {
 public:
-    void Create(int32_t countNum, int32_t fingersNum, double distanceThreshold) override;
+    void Create(int32_t countNum, int32_t fingersNum, double distanceThreshold, bool isLimitFingerCount) override;
 };
 
 class LongPressGestureModelImpl : public OHOS::Ace::LongPressGestureModel {
 public:
-    void Create(int32_t fingersNum, bool repeatResult, int32_t durationNum) override;
+    void Create(int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount) override;
 };
 
 class PanGestureModelImpl : public OHOS::Ace::PanGestureModel {
 public:
-    void Create(int32_t fingersNum, const PanDirection& panDirection, double distanceNum) override;
+    void Create(
+        int32_t fingersNum, const PanDirection& panDirection, double distanceNum, bool isLimitFingerCount) override;
     void SetPanGestureOption(const RefPtr<PanGestureOption>& panGestureOption) override;
 };
 
 class SwipeGestureModelImpl : public OHOS::Ace::SwipeGestureModel {
 public:
-    void Create(int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum) override;
+    void Create(
+        int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum, bool isLimitFingerCount) override;
 };
 
 class PinchGestureModelImpl : public OHOS::Ace::PinchGestureModel {
 public:
-    void Create(int32_t fingersNum, double distanceNum) override;
+    void Create(int32_t fingersNum, double distanceNum, bool isLimitFingerCount) override;
 };
 
 class RotationGestureModelImpl : public OHOS::Ace::RotationGestureModel {
 public:
-    void Create(int32_t fingersNum, double angleNum) override;
+    void Create(int32_t fingersNum, double angleNum, bool isLimitFingerCount) override;
 };
 
 class GestureGroupModelImpl : public OHOS::Ace::GestureGroupModel {

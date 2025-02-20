@@ -4498,6 +4498,12 @@ FrameNode* FrameNode::GetFrameNodeChildByIndex(uint32_t index, bool isCache, boo
     return RawPtr(frameNode);
 }
 
+FrameNode* FrameNode::GetFrameNodeChildByIndexWithoutBuild(uint32_t index)
+{
+    auto frameNode = DynamicCast<FrameNode>(UINode::GetFrameChildByIndex(index, false, false, false));
+    return RawPtr(frameNode);
+}
+
 int32_t FrameNode::GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const
 {
     return frameProxy_->GetChildIndex(child);
@@ -5080,6 +5086,9 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
         event.SetTiltY(touchEvent.tiltY.value());
     }
     event.SetSourceTool(touchEvent.sourceTool);
+    EventTarget eventTarget;
+    eventTarget.id = GetInspectorId().value_or("").c_str();
+    event.SetTarget(eventTarget);
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;

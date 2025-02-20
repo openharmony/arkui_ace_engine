@@ -28,7 +28,7 @@ class PinchRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PinchRecognizer, MultiFingersRecognizer);
 
 public:
-    PinchRecognizer(int32_t fingers, double distance);
+    PinchRecognizer(int32_t fingers, double distance, bool isLimitFingerCount = false);
     ~PinchRecognizer() override = default;
 
     void OnAccepted() override;

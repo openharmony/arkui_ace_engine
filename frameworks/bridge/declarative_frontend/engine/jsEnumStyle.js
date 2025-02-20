@@ -624,6 +624,18 @@ var FlexWrap;
   FlexWrap[FlexWrap["WrapReverse"] = 2] = "WrapReverse";
 })(FlexWrap || (FlexWrap = {}));
 
+class LayoutPolicy {
+  id_ = '';
+
+  constructor(id) {
+    this.id_ = id;
+  }
+
+  static get matchParent() {
+    return new LayoutPolicy('matchParent');
+  }
+}
+
 var BlurStyle;
 (function (BlurStyle) {
   BlurStyle[BlurStyle["SmallLight"] = 100] = "SmallLight";
@@ -1057,10 +1069,14 @@ var NavDestinationMode;
 
 var NavigationSystemTransitionType;
 (function (NavigationSystemTransitionType) {
-  NavigationSystemTransitionType[NavigationSystemTransitionType["DEFAULT"] = 0] = "DEFAULT";
-  NavigationSystemTransitionType[NavigationSystemTransitionType["NONE"] = 1] = "NONE";
-  NavigationSystemTransitionType[NavigationSystemTransitionType["TITLE"] = 2] = "TITLE";
-  NavigationSystemTransitionType[NavigationSystemTransitionType["CONTENT"] = 3] = "CONTENT";
+  NavigationSystemTransitionType[NavigationSystemTransitionType.DEFAULT = 0] = 'DEFAULT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.NONE = 1] = 'NONE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.TITLE = 2] = 'TITLE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.CONTENT = 3] = 'CONTENT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.FADE = 4] = 'FADE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.EXPLODE = 5] = 'EXPLODE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_RIGHT = 6] = 'SLIDE_RIGHT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_BOTTOM = 7] = 'SLIDE_BOTTOM';
 }(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
@@ -1166,6 +1182,7 @@ var KeySource;
 (function (KeySource) {
   KeySource[KeySource["Unknown"] = 0] = "Unknown";
   KeySource[KeySource["Keyboard"] = 4] = "Keyboard";
+  KeySource[KeySource.JOYSTICK = 5] = 'JOYSTICK';
 })(KeySource || (KeySource = {}));
 
 var SeekMode;
@@ -3486,3 +3503,15 @@ class ImageAnalyzerController {
     return this.getSupportTypesAction();
   }
 }
+
+let AxisModel;
+(function (AxisModel) {
+  AxisModel[AxisModel.ABS_X = 0] = 'ABS_X';
+  AxisModel[AxisModel.ABS_Y = 1] = 'ABS_Y';
+  AxisModel[AxisModel.ABS_Z = 2] = 'ABS_Z';
+  AxisModel[AxisModel.ABS_RZ = 3] = 'ABS_RZ';
+  AxisModel[AxisModel.ABS_GAS = 4] = 'ABS_GAS';
+  AxisModel[AxisModel.ABS_BRAKE = 5] = 'ABS_BRAKE';
+  AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
+  AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
+})(AxisModel || (AxisModel = {}));

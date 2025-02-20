@@ -40,6 +40,11 @@ struct ButtonProperties {
     RefPtr<NG::ClickEvent> action; // button click action
 };
 
+enum class PopupKeyboardAvoidMode {
+    DEFAULT,
+    NONE
+};
+
 using StateChangeFunc = std::function<void(const std::string&)>;
 using OnWillDismiss = std::function<void(int32_t)>;
 class PopupParam : public AceType {
@@ -490,6 +495,16 @@ public:
         return followTransformOfTarget_;
     }
 
+    void SetKeyBoardAvoidMode (PopupKeyboardAvoidMode keyboardAvoidMode)
+    {
+        keyboardAvoidMode_ = keyboardAvoidMode;
+    }
+
+    PopupKeyboardAvoidMode GetKeyBoardAvoidMode() const
+    {
+        return keyboardAvoidMode_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -538,6 +553,7 @@ private:
     OnWillDismiss onWillDismiss_;
     bool hasTransition_ = false;
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
+    PopupKeyboardAvoidMode keyboardAvoidMode_ = PopupKeyboardAvoidMode::NONE;
 };
 
 } // namespace OHOS::Ace

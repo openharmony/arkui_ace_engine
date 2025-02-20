@@ -272,8 +272,8 @@ public:
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
-    void ShowNext();
-    void ShowPrevious();
+    void ShowNext(bool needCheckWillScroll = false);
+    void ShowPrevious(bool needCheckWillScroll = false);
     void SwipeTo(int32_t index);
     void ChangeIndex(int32_t index, bool useAnimation);
 
@@ -476,6 +476,16 @@ public:
         onContentDidScroll_ = std::make_shared<ContentDidScrollEvent>(onContentDidScroll);
     }
 
+    void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll)
+    {
+        onContentWillScroll_ = std::make_shared<ContentWillScrollEvent>(onContentWillScroll);
+    }
+
+    bool HasOnContentWillScroll() const
+    {
+        return onContentWillScroll_ && *onContentWillScroll_;
+    }
+
     std::shared_ptr<ContentDidScrollEvent> GetOnContentDidScroll() const
     {
         return onContentDidScroll_;
@@ -651,7 +661,7 @@ private:
 
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(double dragVelocity);
+    void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
 
     bool InsideIndicatorRegion(const TouchLocationInfo& locationInfo);
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -960,6 +970,17 @@ private:
 
     void CheckSpecialItemCount() const;
     bool IsCachedShow() const;
+    bool ContentWillScroll(int32_t currentIndex, int32_t comingIndex, float offset);
+    bool CheckContentWillScroll(float checkValue, float mainDelta);
+    float CalcWillScrollOffset(int32_t comingIndex);
+    std::optional<bool> OnContentWillScroll(int32_t currentIndex, int32_t comingIndex, float offset) const;
+    std::pair<int32_t, SwiperItemInfo> CalcFirstItemWithoutItemSpace() const;
+    int32_t CalcComingIndex(float mainDelta) const;
+    void TriggerAddTabBarEvent() const;
+    bool NeedEnableIgnoreBlankOffset() const
+    {
+        return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
+    }
 
     friend class SwiperHelper;
 
@@ -1108,6 +1129,7 @@ private:
     CustomContentTransitionPtr onTabsCustomContentTransition_;
     std::shared_ptr<SwiperContentAnimatedTransition> onSwiperCustomContentTransition_;
     std::shared_ptr<ContentDidScrollEvent> onContentDidScroll_;
+    std::shared_ptr<ContentWillScrollEvent> onContentWillScroll_;
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
     std::optional<int32_t> customAnimationToIndex_;

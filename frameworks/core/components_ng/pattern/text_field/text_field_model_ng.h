@@ -121,6 +121,8 @@ public:
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
+    static Dimension GetLetterSpacing(FrameNode* frameNode);
+    static bool GetEnablePreviewText(FrameNode* frameNode);
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
 

@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
@@ -686,6 +687,8 @@ void HtmlToSpan::HandleImgSpanOption(const Styles& styleMap, ImageSpanOptions& o
             options.imageAttribute->verticalAlign = StringToTextVerticalAlign(value);
         } else if (key == "width" || key == "height") {
             HandleImageSize(key, value, options);
+        } else if (key == "sync-load") {
+            options.imageAttribute->syncLoad = V2::ConvertStringToBool(value);
         }
     }
 }
@@ -702,12 +705,17 @@ void HtmlToSpan::HandleImagePixelMap(const std::string& src, ImageSpanOptions& o
     ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
     auto image = ctx->MoveCanvasImage();
     if (image != nullptr) {
-        option.imagePixelMap = image->GetPixelMap();
+        auto pixelMap = image->GetPixelMap();
+        if (pixelMap) {
+            option.imagePixelMap = pixelMap;
+        }
     }
     if (option.imagePixelMap.has_value() && option.imagePixelMap.value() != nullptr) {
         auto pixel = option.imagePixelMap.value();
         LOGI("img height: %{public}d, width: %{public}d, size:%{public}d", pixel->GetHeight(),
             pixel->GetWidth(), pixel->GetByteCount());
+    } else {
+        option.image = src;
     }
 }
 

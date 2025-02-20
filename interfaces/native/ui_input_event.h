@@ -211,6 +211,46 @@ typedef enum {
     /** Right hand. */
     ARKUI_EVENT_HAND_RIGHT = 2,
 } ArkUI_InteractionHand;
+ * @brief Enumerates the action types for axis events.
+ *
+ * @since 15
+ */
+enum {
+    /** The axis event is abnormal. */
+    UI_AXIS_EVENT_ACTION_NONE = 0,
+    /** The axis event begins. */
+    UI_AXIS_EVENT_ACTION_BEGIN = 1,
+    /** The axis event is updated. */
+    UI_AXIS_EVENT_ACTION_UPDATE = 2,
+    /** The axis event ends. */
+    UI_AXIS_EVENT_ACTION_END = 3,
+    /** The axis event is canceled. */
+    UI_AXIS_EVENT_ACTION_CANCEL = 4,
+};
+
+/**
+ * @brief Defines an enum for the axis types for focus axis events.
+ *
+ * @since 15
+ */
+enum {
+    /** ABS_X. */
+    UI_FOCUS_AXIS_EVENT_ABS_X = 0,
+    /** ABS_Y. */
+    UI_FOCUS_AXIS_EVENT_ABS_Y = 1,
+    /** ABS_Z. */
+    UI_FOCUS_AXIS_EVENT_ABS_Z = 2,
+    /** ABS_RZ. */
+    UI_FOCUS_AXIS_EVENT_ABS_RZ = 3,
+    /** ABS_GAS. */
+    UI_FOCUS_AXIS_EVENT_ABS_GAS = 4,
+    /** ABS_BRAKE. */
+    UI_FOCUS_AXIS_EVENT_ABS_BRAKE = 5,
+    /** ABS_HAT0X. */
+    UI_FOCUS_AXIS_EVENT_ABS_HAT0X = 6,
+    /** ABS_HAT0Y. */
+    UI_FOCUS_AXIS_EVENT_ABS_HAT0Y = 7,
+};
 
 /**
  * @brief Obtains the type of this UI input event.
@@ -495,6 +535,18 @@ float OH_ArkUI_PointerEvent_GetTouchAreaWidth(const ArkUI_UIInputEvent* event, u
 float OH_ArkUI_PointerEvent_GetTouchAreaHeight(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
 
 /**
+ * @brief Obtains the ID of a touch point which info has been changed.
+ *
+ * @param event Indicates the changed pointer to the current UI input event.
+ * @param pointerIndex Indicates the index of the changed touch point in the multi-touch data list.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* event, uint32_t* pointerIndex);
+
+/**
  * @brief Obtains the number of historical events from a directional input event (such as a touch event, mouse event,
  * or axis event).
  *
@@ -717,6 +769,15 @@ double OH_ArkUI_AxisEvent_GetHorizontalAxisValue(const ArkUI_UIInputEvent* event
 double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event);
 
 /**
+ * @brief Obtains the action type of the current axis event.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @return Returns the action type of the current axis event.
+ * @since 15
+ */
+int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event);
+
+/**
  * @brief Sets how the component behaves during hit testing.
  *
  * @param event Indicates the pointer to the current UI input event.
@@ -782,6 +843,28 @@ int32_t OH_ArkUI_UIInputEvent_GetDeviceId(const ArkUI_UIInputEvent* event);
  */
 int32_t OH_ArkUI_UIInputEvent_GetPressedKeys(
     const ArkUI_UIInputEvent* event, int32_t* pressedKeyCodes, int32_t* length);
+
+/**
+ * @brief Obtains the axis value of a focus axis event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param axis Axis type of the focus axis event.
+ * @return Returns the axis value of the focus axis event; returns <b>0.0</b> if any parameter error occurs.
+ * @since 15
+ */
+double OH_ArkUI_FocusAxisEvent_GetAxisValue(const ArkUI_UIInputEvent* event, int32_t axis);
+
+/**
+ * @brief Sets whether to prevent a focus axis event from bubbling up.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param stopPropagation Indicates whether to stop event propagation.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 15
+ */
+int32_t OH_ArkUI_FocusAxisEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation);
 
 #ifdef __cplusplus
 };

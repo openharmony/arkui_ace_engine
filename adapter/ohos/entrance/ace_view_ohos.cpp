@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "pointer_event.h"
 
 #include <memory>
 
@@ -32,6 +33,8 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/focus_axis_event.h"
+#include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 #include "core/event/touch_event.h"
 
@@ -108,6 +111,11 @@ void AceViewOhos::TransformHintChanged(const RefPtr<AceViewOhos>& view, uint32_t
     view->NotifyTransformHintChanged(transform);
 }
 
+bool IsAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return pointerEvent->GetAxes() != 0;
+}
+
 void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
     const std::function<void()>& callback, bool isInjected)
@@ -136,13 +144,18 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
         return;
     }
     container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_JOYSTICK) {
+        view->ProcessFocusAxisEvent(pointerEvent);
+        return;
+    }
 
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
         if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
             (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
-            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END)) {
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
+            (pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL && IsAxisEvent(pointerEvent))) {
             view->ProcessAxisEvent(pointerEvent, node, isInjected);
         } else {
             view->ProcessDragEvent(pointerEvent, node);
@@ -262,6 +275,12 @@ void AceViewOhos::RegisterKeyEventCallback(KeyEventCallback&& callback)
     keyEventCallback_ = std::move(callback);
 }
 
+void AceViewOhos::RegisterNonPointerEventCallback(NonPointerEventCallback&& callback)
+{
+    ACE_DCHECK(callback);
+    nonPointerEventCallback_ = std::move(callback);
+}
+
 void AceViewOhos::RegisterMouseEventCallback(MouseEventCallback&& callback)
 {
     ACE_DCHECK(callback);
@@ -317,7 +336,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     DragEventAction action;
-    PointerEvent event;
+    DragPointerEvent event;
     ConvertPointerEvent(pointerEvent, event);
     CHECK_NULL_VOID(dragEventCallback_);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -351,7 +370,7 @@ void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& 
     const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     CHECK_NULL_VOID(dragEventCallback_);
-    dragEventCallback_(PointerEvent(x, y), action, node);
+    dragEventCallback_(DragPointerEvent(x, y), action, node);
 }
 
 void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -418,11 +437,24 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
 
 bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
-    CHECK_NULL_RETURN(keyEventCallback_, false);
+    CHECK_NULL_RETURN(nonPointerEventCallback_, false);
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     event.isPreIme = isPreIme;
-    return keyEventCallback_(event);
+    return nonPointerEventCallback_(event, nullptr);
+}
+
+bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(nonPointerEventCallback_, false);
+    NG::FocusAxisEvent event;
+    ConvertFocusAxisEvent(pointerEvent, event);
+    auto markProcess = [event, enabled = pointerEvent->IsMarkEnabled()]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
+            enabled);
+    };
+    return nonPointerEventCallback_(event, std::move(markProcess));
 }
 
 const void* AceViewOhos::GetNativeWindowById(uint64_t textureId)

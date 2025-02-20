@@ -872,7 +872,7 @@ void ViewAbstract::DisableOnKeyEvent()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnKey();
+    focusHub->ClearOnKeyCallback();
 }
 
 void ViewAbstract::DisableOnHover()
@@ -937,14 +937,28 @@ void ViewAbstract::DisableOnFocus()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnFocus();
+    focusHub->ClearOnFocusCallback();
 }
 
 void ViewAbstract::DisableOnBlur()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnBlur();
+    focusHub->ClearOnBlurCallback();
+}
+
+void ViewAbstract::DisableOnFocusAxisEvent()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnFocusAxisCallback();
+}
+
+void ViewAbstract::DisableOnFocusAxisEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnFocusAxisCallback();
 }
 
 void ViewAbstract::DisableOnClick(FrameNode* frameNode)
@@ -1013,7 +1027,7 @@ void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnKey();
+    focusHub->ClearOnKeyCallback();
 }
 
 void ViewAbstract::DisableOnHover(FrameNode* frameNode)
@@ -1062,14 +1076,14 @@ void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnFocus();
+    focusHub->ClearOnFocusCallback();
 }
 
 void ViewAbstract::DisableOnBlur(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnBlur();
+    focusHub->ClearOnBlurCallback();
 }
 
 void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
@@ -1392,6 +1406,20 @@ void ViewAbstract::SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTes
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
+void ViewAbstract::SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnFocusAxisCallback(std::move(onFocusAxisCallback));
+}
+
+void ViewAbstract::SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->SetOnFocusAxisCallback(std::move(onFocusAxisCallback));
 }
 
 void ViewAbstract::AddDragFrameNodeToManager()
@@ -1914,6 +1942,7 @@ void ViewAbstract::BindPopup(
     popupInfo.popupId = popupId;
     popupInfo.popupNode = popupNode;
     popupInfo.isBlockEvent = param->IsBlockEvent();
+    popupInfo.isAvoidKeyboard = param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT;
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
@@ -2093,6 +2122,21 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& bl
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
+    }
+}
+
+void ViewAbstract::SetNodeBackdropBlur(FrameNode *frameNode, const Dimension& radius, const BlurOption& blurOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateNodeBackBlur(radius, blurOption);
     }
 }
 
@@ -4029,6 +4073,57 @@ bool ViewAbstract::GetNeedFocus(FrameNode* frameNode)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
+}
+
+int ViewAbstract::RequestFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_NON_EXIST);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, ERROR_CODE_NON_EXIST);
+    auto instanceId = context->GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto focusManager = context->GetOrCreateFocusManager();
+    focusManager->ResetRequestFocusResult();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    // check node focusable
+    if (focusHub->IsSyncRequestFocusable()) {
+        focusHub->RequestFocusImmediately();
+    }
+    auto retCode = focusManager->GetRequestFocusResult();
+    focusManager->ResetRequestFocusResult();
+    return retCode;
+}
+
+void ViewAbstract::ClearFocus(int32_t instanceId)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    FocusHub::LostFocusToViewRoot();
+}
+
+void ViewAbstract::FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    context->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, isAutoInactive);
+}
+
+void ViewAbstract::SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetIsAutoFocusTransfer(isAutoFocusTransfer);
 }
 
 double ViewAbstract::GetOpacity(FrameNode* frameNode)

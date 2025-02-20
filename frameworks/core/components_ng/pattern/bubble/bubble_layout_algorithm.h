@@ -154,11 +154,17 @@ private:
     OffsetF AddOffset(const OffsetF& position);
     bool CheckPositionInPlacementRect(const Rect& rect, const OffsetF& position, const SizeF& childSize);
     OffsetF AdjustPosition(const OffsetF& position, float width, float height, float space);
+    OffsetF AdjustPositionNew(const OffsetF& position, float width, float height);
+    OffsetF GetBubblePosition(const OffsetF& position, float xMin, float xMax, float yMin, float yMax);
+    bool CheckIfNeedRemoveArrow(float& xMin, float& xMax, float& yMin, float& yMax);
+    void CheckArrowPosition(OffsetF& position, float width, float height);
+    bool IsUIExtensionWindow();
+    void HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     OffsetF GetAdjustPosition(std::vector<Placement>& currentPlacementStates, size_t step, const SizeF& childSize,
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     void InitTargetSizeAndPosition(bool showInSubWindow);
     void InitCaretTargetSizeAndPosition();
-    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow);
+    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacementNew(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
@@ -199,6 +205,7 @@ private:
     void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
     void SetBubbleRadius();
     void UpdateHostWindowRect();
+    void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -257,6 +264,7 @@ private:
     float marginBottom_ = 0.0f;
     float top_ = 0.0f;
     float bottom_ = 0.0f;
+    bool avoidKeyboard_ = false;
     bool bHorizontal_ = false;
     bool bVertical_ = false;
     std::unordered_set<Placement> setHorizontal_;

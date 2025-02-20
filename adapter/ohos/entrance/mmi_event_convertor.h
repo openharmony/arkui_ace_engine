@@ -27,6 +27,7 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/focus_axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
 
@@ -62,6 +63,7 @@ void GetEventDevice(int32_t sourceType, E& event)
             event.sourceType = SourceType::TOUCH_PAD;
             break;
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE:
+        case OHOS::MMI::PointerEvent::SOURCE_TYPE_JOYSTICK:
             event.sourceType = SourceType::MOUSE;
             break;
         default:
@@ -91,7 +93,9 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event);
 
-void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event);
+void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::FocusAxisEvent& event);
+
+void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, DragPointerEvent& event);
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId);
 

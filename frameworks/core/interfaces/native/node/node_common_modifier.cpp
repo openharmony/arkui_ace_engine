@@ -6247,6 +6247,36 @@ ArkUI_Bool GetTabStop(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
 }
+
+void SetNodeBackdropBlur(
+    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+{
+    ArkUI_Float32 blur = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    blur = value > 0 ? value : blur;
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetNodeBackdropBlur(frameNode, dimensionRadius, blurOption);
+}
+
+ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
+{
+    ArkUIBackdropBlur backdropBlur;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, backdropBlur);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, backdropBlur);
+    auto blur = renderContext->GetBackBlurRadius();
+    backdropBlur.dimensionRadius = blur.has_value() ? blur.value().Value() : 0.0f;
+    auto propBackdropBlurOption = renderContext->GetBackdropBlurOption();
+    if (propBackdropBlurOption.has_value() && propBackdropBlurOption->grayscale.size() >= NUM_2) {
+        backdropBlur.brighteningBlur = propBackdropBlurOption->grayscale[NUM_0];
+        backdropBlur.darkeningBlur = propBackdropBlurOption->grayscale[NUM_1];
+    }
+    return backdropBlur;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6323,7 +6353,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
         ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop,
-        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop};
+        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop, SetNodeBackdropBlur, GetNodeBackdropBlur};
 
     return &modifier;
 }
@@ -6672,6 +6702,43 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
     NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
 }
 
+void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onFocusAxisEvent = [frameNode, nodeId, extraParam](FocusAxisEventInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.focusAxisEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
+        event.focusAxisEvent.absXValue = info.GetAbsXValue();
+        event.focusAxisEvent.absYValue = info.GetAbsYValue();
+        event.focusAxisEvent.absZValue = info.GetAbsZValue();
+        event.focusAxisEvent.absRzValue = info.GetAbsRzValue();
+        event.focusAxisEvent.absGasValue = info.GetAbsGasValue();
+        event.focusAxisEvent.absBrakeValue = info.GetAbsBrakeValue();
+        event.focusAxisEvent.absHat0XValue = info.GetAbsHat0XValue();
+        event.focusAxisEvent.absHat0YValue = info.GetAbsHat0YValue();
+        event.focusAxisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.focusAxisEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+        event.focusAxisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        event.focusAxisEvent.deviceId = info.GetDeviceId();
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.focusAxisEvent.keyCodesLength = pressedKeyCodes.size();
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+        info.SetStopPropagation(event.focusAxisEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnFocusAxisEvent(frameNode, onFocusAxisEvent);
+}
+
 void ResetOnKeyEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6684,6 +6751,13 @@ void ResetOnKeyPreIme(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+}
+
+void ResetOnFocusAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstractModelNG::DisableOnFocusAxisEvent(frameNode);
 }
 
 void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint, bool usePx)
@@ -6775,6 +6849,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
             event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+            event.touchEvent.changedPointerId = front.GetFingerId();
             ConvertTouchLocationInfoToPoint(front, event.touchEvent.actionTouchPoint, usePx);
         }
         event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();

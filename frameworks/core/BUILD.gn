@@ -103,6 +103,7 @@ template("ace_core_source_set") {
       "common/font_loader.cpp",
       "common/font_manager.cpp",
       "common/frontend.cpp",
+      "common/key_event_manager.cpp",
       "common/platform_bridge.cpp",
       "common/render_boundary_manager.cpp",
       "common/resource/resource_manager.cpp",
@@ -214,6 +215,7 @@ template("ace_core_source_set") {
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
       "event/mouse_raw_recognizer.cpp",
+      "event/resample_algo.cpp",
 
       # focus
       "focus/focus_node.cpp",
@@ -685,6 +687,7 @@ template("ace_core_ng_source_set") {
       "common/font_loader.cpp",
       "common/font_manager.cpp",
       "common/frontend.cpp",
+      "common/key_event_manager.cpp",
       "common/platform_bridge.cpp",
       "common/render_boundary_manager.cpp",
       "common/resource/resource_manager.cpp",
@@ -710,6 +713,7 @@ template("ace_core_ng_source_set") {
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
       "event/mouse_raw_recognizer.cpp",
+      "event/resample_algo.cpp",
 
       # gestures
       "gestures/click_recognizer.cpp",

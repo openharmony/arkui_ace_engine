@@ -554,7 +554,7 @@ public:
     {
         return isSpanStringMode_;
     }
-    void SetStyledString(const RefPtr<SpanString>& value);
+    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
@@ -812,6 +812,8 @@ protected:
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
+
+    void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
 
     bool enabled_ = true;
     Status status_ = Status::NONE;

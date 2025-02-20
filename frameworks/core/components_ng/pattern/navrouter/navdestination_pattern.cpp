@@ -37,7 +37,6 @@ std::atomic<uint64_t> g_navDestinationPatternNextAutoGenId = 0;
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
 constexpr float TRANSLATE_THRESHOLD = 26.0f;
 const auto TRANSLATE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
-const auto TRANSLATE_DELAY = 2000;
 
 void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
@@ -169,6 +168,9 @@ void NavDestinationPattern::OnModifyDone()
     if (scrollableProcessor_) {
         scrollableProcessor_->UpdateBindingRelation();
     }
+    auto renderContext = hostNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    hostNode->UpdateUserSetOpacity(renderContext->GetOpacity().value_or(1.0f));
 }
 
 void NavDestinationPattern::OnLanguageConfigurationUpdate()
@@ -240,6 +242,13 @@ void NavDestinationPattern::MountTitleBar(
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
 
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    if (backButtonNode) {
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(
+            navDestinationLayoutProperty->GetHideBackButtonValue(false) ? VisibleType::GONE : VisibleType::VISIBLE);
+    }
     if (navDestinationLayoutProperty->HasNoPixMap()) {
         if (navDestinationLayoutProperty->HasImageSource()) {
             titleBarLayoutProperty->UpdateImageSource(navDestinationLayoutProperty->GetImageSourceValue());
@@ -311,6 +320,9 @@ bool NavDestinationPattern::GetBackButtonState()
     auto index = stack->FindIndex(name_, customNode_, true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    if (navDestinationLayoutProperty->GetHideBackButtonValue(false)) {
+        showBackButton = false;
+    }
     if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
         navigationLayoutProperty->GetHideNavBarValue(false))) {
         showBackButton = false;
@@ -562,9 +574,6 @@ void NavDestinationPattern::ResetBarState(const RefPtr<NavDestinationNodeBase>& 
          * it needs to be restored to the shown state.
          */
         StartHideOrShowBarInner(nodeBase, barHeight, translate, isTitle, false);
-    } else {
-        // After a period of inactivity, the titleBar&toolBar needs to be shown again.
-        PostShowBarDelayedTask(isTitle);
     }
 }
 
@@ -686,9 +695,6 @@ void NavDestinationPattern::StartHideOrShowBarInner(
         } else {
             ctx.isBarShowing = false;
         }
-        if (isHide) {
-            pattern->PostShowBarDelayedTask(isTitle);
-        }
     };
     AnimationOption option;
     option.SetCurve(TRANSLATE_CURVE);
@@ -723,40 +729,6 @@ void NavDestinationPattern::StopHideBarIfNeeded(float curTranslate, bool isTitle
     option.SetCurve(Curves::LINEAR);
     AnimationUtils::Animate(option, propertyCallback);
     ctx.isBarHiding = false;
-}
-
-void NavDestinationPattern::PostShowBarDelayedTask(bool isTitle)
-{
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    auto& ctx = GetSwipeContext(isTitle);
-    if (ctx.showBarTask) {
-        ctx.showBarTask.Cancel();
-    }
-
-    ctx.showBarTask.Reset([weak = WeakClaim(this), isTitle]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto nodeBase = AceType::DynamicCast<NavDestinationNodeBase>(pattern->GetHost());
-        CHECK_NULL_VOID(nodeBase);
-        auto pipeline = nodeBase->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto barNode = pattern->GetBarNode(nodeBase, isTitle);
-        CHECK_NULL_VOID(barNode);
-        float translate = 0.0f;
-        float barHeight = 0.0f;
-        if (!GetTitleOrToolBarTranslateAndHeight(barNode, translate, barHeight)) {
-            return;
-        }
-
-        pattern->StartHideOrShowBarInner(nodeBase, barHeight, translate, isTitle, false);
-        pipeline->RequestFrame();
-    });
-
-    taskExecutor->PostDelayedTask(ctx.showBarTask, TaskExecutor::TaskType::UI, TRANSLATE_DELAY,
-        isTitle ? "ArkUINavDestinationShowTitleBar" : "ArkUINavDestinationShowToolBar");
 }
 
 RefPtr<FrameNode> NavDestinationPattern::GetBarNode(const RefPtr<NavDestinationNodeBase>& nodeBase, bool isTitle)

@@ -15,6 +15,8 @@
 #include "linear_layout_base_test_ng.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -77,5 +79,137 @@ HWTEST_F(LinearLayoutNewTestNG, Example, TestSize.Level1)
     // expect: second column offset (x, y) = (0, 30)
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 0.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetY(), 30.0f);
+}
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting layoutPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> column1;
+    auto column = CreateColumn([this, &column1](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        column1 = CreateColumn([](ColumnModelNG model) {
+            FlexModelNG model1;
+            model1.SetWidthLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
+            model1.SetHeightLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
+        });
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    /* corresponding ets code:
+        Column() {
+          Column()
+            .width(LayoutPolicy.MATCH_PARENT)
+            .height(LayoutPolicy.MATCH_PARENT)
+        }
+        .width(500)
+        .height(300)
+    */
+
+    // Expect column's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = column->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect column1's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = column1->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest002
+ * @tc.desc: test the measure result when setting layoutPolicy and other layoutConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> column1, column2, column3;
+    auto column = CreateColumn([this, &column1, &column2, &column3](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        column1 = CreateColumn([](ColumnModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500));
+            ViewAbstract::SetHeight(CalcLength(300));
+            ViewAbstract::SetFlexShrink(1);
+        });
+        column2 = CreateColumn([](ColumnModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500));
+            ViewAbstract::SetHeight(CalcLength(300));
+            ViewAbstract::SetFlexShrink(2);
+        });
+        column3 = CreateColumn([](ColumnModelNG model) {
+            FlexModelNG model1;
+            model1.SetWidthLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
+            model1.SetHeightLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
+            ViewAbstract::SetFlexShrink(2);
+        });
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 3);
+    CreateLayoutTask(column);
+
+    /* corresponding ets code:
+        Column() {
+            Column()
+                .width(500)
+                .height(300)
+                .flexShrink(1)
+            Column()
+                .width(500)
+                .height(300)
+                .flexShrink(2)
+            Column()
+                .width(LayoutPolicy.MATCH_PARENT)
+                .height(LayoutPolicy.MATCH_PARENT)
+                .flexShrink(2)
+        }
+        .width(500)
+        .height(300)
+    */
+
+    // Expect column's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = column->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect column1's width is 500, height is 200 and offset is [0.0, 0.0].
+    auto geometryNode1 = column1->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 200.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+
+    // Expect column2's width is 500, height is 100 and offset is [0.0, 100.0].
+    auto geometryNode2 = column2->GetGeometryNode();
+    ASSERT_NE(geometryNode2, nullptr);
+    auto size2 = geometryNode2->GetFrameSize();
+    auto offset2 = geometryNode2->GetFrameOffset();
+    EXPECT_EQ(size2, SizeF(500.0f, 100.0f));
+    EXPECT_EQ(offset2, OffsetF(0.0f, 200.0f));
+
+    // Expect column3's width is 500, height is 300 and offset is [0.0, 300.0].
+    auto geometryNode3 = column3->GetGeometryNode();
+    ASSERT_NE(geometryNode3, nullptr);
+    auto size3 = geometryNode3->GetFrameSize();
+    auto offset3 = geometryNode3->GetFrameOffset();
+    EXPECT_EQ(size3, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset3, OffsetF(0.0f, 300.0f));
 }
 } // namespace OHOS::Ace::NG

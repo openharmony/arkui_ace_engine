@@ -96,7 +96,7 @@ struct DragControllerAsyncCtx {
     int32_t errCode = -1;
     std::mutex mutex;
     bool hasHandle = false;
-    PointerEvent dragPointerEvent;
+    DragPointerEvent dragPointerEvent;
     float windowScale = 1.0f;
     float dipScale = 0.0;
     int parseBuilderCount = 0;
@@ -672,6 +672,10 @@ void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::set<Media::PixelMap*> scaledPixelMaps;
     auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
+        if (!pixelMap) {
+            TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
+            continue;
+        }
         double scale = 1.0;
         if (!scaledPixelMaps.count(pixelMap.get())) {
             if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {

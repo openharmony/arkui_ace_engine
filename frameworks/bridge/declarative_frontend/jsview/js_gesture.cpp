@@ -241,6 +241,7 @@ constexpr char LONG_PRESS_DURATION[] = "duration";
 constexpr char PAN_DIRECTION[] = "direction";
 constexpr char SWIPE_DIRECTION[] = "direction";
 constexpr char ROTATION_ANGLE[] = "angle";
+constexpr char LIMIT_FINGER_COUNT[] = "isFingerCountLimited";
 } // namespace
 
 void JSGesture::Create(const JSCallbackInfo& info)
@@ -279,11 +280,13 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
     int32_t countNum = DEFAULT_TAP_COUNT;
     int32_t fingersNum = DEFAULT_TAP_FINGER;
     double distanceThresholdNum = DEFAULT_TAP_DISTANCE;
+    bool isLimitFingerCount = false;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> count = obj->GetProperty(TAP_COUNT);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> distanceThreshold = obj->GetProperty(TAP_GESTURE_DISTANCE);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (count->IsNumber()) {
             int32_t countNumber = count->ToNumber<int32_t>();
@@ -298,9 +301,12 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
             distanceThresholdNum = distanceThresholdNumber < 0? DEFAULT_TAP_DISTANCE : distanceThresholdNumber;
             distanceThresholdNum = Dimension(distanceThresholdNum, DimensionUnit::VP).ConvertToPx();
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
 
-    TapGestureModel::GetInstance()->Create(countNum, fingersNum, distanceThresholdNum);
+    TapGestureModel::GetInstance()->Create(countNum, fingersNum, distanceThresholdNum, isLimitFingerCount);
 }
 
 void JSLongPressGesture::Create(const JSCallbackInfo& args)
@@ -308,11 +314,13 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
     int32_t fingersNum = DEFAULT_LONG_PRESS_FINGER;
     bool repeatResult = false;
     int32_t durationNum = DEFAULT_LONG_PRESS_DURATION;
+    bool isLimitFingerCount = false;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> repeat = obj->GetProperty(LONG_PRESS_REPEAT);
         JSRef<JSVal> duration = obj->GetProperty(LONG_PRESS_DURATION);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -325,18 +333,21 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
             int32_t durationNumber = duration->ToNumber<int32_t>();
             durationNum = durationNumber <= 0 ? DEFAULT_LONG_PRESS_DURATION : durationNumber;
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
-
-    LongPressGestureModel::GetInstance()->Create(fingersNum, repeatResult, durationNum);
+    LongPressGestureModel::GetInstance()->Create(fingersNum, repeatResult, durationNum, isLimitFingerCount);
 }
 
 void JSPanGesture::Create(const JSCallbackInfo& args)
 {
     int32_t fingersNum = DEFAULT_PAN_FINGER;
     double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    bool isLimitFingerCount = false;
     PanDirection panDirection;
     if (args.Length() <= 0 || !args[0]->IsObject()) {
-        PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum);
+        PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum, isLimitFingerCount);
         return;
     }
 
@@ -352,6 +363,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
     JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
     JSRef<JSVal> directionNum = obj->GetProperty(PAN_DIRECTION);
+    JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
     if (fingers->IsNumber()) {
         int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -370,8 +382,11 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
             panDirection.type = directNum;
         }
     }
+    if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+    }
 
-    PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum);
+    PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum, isLimitFingerCount);
 }
 
 void JSSwipeGesture::Create(const JSCallbackInfo& args)
@@ -379,9 +394,10 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
     int32_t fingersNum = DEFAULT_SLIDE_FINGER;
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
+    bool isLimitFingerCount = false;
 
     if (args.Length() <= 0 || !args[0]->IsObject()) {
-        SwipeGestureModel::GetInstance()->Create(fingersNum, slideDirection, speedNum);
+        SwipeGestureModel::GetInstance()->Create(fingersNum, slideDirection, speedNum, isLimitFingerCount);
         return;
     }
 
@@ -389,6 +405,7 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
     JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
     JSRef<JSVal> speed = obj->GetProperty(GESTURE_SPEED);
     JSRef<JSVal> directionNum = obj->GetProperty(SWIPE_DIRECTION);
+    JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
     if (fingers->IsNumber()) {
         int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -405,18 +422,23 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
             slideDirection.type = directNum;
         }
     }
+    if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+    }
 
-    SwipeGestureModel::GetInstance()->Create(fingersNum, slideDirection, speedNum);
+    SwipeGestureModel::GetInstance()->Create(fingersNum, slideDirection, speedNum, isLimitFingerCount);
 }
 
 void JSPinchGesture::Create(const JSCallbackInfo& args)
 {
     int32_t fingersNum = DEFAULT_PINCH_FINGER;
     double distanceNum = DEFAULT_PINCH_DISTANCE;
+    bool isLimitFingerCount = false;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -427,19 +449,24 @@ void JSPinchGesture::Create(const JSCallbackInfo& args)
             double distanceNumber = distance->ToNumber<double>();
             distanceNum = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PINCH_DISTANCE : distanceNumber;
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
 
-    PinchGestureModel::GetInstance()->Create(fingersNum, distanceNum);
+    PinchGestureModel::GetInstance()->Create(fingersNum, distanceNum, isLimitFingerCount);
 }
 
 void JSRotationGesture::Create(const JSCallbackInfo& args)
 {
     double angleNum = DEFAULT_ROTATION_ANGLE;
     int32_t fingersNum = DEFAULT_ROTATION_FINGER;
+    bool isLimitFingerCount = false;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> angle = obj->GetProperty(ROTATION_ANGLE);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -449,9 +476,12 @@ void JSRotationGesture::Create(const JSCallbackInfo& args)
             double angleNumber = angle->ToNumber<double>();
             angleNum = LessNotEqual(angleNumber, 0.0) ? DEFAULT_ROTATION_ANGLE : angleNumber;
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
 
-    RotationGestureModel::GetInstance()->Create(fingersNum, angleNum);
+    RotationGestureModel::GetInstance()->Create(fingersNum, angleNum, isLimitFingerCount);
 }
 
 void JSGestureGroup::Create(const JSCallbackInfo& args)
@@ -622,6 +652,7 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
 
     int32_t fingersNum = DEFAULT_PAN_FINGER;
     double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    bool isLimitFingerCount = false;
     PanDirection panDirection;
 
     if (args.Length() > 0 && args[0]->IsObject()) {
@@ -629,6 +660,7 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
         JSRef<JSVal> directionNum = obj->GetProperty(PAN_DIRECTION);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -647,10 +679,14 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
                 panDirection.type = directNum;
             }
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
     option->SetDirection(panDirection);
     option->SetDistance(distanceNum);
     option->SetFingers(fingersNum);
+    option->SetIsLimitFingerCount(isLimitFingerCount);
 
     panGestureOption->SetPanGestureOption(option);
     args.SetReturnValue(Referenced::RawPtr(panGestureOption));

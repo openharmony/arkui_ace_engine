@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextInputModifier* GetTextInputModifier();
     const CJUITextInputModifier* GetCJUITextInputModifier();
     void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextInputChangeWithPreviewText(ArkUINodeHandle node, void* extraParam);
     void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam);
@@ -32,6 +33,7 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetTextInputOnTextContentScroll(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnTextInputChange(ArkUINodeHandle node);
+    void ResetOnTextInputChangeWithPreviewText(ArkUINodeHandle node);
     void ResetTextInputOnSubmit(ArkUINodeHandle node);
     void ResetOnTextInputCut(ArkUINodeHandle node);
     void ResetOnTextInputPaste(ArkUINodeHandle node);

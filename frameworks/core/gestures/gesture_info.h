@@ -182,6 +182,17 @@ public:
         return fingers_;
     }
 
+    void SetIsLimitFingerCount(bool isLimitFingerCount)
+    {
+        isLimitFingerCount_ = isLimitFingerCount;
+    }
+
+
+    bool GetIsLimitFingerCount() const
+    {
+        return isLimitFingerCount_;
+    }
+
     std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc>& GetOnPanFingersIds()
     {
         return onPanFingersIds_;
@@ -216,6 +227,7 @@ private:
     PanDirection direction_;
     double distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
     int32_t fingers_ = 1;
+    bool isLimitFingerCount_ = false;
     std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;
     std::unordered_map<typename OnPanDirectionFunc::IdType, OnPanDirectionFunc> onPanDirectionIds_;
     std::unordered_map<typename OnPanDistanceFunc::IdType, OnPanDistanceFunc> onPanDistanceIds_;
