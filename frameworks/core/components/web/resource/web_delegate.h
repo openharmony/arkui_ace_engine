@@ -1256,6 +1256,7 @@ private:
     void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
     void ratioStrToFloat(const std::string& str);
+    void ratioStrToFloatV2(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
