@@ -510,6 +510,18 @@ void TabsPattern::BeforeCreateLayoutWrapper()
     UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, index);
 }
 
+void TabsPattern::SetAnimateMode(TabAnimateMode mode)
+{
+    animateMode_ = mode;
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetJumpAnimationMode(mode);
+}
+
 /**
  * @brief Handles the update of children in the TabsPattern component.
  *
@@ -571,9 +583,14 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const
     tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     tabBarPattern->UpdateImageColor(index);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    swiperLayoutProperty->UpdateIndex(index);
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    if (!swiperPattern->IsInFastAnimation()) {
+        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(swiperLayoutProperty);
+        swiperLayoutProperty->UpdateIndex(index);
+    }
     tabsLayoutProperty->UpdateIndex(index);
 }
 } // namespace OHOS::Ace::NG

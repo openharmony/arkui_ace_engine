@@ -20,6 +20,7 @@
 #include <set>
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
@@ -28,6 +29,7 @@ using SwipeToImpl = std::function<void(const int32_t, bool)>;
 using SwipeToWithoutAnimationImpl = std::function<void(const int32_t)>;
 using TurnPageRateFunc = std::function<void(const int32_t, float)>;
 using ChangeIndexImpl = std::function<void(const int32_t, bool)>;
+using ChangeIndexWithModeImpl = std::function<void(const int32_t, SwiperAnimationMode)>;
 using PreloadItemsFunc = std::function<void(const std::set<int32_t>)>;
 using PreloadItemsFinishFunc = std::function<void(const int32_t, const std::string)>;
 
@@ -90,9 +92,21 @@ public:
         }
     }
 
+    void ChangeIndex(int32_t index, SwiperAnimationMode animationMode)
+    {
+        if (changeIndexWithModeImpl_) {
+            changeIndexWithModeImpl_(index, animationMode);
+        }
+    }
+
     void SetChangeIndexImpl(const ChangeIndexImpl& changeIndexImpl)
     {
         changeIndexImpl_ = changeIndexImpl;
+    }
+
+    void SetChangeIndexWithModeImpl(const ChangeIndexWithModeImpl& changeIndexWithModeImpl)
+    {
+        changeIndexWithModeImpl_ = changeIndexWithModeImpl;
     }
 
     void FinishAnimation() const
@@ -230,6 +244,7 @@ private:
     CommonFunc showPrevImpl_;
     CommonFunc showNextImpl_;
     ChangeIndexImpl changeIndexImpl_;
+    ChangeIndexWithModeImpl changeIndexWithModeImpl_;
     CommonFunc finishImpl_;
     CommonFunc finishCallback_;
     CommonFunc tabBarFinishCallback_;

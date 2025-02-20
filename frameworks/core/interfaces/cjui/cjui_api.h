@@ -951,7 +951,7 @@ struct CJUISwiperModifier {
     void (*resetSwiperInterval)(ArkUINodeHandle node);
     void (*setSwiperAutoPlay)(ArkUINodeHandle node, ArkUI_Bool autoPlay);
     void (*resetSwiperAutoPlay)(ArkUINodeHandle node);
-    void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
+    void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animationMode);
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
     void (*resetSwiperIndicator)(ArkUINodeHandle node);

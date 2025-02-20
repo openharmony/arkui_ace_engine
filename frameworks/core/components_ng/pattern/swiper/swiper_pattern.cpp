@@ -115,6 +115,7 @@ const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
     AceType::MakeRefPtr<FrameRateRange>(0, 0, 0, COMPONENT_SWIPER_FLING);
 constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 
+constexpr int32_t JUMP_NEAR_VALUE = 3;
 constexpr float MASS = 1.0f;
 constexpr float STIFFNESS = 328.0f;
 constexpr float DAMPING = 34.0f;
@@ -1157,6 +1158,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     const auto& paddingProperty = props->GetPaddingProperty();
+    jumpOnChange_ = false;
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
 }
 
@@ -1272,6 +1274,9 @@ void SwiperPattern::OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPla
 
 void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex) const
 {
+    if (jumpOnChange_) {
+        return;
+    }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireChangeEvent(preIndex, currentIndex);
@@ -1643,6 +1648,12 @@ bool SwiperPattern::IsUseCustomAnimation() const
     return props->GetIsCustomAnimation().value_or(false);
 }
 
+bool SwiperPattern::NeedFastAnimation() const
+{
+    return tabAnimationMode_ == TabAnimateMode::CONTENT_FIRST_WITH_JUMP ||
+           tabAnimationMode_ == TabAnimateMode::ACTION_FIRST_WITH_JUMP;
+}
+
 void SwiperPattern::SwipeTo(int32_t index)
 {
     auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
@@ -1681,6 +1692,10 @@ void SwiperPattern::SwipeTo(int32_t index)
     StopIndicatorAnimation();
     if (usePropertyAnimation_) {
         StopPropertyTranslateAnimation(isFinishAnimation_);
+    }
+
+    if (hasTabsAncestor_ && NeedFastAnimation()) {
+        FastAnimation(targetIndex);
     }
 
     targetIndex_ = targetIndex;
@@ -1867,17 +1882,84 @@ void SwiperPattern::ShowPrevious(bool needCheckWillScroll)
     swiperEventHub->FireIndicatorChangeEvent(GetLoopIndex(currentIndex_));
 }
 
-void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
+void SwiperPattern::FastAnimation(int32_t targetIndex)
+{
+    if (abs(currentIndex_ - targetIndex) > JUMP_NEAR_VALUE) {
+        jumpOnChange_ = true;
+        auto tempIndex = targetIndex - ((currentIndex_ < targetIndex) ? JUMP_NEAR_VALUE : -JUMP_NEAR_VALUE);
+        jumpIndex_ = tempIndex;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        MarkDirtyNodeSelf();
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITaskWithSingleDirtyNode(host);
+        pipeline->FlushSyncGeometryNodeTasks();
+    }
+}
+
+bool SwiperPattern::IsInFastAnimation() const
+{
+    if (!NeedFastAnimation()) {
+        return false;
+    }
+    if (targetIndex_) {
+        return true;
+    }
+    return usePropertyAnimation_;
+}
+
+void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
+{
+    int32_t targetIndex = 0;
+    if (!ComputeTargetIndex(index, targetIndex)) {
+        return;
+    }
+
+    targetIndex = CheckTargetIndex(targetIndex);
+    if (mode == SwiperAnimationMode::NO_ANIMATION) {
+        needFireCustomAnimationEvent_ = translateAnimationIsRunning_;
+
+        if (GetMaxDisplayCount() > 0) {
+            SetIndicatorChangeIndexStatus(false);
+        }
+
+        SwipeToWithoutAnimation(GetLoopIndex(targetIndex));
+    } else if (mode == SwiperAnimationMode::DEFAULT_ANIMATION) {
+        if (GetMaxDisplayCount() > 0) {
+            SetIndicatorChangeIndexStatus(true);
+        }
+        SwipeTo(targetIndex);
+    } else if (mode == SwiperAnimationMode::FAST_ANIMATION) {
+        // skip to the tab near 3 to target
+        FastAnimation(targetIndex);
+        if (GetMaxDisplayCount() > 0) {
+            SetIndicatorChangeIndexStatus(true);
+        }
+        SwipeTo(targetIndex);
+    }
+}
+
+bool SwiperPattern::ComputeTargetIndex(int32_t index, int32_t& targetIndex) const
 {
     auto displayCount = GetDisplayCount();
     if (RealTotalCount() <= 0 || displayCount == 0 || index < 0 || index >= RealTotalCount()) {
-        return;
+        return false;
     }
     auto itemCount = TotalCount();
-    auto loopCount = std::abs(currentIndex_ / itemCount);
-    auto targetIndex = currentIndex_ >= 0 ? loopCount * itemCount + index : -(loopCount + 1) * itemCount + index;
+    auto loopCount = itemCount == 0 ? 0 : std::abs(currentIndex_ / itemCount);
+    targetIndex = currentIndex_ >= 0 ? loopCount * itemCount + index : -(loopCount + 1) * itemCount + index;
     targetIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(targetIndex, displayCount) : targetIndex;
     if (targetIndex_.has_value() && targetIndex_.value() == targetIndex) {
+        return false;
+    }
+    return true;
+}
+
+void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
+{
+    int32_t targetIndex = 0;
+    if (!ComputeTargetIndex(index, targetIndex)) {
         return;
     }
 
