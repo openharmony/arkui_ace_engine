@@ -404,12 +404,10 @@ HWTEST_F(ScrollableCommonMethodModifierTest, OnDidScroll_SetCallback, testing::e
     eventHub->GetOnDidScroll()(offset, ScrollState::SCROLL);
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_SCROLL, result.value().state);
-    auto resultValX = Converter::OptConvert<int>(result.value().x);
-    auto resultValY = Converter::OptConvert<int>(result.value().y);
-    ASSERT_TRUE(resultValX.has_value());
-    EXPECT_EQ(offsetIn, resultValX.value());
-    ASSERT_TRUE(resultValY.has_value());
-    EXPECT_EQ(offsetIn, resultValY.value());
+    auto resultValX = Converter::Convert<int>(result.value().x);
+    auto resultValY = Converter::Convert<int>(result.value().y);
+    EXPECT_EQ(offsetIn, resultValX);
+    EXPECT_EQ(offsetIn, resultValY);
     EXPECT_EQ(id, result.value().resourceId);
 }
 
