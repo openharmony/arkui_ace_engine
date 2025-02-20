@@ -658,6 +658,11 @@ public:
         return true;
     }
 
+    virtual bool ReusedNodeSkipMeasure()
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

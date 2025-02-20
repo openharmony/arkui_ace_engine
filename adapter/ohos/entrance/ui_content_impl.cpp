@@ -1607,6 +1607,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
     });
 
+    bool reusedNodeSkipMeasure = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "reusedNodeSkipMeasure" && metaDataItem.value == "true";
+    });
+    if (reusedNodeSkipMeasure) {
+        EventReport::ReportReusedNodeSkipMeasureApp();
+    }
+    AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
             apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
