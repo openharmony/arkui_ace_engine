@@ -236,8 +236,11 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
+        points[i].operatingHand = fingureIterator == fingureEnd ? 0 : fingureIterator->operatingHand_;
         i++;
-        fingureIterator++;
+        if (fingureIterator != fingureEnd) {
+            fingureIterator++;
+        }
     }
 }
 
@@ -260,6 +263,7 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
         touchEvent.actionTouchPoint.screenX = touchEvent.touchPointes[0].screenX;
         touchEvent.actionTouchPoint.screenY = touchEvent.touchPointes[0].screenY;
         touchEvent.actionTouchPoint.toolType = touchEvent.touchPointes[0].toolType;
+        touchEvent.actionTouchPoint.operatingHand = touchEvent.touchPointes[0].operatingHand;
     }
     touchEvent.touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
     tempTouchEvent.pointers.size() : MAX_POINTS;
