@@ -785,7 +785,7 @@ public:
     void ResetOriginCaretPosition();
     bool RecordOriginCaretPosition(const OffsetF& offset);
 
-    bool GetIsLoopAnimation()
+    bool GetIsLoopAnimation() const
     {
         return isLoopAnimation_;
     }
