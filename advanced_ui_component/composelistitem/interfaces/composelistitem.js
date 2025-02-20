@@ -1641,7 +1641,7 @@ export class ComposeListItem extends ViewPU {
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
-        return Math.min(this.maxFontScale, this.getUIContext().getHostContext()?.config.fontSizeScale ?? 1);
+        return Math.min(this.maxFontScale, this.getUIContext()?.getHostContext()?.config.fontSizeScale ?? 1);
     }
     onMeasureSize(x57, y57, z57) {
         this.fontSizeScale = this.decideFontSizeScale();
