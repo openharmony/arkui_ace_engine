@@ -221,20 +221,32 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
 
 void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
 {
-    if (isTraversing_) {
+    if (!isTraversing_) {
+        return;
+    }
+
+    if (withAbort) {
         if (node) {
-            LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
-                "is traversing", node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+            LOGF_ABORT("Try to remove the child([%{public}s][%{public}d]) of "
+                "node [%{public}s][%{public}d] when its children is traversing",
+                node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
         } else {
-            LOGF("Try to remove all the children of node [%{public}s][%{public}d] when its children is traversing",
+            LOGF_ABORT("Try to remove all the children of "
+                "node [%{public}s][%{public}d] when its children is traversing",
                 GetTag().c_str(), GetId());
         }
-        OHOS::Ace::LogBacktrace();
-
-        if (withAbort) {
-            abort();
-        }
     }
+
+    if (node) {
+        LOGE("Try to remove the child([%{public}s][%{public}d]) of "
+            "node [%{public}s][%{public}d] when its children is traversing",
+            node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+    } else {
+        LOGE("Try to remove all the children of "
+            "node [%{public}s][%{public}d] when its children is traversing",
+            GetTag().c_str(), GetId());
+    }
+    OHOS::Ace::LogBacktrace();
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
@@ -455,7 +467,7 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     static_assert(totalLengthLimit > childLengthLimit, "totalLengthLimit too small");
     constexpr size_t currentLengthLimit = totalLengthLimit - childLengthLimit;
 
-    LOGF("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
+    LOGE("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
         (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
 
     // log full childNode info in case of hilog length limit reached
@@ -475,7 +487,8 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     }
 
     if (SystemProperties::GetLayoutDetectEnabled()) {
-        abort();
+        LOGF_ABORT("LoopDetected: child[%{public}.*s] vs current[%{public}.*s]",
+            (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
     } else {
         LogBacktrace();
     }

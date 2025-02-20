@@ -419,8 +419,7 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
     auto id = context->id;
     auto ret = basicAPI->postFrameCallback(id, userData, callback);
     if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
-        LOGF("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
-        abort();
+        LOGF_ABORT("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
     }
     return static_cast<ArkUI_ErrorCode>(ret);
 }

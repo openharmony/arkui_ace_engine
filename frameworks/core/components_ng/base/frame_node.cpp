@@ -258,11 +258,12 @@ public:
     void ResetChildren(bool needResetChild = false)
     {
         if (inUse_) {
-            LOGF(
-                "[%{public}d:%{public}s] reset children while in use", hostNode_->GetId(), hostNode_->GetTag().c_str());
             if (SystemProperties::GetLayoutDetectEnabled()) {
-                abort();
+                LOGF_ABORT("[%{public}d:%{public}s] reset children while in use",
+                    hostNode_->GetId(), hostNode_->GetTag().c_str());
             } else {
+                LOGW("[%{public}d:%{public}s] reset children while in use",
+                    hostNode_->GetId(), hostNode_->GetTag().c_str());
                 LogBacktrace();
             }
             delayReset_ = true;

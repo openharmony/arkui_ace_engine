@@ -118,8 +118,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         return;
     }
     if (isLayouting_) {
-        LOGF("you are already in flushing layout!");
-        abort();
+        LOGF_ABORT("you are already in flushing layout!");
     }
 
 #ifdef FFRT_EXISTS
