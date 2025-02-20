@@ -276,6 +276,8 @@
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
+      OHOS::Ace::UnParseFontFeatureSetting*;
+      OHOS::Ace::NG::ConvertToCalcPaddingProperty*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
       OHOS::Ace::AceScoringLog::*;
