@@ -162,7 +162,7 @@ void OnWillScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto callValue = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
     if (callValue.has_value()) {
-        auto call = [arkCallback = CallbackHelper(callValue.value(), frameNode)] (
+        auto call = [arkCallback = CallbackHelper(callValue.value())] (
             const Dimension& xOffset,
             const Dimension& yOffset,
             const ScrollState& scrollState,
@@ -280,7 +280,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    auto onScrollFrameEvent = [callback = CallbackHelper(*value, frameNode)](
+    auto onScrollFrameEvent = [callback = CallbackHelper(*value)](
         Dimension dimension, ScrollState state) -> ScrollFrameResult {
         ScrollFrameResult result;
         Ark_Number arkValue = Converter::ArkValue<Ark_Number>(dimension);

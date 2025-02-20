@@ -1775,7 +1775,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         auto preview = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().preview);
         if (preview.has_value()) {
-            previewNodeBuilder = [callback = CallbackHelper(preview.value(), frameNode), node]() {
+            previewNodeBuilder = [callback = CallbackHelper(preview.value()), node]() {
                 NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
             };
         }
@@ -1790,7 +1790,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     menuParam.isShow = true;
     WebModelNG::SetNewDragStyle(frameNode, true);
     if (content) {
-        contentNodeBuilder = [callback = CallbackHelper(*content, frameNode), node]() {
+        contentNodeBuilder = [callback = CallbackHelper(*content), node]() {
             NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
         };
     }

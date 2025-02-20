@@ -397,7 +397,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(internalController);
     peerImplPtr->AddTargetController(internalController);
 
-    auto onCustomAnimation = [callback = CallbackHelper(*value, frameNode), peerImplPtr](
+    auto onCustomAnimation = [callback = CallbackHelper(*value), peerImplPtr](
         int32_t from, int32_t to) -> TabContentAnimatedTransition {
         peerImplPtr->SetFrom(from);
         peerImplPtr->SetTo(to);
@@ -449,7 +449,7 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto callback = [callback = CallbackHelper(*value, frameNode)](
+    auto callback = [callback = CallbackHelper(*value)](
         int32_t currentIndex, int32_t comingIndex) -> bool {
         Ark_Number arkCurrentIndex = Converter::ArkValue<Ark_Number>(currentIndex);
         Ark_Number arkComingIndex = Converter::ArkValue<Ark_Number>(comingIndex);

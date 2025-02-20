@@ -216,7 +216,7 @@ void OnEditChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEditChange = [arkCallback = CallbackHelper(*value, frameNode)](bool value) {
+    auto onEditChange = [arkCallback = CallbackHelper(*value)](bool value) {
         arkCallback.Invoke(value);
     };
     SearchModelNG::SetOnEditChange(frameNode, std::move(onEditChange));
@@ -282,7 +282,7 @@ void OnSubmit0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSubmit = [arkCallback = CallbackHelper(*value, frameNode)](const std::string& value,
+    auto onSubmit = [arkCallback = CallbackHelper(*value)](const std::string& value,
         NG::TextFieldCommonEvent&
     ) {
         Converter::ConvContext ctx;
@@ -315,7 +315,7 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [arkCallback = CallbackHelper(*value, frameNode)](const std::string& text,
+    auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& text,
         PreviewText& prevText
     ) {
         Converter::ConvContext ctx;
@@ -331,7 +331,7 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onTextSelectionChange = [arkCallback = CallbackHelper(*value, frameNode)](
+    auto onTextSelectionChange = [arkCallback = CallbackHelper(*value)](
         int32_t selectionStart, int32_t selectionEnd
     ) {
         auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
@@ -346,7 +346,7 @@ void OnContentScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onContentScroll = [arkCallback = CallbackHelper(*value, frameNode)](float totalOffsetX, float totalOffsetY) {
+    auto onContentScroll = [arkCallback = CallbackHelper(*value)](float totalOffsetX, float totalOffsetY) {
         auto arkTotalOffsetX = Converter::ArkValue<Ark_Number>(totalOffsetX);
         auto arkTotalOffsetY = Converter::ArkValue<Ark_Number>(totalOffsetY);
         arkCallback.Invoke(arkTotalOffsetX, arkTotalOffsetY);
@@ -359,7 +359,7 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [arkCallback = CallbackHelper(*value, frameNode)](const std::string& value) {
+    auto onCopy = [arkCallback = CallbackHelper(*value)](const std::string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
         arkCallback.Invoke(textArkString);
@@ -372,7 +372,7 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCut = [arkCallback = CallbackHelper(*value, frameNode)](const std::string& value) {
+    auto onCut = [arkCallback = CallbackHelper(*value)](const std::string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
         arkCallback.Invoke(textArkString);
@@ -517,7 +517,7 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
+    auto onWillInsert = [callback = CallbackHelper(*value)](const InsertValueInfo& value) -> bool {
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
@@ -549,7 +549,7 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
+    auto onWillDelete = [callback = CallbackHelper(*value)](const DeleteValueInfo& value) -> bool {
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
@@ -643,7 +643,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     KeyboardOptions keyboardOptions = {.supportAvoidance = false};
     auto convOptions = options ? Converter::OptConvert<KeyboardOptions>(*options) : keyboardOptions;
-    auto customNodeBuilder = [callback = CallbackHelper(*value, frameNode), node]() {
+    auto customNodeBuilder = [callback = CallbackHelper(*value), node]() {
         auto builderNode = callback.BuildSync(node);
         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };
