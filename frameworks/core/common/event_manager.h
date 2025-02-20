@@ -96,6 +96,8 @@ public:
     bool OnNonPointerEvent(const NonPointerEvent& event);
     bool DispatchTouchEvent(const TouchEvent& point);
     bool DispatchTouchEvent(const AxisEvent& event);
+    void DispatchTouchCancelToRecognizer(
+        TouchEventTarget* touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items);
     bool PostEventDispatchTouchEvent(const TouchEvent& point);
     void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
     void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);

@@ -3046,6 +3046,8 @@ struct ArkUIGestureInterruptInfo {
     void* gestureEvent = nullptr;
     ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
     ArkUI_Int32 count = 0;
+    void** touchRecognizers = nullptr;
+    ArkUI_Int32 touchRecognizerCnt = 0;
 };
 
 enum ArkUIGestureRecognizerState {
@@ -3113,6 +3115,8 @@ struct ArkUIGestureModifier {
     void (*addGestureToGestureGroupWithRefCountDecrease)(ArkUIGesture* group, ArkUIGesture* child);
     void (*addGestureToNodeWithRefCountDecrease)(
         ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
+    ArkUINodeHandle (*touchRecognizerGetNodeHandle)(void* recognizer);
+    ArkUI_Bool (*touchRecognizerCancelTouch)(void* recognizer);
 };
 
 struct ArkUISliderModifier {
