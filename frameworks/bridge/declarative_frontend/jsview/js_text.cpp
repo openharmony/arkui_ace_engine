@@ -46,7 +46,6 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
-#include "core/components/font/constants_converter.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -204,15 +203,16 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     }
     JSRef<JSVal> args = info[0];
     std::string fontWeight;
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    ParseJsInt32(args, variableFontWeight);
+    TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+
     if (args->IsNumber()) {
         fontWeight = args->ToString();
     } else {
         ParseJsString(args, fontWeight);
     }
-    FontWeight formatFontWeight = ConvertStrToFontWeight(fontWeight);
-    TextModel::GetInstance()->SetFontWeight(formatFontWeight);
-    int32_t fontWeightValue = static_cast<int32_t>(Constants::GetVariableFontWeight(formatFontWeight));
-    TextModel::GetInstance()->SetVariableFontWeight(fontWeightValue);
+    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 
     if (info.Length() < 2) { // 2 : two args
         return;

@@ -1068,6 +1068,7 @@ template("declarative_js_engine_ng") {
       include_dirs += [ "//commonlibrary/c_utils/base/include" ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [
+        "$ace_graphic/rosen/modules/render_service_base:librender_service_base_static",
         "$ark_ets_path:libark_jsruntime_static",
         "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
       ]
