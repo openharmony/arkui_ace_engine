@@ -35,7 +35,6 @@ public:
 private:
     std::unique_ptr<StorageInterface> delegate_;
     std::unique_ptr<StorageInterface> distributedDelegate_;
-    static StorageProxy* inst_;
 };
 
 } // namespace OHOS::Ace
