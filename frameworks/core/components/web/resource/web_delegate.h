@@ -1255,7 +1255,7 @@ private:
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
-    void SetPartitionPoints(std::vector<float>& partition)
+    void SetPartitionPoints(std::vector<float>& partition);
     void ratioStrToFloat(const std::string& str);
     void ratioStrToFloatV2(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
