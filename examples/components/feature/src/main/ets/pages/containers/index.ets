@@ -30,6 +30,7 @@ import { RelativeContainerBootcamp } from './RelativeContainerBootcamp';
 import { RowBootcamp } from './RowBootcamp';
 import { ScrollBootcamp } from './ScrollBootcamp';
 import { WaterFlowBootcamp } from './WaterFlowBootcamp';
+import { SideBarContainerBootcamp } from './SideBarContainerBootcamp';
 import { FlowItemBootcamp } from './FlowItemBootcamp';
 import { SwiperBootcamp } from './SwiperBootcamp';
 import { RefreshBootcamp } from './RefreshBootcamp';
@@ -60,6 +61,13 @@ export const containersRoute: RouteGroup = {
     { name: 'row', label: '横向布局/Row' },
     { name: 'scroll', label: '滚动容器/Scroll' },
     { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
+    {name:'side-bar-container',label:'侧边栏/SideBarContainer'}
+    { name: 'swiper', label: '轮播容器/Swiper' },
+    { name: 'refresh', label: '刷新容器/Refresh' },
+    { name: 'gridRow', label: '栅格容器/GridRow' }
+    { name: 'gridRow', label: '栅格容器/GridRow' },
+    { name: 'gridItem', label: '网格选项/GridItem' }
+    { name: 'folder-stack', label: '折叠布局/FolderStack' },
     { name:'columnSplit', label:'纵向分割容器/ColumnSplit' },
     { name: 'flowItem', label: '瀑布流选项/FlowItem' },
     { name: 'gridRow', label: '栅格容器/GridRow' },
@@ -106,6 +114,8 @@ export function ContainersDestination(name: string, route: Route) {
     ScrollBootcamp({ title: route.label })
   } else if (name === 'containers/waterFlow') {
     WaterFlowBootcamp({ title: route.label })
+  }else if (name==='containers/side-bar-container'){
+    SideBarContainerBootcamp({title: route.label})
   } else if (name === 'containers/flowItem') {
     FlowItemBootcamp({ title: route.label })
   } else if (name === 'containers/swiper') {
