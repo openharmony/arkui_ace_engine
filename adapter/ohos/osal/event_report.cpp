@@ -112,7 +112,7 @@ constexpr char EVENT_KEY_VSYNC_TIMESTAMP[] = "VSYNC_TIMESTAMP";
 constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
-
+constexpr char EVENT_KEY_REUSED_NODE_SKIP_MEASURE[] = "REUSED_NODE_SKIP_MEASURE";
 void StrTrim(std::string& str)
 {
     if (str.size() > MAX_PACKAGE_NAME_LENGTH) {
@@ -649,5 +649,13 @@ void EventReport::ReportHoverStatusChange(
         EVENT_KEY_IS_HOVER_MODE, isHoverMode,
         EVENT_KEY_WINDOW_MODE, windowMode,
         EVENT_KEY_APP_ROTATION, appRotation);
+}
+
+void EventReport::ReportReusedNodeSkipMeasureApp()
+{
+    auto progressName = AceApplicationInfo::GetInstance().GetProcessName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_REUSED_NODE_SKIP_MEASURE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_PACKAGE_NAME, progressName);
+        
 }
 } // namespace OHOS::Ace

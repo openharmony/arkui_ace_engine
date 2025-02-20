@@ -27,7 +27,15 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+void checkNegativeBorderRadius(std::optional<Dimension>& radius, const float defaultBorderRadius)
+{
+    // Change the borderRadius size of a negative number to the default.
+    if (!radius.has_value() || LessNotEqual(radius.value().ConvertToPx(), 0.0)) {
+        radius = Dimension(defaultBorderRadius);
+    }
+}
+}
 void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
@@ -76,7 +84,8 @@ void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
     if (!buttonLayoutProperty->HasLabel()) {
         return;
     }
-    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+    auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
+    if (buttonType == ButtonType::CIRCLE) {
         layoutConstraint.maxSize = HandleLabelCircleButtonConstraint(layoutWrapper).value_or(SizeF());
         return;
     }
@@ -179,7 +188,9 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto renderContext = host->GetRenderContext();
-    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+    CHECK_NULL_VOID(renderContext);
+    auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
+    if (buttonType == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
         auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
@@ -188,12 +199,20 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
         }
         renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(minSize / 2)));
         MeasureCircleButton(layoutWrapper);
-    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::NORMAL) {
-        auto normalRadius =
-            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
-        renderContext->UpdateBorderRadius(normalRadius);
-    } else {
+    } else if (buttonType == ButtonType::CAPSULE) {
         renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(frameSize.Height() / 2)));
+    } else if (buttonType == ButtonType::NORMAL) {
+        auto normalRadius = buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty(Dimension()));
+        renderContext->UpdateBorderRadius(normalRadius);
+    } else if (buttonType == ButtonType::ROUNDED_RECTANGLE) {
+        auto defaultBorderRadius = GetDefaultBorderRadius(layoutWrapper);
+        auto roundedRectRadius =
+            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty(Dimension(defaultBorderRadius)));
+        checkNegativeBorderRadius(roundedRectRadius.radiusTopLeft, defaultBorderRadius);
+        checkNegativeBorderRadius(roundedRectRadius.radiusTopRight, defaultBorderRadius);
+        checkNegativeBorderRadius(roundedRectRadius.radiusBottomLeft, defaultBorderRadius);
+        checkNegativeBorderRadius(roundedRectRadius.radiusBottomRight, defaultBorderRadius);
+        renderContext->UpdateBorderRadius(roundedRectRadius);
     }
 }
 
@@ -220,7 +239,8 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
-        if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+        auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
+        if (buttonType == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);
         } else {
             if (selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value()) {
@@ -315,6 +335,20 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
     }
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     return static_cast<float>(buttonTheme->GetHeight(controlSize).ConvertToPx());
+}
+
+float ButtonLayoutAlgorithm::GetDefaultBorderRadius(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto* context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, 0.0f);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, 0.0f);
+    ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+    return static_cast<float>(buttonTheme->GetBorderRadius(controlSize).ConvertToPx());
 }
 
 void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper)

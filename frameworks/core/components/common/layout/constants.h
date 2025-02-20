@@ -37,6 +37,7 @@ enum class ButtonType {
     DOWNLOAD,
     ICON,
     CUSTOM,
+    ROUNDED_RECTANGLE
 };
 
 enum class RectWidthStyle {
@@ -488,6 +489,11 @@ enum class PixelRoundCalcPolicy {
     NO_FORCE_ROUND = 0,
     FORCE_CEIL = 1,
     FORCE_FLOOR = 2,
+};
+
+enum class LayoutCalPolicy {
+    NO_MATCH = 0,
+    MATCH_PARENT = 1,
 };
 
 const ImageRepeat IMAGE_REPEATS[] = {

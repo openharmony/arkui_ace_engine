@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 
+#include <vector>
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
@@ -86,10 +87,8 @@ enum class HoverEffectType : int32_t {
     UNKNOWN,
 };
 
-struct MouseEvent final {
+struct MouseEvent final : public PointerEvent {
     int32_t id = 0;
-    float x = 0.0f;
-    float y = 0.0f;
     float z = 0.0f;
     float deltaX = 0.0f;
     float deltaY = 0.0f;
@@ -97,13 +96,13 @@ struct MouseEvent final {
     float scrollX = 0.0f;
     float scrollY = 0.0f;
     float scrollZ = 0.0f;
-    float screenX = 0.0f;
-    float screenY = 0.0f;
+    float rawDeltaX = 0.0f;
+    float rawDeltaY = 0.0f;
+    std::vector<MouseButton> pressedButtonsArray;
     MouseAction action = MouseAction::NONE;
     MouseAction pullAction = MouseAction::NONE;
     MouseButton button = MouseButton::NONE_BUTTON;
     int32_t pressedButtons = 0; // combined by MouseButtons
-    TimeStamp time;
     int64_t deviceId = 0;
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
@@ -144,32 +143,40 @@ struct MouseEvent final {
 
     MouseEvent CloneWith(float scale) const
     {
-        return { .x = x / scale,
-            .y = y / scale,
-            .z = z / scale,
-            .deltaX = deltaX / scale,
-            .deltaY = deltaY / scale,
-            .deltaZ = deltaZ / scale,
-            .scrollX = scrollX / scale,
-            .scrollY = scrollY / scale,
-            .scrollZ = scrollZ / scale,
-            .screenX = screenX / scale,
-            .screenY = screenY / scale,
-            .action = action,
-            .pullAction = pullAction,
-            .button = button,
-            .pressedButtons = pressedButtons,
-            .time = time,
-            .deviceId = deviceId,
-            .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType,
-            .sourceTool = sourceTool,
-            .pointerEvent = pointerEvent,
-            .originalId = originalId,
-            .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected,
-            .isPrivacyMode = isPrivacyMode
-        };
+        if (NearEqual(scale, 0.f)) {
+            return {};
+        }
+        MouseEvent mouseEvent;
+        mouseEvent.id = id;
+        mouseEvent.x = x / scale;
+        mouseEvent.y = y / scale;
+        mouseEvent.z = z / scale;
+        mouseEvent.deltaX = deltaX / scale;
+        mouseEvent.deltaY = deltaY /  scale;
+        mouseEvent.deltaZ = deltaZ / scale;
+        mouseEvent.scrollX = scrollX /  scale;
+        mouseEvent.scrollY = scrollY /  scale;
+        mouseEvent.scrollZ = scrollZ / scale;
+        mouseEvent.screenX = screenX / scale;
+        mouseEvent.screenY = screenY / scale;
+        mouseEvent.action = action;
+        mouseEvent.pullAction = pullAction;
+        mouseEvent.button = button;
+        mouseEvent.pressedButtons = pressedButtons;
+        mouseEvent.time = time;
+        mouseEvent.deviceId = deviceId;
+        mouseEvent.targetDisplayId = targetDisplayId;
+        mouseEvent.sourceType = sourceType;
+        mouseEvent.sourceTool = sourceTool;
+        mouseEvent.pointerEvent = pointerEvent;
+        mouseEvent.originalId = originalId;
+        mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+        mouseEvent.isInjected = isInjected;
+        mouseEvent.isPrivacyMode = isPrivacyMode;
+        mouseEvent.rawDeltaX = rawDeltaX;
+        mouseEvent.rawDeltaY = rawDeltaY;
+        mouseEvent.pressedButtonsArray = pressedButtonsArray;
+        return mouseEvent;
     }
 
     MouseEvent CreateScaleEvent(float scale) const
@@ -231,34 +238,7 @@ struct MouseEvent final {
         return event;
     }
 
-    MouseEvent operator-(const Offset& offset) const
-    {
-        return { .x = x - offset.GetX(),
-            .y = y - offset.GetY(),
-            .z = z,
-            .deltaX = deltaX,
-            .deltaY = deltaY,
-            .deltaZ = deltaZ,
-            .scrollX = scrollX,
-            .scrollY = scrollY,
-            .scrollZ = scrollZ,
-            .screenX = screenX - offset.GetX(),
-            .screenY = screenY - offset.GetY(),
-            .action = action,
-            .button = button,
-            .pressedButtons = pressedButtons,
-            .time = time,
-            .deviceId = deviceId,
-            .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType,
-            .sourceTool = sourceTool,
-            .pointerEvent = pointerEvent,
-            .originalId = originalId,
-            .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected,
-            .isPrivacyMode = isPrivacyMode
-        };
-    }
+    MouseEvent operator-(const Offset& offset) const;
 };
 
 class MouseInfo : public BaseEventInfo {
@@ -338,6 +318,33 @@ public:
         return pointerEvent_;
     }
 
+    void SetRawDeltaX(float rawDeltaX)
+    {
+        rawDeltaX_ = rawDeltaX;
+    }
+    float GetRawDeltaX()
+    {
+        return rawDeltaX_;
+    }
+
+    void SetRawDeltaY(float rawDeltaY)
+    {
+        rawDeltaY_ = rawDeltaY;
+    }
+    float GetRawDeltaY()
+    {
+        return rawDeltaY_;
+    }
+    
+    void SetPressedButtons(const std::vector<MouseButton>& pressedButtonsArray)
+    {
+        pressedButtonsArray_ = pressedButtonsArray;
+    }
+    std::vector<MouseButton> GetPressedButtons()
+    {
+        return pressedButtonsArray_;
+    }
+
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
@@ -349,6 +356,9 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset screenLocation_;
+    float rawDeltaX_ = 0.0f;
+    float rawDeltaY_ = 0.0f;
+    std::vector<MouseButton> pressedButtonsArray_;
 };
 
 using HoverEffectFunc = std::function<void(bool)>;
@@ -463,6 +473,9 @@ public:
         info.SetSourceTool(event.sourceTool);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetPressedKeyCodes(event.pressedKeyCodes_);
+        info.SetRawDeltaX(event.rawDeltaX);
+        info.SetRawDeltaY(event.rawDeltaY);
+        info.SetPressedButtons(event.pressedButtonsArray);
         // onMouseCallback_ may be overwritten in its invoke so we copy it first
         auto onMouseCallback = onMouseCallback_;
         onMouseCallback(info);

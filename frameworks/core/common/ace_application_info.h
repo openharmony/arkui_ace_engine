@@ -42,7 +42,8 @@ enum class PlatformVersion {
     VERSION_ELEVEN,
     VERSION_TWELVE,
     VERSION_THIRTEEN,
-    VERSION_FOURTEEN
+    VERSION_FOURTEEN,
+    VERSION_FIFTEEN
 };
 struct AceBundleInfo {
     uint32_t versionCode = 0;
@@ -235,6 +236,16 @@ public:
         return isTouchEventsPassThrough_;
     }
 
+    void SetReusedNodeSkipMeasure(bool reusedNodeSkipMeasure)
+    {
+        reusedNodeSkipMeasure_= reusedNodeSkipMeasure;
+    }
+
+    bool IsReusedNodeSkipMeasure() const
+    {
+        return reusedNodeSkipMeasure_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -266,6 +277,7 @@ protected:
     int32_t missionId_ = -1;
     mutable std::shared_mutex eventsPassThroughMutex_;
     bool isTouchEventsPassThrough_ = false;
+    bool reusedNodeSkipMeasure_ = false;
 };
 
 } // namespace OHOS::Ace

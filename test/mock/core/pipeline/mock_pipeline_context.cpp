@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -194,7 +195,7 @@ void PipelineContext::FlushTouchEvents() {}
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
 void PipelineContext::OnDragEvent(
-    const PointerEvent& pointerEvent, DragEventAction action, const RefPtr<NG::FrameNode>& node)
+    const DragPointerEvent& pointerEvent, DragEventAction action, const RefPtr<NG::FrameNode>& node)
 {}
 
 void PipelineContext::OnIdle(int64_t deadline)
@@ -391,7 +392,7 @@ void PipelineContext::RemoveScheduleTask(uint32_t id) {}
 
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
 
-bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 {
     return false;
 }
@@ -492,7 +493,8 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId,
+    bool isBypass, MouseStyleChangeReason reason)
 {
     return true;
 }

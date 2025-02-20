@@ -126,4 +126,40 @@ void FfiOHOSAceFrameworkImageSpanTextBackgroundStyleBorder(uint32_t color, CBord
     auto textBackgroundStyle = ParseTextBackgroundStyle(color, radius);
     NG::ImageSpanView::SetPlaceHolderStyle(textBackgroundStyle);
 }
+
+void FfiOHOSAceFrameworkImageSpanSetColorFilter(void* vectorHandle)
+{
+    const auto& matrix = *reinterpret_cast<std::vector<float>*>(vectorHandle);
+    ImageModel::GetInstance()->SetColorFilterMatrix(matrix);
+}
+
+void FfiOHOSAceFrameworkImageSpanOnComplete(void (*callback)(CJImageComplete completeInfo))
+{
+    auto onComplete = [ffiOnComplete = CJLambda::Create(callback)](const LoadImageSuccessEvent& newInfo) -> void {
+        CJImageComplete ffiCompleteInfo {};
+        ffiCompleteInfo.width = newInfo.GetWidth();
+        ffiCompleteInfo.height = newInfo.GetHeight();
+        ffiCompleteInfo.componentWidth = newInfo.GetComponentWidth();
+        ffiCompleteInfo.componentHeight = newInfo.GetComponentHeight();
+        ffiCompleteInfo.loadingStatus = newInfo.GetLoadingStatus();
+        ffiCompleteInfo.contentWidth = newInfo.GetContentWidth();
+        ffiCompleteInfo.contentHeight = newInfo.GetContentHeight();
+        ffiCompleteInfo.contentOffsetX = newInfo.GetContentOffsetX();
+        ffiCompleteInfo.contentOffsetY = newInfo.GetContentOffsetY();
+        ffiOnComplete(ffiCompleteInfo);
+    };
+    ImageModel::GetInstance()->SetOnComplete(onComplete);
+}
+
+void FfiOHOSAceFrameworkImageSpanOnError(void (*callback)(CJImageError errorInfo))
+{
+    auto onError = [ffiOnError = CJLambda::Create(callback)](const LoadImageFailEvent& newInfo) -> void {
+        CJImageError ffiErrorInfo {};
+        ffiErrorInfo.componentWidth = newInfo.GetComponentWidth();
+        ffiErrorInfo.componentHeight = newInfo.GetComponentHeight();
+        ffiErrorInfo.message = newInfo.GetErrorMessage().c_str();
+        ffiOnError(ffiErrorInfo);
+    };
+    ImageModel::GetInstance()->SetOnError(onError);
+}
 }

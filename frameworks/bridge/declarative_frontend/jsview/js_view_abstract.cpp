@@ -53,6 +53,9 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
@@ -67,6 +70,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/event/focus_axis_event.h"
 #include "canvas_napi/js_canvas.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -110,6 +114,8 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/base/inspector.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1095,6 +1101,15 @@ void ParsePopupCommonParam(
         auto obj = JSRef<JSObject>::Cast(popupTransition);
         auto effects = ParseChainedTransition(obj, info.GetExecutionContext());
         popupParam->SetTransitionEffects(effects);
+    }
+    
+    auto keyboardAvoidMode = popupObj->GetProperty("keyboardAvoidMode");
+    if (keyboardAvoidMode->IsNumber()) {
+        auto popupKeyboardAvoidMode = keyboardAvoidMode->ToNumber<int32_t>();
+        if (popupKeyboardAvoidMode >= static_cast<int>(PopupKeyboardAvoidMode::DEFAULT) &&
+            popupKeyboardAvoidMode <= static_cast<int>(PopupKeyboardAvoidMode::NONE)) {
+            popupParam->SetKeyBoardAvoidMode(static_cast<PopupKeyboardAvoidMode>(popupKeyboardAvoidMode));
+        }
     }
 }
 
@@ -7459,6 +7474,39 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
+void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (!(arg->IsNumber() || arg->IsString())) {
+        return;
+    }
+    RefPtr<NG::FrameNode> frameNode = nullptr;
+    if (arg->IsString()) {
+        std::string id = arg->ToString();
+        frameNode = NG::Inspector::GetFrameNodeByKey(id);
+    }
+
+    if (arg->IsNumber()) {
+        auto id = arg->ToNumber<int32_t>();
+        auto node = ElementRegister::GetInstance()->GetNodeById(id);
+        frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    if (!(args[1]->IsObject())) {
+        return;
+    }
+    JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
+    auto eventInfoPtr = jsObject->Unwrap<KeyEventInfo>();
+    CHECK_NULL_VOID(eventInfoPtr);
+    KeyEvent keyEvent;
+    eventInfoPtr->ParseKeyEvent(keyEvent);
+    auto result = focusHub->HandleEvent(keyEvent);
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -7994,7 +8042,7 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     };
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;
@@ -8188,49 +8236,88 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.width = width;
     }
 
-    CalcDimension sheetHeight;
-    if (height->IsString()) {
-        std::string heightStr = height->ToString();
-        // Remove all " ".
-        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
-        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-        if (heightStr == SHEET_HEIGHT_MEDIUM) {
-            sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_LARGE) {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
-            sheetStyle.sheetMode = NG::SheetMode::AUTO;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr.find("calc") != std::string::npos) {
-            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
-        } else {
-            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
-        }
-        if (sheetHeight.Value() < 0) {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-            sheetStyle.height.reset();
-            return;
-        }
+    auto radiusValue = paramObj->GetProperty("radius");
+    ParseBindSheetBorderRadius(radiusValue, sheetStyle);
+
+    ParseDetentSelection(paramObj, sheetStyle);
+
+    NG::SheetHeight sheetStruct;
+    bool parseResult = ParseSheetHeight(height, sheetStruct, isPartialUpdate);
+    if (!parseResult) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet height in unnormal condition");
     }
-    if (!ParseJsDimensionVpNG(height, sheetHeight)) {
-        if (isPartialUpdate) {
-            sheetStyle.sheetMode.reset();
-        } else {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-        }
-        sheetStyle.height.reset();
+    sheetStyle.sheetHeight = sheetStruct;
+}
+
+void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    auto detentSelection = paramObj->GetProperty("detentSelection");
+    NG::SheetHeight sheetStruct;
+    bool parseResult = ParseSheetHeight(detentSelection, sheetStruct, true);
+    if (!parseResult) {
+        sheetStruct.height.reset();
+        sheetStruct.sheetMode.reset();
+        TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet detent selection in unnormal condition");
+    }
+    sheetStyle.detentSelection = sheetStruct;
+}
+
+void JSViewAbstract::ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle)
+{
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "radius is not correct type");
+        return;
+    }
+    CalcDimension radius;
+    NG::BorderRadiusProperty borderRadius;
+    if (ParseJsLengthMetrics(args, radius)) {
+        borderRadius.SetRadius(radius);
+        sheetStyle.radius = borderRadius;
+    } else if (ParseBindSheetBorderRadiusProps(args, borderRadius)) {
+        sheetStyle.radius = borderRadius;
     } else {
-        sheetStyle.height = sheetHeight;
-        sheetStyle.sheetMode.reset();
+        TAG_LOGW(AceLogTag::ACE_SHEET, "radius is not correct.");
+        return;
     }
+}
+
+bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
+{
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (CheckLengthMetrics(object)) {
+            std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
+            std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
+            std::optional<CalcDimension> radiusBottomStart = ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
+            std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
+            auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+            radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
+            radius.radiusTopRight = isRightToLeft ? radiusTopStart : radiusTopEnd;
+            radius.radiusBottomLeft = isRightToLeft ? radiusBottomEnd : radiusBottomStart;
+            radius.radiusBottomRight = isRightToLeft ? radiusBottomStart : radiusBottomEnd;
+            radius.multiValued = true;
+        } else {
+            ParseBorderRadiusProps(object, radius);
+        }
+        return true;
+    }
+    return false;
+}
+
+std::optional<CalcDimension> JSViewAbstract::ParseBindSheetBorderRadiusProp(
+    const JSRef<JSObject>& object, const char* prop)
+{
+    if (object->IsEmpty()) {
+        return std::nullopt;
+    }
+    if (object->HasProperty(prop) && object->GetProperty(prop)->IsObject()) {
+        JSRef<JSObject> propObj = JSRef<JSObject>::Cast(object->GetProperty(prop));
+        CalcDimension calcDimension;
+        if (ParseJsLengthMetrics(propObj, calcDimension)) {
+            return calcDimension;
+        }
+    }
+    return std::nullopt;
 }
 
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
@@ -8241,7 +8328,10 @@ bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG:
     JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
     NG::SheetHeight sheetDetent;
     for (size_t i = 0; i < array->Length(); i++) {
-        ParseSheetDetentHeight(array->GetValueAt(i), sheetDetent);
+        bool parseResult = ParseSheetHeight(array->GetValueAt(i), sheetDetent, false);
+        if (!parseResult) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet detent in unnormal condition");
+        }
         if ((!sheetDetent.height.has_value()) && (!sheetDetent.sheetMode.has_value())) {
             continue;
         }
@@ -8250,49 +8340,6 @@ bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG:
         sheetDetent.sheetMode.reset();
     }
     return true;
-}
-
-void JSViewAbstract::ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent)
-{
-    CalcDimension sheetHeight;
-    if (args->IsString()) {
-        std::string heightStr = args->ToString();
-        // Remove all " ".
-        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
-        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-        if (heightStr == SHEET_HEIGHT_MEDIUM) {
-            detent.sheetMode = NG::SheetMode::MEDIUM;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_LARGE) {
-            detent.sheetMode = NG::SheetMode::LARGE;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
-            detent.sheetMode = NG::SheetMode::AUTO;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr.find("calc") != std::string::npos) {
-            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
-        } else {
-            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
-        }
-        if (sheetHeight.Value() < 0) {
-            detent.sheetMode = NG::SheetMode::LARGE;
-            detent.height.reset();
-            return;
-        }
-    }
-    if (!ParseJsDimensionVpNG(args, sheetHeight)) {
-        detent.sheetMode = NG::SheetMode::LARGE;
-        detent.height.reset();
-    } else {
-        detent.height = sheetHeight;
-        detent.sheetMode.reset();
-    }
 }
 
 bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions)
@@ -8461,6 +8508,59 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsSheetSpringBack(panda::JsiRunt
 {
     ViewAbstractModel::GetInstance()->SheetSpringBack();
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
+
+bool JSViewAbstract::ParseSheetMode(const std::string heightStr, NG::SheetHeight& detent)
+{
+    if (heightStr == SHEET_HEIGHT_MEDIUM) {
+        detent.sheetMode = NG::SheetMode::MEDIUM;
+        return true;
+    }
+
+    if (heightStr == SHEET_HEIGHT_LARGE) {
+        detent.sheetMode = NG::SheetMode::LARGE;
+        return true;
+    }
+    if (heightStr == SHEET_HEIGHT_FITCONTENT) {
+        detent.sheetMode = NG::SheetMode::AUTO;
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent,
+    bool isReset)
+{
+    detent.height.reset();
+    detent.sheetMode.reset();
+    CalcDimension sheetHeight;
+    if (args->IsString()) {
+        std::string heightStr = args->ToString();
+
+        // Remove all " ".
+        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
+        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
+        if (ParseSheetMode(heightStr, detent)) {
+            return true;
+        }
+        if (heightStr.find("calc") != std::string::npos) {
+            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+        } else {
+            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
+        }
+        if (sheetHeight.Value() < 0) {
+            detent.sheetMode = NG::SheetMode::LARGE;
+            return false;
+        }
+    }
+    if (!ParseJsDimensionVpNG(args, sheetHeight)) {
+        if (!isReset) {
+            detent.sheetMode = NG::SheetMode::LARGE;
+        }
+        return false;
+    }
+    detent.height = sheetHeight;
+    return true;
 }
 
 void JSViewAbstract::ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
@@ -8834,6 +8934,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
+    JSClass<JSViewAbstract>::StaticMethod("onKeyEventDispatch", &JSInteractableView::JsOnKeyEventDispatch);
+    JSClass<JSViewAbstract>::StaticMethod("dispatchKeyEvent", &JSViewAbstract::JsDispatchKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
     JSClass<JSViewAbstract>::StaticMethod("onFocus", &JSViewAbstract::JsOnFocus);
     JSClass<JSViewAbstract>::StaticMethod("onBlur", &JSViewAbstract::JsOnBlur);
@@ -8873,6 +8975,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onSizeChange", &JSViewAbstract::JsOnSizeChange);
     JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
     JSClass<JSViewAbstract>::StaticMethod("monopolizeEvents", &JSInteractableView::JsMonopolizeEvents);
+    JSClass<JSViewAbstract>::StaticMethod("onFocusAxisEvent", &JSViewAbstract::JsOnFocusAxisEvent);
 
     JSClass<JSViewAbstract>::StaticMethod("accessibilityGroup", &JSViewAbstract::JsAccessibilityGroup);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityText", &JSViewAbstract::JsAccessibilityText);
@@ -10226,6 +10329,37 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, nullptr);
+}
+
+void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (arg->IsUndefined() && IsDisableEventVersion()) {
+        ViewAbstractModel::GetInstance()->DisableOnFocusAxisEvent();
+        return;
+    }
+    if (!arg->IsFunction()) {
+        return;
+    }
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(arg);
+    if (jsOnFocusAxisEventFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnFocusAxisFuncLocalHandle = jsOnFocusAxisEventFunc->GetLocalHandle();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onFocusAxisEvent = [vm, execCtx = args.GetExecutionContext(),
+                       func = panda::CopyableGlobal(vm, jsOnFocusAxisFuncLocalHandle),
+                       node = frameNode](NG::FocusAxisEventInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onFocusAxis");
+        PipelineContext::SetCallBackNode(node);
+        auto eventObj = NG::CommonBridge::CreateFocusAxisEventInfo(vm, info);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    ViewAbstractModel::GetInstance()->SetOnFocusAxisEvent(std::move(onFocusAxisEvent));
 }
 
 bool JSViewAbstract::CheckColor(

@@ -26,8 +26,15 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
+enum class ExpandMode : uint32_t {
+    NOT_EXPAND = 0,
+    EXPAND,
+    LAZY_EXPAND,
+};
+
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -132,18 +139,57 @@ ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Bool isExpanded)
                       : frameNode->GetTotalChildCountWithoutExpanded();
 }
 
-ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool isExpanded)
+ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     CHECK_NULL_RETURN(index >= 0, nullptr);
-    if (isExpanded) {
+    auto expandModeResult = static_cast<ExpandMode>(expandMode);
+    if (expandModeResult == ExpandMode::EXPAND) {
         frameNode->GetAllChildrenWithBuild(false);
     }
-    auto child = frameNode->GetFrameNodeChildByIndex(index, false, isExpanded);
+    FrameNode* child = nullptr;
+    if (expandModeResult == ExpandMode::EXPAND || expandModeResult == ExpandMode::NOT_EXPAND) {
+        child = frameNode->GetFrameNodeChildByIndex(index, false, expandModeResult == ExpandMode::EXPAND);
+    } else if (expandModeResult == ExpandMode::LAZY_EXPAND) {
+        child = frameNode->GetFrameNodeChildByIndexWithoutBuild(index);
+        if (child == nullptr) {
+            return GetChild(node, index, static_cast<ArkUI_Uint32>(ExpandMode::EXPAND));
+        }
+    }
     return reinterpret_cast<ArkUINodeHandle>(child);
+}
+
+ArkUI_Int32 GetFirstChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto child = frameNode->GetFrameNodeChildByIndex(0, false, false);
+    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto childRef = Referenced::Claim<FrameNode>(childNode);
+    *index = frameNode->GetFrameNodeIndex(childRef, true);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 GetLastChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    size_t size = static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
+    CHECK_NULL_RETURN(size > 0, ERROR_CODE_PARAM_INVALID);
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, false);
+    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto childRef = Referenced::Claim<FrameNode>(childNode);
+    *index = frameNode->GetFrameNodeIndex(childRef, true);
+    return ERROR_CODE_NO_ERROR;
 }
 
 ArkUINodeHandle GetFirst(ArkUINodeHandle node, ArkUI_Bool isExpanded)
@@ -522,6 +568,28 @@ ArkUI_Int32 ResetLayoutEvent(ArkUINodeHandle node)
     return 0;
 }
 
+ArkUI_Int32 RequestFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT);
+    return static_cast<ArkUI_Int32>(ViewAbstract::RequestFocus(frameNode));
+}
+
+void ClearFocus(ArkUI_Int32 instanceId)
+{
+    ViewAbstract::ClearFocus(instanceId);
+}
+
+void FocusActivate(ArkUI_Int32 instanceId, bool isActive, bool isAutoInactive)
+{
+    ViewAbstract::FocusActivate(instanceId, isActive, isAutoInactive);
+}
+
+void SetAutoFocusTransfer(ArkUI_Int32 instanceId, bool isAutoFocusTransfer)
+{
+    ViewAbstract::SetAutoFocusTransfer(instanceId, isAutoFocusTransfer);
+}
+
 ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -658,6 +726,15 @@ void GetActiveChildrenInfo(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkU
     }
 }
 
+void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto delegate = EngineHelper::GetDelegateByContainer(container);
+    CHECK_NULL_VOID(delegate);
+    delegate->SetKeyProcessingMode(mode);
+}
+
 void GetCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, char** value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -679,7 +756,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, CreateFrameNode, InvalidateInFrameNode,
         AppendChildInFrameNode, InsertChildAfterInFrameNode, RemoveChildInFrameNode, ClearChildrenInFrameNode,
-        GetChildrenCount, GetChild, GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
+        GetChildrenCount, GetChild, GetFirstChildIndexWithoutExpand, GetLastChildIndexWithoutExpand,
+        GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
         PropertyUpdate, GetLast, GetPositionToParent, GetPositionToScreen, GetPositionToWindow,
         GetPositionToParentWithTransform, GetPositionToScreenWithTransform, GetPositionToWindowWithTransform,
         GetMeasuredSize, GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo,
@@ -688,8 +766,9 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, GetCustomPropertyCapiByKey,
         SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr,
         GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty, SetDrawCompleteEvent,
-        ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent, SetCrossLanguageOptions, GetCrossLanguageOptions,
-        CheckIfCanCrossLanguageAttributeSetting };
+        ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent, RequestFocus, ClearFocus, FocusActivate,
+        SetAutoFocusTransfer, SetCrossLanguageOptions, GetCrossLanguageOptions,
+        CheckIfCanCrossLanguageAttributeSetting, SetKeyProcessingMode };
     return &modifier;
 }
 

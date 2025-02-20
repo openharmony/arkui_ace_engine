@@ -158,7 +158,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
         if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP)
-            && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
+            && (sheetStyle_.sheetHeight.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
             auto&& children = layoutWrapper->GetAllChildrenWithBuild();
             auto secondIter = std::next(children.begin(), 1);
             auto secondChild = *secondIter;
@@ -429,10 +429,12 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
                 width = std::min(static_cast<float>(SHEET_LANDSCAPE_WIDTH.ConvertToPx()), maxSize.Width());
                 break;
             }
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             width = maxSize.Width();
             break;
         case SheetType::SHEET_BOTTOMLANDSPACE:
+            [[fallthrough]];
         case SheetType::SHEET_CENTER:
             width = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
             break;
@@ -449,22 +451,23 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
 {
     float height = 0.0f;
     bool isMediumOrLargeMode = false;
-    if (sheetStyle_.sheetMode == SheetMode::MEDIUM || sheetStyle_.sheetMode == SheetMode::LARGE) {
+    if (sheetStyle_.sheetHeight.sheetMode == SheetMode::MEDIUM ||
+        sheetStyle_.sheetHeight.sheetMode == SheetMode::LARGE) {
         isMediumOrLargeMode =  true;
     }
-    if (sheetStyle_.height.has_value() || isMediumOrLargeMode) {
+    if (sheetStyle_.sheetHeight.height.has_value() || isMediumOrLargeMode) {
         float sheetMaxHeight = sheetMaxHeight_;
         if (SheetInSplitWindow()) {
             sheetMaxHeight = sheetMaxHeight_ - SHEET_SPLIT_STATUS_BAR.ConvertToPx()-
                 SHEET_SPLIT_AI_BAR.ConvertToPx();
         }
         auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * POPUP_LARGE_SIZE;
-        if (sheetStyle_.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle_.height->ConvertToPxWithSize(maxHeight);
+        if (sheetStyle_.sheetHeight.height->Unit() == DimensionUnit::PERCENT) {
+            height = sheetStyle_.sheetHeight.height->ConvertToPxWithSize(maxHeight);
         } else if (isMediumOrLargeMode) {
             height = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
         } else {
-            height = sheetStyle_.height->ConvertToPx();
+            height = sheetStyle_.sheetHeight.height->ConvertToPx();
         }
 
         maxHeight = SheetInSplitWindow()

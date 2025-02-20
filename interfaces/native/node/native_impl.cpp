@@ -113,6 +113,14 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
     OHOS::Ace::DialogModel::RegisterOnWillDismissWithUserData,
 };
 
+ArkUI_NativeDialogAPI_2 dialogImpl_2 = {
+    dialogImpl_1,
+    OHOS::Ace::DialogModel::SetKeyboardAvoidDistance,
+    OHOS::Ace::DialogModel::SetLevelMode,
+    OHOS::Ace::DialogModel::SetLevelUniqueId,
+    OHOS::Ace::DialogModel::SetImmersiveMode,
+};
+
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
 ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     CURRENT_NATIVE_GESTURE_API_VERSION,
@@ -174,6 +182,8 @@ void* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t ver
                 case 0:
                 case 1:
                     return &dialogImpl_1;
+                case 2:
+                    return &dialogImpl_2;
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "fail to get dialog api family, version is incorrect: %{public}d", version);
@@ -223,6 +233,8 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
         case ARKUI_NATIVE_DIALOG:
             if (strcmp(structName, "ArkUI_NativeDialogAPI_1") == 0) {
                 return &dialogImpl_1;
+            } else if (strcmp(structName, "ArkUI_NativeDialogAPI_2") == 0) {
+                return &dialogImpl_2;
             }
             break;
         case ARKUI_NATIVE_GESTURE:

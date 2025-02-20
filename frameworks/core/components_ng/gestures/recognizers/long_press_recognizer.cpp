@@ -38,8 +38,8 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 500;
 } // namespace
 
 LongPressRecognizer::LongPressRecognizer(
-    int32_t duration, int32_t fingers, bool repeat, bool isForDrag, bool isDisableMouseLeft)
-    : MultiFingersRecognizer(fingers), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
+    int32_t duration, int32_t fingers, bool repeat, bool isForDrag, bool isDisableMouseLeft, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
       isDisableMouseLeft_(isDisableMouseLeft)
 {
     if (fingers_ > MAX_LONGPRESS_FINGERS || fingers_ < DEFAULT_LONGPRESS_FINGERS) {
@@ -199,6 +199,9 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
+        if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+            SendCallbackMsg(onAction_, false, true);
+        }
         SendCallbackMsg(onActionUpdate_, false);
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
             SendCallbackMsg(onActionEnd_, false);
@@ -234,6 +237,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    touchPoints_[event.id].operatingHand = event.operatingHand;
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     time_ = event.time;
@@ -291,6 +295,10 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
         }
         return;
     }
+    if (CheckLimitFinger()) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
 }
 
@@ -321,6 +329,9 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
 void LongPressRecognizer::DoRepeat()
 {
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
+    if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {

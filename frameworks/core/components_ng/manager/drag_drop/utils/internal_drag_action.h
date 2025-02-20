@@ -53,7 +53,7 @@ struct ArkUIInteralDragAction {
     DragAdapterState dragState = DragAdapterState::INIT;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
     std::string extraParams;
-    PointerEvent dragPointerEvent;
+    DragPointerEvent dragPointerEvent;
     float dipScale = 0.0;
     void* userData;
     std::function<void(const OHOS::Ace::DragNotifyMsg& info, int32_t status)> callback;

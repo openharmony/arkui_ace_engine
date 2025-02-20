@@ -20,6 +20,7 @@
 #include "core/event/axis_event.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/node/event_converter.h"
+#include "interfaces/native/node/node_model.h"
 #include "base/error/error_code.h"
 
 #ifdef __cplusplus
@@ -114,6 +115,13 @@ int32_t OH_ArkUI_UIInputEvent_GetSourceType(const ArkUI_UIInputEvent* event)
             }
             return axisEvent->sourceType;
         }
+        case C_FOCUS_AXIS_EVENT_ID: {
+            const auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
+            if (!focusAxisEvent) {
+                return static_cast<int32_t>(UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+            }
+            return focusAxisEvent->sourceType;
+        }
         default:
             break;
     }
@@ -147,6 +155,13 @@ int32_t OH_ArkUI_UIInputEvent_GetToolType(const ArkUI_UIInputEvent* event)
             }
             return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(axisEvent->actionTouchPoint.toolType);
         }
+        case C_FOCUS_AXIS_EVENT_ID: {
+            const auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
+            if (!focusAxisEvent) {
+                return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+            }
+            return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(focusAxisEvent->toolType);
+        }
         default:
             break;
     }
@@ -164,7 +179,7 @@ int64_t HandleCTouchEvent(ArkUI_UIInputEvent* event)
 
 int64_t HandleTouchEvent(ArkUI_UIInputEvent* event)
 {
-    const auto* uiEvent = reinterpret_cast<const OHOS::Ace::UIInputEvent*>(event->inputEvent);
+    const auto* uiEvent = reinterpret_cast<const OHOS::Ace::PointerEvent*>(event->inputEvent);
     if (!uiEvent) {
         LOGE("The parameter of OH_ArkUI_UIInputEvent_GetEventTime is invalid");
         return 0;
@@ -174,7 +189,7 @@ int64_t HandleTouchEvent(ArkUI_UIInputEvent* event)
 
 int64_t HandleAxisEvent(ArkUI_UIInputEvent* event)
 {
-    const auto* uiEvent = reinterpret_cast<const OHOS::Ace::UIInputEvent*>(event->inputEvent);
+    const auto* uiEvent = reinterpret_cast<const OHOS::Ace::PointerEvent*>(event->inputEvent);
     if (!uiEvent) {
         LOGE("The parameter of OH_ArkUI_UIInputEvent_GetEventTime is invalid");
         return 0;
@@ -209,6 +224,15 @@ int64_t HandleCKeyEvent(ArkUI_UIInputEvent* event)
     return keyEvent->timestamp;
 }
 
+int64_t HandleCFocusAxisEvent(ArkUI_UIInputEvent* event)
+{
+    const auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
+    if (!focusAxisEvent) {
+        return 0;
+    }
+    return focusAxisEvent->timeStamp;
+}
+
 int64_t OH_ArkUI_UIInputEvent_GetEventTime(const ArkUI_UIInputEvent* event)
 {
     if (!event) {
@@ -220,7 +244,8 @@ int64_t OH_ArkUI_UIInputEvent_GetEventTime(const ArkUI_UIInputEvent* event)
         {AXIS_EVENT_ID, HandleAxisEvent},
         {C_MOUSE_EVENT_ID, HandleCMouseEvent},
         {C_AXIS_EVENT_ID, HandleCAxisEvent},
-        {C_KEY_EVENT_ID, HandleCKeyEvent}
+        {C_KEY_EVENT_ID, HandleCKeyEvent},
+        {C_FOCUS_AXIS_EVENT_ID, HandleCFocusAxisEvent},
     };
     auto it = eventHandlers.find(event->eventTypeId);
     if (it != eventHandlers.end()) {
@@ -230,17 +255,39 @@ int64_t OH_ArkUI_UIInputEvent_GetEventTime(const ArkUI_UIInputEvent* event)
     return 0;
 }
 
+int32_t GetCKeyEventDeviceId(ArkUI_UIInputEvent* event)
+{
+    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
+    if (!keyEvent) {
+        return -1;
+    }
+    return static_cast<int32_t>(keyEvent->deviceId);
+}
+
+int32_t GetCFocusAxisEventDeviceId(ArkUI_UIInputEvent* event)
+{
+    const auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
+    if (!focusAxisEvent) {
+        return -1;
+    }
+    return static_cast<int32_t>(focusAxisEvent->deviceId);
+}
+
 int32_t OH_ArkUI_UIInputEvent_GetDeviceId(const ArkUI_UIInputEvent *event)
 {
     if (!event) {
         return -1;
     }
-    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-    if (!keyEvent) {
-        return -1;
+    std::map<ArkUIEventTypeId, std::function<int64_t(ArkUI_UIInputEvent*)>> eventHandlers = {
+        {C_KEY_EVENT_ID, GetCKeyEventDeviceId},
+        {C_FOCUS_AXIS_EVENT_ID, GetCFocusAxisEventDeviceId},
+    };
+    auto iter = eventHandlers.find(event->eventTypeId);
+    if (iter != eventHandlers.end()) {
+        ArkUI_UIInputEvent* inputEvent = const_cast<ArkUI_UIInputEvent*>(event);
+        return iter->second(inputEvent);
     }
-    auto result = static_cast<int32_t>(keyEvent->deviceId);
-    return result;
+    return -1;
 }
 
 int32_t OH_ArkUI_UIInputEvent_GetPressedKeys(
@@ -254,10 +301,10 @@ int32_t OH_ArkUI_UIInputEvent_GetPressedKeys(
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto inputLength = *length;
-    *length = keyEvent->keyCodesLength;
     if (keyEvent->keyCodesLength > inputLength) {
         return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
     }
+    *length = keyEvent->keyCodesLength;
     for (int i = 0; i < keyEvent->keyCodesLength; i++) {
         pressedKeyCodes[i] = keyEvent->pressedKeyCodes[i];
     }
@@ -872,6 +919,45 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
     return 0.0f;
 }
 
+int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, ArkUI_InteractionHand *hand)
+{
+    if (!event || !hand) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            *hand = static_cast<ArkUI_InteractionHand>(touchEvent->actionTouchPoint.operatingHand);
+            break;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIndex(const ArkUI_UIInputEvent *event, int32_t pointerIndex,
+    ArkUI_InteractionHand *hand)
+{
+    if (!event || !hand) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *hand = static_cast<ArkUI_InteractionHand>(touchEvent->touchPointes[pointerIndex].operatingHand);
+            break;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 float OH_ArkUI_PointerEvent_GetTouchAreaWidth(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     if (!event) {
@@ -908,6 +994,26 @@ float OH_ArkUI_PointerEvent_GetTouchAreaHeight(const ArkUI_UIInputEvent* event, 
             break;
     }
     return 0.0f;
+}
+
+int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* event, uint32_t* pointerIndex)
+{
+    if (!event || !pointerIndex) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!touchEvent || touchEvent->touchPointSize <= 0) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *pointerIndex = touchEvent->changedPointerId;
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 uint32_t OH_ArkUI_PointerEvent_GetHistorySize(const ArkUI_UIInputEvent* event)
@@ -1285,6 +1391,32 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
     return 0.0;
 }
 
+int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return UI_AXIS_EVENT_ACTION_NONE;
+    }
+    switch (event->eventTypeId) {
+        case AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+            if (axisEvent) {
+                return OHOS::Ace::NodeModel::ConvertToCAxisActionType(static_cast<int32_t>(axisEvent->action));
+            }
+            break;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (axisEvent) {
+                return OHOS::Ace::NodeModel::ConvertToCAxisActionType(axisEvent->action);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return UI_AXIS_EVENT_ACTION_NONE;
+}
+
 int32_t OH_ArkUI_PointerEvent_SetInterceptHitTestMode(const ArkUI_UIInputEvent* event, HitTestMode mode)
 {
     if (!event) {
@@ -1362,6 +1494,325 @@ int32_t OH_ArkUI_MouseEvent_GetMouseAction(const ArkUI_UIInputEvent* event)
             break;
     }
     return -1;
+}
+
+int64_t OH_ArkUI_PointerEvent_GetPressedTimeByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
+{
+    if (!event) {
+        return 0;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
+                return 0;
+            }
+            return touchEvent->touchPointes[pointerIndex].pressedTime;
+        }
+        default:
+            break;
+    }
+    return 0;
+}
+
+float OH_ArkUI_MouseEvent_GetRawDeltaX(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    switch (event->eventTypeId) {
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->rawDeltaX;
+        }
+        default:
+            break;
+    }
+    return 0.0f;
+}
+
+float OH_ArkUI_MouseEvent_GetRawDeltaY(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    switch (event->eventTypeId) {
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->rawDeltaY;
+        }
+        default:
+            break;
+    }
+    return 0.0f;
+}
+
+int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return 0;
+    }
+    auto getTargetDisplayId = [](auto* specificEvent) -> int32_t {
+        return specificEvent ? specificEvent->targetDisplayId : 0;
+    };
+    switch (event->eventTypeId) {
+        case C_MOUSE_EVENT_ID:
+            return getTargetDisplayId(reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent));
+        case C_TOUCH_EVENT_ID:
+            return getTargetDisplayId(reinterpret_cast<ArkUITouchEvent*>(event->inputEvent));
+        case C_AXIS_EVENT_ID:
+            return getTargetDisplayId(reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent));
+        case C_FOCUS_AXIS_EVENT_ID:
+            return getTargetDisplayId(reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent));
+        case TOUCH_EVENT_ID: {
+            return getTargetDisplayId(reinterpret_cast<OHOS::Ace::TouchEvent*>(event->inputEvent));
+        }
+        case AXIS_EVENT_ID: {
+            return getTargetDisplayId(reinterpret_cast<OHOS::Ace::AxisEvent*>(event->inputEvent));
+        }
+        default:
+            return 0;
+    }
+}
+
+int32_t OH_ArkUI_MouseEvent_GetPressedButtons(const ArkUI_UIInputEvent* event, int32_t* pressedButtons, int32_t* length)
+{
+    if (!event || !pressedButtons || !length) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            auto inputLength = *length;
+            if (mouseEvent->pressedButtonsLength > inputLength) {
+                return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
+            }
+            *length = mouseEvent->pressedButtonsLength;
+            for (int i = 0; i < mouseEvent->pressedButtonsLength; i++) {
+                pressedButtons[i] = mouseEvent->pressedButtons[i];
+            }
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
+double OH_ArkUI_FocusAxisEvent_GetAxisValue(const ArkUI_UIInputEvent* event, int32_t axis)
+{
+    if (!event) {
+        return 0.0;
+    }
+    if (event->eventTypeId != C_FOCUS_AXIS_EVENT_ID) {
+        return 0.0f;
+    }
+    const auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
+    if (!focusAxisEvent) {
+        return 0.0;
+    }
+    switch (axis) {
+        case UI_FOCUS_AXIS_EVENT_ABS_X:
+            return focusAxisEvent->absXValue;
+        case UI_FOCUS_AXIS_EVENT_ABS_Y:
+            return focusAxisEvent->absYValue;
+        case UI_FOCUS_AXIS_EVENT_ABS_Z:
+            return focusAxisEvent->absZValue;
+        case UI_FOCUS_AXIS_EVENT_ABS_RZ:
+            return focusAxisEvent->absRzValue;
+        case UI_FOCUS_AXIS_EVENT_ABS_GAS:
+            return focusAxisEvent->absGasValue;
+        case UI_FOCUS_AXIS_EVENT_ABS_BRAKE:
+            return focusAxisEvent->absBrakeValue;
+        case UI_FOCUS_AXIS_EVENT_ABS_HAT0X:
+            return focusAxisEvent->absHat0XValue;
+        case UI_FOCUS_AXIS_EVENT_ABS_HAT0Y:
+            return focusAxisEvent->absHat0YValue;
+        default:
+            return 0.0;
+    }
+    return 0.0;
+}
+
+int32_t OH_ArkUI_FocusAxisEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_FOCUS_AXIS_EVENT_ID: {
+            auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
+            focusAxisEvent->stopPropagation = stopPropagation;
+            break;
+        }
+        default:
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event, ArkUI_UIInputEvent** clonedEvent)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+    currentEvent->inputType = event->inputType;
+    currentEvent->eventTypeId = event->eventTypeId;
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!fullImpl) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->createClonedTouchEvent(touchEventCloned, touchEvent);
+    currentEvent->inputEvent = touchEventCloned;
+    currentEvent->isCloned = true;
+    *clonedEvent = currentEvent;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_DestroyClonedEvent(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (touchEvent) {
+        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+        fullImpl->getNodeModifiers()->getCommonModifier()->destroyTouchEvent(touchEvent);
+    }
+    delete event;
+    event = nullptr;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(const ArkUI_UIInputEvent* event, float x, float y)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->actionTouchPoint.nodeX = x;
+    touchEvent->actionTouchPoint.nodeY = y;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(
+    const ArkUI_UIInputEvent* event, float x, float y, int32_t pointerIndex)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->touchPointes[pointerIndex].nodeX = x;
+    touchEvent->touchPointes[pointerIndex].nodeY = y;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventActionType(const ArkUI_UIInputEvent* event, int32_t actionType)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->action = OHOS::Ace::NodeModel::ConvertToOriginTouchActionType(actionType);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(const ArkUI_UIInputEvent* event, int32_t fingerId)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->actionTouchPoint.id = fingerId;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(
+    const ArkUI_UIInputEvent* event, int32_t fingerId, int32_t pointerIndex)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->touchPointes[pointerIndex].id = fingerId;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!node) {
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!fullImpl) {
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    int32_t res = fullImpl->getNodeModifiers()->getCommonModifier()->postTouchEvent(node->uiNodeHandle, touchEvent);
+    return res;
 }
 
 #ifdef __cplusplus

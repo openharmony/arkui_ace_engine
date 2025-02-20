@@ -922,21 +922,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest071, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest072
- * @tc.desc: Test UpdateHoverNode
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest072, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
-    EXPECT_FALSE(eventManager->IsSkipEventNode(pageNode));
-}
-
-/**
  * @tc.name: EventManagerTest073
  * @tc.desc: Test AddKeyboardShortcutNode
  * @tc.type: FUNC
@@ -1182,5 +1167,37 @@ HWTEST_F(EventManagerTestNg, GetSetPressedKeyCodesTest001, TestSize.Level1)
     auto pressedKeyCodes = event.GetPressedKeyCodes();
     EXPECT_EQ(pressedKeyCodes.size(), 2);
     EXPECT_EQ(pressedKeyCodes[1], KeyCode::KEY_CTRL_RIGHT);
+}
+
+/**
+ * @tc.name: DispatchTouchCancelToRecognizerTest
+ * @tc.desc: Test DispatchTouchCancelToRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    auto& touchTestResult = eventManager->touchTestResults_;
+    const uint8_t targetCnt = 2; // defines 2 touch target;
+    const uint8_t fingerCnt = 2; // defines 2 fingers;
+    RefPtr<TouchEventActuator> targetRefs[targetCnt];
+    using TouchRecoginerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
+    TouchRecoginerTarget items[targetCnt];
+    int32_t fingers[fingerCnt] = { 0, 1 };
+    for (int32_t i = 0; i < targetCnt; ++i) {
+        targetRefs[i] = AceType::MakeRefPtr<TouchEventActuator>();
+        for (auto& finger : fingers) {
+            touchTestResult[finger].emplace_front(targetRefs[i]);
+            items[i].emplace_back(finger, touchTestResult[finger].begin());
+        }
+    }
+    EXPECT_EQ(touchTestResult.size(), fingerCnt);
+    EXPECT_EQ(touchTestResult[0].size(), targetCnt);
+    EXPECT_EQ(touchTestResult[1].size(), targetCnt);
+    eventManager->DispatchTouchCancelToRecognizer(targetRefs[0].GetRawPtr(), items[0]);
+    EXPECT_EQ(touchTestResult.size(), fingerCnt);
+    EXPECT_EQ(touchTestResult[1].size(), 1);
+    eventManager->DispatchTouchCancelToRecognizer(targetRefs[1].GetRawPtr(), items[1]);
+    EXPECT_EQ(touchTestResult.size(), 0);
 }
 } // namespace OHOS::Ace::NG

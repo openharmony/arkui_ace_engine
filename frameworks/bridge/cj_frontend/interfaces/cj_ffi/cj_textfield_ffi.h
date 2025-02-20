@@ -58,6 +58,11 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextFieldOnCopy(void (*callback)(const char* v
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldOnCut(void (*callback)(const char* value));
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldOnPaste(void (*callback)(const char* value));
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldOnEditChanged(void (*callback)(bool value));
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetSelectionMenuHidden(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetMaxLines(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetEnableKeyboardOnFocus(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetCustomKeyboard(void (*callback)(), bool options);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetShowUnderline(bool show);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXTINPUT_FFI_H

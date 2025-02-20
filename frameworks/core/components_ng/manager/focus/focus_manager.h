@@ -19,6 +19,7 @@
 #include <list>
 #include <optional>
 
+#include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/manager/focus/focus_view.h"
@@ -43,6 +44,11 @@ enum class FocusActiveReason : int32_t {
     POINTER_EVENT = 0,
     KEYBOARD_EVENT = 1,
     USE_API = 2,
+};
+
+enum class KeyProcessingMode : int32_t {
+    FOCUS_NAVIGATION = 0,
+    ANCESTOR_EVENT = 1,
 };
 
 class FocusManager : public virtual AceType {
@@ -100,6 +106,21 @@ public:
         }
     }
 
+    void SetRequestFocusResult(const int32_t requestFocusResult)
+    {
+        requestFocusResult_ = requestFocusResult;
+    }
+
+    int32_t GetRequestFocusResult()
+    {
+        return requestFocusResult_;
+    }
+
+    void ResetRequestFocusResult()
+    {
+        requestFocusResult_ = ERROR_CODE_NO_ERROR;
+    }
+
     void SetLastFocusStateNode(const RefPtr<FocusHub>& node)
     {
         lastFocusStateNode_ = AceType::WeakClaim(AceType::RawPtr(node));
@@ -134,6 +155,16 @@ public:
     void SetFocusViewStackState(FocusViewStackState focusViewStackState)
     {
         focusViewStackState_ = focusViewStackState;
+    }
+
+    void SetKeyProcessingMode(KeyProcessingMode keyProcessingMode)
+    {
+        keyProcessingMode_ = keyProcessingMode;
+    }
+
+    KeyProcessingMode GetKeyProcessingMode() const
+    {
+        return keyProcessingMode_;
     }
 
     bool SetFocusViewRootScope(const RefPtr<FocusView>& focusView);
@@ -191,6 +222,8 @@ private:
 
     bool isAutoFocusTransfer_ = true;
     FocusViewStackState focusViewStackState_ = FocusViewStackState::IDLE;
+    KeyProcessingMode keyProcessingMode_ = KeyProcessingMode::FOCUS_NAVIGATION;
+    int32_t requestFocusResult_ = ERROR_CODE_NO_ERROR;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

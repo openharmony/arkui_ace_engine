@@ -955,14 +955,19 @@ public:
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
+    }
+
+    void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) override
+    {
+        ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback));
     }
 
     static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
@@ -1016,6 +1021,11 @@ public:
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override
     {
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
+    }
+
+    void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) override
+    {
+        ViewAbstract::SetOnFocusAxisEvent(std::move(onFocusAxisCallback));
     }
 
     void SetDraggable(bool draggable) override
@@ -1339,6 +1349,11 @@ public:
         focusHub->ClearOnKeyPreIme();
     }
 
+    void DisableOnKeyEventDispatch() override
+    {
+        ViewAbstract::DisableOnKeyEventDispatch();
+    }
+
     static void DisableOnKeyPreIme(FrameNode* frameNode)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1394,6 +1409,18 @@ public:
     void DisableOnBlur() override
     {
         ViewAbstract::DisableOnBlur();
+    }
+
+    void DisableOnFocusAxisEvent() override
+    {
+        ViewAbstract::DisableOnFocusAxisEvent();
+    }
+
+    static void DisableOnFocusAxisEvent(FrameNode* frameNode)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnFocusAxisCallback();
     }
 
     static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);

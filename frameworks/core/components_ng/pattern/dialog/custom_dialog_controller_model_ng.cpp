@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -40,7 +42,12 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
     dialogProperties.onStatusChanged = [&isShown](bool isShownStatus) {
         if (!isShownStatus) {
             isShown = isShownStatus;
@@ -97,6 +104,12 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     CHECK_NULL_RETURN(context, nullptr);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, nullptr);
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
     RefPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
@@ -160,6 +173,10 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             SubwindowManager::GetInstance()->CloseDialogNG(dialog);
             dialogs.pop_back();
         } else {
+            auto dialogPattern = dialog->GetPattern<DialogPattern>();
+            if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED && dialogPattern) {
+                overlayManager = dialogPattern->GetEmbeddedOverlay(overlayManager);
+            }
             overlayManager->CloseDialog(dialog);
         }
     };
@@ -172,6 +189,7 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
     ContainerScope scope(Container::CurrentIdSafely());
     auto container = Container::Current();
     dialogNode->SetIsUseTransitionAnimator(true);
+    auto dialogRef = AceType::Claim(dialogNode);
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -179,7 +197,10 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto dialogRef = AceType::Claim(dialogNode);
+    auto currentOverlay = DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogRef);
+    if (currentOverlay) {
+        overlayManager = currentOverlay;
+    }
     overlayManager->CloseDialog(dialogRef);
 }
 } // namespace OHOS::Ace::NG

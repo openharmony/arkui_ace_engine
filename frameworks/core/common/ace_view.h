@@ -53,6 +53,7 @@ public:
     virtual void RegisterTouchEventCallback(TouchEventCallback&& callback) = 0;
     virtual void RegisterDragEventCallback(DragEventCallBack&& callback) = 0;
     virtual void RegisterKeyEventCallback(KeyEventCallback&& callback) = 0;
+    virtual void RegisterNonPointerEventCallback(NonPointerEventCallback&& callback) = 0;
     virtual void RegisterMouseEventCallback(MouseEventCallback&& callback) = 0;
     virtual void RegisterAxisEventCallback(AxisEventCallback&& callback) = 0;
     virtual void RegisterRotationEventCallback(RotationEventCallBack&& callback) = 0;

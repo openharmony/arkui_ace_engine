@@ -166,6 +166,10 @@ public:
                     buttonPattern->GetAttr<Dimension>("small_button_horizontal_padding", 0.0_vp).Value(),
                     buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Value(),
                     buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Unit())));
+            theme->borderRadiusMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::NORMAL, buttonPattern->GetAttr<Dimension>("button_border_radius_normal", 20.0_vp)));
+            theme->borderRadiusMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, buttonPattern->GetAttr<Dimension>("button_border_radius_small", 14.0_vp)));
         }
     };
 
@@ -389,6 +393,15 @@ public:
         return height_;
     }
 
+    const Dimension& GetBorderRadius(ControlSize controlSize) const
+    {
+        auto result = borderRadiusMap_.find(controlSize);
+        if (result != borderRadiusMap_.end()) {
+            return result->second;
+        }
+        return borderRadius_;
+    }
+
     const Dimension& GetTextSize(ControlSize controlSize) const
     {
         auto result = textSizeMap_.find(controlSize);
@@ -476,12 +489,14 @@ private:
     Dimension maxCircleButtonIcon_;
     Dimension borderWidth_;
     Dimension downloadHeight_;
+    Dimension borderRadius_;
     std::unordered_map<ButtonRole, std::unordered_map<ButtonStyleMode, Color>> bgColorMap_;
     std::unordered_map<ButtonRole, Color> textColorByRoleMap_;
     std::unordered_map<ButtonStyleMode, Color> textColorMap_;
     std::unordered_map<ControlSize, Dimension> heightMap_;
     std::unordered_map<ControlSize, Dimension> textSizeMap_;
     std::unordered_map<ControlSize, Edge> paddingMap_;
+    std::unordered_map<ControlSize, Dimension> borderRadiusMap_;
     double bgDisabledAlpha_ = 1.0;
     uint32_t textMaxLines_ = 1;
     float bigFontSizeScale_ = 1.75f;

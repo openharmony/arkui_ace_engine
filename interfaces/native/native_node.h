@@ -1675,6 +1675,27 @@ typedef enum {
     NODE_TAB_STOP = 98,
 
     /**
+     * @brief Defines blur attribute of backdrop, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
+     * .value[1]?.f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
+     * The value range is [0,127].\n
+     * .value[2]?.f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
+     * The value range is [0,127].\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
+     * .value[1].f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
+     * The value range is [0,127].\n
+     * .value[2].f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
+     * The value range is [0,127].\n
+     *
+     * @since 16
+     */
+    NODE_BACKDROP_BLUR = 99,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -2774,6 +2795,34 @@ typedef enum {
      */
     NODE_TEXT_INPUT_NUMBER_OF_LINES,
     /**
+     * @brief 设置该属性后，通过该属性调整textInput组件的字符间距。
+     * 接口支持设置，重置以及获取该属性。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32: 设置letterSpacing的值，默认单位fp。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32: 获取letterSpacing的值，默认单位fp。\n
+     *
+     * @since 15
+     */
+    NODE_TEXT_INPUT_LETTER_SPACING = 7032,
+
+     /**
+      * @brief 设置textInput组件是否开启输入预上屏。
+      * 接口支持设置，重置以及获取该属性。
+      *
+      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+      * .value[0].i32: 设置是否开启输入预上屏。\n
+      * \n
+      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+      * .value[0].i32: 获取是否开启输入预上屏。\n
+      *
+      * @since 15
+      */
+    NODE_TEXT_INPUT_ENABLE_PREVIEW_TEXT = 7033,
+
+     /**
     * @brief Set the keyboard style of textInput
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -3073,6 +3122,34 @@ typedef enum {
      */
     NODE_TEXT_AREA_NUMBER_OF_LINES,
     /**
+     * @brief 设置该属性后，通过该属性调整textArea组件的字符间距。
+     * 接口支持设置，重置以及获取该属性。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32: 设置letterSpacing的值，默认单位fp。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32: 获取letterSpacing的值，默认单位fp。\n
+     *
+     * @since 15
+     */
+    NODE_TEXT_AREA_LETTER_SPACING = 8023,
+
+     /**
+      * @brief 设置textArea组件是否开启输入预上屏。
+      * 接口支持设置，重置以及获取该属性。
+      *
+      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+      * .value[0].i32: 设置是否开启输入预上屏。\n
+      * \n
+      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+      * .value[0].i32: 获取是否开启输入预上屏。\n
+      *
+      * @since 15
+      */
+    NODE_TEXT_AREA_ENABLE_PREVIEW_TEXT = 8024,
+
+     /**
     * @brief Set the keyboard style of textArea
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -5402,6 +5479,20 @@ typedef struct {
 } ArkUI_StringAsyncEvent;
 
 /**
+ * @brief 定义组件事件的混合类型数据
+ *
+ * @since 15
+ */
+typedef struct {
+    /** 字符串 */
+    const char* pStr;
+    /** 字符串 */
+    const char* pExtendStr;
+    /** 数字 */
+    int32_t number;
+} ArkUI_TextChangeEvent;
+
+/**
  * @brief Enumerates the event types supported by the NativeNode component.
  *
  * @since 12
@@ -5669,6 +5760,30 @@ typedef enum {
      */
     NODE_ON_KEY_PRE_IME = 22,
     /**
+     * @brief Defines the event triggered when the bound component receives a focus axis event after gaining focus.
+     *
+     * The event callback is triggered by interactions with a joystick and a focused component. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     * 
+     * @since 15
+     */
+    NODE_ON_FOCUS_AXIS = 23,
+
+    
+    /**
+     * @brief Dispatch key event on the component node.
+     *
+     * When the component node receives a key event, this callback will be triggered instead of dispatching event to its
+     * children. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 16
+     */
+    NODE_DISPATCH_KEY_EVENT = 24,
+    
+    /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
      * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n
@@ -5886,6 +6001,18 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ON_DID_DELETE = 7012,
     /**
+     * @brief 定义textInput组件在内容改变时（包含预上屏内容），触发回调的枚举值。
+     *
+     * 事件回调发生时，联合类型{@link ArkUI_NodeEvent}为{@link ArkUI_TextChangeEvent}。\n
+     * {@link ArkUI_TextChangeEvent}包含参数：\n
+     * <b>ArkUI_TextChangeEvent.pStr</b>: textInput的内容。
+     * <b>ArkUI_TextChangeEvent.pExtendStr</b>: textInput的预上屏内容。
+     * <b>ArkUI_TextChangeEvent.number</b>: textInput的预上屏起始位置。
+     *
+     * @since 15
+     */
+    NODE_TEXT_INPUT_ON_CHANGE_WITH_PREVIEW_TEXT = 7013,
+    /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
       \n
@@ -6013,6 +6140,18 @@ typedef enum {
      * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
      */
     NODE_TEXT_AREA_ON_DID_DELETE = 8011,
+    /**
+     * @brief 定义textArea组件在内容改变时（包含预上屏内容），触发回调的枚举值。
+     *
+     * 事件回调发生时，联合类型{@link ArkUI_NodeEvent}为{@link ArkUI_TextChangeEvent}。\n
+     * {@link ArkUI_TextChangeEvent}包含参数：\n
+     * <b>ArkUI_TextChangeEvent.pStr</b>: textArea的内容。
+     * <b>ArkUI_TextChangeEvent.pExtendStr</b>: textArea的预上屏内容。
+     * <b>ArkUI_TextChangeEvent.number</b>: textArea的预上屏起始位置。
+     *
+     * @since 15
+     */
+    NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT = 8012,
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *
@@ -6179,6 +6318,20 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[3].f32</b>: length of the page in the main axis direction. \n
      */
     NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL,
+
+    /**
+     * @brief Defines the event triggered when content in the swiper component will scroll.
+     * Instructions: Before page scrolling, the </b>ContentWillScrollCallback</b> callback is invoked. \n \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index value of the current child page. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: the index value of the child page that will display. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>: the sliding offset of each frame.
+     * Positive numbers indicating slide backward(e.g. from index=1 to index=0), negative numbers indicating
+     * slide forward(e.g. from index=0 to index=1). \n
+     */
+    NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL = 1001007,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.
@@ -6575,6 +6728,15 @@ ArkUI_NodeComponentEvent* OH_ArkUI_NodeEvent_GetNodeComponentEvent(ArkUI_NodeEve
  * @since 12
  */
 ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* event);
+
+/**
+ * @brief 获取ArkUI_TextChangeEvent的数据。
+ *
+ * @param event ArkUI_NodeEvent的指针，不应为空。
+ * @return 返回ArkUI_TextChangeEvent对象的指针。
+ * @since 15
+ */
+ArkUI_TextChangeEvent* OH_ArkUI_NodeEvent_GetTextChangeEvent(ArkUI_NodeEvent* event);
 
 /**
  * @brief Obtains the custom data in a component event.
@@ -7923,7 +8085,7 @@ int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
  */
 int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
 
-/*
+/**
  * @brief Set the cross-language option of the target node handle.
  *
  * @param node The target node handle.
@@ -7931,7 +8093,6 @@ int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
@@ -7944,10 +8105,79 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Get the snapshot pixelmap for the given node synchronously, will get error if the node is not on the
+ * tree or is not rendered yet.
+ * Note: the pixelmap should be released through OH_PixelmapNative_Release when it's not used any more.
+ *
+ * @param node Indicates the target node.
+ * @param snapshotOptions the given configuration for taking snapshot, can be null for using default.
+ * @param pixelmap Pixelmap pointer created by system, it's the out result.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_INTERNAL_ERROR} if the snapshot taking failed will null pixelmap returned.
+ *         Returns {@link ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT} if the snapshot taking is timeout.
+ * @since 15
+ */
+int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions,
+    OH_PixelmapNative** pixelmap);
+
+/**
+ * @brief Obtains the index of the current FrameNode's first child node which is on the tree.
+ *
+ * @param node Indicates the target node.
+ * @param index The index of the subnode.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 15
+ */
+int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
+
+/**
+ * @brief Obtains the index of the current FrameNode's last child node which is on the tree.
+ *
+ * @param node Indicates the target node.
+ * @param index the index of the subnode.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 15
+ */
+int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
+
+/**
+ * @brief Obtains a subnode by position with the expand mode.
+ *
+ * @param node Indicates the target node.
+ * @param position Indicates the position of the subnode.
+ * @param subnode The pointer to the subnode.
+ * @param expandMode Indicates the expand mode. {@link ArkUI_ExpandMode}.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 15
+ */
+int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,
+    ArkUI_NodeHandle* subnode, uint32_t expandMode);
+
+/**
+ * @brief Obtain the position of the component layout area relative to the window.
+ * The relative position of the layout area does not include graphic variation attributes, such as translation.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param globalOffset The offset value of the component handle relative to the window, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 15
+ */
+int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset);
 #ifdef __cplusplus
 };
 #endif

@@ -581,6 +581,15 @@ public:
     void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
+    void UpdateJavaScriptOnDocumentStartByOrder();
+    void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
+    void UpdateJavaScriptOnDocumentEndByOrder();
+    void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
+    void UpdateJavaScriptOnHeadReadyByOrder();
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(const TouchEvent& touchEvent,
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
@@ -824,7 +833,7 @@ private:
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
-    void OnOptimizeParserBudgetEnabledUpdate(bool value);
+    void OnOptimizeParserBudgetEnabledUpdate(bool enable);
     int GetWebId();
 
     void InitEvent();
@@ -1137,6 +1146,11 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItems> onHeadReadyScriptItems_;
+    std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
+
     bool isAttachedToMainTree_ = false;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
@@ -1184,19 +1198,19 @@ private:
     bool imageOverlayIsSelected_ = false;
     int32_t densityCallbackId_ = 0;
     bool isLayoutModeChanged_ = false;
+    bool isDragEnd_ = false;
     float touchPointX = 0;
     float touchPointY = 0;
-    bool isDragEnd_ = false;
+    NestedScrollOptionsExt nestedScroll_ = {
+        .scrollUp = NestedScrollMode::SELF_FIRST,
+        .scrollDown = NestedScrollMode::SELF_FIRST,
+        .scrollLeft = NestedScrollMode::SELF_FIRST,
+        .scrollRight = NestedScrollMode::SELF_FIRST,
+    };
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
-    NestedScrollOptionsExt nestedScroll_ = {
-        .scrollUp = NestedScrollMode::SELF_ONLY,
-        .scrollDown = NestedScrollMode::SELF_ONLY,
-        .scrollLeft = NestedScrollMode::SELF_ONLY,
-        .scrollRight = NestedScrollMode::SELF_ONLY,
-    };
 };
 } // namespace OHOS::Ace::NG
 

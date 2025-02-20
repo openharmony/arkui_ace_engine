@@ -956,7 +956,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     JsiObject obj(firstArg);
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); },
+        [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); },
         TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
     return panda::BooleanRef::New(vm, result);
 }
@@ -1452,6 +1452,7 @@ void JsRegisterFormViews(
     buttonType.Constant("Capsule", (int)ButtonType::CAPSULE);
     buttonType.Constant("Circle", (int)ButtonType::CIRCLE);
     buttonType.Constant("Arc", (int)ButtonType::ARC);
+    buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
@@ -1653,6 +1654,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     buttonType.Constant("Capsule", (int)ButtonType::CAPSULE);
     buttonType.Constant("Circle", (int)ButtonType::CIRCLE);
     buttonType.Constant("Arc", (int)ButtonType::ARC);
+    buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);

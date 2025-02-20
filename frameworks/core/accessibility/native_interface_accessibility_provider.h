@@ -21,6 +21,12 @@
 
 #include "core/accessibility/accessibility_provider.h"
 
+enum AccessibilityProviderOperatorErrorCode : int32_t {
+    OPERATOR_SUCCESS = 0,
+    NOT_REGISTERED = -10001,
+    COPY_FAILED = -10002,
+};
+
 struct ArkUI_AccessibilityProvider {
 public:
     ArkUI_AccessibilityProvider() = default;

@@ -23,13 +23,14 @@ namespace {
 constexpr int32_t DEFAULT_MAX_FINGERS = 10;
 } // namespace
 
-MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers)
+MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers, bool isLimitFingerCount)
 {
     if (fingers > DEFAULT_MAX_FINGERS || fingers <= 0) {
         fingers_ = 1;
     } else {
         fingers_ = fingers;
     }
+    isLimitFingerCount_ = isLimitFingerCount;
 }
 
 void MultiFingersRecognizer::UpdateFingerListInfo()
@@ -39,9 +40,9 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
     for (const auto& point : touchPoints_) {
         PointF localPoint(point.second.x, point.second.y);
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-            isPostEventResult_, point.second.postEventNodeId);
-        FingerInfo fingerInfo = { point.second.originalId, point.second.GetOffset(),
+        NGGestureRecognizer::Transform(
+            localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
+        FingerInfo fingerInfo = { point.second.originalId, point.second.operatingHand, point.second.GetOffset(),
             Offset(localPoint.GetX(), localPoint.GetY()),
             point.second.GetScreenOffset(), point.second.sourceType, point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);

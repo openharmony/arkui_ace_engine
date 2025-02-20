@@ -34,6 +34,7 @@ public:
     virtual void Create(
         std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar, bool animated = false) = 0;
+    virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
@@ -78,6 +79,7 @@ public:
         const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) {}
     virtual void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) {}
+    virtual void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

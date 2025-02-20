@@ -29,12 +29,14 @@ typedef enum {
     C_MOUSE_EVENT_ID = 3, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
     C_AXIS_EVENT_ID = 4, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
     C_KEY_EVENT_ID = 5, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
+    C_FOCUS_AXIS_EVENT_ID = 6, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
 } ArkUIEventTypeId;
 
 struct ArkUI_UIInputEvent {
     ArkUI_UIInputEvent_Type inputType;
     ArkUIEventTypeId eventTypeId;
     void* inputEvent;
+    bool isCloned = false;
 };
 
 #ifdef __cplusplus

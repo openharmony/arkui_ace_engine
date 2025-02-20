@@ -28,6 +28,7 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
     hoverInfo.SetSourceTool(event.sourceTool);
+    hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
     // onHoverEventCallback_ may be overwritten in its invoke so we copy it first
     auto onHoverEventCallback = onHoverEventCallback_;
@@ -110,4 +111,36 @@ AccessibilityHoverAction HoverEventTarget::ConvertAccessibilityHoverAction(Touch
     }
 }
 
+MouseEvent MouseEvent::operator-(const Offset& offset) const
+{
+    MouseEvent mouseEvent;
+    mouseEvent.x = x - offset.GetX();
+    mouseEvent.y = y - offset.GetY();
+    mouseEvent.z = z;
+    mouseEvent.deltaX = deltaX;
+    mouseEvent.deltaY = deltaY;
+    mouseEvent.deltaZ = deltaZ;
+    mouseEvent.scrollX = scrollX;
+    mouseEvent.scrollY = scrollY;
+    mouseEvent.scrollZ = scrollZ;
+    mouseEvent.screenX = screenX - offset.GetX();
+    mouseEvent.screenY = screenY - offset.GetY();
+    mouseEvent.action = action;
+    mouseEvent.button = button;
+    mouseEvent.pressedButtons = pressedButtons;
+    mouseEvent.time = time;
+    mouseEvent.deviceId = deviceId;
+    mouseEvent.targetDisplayId = targetDisplayId;
+    mouseEvent.sourceType = sourceType;
+    mouseEvent.sourceTool = sourceTool;
+    mouseEvent.pointerEvent = pointerEvent;
+    mouseEvent.originalId = originalId;
+    mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+    mouseEvent.isInjected = isInjected;
+    mouseEvent.isPrivacyMode = isPrivacyMode;
+    mouseEvent.rawDeltaX = rawDeltaX;
+    mouseEvent.rawDeltaY = rawDeltaY;
+    mouseEvent.pressedButtonsArray = pressedButtonsArray;
+    return mouseEvent;
+}
 } // namespace OHOS::Ace

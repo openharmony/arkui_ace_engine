@@ -22,6 +22,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -68,6 +69,12 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             CHECK_NULL_VOID(context);
             auto overlayManager = context->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
+            if (arg.dialogLevelMode == LevelMode::EMBEDDED) {
+                auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(arg.dialogLevelUniqueId, context);
+                if (embeddedOverlay) {
+                    overlayManager = embeddedOverlay;
+                }
+            }
             if (arg.isShowInSubWindow) {
                 dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
                 CHECK_NULL_VOID(dialog);

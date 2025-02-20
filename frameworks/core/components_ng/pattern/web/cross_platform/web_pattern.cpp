@@ -80,7 +80,7 @@ void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->UpdateClipEdge(true);
+    host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1216,6 +1216,24 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
     // cross platform is not support now;
 }
 
+void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnOverScrollModeUpdate(int mode)
 {
    // cross platform is not support now;
@@ -1374,11 +1392,6 @@ void WebPattern::RemovePreviewMenuNode()
 }
 
 void WebPattern::UpdateImagePreviewParam()
-{
-    // cross platform is not support now;
-}
-
-void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
 {
     // cross platform is not support now;
 }

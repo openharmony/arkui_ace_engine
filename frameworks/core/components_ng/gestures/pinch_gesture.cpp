@@ -29,7 +29,7 @@ RefPtr<NGGestureRecognizer> PinchGesture::CreateRecognizer()
     CHECK_NULL_RETURN(context, nullptr);
 
     double distance = context->NormalizeToPx(Dimension(distance_, DimensionUnit::VP));
-    auto pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(fingers_, distance);
+    auto pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(fingers_, distance, isLimitFingerCount_);
     if (onActionStartId_) {
         pinchRecognizer->SetOnActionStart(*onActionStartId_);
     }

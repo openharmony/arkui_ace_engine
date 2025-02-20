@@ -1985,4 +1985,105 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchUpEvent005, TestSize.Level
     panRecognizerPtr->HandleTouchUpEvent(axisEvent);
     EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::FAIL);
 }
+
+/**
+ * @tc.name: PanGestureLimitFingerTest001
+ * @tc.desc: Test PanGesture CreateRecognizer function
+ */
+HWTEST_F(PanRecognizerTestNg, PanGestureLimitFingerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanGesture.
+     */
+    PanDirection panDirection;
+    panDirection.type = PanDirection::RIGHT;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(
+        SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE, IS_LIMIT_FINGER_COUNT);
+    ASSERT_NE(panGesture, nullptr);
+    EXPECT_EQ(panGesture->fingers_, SINGLE_FINGER_NUMBER);
+    EXPECT_EQ(panGesture->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. create onActionStart, onActionUpdate, onActionEnd, onActionCancel for PanRecognizer.
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
+     * @tc.expect: panRecognizer create successfully with the OnActionCall.
+     */
+    panGesture->priority_ = GesturePriority::Low;
+    panGesture->gestureMask_ = GestureMask::Normal;
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(panGesture->CreateRecognizer());
+    ASSERT_NE(panRecognizer, nullptr);
+    EXPECT_EQ(panRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(panRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(panRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. create onActionStart, onActionUpdate, onActionEnd, onActionCancel for PanRecognizer.
+     * @tc.steps: case2: onActionId, onActionEndId, onActionCancelId not existed
+     * @tc.expect: panRecognizer create successfully without the OnActionCall.
+     */
+    panGesture->priority_ = GesturePriority::Low;
+    panGesture->gestureMask_ = GestureMask::Normal;
+    auto panRecognizerWithoutFunc = AceType::DynamicCast<PanRecognizer>(panGesture->CreateRecognizer());
+    ASSERT_NE(panRecognizerWithoutFunc, nullptr);
+    EXPECT_EQ(panRecognizerWithoutFunc->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(panRecognizerWithoutFunc->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(panRecognizerWithoutFunc->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+}
+
+/**
+ * @tc.name: PanGestureLimitFingerTest002
+ * @tc.desc: Test PanGesture CreateRecognizer function
+ */
+HWTEST_F(PanRecognizerTestNg, PanGestureLimitFingerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanGesture.
+     */
+    PanDirection panDirection;
+    panDirection.type = PanDirection::RIGHT;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(
+        SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE, IS_NOT_LIMIT_FINGER_COUNT);
+    ASSERT_NE(panGesture, nullptr);
+    EXPECT_EQ(panGesture->fingers_, SINGLE_FINGER_NUMBER);
+    EXPECT_EQ(panGesture->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. create onActionStart, onActionUpdate, onActionEnd, onActionCancel for PanRecognizer.
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
+     * @tc.expect: panRecognizer create successfully with the OnActionCall.
+     */
+    panGesture->priority_ = GesturePriority::Low;
+    panGesture->gestureMask_ = GestureMask::Normal;
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(panGesture->CreateRecognizer());
+    ASSERT_NE(panRecognizer, nullptr);
+    EXPECT_EQ(panRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(panRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(panRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. create onActionStart, onActionUpdate, onActionEnd, onActionCancel for PanRecognizer.
+     * @tc.steps: case2: onActionId, onActionEndId, onActionCancelId existed
+     * @tc.expect: panRecognizer create successfully with the OnActionCall.
+     */
+    panGesture->priority_ = GesturePriority::Low;
+    panGesture->gestureMask_ = GestureMask::Normal;
+    auto onActionStart = [](GestureEvent& info) {};
+    auto onActionUpdate = [](GestureEvent& info) {};
+    auto onActionEnd = [](GestureEvent& info) {};
+    auto onActionCancel = []() {};
+    panGesture->SetOnActionStartId(onActionStart);
+    panGesture->SetOnActionUpdateId(onActionUpdate);
+    panGesture->SetOnActionEndId(onActionEnd);
+    panGesture->SetOnActionCancelId(onActionCancel);
+    EXPECT_TRUE(panGesture->onActionStartId_);
+    EXPECT_TRUE(panGesture->onActionUpdateId_);
+    EXPECT_TRUE(panGesture->onActionEndId_);
+    EXPECT_TRUE(panGesture->onActionCancelId_);
+
+    auto panRecognizerWithFunc = AceType::DynamicCast<PanRecognizer>(panGesture->CreateRecognizer());
+    ASSERT_NE(panRecognizerWithFunc, nullptr);
+    EXPECT_EQ(panRecognizerWithFunc->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(panRecognizerWithFunc->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(panRecognizerWithFunc->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+}
 } // namespace OHOS::Ace::NG

@@ -77,6 +77,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
+    auto parent = hostNode->GetParent();
     expandDisplay_ = dialogTheme->GetExpandDisplay() || dialogPattern->IsShowInFreeMultiWindow();
     keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
     isUIExtensionSubWindow_ = dialogPattern->IsUIExtensionSubWindow();
@@ -107,12 +108,24 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isSuitableForElderly_ || GreatOrEqual(dialogContext->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
-    UpdateSafeArea();
+    UpdateSafeArea(hostNode);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     OptionalSizeF realSize;
     // dialog size fit screen.
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
+    embeddedDialogOffsetY_ = 0.0f;
+    if (IsEmbeddedDialog(hostNode)) {
+        if (!realSize.IsValid()) {
+            realSize.UpdateIllegalSizeWithCheck(layoutConstraint->maxSize);
+        }
+        if (dialogPattern->GetDialogProperties().dialogImmersiveMode == ImmersiveMode::EXTEND) {
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM,
+                .edges = SAFE_AREA_EDGE_TOP | SAFE_AREA_EDGE_BOTTOM };
+            dialogProp->UpdateSafeAreaExpandOpts(opts);
+        }
+        embeddedDialogOffsetY_ = GetEmbeddedDialogOffsetY(hostNode);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
@@ -715,7 +728,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     }
     const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
     bool needAvoidKeyboard = true;
-    if ((expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) ||
+    if ((expandSafeAreaOpts && (expandSafeAreaOpts->type & SAFE_AREA_TYPE_KEYBOARD)) ||
         keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         needAvoidKeyboard = false;
     }
@@ -755,7 +768,7 @@ void DialogLayoutAlgorithm::CaculateMaxSize(SizeF& maxSize)
             maxSize.SetHeight(foldCreaseRect.Top());
             return;
         }
-        maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+        maxSize.MinusHeight(safeAreaBottomLength_);
     }
 }
 
@@ -858,7 +871,7 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
-    if (!customSize_ && topLeftPoint.GetY() < safeAreaInsets_.top_.end) {
+    if (!customSize_ && LessNotEqual(topLeftPoint.GetY() + embeddedDialogOffsetY_, safeAreaInsets_.top_.end)) {
         topLeftPoint.SetY(safeAreaInsets_.top_.end);
     }
     if (alignBottomScreen_) {
@@ -869,10 +882,9 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
         }
     }
     auto childOffset = topLeftPoint + dialogOffset;
-
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
-    auto childBottom = childOffset.GetY() + childSize.Height();
+    auto childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_;
     auto paddingBottom = static_cast<float>(GetPaddingBottom());
     if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
         auto limitPos = std::min(childOffset.GetY(),
@@ -889,7 +901,7 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     return childOffset;
 }
 
-void DialogLayoutAlgorithm::UpdateSafeArea()
+void DialogLayoutAlgorithm::UpdateSafeArea(const RefPtr<FrameNode>& frameNode)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -905,6 +917,9 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
     safeAreaInsets_ = context->GetSafeAreaWithoutProcess();
+    if (!IsEmbeddedDialog(frameNode)) {
+        safeAreaBottomLength_ = safeAreaInsets_.bottom_.Length();
+    }
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
@@ -949,5 +964,27 @@ void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWr
             dialogPattern->SetIsScrollHeightNegative(true);
         }
     }
+}
+
+bool DialogLayoutAlgorithm::IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode)
+{
+    auto parent = frameNode->GetParent();
+    if (parent && (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG)) {
+        return true;
+    }
+    return false;
+}
+
+float DialogLayoutAlgorithm::GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode)
+{
+    auto parent = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(parent, 0.0f);
+    if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+        return parent->GetOffsetRelativeToWindow().GetY();
+    }
+    if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        return parent->GetGeometryNode()->GetParentAdjust().GetY();
+    }
+    return 0.0f;
 }
 } // namespace OHOS::Ace::NG
