@@ -2808,7 +2808,7 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
                     CHECK_NULL_VOID(delegate->nweb_);
                     delegate->nweb_->OnOccluded();
                 }
-            },TaskExecutor::TaskType::UI, delayTime_, "ArkUIWebOccluded");
+            }, TaskExecutor::TaskType::UI, delayTime_, "ArkUIWebOccluded");
     }
 }
 
