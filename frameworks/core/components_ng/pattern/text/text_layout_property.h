@@ -244,6 +244,16 @@ public:
         propNeedReCreateParagraph_ = true;
     }
 
+    bool GetIsLoopAnimation() const
+    {
+        return isLoopAnimation_;
+    }
+
+    void SetIsLoopAnimation(bool isLoopAnimation)
+    {
+        isLoopAnimation_ = isLoopAnimation;
+    }
+
     // Used to mark whether a paragraph needs to be recreated for Measure.
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(NeedReCreateParagraph, bool);
 
@@ -266,6 +276,8 @@ protected:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
+
+    bool isLoopAnimation_ = false;
 };
 } // namespace OHOS::Ace::NG
 

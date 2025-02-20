@@ -375,10 +375,6 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
         symbolEffectOptions.Reset();
         layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-        if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
-            auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
-            symboloptiOns.Reset();
-        }
     }
     paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
     paragraph->PopStyle();
