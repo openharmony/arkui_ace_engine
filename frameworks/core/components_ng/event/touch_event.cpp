@@ -139,6 +139,7 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
         eventInfo.SetTouchEventsEnd(true);
         isFlushTouchEventsEnd_ = false;
     }
+    eventInfo.SetTargetDisplayId(lastPoint.targetDisplayId);
     return eventInfo;
 }
 
@@ -154,6 +155,9 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
     changedInfo.SetTouchType(lastPoint.type);
     changedInfo.SetForce(lastPoint.force);
+    changedInfo.SetPressedTime(lastPoint.pressedTime);
+    changedInfo.SetWidth(lastPoint.width);
+    changedInfo.SetHeight(lastPoint.height);
     if (lastPoint.tiltX.has_value()) {
         changedInfo.SetTiltX(lastPoint.tiltX.value());
     }
@@ -181,6 +185,9 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     info.SetScreenLocation(Offset(screenX, screenY));
     info.SetTouchType(type);
     info.SetForce(pointItem.force);
+    info.SetPressedTime(pointItem.downTime);
+    info.SetWidth(pointItem.width);
+    info.SetHeight(pointItem.height);
     if (pointItem.tiltX.has_value()) {
         info.SetTiltX(pointItem.tiltX.value());
     }
@@ -208,6 +215,9 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     historyInfo.SetScreenLocation(Offset(screenX, screenY));
     historyInfo.SetTouchType(eventItem.type);
     historyInfo.SetForce(eventItem.force);
+    historyInfo.SetPressedTime(eventItem.pressedTime);
+    historyInfo.SetWidth(eventItem.width);
+    historyInfo.SetHeight(eventItem.height);
     if (eventItem.tiltX.has_value()) {
         historyInfo.SetTiltX(eventItem.tiltX.value());
     }

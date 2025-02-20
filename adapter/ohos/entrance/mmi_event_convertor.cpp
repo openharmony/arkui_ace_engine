@@ -80,6 +80,8 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.tiltY = pointerItem.GetTiltY();
     touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
     touchPoint.originalId = pointerItem.GetOriginPointerId();
+    touchPoint.width = pointerItem.GetWidth();
+    touchPoint.height = pointerItem.GetHeight();
     return touchPoint;
 }
 
@@ -156,6 +158,30 @@ void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, M
     mouseEvent.originalId = mouseEvent.id;
 }
 
+TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
+{
+    TouchEvent event;
+    event.SetId(touchPoint.id)
+        .SetX(touchPoint.x)
+        .SetY(touchPoint.y)
+        .SetScreenX(touchPoint.screenX)
+        .SetScreenY(touchPoint.screenY)
+        .SetType(TouchType::UNKNOWN)
+        .SetPullType(TouchType::UNKNOWN)
+        .SetSize(touchPoint.size)
+        .SetForce(touchPoint.force)
+        .SetTiltX(touchPoint.tiltX)
+        .SetTiltY(touchPoint.tiltY)
+        .SetSourceType(SourceType::NONE)
+        .SetSourceTool(touchPoint.sourceTool)
+        .SetOriginalId(touchPoint.originalId)
+        .SetSourceType(SourceType::NONE)
+        .SetPressedTime(touchPoint.downTime)
+        .SetWidth(touchPoint.width)
+        .SetHeight(touchPoint.height);
+    return event;
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
@@ -166,27 +192,13 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         return TouchEvent();
     }
     auto touchPoint = ConvertTouchPoint(item);
+    TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
-    TouchEvent event;
-    event.SetId(touchPoint.id)
-        .SetX(touchPoint.x)
-        .SetY(touchPoint.y)
-        .SetScreenX(touchPoint.screenX)
-        .SetScreenY(touchPoint.screenY)
-        .SetType(TouchType::UNKNOWN)
-        .SetPullType(TouchType::UNKNOWN)
-        .SetTime(time)
-        .SetSize(touchPoint.size)
-        .SetForce(touchPoint.force)
-        .SetTiltX(touchPoint.tiltX)
-        .SetTiltY(touchPoint.tiltY)
+    event.SetTime(time)
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
-        .SetSourceType(SourceType::NONE)
-        .SetSourceTool(touchPoint.sourceTool)
-        .SetTouchEventId(pointerEvent->GetId())
-        .SetOriginalId(touchPoint.originalId);
+        .SetTouchEventId(pointerEvent->GetId());
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();
@@ -288,27 +300,21 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
     }
 }
 
-void GetMouseEventButton(int32_t button, MouseEvent& events)
+MouseButton GetMouseEventButton(int32_t button)
 {
     switch (button) {
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_LEFT:
-            events.button = MouseButton::LEFT_BUTTON;
-            break;
+            return MouseButton::LEFT_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_RIGHT:
-            events.button = MouseButton::RIGHT_BUTTON;
-            break;
+            return MouseButton::RIGHT_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
-            events.button = MouseButton::MIDDLE_BUTTON;
-            break;
+            return MouseButton::MIDDLE_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_SIDE:
-            events.button = MouseButton::BACK_BUTTON;
-            break;
+            return MouseButton::BACK_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_EXTRA:
-            events.button = MouseButton::FORWARD_BUTTON;
-            break;
+            return MouseButton::FORWARD_BUTTON;
         default:
-            events.button = MouseButton::NONE_BUTTON;
-            break;
+            return MouseButton::NONE_BUTTON;
     }
 }
 
@@ -327,10 +333,12 @@ void ConvertMouseEvent(
     events.y = item.GetWindowY();
     events.screenX = item.GetDisplayX();
     events.screenY = item.GetDisplayY();
+    events.rawDeltaX = item.GetRawDx();
+    events.rawDeltaY = item.GetRawDy();
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetMouseEventAction(orgAction, events, isScenceBoardWindow);
     int32_t orgButton = pointerEvent->GetButtonId();
-    GetMouseEventButton(orgButton, events);
+    events.button = GetMouseEventButton(orgButton);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
     events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
@@ -351,8 +359,10 @@ void ConvertMouseEvent(
     }
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
-    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
-    events.time = TimeStamp(microseconds);
+    for (const auto& pressedButton : pressedSet) {
+        events.pressedButtonsArray.emplace_back(GetMouseEventButton(pressedButton));
+    }
+    events.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     events.pointerEvent = pointerEvent;
     events.sourceTool = GetSourceTool(item.GetToolType());
     UpdateMouseEventForPen(item, events);
