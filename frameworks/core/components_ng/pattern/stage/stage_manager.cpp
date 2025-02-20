@@ -84,6 +84,7 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     auto sharedManager = pipeline->GetSharedOverlayManager();
     CHECK_NULL_VOID(sharedManager);
     sharedManager->StartSharedTransition(srcPage, destPage);
+    animationSrcPage_ = srcPage;
     destPageNode_ = destPage;
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "start pageTransition, from node %{public}d to %{public}d",
         srcPage ? srcPage->GetId() : -1, destPage ? destPage->GetId() : -1);
@@ -328,12 +329,11 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (popSize == 0) {
         return true;
     }
-
+    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
-    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     auto iter = children.rbegin();
     for (int32_t current = 0; current < popSize; ++current) {
         auto pageNode = *iter;
@@ -581,7 +581,7 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return nullptr;
     }
     if (stageInTrasition_) {
-        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+        return DynamicCast<FrameNode>(animationSrcPage_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
 }
@@ -696,11 +696,11 @@ void StageManager::StopPageTransition(bool needTransition)
     if (needTransition) {
         return;
     }
-    auto srcNode = srcPageNode_.Upgrade();
+    auto srcNode = animationSrcPage_.Upgrade();
     if (srcNode) {
         auto pattern = srcNode->GetPattern<PagePattern>();
         pattern->StopPageTransition();
-        srcPageNode_ = nullptr;
+        animationSrcPage_ = nullptr;
     }
     auto destNode = destPageNode_.Upgrade();
     if (destNode) {
