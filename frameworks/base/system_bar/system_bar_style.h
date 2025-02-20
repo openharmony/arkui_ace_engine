@@ -20,7 +20,7 @@
 #include "base/memory/referenced.h"
 
 namespace OHOS::Ace {
-class SystemBarStyle : public AceType {
+class ACE_FORCE_EXPORT SystemBarStyle : public AceType {
     DECLARE_ACE_TYPE(SystemBarStyle, AceType)
 public:
     SystemBarStyle() = default;

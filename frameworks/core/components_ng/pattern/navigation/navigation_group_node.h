@@ -45,7 +45,7 @@ struct TransitionUnitInfo {
     {}
 };
 
-class ACE_EXPORT NavigationGroupNode : public GroupNode {
+class ACE_FORCE_EXPORT NavigationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
 public:
     NavigationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
