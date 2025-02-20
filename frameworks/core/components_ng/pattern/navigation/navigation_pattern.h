@@ -37,8 +37,8 @@ namespace OHOS::Ace::NG {
 using namespace Framework;
 using OnNavigationAnimation = std::function<NavigationTransition(RefPtr<NavDestinationContext>,
         RefPtr<NavDestinationContext>, NavigationOperation)>;
-class NavigationPattern : public Pattern {
-    DECLARE_ACE_TYPE(NavigationPattern, Pattern);
+class NavigationPattern : public Pattern, public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(NavigationPattern, Pattern, IAvoidInfoListener);
 
 public:
     NavigationPattern();
@@ -578,9 +578,10 @@ private:
     RefPtr<FrameNode> CreateDragBarItemNode();
     void SetMouseStyle(MouseFormat format);
 
-    void RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
-    void UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
-    virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode);
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnregisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode, bool skipCheck = false);
     void UpdateToobarFocusColor();
     void UpdateDividerBackgroundColor();
 

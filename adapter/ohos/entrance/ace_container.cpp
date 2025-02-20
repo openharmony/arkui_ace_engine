@@ -2292,6 +2292,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #endif
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
+    RegisterAvoidInfoCallback();
 
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
@@ -4010,4 +4011,71 @@ bool AceContainer::HideWindow(int32_t instanceId)
     return true;
 }
 
+void AceContainer::RegisterAvoidInfoCallback()
+{
+    RegisterAvoidInfoDataProcessCallback();
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipeline);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(avoidInfoMgr);
+    auto uiExtMgr = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtMgr);
+    auto checkTask = [weakMgr = WeakPtr(uiExtMgr)]() {
+        auto mgr = weakMgr.Upgrade();
+        CHECK_NULL_VOID(mgr);
+        mgr->NotifyUECProviderIfNeedded();
+    };
+    auto registerCallback = [weakMgr = WeakPtr(uiExtMgr)](NG::UECAvoidInfoConsumer&& consumer) {
+        auto mgr = weakMgr.Upgrade();
+        CHECK_NULL_VOID(mgr);
+        mgr->RegisterBusinessDataConsumeCallback(NG::UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE, consumer);
+    };
+    auto requestCallback = [weakMgr = WeakPtr(uiExtMgr)]() {
+        auto mgr = weakMgr.Upgrade();
+        CHECK_NULL_VOID(mgr);
+        AAFwk::Want want;
+        mgr->SendBusinessToHost(
+            NG::UIContentBusinessCode::GET_AVOID_INFO, std::move(want), NG::BusinessDataSendType::ASYNC);
+    };
+    pipeline->AddPersistAfterLayoutTask(std::move(checkTask));
+    avoidInfoMgr->SetRegisterUECAvoidInfoConsumerCallback(std::move(registerCallback));
+    avoidInfoMgr->SetRequestAvoidInfoCallback(std::move(requestCallback));
+#endif
+}
+
+void AceContainer::RegisterAvoidInfoDataProcessCallback()
+{
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipeline);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(avoidInfoMgr);
+    auto parseCallback = [](const AAFwk::Want& want, NG::ContainerModalAvoidInfo& info) {
+        if (!want.HasParameter("needAvoid")) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "Invalid want for ContainerModalAvoidInfo");
+            return false;
+        }
+        bool needAvoid = want.GetBoolParam("needAvoid", false);
+        int32_t titleHeight = want.GetIntParam("titleHeight", 0);
+        float x = want.GetFloatParam("controlBottonsRectX", 0);
+        float y = want.GetFloatParam("controlBottonsRectY", 0);
+        float w = want.GetFloatParam("controlBottonsRectW", 0);
+        float h = want.GetFloatParam("controlBottonsRectH", 0);
+        info.needAvoid = needAvoid;
+        info.titleHeight = titleHeight;
+        info.controlBottonsRect.SetRect(x, y, w, h);
+        return true;
+    };
+    auto buildCallback = [](const NG::ContainerModalAvoidInfo& info, AAFwk::Want& want) {
+        want.SetParam("needAvoid", info.needAvoid);
+        want.SetParam("titleHeight", info.titleHeight);
+        want.SetParam("controlBottonsRectX", info.controlBottonsRect.GetX());
+        want.SetParam("controlBottonsRectY", info.controlBottonsRect.GetY());
+        want.SetParam("controlBottonsRectW", info.controlBottonsRect.Width());
+        want.SetParam("controlBottonsRectH", info.controlBottonsRect.Height());
+    };
+    avoidInfoMgr->SetParseAvoidInfoCallback(std::move(parseCallback));
+    avoidInfoMgr->SetBuildAvoidInfoCallback(std::move(buildCallback));
+}
 } // namespace OHOS::Ace::Platform

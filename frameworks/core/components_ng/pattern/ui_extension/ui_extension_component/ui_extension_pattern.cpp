@@ -427,6 +427,7 @@ void UIExtensionPattern::OnConnect()
 void UIExtensionPattern::InitBusinessDataHandleCallback()
 {
     RegisterEventProxyFlagCallback();
+    RegisterGetAvoidInfoCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -1788,6 +1789,26 @@ void UIExtensionPattern::RegisterReplyPageModeCallback()
         return -1;
     };
     RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::SEND_PAGE_MODE, callback);
+}
+
+void UIExtensionPattern::RegisterGetAvoidInfoCallback()
+{
+    auto callback = [weak = WeakClaim(this)](const AAFwk::Want&) -> int32_t {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, -1);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, -1);
+        auto avoidInfoMgr = context->GetAvoidInfoManager();
+        CHECK_NULL_RETURN(avoidInfoMgr, -1);
+        AAFwk::Want avoidInfoWant;
+        avoidInfoMgr->BuildAvoidInfo(pattern->GetAvoidInfo(), avoidInfoWant);
+        pattern->SendBusinessData(UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE,
+            std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
+        return 0;
+    };
+    RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::GET_AVOID_INFO, callback);
 }
 
 bool UIExtensionPattern::SendBusinessDataSyncReply(
