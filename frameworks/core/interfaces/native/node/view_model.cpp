@@ -59,6 +59,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
@@ -518,6 +519,14 @@ void* createMarqueeNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createTextClockNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
@@ -617,6 +626,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createBadgeNode,
     createTextClockNode,
     createTextTimerNode,
+    createCheckBoxGroupNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

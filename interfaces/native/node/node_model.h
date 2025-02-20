@@ -59,7 +59,7 @@ struct ArkUI_Context {
     int32_t id;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 20;
+constexpr int BASIC_COMPONENT_NUM = 22;
 struct ArkUI_GuidelineStyle {
     std::string id;
     ArkUI_Axis direction;

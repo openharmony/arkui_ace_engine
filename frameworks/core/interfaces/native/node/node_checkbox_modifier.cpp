@@ -27,6 +27,7 @@ constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
+static std::string nameValue;
 
 void SetSelect(ArkUINodeHandle node, ArkUI_Bool isSelected)
 {
@@ -275,6 +276,38 @@ ArkUI_Int32 GetCheckboxShape(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(CheckBoxModelNG::GetCheckboxStyle(frameNode));
 }
 
+void SetCheckboxName(ArkUINodeHandle node, ArkUI_CharPtr name)
+{
+    CHECK_NULL_VOID(name);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelNG::SetCheckboxName(frameNode, std::string(name));
+}
+
+void SetCheckboxGroup(ArkUINodeHandle node, ArkUI_CharPtr group)
+{
+    CHECK_NULL_VOID(group);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelNG::SetCheckboxGroup(frameNode, std::string(group));
+}
+
+ArkUI_CharPtr GetCheckboxName(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    nameValue = CheckBoxModelNG::GetCheckboxName(frameNode);
+    return nameValue.c_str();
+}
+
+ArkUI_CharPtr GetCheckboxGroup(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    nameValue = CheckBoxModelNG::GetCheckboxGroup(frameNode);
+    return nameValue.c_str();
+}
+
 namespace NodeModifier {
 const ArkUICheckboxModifier *GetCheckboxModifier()
 {
@@ -284,7 +317,7 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
         ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape,
         ResetCheckboxShape, ResetCheckboxPadding, ResetCheckboxResponseRegion,
         GetSelect, GetSelectedColor, GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth,
-        GetCheckboxShape };
+        GetCheckboxShape, SetCheckboxName, SetCheckboxGroup, GetCheckboxName, GetCheckboxGroup };
     return &modifier;
 }
 
@@ -294,7 +327,8 @@ const CJUICheckboxModifier* GetCJUICheckboxModifier()
         SetCheckboxHeight, SetMark, SetCheckboxPadding, SetCheckboxResponseRegion, ResetSelect, ResetSelectedColor,
         ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape, ResetCheckboxShape,
         ResetCheckboxPadding, ResetCheckboxResponseRegion, GetSelect, GetSelectedColor, GetUnSelectedColor,
-        GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth, GetCheckboxShape, };
+        GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth, GetCheckboxShape, SetCheckboxName, SetCheckboxGroup,
+        GetCheckboxName, GetCheckboxGroup };
     return &modifier;
 }
 
