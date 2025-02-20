@@ -5538,7 +5538,7 @@ void WebPattern::OnWindowHide()
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
     CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToBackground();
-    if (!isWindowShow_ || !isVisible_) {
+    if (!isWindowShow_ || !isActive_) {
         return;
     }
 
