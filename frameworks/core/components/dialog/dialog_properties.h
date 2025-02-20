@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
@@ -286,6 +287,7 @@ struct DialogProperties {
     WordBreak wordBreak = WordBreak::BREAK_ALL;
 
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
+    std::optional<Dimension> keyboardAvoidDistance;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
@@ -325,6 +327,7 @@ struct PromptDialogAttr {
     std::function<void()> onWillDisappear;
     std::function<void(DialogProperties&)> onLanguageChange;
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
+    std::optional<Dimension> keyboardAvoidDistance;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;

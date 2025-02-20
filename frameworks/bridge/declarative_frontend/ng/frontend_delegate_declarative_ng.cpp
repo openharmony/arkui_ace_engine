@@ -771,6 +771,7 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .onWillAppear = dialogAttr.onWillAppear,
         .onWillDisappear = dialogAttr.onWillDisappear,
         .keyboardAvoidMode = dialogAttr.keyboardAvoidMode,
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
