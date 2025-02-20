@@ -211,6 +211,8 @@ typedef enum {
     /** Right hand. */
     ARKUI_EVENT_HAND_RIGHT = 2,
 } ArkUI_InteractionHand;
+
+/**
  * @brief Enumerates the action types for axis events.
  *
  * @since 15
