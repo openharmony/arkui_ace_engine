@@ -9649,6 +9649,23 @@ class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
   }
 }
 SearchSelectionMenuHiddenModifier.identity = Symbol('searchSelectionMenuHidden');
+class SearchAutoCapitalizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetAutoCapitalizationMode(node);
+    }
+    else {
+      getUINativeModule().search.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchAutoCapitalizationModifier.identity = Symbol('SearchAutoCapitalization');
 class SearchCaretStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10651,6 +10668,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   enablePreviewText(value) {
     modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
+    return this;
+  }
+  autoCapitalizationMode(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchAutoCapitalizationModifier.identity, SearchAutoCapitalizationModifier, value);
     return this;
   }
   editMenuOptions(value) {
@@ -13740,6 +13761,23 @@ class TextAreaEnterKeyTypeModifier extends ModifierWithKey {
   }
 }
 TextAreaEnterKeyTypeModifier.identity = Symbol('textAreaEnterKeyType');
+class TextAreaAutoCapitalizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetAutoCapitalizationMode(node);
+    }
+    else {
+      getUINativeModule().textArea.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaAutoCapitalizationModifier.identity = Symbol('textAreaAutoCapitalization');
 class TextAreaInputFilterModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14689,6 +14727,10 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnablePreviewTextModifier.identity, TextAreaEnablePreviewTextModifier, value);
     return this;
   }
+  autoCapitalizationMode(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaAutoCapitalizationModifier.identity, TextAreaAutoCapitalizationModifier, value);
+    return this;
+  }
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
       TextAreaEditMenuOptionsModifier, value);
@@ -15391,6 +15433,23 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey {
   }
 }
 TextInputEnterKeyTypeModifier.identity = Symbol('textInputEnterKeyType');
+class TextInputAutoCapitalizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetAutoCapitalizationMode(node);
+    }
+    else {
+      getUINativeModule().textInput.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputAutoCapitalizationModifier.identity = Symbol('textInputAutoCapitalization');
 class TextInputBarStateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16581,6 +16640,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enablePreviewText(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnablePreviewTextModifier.identity, TextInputEnablePreviewTextModifier, value);
+    return this;
+  }
+  autoCapitalizationMode(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputAutoCapitalizationModifier.identity, TextInputAutoCapitalizationModifier, value);
     return this;
   }
   editMenuOptions(value) {
