@@ -43,8 +43,7 @@
             "day":"日"
         },
         "navigation":{
-            "back":"返回",
-            "more":"更多"
+            "back":"返回"
         },
         "patternlock":{
             "accessibilitypasspoint":"已连接圆点"
@@ -102,8 +101,7 @@
             "lunarSwitch":"Show lunar calendar"
         },
         "navigation":{
-            "back":"Back",
-            "more":"More"
+            "back":"Back"
         },
         "sheet":{
             "close":"Close"
@@ -735,8 +733,7 @@
             "lunarSwitch":"ལུགས་རྙིང་ལོ་ཐོ་མངོན་སྟོན།"
         },
         "navigation":{
-            "back":"ཕྱིར་ལོག",
-            "more":"དེ་ལས་མང་བ།"
+            "back":"ཕྱིར་ལོག"
         },
         "sheet":{
             "close":"ཁ་རྒྱག"
@@ -1984,8 +1981,7 @@
             "lunarSwitch":"دېھقانلار كالېندارى كۆرسىتىش"
         },
         "navigation":{
-            "back":"قايتىش",
-            "more":"كۆپرەك"
+            "back":"قايتىش"
         },
         "sheet":{
             "close":"ئېتىش"
@@ -2169,8 +2165,7 @@
             "lunarSwitch":"顯示農曆"
         },
         "navigation":{
-            "back":"返回",
-            "more":"更多"
+            "back":"返回"
         },
         "sheet":{
             "close":"關閉"
@@ -2214,8 +2209,7 @@
             "lunarSwitch":"顯示農曆"
         },
         "navigation":{
-            "back":"返回",
-            "more":"更多"
+            "back":"返回"
         },
         "sheet":{
             "close":"關閉"
@@ -2364,8 +2358,7 @@
             "back":"[TS_954619]_Back"
         },
         "navigation":{
-            "back":"[TS_954632]_Back",
-            "more":"[TS_954620]_MORE"
+            "back":"[TS_954632]_Back"
         },
         "sheet":{
             "close":"[TS_961627]_Close"
