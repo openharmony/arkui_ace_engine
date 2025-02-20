@@ -1511,6 +1511,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             StartWindowMaximizeAnimation(width, height, rsTransaction);
             break;
         }
+        case WindowSizeChangeReason::MAXIMIZE_TO_SPLIT:
+        case WindowSizeChangeReason::SPLIT_TO_MAXIMIZE: {
+            StartSplitWindowAnimation(width, height, type, rsTransaction);
+            break;
+        }
         case WindowSizeChangeReason::ROTATION: {
             safeAreaManager_->UpdateKeyboardOffset(0.0);
             SetRootRect(width, height, 0.0);
@@ -1641,6 +1646,34 @@ void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t heig
     option.SetCurve(springMotion);
     auto weak = WeakClaim(this);
     Animate(option, springMotion, [width, height, weak]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "Root node start split window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
+        width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 300.0f, 33.0f);
+    AnimationOption option;
+    option.SetCurve(curve);
+    Animate(option, curve, [width, height, weak = WeakClaim(this)]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         pipeline->SetRootRect(width, height, 0.0);
