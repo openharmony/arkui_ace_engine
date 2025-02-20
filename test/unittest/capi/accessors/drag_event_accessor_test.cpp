@@ -93,6 +93,7 @@ public:
         peer_->dragInfo = dragEvent_;
     }
     RefPtr<OHOS::Ace::DragEvent> dragEvent_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /**
@@ -228,7 +229,7 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto arkUnifiedData = ArkValue<Ark_UnifiedData>(unifiedData);
     accessor_->setData(peer_, arkUnifiedData);
-    auto getData = accessor_->getData(peer_);
+    auto getData = accessor_->getData(vmContext_, peer_);
     ASSERT_NE(getData, nullptr);
     auto dataPeer = getData;
     ASSERT_NE(dataPeer->unifiedData, nullptr);
@@ -405,7 +406,7 @@ HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
         Converter::ArkArrayHolder<Array_String> stringHolder(param);
         Array_String stringArrayValues = stringHolder.ArkValue();
         dragEvent_->SetPressedKeyCodes(value);
-        auto result = accessor_->getModifierKeyState(peer_, &stringArrayValues);
+        auto result = accessor_->getModifierKeyState(vmContext_, peer_, &stringArrayValues);
         EXPECT_EQ(Converter::Convert<bool>(result), expected);
     }
 }

@@ -38,10 +38,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetModifierKeyStateImpl(Ark_KeyEvent peer,
+Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
+                                    Ark_KeyEvent peer,
                                     const Array_String* keys)
 {
-    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getModifierKeyState(peer, keys);
+    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getModifierKeyState(vmContext, peer, keys);
 }
 Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
 {
@@ -69,14 +70,15 @@ void SetKeyCodeImpl(Ark_KeyEvent peer,
 {
     LOGW("ARKOALA KeyEventAccessor::SetKeyCodeImpl doesn't have sense.");
 }
-void GetKeyTextImpl(Ark_KeyEvent peer)
+Ark_String GetKeyTextImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_VOID(peer);
+    CHECK_NULL_RETURN(peer, {});
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
+    CHECK_NULL_RETURN(info, {});
     const auto keyText = info->GetKeyText();
     LOGE("ARKOALA KeyEventAccessor::GetKeyTextImpl is not implemented "
         "-> incorrect return Converter::ArkValue<Ark_String>(keyText): %s", keyText);
+    return {};
 }
 void SetKeyTextImpl(Ark_KeyEvent peer,
                     const Ark_String* keyText)

@@ -50,19 +50,21 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetMessageImpl(Ark_ConsoleMessage peer)
+Ark_String GetMessageImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_VOID(peer && peer->webConsoleLog);
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
     peer->webConsoleLog->GetLog();
     // log message need to be returned
     LOGE("ConsoleMessageAccessor::GetMessageImpl - return value need to be supported");
+    return {};
 }
-void GetSourceIdImpl(Ark_ConsoleMessage peer)
+Ark_String GetSourceIdImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_VOID(peer && peer->webConsoleLog);
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
     peer->webConsoleLog->GetSourceId();
     // source id need to be returned
     LOGE("ConsoleMessageAccessor::GetSourceIdImpl - return value need to be supported");
+    return {};
 }
 Ark_Int32 GetLineNumberImpl(Ark_ConsoleMessage peer)
 {

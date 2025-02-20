@@ -36,12 +36,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetTitleImpl(Ark_FileSelectorParam peer)
+Ark_String GetTitleImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetTitle();
     // title need to be returned
     LOGE("FileSelectorParamAccessor::GetTitleImpl - return value need to be supported");
+    return {};
 }
 Ark_FileSelectorMode GetModeImpl(Ark_FileSelectorParam peer)
 {

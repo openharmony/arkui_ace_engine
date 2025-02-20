@@ -76,13 +76,14 @@ void SetPathStackImpl(Ark_NavDestinationContext peer,
 {
     LOGE("NavDestinationContext doesn't support set nav path stack");
 }
-void GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
+Ark_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
 {
     LOGE("NavDestinationContext doesn't support a return value"); // temp
-    CHECK_NULL_VOID(peer && peer->handler); // fix a return value
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     auto id = std::to_string(peer->handler->GetNavDestinationId());
     // fix a return value
     Converter::ArkValue<Ark_String>(id);
+    return {};
 }
 void SetNavDestinationIdImpl(Ark_NavDestinationContext peer,
                              const Ark_String* navDestinationId)

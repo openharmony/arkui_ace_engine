@@ -42,13 +42,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
+Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer && peer->controller);
+    CHECK_NULL_RETURN(peer && peer->controller, {});
     auto surfaceId = peer->controller->GetSurfaceId();
     LOGE("XComponentControllerAccessor::GetXComponentSurfaceIdImpl - return surfaceId need to be supported");
 #endif //XCOMPONENT_SUPPORTED
+    return {};
 }
 Ark_CustomObject GetXComponentContextImpl(Ark_XComponentController peer)
 {
@@ -167,7 +168,8 @@ void OnSurfaceDestroyedImpl(Ark_XComponentController peer,
     LOGE("XComponentControllerAccessor::OnSurfaceDestroyedImpl - callback need to be supported");
 #endif //XCOMPONENT_SUPPORTED
 }
-void StartImageAnalyzerImpl(Ark_XComponentController peer,
+void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                            Ark_XComponentController peer,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {

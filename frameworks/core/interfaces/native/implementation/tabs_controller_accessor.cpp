@@ -46,7 +46,8 @@ void ChangeIndexImpl(Ark_TabsController peer,
     auto index = Converter::Convert<Ark_Int32>(*value);
     peerImpl->TriggerChangeIndex(index);
 }
-void PreloadItemsImpl(Ark_TabsController peer,
+void PreloadItemsImpl(Ark_VMContext vmContext,
+                      Ark_TabsController peer,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {

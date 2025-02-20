@@ -52,6 +52,7 @@ public:
     }
 
     std::unique_ptr<KeyEventInfo> eventInfo_;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /**
@@ -76,7 +77,7 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateValidTest, TestSize.Level1)
         Converter::ArkArrayHolder<Array_String> stringHolder(param);
         const auto stringArrayValues = stringHolder.ArkValue();
         eventInfo_->SetPressedKeyCodes(value);
-        const auto result = accessor_->getModifierKeyState(peer_, &stringArrayValues);
+        const auto result = accessor_->getModifierKeyState(vmContext_, peer_, &stringArrayValues);
         EXPECT_EQ(Converter::Convert<bool>(result), expected);
     }
 }
@@ -100,7 +101,7 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateInvalidTest, TestSize.Level1)
         { peer_, &stringArrayValues },
     };
     for (auto& [peer, str] : TEST_PLAN) {
-        auto result = accessor_->getModifierKeyState(peer, str);
+        auto result = accessor_->getModifierKeyState(vmContext_, peer, str);
         EXPECT_FALSE(Converter::Convert<bool>(result));
     }
 }

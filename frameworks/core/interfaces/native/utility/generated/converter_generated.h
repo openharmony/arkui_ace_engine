@@ -2406,6 +2406,21 @@ void AssignUnionTo(std::optional<T>& dst,
     }
 }
 
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_RectShapeOptions_RoundRectShapeOptions& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
 template<typename T, typename P>
 void AssignLiteralTo(std::optional<T>& dst, const P& src);
 
@@ -3171,8 +3186,8 @@ ASSIGN_OPT(Opt_TabsController)
 ASSIGN_OPT(Opt_BarPosition)
 ASSIGN_OPT(Opt_SymbolGlyphAttribute)
 ASSIGN_OPT(Opt_SymbolEffect)
-ASSIGN_OPT(Opt_EffectScope)
 ASSIGN_OPT(Opt_EffectDirection)
+ASSIGN_OPT(Opt_EffectScope)
 ASSIGN_OPT(Opt_EffectFillStyle)
 ASSIGN_OPT(Opt_DigitIndicator)
 ASSIGN_OPT(Opt_DotIndicator)
@@ -3460,6 +3475,12 @@ ASSIGN_OPT(Opt_AlertDialogParamWithConfirm)
 ASSIGN_OPT(Opt_ActionSheetOptions)
 ASSIGN_OPT(Opt_ClickEvent)
 ASSIGN_OPT(Opt_NavExtender_OnUpdateStack)
+ASSIGN_OPT(Opt_FontOptions)
+ASSIGN_OPT(Opt_RoundRectShapeOptions)
+ASSIGN_OPT(Opt_RectShapeOptions)
+ASSIGN_OPT(Opt_BaseShape)
+ASSIGN_OPT(Opt_CommonShape)
+ASSIGN_OPT(Opt_BusinessError)
 ASSIGN_OPT(Opt_PerfMonitorSourceType)
 ASSIGN_OPT(Opt_PerfMonitorActionType)
 ASSIGN_OPT(Opt_SnapshotOptions)
@@ -3722,12 +3743,10 @@ ASSIGN_OPT(Opt_OnTabsAnimationEndCallback)
 ASSIGN_OPT(Opt_TabsAnimationEvent)
 ASSIGN_OPT(Opt_OnTabsAnimationStartCallback)
 ASSIGN_OPT(Opt_TabsOptions)
-ASSIGN_OPT(Opt_ReplaceSymbolEffect)
 ASSIGN_OPT(Opt_BounceSymbolEffect)
 ASSIGN_OPT(Opt_DisappearSymbolEffect)
 ASSIGN_OPT(Opt_AppearSymbolEffect)
 ASSIGN_OPT(Opt_HierarchicalSymbolEffect)
-ASSIGN_OPT(Opt_ScaleSymbolEffect)
 ASSIGN_OPT(Opt_Union_DotIndicator_DigitIndicator)
 ASSIGN_OPT(Opt_Union_Number_String_SwiperAutoFill)
 ASSIGN_OPT(Opt_Union_ArrowStyle_Boolean)
@@ -4178,6 +4197,13 @@ ASSIGN_OPT(Opt_ActionSheet)
 ASSIGN_OPT(Opt_Literal_Want_want)
 ASSIGN_OPT(Opt_EventEmulator)
 ASSIGN_OPT(Opt_NavExtender)
+ASSIGN_OPT(Opt_ReplaceSymbolEffect)
+ASSIGN_OPT(Opt_ScaleSymbolEffect)
+ASSIGN_OPT(Opt_GlobalScope_ohos_font)
+ASSIGN_OPT(Opt_PathShapeOptions)
+ASSIGN_OPT(Opt_ShapeSize)
+ASSIGN_OPT(Opt_Union_RectShapeOptions_RoundRectShapeOptions)
+ASSIGN_OPT(Opt_ErrorCallback)
 ASSIGN_OPT(Opt_GlobalScope_ohos_arkui_performanceMonitor)
 ASSIGN_OPT(Opt_GlobalScope_ohos_arkui_componentSnapshot)
 ASSIGN_OPT(Opt_WebHeader)

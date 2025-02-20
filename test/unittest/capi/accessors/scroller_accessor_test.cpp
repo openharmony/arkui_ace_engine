@@ -151,6 +151,7 @@ public:
 
     MockScrollController *mockScrollerController_ = nullptr;
     RefPtr<MockScrollController> mockScrollerControllerKeeper_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /**
@@ -171,12 +172,12 @@ HWTEST_F(ScrollerAccessorTest, flingTest, TestSize.Level1)
     ASSERT_NE(accessor_->fling, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, Fling(validFlingValue1)).Times(1);
-    accessor_->fling(peer_, &arkFlingValid1);
+    accessor_->fling(vmContext_, peer_, &arkFlingValid1);
 
     EXPECT_CALL(*mockScrollerController_, Fling(validFlingValue2)).Times(1);
-    accessor_->fling(peer_, &arkFlingValid2);
-    accessor_->fling(peer_, &arkFlingInvalid);
-    accessor_->fling(peer_, nullptr);
+    accessor_->fling(vmContext_, peer_, &arkFlingValid2);
+    accessor_->fling(vmContext_, peer_, &arkFlingInvalid);
+    accessor_->fling(vmContext_, peer_, nullptr);
 }
 
 /**
@@ -569,13 +570,13 @@ HWTEST_F(ScrollerAccessorTest, getItemIndexTest, TestSize.Level1)
     ASSERT_NE(accessor_->getItemIndex, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemIndex(x, y)).Times(1).WillOnce(Return(arkIndex));
-    auto result = accessor_->getItemIndex(peer_, &arkX, &arkY);
+    auto result = accessor_->getItemIndex(vmContext_, peer_, &arkX, &arkY);
     EXPECT_EQ(result, arkIndex);
-    result = accessor_->getItemIndex(peer_, nullptr, &arkY);
+    result = accessor_->getItemIndex(vmContext_, peer_, nullptr, &arkY);
     EXPECT_EQ(result, arkIndexInavid);
-    result = accessor_->getItemIndex(peer_, &arkX, nullptr);
+    result = accessor_->getItemIndex(vmContext_, peer_, &arkX, nullptr);
     EXPECT_EQ(result, arkIndexInavid);
-    result = accessor_->getItemIndex(peer_, nullptr, nullptr);
+    result = accessor_->getItemIndex(vmContext_, peer_, nullptr, nullptr);
     EXPECT_EQ(result, arkIndexInavid);
 }
 
@@ -612,7 +613,7 @@ HWTEST_F(ScrollerAccessorTest, getItemRectTest, TestSize.Level1)
     ASSERT_NE(accessor_->getItemRect, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemRect(index)).Times(1).WillOnce(Return(expectedRect));
-    auto arkRectResult = accessor_->getItemRect(peer_, &arkIndex);
+    auto arkRectResult = accessor_->getItemRect(vmContext_, peer_, &arkIndex);
     auto x = Converter::Convert<float>(arkRectResult.x);
     auto y = Converter::Convert<float>(arkRectResult.y);
     auto w = Converter::Convert<float>(arkRectResult.width);

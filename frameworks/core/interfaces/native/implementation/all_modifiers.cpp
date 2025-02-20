@@ -215,6 +215,16 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor();
+const GENERATED_ArkUIErrorCallbackAccessor* GetErrorCallbackAccessor();
+const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor();
+const GENERATED_ArkUIBaseShapeAccessor* GetBaseShapeAccessor();
+const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor();
+const GENERATED_ArkUICircleShapeAccessor* GetCircleShapeAccessor();
+const GENERATED_ArkUIEllipseShapeAccessor* GetEllipseShapeAccessor();
+const GENERATED_ArkUIPathShapeAccessor* GetPathShapeAccessor();
+const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor();
+const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor();
+const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor();
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
@@ -295,12 +305,10 @@ const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor();
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor();
 const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor();
 const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor();
-const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor();
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor();
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
 const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor();
-const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor();
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor();
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor();
 const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor();
@@ -494,6 +502,16 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetWebviewControllerAccessor,
         GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
         GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
+        GetErrorCallbackAccessor,
+        GetCommonShapeAccessor,
+        GetBaseShapeAccessor,
+        GetRectShapeAccessor,
+        GetCircleShapeAccessor,
+        GetEllipseShapeAccessor,
+        GetPathShapeAccessor,
+        GetGlobalScope_ohos_fontAccessor,
+        GetScaleSymbolEffectAccessor,
+        GetReplaceSymbolEffectAccessor,
         GetFrameNodeAccessor,
         GetPixelMapAccessor,
         GetNavExtenderAccessor,
@@ -574,12 +592,10 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetSwiperControllerAccessor,
         GetSwiperContentTransitionProxyAccessor,
         GetIndicatorComponentControllerAccessor,
-        GetScaleSymbolEffectAccessor,
         GetHierarchicalSymbolEffectAccessor,
         GetAppearSymbolEffectAccessor,
         GetDisappearSymbolEffectAccessor,
         GetBounceSymbolEffectAccessor,
-        GetReplaceSymbolEffectAccessor,
         GetTabsControllerAccessor,
         GetTabContentTransitionProxyAccessor,
         GetTextControllerAccessor,

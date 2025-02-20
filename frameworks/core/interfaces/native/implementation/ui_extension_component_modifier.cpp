@@ -203,11 +203,10 @@ void OnReleaseImpl(Ark_NativePointer node,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_CustomObject* value)
+                 Ark_ErrorCallback value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     LOGE("UIExtensionComponentInterfaceModifier::OnErrorImpl - is not supported");
 }
 void OnTerminatedImpl(Ark_NativePointer node,

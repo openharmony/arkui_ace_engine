@@ -37,12 +37,13 @@ void KeepEditableStateImpl(Ark_SubmitEvent peer)
     CHECK_NULL_VOID(peer->GetEventInfo());
     peer->GetEventInfo()->SetKeepEditable(true);
 }
-void GetTextImpl(Ark_SubmitEvent peer)
+Ark_String GetTextImpl(Ark_SubmitEvent peer)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->GetEventInfo());
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->GetEventInfo(), {});
     auto text = peer->GetEventInfo()->GetText();
     LOGE("Arkoala method SubmitEventAccessor.GetTextImpl has incorrect return type");
+    return {};
 }
 void SetTextImpl(Ark_SubmitEvent peer,
                  const Ark_String* text)

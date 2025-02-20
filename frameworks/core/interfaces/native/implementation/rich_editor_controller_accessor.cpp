@@ -458,7 +458,8 @@ Ark_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
     peerImpl->GetSelectionImpl();
     return {};
 }
-Array_RichEditorSpan FromStyledStringImpl(Ark_RichEditorController peer,
+Array_RichEditorSpan FromStyledStringImpl(Ark_VMContext vmContext,
+                                          Ark_RichEditorController peer,
                                           Ark_StyledString value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
@@ -471,7 +472,8 @@ Array_RichEditorSpan FromStyledStringImpl(Ark_RichEditorController peer,
     }
     return {};
 }
-Ark_StyledString ToStyledStringImpl(Ark_RichEditorController peer,
+Ark_StyledString ToStyledStringImpl(Ark_VMContext vmContext,
+                                    Ark_RichEditorController peer,
                                     const Ark_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl*>(peer);

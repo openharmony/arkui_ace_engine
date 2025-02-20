@@ -70,7 +70,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetModifierKeyStateImpl(Ark_BaseEvent peer,
+Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
+                                    Ark_BaseEvent peer,
                                     const Array_String* keys)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueBoolean);

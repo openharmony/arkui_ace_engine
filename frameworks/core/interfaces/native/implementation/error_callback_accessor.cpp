@@ -18,11 +18,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace UrlStyleAccessor {
-void DestroyPeerImpl(Ark_UrlStyle peer)
+namespace ErrorCallbackAccessor {
+void DestroyPeerImpl(Ark_ErrorCallback peer)
 {
 }
-Ark_UrlStyle CtorImpl(const Ark_String* url)
+Ark_ErrorCallback CtorImpl()
 {
     return {};
 }
@@ -30,23 +30,23 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_String GetUrlImpl(Ark_UrlStyle peer)
+void InvokeImpl(Ark_ErrorCallback peer,
+                const Ark_BusinessError* err)
 {
-    return {};
 }
-} // UrlStyleAccessor
-const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
+} // ErrorCallbackAccessor
+const GENERATED_ArkUIErrorCallbackAccessor* GetErrorCallbackAccessor()
 {
-    static const GENERATED_ArkUIUrlStyleAccessor UrlStyleAccessorImpl {
-        UrlStyleAccessor::DestroyPeerImpl,
-        UrlStyleAccessor::CtorImpl,
-        UrlStyleAccessor::GetFinalizerImpl,
-        UrlStyleAccessor::GetUrlImpl,
+    static const GENERATED_ArkUIErrorCallbackAccessor ErrorCallbackAccessorImpl {
+        ErrorCallbackAccessor::DestroyPeerImpl,
+        ErrorCallbackAccessor::CtorImpl,
+        ErrorCallbackAccessor::GetFinalizerImpl,
+        ErrorCallbackAccessor::InvokeImpl,
     };
-    return &UrlStyleAccessorImpl;
+    return &ErrorCallbackAccessorImpl;
 }
 
-struct UrlStylePeer {
-    virtual ~UrlStylePeer() = default;
+struct ErrorCallbackPeer {
+    virtual ~ErrorCallbackPeer() = default;
 };
 }

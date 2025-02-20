@@ -412,15 +412,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetStringImpl(Ark_StyledString peer)
+Ark_String GetStringImpl(Ark_StyledString peer)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->spanString);
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->spanString, {});
     peer->spanString->GetString();
     // string need to be returned
     LOGE("StyledStringAccessor::GetStringImpl - return value need to be supported");
+    return {};
 }
-Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
+Array_SpanStyle GetStylesImpl(Ark_VMContext vmContext,
+                              Ark_StyledString peer,
                               const Ark_Number* start,
                               const Ark_Number* length,
                               const Opt_StyledStringKey* styledKey)
@@ -455,7 +457,8 @@ Ark_Boolean EqualsImpl(Ark_StyledString peer,
     CHECK_NULL_RETURN(other->spanString, false);
     return peer->spanString->IsEqualToSpanString(other->spanString);
 }
-Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
+Ark_StyledString SubStyledStringImpl(Ark_VMContext vmContext,
+                                     Ark_StyledString peer,
                                      const Ark_Number* start,
                                      const Opt_Number* length)
 {
@@ -477,7 +480,8 @@ Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
     CHECK_NULL_RETURN(spanString, ret);
     return StyledStringPeer::Create(spanString);
 }
-void FromHtmlImpl(const Ark_String* html,
+void FromHtmlImpl(Ark_VMContext vmContext,
+                  const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(html);
@@ -486,12 +490,14 @@ void FromHtmlImpl(const Ark_String* html,
     // StyledString need to be returned
     LOGE("StyledStringAccessor::FromHtmlImpl - return value need to be supported");
 }
-void ToHtmlImpl(Ark_StyledString styledString)
+Ark_String ToHtmlImpl(Ark_VMContext vmContext,
+                      Ark_StyledString styledString)
 {
-    CHECK_NULL_VOID(styledString);
-    CHECK_NULL_VOID(styledString->spanString);
+    CHECK_NULL_RETURN(styledString, {});
+    CHECK_NULL_RETURN(styledString->spanString, {});
     auto htmlStr = OHOS::Ace::HtmlUtils::ToHtml(styledString->spanString.GetRawPtr());
     LOGE("StyledStringAccessor::ToHtmlImpl - return value need to be supported");
+    return {};
 }
 Ark_Buffer MarshallingImpl(Ark_StyledString styledString)
 {
@@ -505,7 +511,8 @@ Ark_Buffer MarshallingImpl(Ark_StyledString styledString)
     LOGE("StyledStringAccessor::MarshallingImpl - return value need to be supported");
     return {};
 }
-void UnmarshallingImpl(const Ark_Buffer* buffer,
+void UnmarshallingImpl(Ark_VMContext vmContext,
+                       const Ark_Buffer* buffer,
                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(outputArgumentForReturningPromise);
