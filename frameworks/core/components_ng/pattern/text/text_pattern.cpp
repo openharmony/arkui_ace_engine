@@ -1394,7 +1394,8 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     CheckOnClickEvent(info);
-    if (!IsSelectableAndCopy() || textForDisplay_.empty()) {
+    auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+    if (!IsSelectableAndCopy() || (textSize == 0)) {
         return;
     }
     auto host = GetHost();
