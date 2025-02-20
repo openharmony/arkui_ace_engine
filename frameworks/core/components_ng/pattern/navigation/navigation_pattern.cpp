@@ -3439,11 +3439,12 @@ void NavigationPattern::FireOnNewParam(const RefPtr<UINode>& uiNode)
     CHECK_NULL_VOID(uiNode);
     auto navDestination = DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
     CHECK_NULL_VOID(navDestination);
-    auto eventhub = navDestination->GetEventHub<NavDestinationEventHub>();
     auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
-    if (eventhub && navDestinationPattern) {
-        auto navPathInfo = navDestinationPattern->GetNavPathInfo();
-        eventhub->FireOnNewParam(navPathInfo == nullptr ? nullptr : navPathInfo->GetParamObj());
-    }
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto navPathInfo = navDestinationPattern->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnNewParam(navPathInfo->GetParamObj());
 }
 } // namespace OHOS::Ace::NG
