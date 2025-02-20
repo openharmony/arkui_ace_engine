@@ -95,7 +95,7 @@ void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOpti
             symbolEffectOptions.GetFillStyle() == FillStyle::ITERATIVE)) {
         isLoopAnimation = symbolEffectOptions.GetIsTxtActive();
     }
-    property->UpdateIsLoopAnimation(isLoopAnimation);
+    property->SetIsLoopAnimation(isLoopAnimation);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
 }
 
