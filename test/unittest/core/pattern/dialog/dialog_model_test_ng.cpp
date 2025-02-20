@@ -1398,6 +1398,94 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogModelTestNg035
+ * @tc.desc: Test CreateDialogNode with dialogTransition effect and maskTransition effect.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DialogModelTestNg, DialogModelTestNg035, TestSize.Level1)
+ {
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    AnimationOption animationOption;
+    animationOption.SetDelay(10);
+
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    auto dialogTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+    auto maskTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+ 
+    DialogProperties dialogProps {
+        .type = DialogType::ALERT_DIALOG,
+        .title = TITLE,
+        .content = MESSAGE,
+        .openAnimation = animationOption,
+        .dialogTransitionEffect = dialogTransitionEffect,
+        .maskTransitionEffect = maskTransitionEffect,
+    };
+ 
+    ASSERT_NE(dialogProps.dialogTransitionEffect, nullptr);
+    ASSERT_NE(dialogProps.maskTransitionEffect, nullptr);
+    /**
+     * @tc.steps: step2. Create DialogNode.
+     * @tc.expected: DialogNode created successfully
+     */
+    rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.dialogTransitionEffect);
+    ASSERT_NE(rootNode, nullptr);
+
+    rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.maskTransitionEffect);
+    ASSERT_NE(rootNode, nullptr);
+}
+ 
+ /**
+  * @tc.name: DialogModelTestNg036
+  * @tc.desc: Test CreateDialogNode with no dialogTransition effect and maskTransition effect.
+  * @tc.type: FUNC
+  */
+ HWTEST_F(DialogModelTestNg, DialogModelTestNg036, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    AnimationOption animationOption;
+    animationOption.SetDelay(10);
+
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    DialogProperties dialogProps {
+        .type = DialogType::ALERT_DIALOG,
+        .title = TITLE,
+        .content = MESSAGE,
+        .openAnimation = animationOption,
+        .dialogTransitionEffect = nullptr,
+        .maskTransitionEffect = nullptr,
+    };
+ 
+    /**
+     * @tc.steps: step2. Create DialogNode.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto customDialog = DialogView::CreateDialogNode(dialogProps, nullptr);
+    ASSERT_NE(customDialog, nullptr);
+
+    auto customDialogPattern = customDialog->GetPattern<DialogPattern>();
+    ASSERT_NE(customDialogPattern, nullptr);
+    customDialogPattern->SetDialogProperties(dialogProps);
+
+    /**
+     * @tc.steps: step3. Call maskTransitionEffect from dialog.
+     * @tc.expected: transitionEffect is not nullptr.
+     */
+    auto dialogTransitionEffect = customDialogPattern->GetDialogProperties().dialogTransitionEffect;
+    ASSERT_EQ(dialogTransitionEffect, nullptr);
+    auto maskTransitionEffect = customDialogPattern->GetDialogProperties().maskTransitionEffect;
+    ASSERT_EQ(maskTransitionEffect, nullptr);
+}
+
+/**
  * @tc.name: ComputeInnerLayoutSizeParam001
  * @tc.desc: Test ComputeInnerLayoutSizeParam function
  * @tc.type: FUNC
