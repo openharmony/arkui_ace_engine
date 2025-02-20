@@ -2637,6 +2637,18 @@
     },
     {
         "first_introduced": "15",
+        "name": "OH_ArkUI_DragEvent_StartDataLoading"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_CancelDataLoading"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_DisableDropDataPrefetchOnNode"
+    },
+    {
+        "first_introduced": "15",
         "name": "OH_ArkUI_CreateSnapshotOptions"
     },
     {

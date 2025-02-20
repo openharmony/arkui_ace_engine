@@ -106,6 +106,7 @@ ohos_shared_library("ace_ndk") {
       "hilog:libhilog",
       "image_framework:pixelmap",
       "napi:ace_napi",
+      "udmf:libudmf",
       "udmf:udmf_client",
     ]
     version_script =

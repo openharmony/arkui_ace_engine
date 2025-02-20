@@ -3645,6 +3645,13 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
         { true, false, false, false, false, false, true, { .isShowBadge = true } });
 }
 
+void SetDisableDataPrefetch(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisableDataPrefetch(frameNode, value);
+}
+
 void SetMouseResponseRegion(
     ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
 {
@@ -6540,7 +6547,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
         ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop,
         SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop, PostTouchEvent, CreateClonedTouchEvent,
-        DestroyTouchEvent, SetNodeBackdropBlur, GetNodeBackdropBlur, DispatchKeyEvent };
+        DestroyTouchEvent, SetNodeBackdropBlur, GetNodeBackdropBlur, SetDisableDataPrefetch, DispatchKeyEvent };
 
     return &modifier;
 }
