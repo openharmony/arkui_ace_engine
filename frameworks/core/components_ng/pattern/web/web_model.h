@@ -170,6 +170,7 @@ public:
     virtual void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) {}
     virtual void SetMetaViewport(bool enabled) {}
     virtual void SetLayoutMode(WebLayoutMode mode) {}
+    virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
     virtual void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder) {};
@@ -179,7 +180,6 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
     virtual void SetOverScrollMode(OverScrollMode mode) {};
-    virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void SetCopyOptionMode(CopyOptions mode) {};
 
     virtual void SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
