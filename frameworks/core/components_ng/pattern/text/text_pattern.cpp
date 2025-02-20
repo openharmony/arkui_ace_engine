@@ -3614,7 +3614,7 @@ void TextPattern::PauseSymbolAnimation()
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-    if (!symbolEffectOptions || !symbolEffectOptions.GetIsTxtActive()) {
+    if (!symbolEffectOptions.GetIsTxtActive()) {
         return;
     }
     symbolEffectOptions.SetIsTxtActive(false);
@@ -3635,7 +3635,7 @@ void TextPattern::ResumeSymbolAnimation()
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-    if (!symbolEffectOptions || symbolEffectOptions.GetIsTxtActive()) {
+    if (symbolEffectOptions.GetIsTxtActive()) {
         return;
     }
     symbolEffectOptions.SetIsTxtActive(true);
