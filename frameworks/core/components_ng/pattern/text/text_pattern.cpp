@@ -3608,11 +3608,11 @@ void TextPattern::PauseSymbolAnimation()
     if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
         return;
     }
-    if (!isLoopAnimation_) {
-        return;
-    }
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetIsLoopAnimation()) {
+        return;
+    }
     auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     if (!symbolEffectOptions.GetIsTxtActive()) {
         return;
@@ -3629,11 +3629,11 @@ void TextPattern::ResumeSymbolAnimation()
     if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
         return;
     }
-    if (!isLoopAnimation_) {
-        return;
-    }
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetIsLoopAnimation()) {
+        return;
+    }
     auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     if (symbolEffectOptions.GetIsTxtActive()) {
         return;

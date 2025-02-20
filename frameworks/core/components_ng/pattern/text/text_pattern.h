@@ -785,16 +785,6 @@ public:
     void ResetOriginCaretPosition();
     bool RecordOriginCaretPosition(const OffsetF& offset);
 
-    bool GetIsLoopAnimation() const
-    {
-        return isLoopAnimation_;
-    }
-
-    void SetIsLoopAnimation(bool isLoopAnimation)
-    {
-        isLoopAnimation_ = isLoopAnimation;
-    }
-
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -1085,7 +1075,6 @@ private:
     // Used to record original caret position for "shift + up/down"
     // Less than 0 is invalid, initialized as invalid in constructor
     OffsetF originCaretPosition_;
-    bool isLoopAnimation_ = false;
 };
 } // namespace OHOS::Ace::NG
 
