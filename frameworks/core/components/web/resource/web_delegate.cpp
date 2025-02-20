@@ -2771,7 +2771,6 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
         return;
     }
     visibleRatio_ = visibleRatio;
-
     if (fabs(visibleRatio_) > FLT_EPSILON && visibleRatio_ > 0.0) {
         CHECK_NULL_VOID(nweb_);
         nweb_->OnUnoccluded();
@@ -2874,6 +2873,25 @@ void WebDelegate::ratioStrToFloatV2(const std::string& str)
     }
 }
 
+void SetPartitionPoints(std::vector<float>& partition)
+{
+    if (isHalfFrame_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to half frame rate:%{public}f", halfFrameRateVisibleRatio_);
+        if ((int)(halfFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0 };
+        } else if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0, halfFrameRateVisibleRatio_ };
+        } else {
+            partition = { 0, lowerFrameRateVisibleRatio_, halfFrameRateVisibleRatio_ };
+        }
+    } else {
+        if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0 };
+        } else {
+            partition = { 0, lowerFrameRateVisibleRatio_ };
+        }
+    }
+}
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
     if (!GetWebOptimizationValue()) {
@@ -2890,29 +2908,10 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
         OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatioV2");
     ratioStrToFloat(visibleAreaRatio);
     ratioStrToFloatV2(visibleAreaRatioV2);
-    if (lowerFrameRateVisibleRatio_ < halfFrameRateVisibleRatio_) {
-        isHalfFrame_ = true;
-    } else {
-        isHalfFrame_ = false;
-    }
+    isHalfFrame_ = (lowerFrameRateVisibleRatio_ < halfFrameRateVisibleRatio_ ? true : false);
     std::vector<float> partitionPoints;
     TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
-    if (isHalfFrame_) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to half frame rate:%{public}f", halfFrameRateVisibleRatio_);
-        if ((int)(halfFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
-            partitionPoints = { 0 };
-        } else if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
-            partitionPoints = { 0, halfFrameRateVisibleRatio_ };
-        } else {
-            partitionPoints = { 0, lowerFrameRateVisibleRatio_, halfFrameRateVisibleRatio_ };
-        }
-    } else {
-        if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
-            partitionPoints = { 0 };
-        } else {
-            partitionPoints = { 0, lowerFrameRateVisibleRatio_ };
-        }
-    }
+    SetPartitionPoints(partitionPoints);
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
         [weak = WeakClaim(this)](float visibleRatio) {
