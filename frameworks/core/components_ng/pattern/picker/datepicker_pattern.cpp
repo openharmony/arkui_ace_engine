@@ -2750,6 +2750,17 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         ret += std::to_string(pickerDate.GetDay());
         return ret;
     };
+    auto GetModeString = [](const DatePickerMode& datePickerMode) {
+        std::string ret;
+        if (datePickerMode == DatePickerMode::DATE) {
+            ret = "DatePickerMode.DATE";
+        } else if (datePickerMode == DatePickerMode::YEAR_AND_MONTH) {
+            ret = "DatePickerMode.YEAR_AND_MONTH";
+        } else if (datePickerMode == DatePickerMode::MONTH_AND_DAY) {
+            ret = "DatePickerMode.MONTH_AND_DAY";
+        }
+        return ret;
+    };
     auto rowLayoutProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(rowLayoutProperty);
     auto jsonConstructor = JsonUtil::Create(true);
@@ -2758,12 +2769,13 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         jsonConstructor->Put("start", rowLayoutProperty->GetDateStart().c_str());
         jsonConstructor->Put("end", rowLayoutProperty->GetDateEnd().c_str());
         jsonConstructor->Put("selected", rowLayoutProperty->GetDateSelected().c_str());
+        jsonConstructor->Put("mode", rowLayoutProperty->GetDatePickerMode().c_str());
     } else {
         jsonConstructor->Put("start", GetDateString(startDateSolar_).c_str());
         jsonConstructor->Put("end", GetDateString(endDateSolar_).c_str());
         jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
+        jsonConstructor->Put("mode", GetModeString(datePickerMode_).c_str());
     }
-    jsonConstructor->Put("mode", rowLayoutProperty->GetDatePickerMode().c_str());
     json->PutExtAttr("constructor", jsonConstructor, filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }
