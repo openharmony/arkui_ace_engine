@@ -46,6 +46,11 @@ enum class FocusActiveReason : int32_t {
     USE_API = 2,
 };
 
+enum class KeyProcessingMode : int32_t {
+    FOCUS_NAVIGATION = 0,
+    ANCESTOR_EVENT = 1,
+};
+
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
@@ -152,6 +157,16 @@ public:
         focusViewStackState_ = focusViewStackState;
     }
 
+    void SetKeyProcessingMode(KeyProcessingMode keyProcessingMode)
+    {
+        keyProcessingMode_ = keyProcessingMode;
+    }
+
+    KeyProcessingMode GetKeyProcessingMode() const
+    {
+        return keyProcessingMode_;
+    }
+
     bool SetFocusViewRootScope(const RefPtr<FocusView>& focusView);
 
     void PaintFocusState();
@@ -207,7 +222,7 @@ private:
 
     bool isAutoFocusTransfer_ = true;
     FocusViewStackState focusViewStackState_ = FocusViewStackState::IDLE;
-
+    KeyProcessingMode keyProcessingMode_ = KeyProcessingMode::FOCUS_NAVIGATION;
     int32_t requestFocusResult_ = ERROR_CODE_NO_ERROR;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);

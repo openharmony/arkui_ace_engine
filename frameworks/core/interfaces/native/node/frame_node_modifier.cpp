@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
@@ -725,6 +726,15 @@ void GetActiveChildrenInfo(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkU
     }
 }
 
+void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto delegate = EngineHelper::GetDelegateByContainer(container);
+    CHECK_NULL_VOID(delegate);
+    delegate->SetKeyProcessingMode(mode);
+}
+
 void GetCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, char** value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -758,7 +768,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty, SetDrawCompleteEvent,
         ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent, RequestFocus, ClearFocus, FocusActivate,
         SetAutoFocusTransfer, SetCrossLanguageOptions, GetCrossLanguageOptions,
-        CheckIfCanCrossLanguageAttributeSetting };
+        CheckIfCanCrossLanguageAttributeSetting, SetKeyProcessingMode };
     return &modifier;
 }
 

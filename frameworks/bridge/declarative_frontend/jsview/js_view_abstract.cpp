@@ -53,6 +53,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -112,6 +114,8 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/base/inspector.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -7470,6 +7474,39 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
+void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (!(arg->IsNumber() || arg->IsString())) {
+        return;
+    }
+    RefPtr<NG::FrameNode> frameNode = nullptr;
+    if (arg->IsString()) {
+        std::string id = arg->ToString();
+        frameNode = NG::Inspector::GetFrameNodeByKey(id);
+    }
+
+    if (arg->IsNumber()) {
+        auto id = arg->ToNumber<int32_t>();
+        auto node = ElementRegister::GetInstance()->GetNodeById(id);
+        frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    if (!(args[1]->IsObject())) {
+        return;
+    }
+    JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
+    auto eventInfoPtr = jsObject->Unwrap<KeyEventInfo>();
+    CHECK_NULL_VOID(eventInfoPtr);
+    KeyEvent keyEvent;
+    eventInfoPtr->ParseKeyEvent(keyEvent);
+    auto result = focusHub->HandleEvent(keyEvent);
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -8897,6 +8934,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
+    JSClass<JSViewAbstract>::StaticMethod("onKeyEventDispatch", &JSInteractableView::JsOnKeyEventDispatch);
+    JSClass<JSViewAbstract>::StaticMethod("dispatchKeyEvent", &JSViewAbstract::JsDispatchKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
     JSClass<JSViewAbstract>::StaticMethod("onFocus", &JSViewAbstract::JsOnFocus);
     JSClass<JSViewAbstract>::StaticMethod("onBlur", &JSViewAbstract::JsOnBlur);

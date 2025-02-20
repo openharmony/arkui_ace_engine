@@ -360,6 +360,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnPreDrag,
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
+    NodeModifier::SetOnKeyEventDispatch,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {

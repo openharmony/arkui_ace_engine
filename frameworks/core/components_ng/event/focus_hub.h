@@ -473,6 +473,7 @@ public:
 
     bool HandleEvent(const NonPointerEvent& event);
     bool HandleFocusTravel(const FocusEvent& event) override;
+    bool HandleFocusNavigation(const FocusEvent& event);
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);

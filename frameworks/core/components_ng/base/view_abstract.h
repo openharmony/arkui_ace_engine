@@ -399,6 +399,7 @@ public:
     static void DisableOnClick();
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
+    static void DisableOnKeyEventDispatch();
     static void DisableOnHover();
     static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
@@ -420,6 +421,7 @@ public:
     static void DisableOnDragEnd(FrameNode* frameNode);
     static void DisableOnTouch(FrameNode* frameNode);
     static void DisableOnKeyEvent(FrameNode* frameNode);
+    static void DisableOnKeyEventDispatch(FrameNode* frameNode);
     static void DisableOnHover(FrameNode* frameNode);
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
@@ -654,6 +656,9 @@ public:
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
+    static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);
+    static void SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback);
+    static void DispatchKeyEvent(FrameNode* frameNode, KeyEvent& keyEvent);
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
