@@ -183,6 +183,13 @@ void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
 
 FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
 {
+    if (index < offset_) {
+        return container_->GetFrameNodeChildByIndex(index);
+    }
+    if (index >= offset_ + totalCount_) {
+        // LazyForEach generated items are at the back of children list
+        return container_->GetFrameNodeChildByIndex(index - filled_.size()); // filled.size = active item count
+    }
     FrameNode* node = nullptr;
     auto iter = indexToNode_.find(index);
     if (iter != indexToNode_.end()) {
@@ -194,12 +201,8 @@ FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
     return node;
 }
 
-RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index) const
+RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
 {
-    auto iter = indexToNode_.find(index);
-    if (iter != indexToNode_.end()) {
-        return iter->second.Upgrade();
-    }
-    return nullptr;
+    return Claim(GetChildPtrByIndex(index));
 }
 } // namespace OHOS::Ace::NG
