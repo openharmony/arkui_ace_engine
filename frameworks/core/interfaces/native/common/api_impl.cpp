@@ -47,9 +47,12 @@ ExtensionCompanionNode* GetCompanion(Ark_NodeHandle nodePtr)
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto rootNode = pipeline->GetRootElement();
         CHECK_NULL_RETURN(rootNode, nullptr);
-        auto companion = AceType::MakeRefPtr<ExtensionCompanionNode>(0, 0, nullptr);
-        rootNode->SetExtensionHandler(companion);
-        ret = AceType::RawPtr(companion);
+        ret = AceType::DynamicCast<ExtensionCompanionNode>(rootNode->GetExtensionHandler());
+        if (ret == nullptr) {
+            auto companion = AceType::MakeRefPtr<ExtensionCompanionNode>(0, 0, nullptr);
+            rootNode->SetExtensionHandler(companion);
+            ret = AceType::RawPtr(companion);
+        }
     }
     return ret;
 }
