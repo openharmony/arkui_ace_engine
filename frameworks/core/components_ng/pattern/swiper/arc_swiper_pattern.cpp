@@ -1044,9 +1044,11 @@ void ArcSwiperPattern::HorizontalScrollAnimation(float offset)
     if (scrollToLeft_) {
         curInter = itemPosition_.begin();
         nextInter = std::next(curInter, 1);
+        swiperProportion_ = TO_LEFT_ARC_SWIPER_PROPORTION;
     } else {
         nextInter = itemPosition_.begin();
         curInter = std::next(nextInter, 1);
+        swiperProportion_ = TO_RIGHT_ARC_SWIPER_PROPORTION;
     }
     if (curInter != itemPosition_.end()) {
         auto curStartPos = curInter->second.startPos;
@@ -1074,9 +1076,11 @@ void ArcSwiperPattern::VerticalScrollAnimation(float offset)
     if (scrollToTop_) {
         curInter = itemPosition_.begin();
         nextInter = std::next(curInter, 1);
+        swiperProportion_ = TO_LEFT_ARC_SWIPER_PROPORTION;
     } else {
         nextInter = itemPosition_.begin();
         curInter = std::next(nextInter, 1);
+        swiperProportion_ = TO_RIGHT_ARC_SWIPER_PROPORTION;
     }
     if (curInter != itemPosition_.end()) {
         auto curStartPos = curInter->second.startPos;
