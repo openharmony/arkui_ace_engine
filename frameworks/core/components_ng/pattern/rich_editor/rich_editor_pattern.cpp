@@ -6338,11 +6338,12 @@ void RichEditorPattern::AddOperationRecord(const OperationRecord& record)
 
 void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
 {
-    bool flag = keyEvent.action == KeyAction::DOWN
-        && (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT));
-    if (flag != shiftFlag_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateShiftFlag to %{public}d", flag);
-        shiftFlag_ = flag;
+    bool hasKeyShift = keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT);
+    auto action = keyEvent.action;
+    bool isShiftPressed = hasKeyShift && (action == KeyAction::DOWN || action == KeyAction::UP);
+    if (isShiftPressed != shiftFlag_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateShiftFlag:%{public}d by action:%{public}d", isShiftPressed, action);
+        shiftFlag_ = isShiftPressed;
     }
 }
 
@@ -7232,6 +7233,7 @@ void RichEditorPattern::HandleShiftSelect(int32_t position)
     int32_t start = textSelector_.SelectNothing() ? caretPosition_ : textSelector_.baseOffset;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleShiftSelect [%{public}d-%{public}d]", start, position);
     UpdateSelector(start, position);
+    SetCaretPosition(position);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
