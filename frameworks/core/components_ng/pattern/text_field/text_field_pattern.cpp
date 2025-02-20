@@ -3909,6 +3909,13 @@ void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
     };
 }
 
+void TextFieldPattern::CancelDelayProcessOverlay()
+{
+    if (processOverlayDelayTask_) {
+        processOverlayDelayTask_ = nullptr;
+    }
+}
+
 bool TextFieldPattern::AllowCopy()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -6541,6 +6548,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position, bool moveContent)
         StartTwinkling();
     }
     CloseSelectOverlay();
+    CancelDelayProcessOverlay();
     TriggerAvoidOnCaretChange();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
