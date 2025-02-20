@@ -846,7 +846,7 @@ HWTEST_F(GridOptionLayoutTestNg, AdaptToChildMainSize001, TestSize.Level1)
     ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
     CreateFixedItems(8);
     CreateDone();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_HEIGHT * 2);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_WIDTH * 2);
 }
 
 /**
