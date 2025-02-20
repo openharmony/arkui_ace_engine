@@ -84,4 +84,11 @@ void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::strin
                                     const std::string& pageName) {}
 
 void EventReport::ReportDragInfo(const DragInfo& dragInfo) {}
+
+void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
+{}
+
+void EventReport::ReportClipboardFailEvent(const std::string& errorType)
+{}
+
 } // namespace OHOS::Ace
