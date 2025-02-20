@@ -59,7 +59,7 @@ public:
             return;
         }
 
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<HyperlinkTheme>() : nullptr;
         json->PutExtAttr("color", propColor_.value_or(theme ? theme->GetTextColor() :
             Color::FromString("#FF007DFF")).ColorToString().c_str(), filter);

@@ -51,7 +51,7 @@ void ProgressPattern::OnAttachToFrameNode()
 
 void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
@@ -128,7 +128,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
@@ -181,7 +181,7 @@ void ProgressPattern::HandleEnabled()
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
@@ -193,7 +193,7 @@ void ProgressPattern::HandleEnabled()
 void ProgressPattern::OnPress(const TouchEventInfo& info)
 {
     auto touchType = info.GetTouches().front().GetTouchType();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
@@ -248,7 +248,7 @@ void ProgressPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
     auto contentSize = content->GetRect().GetSize();
-    auto currentContext = PipelineBase::GetCurrentContext();
+    auto currentContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(currentContext);
     auto appTheme = currentContext->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
@@ -287,7 +287,7 @@ void ProgressPattern::DumpInfo()
 {
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
@@ -343,7 +343,7 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
     }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     auto theme = pipeline->GetTheme<ProgressTheme>();
 
     auto jsonValue = JsonUtil::Create(true);
@@ -364,7 +364,7 @@ void ProgressPattern::ToJsonValueForLinearStyleOptions(
     }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     auto theme = pipeline->GetTheme<ProgressTheme>();
 
     auto jsonValue = JsonUtil::Create(true);
@@ -463,7 +463,7 @@ void ProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);

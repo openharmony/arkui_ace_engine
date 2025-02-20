@@ -97,7 +97,7 @@ public:
         bubbleLayoutProperty->Put("blockEvent", GetBlockEvent().value_or(true));
         bubbleLayoutProperty->Put("positionOffset", GetPositionOffset().value_or(OffsetF()).ToString().c_str());
 
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<PopupTheme>() : nullptr;
         auto defaultTargetSpace = theme ? theme->GetTargetSpace() : Dimension();
         bubbleLayoutProperty->Put("targetSpace", GetTargetSpace().value_or(defaultTargetSpace).ToString().c_str());

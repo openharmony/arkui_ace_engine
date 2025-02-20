@@ -61,7 +61,7 @@ void RatingModifier::onDraw(DrawingContext& context)
 
 void RatingModifier::PaintBoard(DrawingContext& context)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);

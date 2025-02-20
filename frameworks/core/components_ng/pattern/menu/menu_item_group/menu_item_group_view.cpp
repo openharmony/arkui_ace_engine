@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 namespace {
 void UpdateRowPadding(const RefPtr<FrameNode>& row)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -87,7 +87,7 @@ void MenuItemGroupView::SetHeader(FrameNode* frameNode, const std::optional<std:
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     layoutProps->UpdateContent(header.value_or(""));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -138,7 +138,7 @@ void MenuItemGroupView::SetFooter(FrameNode* frameNode, const std::optional<std:
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     layoutProps->UpdateContent(footer.value_or(""));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);

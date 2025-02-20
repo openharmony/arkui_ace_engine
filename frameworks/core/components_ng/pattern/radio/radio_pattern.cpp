@@ -752,7 +752,7 @@ void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern RadioPattern::GetFocusPattern() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_RETURN(radioTheme, FocusPattern());

@@ -522,7 +522,7 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         double starNum = property->GetStarsValue(themeStarNum_);
         wholeStarNum = starNum - wholeStarNum - 1;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);
@@ -796,7 +796,7 @@ void RatingPattern::OnModifyDone()
     HandleEnabled();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);

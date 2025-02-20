@@ -80,7 +80,7 @@ public:
         bubbleRenderProperty->Put("arrowOffset", GetArrowOffset().value_or(Dimension()).ToString().c_str());
         bubbleRenderProperty->Put("autoCancel", GetAutoCancel().value_or(true)); // !hasAction
 
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<PopupTheme>() : nullptr;
         auto defaultMaskColor = theme ? theme->GetMaskColor() : Color();
         bubbleRenderProperty->Put("maskColor", GetMaskColor().value_or(defaultMaskColor).ToString().c_str());

@@ -20,7 +20,7 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);

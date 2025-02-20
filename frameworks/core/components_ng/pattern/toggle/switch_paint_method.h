@@ -45,7 +45,7 @@ public:
             bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                            : direction_ == TextDirection::RTL;
             auto pointOffset = isSelect_ ^ isRtl ? size.Width() - size.Height() : 0.0f;
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_RETURN(pipeline, nullptr);
             auto switchTheme = pipeline->GetTheme<SwitchTheme>();
             auto boardColor = isSelect_ ? paintProperty->GetSelectedColorValue(switchTheme->GetActiveColor())
@@ -62,7 +62,7 @@ public:
         CHECK_NULL_VOID(switchModifier_);
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto switchTheme = pipeline->GetTheme<SwitchTheme>();
         auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding().ConvertToPx();

@@ -183,7 +183,7 @@ void GaugeModifier::PaintCircularAndIndicator(RSCanvas& canvas)
     CHECK_NULL_VOID(pattern);
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto host = pattern->GetHost();
     auto geometryNode = host->GetGeometryNode();
@@ -347,7 +347,7 @@ void GaugeModifier::NewPaintCircularAndIndicator(RSCanvas& canvas)
     CHECK_NULL_VOID(paintProperty);
     auto host = pattern->GetHost();
     auto geometryNode = host->GetGeometryNode();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto offset = geometryNode->GetContentOffset();
 
@@ -790,7 +790,7 @@ void GaugeModifier::NewDrawIndicator(
         return;
     }
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<GaugeTheme>();
 

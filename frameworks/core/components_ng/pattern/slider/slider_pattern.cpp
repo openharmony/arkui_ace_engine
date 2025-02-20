@@ -728,7 +728,7 @@ void SliderPattern::InitializeBubble()
     CHECK_NULL_VOID(showTips_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sliderTheme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(sliderTheme);
@@ -1119,8 +1119,8 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
     const auto& content = GetHost()->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
-    auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    auto theme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<SliderTheme>();
+    auto appTheme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<AppTheme>();
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusSideDistance = theme->GetFocusSideDistance();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
@@ -1163,13 +1163,13 @@ void SliderPattern::GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(frameNode);
     const auto& content = frameNode->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    auto theme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     auto focusSideDistance = theme->GetFocusSideDistance();
-    auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    auto appTheme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusDistance = paintWidth * HALF + focusSideDistance;

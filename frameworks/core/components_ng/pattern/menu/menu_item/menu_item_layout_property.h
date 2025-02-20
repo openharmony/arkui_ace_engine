@@ -160,7 +160,7 @@ public:
         } else {
             json->PutExtAttr("selectIcon", "false", filter);
         }
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
         auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
         auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;

@@ -69,7 +69,7 @@ public:
             paintProperty->UpdateRadioCheck(false);
         }
 
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto radioTheme = pipeline->GetTheme<RadioTheme>();
         activeColor_ = paintProperty->GetRadioCheckedBackgroundColor().value_or(Color(radioTheme->GetActiveColor()));

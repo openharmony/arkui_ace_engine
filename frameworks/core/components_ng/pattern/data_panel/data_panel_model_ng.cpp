@@ -27,7 +27,7 @@ void SetDefaultBorderRadius(void)
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DataPanelTheme>();
     CHECK_NULL_VOID(theme);

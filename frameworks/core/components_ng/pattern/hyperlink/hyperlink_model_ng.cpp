@@ -55,7 +55,7 @@ void HyperlinkModelNG::SetTextStyle(
     CHECK_NULL_VOID(hyperlinkNode);
     auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
+    auto textStyle = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<TextTheme>()->GetTextStyle();
     textLayoutProperty->UpdateContent(content.empty() ? address : content);
     textLayoutProperty->UpdateAddress(address);
     auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
@@ -82,7 +82,7 @@ void HyperlinkModelNG::SetTextStyle(
         (!content.has_value() || content.value().empty()) ? address : content.value());
     textLayoutProperty->UpdateAddress(address);
 
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto textTheme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);

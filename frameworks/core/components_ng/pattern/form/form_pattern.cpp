@@ -86,7 +86,7 @@ private:
 
 void PostTask(const TaskExecutor::Task& task, TaskExecutor::TaskType type, const std::string& name)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
