@@ -134,6 +134,7 @@ ohos_unittest("SvgAnimateTest") {
     "$ace_root/frameworks/core/components/box/render_box_base.cpp",
     "$ace_root/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/animatable_color.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",

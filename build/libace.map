@@ -95,6 +95,8 @@
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;
       OHOS::Ace::NG::ViewAdvancedRegister::*;
+      "OHOS::Ace::AnimatableColor::AnimatableColor()";
+      "OHOS::Ace::AnimatableColor::~AnimatableColor()";
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;

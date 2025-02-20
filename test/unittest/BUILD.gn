@@ -554,6 +554,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/animatable_color.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_image.cpp",

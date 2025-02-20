@@ -23,12 +23,9 @@
 #include "base/utils/macros.h"
 #include "base/utils/resource_configuration.h"
 #include "bridge/common/utils/source_map.h"
-#include "core/accessibility/accessibility_manager.h"
-#include "core/common/ace_page.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/router_recover_record.h"
 #include "core/event/ace_event_handler.h"
-#include "core/pipeline/pipeline_base.h"
 #include "interfaces/inner_api/ace/constants.h"
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
@@ -37,6 +34,11 @@ typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
 
+class AcePage;
+class PipelineBase;
+class AssetManager;
+class TaskExecutor;
+class AccessibilityManager;
 enum class ContentInfoType;
 
 #ifndef WEARABLE_PRODUCT
@@ -164,10 +166,7 @@ public:
         return type_;
     }
 
-    RefPtr<TaskExecutor> GetTaskExecutor() const
-    {
-        return taskExecutor_;
-    }
+    RefPtr<TaskExecutor> GetTaskExecutor() const;
 
     // inform the frontend that onCreate or onDestroy
     virtual void UpdateState(State) = 0;

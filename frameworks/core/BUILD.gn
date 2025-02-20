@@ -844,6 +844,7 @@ template("ace_core_ng_source_set") {
       # properties
       "components/common/painter/rosen_decoration_painter.cpp",
       "components/common/properties/alignment.cpp",
+      "components/common/properties/animatable_color.cpp",
       "components/common/properties/border.cpp",
       "components/common/properties/border_edge.cpp",
       "components/common/properties/border_image.cpp",

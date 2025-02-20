@@ -18,6 +18,7 @@
 #include "base/i18n/localization.h"
 #include "core/components/clock/clock_component.h"
 #include "core/components/image/image_component.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

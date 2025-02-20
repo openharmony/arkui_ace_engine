@@ -15,6 +15,8 @@
 
 #include "core/components/common/properties/border.h"
 
+#include "core/pipeline/pipeline_context.h"
+
 namespace OHOS::Ace {
 
 Border::Border(const BorderEdge& left, const BorderEdge& top, const BorderEdge& right, const BorderEdge& bottom)
@@ -80,4 +82,16 @@ BorderEdge Border::GetValidEdge() const
     return BorderEdge();
 }
 
+void Border::SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+{
+    left_.SetContextAndCallback(context, callback);
+    top_.SetContextAndCallback(context, callback);
+    right_.SetContextAndCallback(context, callback);
+    bottom_.SetContextAndCallback(context, callback);
+
+    topLeftRadius_.SetContextAndCallback(context, callback);
+    topRightRadius_.SetContextAndCallback(context, callback);
+    bottomLeftRadius_.SetContextAndCallback(context, callback);
+    bottomRightRadius_.SetContextAndCallback(context, callback);
+}
 } // namespace OHOS::Ace

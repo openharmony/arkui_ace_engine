@@ -110,11 +110,7 @@ public:
             .append(")");
     }
 
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
-    {
-        width_.SetContextAndCallback(context, callback);
-        color_.SetContextAndCallback(context, callback);
-    }
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
 
 private:
     AnimatableColor color_;
