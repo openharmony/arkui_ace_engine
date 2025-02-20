@@ -579,6 +579,8 @@ public:
     static float GetDragStartPanDistanceThreshold();
 
     static bool IsSmallFoldProduct();
+    
+    static bool IsBigFoldProduct();
 
     static bool IsNeedResampleTouchPoints();
 

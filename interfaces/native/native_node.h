@@ -1679,6 +1679,27 @@ typedef enum {
     NODE_TAB_STOP = 98,
 
     /**
+     * @brief Defines blur attribute of backdrop, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
+     * .value[1]?.f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
+     * The value range is [0,127].\n
+     * .value[2]?.f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
+     * The value range is [0,127].\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
+     * .value[1].f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
+     * The value range is [0,127].\n
+     * .value[2].f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
+     * The value range is [0,127].\n
+     *
+     * @since 16
+     */
+    NODE_BACKDROP_BLUR = 99,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -5861,6 +5882,16 @@ typedef enum {
      */
     NODE_ON_KEY_PRE_IME = 22,
     /**
+     * @brief Defines the event triggered when the bound component receives a focus axis event after gaining focus.
+     *
+     * The event callback is triggered by interactions with a joystick and a focused component. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     * 
+     * @since 15
+     */
+    NODE_ON_FOCUS_AXIS = 23,
+    /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
      * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n
@@ -8179,7 +8210,7 @@ int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
  */
 int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
 
-/*
+/**
  * @brief Set the cross-language option of the target node handle.
  *
  * @param node The target node handle.
@@ -8187,7 +8218,6 @@ int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
@@ -8200,10 +8230,67 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Get the snapshot pixelmap for the given node synchronously, will get error if the node is not on the
+ * tree or is not rendered yet.
+ * Note: the pixelmap should be released through OH_PixelmapNative_Release when it's not used any more.
+ *
+ * @param node Indicates the target node.
+ * @param snapshotOptions the given configuration for taking snapshot, can be null for using default.
+ * @param pixelmap Pixelmap pointer created by system, it's the out result.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_INTERNAL_ERROR} if the snapshot taking failed will null pixelmap returned.
+ *         Returns {@link ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT} if the snapshot taking is timeout.
+ * @since 15
+ */
+int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions,
+    OH_PixelmapNative** pixelmap);
+
+/**
+ * @brief Obtains the index of the current FrameNode's first child node which is on the tree.
+ *
+ * @param node Indicates the target node.
+ * @param index The index of the subnode.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 15
+ */
+int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
+
+/**
+ * @brief Obtains the index of the current FrameNode's last child node which is on the tree.
+ *
+ * @param node Indicates the target node.
+ * @param index the index of the subnode.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 15
+ */
+int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
+
+/**
+ * @brief Obtains a subnode by position with the expand mode.
+ *
+ * @param node Indicates the target node.
+ * @param position Indicates the position of the subnode.
+ * @param subnode The pointer to the subnode.
+ * @param expandMode Indicates the expand mode. {@link ArkUI_ExpandMode}.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 15
+ */
+int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,
+    ArkUI_NodeHandle* subnode, uint32_t expandMode);
+
 #ifdef __cplusplus
 };
 #endif

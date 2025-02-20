@@ -62,17 +62,6 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
     return true;
 }
 
-bool EventManager::DispatchTabIndexEvent(
-    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage)
-{
-    return true;
-}
-
-bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
-{
-    return true;
-}
-
 bool EventManager::DispatchTabIndexEventNG(
     const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView)
 {

@@ -942,6 +942,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnKeyPreIme));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnKeyPreIme"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnKeyPreIme));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFocusAxisEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnFocusAxisEvent));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFocusAxisEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnFocusAxisEvent));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFocus"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnFocus));
         common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFocus"),
@@ -2560,6 +2564,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetHideToolBar));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideToolBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetHideToolBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideBackButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetHideBackButton));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideBackButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetHideBackButton));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackButtonIcon"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBackButtonIcon));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackButtonIcon"),
@@ -3743,6 +3751,10 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetChildrenCount));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetChild));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFirstChildIndexWithoutExpand"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetFirstChildIndexWithoutExpand));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getLastChildIndexWithoutExpand"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetLastChildIndexWithoutExpand));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFirst"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetFirst));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNextSibling"),

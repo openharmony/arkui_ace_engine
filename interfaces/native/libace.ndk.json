@@ -192,6 +192,10 @@
         "name": "OH_ArkUI_SetGestureRecognizerEnabled"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SetGestureRecognizerLimitFingerCount"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetGestureRecognizerEnabled"
     },
@@ -294,6 +298,10 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_AxisEvent_GetPinchAxisScaleValue"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_AxisEvent_GetAxisAction"
     },
     {
         "first_introduced": "12",
@@ -1484,6 +1492,18 @@
         "name": "OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus"
     },
     {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_NodeUtils_GetChildWithExpandMode"
+    },
+    {
         "first_introduced": "14",
         "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
     },
@@ -2501,6 +2521,18 @@
     },
     {
         "first_introduced": "15",
+        "name": "OH_ArkUI_FocusAxisEvent_GetAxisValue"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_PointerEvent_GetChangedPointerId"
+    },
+    {
+        "first_introduced": "15",
         "name": "OH_ArkUI_NodeEvent_GetTextChangeEvent"
     },
     {
@@ -2578,5 +2610,21 @@
     {
         "first_introduced": "15",
         "name": "OH_ArkUI_AccessibilityProviderRegisterCallbackWithInstance"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_CreateSnapshotOptions"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_DestroySnapshotOptions"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_SnapshotOptions_SetScale"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_GetNodeSnapshot"
     }
 ]

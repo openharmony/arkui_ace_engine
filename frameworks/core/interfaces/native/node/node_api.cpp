@@ -71,6 +71,7 @@
 #include "core/text/html_utils.h"
 #include "interfaces/native/native_type.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -359,6 +360,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDragEnd,
     NodeModifier::SetOnPreDrag,
     NodeModifier::SetOnKeyPreIme,
+    NodeModifier::SetOnFocusAxisEvent,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -563,6 +565,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
     nullptr,
     NodeModifier::ResetOnKeyPreIme,
+    NodeModifier::ResetOnFocusAxisEvent,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -2196,6 +2199,50 @@ const ArkUIStyledStringAPI* GetStyledStringAPI()
     return &impl;
 }
 
+ArkUISnapshotOptions* CreateSnapshotOptions()
+{
+    ArkUISnapshotOptions* snapshotOptions = new ArkUISnapshotOptions();
+    snapshotOptions->scale = 1.0f;
+    return snapshotOptions;
+}
+
+void DestroySnapshotOptions(ArkUISnapshotOptions* snapshotOptions)
+{
+    if (snapshotOptions != nullptr) {
+        delete snapshotOptions;
+        snapshotOptions = nullptr;
+    }
+}
+
+ArkUI_Int32 SnapshotOptionsSetScale(ArkUISnapshotOptions* snapshotOptions, ArkUI_Float32 scale)
+{
+    if (snapshotOptions == nullptr || !OHOS::Ace::GreatNotEqual(scale, 0.0)) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    snapshotOptions->scale = scale;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshotOptions, void* mediaPixel)
+{
+    auto frameNode =
+        OHOS::Ace::AceType::Claim<OHOS::Ace::NG::FrameNode>(reinterpret_cast<OHOS::Ace::NG::FrameNode*>(node));
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    NG::SnapshotOptions options;
+    options.scale = snapshotOptions != nullptr ? snapshotOptions->scale : 1.0f;
+    options.waitUntilRenderFinished = true;
+    auto result = delegate->GetSyncSnapshot(frameNode, options);
+    *reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(mediaPixel) = result.second;
+    return result.first;
+}
+
+const ArkUISnapshotAPI* GetComponentSnapshotAPI()
+{
+    static const ArkUISnapshotAPI impl { CreateSnapshotOptions, DestroySnapshotOptions, SnapshotOptionsSetScale,
+        GetNodeSnapshot };
+    return &impl;
+}
+
 /* clang-format off */
 ArkUIFullNodeAPI impl_full = {
     ARKUI_NODE_API_VERSION,
@@ -2210,6 +2257,7 @@ ArkUIFullNodeAPI impl_full = {
     NodeAdapter::GetNodeAdapterAPI,         // adapter.
     DragAdapter::GetDragAdapterAPI,        // drag adapter.
     GetStyledStringAPI,     // StyledStringAPI
+    GetComponentSnapshotAPI,     // SyncSnapshot
 };
 /* clang-format on */
 

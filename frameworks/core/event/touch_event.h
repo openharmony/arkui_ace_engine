@@ -77,17 +77,13 @@ struct TouchPoint final {
 /**
  * @brief TouchEvent contains the active change point and a list of all touch points.
  */
-struct TouchEvent final : public UIInputEvent {
+struct TouchEvent final : public PointerEvent {
     ~TouchEvent() = default;
     // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
     int32_t postEventNodeId = 0;
     int32_t id = 0;
-    float x = 0.0f;
-    float y = 0.0f;
-    float screenX = 0.0f;
-    float screenY = 0.0f;
     TouchType type = TouchType::UNKNOWN;
     TouchType pullType = TouchType::UNKNOWN;
     double size = 0.0;
@@ -124,7 +120,10 @@ struct TouchEvent final : public UIInputEvent {
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
 
-    TouchEvent() {}
+    TouchEvent()
+    {
+        eventType = UIInputEventType::TOUCH;
+    }
 
     TouchEvent& SetId(int32_t id)
     {

@@ -310,16 +310,15 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0056, TestSize.Level1)
     auto eventHub1 = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
-    RectF childRect;
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
     focusHub->focusAlgorithm_.scopeType = ScopeType::PROJECT_AREA;
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::LEFT, childRect));
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::SHIFT_TAB, childRect));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::LEFT));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::SHIFT_TAB));
     focusHub->focusAlgorithm_.getNextFocusNode = [](FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&) {};
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::TAB, childRect));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::TAB));
 }
 
 /**
@@ -1069,9 +1068,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0094, TestSize.Level1)
     TabIndexNodeList tabIndexNodes;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->isTabJustTriggerOnKeyEvent_ = false;
-    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent));
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    context->eventManager_->isTabJustTriggerOnKeyEvent_ = false;
+    context->isFocusingByTab_ = false;
+    EXPECT_TRUE(focusHub->HandleFocusByTabIndex(keyEvent));
 }
 
 /**
@@ -1478,12 +1478,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isFocusActive_ = true;
-    pipeline->isTabJustTriggerOnKeyEvent_ = true;
+    pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = true;
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
-    EXPECT_FALSE(parentFocusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(parentFocusHub->HandleEvent(keyEvent));
 }
 
 /**

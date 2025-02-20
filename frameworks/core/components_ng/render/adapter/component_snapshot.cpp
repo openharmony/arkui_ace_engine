@@ -122,6 +122,66 @@ private:
 };
 } // namespace
 
+bool IsSnapshotRegionValid(LocalizedSnapshotRegion& snapshotRegion)
+{
+    if (snapshotRegion.start < 0 || snapshotRegion.end < 0 || snapshotRegion.top < 0 ||
+        snapshotRegion.bottom < 0) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Snapshot reigon is invalid.");
+        return false;
+    }
+    return true;
+}
+
+bool IsSnapshotRegionInRange(LocalizedSnapshotRegion& snapshotRegion, float& nodeWidth, float& nodeHeight)
+{
+    if (snapshotRegion.start > nodeWidth || snapshotRegion.end > nodeWidth || snapshotRegion.top > nodeHeight ||
+        snapshotRegion.bottom > nodeHeight) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Snapshot reigon out of range.");
+        return false;
+    }
+    return true;
+}
+
+bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& options,
+    Rosen::Drawing::Rect& specifiedAreaRect)
+{
+    RectF nodeRect = node->GetGeometryNode()->GetFrameRect();
+    float nodeWidth = nodeRect.Width();
+    float nodeHeight = nodeRect.Height();
+    if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
+        specifiedAreaRect = Rosen::Drawing::Rect(
+            0.0f,
+            0.0f,
+            nodeWidth,
+            nodeHeight);
+        return true;
+    }
+
+    LocalizedSnapshotRegion snapshotRegion = options.snapshotRegion;
+    if (!IsSnapshotRegionValid(snapshotRegion) || !IsSnapshotRegionInRange(snapshotRegion, nodeWidth, nodeHeight)) {
+        return false;
+    }
+
+    auto nodeLayoutProperty = node->GetLayoutProperty();
+    if (!nodeLayoutProperty) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get the layout property of target node.");
+        return false;
+    }
+
+    TextDirection layoutDirection = nodeLayoutProperty->GetLayoutDirection();
+    if (layoutDirection == TextDirection::AUTO || layoutDirection == TextDirection::INHERIT) {
+        layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
+    bool isRegionMirror = NG::SnapshotRegionMode::LOCALIZED && layoutDirection == TextDirection::RTL;
+
+    specifiedAreaRect = Rosen::Drawing::Rect(
+        isRegionMirror ? nodeWidth - snapshotRegion.end : snapshotRegion.start,
+        snapshotRegion.top,
+        isRegionMirror ? nodeWidth - snapshotRegion.start : snapshotRegion.end,
+        snapshotRegion.bottom);
+    return true;
+}
+
 void ProcessImageNode(const RefPtr<UINode>& node)
 {
     if (node->GetTag() == V2::IMAGE_ETS_TAG) {
@@ -250,8 +310,14 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
         options.ToString().c_str(), SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str(),
         imageCount, checkImage, rsNode->GetId());
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    Rosen::Drawing::Rect specifiedAreaRect = {};
+    bool isSetReigon = SetCaptureReigon(node, options, specifiedAreaRect);
+    if (!isSetReigon) {
+        callback(nullptr, ERROR_CODE_PARAM_INVALID, nullptr);
+        return;
+    }
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
-        options.scale, options.scale, options.waitUntilRenderFinished);
+        options.scale, options.scale, options.waitUntilRenderFinished, specifiedAreaRect);
 }
 
 void ComponentSnapshot::GetByUniqueId(int32_t uniqueId, JsCallback&& callback, const SnapshotOptions& options)
@@ -296,8 +362,14 @@ void ComponentSnapshot::GetByUniqueId(int32_t uniqueId, JsCallback&& callback, c
         "checkImage=%{public}d RsNodeId=%{public}" PRIu64 "",
         options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), imageCount, checkImage, rsNode->GetId());
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    Rosen::Drawing::Rect specifiedAreaRect = {};
+    bool isSetReigon = SetCaptureReigon(node, options, specifiedAreaRect);
+    if (!isSetReigon) {
+        callback(nullptr, ERROR_CODE_PARAM_INVALID, nullptr);
+        return;
+    }
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
-        options.scale, options.scale, options.waitUntilRenderFinished);
+        options.scale, options.scale, options.waitUntilRenderFinished, specifiedAreaRect);
 }
 
 void ComponentSnapshot::Create(
@@ -390,10 +462,66 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         "Begin to take surfaceCapture for ui, rootId=" SEC_PLD(%{public}d) " depth=%{public}d param=%{public}s "
         "imageCount=%{public}d",
         SEC_PARAM(node->GetId()), node->GetDepth(), param.ToString().c_str(), imageCount);
+    Rosen::Drawing::Rect specifiedAreaRect = {};
+    bool isSetReigon = SetCaptureReigon(node, param.options, specifiedAreaRect);
+    if (!isSetReigon) {
+        callback(nullptr, ERROR_CODE_PARAM_INVALID, nullptr);
+        return;
+    }
     rsInterface.TakeSurfaceCaptureForUI(
         rsNode,
         std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr),
-        param.options.scale, param.options.scale, param.options.waitUntilRenderFinished);
+        param.options.scale, param.options.scale, param.options.waitUntilRenderFinished, specifiedAreaRect);
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
+    RefPtr<FrameNode>& node, const SnapshotOptions& options)
+{
+    CHECK_RUN_ON(UI);
+    ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncStart_%s", node->GetInspectorIdValue("").c_str());
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
+    CHECK_NULL_RETURN(node, result);
+    auto rsNode = GetRsNode(node);
+
+    if (node->GetIsLayoutNode()) {
+        std::list<RefPtr<FrameNode>> children;
+        node->GetOneDepthVisibleFrame(children);
+        if (children.empty()) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "Children is empty from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
+                SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
+            return result;
+        }
+        node = children.front();
+        rsNode = GetRsNode(children.front());
+    }
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> regionResult(ERROR_CODE_PARAM_INVALID, nullptr);
+
+    if (!rsNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "RsNode is null from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
+            SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
+        return result;
+    }
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "GetSync ComponentSnapshot options=%{public}s Id=" SEC_PLD(%{public}d) " Depth=%{public}d Tag=%{public}s "
+        "RsNodeId=%{public}" PRIu64 "",
+        options.ToString().c_str(), SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str(),
+        rsNode->GetId());
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    auto syncCallback = std::make_shared<SyncCustomizedCallback>();
+    {
+        ACE_SCOPED_TRACE("ComponentSnapshot::GetSync_TakeSurfaceCaptureForUI_%s_%d_%" PRIu64 "",
+            node->GetInspectorIdValue("").c_str(), node->GetId(), rsNode->GetId());
+    }
+    Rosen::Drawing::Rect specifiedAreaRect = {};
+    bool isSetReigon = SetCaptureReigon(node, options, specifiedAreaRect);
+    if (!isSetReigon) {
+        return regionResult;
+    }
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
+        options.scale, options.scale, options.waitUntilRenderFinished);
+    return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(const std::string& componentId,
@@ -411,41 +539,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
         return result;
     }
 
-    auto rsNode = GetRsNode(node);
-
-    if (node->GetIsLayoutNode()) {
-        std::list<RefPtr<FrameNode>> children;
-        node->GetOneDepthVisibleFrame(children);
-        if (children.empty()) {
-            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "Children is empty from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
-                SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
-            return result;
-        }
-        node = children.front();
-        rsNode = GetRsNode(children.front());
-    }
-
-    if (!rsNode) {
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "RsNode is null from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
-            SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
-        return result;
-    }
-    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "GetSync ComponentSnapshot options=%{public}s Id=" SEC_PLD(%{public}d) " Depth=%{public}d Tag=%{public}s "
-        "RsNodeId=%{public}" PRIu64 "",
-        options.ToString().c_str(), SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str(),
-        rsNode->GetId());
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    auto syncCallback = std::make_shared<SyncCustomizedCallback>();
-    {
-        ACE_SCOPED_TRACE("ComponentSnapshot::GetSync_TakeSurfaceCaptureForUI_%s_%d_%" PRIu64 "", componentId.c_str(),
-            node->GetId(), rsNode->GetId());
-    }
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
-        options.scale, options.scale, options.waitUntilRenderFinished);
-    return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
+    return GetSync(node, options);
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncByUniqueId(int32_t uniqueId,
@@ -454,6 +548,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncByUniqueId_%d", uniqueId);
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> regionResult(ERROR_CODE_PARAM_INVALID, nullptr);
     auto node = AceType::DynamicCast<FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
     if (!node) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
@@ -492,8 +587,13 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
         ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncByUniqueId_TakeSurfaceCaptureForUI_%d_%" PRIu64 "",
             node->GetId(), rsNode->GetId());
     }
+    Rosen::Drawing::Rect specifiedAreaRect = {};
+    bool isSetReigon = SetCaptureReigon(node, options, specifiedAreaRect);
+    if (!isSetReigon) {
+        return regionResult;
+    }
     rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
-        options.scale, options.scale, options.waitUntilRenderFinished);
+        options.scale, options.scale, options.waitUntilRenderFinished, specifiedAreaRect);
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 

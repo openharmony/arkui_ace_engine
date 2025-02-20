@@ -147,6 +147,7 @@ public:
     bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
+    void FlushSubWindowUITasks(int32_t instanceId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);

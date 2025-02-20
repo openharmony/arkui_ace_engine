@@ -40,7 +40,8 @@ namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t MAX_POINTS = 10;
 }
-ArkUIGesture* createPanGesture(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, void* userData)
+ArkUIGesture* createPanGesture(
+    ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, bool limitFingerCount, void* userData = nullptr)
 {
     PanDirection panDirection;
     switch (direction) {
@@ -72,55 +73,64 @@ ArkUIGesture* createPanGesture(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI
             panDirection.type = panDirection.NONE;
             break;
     }
-    auto panGestureObject = AceType::MakeRefPtr<PanGesture>(fingers, panDirection, distance);
+    auto panGestureObject = AceType::MakeRefPtr<PanGesture>(fingers, panDirection, distance, limitFingerCount);
     panGestureObject->SetUserData(userData);
     panGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(panGestureObject));
 }
 
-ArkUIGesture* createTapGesture(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData)
+ArkUIGesture* createTapGesture(
+    ArkUI_Int32 count, ArkUI_Int32 fingers, bool limitFingerCount = false, void* userData = nullptr)
 {
-    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, std::numeric_limits<double>::infinity());
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(
+        count, fingers, std::numeric_limits<double>::infinity(), limitFingerCount);
     tapGestureObject->SetUserData(userData);
     tapGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
 }
 
 ArkUIGesture* createTapGestureWithDistanceThreshold(
-    ArkUI_Int32 count, ArkUI_Int32 fingers, double distanceThreshold, void* userData)
+    ArkUI_Int32 count, ArkUI_Int32 fingers, double distanceThreshold, bool limitFingerCount = false,
+    void* userData = nullptr)
 {
     distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
-    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, distanceThreshold);
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, distanceThreshold, limitFingerCount);
     tapGestureObject->SetUserData(userData);
     tapGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
 }
 
-ArkUIGesture* createLongPressGesture(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration, void* userData)
+ArkUIGesture* createLongPressGesture(
+    ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration, bool limitFingerCount = false, void* userData = nullptr)
 {
-    auto longPressGestureObject = AceType::MakeRefPtr<LongPressGesture>(fingers, repeat, duration);
+    auto longPressGestureObject = AceType::MakeRefPtr<LongPressGesture>(
+        fingers, repeat, duration, false, false, limitFingerCount);
     longPressGestureObject->SetUserData(userData);
     longPressGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(longPressGestureObject));
 }
 
-ArkUIGesture* createPinchGesture(ArkUI_Int32 fingers, ArkUI_Float64 distance, void* userData)
+ArkUIGesture* createPinchGesture(
+    ArkUI_Int32 fingers, ArkUI_Float64 distance, bool limitFingerCount = false, void* userData = nullptr)
 {
-    auto pinchGestureObject = AceType::MakeRefPtr<PinchGesture>(fingers, distance);
+    auto pinchGestureObject = AceType::MakeRefPtr<PinchGesture>(fingers, distance, limitFingerCount);
     pinchGestureObject->SetUserData(userData);
     pinchGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(pinchGestureObject));
 }
 
-ArkUIGesture* createRotationGesture(ArkUI_Int32 fingers, ArkUI_Float64 angle, void* userData)
+ArkUIGesture* createRotationGesture(
+    ArkUI_Int32 fingers, ArkUI_Float64 angle, bool limitFingerCount = false, void* userData = nullptr)
 {
-    auto rotationGestureObject = AceType::MakeRefPtr<RotationGesture>(fingers, angle);
+    auto rotationGestureObject = AceType::MakeRefPtr<RotationGesture>(fingers, angle, limitFingerCount);
     rotationGestureObject->SetUserData(userData);
     rotationGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(rotationGestureObject));
 }
 
-ArkUIGesture* createSwipeGesture(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, void* userData)
+ArkUIGesture* createSwipeGesture(
+    ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, bool limitFingerCount = false,
+    void* userData = nullptr)
 {
     SwipeDirection swipeDirection{SwipeDirection::NONE};
     if (static_cast<uint32_t>(directions) & ArkUI_GESTURE_DIRECTION_HORIZONTAL) {
@@ -129,13 +139,14 @@ ArkUIGesture* createSwipeGesture(ArkUI_Int32 fingers, ArkUI_Int32 directions, Ar
     if (static_cast<uint32_t>(directions) & ArkUI_GESTURE_DIRECTION_VERTICAL) {
         swipeDirection.type += SwipeDirection::VERTICAL;
     }
-    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);
+    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed, limitFingerCount);
     swipeGestureObject->SetUserData(userData);
     swipeGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
 }
 
-ArkUIGesture* createSwipeGestureByModifier(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed)
+ArkUIGesture* createSwipeGestureByModifier(
+    ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed, bool limitFingerCount = false)
 {
     SwipeDirection swipeDirection{ SwipeDirection::NONE};
     switch (direction) {
@@ -155,7 +166,7 @@ ArkUIGesture* createSwipeGestureByModifier(ArkUI_Int32 fingers, ArkUI_Int32 dire
             swipeDirection.type = SwipeDirection::NONE;
             break;
     }
-    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);
+    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed, limitFingerCount);
     swipeGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
 }
@@ -627,6 +638,14 @@ ArkUI_Int32 setGestureRecognizerEnabled(ArkUIGestureRecognizer* recognizer, bool
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 setGestureRecognizerLimitFingerCount(ArkUIGesture* gesture, bool limitFingerCount)
+{
+    auto gestureForLimitFinger = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
+    CHECK_NULL_RETURN(gestureForLimitFinger, ERROR_CODE_PARAM_INVALID);
+    gestureForLimitFinger->SetLimitFingerCount(limitFingerCount);
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Bool getGestureRecognizerEnabled(ArkUIGestureRecognizer* recognizer)
 {
     auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
@@ -807,6 +826,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         setGestureInterrupterToNode,
         setInnerGestureParallelTo,
         setGestureRecognizerEnabled,
+        setGestureRecognizerLimitFingerCount,
         getGestureRecognizerEnabled,
         getGestureRecognizerState,
         gestureEventTargetInfoIsScrollBegin,

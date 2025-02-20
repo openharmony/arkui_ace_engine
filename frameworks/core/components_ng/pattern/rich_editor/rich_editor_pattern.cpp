@@ -224,16 +224,20 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(imageItem);
+    auto options = imageItem->options;
     auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto pattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetSyncLoad(true);
+    if (options.imagePixelMap.has_value()) {
+        pattern->SetSyncLoad(true);
+    } else if (options.imageAttribute.has_value()) {
+        pattern->SetSyncLoad(options.imageAttribute.value().syncLoad);
+    }
     auto index = host->GetChildren().size();
     imageNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
     imageNode->MountToParent(host, index);
-    CHECK_NULL_VOID(imageItem);
-    auto options = imageItem->options;
     HandleImageDrag(imageNode);
     SetImageLayoutProperty(imageNode, options);
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -270,6 +274,14 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
             auto imageRenderCtx = imageNode->GetRenderContext();
             imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
             imageRenderCtx->SetClipToBounds(true);
+        }
+        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        if (imgAttr.colorFilterMatrix.has_value() && paintProperty) {
+            paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
+            paintProperty->ResetDrawingColorFilter();
+        } else if (imgAttr.drawingColorFilter.has_value() && paintProperty) {
+            paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
+            paintProperty->ResetColorFilter();
         }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -709,16 +721,21 @@ std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const 
     if (options.moduleName.has_value()) {
         moduleName = options.moduleName.value();
     }
-    auto createSourceInfoFunc = [src, noPixMap = !options.imagePixelMap.has_value(), pixMap, bundleName,
+    auto createSourceInfoFunc = [src, noPixMap = !options.imagePixelMap.has_value(),
+                                    isUriPureNumber = options.isUriPureNumber.value_or(false), pixMap, bundleName,
                                     moduleName]() -> ImageSourceInfo {
+        ImageSourceInfo info;
 #if defined(PIXEL_MAP_SUPPORTED)
         if (noPixMap) {
-            return { src, bundleName, moduleName };
+            info = ImageSourceInfo { src, bundleName, moduleName };
+        } else {
+            info = ImageSourceInfo(pixMap);
         }
-        return ImageSourceInfo(pixMap);
 #else
-        return { src, bundleName, moduleName };
+        info = ImageSourceInfo { src, bundleName, moduleName };
 #endif
+        info.SetIsUriPureNumber(isUriPureNumber);
+        return info;
     };
     return std::move(createSourceInfoFunc);
 }

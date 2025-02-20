@@ -1228,7 +1228,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragDropProxy_->OnDragStart(info, extraInfoLimited, GetFrameNode());
     if (!dragDropManager->IsDraggingPressed(info.GetPointerId())) {
         dragDropManager->OnDragEnd(
-            PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
+            DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
     }
 }
 
@@ -1277,7 +1277,8 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
         dragDropProxy_->OnDragMove(info);
     }
     if (IsNeedSwitchToSubWindow()) {
-        PointerEvent pointerEvent = PointerEvent(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        DragPointerEvent pointerEvent =
+            DragPointerEvent(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
         dragDropManager->DoDragMoveAnimate(pointerEvent);
     }
 }
@@ -1504,7 +1505,7 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
     TimeStamp time(microseconds);
     info.SetTimeStamp(time);
     EventTarget clickEventTarget;
-    clickEventTarget.id = host->GetId();
+    clickEventTarget.id = host->GetInspectorId().value_or("").c_str();
     clickEventTarget.type = host->GetTag();
 #ifdef SECURITY_COMPONENT_ENABLE
     info.SetSecCompHandleEvent(secComphandle);
@@ -1546,7 +1547,7 @@ bool GestureEventHub::ActLongClick()
     TimeStamp time(microseconds);
     info.SetTimeStamp(time);
     EventTarget longPressTarget;
-    longPressTarget.id = host->GetId();
+    longPressTarget.id = host->GetInspectorId().value_or("").c_str();
     longPressTarget.type = host->GetTag();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
@@ -1598,7 +1599,7 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     info.SetSourceDevice(event.sourceType);
     info.SetTimeStamp(event.timeStamp);
     EventTarget target;
-    target.id = host->GetId();
+    target.id = host->GetInspectorId().value_or("").c_str();
     target.type = host->GetTag();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);

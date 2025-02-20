@@ -108,6 +108,8 @@ class ACE_EXPORT Gesture : public virtual AceType {
 public:
     Gesture() = default;
     explicit Gesture(int32_t fingers) : fingers_(fingers) {}
+    explicit Gesture(
+        int32_t fingers, bool isLimitFingerCount) : fingers_(fingers), isLimitFingerCount_(isLimitFingerCount) {}
     ~Gesture() override = default;
 
     void SetOnActionId(const GestureEventFunc& onActionId)
@@ -156,6 +158,11 @@ public:
     int32_t GetFingers() const
     {
         return fingers_;
+    }
+
+    void SetLimitFingerCount(bool limitFingerCount)
+    {
+        isLimitFingerCount_ = limitFingerCount;
     }
 
     void SetTag(std::string tag)
@@ -235,6 +242,7 @@ public:
 
 protected:
     int32_t fingers_ = 1;
+    bool isLimitFingerCount_ = false;
     GesturePriority priority_ = GesturePriority::Low;
     GestureMask gestureMask_ = GestureMask::Normal;
     std::shared_ptr<GestureEventFunc> onActionId_;

@@ -54,6 +54,8 @@ void ConstructGestureStyle(GestureStyle& gestureInfo)
     auto tmpLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
     gestureInfo.onLongPress = std::move(tmpLongPressFunc);
 }
+const double NUMBER_TEN = 10.0;
+const double NUMBER_FIVE = 10.0;
 } // namespace
 
 class SpanStringTestNg : public testing::Test {
@@ -61,6 +63,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     static ImageSpanOptions GetImageOption(const std::string& src);
+    static ImageSpanOptions GetColorFilterImageOption(const std::string& src);
 };
 
 void SpanStringTestNg::SetUpTestSuite()
@@ -85,14 +88,34 @@ ImageSpanOptions SpanStringTestNg::GetImageOption(const std::string& src)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(2.0_vp);
     MarginProperty margins;
-    margins.SetEdges(CalcLength(10.0));
+    margins.SetEdges(CalcLength(NUMBER_TEN));
     PaddingProperty paddings;
-    paddings.SetEdges(CalcLength(5.0));
+    paddings.SetEdges(CalcLength(NUMBER_FIVE));
     ImageSpanAttribute attr { .paddingProp = paddings,
         .marginProp = margins,
         .borderRadius = borderRadius,
         .objectFit = ImageFit::COVER,
         .verticalAlign = VerticalAlign::BOTTOM };
+    ImageSpanOptions option { .image = src, .imageAttribute = attr };
+    return option;
+}
+
+ImageSpanOptions SpanStringTestNg::GetColorFilterImageOption(const std::string& src)
+{
+    ImageSpanSize size { .width = 50.0_vp, .height = 50.0_vp };
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(2.0_vp);
+    MarginProperty margins;
+    margins.SetEdges(CalcLength(NUMBER_TEN));
+    PaddingProperty paddings;
+    paddings.SetEdges(CalcLength(NUMBER_FIVE));
+    std::vector<float> colorFilterMat {1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0};
+    ImageSpanAttribute attr { .paddingProp = paddings,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM,
+        .colorFilterMatrix = colorFilterMat };
     ImageSpanOptions option { .image = src, .imageAttribute = attr };
     return option;
 }
@@ -1281,6 +1304,32 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     EXPECT_EQ((*it)->content, "456");
     EXPECT_EQ((*it)->interval.first, 11);
     EXPECT_EQ((*it)->interval.second, 14);
+}
+
+/**
+ * @tc.name: SpanStringTest019
+ * @tc.desc: Test basic function of ImageAttachment setting color filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString019, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetColorFilterImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto imageSpan = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    EXPECT_EQ(imageSpan->GetImageSpanOptions().imageAttribute, imageOption.imageAttribute);
+    mutableStr->InsertString(0, "123");
+    mutableStr->InsertString(4, "456");
+    auto imageOption1 = SpanStringTestNg::GetColorFilterImageOption("src/icon-2.png");
+    auto imageSpan1 = AceType::MakeRefPtr<SpanString>(imageOption1);
+    mutableStr->AppendSpanString(imageSpan1);
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    spanString->AppendSpanString(mutableStr);
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 3);
+    spanString->AppendSpanString(spanString);
+    spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 6);
 }
 
 /**
