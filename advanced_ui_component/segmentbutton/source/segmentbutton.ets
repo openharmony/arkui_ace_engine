@@ -1136,6 +1136,7 @@ export struct SegmentButton {
   private isPanGestureMoved: boolean = false
   @State shouldMirror: boolean = false
   private isSegmentFocusStyleCustomized: boolean = segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED;
+  private isGestureInProgress: boolean = false;
 
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
@@ -1346,6 +1347,9 @@ export struct SegmentButton {
       GestureGroup(GestureMode.Parallel,
         TapGesture()
           .onAction((event: GestureEvent) => {
+            if (this.isGestureInProgress) {
+              return;
+            }
             let fingerInfo = event.fingerList.find(Boolean)
             if (fingerInfo === void 0) {
               return
@@ -1410,6 +1414,7 @@ export struct SegmentButton {
           }),
         PanGesture()
           .onActionStart((event: GestureEvent) => {
+            this.isGestureInProgress = true;
             if (this.options === void 0 || this.options.buttons === void 0) {
               return
             }
@@ -1474,6 +1479,7 @@ export struct SegmentButton {
             })
           })
           .onActionEnd((event: GestureEvent) => {
+            this.isGestureInProgress = false;
             if (this.options === void 0 || this.options.buttons === void 0) {
               return
             }
@@ -1506,6 +1512,7 @@ export struct SegmentButton {
             this.isCurrentPositionSelected = false
           })
           .onActionCancel(() => {
+            this.isGestureInProgress = false;
             if (this.options === void 0 || this.options.buttons === void 0) {
               return
             }

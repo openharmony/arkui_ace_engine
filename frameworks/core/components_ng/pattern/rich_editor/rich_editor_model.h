@@ -23,12 +23,14 @@
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/device_config.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/text_model.h"
@@ -303,6 +305,8 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
+    virtual ColorMode GetColorMode() = 0;
+    virtual RefPtr<NG::RichEditorTheme> GetTheme() = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {

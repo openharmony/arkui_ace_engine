@@ -37,12 +37,16 @@ public:
         RefPtr<SideBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<SideBarTheme> theme = AceType::Claim(new SideBarTheme());
-            if (!themeConstants) {
-                return theme;
-            }
-
-            ParsePattern(themeConstants, theme);
+            InitTheme(theme, themeConstants);
             return theme;
+        }
+
+    protected:
+        void InitTheme(const RefPtr<SideBarTheme>& theme, const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            CHECK_NULL_VOID(theme);
+            CHECK_NULL_VOID(themeConstants);
+            ParsePattern(themeConstants, theme);
         }
 
     private:
@@ -100,6 +104,11 @@ public:
     const Color& GetControlImageColor() const
     {
         return controlImageColor_;
+    }
+
+    void SetControlImageColor(const Color& color)
+    {
+        controlImageColor_ = color;
     }
 
     const Color& GetSideBarBackgroundColor() const

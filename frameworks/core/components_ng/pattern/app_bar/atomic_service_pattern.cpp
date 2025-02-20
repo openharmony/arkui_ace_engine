@@ -57,6 +57,11 @@ void AtomicServicePattern::ContentSafeAreaCallBack()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeArea();
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->KeyboardSafeAreaEnabled()) {
+        safeArea.bottom_ = safeArea.bottom_.Combine(manager->GetKeyboardInset());
+    }
     auto left = Dimension(safeArea.left_.Length(), DimensionUnit::PX).ConvertToVp();
     auto right = Dimension(safeArea.right_.Length(), DimensionUnit::PX).ConvertToVp();
     auto top = Dimension(safeArea.top_.Length(), DimensionUnit::PX).ConvertToVp();

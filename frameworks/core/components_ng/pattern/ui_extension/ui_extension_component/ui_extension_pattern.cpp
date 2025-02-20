@@ -534,7 +534,7 @@ void UIExtensionPattern::OnUeaAccessibilityEventAsync()
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     UpdateFrameNodeState();
-    TransferAccessibilityRectInfo(); // first connect need info UEC rect info
+    TransferAccessibilityRectInfo(true); // first connect need info UEC rect info
     if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
         UIEXT_LOGI("uec need notify register accessibility again %{public}d, %{public}d.",
             accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
@@ -698,7 +698,7 @@ public:
         CHECK_NULL_RETURN(pattern, false);
         if (state) {
             // first time turn on Accessibility, add TransferAccessibilityRectInfo
-            pattern->TransferAccessibilityRectInfo();
+            pattern->TransferAccessibilityRectInfo(true);
         }
         return true;
     }
@@ -731,6 +731,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
         pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->TransferAccessibilityRectInfo();
         pattern->DispatchDisplayArea(true);
     });
     foldDisplayCallBackId_ =
@@ -1789,18 +1790,20 @@ void UIExtensionPattern::RegisterReplyPageModeCallback()
     RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::SEND_PAGE_MODE, callback);
 }
 
-bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+bool UIExtensionPattern::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
     UIEXT_LOGI("SendBusinessDataSyncReply businessCode=%{public}u.", code);
-    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, data, reply, subSystemId);
 }
 
-bool UIExtensionPattern::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+bool UIExtensionPattern::SendBusinessData(
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
     UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
-    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+    return sessionWrapper_->SendBusinessData(code, data, type, subSystemId);
 }
 
 void UIExtensionPattern::OnUIExtBusinessReceiveReply(
@@ -1893,9 +1896,6 @@ void UIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
     if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeGeometryChange(flag))) {
         return;
     }
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        return;
-    }
     TransferAccessibilityRectInfo();
 }
 
@@ -1905,7 +1905,7 @@ AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
     AccessibilityParentRectInfo rectInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, rectInfo);
-    auto rect = host->GetTransformRectRelativeToWindow();
+    auto rect = host->GetTransformRectRelativeToWindow(true);
     VectorF finalScale = host->GetTransformScaleRelativeToWindow();
     
     rectInfo.left = static_cast<int32_t>(rect.Left());
@@ -1928,8 +1928,11 @@ AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
 }
 
 // Once enter this function, must calculate and transfer data to provider
-void UIExtensionPattern::TransferAccessibilityRectInfo()
+void UIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
 {
+    if (!(isForce || AceApplicationInfo::GetInstance().IsAccessibilityEnabled())) {
+        return;
+    }
     auto parentRectInfo = GetAccessibilityRectInfo();
     AAFwk::Want data;
     data.SetParam("left", parentRectInfo.left);
@@ -1939,6 +1942,16 @@ void UIExtensionPattern::TransferAccessibilityRectInfo()
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
         parentRectInfo.scaleX, parentRectInfo.scaleY);
-    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, std::move(data), BusinessDataSendType::ASYNC);
+    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
+}
+
+void UIExtensionPattern::UpdateWMSUIExtProperty(
+    UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId)
+{
+    if (state_ != AbilityState::FOREGROUND) {
+        UIEXT_LOGI("UEC UpdatWMSUIExtProperty state=%{public}s.", ToString(state_));
+        return;
+    }
+    SendBusinessData(code, data, BusinessDataSendType::ASYNC, subSystemId);
 }
 } // namespace OHOS::Ace::NG

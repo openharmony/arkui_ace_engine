@@ -1340,7 +1340,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc072, TestSize.Level1)
     RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
     ASSERT_NE(element, nullptr);
     element->tag_ = V2::SHEET_WRAPPER_TAG;
-    textFieldNode->SetParent(element);
+    textFieldNode->SetParent(element, false);
     auto result = textFieldManager->FindNavNode(textFieldNode);
     auto parent = textFieldNode->GetAncestorNodeOfFrame(false);
     auto sheetNode = parent->GetChildAtIndex(0);
@@ -1631,7 +1631,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc081, TestSize.Level1)
     RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
     ASSERT_NE(element, nullptr);
     element->tag_ = "Panel";
-    textFieldNode->SetParent(element);
+    textFieldNode->SetParent(element, false);
     Offset menuOffset(960, 1660);
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->SetClickPosition(menuOffset);
@@ -1659,7 +1659,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc082, TestSize.Level1)
     RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
     ASSERT_NE(element, nullptr);
     element->tag_ = "SheetPage";
-    textFieldNode->SetParent(element);
+    textFieldNode->SetParent(element, false);
     Offset menuOffset(960, 0.0f);
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->SetClickPosition(menuOffset);

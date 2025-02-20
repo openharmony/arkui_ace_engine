@@ -408,7 +408,7 @@ void FfiOHOSAceFrameworkTextFieldSetSelectionMenuHidden(bool value)
 void FfiOHOSAceFrameworkTextFieldSetShowCounter(bool value, int32_t threshold, bool showBorder)
 {
     TextFieldModel::GetInstance()->SetShowCounterBorder(showBorder);
-    if (threshold >= MINI_VAILD_VALUE && threshold <= MAX_VAILD_VALUE) {
+    if (threshold >= static_cast<int32_t>(MINI_VAILD_VALUE) && threshold <= static_cast<int32_t>(MAX_VAILD_VALUE)) {
         TextFieldModel::GetInstance()->SetShowCounter(value);
         TextFieldModel::GetInstance()->SetCounterType(threshold);
     } else {

@@ -34,9 +34,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -46,6 +44,8 @@ constexpr uint32_t MIN_MONTH = 1;
 constexpr uint32_t MAX_MONTH = 12;
 constexpr uint32_t MIN_DAY = 1;
 const Dimension PRESS_INTERVAL = 4.0_vp;
+const Dimension FOCUS_INTERVAL = 2.0_vp;
+const Dimension LINE_WIDTH = 1.5_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 const int32_t UNOPTION_COUNT = 2;
 const int32_t COLUMNS_SIZE = 3;
@@ -56,7 +56,6 @@ const int32_t INDEX_YEAR = 0;
 const int32_t INDEX_MONTH = 1;
 const int32_t INDEX_DAY = 2;
 constexpr float DISABLE_ALPHA = 0.6f;
-const Dimension FOCUS_OFFSET = 2.0_vp;
 const int32_t RATE = 2;
 const int32_t MONTH_DECEMBER = 12;
 constexpr int32_t RATIO_ZERO = 0;
@@ -327,6 +326,27 @@ void DatePickerPattern::ColumnPatternInitHapticController(const RefPtr<FrameNode
     columnPattern->InitHapticController();
 }
 
+void DatePickerPattern::ColumnPatternStopHaptic()
+{
+    if (!isEnableHaptic_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = blendNode->GetLastChild();
+        CHECK_NULL_VOID(childNode);
+        auto datePickerColumnPattern = DynamicCast<FrameNode>(childNode)->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_VOID(datePickerColumnPattern);
+        datePickerColumnPattern->StopHaptic();
+    }
+}
+
 void DatePickerPattern::InitFocusKeyEvent()
 {
     auto host = GetHost();
@@ -337,6 +357,16 @@ void DatePickerPattern::InitFocusKeyEvent()
 #ifdef SUPPORT_DIGITAL_CROWN
         InitOnCrownEvent(focusHub);
 #endif
+    }
+}
+
+void DatePickerPattern::FlushChildNodes()
+{
+    auto frameNodes = GetAllChildNode();
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        it.second->MarkModifyDone();
+        it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -351,7 +381,8 @@ void DatePickerPattern::OnModifyDone()
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
-    if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false))) {
+    if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false)) &&
+        !isDateOrderChange_) {
         isFiredDateChange_ = false;
         return;
     }
@@ -381,6 +412,7 @@ void DatePickerPattern::OnModifyDone()
     SetDefaultFocus();
     InitFocusEvent();
     InitSelectorProps();
+    FlushChildNodes();
 }
 
 void DatePickerPattern::InitDisabled()
@@ -697,19 +729,15 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (useButtonFocusArea_) {
         return GetInnerFocusButtonPaintRect(paintRect, leftTotalColumnWidth);
     }
-    auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
-    auto pickerThemeWidth = dividerSpacing * RATE;
 
-    auto centerX = (columnWidth - pickerThemeWidth)/ RATE + leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx();
-    auto centerY =
-        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
-    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
-    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
-    if (piantRectWidth > columnWidth) {
-        piantRectWidth = columnWidth - FOCUS_OFFSET.ConvertToPx() * RATE;
-        centerX = leftTotalColumnWidth + FOCUS_OFFSET.ConvertToPx();
-    }
-    paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
+    auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
+    float paintRectWidth = columnWidth - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
+    float paintRectHeight = dividerSpacing - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
+    auto centerX = leftTotalColumnWidth + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
+    auto centerY = (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE +
+        FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
+
+    paintRect.SetRect(RectF(centerX, centerY, paintRectWidth, paintRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -1058,7 +1086,7 @@ bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string&
     value->Put("day", dataJson->GetUInt("day"));
     value->Put("hour", dataJson->GetUInt("hour"));
     value->Put("minute", dataJson->GetUInt("minute"));
-    UiSessionManager::GetInstance().ReportComponentChangeEvent(nodeId, "event", value);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
 #endif
     return true;
 }

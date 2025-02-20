@@ -26,6 +26,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
@@ -57,6 +58,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
@@ -103,6 +107,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
@@ -226,7 +231,7 @@ void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 
 void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -576,6 +581,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSEffectComponent::JSBind(globalObj);
 #endif
     JSFormLink::JSBind(globalObj);
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+    JSFormButton::JSBind(globalObj);
+#endif
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);

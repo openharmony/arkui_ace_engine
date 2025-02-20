@@ -1307,10 +1307,6 @@ bool SelectContentOverlayManager::IsEnableSubWindowMenu()
         TAG_LOGW(AceLogTag::ACE_SELECT_OVERLAY, "The callerNode does not support show menu in subwinodw.");
         return false;
     }
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    auto expandDisplay = theme->GetExpandDisplay();
-    CHECK_NULL_RETURN(expandDisplay, false);
     auto containerId = Container::CurrentIdSafelyWithCheck();
     auto callerFrameNode = shareOverlayInfo_->callerFrameNode.Upgrade();
     CHECK_NULL_RETURN(callerFrameNode, false);
@@ -1333,7 +1329,7 @@ bool SelectContentOverlayManager::IsRightClickSubWindowMenu()
 }
 
 // whether the menu is the text selection menu which root node is selectoverlay and is displayed in subwindow
-bool SelectContentOverlayManager::IsSeletctOverlaySubWindowMenu()
+bool SelectContentOverlayManager::IsSelectOverlaySubWindowMenu()
 {
     CHECK_NULL_RETURN(shareOverlayInfo_, false);
     if (shareOverlayInfo_->isUsingMouse && !shareOverlayInfo_->menuInfo.menuBuilder) {

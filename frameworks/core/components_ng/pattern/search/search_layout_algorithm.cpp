@@ -33,6 +33,7 @@ constexpr float MAX_SEARCH_BUTTON_RATE = 0.4f;
 constexpr float AGING_MIN_SCALE = 1.75f;
 constexpr float MAX_FONT_SCALE = 2.0f;
 constexpr int TWO = 2;
+constexpr Dimension DEFAULT_DIVIDER_HEIGHT = 12.0_vp;
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -377,6 +378,10 @@ void SearchLayoutAlgorithm::DividerMeasure(LayoutWrapper* layoutWrapper)
 
     auto iconHeight = searchTheme->GetIconHeight().ConvertToPx();
     auto dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(iconHeight));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        auto defaultDividerHeight = DEFAULT_DIVIDER_HEIGHT.ConvertToPx();
+        dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(defaultDividerHeight));
+    }
     auto dividerWidth = searchTheme->GetSearchDividerWidth();
 
     CalcSize dividerSize;
@@ -444,11 +449,12 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    UpdateClipBounds(layoutWrapper, searchHeight_);
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    UpdateClipBounds(layoutWrapper, searchHeight);
     // update search height
-    constraint->selfIdealSize.SetHeight(searchHeight_);
+    constraint->selfIdealSize.SetHeight(searchHeight);
     auto searchWidth = CalcSearchWidth(constraint.value(), layoutWrapper);
-    SizeF idealSize(searchWidth, searchHeight_);
+    SizeF idealSize(searchWidth, searchHeight);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         geometryNode->SetFrameSize(SizeF());
         return;
@@ -565,18 +571,11 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     maxFontScale_ = CalculateMaxFontScale(layoutWrapper);
     minFontScale_ = CalculateMinFontScale(layoutWrapper);
 
-    auto searchPattern = host->GetPattern<SearchPattern>();
-    CHECK_NULL_VOID(searchPattern);
-    if (searchPattern->IsShowSearchButton()) {
-        SearchButtonMeasure(layoutWrapper);
-        DividerMeasure(layoutWrapper);
-    }
-    if (searchPattern->IsShowCancelButton()) {
-        CancelImageMeasure(layoutWrapper);
-        CancelButtonMeasure(layoutWrapper);
-    }
-
+    SearchButtonMeasure(layoutWrapper);
+    DividerMeasure(layoutWrapper);
     ImageMeasure(layoutWrapper);
+    CancelImageMeasure(layoutWrapper);
+    CancelButtonMeasure(layoutWrapper);
     TextFieldMeasure(layoutWrapper);
     SelfMeasure(layoutWrapper);
 }
@@ -678,17 +677,11 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .isRTL = isRTL
     };
 
-    auto searchPattern = host->GetPattern<SearchPattern>();
-    CHECK_NULL_VOID(searchPattern);
-    if (searchPattern->IsShowSearchButton()) {
-        LayoutSearchButton(params);
-        LayoutDivider(params);
-    }
-    if (searchPattern->IsShowCancelButton()) {
-        LayoutCancelButton(params);
-        LayoutCancelImage(params);
-    }
     LayoutSearchIcon(params);
+    LayoutSearchButton(params);
+    LayoutDivider(params);
+    LayoutCancelButton(params);
+    LayoutCancelImage(params);
     LayoutTextField(params);
 
     CalcChildrenHotZone(layoutWrapper);

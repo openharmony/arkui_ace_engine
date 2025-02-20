@@ -54,6 +54,7 @@ enum class PointerAction : int32_t {
     POINTER_ACTION_ROTATE_BEGIN = 20,
     POINTER_ACTION_ROTATE_UPDATE = 21,
     POINTER_ACTION_ROTATE_END = 22,
+    PULL_CANCEL = 37,
 };
 
 struct DragPointerEvent final : public PointerEvent {

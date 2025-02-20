@@ -18,7 +18,6 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_checkboxgroup_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -105,8 +104,6 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
     }
 
     CheckBoxGroupModel::GetInstance()->Create(checkboxGroupName);
-
-    JSCheckBoxGroupTheme::ApplyTheme();
 }
 
 void ParseSelectAllObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -212,9 +209,9 @@ void JSCheckboxGroup::SelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    auto theme = GetTheme<CheckboxTheme>();
     if (!ParseJsColor(info[0], selectedColor)) {
-        selectedColor = theme->GetActiveColor();
+        CheckBoxGroupModel::GetInstance()->ResetSelectedColor();
+        return;
     }
 
     CheckBoxGroupModel::GetInstance()->SetSelectedColor(selectedColor);
@@ -226,9 +223,9 @@ void JSCheckboxGroup::UnSelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color unSelectedColor;
-    auto theme = GetTheme<CheckboxTheme>();
     if (!ParseJsColor(info[0], unSelectedColor)) {
-        unSelectedColor = theme->GetInactiveColor();
+        CheckBoxGroupModel::GetInstance()->ResetUnSelectedColor();
+        return;
     }
 
     CheckBoxGroupModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
@@ -249,9 +246,10 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
     auto theme = GetTheme<CheckboxTheme>();
     Color strokeColor = theme->GetPointColor();
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
-        JSCheckBoxGroupTheme::ObtainCheckMarkColor(strokeColor);
+        CheckBoxGroupModel::GetInstance()->ResetCheckMarkColor();
+    } else {
+        CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(strokeColor);
     }
-    CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(strokeColor);
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&

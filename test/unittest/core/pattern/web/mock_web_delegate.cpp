@@ -1206,6 +1206,7 @@ void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
     const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
 {}
 void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {}
 bool WebDelegate::IsActivePolicyDisable()
 {
     return false;
@@ -1213,4 +1214,8 @@ bool WebDelegate::IsActivePolicyDisable()
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
+std::string WebDelegate::GetCurrentLanguage()
+{
+    return "";
+}
 } // namespace OHOS::Ace

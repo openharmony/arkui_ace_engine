@@ -196,6 +196,7 @@ HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight002, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     auto paddingTwoLines = theme->GetPaddingTopTwolines();
     auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
@@ -296,6 +297,7 @@ HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight003, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     auto paddingTwoLines = theme->GetPaddingTopTwolines();
     auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
@@ -400,6 +402,7 @@ HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     auto paddingTwoLines = theme->GetPaddingTopTwolines();
     auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
@@ -527,6 +530,7 @@ HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY002, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     auto paddingTwoLines = theme->GetPaddingTopTwolines();
     auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
@@ -630,6 +634,7 @@ HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY003, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     auto paddingTwoLines = theme->GetPaddingTopTwolines();
     auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
@@ -735,6 +740,7 @@ HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     auto paddingTwoLines = theme->GetPaddingTopTwolines();
     auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
@@ -1805,6 +1811,7 @@ HWTEST_F(TitleBarTestNg, GetFontSize001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
     float singleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
@@ -2043,6 +2050,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone002, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     MockContainer::SetUp();
     int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
@@ -2127,6 +2135,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone003, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     MockContainer::SetUp();
     int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
@@ -2205,6 +2214,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     MockContainer::SetUp();
     int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
@@ -2282,6 +2292,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone005, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**
      * @tc.steps: step2. create backButtonNode and layoutProperty.
@@ -2332,6 +2343,7 @@ HWTEST_F(TitleBarTestNg, SetDefaultTitleFontSize001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**
      * @tc.steps: step2. call SetDefaultTitleFontSize.
@@ -2357,6 +2369,7 @@ HWTEST_F(TitleBarTestNg, GetSubTitleOffsetY001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**
      * @tc.steps: step2. call GetSubTitleOffsetY.
@@ -2381,6 +2394,7 @@ HWTEST_F(TitleBarTestNg, OnColorConfigurationUpdate003, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
@@ -2453,6 +2467,7 @@ HWTEST_F(TitleBarTestNg, OnColorConfigurationUpdate004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 
@@ -2505,6 +2520,7 @@ HWTEST_F(TitleBarTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(backButtonNode, nullptr);
@@ -2539,6 +2555,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     ASSERT_NE(titleBarNode, nullptr);
@@ -2592,6 +2609,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress002, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     ASSERT_NE(titleBarNode, nullptr);
@@ -2644,6 +2662,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress003, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     ASSERT_NE(titleBarNode, nullptr);

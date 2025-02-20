@@ -508,6 +508,12 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     if (pickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = pickerDialog.backgroundBlurStyle.value();
     }
+    if (pickerDialog.blurStyleOption.has_value()) {
+        properties.blurStyleOption = pickerDialog.blurStyleOption.value();
+    }
+    if (pickerDialog.effectOption.has_value()) {
+        properties.effectOption = pickerDialog.effectOption.value();
+    }
     if (pickerDialog.shadow.has_value()) {
         properties.shadow = pickerDialog.shadow.value();
     }

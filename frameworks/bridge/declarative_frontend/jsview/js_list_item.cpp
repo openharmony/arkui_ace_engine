@@ -467,8 +467,11 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSListItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSListItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSListItem>::StaticMethod("onDragStart", &JSListItem::JsOnDragStart);
-
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSClass<JSListItem>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
+    } else {
+        JSClass<JSListItem>::StaticMethod("onDragStart", &JSListItem::JsOnDragStart);
+    }
     JSClass<JSListItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

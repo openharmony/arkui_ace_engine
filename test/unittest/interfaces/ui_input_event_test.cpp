@@ -729,4 +729,373 @@ HWTEST_F(UIInputEventTest, PointerEventGetInteractionHandByIndexTest004, TestSiz
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(hand, ARKUI_EVENT_HAND_NONE);
 }
+
+/**
+ * @tc.name: AxisEventScrollStepTest001
+ * @tc.desc: Test OH_ArkUI_AxisEvent_GetScrollStep function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventScrollStepTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::AXIS_EVENT;
+    event.axisEvent.subKind = ArkUIEventSubKind::ON_AXIS;
+    event.axisEvent.timeStamp = ARKUI_TIME;
+    event.axisEvent.scrollStep = 3;
+    uiInputEvent.inputEvent = &event.axisEvent;
+    uiInputEvent.eventTypeId = C_AXIS_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.steps: step2. call functions.
+     */
+    auto scroll_step = OH_ArkUI_AxisEvent_GetScrollStep(inputEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(scroll_step, 3);
+}
+
+/*
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY001
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, MouseEventGetRawDeltaY001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<ArkUIMouseEvent>();
+    EXPECT_NE(event, nullptr);
+
+    event->rawDeltaY = 5.0;
+    uiInputEvent->inputEvent = event.get();
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+
+    auto action = OH_ArkUI_MouseEvent_GetRawDeltaY(uiInputEvent.get());
+    EXPECT_EQ(action, 5.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY002
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, MouseEventGetRawDeltaY002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<ArkUIMouseEvent>();
+    EXPECT_NE(event, nullptr);
+
+    event->rawDeltaY = 5.0;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = C_AXIS_EVENT_ID;
+
+    auto action = OH_ArkUI_MouseEvent_GetRawDeltaY(uiInputEvent.get());
+    EXPECT_EQ(action, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetPressedButtons001
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetPressedButtons
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, MouseEventGetPressedButtons001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto event = std::make_unique<ArkUIMouseEvent>();
+    event->pressedButtonsLength = 0;
+    EXPECT_NE(event, nullptr);
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    int32_t pressedButtons[] = {5, 5, 5};
+    int32_t length = 1;
+
+    auto result = OH_ArkUI_MouseEvent_GetPressedButtons(uiInputEvent.get(), pressedButtons, &length);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetPressedButtons002
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetPressedButtons
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, MouseEventGetPressedButtons002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto event = std::make_unique<ArkUIMouseEvent>();
+    event->pressedButtonsLength = 6;
+    EXPECT_NE(event, nullptr);
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    int32_t pressedButtons[] = {5, 5, 5};
+    int32_t length = 1;
+
+    auto result = OH_ArkUI_MouseEvent_GetPressedButtons(uiInputEvent.get(), pressedButtons, &length);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetPressedButtons003
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetPressedButtons
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, MouseEventGetPressedButtons003, TestSize.Level1)
+{
+    int32_t length = 1;
+    auto result = OH_ArkUI_MouseEvent_GetPressedButtons(nullptr, nullptr, &length);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetPressedButtons004
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetPressedButtons
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, MouseEventGetPressedButtons004, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    uiInputEvent->inputEvent = nullptr;
+    int32_t pressedButtons[] = {5, 5, 5};
+    int32_t length = 1;
+
+    auto result = OH_ArkUI_MouseEvent_GetPressedButtons(uiInputEvent.get(), pressedButtons, &length);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId001
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId001, TestSize.Level1)
+{
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(nullptr);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId002
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId002, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    mouseEvent->targetDisplayId = 1;
+    event->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(event.get());
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId003
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId003, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    touchEvent->targetDisplayId = 2;
+    event->inputEvent = touchEvent.get();
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(event.get());
+    EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId004
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId004, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_AXIS_EVENT_ID;
+    auto axisEvent = std::make_unique<ArkUIAxisEvent>();
+    axisEvent->targetDisplayId = 3;
+    event->inputEvent = axisEvent.get();
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(event.get());
+    EXPECT_EQ(result, 3);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId005
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId005, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_FOCUS_AXIS_EVENT_ID;
+    auto focusAxisEvent = std::make_unique<ArkUIFocusAxisEvent>();
+    focusAxisEvent->targetDisplayId = 4;
+    event->inputEvent = focusAxisEvent.get();
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(event.get());
+    EXPECT_EQ(result, 4);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId006
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId006, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = AXIS_EVENT_ID;
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(event.get());
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX001
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX001, TestSize.Level1)
+{
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(nullptr);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX002
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX002, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_MOUSE_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX003
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX003, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    mouseEvent->rawDeltaX = 1;
+    event->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX004
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX004, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = AXIS_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetPressedTimeByIndex001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetPressedTimeByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetPressedTimeByIndex001, TestSize.Level1)
+{
+    auto result = OH_ArkUI_PointerEvent_GetPressedTimeByIndex(nullptr, 0);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetPressedTimeByIndex002
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetPressedTimeByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetPressedTimeByIndex002, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto result = OH_ArkUI_PointerEvent_GetPressedTimeByIndex(event.get(), -1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetPressedTimeByIndex003
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetPressedTimeByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetPressedTimeByIndex003, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto result = OH_ArkUI_PointerEvent_GetPressedTimeByIndex(event.get(), 0);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetPressedTimeByIndex004
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetPressedTimeByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetPressedTimeByIndex004, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetPressedTimeByIndex(event.get(), -2);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetPressedTimeByIndex005
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetPressedTimeByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetPressedTimeByIndex005, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUITouchPoint touchPoint;
+    touchPoint.pressedTime = 20;
+    touchEvent->touchPointes = &touchPoint;
+    touchEvent->touchPointSize = 2;
+    event->inputEvent = touchEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetPressedTimeByIndex(event.get(), 0);
+    EXPECT_EQ(result, 20);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetPressedTimeByIndex006
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetPressedTimeByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetPressedTimeByIndex006, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = AXIS_EVENT_ID;
+    auto result = OH_ArkUI_PointerEvent_GetPressedTimeByIndex(event.get(), 0);
+    EXPECT_EQ(result, 0);
+}
 } // namespace OHOS::Ace

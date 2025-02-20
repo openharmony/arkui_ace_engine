@@ -704,6 +704,15 @@ class ArkScrollableBarModeOptions {
   }
 }
 
+class ArkTabsCachedMaxCount {
+  count: number;
+  mode: TabsCacheMode;
+
+  isEqual(another: ArkTabsCachedMaxCount): boolean {
+    return (this.count === another.count && this.mode === another.mode);
+  }
+}
+
 class ArkAlignRules {
   left: string | undefined;
   middle: string | undefined;
@@ -1328,6 +1337,20 @@ class ArkSymbolEffect {
   }
   isEqual(another: ArkSymbolEffect): boolean {
     return (this.symbolEffect === another.symbolEffect) && (this.action === another.action);
+  }
+}
+
+class ArkBindMenu{
+  content: Array<MenuElement> | CustomBuilder | undefined;
+  options: MenuOptions | undefined;
+
+  constructor() {
+    this.content = undefined;
+    this.options = undefined;
+  }
+
+  isEqual(another: ArkBindMenu): boolean {
+    return (this.content === another.content && this.options === another.options);
   }
 }
 

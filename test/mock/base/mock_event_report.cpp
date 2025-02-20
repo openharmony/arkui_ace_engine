@@ -90,6 +90,12 @@ void EventReport::ReportDragInfo(const DragInfo& dragInfo)
     return;
 }
 
+void EventReport::ReportScrollableErrorEvent(
+    const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType)
+{}
+
+void EventReport::ReportRichEditorInfo(const RichEditorInfo& richEditorInfo) {}
+
 void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
 {}
 

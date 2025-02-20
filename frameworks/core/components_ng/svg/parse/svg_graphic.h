@@ -108,7 +108,10 @@ protected:
             ));
             brush.SetFilter(filter);
         }
-        InitBrush(canvas, brush, svgCoordinateSystemContext, paintType);
+        if (!InitBrush(canvas, brush, svgCoordinateSystemContext, paintType)) {
+            LOGW("OnGraphicFill call InitBrush paint type :%{public}d failed ", paintType);
+            return;
+        }
         canvas.AttachBrush(brush);
         canvas.DrawPath(rsPath);
         canvas.DetachBrush();
@@ -126,7 +129,10 @@ protected:
             ));
             rsPen.SetFilter(filter);
         }
-        InitPenFill(rsPen, svgCoordinateSystemContext, paintType);
+        if (!InitPenFill(rsPen, svgCoordinateSystemContext, paintType)) {
+            LOGW("OnGraphicStroke call InitBrush paint type :%{public}d failed ", paintType);
+            return;
+        }
         SetPenStyle(rsPen);
         canvas.AttachPen(rsPen);
         canvas.DrawPath(rsPath);
@@ -182,7 +188,7 @@ protected:
     void SetRadialGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient);
     void SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& gradient, std::vector<RSScalar> pos,
         std::vector<RSColorQuad> colors);
-    uint32_t GetAlpha();
+    void ApplyTransform(RSRecordingPath& path);
 
     std::optional<RSRecordingPath> path_;
     RSBrush fillBrush_;
@@ -196,23 +202,29 @@ private:
     RsLinearGradient ConvertToRsLinearGradient(const SvgLinearGradientInfo& linearGradientInfo);
     RsRadialGradient ConvertToRsRadialGradient(const SvgRadialGradientInfo& radialGradientInfo);
     PaintType GetFillType();
-    void InitBrush(RSCanvas& canvas, RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+    bool InitBrush(RSCanvas& canvas, RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
         PaintType paintType);
     void SetBrushColor(RSBrush& brush);
-    void SetBrushLinearGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
-    void SetBrushRadialGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
-    void SetBrushPattern(RSCanvas& canvas, RSBrush& brush,
+    bool SetBrushLinearGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    bool SetBrushRadialGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    bool SetBrushPattern(RSCanvas& canvas, RSBrush& brush,
         const SvgCoordinateSystemContext& svgCoordinateSystemContext);
-
+    bool GradientHasColors();
     PaintType GetStrokeType();
-    void InitPenFill(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext, PaintType paintType);
+    bool InitPenFill(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext, PaintType paintType);
     void SetPenColor(RSPen& rsPen);
     void SetPenStyle(RSPen& rsPen);
     void AddColorFilterEffect(RSPen& rsPen);
-    void SetPenLinearGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
-    void SetPenRadialGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    bool SetPenLinearGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    bool SetPenRadialGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     bool CheckHrefPattern();
     void RectifyTargetSize(const Rect& bounds, double& width, double& height);
+    RSMatrix GetLocalMatrix(SvgLengthScaleUnit gradientUnits,
+        const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    double GetFillOpacity();
+    double GetStrokeOpacity();
+    void SetBrushOpacity(RSBrush& brush);
+    void SetPenOpacity(RSPen& pen);
 };
 
 } // namespace OHOS::Ace::NG

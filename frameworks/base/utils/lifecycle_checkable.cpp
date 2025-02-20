@@ -22,8 +22,7 @@ namespace OHOS::Ace {
 LifeCycleCheckable::~LifeCycleCheckable()
 {
     if (usingCount_) {
-        LOGF("this object is still in use, use_count=%{public}d", usingCount_.load());
-        abort();
+        LOGF_ABORT("this object is still in use, use_count=%{public}d", usingCount_.load());
     }
 }
 

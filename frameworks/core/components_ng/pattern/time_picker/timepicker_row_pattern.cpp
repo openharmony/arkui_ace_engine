@@ -47,7 +47,8 @@ const int32_t CHILD_INDEX_SECOND = 1;
 const int32_t CHILD_INDEX_THIRD = 2;
 const int32_t CHILD_INDEX_FOURTH = 3;
 constexpr float DISABLE_ALPHA = 0.6f;
-const Dimension FOCUS_OFFSET = 2.0_vp;
+const Dimension FOCUS_INTERVAL = 2.0_vp;
+const Dimension LINE_WIDTH = 1.5_vp;
 const int32_t RATE = 2;
 const PickerTime START_DEFAULT_TIME = PickerTime(0, 0, 0);
 const PickerTime END_DEFAULT_TIME = PickerTime(23, 59, 59);
@@ -139,6 +140,24 @@ void TimePickerRowPattern::ColumnPatternInitHapticController()
             continue;
         }
         pattern->InitHapticController(columnNode);
+    }
+}
+
+void TimePickerRowPattern::ColumnPatternStopHaptic()
+{
+    if (!isEnableHaptic_) {
+        return;
+    }
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (!columnNode) {
+            continue;
+        }
+        auto timePickerColumnPattern = columnNode->GetPattern<TimePickerColumnPattern>();
+        if (!timePickerColumnPattern) {
+            continue;
+        }
+        timePickerColumnPattern->StopHaptic();
     }
 }
 
@@ -324,11 +343,7 @@ void TimePickerRowPattern::OnModifyDone()
     isHapticChanged_ = false;
     isForceUpdate_ = false;
     isDateTimeOptionUpdate_ = false;
-
     ClearFocus();
-    isHapticChanged_ = false;
-    isForceUpdate_ = false;
-    isDateTimeOptionUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -668,7 +683,11 @@ PickerTime TimePickerRowPattern::GetCurrentEnterTime()
     CHECK_NULL_RETURN(minutePickerColumnPattern, time);
 
     if (GetHour24()) {
-        time.SetHour(hourPickerColumnPattern->GetEnterIndex()); // hour from 0 to 23, index from 0 to 23
+        if (IsStartEndTimeDefined()) {
+            time.SetHour(hourPickerColumnPattern->GetEnterIndex() + startTime_.GetHour());
+        } else {
+            time.SetHour(hourPickerColumnPattern->GetEnterIndex()); // hour from 0 to 23, index from 0 to 23
+        }
     } else if (amPmColumn) {
         auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_RETURN(amPmPickerColumnPattern, time);
@@ -1976,6 +1995,7 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childSize = static_cast<float>(host->GetChildren().size());
+    CHECK_EQUAL_VOID(childSize, 0);
     auto leftTotalColumnWidth = 0.0f;
     CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
@@ -1990,19 +2010,14 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
-    auto pickerThemeWidth = dividerSpacing * RATE;
 
-    CHECK_EQUAL_VOID(childSize, 0);
-    auto centerX = (columnWidth - pickerThemeWidth) / RATE + leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx();
-    auto centerY =
-        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
-    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
-    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
-    if (piantRectWidth > columnWidth) {
-        piantRectWidth = columnWidth - FOCUS_OFFSET.ConvertToPx() * RATE;
-        centerX = leftTotalColumnWidth + FOCUS_OFFSET.ConvertToPx();
-    }
-    paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
+    float paintRectWidth = columnWidth - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
+    float paintRectHeight = dividerSpacing - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
+    auto centerX = leftTotalColumnWidth + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
+    auto centerY = (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE +
+        FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
+
+    paintRect.SetRect(RectF(centerX, centerY, paintRectWidth, paintRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),

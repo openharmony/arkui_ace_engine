@@ -116,6 +116,7 @@ ArkUI_NativeDialogAPI_2 dialogImpl_2 = {
     OHOS::Ace::DialogModel::SetLevelMode,
     OHOS::Ace::DialogModel::SetLevelUniqueId,
     OHOS::Ace::DialogModel::SetImmersiveMode,
+    OHOS::Ace::DialogModel::SetLevelOrder,
 };
 
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;

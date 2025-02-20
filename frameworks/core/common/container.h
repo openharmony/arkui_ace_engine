@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -186,6 +186,13 @@ public:
 
     // Get MultiModal ptr.
     virtual uintptr_t GetMutilModalPtr() const
+    {
+        return 0;
+    }
+
+    virtual void SetParentId(int32_t parentId) {}
+
+    virtual int32_t GetParentId() const
     {
         return 0;
     }
@@ -500,6 +507,11 @@ public:
         return false;
     }
 
+    virtual bool IsCrossAxisWindow()
+    {
+        return false;
+    }
+
     virtual bool IsUIExtensionWindow()
     {
         return false;
@@ -741,6 +753,7 @@ protected:
     bool isDynamicRender_ = false;
     // for common handler
     WeakPtr<ContainerHandler> containerHandler_;
+    RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:
     std::string bundleName_;

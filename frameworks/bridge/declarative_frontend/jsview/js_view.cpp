@@ -95,21 +95,15 @@ void JSView::JSBind(BindingTarget object)
     JSViewFullUpdate::JSBind(object);
 }
 
-void JSView::DoRenderJSExecution(int64_t deadline, bool& isTimeout)
-{
-    jsViewFunction_->ExecuteRender();
-}
-
 void JSView::RenderJSExecution(int64_t deadline, bool& isTimeout)
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (!jsViewFunction_) {
         return;
     }
-    if (!executedAboutToRender_) {
+    {
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
-        executedAboutToRender_ = true;
     }
     if (!jsViewFunction_) {
         return;
@@ -117,22 +111,18 @@ void JSView::RenderJSExecution(int64_t deadline, bool& isTimeout)
     {
         ACE_SCORING_EVENT("Component.Build");
         ViewStackModel::GetInstance()->PushKey(viewId_);
-        DoRenderJSExecution(deadline, isTimeout);
+        jsViewFunction_->ExecuteRender();
         ViewStackModel::GetInstance()->PopKey();
-        if (isTimeout) {
-            return;
-        }
     }
     if (!jsViewFunction_) {
         return;
     }
-    if (!executedOnRenderDone_) {
+    {
         ACE_SCORING_EVENT("Component.OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
         if (notifyRenderDone_) {
             notifyRenderDone_();
         }
-        executedOnRenderDone_ = true;
     }
 }
 
@@ -176,6 +166,14 @@ void JSView::JsGetCardId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(cardId_)));
 }
 
+JSView* JSView::GetNativeView(JSRef<JSObject> obj)
+{
+    if (obj->HasProperty("nativeViewPartialUpdate")) {
+        JSRef<JSObject> nativeViewPartialUpdate = obj->GetProperty("nativeViewPartialUpdate");
+        return nativeViewPartialUpdate->Unwrap<JSView>();
+    }
+    return obj->Unwrap<JSView>();
+}
 
 JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
 {
@@ -869,6 +867,42 @@ void JSViewPartialUpdate::DoRenderJSExecution(int64_t deadline, bool& isTimeout)
     PrebuildComponentsInMultiFrame(deadline, isTimeout);
 }
 
+void JSViewPartialUpdate::RenderJSExecution(int64_t deadline, bool& isTimeout)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+    if (!jsViewFunction_) {
+        return;
+    }
+    if (!executedAboutToRender_) {
+        ACE_SCORING_EVENT("Component.AboutToRender");
+        jsViewFunction_->ExecuteAboutToRender();
+        executedAboutToRender_ = true;
+    }
+    if (!jsViewFunction_) {
+        return;
+    }
+    {
+        ACE_SCORING_EVENT("Component.Build");
+        ViewStackModel::GetInstance()->PushKey(viewId_);
+        DoRenderJSExecution(deadline, isTimeout);
+        ViewStackModel::GetInstance()->PopKey();
+        if (isTimeout) {
+            return;
+        }
+    }
+    if (!jsViewFunction_) {
+        return;
+    }
+    if (!executedOnRenderDone_) {
+        ACE_SCORING_EVENT("Component.OnRenderDone");
+        jsViewFunction_->ExecuteOnRenderDone();
+        if (notifyRenderDone_) {
+            notifyRenderDone_();
+        }
+        executedOnRenderDone_ = true;
+    }
+}
+
 void JSViewPartialUpdate::SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline)
 {
     prebuildPhase_ = prebuildPhase;
@@ -925,7 +959,7 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
 
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-        auto* view = object->Unwrap<JSView>();
+        auto* view = JSView::GetNativeView(object);
         if (view == nullptr) {
             LOGE("View is null");
             return;
@@ -978,7 +1012,8 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     }
 
     auto viewObj = JSRef<JSObject>::Cast(params[PARAM_VIEW_OBJ]);
-    auto* view = viewObj->Unwrap<JSViewPartialUpdate>();
+    JSRef<JSObject> nativeViewPartialUpdate = viewObj->GetProperty("nativeViewPartialUpdate");
+    auto* view = nativeViewPartialUpdate->Unwrap<JSViewPartialUpdate>();
     if (!view) {
         return;
     }
@@ -1044,9 +1079,9 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
         obj->SetProperty<int32_t>("index", result->index);
         obj->SetPropertyObject("param", JsConverter::ConvertNapiValueToJsVal(result->param));
         obj->SetProperty<std::string>("navDestinationId", result->navDestinationId);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
             obj->SetProperty<int32_t>("mode", static_cast<int32_t>(result->mode));
-            obj->SetProperty<std::string>("uniqueId", result->uniqueId);
+            obj->SetProperty<int32_t>("uniqueId", result->uniqueId);
         }
         info.SetReturnValue(obj);
     }
@@ -1241,7 +1276,11 @@ bool JSViewPartialUpdate::JSAllowReusableV2Descendant()
 
 void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
 {
-    JSRef<JSObject> thisObj = info.This();
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("NativeViewPartialUpdate argument invalid");
+        return;
+    }
+    JSRef<JSObject> thisObj = JSRef<JSObject>::Cast(info[0]);
 
     // Get js view name by this.constructor.name
     JSRef<JSObject> constructor = thisObj->GetProperty("constructor");

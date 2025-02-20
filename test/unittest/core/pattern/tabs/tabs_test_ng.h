@@ -19,6 +19,8 @@
 #include "test/unittest/core/pattern/test_ng.h"
 #define private public
 #define protected public
+#include "test/mock/core/animation/mock_animation_manager.h"
+
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
@@ -59,7 +61,7 @@ constexpr double BIG_DIALOG_WIDTH = 216.0;
 constexpr double MAX_DIALOG_WIDTH = 256.0;
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 constexpr int8_t MASK_COUNT = 2;
-constexpr float DRAG_DELTA = 400.0f;
+constexpr float DRAG_DELTA = TABS_WIDTH;
 
 class TabsTestNg : public TestNG {
 public:
@@ -80,9 +82,9 @@ public:
     void HandleClick(Offset offset, int32_t index);
     void HandleMouseEvent(MouseAction action, Offset location);
     void HandleHoverEvent(bool isHover);
-    void HandleTouchEvent(TouchType type, Offset location);
     GestureEvent CreateDragInfo(bool moveDirection);
     AssertionResult CurrentIndex(int32_t expectIndex);
+    RefPtr<TabBarModifier> OnDraw();
 
     RefPtr<TabsNode> frameNode_;
     RefPtr<TabsPattern> pattern_;

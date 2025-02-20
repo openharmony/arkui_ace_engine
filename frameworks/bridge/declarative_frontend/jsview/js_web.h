@@ -172,6 +172,7 @@ public:
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void EnableHapticFeedback(const JSCallbackInfo& args);
     static void EnableWebAVSession(const JSCallbackInfo& args);
+    static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

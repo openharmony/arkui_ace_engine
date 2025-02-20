@@ -46,11 +46,11 @@ public:
 };
 
 /**
- * @tc.name: Interface005
+ * @tc.name: Interface001
  * @tc.desc: Test Tabs attr
  * @tc.type: FUNC
  */
-HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
+HWTEST_F(TabsAttrTestNg, Interface001, TestSize.Level1)
 {
     /**
      * @tc.cases: create tabs
@@ -108,48 +108,6 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(renderContext->GetBackBlurStyle().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
-}
-
-/**
- * @tc.name: TabContentModelSetIndicator001
- * @tc.desc: test SetIndicator
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabContentModelSetIndicator001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
-    IndicatorStyle indicator;
-    indicator.color = Color::BLACK;
-    indicator.height = 10.0_vp;
-    indicator.width = 20.0_vp;
-    indicator.borderRadius = 2.0_vp;
-    indicator.marginTop = 3.0_vp;
-    tabContentPattern->SetIndicatorStyle(indicator);
-    FlushUITasks();
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().color, Color::BLACK);
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().height, 10.0_vp);
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width, 20.0_vp);
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().borderRadius, 2.0_vp);
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().marginTop, 3.0_vp);
-}
-
-/**
- * @tc.name: TabContentModelSetIndicator002
- * @tc.desc: test SetIndicator with getTheme once
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabContentModelSetIndicator002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
-    tabContentPattern->SetIndicatorStyle(IndicatorStyle());
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width, 0.0_vp);
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().borderRadius, 0.0_vp);
 }
 
 /**
@@ -504,26 +462,6 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
     CreateTabsDone(model);
     auto renderContext = tabBarNode_->GetRenderContext();
     EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::BLACK), Color::RED);
-}
-
-/**
- * @tc.name: TabsModelSetWidthAuto001
- * @tc.desc: test SetWidthAuto and SetHeightAuto
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelSetWidthAuto001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Test function SetWidthAuto and SetHeightAuto When isAuto is true.
-     * @tc.expected: Related functions run ok.
-     */
-    TabsModelNG model = CreateTabs();
-    model.SetWidthAuto(true);
-    model.SetHeightAuto(true);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_TRUE(layoutProperty_->GetWidthAutoValue(false));
-    EXPECT_TRUE(layoutProperty_->GetHeightAutoValue(false));
 }
 
 /**

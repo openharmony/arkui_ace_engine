@@ -275,6 +275,7 @@ public:
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
+    virtual void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
@@ -317,6 +318,7 @@ public:
     virtual void DisableOnKeyPreIme() {}
     virtual void DisableOnKeyEventDispatch() {}
     virtual void DisableOnHover() = 0;
+    virtual void DisableOnHoverMove() = 0;
     virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
@@ -423,6 +425,7 @@ public:
     virtual void ResetOnAccessibilityFocus() = 0;
     virtual void SetAccessibilityDefaultFocus() = 0;
     virtual void SetAccessibilityUseSamePage(bool isFullSilent) = 0;
+    virtual void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

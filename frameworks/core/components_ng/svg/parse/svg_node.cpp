@@ -409,10 +409,16 @@ void SvgNode::InitStyle(const SvgBaseAttribute& attr)
 
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
+    if (isDrawing_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "The current node is already in the process of being drawn in the SVG rendering flow.");
+        return;
+    }
     if (!OnCanvas(canvas)) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Draw failed(Reason: Canvas is null).");
         return;
     }
+    isDrawing_ = true;
     // mask and filter create extra layers, need to record initial layer count
     auto count = rsCanvas_->GetSaveCount();
     rsCanvas_->Save();
@@ -434,6 +440,7 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     OnDraw(canvas, viewPort, color);
     OnDrawTraversed(canvas, viewPort, color);
     rsCanvas_->RestoreToCount(count);
+    isDrawing_ = false; // end the drawing process.
 }
 
 void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)

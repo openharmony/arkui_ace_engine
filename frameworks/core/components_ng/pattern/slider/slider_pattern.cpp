@@ -184,14 +184,21 @@ void SliderPattern::InitAccessibilityHoverEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto level = accessibilityProperty->GetAccessibilityLevel();
     auto eventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    if (level == AccessibilityProperty::Level::NO_STR || level == AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+        ClearSliderVirtualNode();
+        return;
+    }
     eventHub->SetAccessibilityHoverEvent([weak = WeakClaim(this)](bool isHover, AccessibilityHoverInfo& info) {
         auto slider = weak.Upgrade();
         CHECK_NULL_VOID(slider);
         slider->HandleAccessibilityHoverEvent(isHover, info);
     });
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
+
     accessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
         if (focus) {
             auto slider = weak.Upgrade();
@@ -225,6 +232,7 @@ public:
         if (state) {
             sliderPattern->InitAccessibilityVirtualNodeTask();
         }
+        sliderPattern->SetIsAccessibilityOn(state);
         return true;
     }
 private:
@@ -299,7 +307,12 @@ bool SliderPattern::CheckCreateAccessibilityVirtualNode()
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, false);
     bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier() || !isShowSteps) {
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    auto level = accessibilityProperty->GetAccessibilityLevel();
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier() || !isShowSteps ||
+        (level == AccessibilityProperty::Level::NO_STR) ||
+        (level == AccessibilityProperty::Level::NO_HIDE_DESCENDANTS)) {
         return false;
     }
     return true;
@@ -325,7 +338,6 @@ bool SliderPattern::InitAccessibilityVirtualNode()
     FrameNode::ProcessOffscreenNode(parentAccessibilityNode_);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SaveAccessibilityVirtualNode(parentAccessibilityNode_);
-    accessibilityProperty->SetAccessibilityText(" ");
     ModifyAccessibilityVirtualNode();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     return true;
@@ -517,7 +529,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);
             auto offsetStep = index - pattern->GetCurrentStepIndex();
-            pattern->MoveStep(reverse ? -offsetStep : offsetStep);
+            pattern->MoveStep(offsetStep);
             pattern->FireChangeEvent(SliderChangeMode::End);
             if (pattern->showTips_) {
                 pattern->bubbleFlag_ = true;
@@ -628,6 +640,21 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return UpdateParameters();
 }
 
+void SliderPattern::ClearSliderVirtualNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pointAccessibilityNodeVec_.clear();
+    pointAccessibilityNodeEventVec_.clear();
+    isInitAccessibilityVirtualNode_ = false;
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SaveAccessibilityVirtualNode(nullptr);
+    auto eventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAccessibilityHover();
+}
+
 bool SliderPattern::UpdateParameters()
 {
     auto host = GetHost();
@@ -653,6 +680,12 @@ bool SliderPattern::UpdateParameters()
     auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
+    if (sliderMode_ != sliderMode && isAccessibilityOn_) {
+        ClearSliderVirtualNode();
+        InitAccessibilityVirtualNodeTask();
+        InitAccessibilityHoverEvent();
+        sliderMode_ = sliderMode;
+    }
     if (sliderMode == SliderModel::SliderMode::OUTSET) {
         borderBlank_ = std::max(trackThickness_, blockLength + hotBlockShadowWidth_ / HALF);
     } else if (sliderMode == SliderModel::SliderMode::INSET) {

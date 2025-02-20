@@ -288,11 +288,11 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
         .autoCancel = options.autoCancel,
         .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,
-        .isSysBlurStyle = false,
         .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
-        .transitionEffect = chainedEffect,
         .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
+        .isSysBlurStyle = false,
         .enableHoverMode = options.enableHoverMode,
+        .transitionEffect = chainedEffect,
         .shadow = shadow,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
     };
@@ -540,17 +540,17 @@ void FfiPromptShowToastWithOption(NativeShowToastOptions options)
         };
 
         auto toastInfo = NG::ToastInfo { .message = toastMessage,
-            .isRightToLeft = isRightToLeft,
             .duration = durationTime,
             .bottom = toastBottom,
+            .isRightToLeft = isRightToLeft,
             .showMode = NG::ToastShowMode(options.showMode),
             .alignment = options.alignment,
             .offset = offset,
             .backgroundColor = Color(options.backgroundColor),
             .textColor = Color(ColorAlphaAdapt(options.textColor)),
+            .backgroundBlurStyle = options.backgroundBlurStyle,
             .shadow = shadow,
             .enableHoverMode = options.enableHoverMode,
-            .backgroundBlurStyle = options.backgroundBlurStyle,
             .hoverModeArea = HoverModeAreaType(options.hoverModeArea) };
         overlayManager->ShowToast(toastInfo, nullptr);
     };
@@ -572,8 +572,8 @@ void FfiPromptShowDialogWithOption(NativeShowDialogOptions options, ShowDialogCa
         .title = options.title,
         .content = options.message,
         .buttons = buttons,
-        .isShowInSubWindow = options.showInSubWindow,
         .backgroundColor = Color(options.backgroundColor),
+        .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,
         .enableHoverMode = options.enableHoverMode,
         .backgroundBlurStyle = options.backgroundBlurStyle,
@@ -597,9 +597,9 @@ void FfiPromptShowActionMenuWithOption(NativeActionMenuOptions options, ShowActi
     auto callback = [ffiOnClick = CJLambda::Create(callbackRef)](
                         int32_t callbackType, int32_t successType) { ffiOnClick(callbackType, successType); };
     DialogProperties dialogProperties = {
+        .title = options.title,
         .autoCancel = true,
         .isMenu = true,
-        .title = options.title,
         .buttons = buttons,
         .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,

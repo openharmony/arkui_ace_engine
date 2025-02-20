@@ -89,7 +89,7 @@ void KeyboardPattern::OnAreaChangedInner()
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         if (safeAreaManager) {
-            safeAreaManager->SetRawKeyboardHeight(customHeight);
+            safeAreaManager->SetKeyboardInfo(customHeight);
         }
         TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
             customHeight, safeHeight_);
@@ -108,7 +108,7 @@ void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
         CHECK_NULL_VOID(pipeline);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         if (safeAreaManager) {
-            safeAreaManager->SetRawKeyboardHeight(keyboardHeight);
+            safeAreaManager->SetKeyboardInfo(keyboardHeight);
         }
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, keyboardHeight);
         TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",

@@ -86,7 +86,6 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
             aliasInfoList->push_back(nativeAlias);
         }
         nativeGeneric.alias = aliasInfoList;
-        free(aliasInfoList);
         std::vector<NativeUIFontAdjustInfo>* adjustInfoList = new std::vector<NativeUIFontAdjustInfo>();
         for (auto adjust : generic.adjustSet) {
             NativeUIFontAdjustInfo nativeAdjust = NativeUIFontAdjustInfo {
@@ -96,7 +95,6 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
             adjustInfoList->push_back(nativeAdjust);
         }
         nativeGeneric.adjust = adjustInfoList;
-        free(adjustInfoList);
         genericList->push_back(nativeGeneric);
     }
 }
@@ -116,7 +114,6 @@ void parseFallbackGroupList(FontConfigJsonInfo fontConfigJsonInfo,
             fallbackList->push_back(nativeFallbackInfo);
         }
         nativeFallbackGroup.fallback = fallbackList;
-        free(fallbackList);
         fallbackGroupList->push_back(nativeFallbackGroup);
     }
 }

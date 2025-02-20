@@ -34,6 +34,7 @@ public:
     using PreparedListener = std::function<void(uint32_t, uint32_t, bool, uint32_t, uint32_t, bool)>;
     using PlayStatusListener = std::function<void(bool)>;
     using CurrentPosListener = std::function<void(uint32_t)>;
+    using SeekDoneListener = std::function<void(uint32_t)>;
     using CompletionListener = std::function<void()>;
     using RefreshRenderListener = std::function<void()>;
 
@@ -90,6 +91,7 @@ public:
     void AddPreparedListener(PreparedListener&& listener);
     void AddPlayStatusListener(PlayStatusListener&& listener);
     void AddCurrentPosListener(CurrentPosListener&& listener);
+    void AddSeekDoneListener(SeekDoneListener&& listener);
     void AddCompletionListener(CompletionListener&& listener);
     void AddRefreshRenderListener(RefreshRenderListener&& listener);
 
@@ -116,6 +118,7 @@ private:
     void OnAddPreparedListener(PreparedListener&& listener);
     void OnAddPlayStatusListener(PlayStatusListener&& listener);
     void OnAddCurrentPosListener(CurrentPosListener&& listener);
+    void OnAddSeekDoneListener(CurrentPosListener&& listener);
     void OnAddCompletionListener(CompletionListener&& listener);
 
     void OnStarted();
@@ -159,6 +162,7 @@ private:
     std::list<PreparedListener> onPreparedListener_;
     std::list<PlayStatusListener> onPlayStatusListener_;
     std::list<CurrentPosListener> onCurrentPosListener_;
+    std::list<SeekDoneListener> onSeekDoneListener_;
     std::list<CompletionListener> onCompletionListener_;
     std::list<RefreshRenderListener> onRefreshRenderListener_;
 

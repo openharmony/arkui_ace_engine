@@ -569,12 +569,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
-    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
-    bool isHdrDecoderNeed = false;
-    if (renderProp && renderProp->HasDynamicMode()) {
-        isHdrDecoderNeed = true;
-        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
-    }
+    bool isHdrDecoderNeed = renderProp && renderProp->HasDynamicMode();
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
@@ -1124,13 +1119,13 @@ bool ImagePattern::RecycleImageData()
     if (!rsRenderContext) {
         return false;
     }
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str());
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "OnRecycleImageData imageInfo: %{public}s",
-        imageDfxConfig_.ToStringWithSrc().c_str());
     ACE_SCOPED_TRACE("OnRecycleImageData imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
     return true;
 }
@@ -1146,6 +1141,8 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     frameNode->SetTrimMemRecycle(false);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s OnNotifyMemoryLevel %{public}d.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str(), level);
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
     loadingCtx_ = nullptr;
@@ -2384,6 +2381,8 @@ void ImagePattern::ResetImage()
     if (!altImage_) {
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s ResetImage.",
+            imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
     }
@@ -2399,6 +2398,8 @@ void ImagePattern::ResetAltImage()
         CHECK_NULL_VOID(host);
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s ResetAltImage.",
+            imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
     }
@@ -2406,6 +2407,8 @@ void ImagePattern::ResetAltImage()
 
 void ImagePattern::ResetImageAndAlt()
 {
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s reseting Image and Alt.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str());
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->IsInDestroying() && frameNode->IsOnMainTree()) {
@@ -2601,5 +2604,17 @@ void ImagePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         json->Put("currentLoadImageState", currentLoadImageState.c_str());
     }
+}
+
+void ImagePattern::AddPixelMapToUiManager()
+{
+    CHECK_NULL_VOID(image_);
+    auto pixmap = image_->GetPixelMap();
+    CHECK_NULL_VOID(pixmap);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddPixelMap(host->GetId(), pixmap);
 }
 } // namespace OHOS::Ace::NG

@@ -846,6 +846,7 @@ public:
     void UpdateTextAutosizing(bool isTextAutosizing);
     void UpdateMetaViewport(bool isMetaViewportEnabled);
     void UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay);
+    void UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -1176,6 +1177,8 @@ public:
 
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
+    std::string GetCurrentLanguage();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1258,6 +1261,7 @@ private:
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
     void UnregisterAvoidAreaChangeListener(int32_t instanceId);
+    NG::SafeAreaInsets GetCombinedSafeArea();
     void OnSafeInsetsChange();
     void EnableHardware();
 #endif
@@ -1394,6 +1398,7 @@ private:
     bool isDragResizeStart_ = false;
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
+    bool enableFollowSystemFontWeight_ = false;
 #endif
 };
 

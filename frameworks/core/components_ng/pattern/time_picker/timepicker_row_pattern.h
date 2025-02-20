@@ -651,6 +651,7 @@ public:
     }
 
     void ColumnPatternInitHapticController();
+    void ColumnPatternStopHaptic();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,

@@ -2131,4 +2131,40 @@ HWTEST_F(WaterFlowSWTest, EdgeEffect001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 }
+
+/**
+ * @tc.name: UpdateAndJump001
+ * @tc.desc: call ScrollToIndex after updating sections.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, UpdateAndJump001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(1000.f));
+    CreateWaterFlowItems(32);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_15);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 7);
+
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 8, .crossCount = 2, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC } };
+    secObj->ChangeData(1, 1, newSection);
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f), CalcLength(Dimension(1000.0f))));
+    pattern_->ScrollToIndex(8, false, ScrollAlign::START);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(info_->startIndex_, 7);
+    EXPECT_EQ(info_->endIndex_, 16);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -200.000000 EndPos: -200.000000 empty}");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -400.000000 EndPos: -400.000000 empty}");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 0.000000 EndPos: 500.000000 Items [7 10 11 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 0.000000 EndPos: 300.000000 Items [8 9 ] }");
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 500.000000 EndPos: 900.000000 Items [12 14 15 ] }");
+    EXPECT_EQ(info_->lanes_[2][1].ToString(), "{StartPos: 500.000000 EndPos: 700.000000 Items [13 ] }");
+}
 } // namespace OHOS::Ace::NG

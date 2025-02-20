@@ -336,7 +336,7 @@ struct custombutton {
 
   }
 
-  onAreaChangeEvent(oldValue: Area, newValue: Area) {
+  onAreaChangeEvent(oldValue: SizeOptions, newValue: SizeOptions) {
 
   }
 
@@ -686,7 +686,7 @@ struct custombutton {
       }.id('containerModalButtonRowId')
       .height('100%')
       .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset +'vp'})
-      .onAreaChange((oldValue: Area, newValue: Area) => {
+      .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.onAreaChangeEvent(oldValue, newValue)
       })
       .gesture(PanGesture())

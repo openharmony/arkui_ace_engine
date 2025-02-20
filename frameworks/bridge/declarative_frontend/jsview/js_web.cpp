@@ -2029,6 +2029,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
+    JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -5629,5 +5630,10 @@ void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetWebMediaAVSessionEnabled(isEnabled);
+}
+
+void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
 }
 } // namespace OHOS::Ace::Framework

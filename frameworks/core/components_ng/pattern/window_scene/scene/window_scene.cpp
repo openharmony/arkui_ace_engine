@@ -250,8 +250,8 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged", transaction);
     auto sizeChangeReason = session_->GetSizeChangeReason();
     if ((sizeChangeReason >= Rosen::SizeChangeReason::MAXIMIZE &&
-        sizeChangeReason <= Rosen::SizeChangeReason::ROTATION) ||
-        sizeChangeReason == Rosen::SizeChangeReason::RESIZE) {
+        sizeChangeReason <= Rosen::SizeChangeReason::RESIZE) ||
+        sizeChangeReason == Rosen::SizeChangeReason::DRAG_MOVE) {
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect id:%{public}d, reason:%{public}u, rect:%{public}s",
             session_->GetPersistentId(), sizeChangeReason, windowRect.ToString().c_str());
     }

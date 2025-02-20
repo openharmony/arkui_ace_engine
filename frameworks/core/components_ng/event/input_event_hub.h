@@ -96,6 +96,14 @@ public:
         hoverEventActuator_->ReplaceInputEvent(std::move(onHoverEventFunc));
     }
 
+    void SetHoverMoveEvent(OnHoverMoveFunc&& onHoverMoveEventFunc)
+    {
+        if (!hoverMoveEventActuator_) {
+            hoverMoveEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        hoverMoveEventActuator_->ReplaceInputEvent(std::move(onHoverMoveEventFunc));
+    }
+
     void SetAccessibilityHoverEvent(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc)
     {
         if (!accessibilityHoverEventActuator_) {
@@ -110,6 +118,14 @@ public:
             hoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
         }
         hoverEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onHoverEventFunc));
+    }
+
+    void SetJSFrameNodeOnHoverMoveEvent(OnHoverMoveFunc&& onHoverMoveEventFunc)
+    {
+        if (!hoverMoveEventActuator_) {
+            hoverMoveEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        hoverMoveEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onHoverMoveEventFunc));
     }
     
     void AddOnHoverEvent(const RefPtr<InputEvent>& onHoverEvent)
@@ -126,6 +142,22 @@ public:
             return;
         }
         hoverEventActuator_->RemoveInputEvent(onHoverEvent);
+    }
+    
+    void AddOnHoverMoveEvent(const RefPtr<InputEvent>& onHoverMoveEvent)
+    {
+        if (!hoverMoveEventActuator_) {
+            hoverMoveEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        hoverMoveEventActuator_->AddInputEvent(onHoverMoveEvent);
+    }
+
+    void RemoveOnHoverMoveEvent(const RefPtr<InputEvent>& onHoverMoveEvent)
+    {
+        if (!hoverMoveEventActuator_) {
+            return;
+        }
+        hoverMoveEventActuator_->RemoveInputEvent(onHoverMoveEvent);
     }
 
     void SetAxisEvent(OnAxisEventFunc&& onAxisEventFunc)
@@ -173,6 +205,13 @@ public:
         }
     }
 
+    void ClearUserOnHoverMove()
+    {
+        if (hoverMoveEventActuator_) {
+            hoverMoveEventActuator_->ClearUserCallback();
+        }
+    }
+
     void ClearUserOnAccessibilityHover()
     {
         if (accessibilityHoverEventActuator_) {
@@ -184,6 +223,13 @@ public:
     {
         if (hoverEventActuator_) {
             hoverEventActuator_->ClearJSFrameNodeCallback();
+        }
+    }
+
+    void ClearJSFrameNodeOnHoverMove()
+    {
+        if (hoverMoveEventActuator_) {
+            hoverMoveEventActuator_->ClearJSFrameNodeCallback();
         }
     }
 
@@ -212,6 +258,7 @@ private:
     WeakPtr<EventHub> eventHub_;
     RefPtr<InputEventActuator> mouseEventActuator_;
     RefPtr<InputEventActuator> hoverEventActuator_;
+    RefPtr<InputEventActuator> hoverMoveEventActuator_;
     RefPtr<InputEventActuator> hoverEffectActuator_;
     RefPtr<InputEventActuator> axisEventActuator_;
     RefPtr<InputEventActuator> accessibilityHoverEventActuator_;

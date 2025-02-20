@@ -3801,6 +3801,7 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
     CHECK_NULL_VOID(executor);
 
     std::string colorMode = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    std::string weightScale = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
     std::string themeTag = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::THEME);
     uint8_t themeFlags = static_cast<uint8_t>(OHOS::NWeb::SystemThemeFlags::NONE);
     if (!themeTag.empty()) {
@@ -3812,7 +3813,7 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
     }
 
     executor->PostTask(
-        [weak = WeakClaim(this), colorMode, themeFlags, dark_mode = current_dark_mode_]() {
+        [weak = WeakClaim(this), colorMode, themeFlags, dark_mode = current_dark_mode_, weightScale]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto nweb = delegate->GetNweb();
@@ -3833,6 +3834,9 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
             } else if (auto_dark_mode && colorMode == "light") {
                 setting->PutDarkSchemeEnabled(false);
                 setting->PutForceDarkModeEnabled(false);
+            }
+            if (delegate->enableFollowSystemFontWeight_) {
+                setting->SetFontWeightScale(stof(weightScale));
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebConfigurationUpdated");
@@ -4072,6 +4076,32 @@ void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebPutScrollBarColor");
+}
+
+void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::UpdateEnableFollowSystemFontWeight isfollow:%{public}d",
+        enableFollowSystemFontWeight);
+    enableFollowSystemFontWeight_ = enableFollowSystemFontWeight;
+    if (!enableFollowSystemFontWeight_) {
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    float fontWeightScale = SystemProperties::GetFontWeightScale();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fontWeightScale]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetFontWeightScale(fontWeightScale);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetFontWeightScale");
 }
 
 void WebDelegate::LoadUrl()
@@ -7422,30 +7452,42 @@ void WebDelegate::OnCursorUpdate(double x, double y, double width, double height
     webPattern->OnCursorUpdate(x, y, width, height);
 }
 
-void WebDelegate::OnSafeInsetsChange()
+NG::SafeAreaInsets WebDelegate::GetCombinedSafeArea()
 {
     NG::SafeAreaInsets resultSafeArea({0, 0}, {0, 0}, {0, 0}, {0, 0});
     resultSafeArea = resultSafeArea.Combine(systemSafeArea_);
     resultSafeArea = resultSafeArea.Combine(cutoutSafeArea_);
     resultSafeArea = resultSafeArea.Combine(navigationIndicatorSafeArea_);
+    return resultSafeArea;
+}
+
+void WebDelegate::OnSafeInsetsChange()
+{
+    NG::SafeAreaInsets resultSafeArea = GetCombinedSafeArea();
+    auto context = context_.Upgrade();
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::OnSafeInsetsChange occur errors, context is nullptr");
+        return;
+    }
+    auto windowRect = context->GetDisplayWindowRectInfo();
 
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
-        left = static_cast<int>(resultSafeArea.left_.start + resultSafeArea.left_.end);
+        left = static_cast<int>(
+            resultSafeArea.left_.start + resultSafeArea.left_.end - std::max(currentArea_.Left(), windowRect.Left()));
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
-        top = static_cast<int>(resultSafeArea.top_.end - resultSafeArea.top_.start);
+        top = static_cast<int>(resultSafeArea.top_.end - std::max(windowRect.Top(), currentArea_.Top()));
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
-        constexpr static int32_t CUTOUT_EDGES_BALANCE_FACTOR = 2;
-        right = static_cast<int>(resultSafeArea.right_.end - resultSafeArea.right_.start +
-                (currentArea_.Right() - resultSafeArea.right_.end) * CUTOUT_EDGES_BALANCE_FACTOR);
+        right = static_cast<int>(std::min(windowRect.Right(), currentArea_.Right()) +
+            windowRect.Right() - resultSafeArea.right_.end - resultSafeArea.right_.start);
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
-        bottom = static_cast<int>(resultSafeArea.bottom_.end - resultSafeArea.bottom_.start);
+        bottom = static_cast<int>(std::min(windowRect.Bottom(), currentArea_.Bottom()) - resultSafeArea.bottom_.start);
     }
 
     if (left < 0 || bottom < 0 || right < 0 || top < 0) {
@@ -7453,7 +7495,6 @@ void WebDelegate::OnSafeInsetsChange()
                 "ltrb:%{public}d,%{public}d,%{public}d,%{public}d", left, top, right, bottom);
         return;
     }
-
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebDelegate::OnSafeInsetsChange left:%{public}d top:%{public}d right:%{public}d bottom:%{public}d "
         "systemSafeArea:%{public}s cutoutSafeArea:%{public}s navigationIndicatorSafeArea:%{public}s "
@@ -7462,10 +7503,6 @@ void WebDelegate::OnSafeInsetsChange()
         navigationIndicatorSafeArea_.ToString().c_str(), resultSafeArea.ToString().c_str(),
         currentArea_.ToString().c_str());
 
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), left, top, right, bottom]() {
             auto delegate = weak.Upgrade();
@@ -7636,4 +7673,11 @@ void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaAVSessionEnabled");
 }
 
+std::string WebDelegate::GetCurrentLanguage()
+{
+    if (nweb_) {
+        return nweb_->GetCurrentLanguage();
+    }
+    return "";
+}
 } // namespace OHOS::Ace

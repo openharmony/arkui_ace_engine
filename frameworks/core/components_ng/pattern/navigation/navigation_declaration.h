@@ -33,6 +33,14 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
     return pipeline->GetTheme<NavigationBarTheme>();
 }
 
+
+inline RefPtr<NavigationBarTheme> NavigationGetTheme(int32_t themeScopeId)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<NavigationBarTheme>(themeScopeId);
+}
+
 // TODO：move some items to theme
 // title bar back button
 constexpr const char* BACK_BUTTON = "Back";

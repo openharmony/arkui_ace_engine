@@ -70,12 +70,15 @@ public:
 
         if (!animationRect_) {
             animationRect_ = std::make_shared<Rosen::RSAnimatableProperty<RectF>>(rect.GetRect());
-            AttachProperty(animationRect_);
         } else {
             animationRect_->Set(rect.GetRect());
         }
     }
 
+    void AttachAnimationRectProperty()
+    {
+        AttachProperty(animationRect_);
+    }
 private:
     void PaintFocusState(const RSRoundRect&, RSCanvas&) const;
 

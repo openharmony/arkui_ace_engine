@@ -175,6 +175,13 @@ public:
         return keyboardOffset_;
     }
 
+    void SetKeyboardInfo(float height);
+
+    int32_t GetKeyboardOrientation() const
+    {
+        return keyboardOrientation_;
+    }
+
     float GetRawKeyboardHeight() const
     {
         return rawKeyboardHeight_;
@@ -393,9 +400,9 @@ private:
     std::set<WeakPtr<FrameNode>, DepthCompare> needExpandNodes_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
-
     float lastKeyboardY_ = 0.0f;
     float rawKeyboardHeight_ = 0.0f;
+    int32_t keyboardOrientation_ = -1;
 
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;
     static constexpr float SAFE_AREA_MASS = 1.0f;

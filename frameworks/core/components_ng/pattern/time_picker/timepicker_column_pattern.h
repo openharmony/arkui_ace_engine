@@ -313,6 +313,7 @@ public:
 
     void InitHapticController(const RefPtr<FrameNode>& host);
 
+    void StopHaptic();
     uint32_t GetEnterIndex() const
     {
         return currentEnterIndex_;
@@ -466,6 +467,7 @@ private:
     bool hoverd_ = false;
     bool wheelModeEnabled_ = true;
     double scrollDelta_ = 0.0;
+    double enterDelta_ = 0.0;
     bool animationCreated_ = false;
     OffsetF offset_;
     SizeF size_;
@@ -483,6 +485,8 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool stopHaptic_ = false;
+    bool isTossReadyToStop_ = false;
 
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);

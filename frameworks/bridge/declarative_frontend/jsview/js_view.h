@@ -93,9 +93,7 @@ public:
         LOGE("jsViewFunction_ is null");
     }
 
-    void RenderJSExecution(int64_t deadline, bool& isTimeout);
-
-    virtual void DoRenderJSExecution(int64_t deadline, bool& isTimeout);
+    virtual void RenderJSExecution(int64_t deadline, bool& isTimeout);
 
     virtual void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) {};
 
@@ -170,6 +168,7 @@ public:
 
     virtual void OnDumpInfo(const std::vector<std::string>& params) {}
 
+    static JSView* GetNativeView(JSRef<JSObject> obj);
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -182,6 +181,7 @@ protected:
     // set on the root JSView of the card and inherited by all child JSViews
     // -1 means not part of a card
     int64_t cardId_ = -1;
+    std::function<void()> notifyRenderDone_;
 
 private:
     int32_t instanceId_ = -1;
@@ -192,9 +192,6 @@ private:
     // This can avoid crashing when the pointer in vector is corrupted.
     std::array<int32_t, PRIMARY_ID_STACK_SIZE> primaryIdStack_{};
     bool isStatic_ = false;
-    std::function<void()> notifyRenderDone_;
-    bool executedAboutToRender_ = false;
-    bool executedOnRenderDone_ = false;
 };
 
 class JSViewFullUpdate : public JSView {
@@ -313,7 +310,9 @@ public:
 
     void Destroy(JSView* parentCustomView) override;
 
-    void DoRenderJSExecution(int64_t deadline, bool& isTimeout) override;
+    void DoRenderJSExecution(int64_t deadline, bool& isTimeout);
+
+    void RenderJSExecution(int64_t deadline, bool& isTimeout) override;
 
     RefPtr<AceType> InitialRender(int64_t deadline, bool& isTimeout);
 
@@ -468,6 +467,8 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
+    bool executedAboutToRender_ = false;
+    bool executedOnRenderDone_ = false;
     bool executedRender_ = false;
 };
 

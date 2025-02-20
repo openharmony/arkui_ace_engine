@@ -618,6 +618,18 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 
 void VideoPattern::OnError(const std::string& errorId)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto video = AceType::DynamicCast<VideoNode>(host);
+    CHECK_NULL_VOID(video);
+    auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
+    CHECK_NULL_VOID(column);
+    auto renderContext = column->GetRenderContext();
+    renderContext->AddChild(renderContextForMediaPlayer_, 0);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
+
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
     auto json = JsonUtil::Create(true);
     json->Put("error", "");

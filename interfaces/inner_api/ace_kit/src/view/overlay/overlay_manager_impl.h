@@ -37,7 +37,7 @@ public:
 
     void ShowMenu(const int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode>& menu) override;
 private:
-    NG::OverlayManager* overlayManager_;
+    NG::OverlayManager* overlayManager_ = nullptr;
 };
 } // OHOS::Ace::Kit
 

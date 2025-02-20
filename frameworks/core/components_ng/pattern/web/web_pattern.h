@@ -503,6 +503,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
 
     bool IsFocus() const
     {
@@ -773,6 +774,8 @@ public:
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
 
+    std::string GetCurrentLanguage() override;
+
 private:
     friend class WebContextSelectOverlay;
 
@@ -865,6 +868,7 @@ private:
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
+    void OnEnableFollowSystemFontWeightUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
@@ -888,6 +892,7 @@ private:
     void SetFakeDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
+    void HandleTouchEvent(const TouchEventInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
     void WebSendMouseEvent(const MouseInfo& info, int32_t clickNum);
     bool HandleDoubleClickEvent(const MouseInfo& info);
@@ -1211,6 +1216,7 @@ private:
     int32_t zoomErrorCount_ = 0;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
     bool overlayCreating_ = false;
+    bool awaitingOnTextSelected_ = false;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;

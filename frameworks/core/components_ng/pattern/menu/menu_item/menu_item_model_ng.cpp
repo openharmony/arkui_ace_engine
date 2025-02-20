@@ -48,10 +48,9 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     renderContext->UpdateBorderRadius(border);
 
     CHECK_NULL_VOID(customNode);
-    if (!menuItem->GetChildren().empty()) {
-        menuItem->Clean();
+    if (menuItem->GetChildren().empty()) {
+        menuItem->AddChild(customNode);
     }
-    menuItem->AddChild(customNode);
 }
 
 /*
@@ -170,6 +169,14 @@ void MenuItemModelNG::SetOnChange(std::function<void(bool)>&& onChange)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(onChange);
+}
+
+void MenuItemModelNG::SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 
 void MenuItemModelNG::SetFontSize(const Dimension& fontSize)

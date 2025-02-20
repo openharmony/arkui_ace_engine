@@ -71,15 +71,10 @@ const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_ico
 
 bool GestureEventHub::IsPixelMapNeedScale() const
 {
-    CHECK_NULL_RETURN(pixelMap_, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto width = pixelMap_->GetWidth();
-    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
-    if (!frameNode->GetDragPreviewOption().isScaleEnabled || width == 0 || width <= maxWidth) {
-        return false;
-    }
-    return true;
+    auto scale = DragDropFuncWrapper::GetPixelMapScale(frameNode);
+    return scale != 1.0f;
 }
 
 bool CheckNeedDragDropFrameworkStatus(const std::string& tag)
@@ -169,7 +164,7 @@ void GestureEventHub::StartLongPressActionForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
 }
 
 void GestureEventHub::CancelDragForWeb()
@@ -775,7 +770,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     dragDropManager->SetSummaryMap(summary);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
-    if (pixelMap_ == nullptr) {
+    if (pixelMap) {
+        SetPixelMap(pixelMap);
+    } else if (pixelMap == nullptr) {
         FireCustomerOnDragEnd(pipeline, eventHub);
         TAG_LOGW(AceLogTag::ACE_DRAG, "Thumbnail pixelMap is empty.");
         if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
@@ -998,7 +995,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
-            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -1439,7 +1436,7 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
                 CHECK_NULL_VOID(frameNode);
                 gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;

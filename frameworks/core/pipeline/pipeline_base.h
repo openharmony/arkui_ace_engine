@@ -1165,8 +1165,6 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    virtual void SetupSubRootElement() = 0;
-
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
     void SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
@@ -1521,6 +1519,8 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
+    
+    bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;

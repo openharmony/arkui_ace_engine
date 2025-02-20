@@ -44,6 +44,16 @@ void SymbolModelNG::SetFontWeight(const Ace::FontWeight& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
 }
 
+void SymbolModelNG::SetFontFamilies(std::vector<std::string>& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
+}
+
+void SymbolModelNG::SetSymbolType(SymbolType value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, value);
+}
+
 void SymbolModelNG::SetFontSize(const CalcDimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
@@ -123,6 +133,16 @@ void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::uint32_t ef
 void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, SymbolType::SYSTEM, frameNode);
+}
+
+void SymbolModelNG::InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode, const char* fontFamilyName)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, SymbolType::CUSTOM, frameNode);
+    std::vector<std::string> fontFamilyNames;
+    fontFamilyNames.push_back(fontFamilyName);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, fontFamilyNames, frameNode);
 }
 
 void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOptions& symbolEffectOptions)
@@ -140,6 +160,12 @@ void SymbolModelNG::SetSymbolGlyphInitialize(FrameNode* frameNode, const std::ui
     InitialSymbol(frameNode, symbolId);
 }
 
+void SymbolModelNG::SetCustomSymbolGlyphInitialize(FrameNode* frameNode, const std::uint32_t& symbolId,
+    const char* fontFamilyName)
+{
+    InitialCustomSymbol(frameNode, symbolId, fontFamilyName);
+}
+
 void SymbolModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
@@ -148,5 +174,19 @@ void SymbolModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
 void SymbolModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
+}
+
+void SymbolModelNG::UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t symbolEffectType, const bool isActive,
+    const std::int16_t isTxtActiveSource)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto symbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.SetEffectType(SymbolEffectType(symbolEffectType));
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(isTxtActiveSource);
+    property->UpdateSymbolEffectOptions(symbolEffectOptions);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 } // namespace OHOS::Ace::NG

@@ -171,6 +171,20 @@ struct DragInfo {
     std::string allowDropType;
 };
 
+enum class RichEditorErrorType {
+    DELETE_BACKWARD = 0,
+    DELETE_FORWARD,
+    INSERT_VALUE,
+    DELETE_NODE,
+};
+
+struct RichEditorInfo {
+    RichEditorErrorType errorType;
+    int32_t spanLength = -1;
+    int32_t textLength = -1;
+    int32_t spanIndex = -1;
+};
+
 class ACE_FORCE_EXPORT EventReport {
 public:
     static void SendEvent(const EventInfo& eventInfo);
@@ -224,10 +238,12 @@ public:
     static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
         const std::string& moduleName);
     static void ReportDragInfo(const DragInfo& dragInfo);
+    static void ReportRichEditorInfo(const RichEditorInfo& richEditorInfo);
     static void ReportScrollableErrorEvent(
         const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType);
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
+    static void ReportReusedNodeSkipMeasureApp();
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

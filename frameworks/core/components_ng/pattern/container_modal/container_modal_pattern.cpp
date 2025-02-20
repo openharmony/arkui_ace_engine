@@ -589,7 +589,18 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     TrimFloatingWindowLayout();
 }
 
-bool ContainerModalPattern::GetContainerModalTitleVisible() { return customTitleSettedShow_; }
+bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
+{
+    if (isImmersive) {
+        auto floatingTitleRow = GetFloatingTitleRow();
+        CHECK_NULL_RETURN(floatingTitleRow, false);
+        auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
+        CHECK_NULL_RETURN(floatingLayoutProperty, false);
+        return floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE;
+    } else {
+        return isTitleShow_ && customTitleSettedShow_;
+    }
+}
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
@@ -811,6 +822,22 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
     auto sidePadding = isRtl ? &padding.left : &padding.right;
     *sidePadding = GetControlButtonRowWidth();
     titleRowProperty->UpdatePadding(padding);
+}
+
+void ContainerModalPattern::InitAllTitleRowLayoutProperty()
+{
+    auto containerModal = GetHost();
+    CHECK_NULL_VOID(containerModal);
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_VOID(floatingTitleRow);
+    InitTitleRowLayoutProperty(customTitleRow);
+    customTitleRow->MarkModifyDone();
+    customTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    InitTitleRowLayoutProperty(floatingTitleRow);
+    floatingTitleRow->MarkModifyDone();
+    floatingTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 CalcLength ContainerModalPattern::GetControlButtonRowWidth()

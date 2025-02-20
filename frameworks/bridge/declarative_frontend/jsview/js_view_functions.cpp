@@ -708,7 +708,7 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
         // jsRenderResult_ maybe an js exception, not a JSView
-        JSView* view = obj->Unwrap<JSView>();
+        JSView* view = JSView::GetNativeView(obj);
         if (view != nullptr) {
             view->Destroy(parentCustomView);
         }
@@ -733,7 +733,7 @@ void ViewFunctions::Destroy()
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
         // jsRenderResult_ maybe an js exception, not a JSView
-        JSView* view = obj->Unwrap<JSView>();
+        JSView* view = JSView::GetNativeView(obj);
         if (view != nullptr) {
             LOGE("NOTE NOTE NOTE render returned a JSView object that's dangling!");
         }

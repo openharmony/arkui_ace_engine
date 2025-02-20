@@ -230,6 +230,7 @@ public:
     void SetEnabledHapticFeedback(bool isEnabled) override;
     void SetOptimizeParserBudgetEnabled(bool enable) override;
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
+    void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

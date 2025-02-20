@@ -120,7 +120,7 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t pa
 
 void UiReportProxy::OnComponentChange(const std::string& key, const std::string& value)
 {
-    if (UiSessionManager::GetInstance().GetComponentChangeEventRegistered()) {
+    if (UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         auto result = InspectorJsonUtil::Create(true);
         result->Put(key.c_str(), value.c_str());
         ReportComponentChangeEvent(result->ToString());
@@ -216,6 +216,65 @@ void UiReportProxyRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
     }
     if (handler_) {
         handler_();
+    }
+}
+
+void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendShowingImage write interface token failed");
+        return;
+    }
+    if (!messageData.WriteInt32(maps.size())) {
+        LOGW("SendShowingImage write size failed");
+        return;
+    }
+    for (auto& map : maps) {
+        if (!messageData.WriteInt32(map.first)) {
+            LOGW("SendShowingImage write id failed");
+            return;
+        }
+        std::vector<uint8_t> buf;
+        map.second->EncodeTlv(buf);
+        auto dataSize = buf.size();
+        sptr<Ashmem> ashmem = Ashmem::CreateAshmem((std::to_string(map.first)).c_str(), dataSize);
+        if (ashmem == nullptr) {
+            LOGW("Create shared memory failed");
+            return;
+        }
+        // Set the read/write mode of the ashme.
+        if (!ashmem->MapReadAndWriteAshmem()) {
+            LOGW("Map shared memory fail");
+            return;
+        }
+        // Write the size and content of each item to the ashmem.
+        int32_t offset = 0;
+        if (!ashmem->WriteToAshmem(reinterpret_cast<uint8_t*>(buf.data()), dataSize, offset)) {
+            LOGW("Write info to shared memory fail");
+            ClearAshmem(ashmem);
+            return;
+        }
+
+        if (!messageData.WriteAshmem(ashmem)) {
+            ClearAshmem(ashmem);
+            LOGW("Write ashmem to tempParcel fail");
+            return;
+        }
+        ClearAshmem(ashmem);
+    }
+    if (Remote()->SendRequest(SEND_IMAGES, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendShowingImage send request failed");
+    }
+}
+
+void UiReportProxy::ClearAshmem(sptr<Ashmem>& optMem)
+{
+    if (optMem != nullptr) {
+        optMem->UnmapAshmem();
+        optMem->CloseAshmem();
     }
 }
 } // namespace OHOS::Ace

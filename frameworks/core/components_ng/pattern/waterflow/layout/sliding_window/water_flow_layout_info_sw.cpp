@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+#include "base/log/event_report.h"
 
 #include <numeric>
 
@@ -341,7 +342,7 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
 
 void WaterFlowLayoutInfoSW::PrepareJump()
 {
-    if (startIndex_ > endIndex_) {
+    if (startIndex_ > endIndex_ || jumpIndex_ != EMPTY_JUMP_INDEX) {
         return;
     }
     align_ = ScrollAlign::START;
@@ -875,7 +876,7 @@ void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t start
 
 bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t itemCnt)
 {
-    using std::abs, std::round, std::min, std::max;
+    using std::abs, std::round, std::clamp;
     const float offset = StartPos() + delta_;
     if (LessOrEqual(abs(offset), viewport * 2.0f)) {
         return false;
@@ -891,10 +892,9 @@ bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t i
     if (NearZero(average)) {
         return false;
     }
-    jumpIndex_ -= static_cast<int32_t>(round(offset * crossCnt / average));
 
-    jumpIndex_ = min(jumpIndex_, itemCnt);
-    jumpIndex_ = max(jumpIndex_, 0);
+    jumpIndex_ = startIdx - static_cast<int32_t>(round(offset * crossCnt / average));
+    jumpIndex_ = clamp(jumpIndex_, 0, itemCnt - 1);
     align_ = ScrollAlign::START;
     delta_ = 0.0f;
     return true;
@@ -963,6 +963,8 @@ const Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx) const
 {
     if (!idxToLane_.count(itemIdx)) {
         TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d", itemIdx);
+        std::string subErrorType = "Inconsistent data found on item " + std::to_string(itemIdx);
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::INTERNAL_ERROR, subErrorType);
         return nullptr;
     }
     size_t laneIdx = idxToLane_.at(itemIdx);
@@ -974,6 +976,9 @@ const Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx) const
     if (lane.items_.empty()) {
         TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d when accessing lane %{public}zu", itemIdx,
             laneIdx);
+        std::string subErrorType = "Inconsistent data found on item " + std::to_string(itemIdx) +
+                                   " when accessing lane " + std::to_string(laneIdx);
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::INTERNAL_ERROR, subErrorType);
         return nullptr;
     }
     return &lane;

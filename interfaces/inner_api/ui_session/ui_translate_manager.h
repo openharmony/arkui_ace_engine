@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_TRANSLATE_MANAGER_H
 #define FOUNDATION_ACE_TRANSLATE_MANAGER_H
 #include <cstdint>
+#include <vector>
 
 #include "ui_session_json_util.h"
 

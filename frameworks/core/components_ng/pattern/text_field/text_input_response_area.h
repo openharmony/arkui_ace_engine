@@ -53,6 +53,8 @@ public:
 
     SizeF GetFrameSize(bool withSafeArea = false);
 
+    virtual void CreateIconRect(RoundRect& paintRect, bool isFocus) {}
+
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
@@ -101,6 +103,8 @@ public:
     void OnPasswordIconClicked();
     void UpdatePasswordIconColor(const Color& color);
 
+    void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
+
 private:
     void LoadImageSourceInfo();
     void AddImageEventOnError();
@@ -116,6 +120,7 @@ private:
     bool IsShowPasswordIcon();
     float GetIconRightOffset();
     float GetIconSize();
+    void AddIconHotZoneRect();
     RefPtr<FrameNode> CreateNode();
     std::optional<ImageSourceInfo> GetCurrentSourceInfo()
     {
@@ -127,6 +132,7 @@ private:
     RefPtr<FrameNode> stackNode_;
     WeakPtr<FrameNode> passwordNode_;
     Color symbolColor_;
+    float passwordHoverSize_ = 0.0f;
 };
 
 class UnitResponseArea : public TextInputResponseArea {
@@ -197,6 +203,8 @@ public:
 
     bool CheckUpdateCleanNode();
 
+    void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
+
 private:
     bool IsShowClean() const;
     bool IsShowSymbol() const;
@@ -210,6 +218,7 @@ private:
     RefPtr<FrameNode> CreateNode();
     void LoadingImageProperty();
     void LoadingCancelButtonColor();
+    void AddIconHotZoneRect();
     ImageSourceInfo CreateImageSourceInfo();
     RefPtr<FrameNode> cleanNode_;
     CalcDimension iconSize_ = 0.0_px;
@@ -218,6 +227,7 @@ private:
     std::string moduleName_;
     Color iconColor_;
     bool isShow_ = false;
+    float cancelHoverSize_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

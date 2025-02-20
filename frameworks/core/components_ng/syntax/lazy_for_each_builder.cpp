@@ -1013,8 +1013,13 @@ namespace OHOS::Ace::NG {
         const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         if (GetSysTimestamp() > deadline) {
-            if (!DeleteExpiringItemImmediately()) {
-                cache.merge(expiringItem_);
+            if (DeleteExpiringItemImmediately()) {
+                return false;
+            }
+            for (const auto& [key, node] : expiringItem_) {
+                if (node.first == -1) {
+                    cache.try_emplace(key, node);
+                }
             }
             return false;
         }
@@ -1140,7 +1145,7 @@ namespace OHOS::Ace::NG {
             if (node.second.second == nullptr) {
                 continue;
             }
-            if (node.second.second->GetTag() == "BuilderProxyNode") {
+            if (node.second.second->IsReusableNode()) {
                 node.second.second->SetDestroying(isDestroying, false);
             } else {
                 node.second.second->SetDestroying(isDestroying, cleanStatus);
@@ -1151,7 +1156,7 @@ namespace OHOS::Ace::NG {
             if (node.second.second == nullptr) {
                 continue;
             }
-            if (node.second.second->GetTag() == "BuilderProxyNode") {
+            if (node.second.second->IsReusableNode()) {
                 node.second.second->SetDestroying(isDestroying, false);
             } else {
                 node.second.second->SetDestroying(isDestroying, cleanStatus);

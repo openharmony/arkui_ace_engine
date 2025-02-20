@@ -1399,10 +1399,98 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
 
 /**
  * @tc.name: DialogModelTestNg035
+ * @tc.desc: Test CreateDialogNode with dialogTransition effect and maskTransition effect.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DialogModelTestNg, DialogModelTestNg035, TestSize.Level1)
+ {
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    AnimationOption animationOption;
+    animationOption.SetDelay(10);
+
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    auto dialogTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+    auto maskTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+ 
+    DialogProperties dialogProps {
+        .type = DialogType::ALERT_DIALOG,
+        .title = TITLE,
+        .content = MESSAGE,
+        .openAnimation = animationOption,
+        .dialogTransitionEffect = dialogTransitionEffect,
+        .maskTransitionEffect = maskTransitionEffect,
+    };
+ 
+    ASSERT_NE(dialogProps.dialogTransitionEffect, nullptr);
+    ASSERT_NE(dialogProps.maskTransitionEffect, nullptr);
+    /**
+     * @tc.steps: step2. Create DialogNode.
+     * @tc.expected: DialogNode created successfully
+     */
+    rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.dialogTransitionEffect);
+    ASSERT_NE(rootNode, nullptr);
+
+    rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.maskTransitionEffect);
+    ASSERT_NE(rootNode, nullptr);
+}
+ 
+ /**
+  * @tc.name: DialogModelTestNg036
+  * @tc.desc: Test CreateDialogNode with no dialogTransition effect and maskTransition effect.
+  * @tc.type: FUNC
+  */
+ HWTEST_F(DialogModelTestNg, DialogModelTestNg036, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    AnimationOption animationOption;
+    animationOption.SetDelay(10);
+
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    DialogProperties dialogProps {
+        .type = DialogType::ALERT_DIALOG,
+        .title = TITLE,
+        .content = MESSAGE,
+        .openAnimation = animationOption,
+        .dialogTransitionEffect = nullptr,
+        .maskTransitionEffect = nullptr,
+    };
+ 
+    /**
+     * @tc.steps: step2. Create DialogNode.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto customDialog = DialogView::CreateDialogNode(dialogProps, nullptr);
+    ASSERT_NE(customDialog, nullptr);
+
+    auto customDialogPattern = customDialog->GetPattern<DialogPattern>();
+    ASSERT_NE(customDialogPattern, nullptr);
+    customDialogPattern->SetDialogProperties(dialogProps);
+
+    /**
+     * @tc.steps: step3. Call maskTransitionEffect from dialog.
+     * @tc.expected: transitionEffect is not nullptr.
+     */
+    auto dialogTransitionEffect = customDialogPattern->GetDialogProperties().dialogTransitionEffect;
+    ASSERT_EQ(dialogTransitionEffect, nullptr);
+    auto maskTransitionEffect = customDialogPattern->GetDialogProperties().maskTransitionEffect;
+    ASSERT_EQ(maskTransitionEffect, nullptr);
+}
+
+/**
+ * @tc.name: DialogModelTestNg037
  * @tc.desc: Test ActionSheetModelNG's ShowActionSheet.
  * @tc.type: FUNC
  */
-HWTEST_F(DialogModelTestNg, DialogModelTestNg035, TestSize.Level1)
+HWTEST_F(DialogModelTestNg, DialogModelTestNg037, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.Mock data.
@@ -1447,11 +1535,11 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg035, TestSize.Level1)
 }
   
 /**
- * @tc.name: DialogModelTestNg036
+ * @tc.name: DialogModelTestNg038
  * @tc.desc: Test AlertDialogModelNG's SetShowDialog.
  * @tc.type: FUNC
  */
-HWTEST_F(DialogModelTestNg, DialogModelTestNg036, TestSize.Level1)
+HWTEST_F(DialogModelTestNg, DialogModelTestNg038, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.Mock data.
@@ -1495,12 +1583,12 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg036, TestSize.Level1)
     EXPECT_EQ(onDidDisappearFlag, true);
 }
   
-  /**
-   * @tc.name: DialogModelTestNg037
-   * @tc.desc: Test CustomDialogControllerModelNG's SetOpenDialog.
-   * @tc.type: FUNC
-   */
-HWTEST_F(DialogModelTestNg, DialogModelTestNg037, TestSize.Level1)
+/**
+ * @tc.name: DialogModelTestNg039
+ * @tc.desc: Test CustomDialogControllerModelNG's SetOpenDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg039, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.Mock data.
@@ -1656,5 +1744,101 @@ HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode001, TestSize.Level1)
      */
     auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternTest032
+ * @tc.desc: Test dialogPattern.BuildTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogPatternTest032, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    /**
+     * @tc.steps: step3. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps: step4. create pattern.
+     * @tc.expected: the pattern created successfully.
+     */
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step5. execute UpdateContentRenderContext.
+     * @tc.expected: UpdateContentRenderContext successfully.
+     */
+    DialogProperties props;
+    props.isSysBlurStyle = true;
+    props.blurStyleOption->policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    props.blurStyleOption->blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    pattern->UpdateContentRenderContext(dialogNode, props);
+
+    auto renderContext = pattern->contentRenderContext_;
+    ASSERT_NE(renderContext, nullptr);
+
+    EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_NE(renderContext->GetBackBlurStyle()->policy, props.blurStyleOption->policy);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, props.blurStyleOption->blurStyle);
+}
+
+/**
+ * @tc.name: DialogPatternTest033
+ * @tc.desc: Test dialogPattern.BuildTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogPatternTest033, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    /**
+     * @tc.steps: step3. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps: step4. create pattern.
+     * @tc.expected: the pattern created successfully.
+     */
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step5. execute UpdateContentRenderContext.
+     * @tc.expected: UpdateContentRenderContext successfully.
+     */
+    DialogProperties props;
+    props.isSysBlurStyle = true;
+    props.effectOption->policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    pattern->UpdateContentRenderContext(dialogNode, props);
+
+    auto renderContext = pattern->contentRenderContext_;
+    ASSERT_NE(renderContext, nullptr);
+
+    EXPECT_FALSE(renderContext->GetBackgroundEffect().has_value());
+    EXPECT_NE(renderContext->GetBackgroundEffect()->policy, props.effectOption->policy);
 }
 } // namespace OHOS::Ace::NG

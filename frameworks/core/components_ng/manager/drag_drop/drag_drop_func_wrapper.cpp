@@ -23,6 +23,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -103,7 +104,7 @@ void PostStopDrag(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAct
             InteractionInterface::GetInstance()->StopDrag(dropResult);
             InteractionInterface::GetInstance()->SetDragWindowVisible(false);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDragStop", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDragStop");
 }
 
 bool ConfirmCurPointerEventInfo(
@@ -306,6 +307,32 @@ void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPoint
     CHECK_NULL_VOID(manager);
     manager->SetDraggingPointer(currentPointerId);
     manager->SetDraggingPressedState(true);
+}
+
+int32_t DragDropFuncWrapper::RequestDragEndPending()
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    static std::atomic<int32_t> gDragDropDelayEndRequestId;
+    int32_t id = gDragDropDelayEndRequestId.fetch_add(1);
+    return id;
+}
+
+int32_t DragDropFuncWrapper::NotifyDragResult(int32_t requestId, int32_t result)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDragResult(requestId, result);
+}
+
+int32_t DragDropFuncWrapper::NotifyDragEndPendingDone(int32_t requestId)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(requestId);
 }
 
 void DragDropFuncWrapper::DecideWhetherToStopDragging(
@@ -944,6 +971,17 @@ void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
     auto overlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto menuWrapperNode = overlayManager->GetMenuNode(targetId);
+    if (!menuWrapperNode) {
+        auto rootNode = overlayManager->GetRootNode().Upgrade();
+        CHECK_NULL_VOID(rootNode);
+        for (const auto& child : rootNode->GetChildren()) {
+            auto node = AceType::DynamicCast<FrameNode>(child);
+            if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+                menuWrapperNode = node;
+                break;
+            }
+        }
+    }
     CHECK_NULL_VOID(menuWrapperNode);
 
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1376,13 +1414,14 @@ float DragDropFuncWrapper::GetPixelMapScale(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_RETURN(frameNode, scale);
     auto pixelMap = frameNode->GetDragPixelMap();
     CHECK_NULL_RETURN(pixelMap, scale);
-    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        return scale;
-    }
     auto width = pixelMap->GetWidth();
-    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
-    if (frameNode->GetDragPreviewOption().isScaleEnabled && width != 0 && width > maxWidth) {
-        scale = maxWidth / width;
+    auto height = pixelMap->GetHeight();
+    auto gestureEvent = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEvent, scale);
+    if (frameNode->GetDragPreviewOption().isScaleEnabled && width > 0 && height > 0) {
+        auto scaleData = DragDropManager::GetScaleInfo(width, height, gestureEvent->GetTextDraggable());
+        CHECK_NULL_RETURN(scaleData, scale);
+        scale = scaleData->scale;
     }
     return scale;
 }

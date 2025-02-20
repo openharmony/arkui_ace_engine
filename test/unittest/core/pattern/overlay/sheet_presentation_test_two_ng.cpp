@@ -1460,18 +1460,18 @@ HWTEST_F(SheetPresentationTestTwoNg, FireOnHeightDidChange001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. same height to excute FireOnHeightDidChange.
-     * @tc.expected: preDidHeight_ is 100.
+     * @tc.expected: preDidHeight_ is -8.
      */
 
-    sheetPattern->FireOnHeightDidChange(100);
-    EXPECT_EQ(sheetPattern->preDidHeight_, 100);
+    sheetPattern->FireOnHeightDidChange();
+    EXPECT_EQ(sheetPattern->preDidHeight_, -8);
 
     /**
      * @tc.steps: step5. new height to excute FireOnHeightDidChange.
-     * @tc.expected: preDidHeight_ is 200.
+     * @tc.expected: preDidHeight_ is -8.
      */
-    sheetPattern->FireOnHeightDidChange(200);
-    EXPECT_EQ(sheetPattern->preDidHeight_, 200);
+    sheetPattern->FireOnHeightDidChange();
+    EXPECT_EQ(sheetPattern->preDidHeight_, -8);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 

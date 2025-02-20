@@ -101,6 +101,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(true);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
@@ -378,6 +379,11 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return false;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

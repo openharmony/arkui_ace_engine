@@ -384,6 +384,12 @@ public:
         return resourceAdapter_->GetSymbolById(resId);
     }
 
+    void UpdateColorMode(ColorMode colorMode)
+    {
+        CHECK_NULL_VOID(resourceAdapter_);
+        resourceAdapter_->UpdateColorMode(colorMode);
+    }
+
 private:
     RefPtr<ThemeConstants> themeConstants_;
     RefPtr<ResourceAdapter> resourceAdapter_;

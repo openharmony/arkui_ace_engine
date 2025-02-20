@@ -170,7 +170,7 @@ public:
         }
     }
 
-    void FireOnHeightDidChange(float height);
+    void FireOnHeightDidChange();
 
     bool HasOnHeightDidChange()
     {
@@ -328,7 +328,6 @@ public:
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
-        ProcessColumnRect(height_);
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
@@ -525,14 +524,20 @@ public:
         return sheetOffsetY_;
     }
 
+    bool IsShowInSubWindowTwoInOne();
+    bool IsShowInSubWindow();
+    SheetType ComputeSheetTypeInSubWindow();
+    void SheetTransitionAction(float offset, bool isStart, bool isTransitionIn);
+    float ComputeTransitionOffset(float sheetHeight);
+    void InitSheetTransitionAction(float offset);
+    int32_t GetSubWindowId();
+
     OffsetF GetSheetArrowOffset() const
     {
         return arrowOffset_;
     }
 
     float GetFitContentHeight();
-
-    void ProcessColumnRect(float height = 0.0f);
 
     bool WillSpringBack() const
     {
@@ -709,6 +714,8 @@ public:
     }
     void OnFontScaleConfigurationUpdate() override;
 
+    void FireCommonCallback();
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -760,6 +767,7 @@ private:
     float GetTopAreaInWindow() const;
     void MarkSheetPageNeedRender();
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
+    PipelineContext* GetSheetMainPipeline() const;
     float GetBottomSafeArea();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     bool AvoidKeyboardBeforeTranslate();

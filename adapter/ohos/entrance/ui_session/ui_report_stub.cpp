@@ -75,6 +75,39 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             SendWebText(nodeId, res);
             break;
         }
+        case SEND_IMAGES: {
+            std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> result;
+            int32_t size = data.ReadInt32();
+            for (int i = 0; i < size; i++) {
+                int32_t nodeId = data.ReadInt32();
+                sptr<Ashmem> ashMem = data.ReadAshmem();
+                if (ashMem == nullptr) {
+                    LOGI("Ashmem is nullptr");
+                    return -1;
+                }
+                if (!ashMem->MapReadOnlyAshmem()) {
+                    LOGI("MapReadOnlyAshmem failed");
+                    ClearAshmem(ashMem);
+                    return -1;
+                }
+                int32_t ashMemSize = ashMem->GetAshmemSize();
+                int32_t offset = 0;
+                const uint8_t* ashDataPtr =
+                    reinterpret_cast<const uint8_t*>(ashMem->ReadFromAshmem(ashMemSize, offset));
+                if (ashDataPtr == nullptr) {
+                    LOGI("ashDataPtr is nullptr");
+                    ClearAshmem(ashMem);
+                    return -1;
+                }
+                std::vector<uint8_t> mapData(ashDataPtr, ashDataPtr + ashMemSize);
+                auto data = std::shared_ptr<Media::PixelMap>(OHOS::Media::PixelMap::DecodeTlv(mapData));
+                std::pair<int32_t, std::shared_ptr<Media::PixelMap>> value = { nodeId, data };
+                result.push_back(value);
+                ClearAshmem(ashMem);
+            }
+            SendShowingImage(result);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -201,11 +234,36 @@ void UiReportStub::UnregisterComponentChangeEventCallback()
 
 void UiReportStub::SendCurrentLanguage(const std::string& data)
 {
-    getWebViewCurrentLanguageCallback_(data);
+    if (getWebViewCurrentLanguageCallback_) {
+        getWebViewCurrentLanguageCallback_(data);
+    }
 }
 
 void UiReportStub::SendWebText(int32_t nodeId, std::string res)
 {
-    getTranslateTextCallback_(nodeId, res);
+    if (getTranslateTextCallback_) {
+        getTranslateTextCallback_(nodeId, res);
+    }
+}
+
+void UiReportStub::RegisterGetShowingImageCallback(
+    const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& eventCallback)
+{
+    getShowingImageCallback_ = std::move(eventCallback);
+}
+
+void UiReportStub::SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
+{
+    if (getShowingImageCallback_) {
+        getShowingImageCallback_(maps);
+    }
+}
+
+void UiReportStub::ClearAshmem(sptr<Ashmem>& optMem)
+{
+    if (optMem != nullptr) {
+        optMem->UnmapAshmem();
+        optMem->CloseAshmem();
+    }
 }
 } // namespace OHOS::Ace
