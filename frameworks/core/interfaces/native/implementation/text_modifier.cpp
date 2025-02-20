@@ -607,7 +607,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto optSpanType = Converter::OptConvert<TextSpanType>(spanType);
     auto convResponseType = Converter::Convert<TextResponseType>(responseType);
-    auto convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
+    auto convBuildFunc = [callback = CallbackHelper(*content), node]() {
         auto builderNode = callback.BuildSync(node);
         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };

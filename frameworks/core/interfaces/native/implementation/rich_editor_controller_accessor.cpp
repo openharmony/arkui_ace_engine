@@ -363,7 +363,7 @@ Ark_Int32 AddBuilderSpanImpl(Ark_RichEditorController peer,
             result = peerImpl->AddBuilderSpanImpl(locOptions.value());
         } else {
             auto frameNode = frameNodePtr.GetRawPtr();
-            auto customNode = CallbackHelper(*value, frameNode).BuildSync(frameNode);
+            auto customNode = CallbackHelper(*value).BuildSync(frameNode);
             auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
             if (customFrameNode) {
                 result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());

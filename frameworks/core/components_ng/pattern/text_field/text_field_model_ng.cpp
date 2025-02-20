@@ -2335,6 +2335,7 @@ void TextFieldModelNG::SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UI
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     RefPtr<UINode> unitNode = builder();
+    CHECK_NULL_VOID(unitNode);
     pattern->SetUnitNode(unitNode);
 }
 

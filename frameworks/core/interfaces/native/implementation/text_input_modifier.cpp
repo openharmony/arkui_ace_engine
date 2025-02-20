@@ -438,7 +438,7 @@ void ShowUnitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto builder = [callback = CallbackHelper(*value, frameNode), node]() -> RefPtr<UINode> {
+    auto builder = [callback = CallbackHelper(*value), node]() -> RefPtr<UINode> {
         return callback.BuildSync(node);
     };
     TextFieldModelNG::SetShowUnit(frameNode, std::move(builder));
@@ -669,7 +669,7 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
+    auto onWillInsert = [callback = CallbackHelper(*value)](const InsertValueInfo& value) -> bool {
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
@@ -699,7 +699,7 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
+    auto onWillDelete = [callback = CallbackHelper(*value)](const DeleteValueInfo& value) -> bool {
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
@@ -781,7 +781,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     KeyboardOptions keyboardOptions = {.supportAvoidance = false};
     auto convOptions = options ? Converter::OptConvert<KeyboardOptions>(*options) : keyboardOptions;
-    auto customNode = CallbackHelper(*value, frameNode).BuildSync(node);
+    auto customNode = CallbackHelper(*value).BuildSync(node);
     auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
     bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
     TextFieldModelNG::SetCustomKeyboard(frameNode, customFrameNode, supportAvoidance);

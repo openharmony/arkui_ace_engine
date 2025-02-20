@@ -63,7 +63,7 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
     }
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(options->indicatorBuilder);
     if (arkBuilder.has_value()) {
-        auto builder = [callback = CallbackHelper(arkBuilder.value(), frameNode), node]() {
+        auto builder = [callback = CallbackHelper(arkBuilder.value()), node]() {
             auto builderNode = callback.BuildSync(node);
             NG::ViewStackProcessor::GetInstance()->Push(builderNode);
         };

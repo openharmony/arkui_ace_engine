@@ -414,7 +414,7 @@ void OnItemDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDelete = [callback = CallbackHelper(*value, frameNode)](int32_t index) -> bool {
+    auto onItemDelete = [callback = CallbackHelper(*value)](int32_t index) -> bool {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkIndex);
         return Converter::Convert<bool>(arkResult);
@@ -427,7 +427,7 @@ void OnItemMoveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemMove = [callback = CallbackHelper(*value, frameNode)](int32_t from, int32_t to) {
+    auto onItemMove = [callback = CallbackHelper(*value)](int32_t from, int32_t to) {
         auto arkFrom = Converter::ArkValue<Ark_Number>(from);
         auto arkTo = Converter::ArkValue<Ark_Number>(to);
         auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkFrom, arkTo);
@@ -441,14 +441,14 @@ void OnItemDragStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragStart = [callback = CallbackHelper(*value, frameNode), frameNode, node](
+    auto onItemDragStart = [callback = CallbackHelper(*value), frameNode, node](
         const ItemDragInfo& dragInfo, int32_t itemIndex
     ) -> RefPtr<AceType> {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto builder =
             callback.InvokeWithObtainResult<CustomNodeBuilder, Callback_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
-        return CallbackHelper(builder, frameNode).BuildSync(node);
+        return CallbackHelper(builder).BuildSync(node);
     };
     ListModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }
@@ -514,7 +514,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollFrameBegin = [callback = CallbackHelper(*value, frameNode)](
+    auto onScrollFrameBegin = [callback = CallbackHelper(*value)](
             const Dimension& offset, const ScrollState& state
         ) -> ScrollFrameResult {
         auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
