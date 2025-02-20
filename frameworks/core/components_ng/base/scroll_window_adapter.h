@@ -83,8 +83,8 @@ public:
 private:
     /**
      * @brief Call updaters with @c markIdx to request recomposition.
-     * 
-     * @param markIdx 
+     *
+     * @param markIdx
      */
     void RequestRecompose(int32_t markIdx) const;
 
@@ -103,7 +103,7 @@ private:
     std::unordered_set<int32_t> filled_; // to record measured items during Fill
 
     Axis axis_ = Axis::VERTICAL;
-    bool rangeMode_ = false; // true if providing item range to frontend directly
+    bool rangeMode_ = false;   // true if providing item range to frontend directly
     bool jumpPending_ = false; // will perform a jump on the next recomposition
 };
 } // namespace OHOS::Ace::NG
