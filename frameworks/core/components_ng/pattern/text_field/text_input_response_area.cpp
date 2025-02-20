@@ -577,6 +577,9 @@ void PasswordResponseArea::UpdateSymbolSource()
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(currentSymbolId));
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        symbolProperty->UpdateFontSize(textFieldTheme->GetPasswordIconSize());
+    }
     UpdateSymbolColor();
 
     symbolNode->MarkModifyDone();

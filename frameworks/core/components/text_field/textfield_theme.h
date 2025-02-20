@@ -246,13 +246,6 @@ public:
                 static_cast<bool>(pattern->GetAttr<double>("independent_control_keyboard", 0.0));
             theme->directionKeysMoveFocusOut_ =
                 static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-                theme->padding_ = Edge(
-                    pattern->GetAttr<Dimension>("ohos_id_textfield_underline_padding_vertical", 14.0_vp),
-                    pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp),
-                    pattern->GetAttr<Dimension>("ohos_id_textfield_underline_padding_vertical", 14.0_vp),
-                    pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp));
-            }
         }
     };
 
