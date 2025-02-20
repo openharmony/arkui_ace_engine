@@ -1002,7 +1002,7 @@ void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimens
     row->MarkDirtyNode();
 }
 
-void ContainerModalPattern::EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable) 
+void ContainerModalPattern::EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable)
 {
     CHECK_NULL_VOID(pipeline);
     if (!pipeline || pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
