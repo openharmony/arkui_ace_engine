@@ -234,8 +234,8 @@ public:
     virtual void ResizeDialogSubwindow() = 0;
     virtual uint64_t GetDisplayId() = 0;
     virtual bool IsSameDisplayWithParentWindow(bool useInitializedId = false) = 0;
-    virtual OHOS::Ace::MenuWindowState GetAttachState() = 0;
-    virtual OHOS::Ace::MenuWindowState GetDetachState() = 0;
+    virtual OHOS::Ace::MenuWindowState GetAttachState() {return MenuWindowState::DEFAULT;};
+    virtual OHOS::Ace::MenuWindowState GetDetachState() {return MenuWindowState::DEFAULT;};
 
 private:
     int32_t subwindowId_ = 0;
