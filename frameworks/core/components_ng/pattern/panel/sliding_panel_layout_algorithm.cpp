@@ -45,7 +45,8 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto maxSize = childLayoutConstraint.maxSize;
     auto idealSize =
         !invisibleFlag_
-            ? ((PipelineBase::GetCurrentContextSafelyWithCheck() && PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() > 9)
+            ? ((PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() > 9)
                 ? CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL,
                     layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT()
                 : CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL,
