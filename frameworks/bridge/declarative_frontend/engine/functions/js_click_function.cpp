@@ -64,6 +64,25 @@ void JsClickFunction::Execute(const ClickInfo& info)
     JsFunction::ExecuteJS(1, &param);
 }
 
+static int32_t GetOperatingHand(GestureEvent& info)
+{
+    int32_t left = 0;
+    int32_t right = 0;
+    for (const FingerInfo& fingerInfo : info.GetFingerList()) {
+        if (fingerInfo.operatingHand_ == HAND_LEFT) {
+            ++left;
+        } else if (fingerInfo.operatingHand_ == HAND_RIGHT) {
+            ++right;
+        }
+    }
+    if (left > right) {
+        return HAND_LEFT;
+    } else if (right > left) {
+        return HAND_RIGHT;
+    }
+    return HAND_NONE;
+}
+
 void JsClickFunction::Execute(GestureEvent& info)
 {
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
@@ -72,6 +91,7 @@ void JsClickFunction::Execute(GestureEvent& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    obj->SetProperty<int32_t>("hand", GetOperatingHand(info));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
