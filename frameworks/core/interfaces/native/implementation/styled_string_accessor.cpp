@@ -527,18 +527,24 @@ void UnmarshallingImpl(const Ark_Buffer* buffer,
 {
     CHECK_NULL_VOID(outputArgumentForReturningPromise);
     std::vector<std::string> errorsStr;
-    auto str = Converter::Convert<std::string>(*buffer);
-    std::vector<uint8_t> vec(str.begin(), str.end());
-    auto spanString = SpanString::DecodeTlv(vec);
     StyledStringPeer *peer = new StyledStringPeer();
-    peer->spanString = spanString;
-    Opt_StyledString styledString = Converter::ArkValue<Opt_StyledString>(*peer);
-    Converter::ArkArrayHolder<Array_String> errorHolder(errorsStr);
-    auto error = errorHolder.OptValue<Opt_Array_String>();
-    // StyledString need to be returned
-    peer->spanString = nullptr;
-    delete peer;
-    LOGE("StyledStringAccessor::UnmarshallingImpl - return value need to be supported");
+
+    auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
+        (StyledStringPeer* peer, const StringArray& errors) {
+        Converter::ArkArrayHolder<Array_String> errorHolder(errors);
+        arkCallback.Invoke(Converter::ArkValue<Opt_StyledString>(*peer), errorHolder.OptValue<Opt_Array_String>());
+    };
+
+    auto str = Converter::Convert<std::string>(*buffer);
+    if (str.empty()) {
+        errorsStr.emplace_back("buffer is empty");
+        callback(peer, errorsStr);
+        return;
+    }
+    std::vector<uint8_t> vec(str.begin(), str.end());
+    peer->spanString = SpanString::DecodeTlv(vec);
+
+    callback(peer, errorsStr);
 }
 Ark_Int32 GetLengthImpl(StyledStringPeer* peer)
 {
