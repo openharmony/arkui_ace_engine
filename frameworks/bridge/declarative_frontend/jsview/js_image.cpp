@@ -946,6 +946,10 @@ void JSImage::JsSetDraggable(bool draggable)
 
 void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (!Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
     if (info.Length() != 1 || !info[0]->IsFunction()) {
         return;
     }
