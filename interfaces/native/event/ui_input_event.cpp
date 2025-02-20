@@ -20,6 +20,7 @@
 #include "core/event/axis_event.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/node/event_converter.h"
+#include "interfaces/native/node/node_model.h"
 #include "base/error/error_code.h"
 
 #ifdef __cplusplus
@@ -1657,6 +1658,161 @@ int32_t OH_ArkUI_FocusAxisEvent_SetStopPropagation(const ArkUI_UIInputEvent* eve
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event, ArkUI_UIInputEvent** clonedEvent)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+    currentEvent->inputType = event->inputType;
+    currentEvent->eventTypeId = event->eventTypeId;
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!fullImpl) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->createClonedTouchEvent(touchEventCloned, touchEvent);
+    currentEvent->inputEvent = touchEventCloned;
+    currentEvent->isCloned = true;
+    *clonedEvent = currentEvent;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_DestroyClonedEvent(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (touchEvent) {
+        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+        fullImpl->getNodeModifiers()->getCommonModifier()->destroyTouchEvent(touchEvent);
+    }
+    delete event;
+    event = nullptr;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(const ArkUI_UIInputEvent* event, float x, float y)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->actionTouchPoint.nodeX = x;
+    touchEvent->actionTouchPoint.nodeY = y;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(
+    const ArkUI_UIInputEvent* event, float x, float y, int32_t pointerIndex)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->touchPointes[pointerIndex].nodeX = x;
+    touchEvent->touchPointes[pointerIndex].nodeY = y;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventActionType(const ArkUI_UIInputEvent* event, int32_t actionType)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->action = OHOS::Ace::NodeModel::ConvertToOriginTouchActionType(actionType);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(const ArkUI_UIInputEvent* event, int32_t fingerId)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->actionTouchPoint.id = fingerId;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(
+    const ArkUI_UIInputEvent* event, int32_t fingerId, int32_t pointerIndex)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    touchEvent->touchPointes[pointerIndex].id = fingerId;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!node) {
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!fullImpl) {
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    int32_t res = fullImpl->getNodeModifiers()->getCommonModifier()->postTouchEvent(node->uiNodeHandle, touchEvent);
+    return res;
 }
 
 #ifdef __cplusplus
