@@ -779,8 +779,9 @@ abstract class ViewPU extends PUV2ViewBase
     }
     this.recycleManager_ = new RecycleManager;
   }
-  rebuildUpdateFunc(elmtId, compilerAssignedUpdateFunc): void {
-    const updateFunc = (elmtId, isFirstRender): void => {
+
+  rebuildUpdateFunc(elmtId: number, compilerAssignedUpdateFunc: UpdateFunc): void {
+    const updateFunc: UpdateFunc = (elmtId, isFirstRender) => {
       this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       this.currentlyRenderedElmtIdStack_.pop();
