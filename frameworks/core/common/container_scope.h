@@ -51,12 +51,7 @@ public:
         UpdateCurrent(restoreId_);
     }
 
-    // preview not support multi-instance, always using default instance id 0.
-    #if defined(PREVIEW)
-    static const int32_t DEFAULT_ID = 0;
-    #else
-    static const int32_t DEFAULT_ID = INSTANCE_ID_UNDEFINED;
-    #endif
+    static const int32_t DEFAULT_ID;
 
     static int32_t CurrentId();
     static int32_t DefaultId();
