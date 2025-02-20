@@ -105,6 +105,7 @@ constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
 constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
 constexpr int32_t OUTLINE_WIDTH_VECTOR_SIZE = 4;
 const int32_t ERROR_INT_CODE = -1;
+constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 const double DEFAULT_DASH_DIMENSION = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
@@ -6248,6 +6249,169 @@ ArkUI_Bool GetTabStop(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
 }
 
+ArkUI_Int32 PostTouchEventToFrameNode(ArkUINodeHandle node, TouchEvent& touchEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenode is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto frameNodePtr = AceType::Claim<FrameNode>(frameNode);
+    if (!frameNodePtr) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenodeptr is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto pipelineContext = frameNodePtr->GetContext();
+    if (!pipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent pipeline context is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event manager is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    bool res = postEventManager->PostEvent(frameNodePtr, touchEvent);
+    if (!res) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event fail!");
+        return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITouchEvent)
+{
+    if (!arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent touchevent is null!");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    TouchEvent touchEvent;
+    touchEvent.type = static_cast<TouchType>(arkUITouchEvent->action);
+    touchEvent.sourceType = static_cast<SourceType>(arkUITouchEvent->sourceType);
+    touchEvent.sourceTool = static_cast<SourceTool>(arkUITouchEvent->actionTouchPoint.toolType);
+    touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
+    touchEvent.deviceId = arkUITouchEvent->deviceId;
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
+    TimeStamp time(nanoseconds);
+    touchEvent.time = time;
+    ArkUITouchPoint* touchPointes = arkUITouchEvent->touchPointes;
+    auto density = PipelineBase::GetCurrentDensity();
+    for (size_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
+        TouchPoint point;
+        point.id = touchPointes[index].id;
+        point.x = touchPointes[index].nodeX;
+        point.y = touchPointes[index].nodeY;
+        point.screenX = touchPointes[index].screenX * density;
+        point.screenY = touchPointes[index].screenY * density;
+        point.originalId = touchPointes[index].id;
+        std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
+        TimeStamp downTime(downNanoseconds);
+        point.downTime = downTime;
+        point.force = touchPointes[index].pressure;
+        touchEvent.pointers.emplace_back(point);
+    }
+    touchEvent.id = arkUITouchEvent->actionTouchPoint.id;
+    touchEvent.x = arkUITouchEvent->actionTouchPoint.nodeX;
+    touchEvent.y = arkUITouchEvent->actionTouchPoint.nodeY;
+    touchEvent.screenX = arkUITouchEvent->actionTouchPoint.screenX * density;
+    touchEvent.screenY = arkUITouchEvent->actionTouchPoint.screenY * density;
+    touchEvent.originalId = arkUITouchEvent->actionTouchPoint.id;
+    ArkUITouchEvent* arkUITouchEventCloned = const_cast<ArkUITouchEvent*>(arkUITouchEvent);
+    NG::SetPostPointerEvent(touchEvent, arkUITouchEventCloned);
+    return PostTouchEventToFrameNode(node, touchEvent);
+}
+
+void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
+{
+    std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
+    std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints;
+    if (arkUITouchEvent->historySize > 0) {
+        for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
+            allHistoryEvents[i].action = arkUITouchEvent->historyEvents[i].action;
+            allHistoryEvents[i].sourceType = arkUITouchEvent->historyEvents[i].sourceType;
+            allHistoryEvents[i].timeStamp = arkUITouchEvent->historyEvents[i].timeStamp;
+            allHistoryEvents[i].actionTouchPoint.nodeX = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeX;
+            allHistoryEvents[i].actionTouchPoint.nodeY = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeY;
+            allHistoryEvents[i].actionTouchPoint.windowX = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowX;
+            allHistoryEvents[i].actionTouchPoint.windowY = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowY;
+            allHistoryEvents[i].actionTouchPoint.screenX = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenX;
+            allHistoryEvents[i].actionTouchPoint.screenY = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenY;
+            allHistoryEvents[i].actionTouchPoint.pressure =
+                arkUITouchEvent->historyEvents[i].actionTouchPoint.pressure;
+            for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
+                allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
+                allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
+                allHistoryPoints[i][j].nodeY = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeY;
+                allHistoryPoints[i][j].windowX = arkUITouchEvent->historyEvents[i].touchPointes[j].windowX;
+                allHistoryPoints[i][j].windowY = arkUITouchEvent->historyEvents[i].touchPointes[j].windowY;
+                allHistoryPoints[i][j].screenX = arkUITouchEvent->historyEvents[i].touchPointes[j].screenX;
+                allHistoryPoints[i][j].screenY = arkUITouchEvent->historyEvents[i].touchPointes[j].screenY;
+                allHistoryPoints[i][j].contactAreaWidth =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].contactAreaWidth;
+                allHistoryPoints[i][j].contactAreaHeight =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].contactAreaHeight;
+                allHistoryPoints[i][j].pressure = arkUITouchEvent->historyEvents[i].touchPointes[j].pressure;
+                allHistoryPoints[i][j].tiltX = arkUITouchEvent->historyEvents[i].touchPointes[j].tiltX;
+                allHistoryPoints[i][j].tiltY = arkUITouchEvent->historyEvents[i].touchPointes[j].tiltY;
+                allHistoryPoints[i][j].pressedTime =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].pressedTime;
+                allHistoryPoints[i][j].toolType = arkUITouchEvent->historyEvents[i].touchPointes[j].toolType;
+            }
+            if (arkUITouchEvent->historyEvents[i].touchPointSize > 0) {
+                allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
+            }
+            allHistoryEvents[i].touchPointSize = arkUITouchEvent->historyEvents[i].touchPointSize;
+        }
+        arkUITouchEventCloned->historyEvents = &allHistoryEvents[0];
+        arkUITouchEventCloned->historySize = arkUITouchEvent->historySize;
+    } else {
+        arkUITouchEventCloned->historyEvents = nullptr;
+        arkUITouchEventCloned->historySize = 0;
+    }
+}
+
+void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
+{
+    if (!arkUITouchEventCloned || !arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CreateClonedTouchEvent touchevent is null!");
+        return;
+    }
+    arkUITouchEventCloned->target.id = arkUITouchEvent->target.id;
+    arkUITouchEventCloned->target.type = arkUITouchEvent->target.type;
+    arkUITouchEventCloned->target.area = arkUITouchEvent->target.area;
+    arkUITouchEventCloned->target.origin = arkUITouchEvent->target.origin;
+    arkUITouchEventCloned->action = arkUITouchEvent->action;
+    arkUITouchEventCloned->changedPointerId = arkUITouchEvent->changedPointerId;
+    arkUITouchEventCloned->actionTouchPoint = arkUITouchEvent->actionTouchPoint;
+    arkUITouchEventCloned->timeStamp = arkUITouchEvent->timeStamp;
+    arkUITouchEventCloned->sourceType = arkUITouchEvent->sourceType;
+    arkUITouchEventCloned->deviceId = arkUITouchEvent->deviceId;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    NG::SetClonedPointerEvent(pointerEvent, arkUITouchEventCloned);
+    std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
+    if (arkUITouchEvent->touchPointSize > 0) {
+        for (size_t i = 0; i < arkUITouchEvent->touchPointSize; i++) {
+            touchPoints[i] = arkUITouchEvent->touchPointes[i];
+        }
+        arkUITouchEventCloned->touchPointes = &touchPoints[0];
+        arkUITouchEventCloned->touchPointSize = arkUITouchEvent->touchPointSize;
+    } else {
+        arkUITouchEventCloned->touchPointes = nullptr;
+        arkUITouchEventCloned->touchPointSize = 0;
+    }
+    arkUITouchEventCloned->subKind = arkUITouchEvent->subKind;
+    SetHistoryTouchEvent(arkUITouchEventCloned, arkUITouchEvent);
+    arkUITouchEventCloned->stopPropagation = arkUITouchEvent->stopPropagation;
+}
+
+void DestroyTouchEvent(ArkUITouchEvent* arkUITouchEvent)
+{
+    CHECK_NULL_VOID(arkUITouchEvent);
+    NG::DestroyRawPointerEvent(arkUITouchEvent);
+    delete arkUITouchEvent;
+    arkUITouchEvent = nullptr;
+}
+
 void SetNodeBackdropBlur(
     ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
 {
@@ -6375,8 +6539,8 @@ const ArkUICommonModifier* GetCommonModifier()
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
         ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop,
-        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop, SetNodeBackdropBlur, GetNodeBackdropBlur,
-        DispatchKeyEvent };
+        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop, PostTouchEvent, CreateClonedTouchEvent,
+        DestroyTouchEvent, SetNodeBackdropBlur, GetNodeBackdropBlur, DispatchKeyEvent };
 
     return &modifier;
 }
@@ -6913,7 +7077,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
         event.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
         event.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
-
+        event.touchEvent.rawPointerEvent = eventInfo.GetPointerEvent().get();
         std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
         if (!eventInfo.GetTouches().empty()) {
             size_t index = 0;
@@ -6978,6 +7142,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
             event.touchEvent.historySize = 0;
         }
         event.touchEvent.stopPropagation = false;
+        event.touchEvent.deviceId = eventInfo.GetDeviceId();
         SendArkUIAsyncEvent(&event);
         eventInfo.SetStopPropagation(event.touchEvent.stopPropagation);
     };

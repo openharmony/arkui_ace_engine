@@ -217,6 +217,8 @@ struct ArkUITouchEvent {
     ArkUI_Int32 interceptResult;
     ArkUI_Int32 changedPointerId;
     ArkUI_Int32 targetDisplayId;
+    ArkUI_Int64 deviceId;
+    void* rawPointerEvent;
 };
 
 struct ArkUIMouseEvent {
@@ -2041,6 +2043,9 @@ struct ArkUICommonModifier {
     void (*setTabStop)(ArkUINodeHandle node, ArkUI_Bool tabstop);
     void (*resetTabStop)(ArkUINodeHandle node);
     ArkUI_Bool (*getTabStop)(ArkUINodeHandle node);
+    ArkUI_Int32 (*postTouchEvent)(ArkUINodeHandle node, const ArkUITouchEvent* arkUItouchEvent);
+    void (*createClonedTouchEvent)(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent);
+    void (*destroyTouchEvent)(ArkUITouchEvent* arkUITouchEvent);
     void (*setNodeBackdropBlur)(
         ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     ArkUIBackdropBlur (*getNodeBackdropBlur)(ArkUINodeHandle node);

@@ -30,6 +30,7 @@
 #include "core/event/focus_axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -100,6 +101,12 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId);
 
 void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const PointerAction action);
+
+void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned);
+
+void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned);
+
+void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent);
 
 } // namespace OHOS::Ace::Platform
 

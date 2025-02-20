@@ -158,6 +158,34 @@ void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, M
     mouseEvent.originalId = mouseEvent.id;
 }
 
+void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned)
+{
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUITouchEventCloned->rawPointerEvent = clonedEvent;
+    }
+}
+
+void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEventCloned->rawPointerEvent);
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUITouchEventCloned->rawPointerEvent = clonedEvent;
+    }
+    std::shared_ptr<MMI::PointerEvent> pointer(pointerEvent);
+    touchEvent.SetPointerEvent(pointer);
+}
+
+void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    if (pointerEvent) {
+        delete pointerEvent;
+        pointerEvent = nullptr;
+    }
+}
+
 TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
 {
     TouchEvent event;
