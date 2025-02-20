@@ -846,6 +846,7 @@ public:
     void UpdateTextAutosizing(bool isTextAutosizing);
     void UpdateMetaViewport(bool isMetaViewportEnabled);
     void UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay);
+    void UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -1397,6 +1398,7 @@ private:
     bool isDragResizeStart_ = false;
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
+    bool enableFollowSystemFontWeight_ = false;
 #endif
 };
 
