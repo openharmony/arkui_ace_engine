@@ -81,6 +81,7 @@ public:
     OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
     OnFocusAxisEventFunc onFocusAxisEventCallback_;
+    OnKeyEventDispatchFunc onKeyEventDispatchCallback_;
 
     WeakPtr<FocusHub> defaultFocusNode_;
     bool isDefaultFocus_ = { false };
@@ -116,7 +117,7 @@ public:
 protected:
     bool OnFocusEvent(const FocusEvent& event);
     virtual bool HandleFocusTravel(const FocusEvent& event) = 0; // bad design which need to be deleted
-
+    int32_t GetKeyProcessingMode();
     ACE_DEFINE_FOCUS_EVENT(OnFocusCallback, OnFocusFunc, onFocusCallback)
     ACE_DEFINE_FOCUS_EVENT(OnBlurCallback, OnBlurFunc, onBlurCallback)
     ACE_DEFINE_FOCUS_EVENT(JSFrameNodeOnFocusCallback, OnFocusFunc, onJSFrameNodeFocusCallback)
@@ -126,6 +127,7 @@ protected:
     ACE_DEFINE_FOCUS_EVENT(OnKeyPreIme, OnKeyConsumeFunc, onKeyPreImeCallback)
     ACE_DEFINE_FOCUS_EVENT(OnClickCallback, GestureEventFunc, onClickEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnFocusAxisCallback, OnFocusAxisEventFunc, onFocusAxisEventCallback)
+    ACE_DEFINE_FOCUS_EVENT(OnKeyEventDispatchCallback, OnKeyEventDispatchFunc, onKeyEventDispatchCallback)
 
     std::unordered_map<OnKeyEventType, OnKeyEventFunc> onKeyEventsInternal_;
     bool forceProcessOnKeyEventInternal_ { false }; // extension use only
@@ -141,7 +143,8 @@ private:
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool ProcessOnKeyEventInternal(const KeyEvent& event);
     bool HandleFocusAxisEvent(const FocusAxisEvent& event);
-
+    bool HasCustomKeyEventDispatch(const FocusEvent& event);
+    bool HandleCustomEventDispatch(const FocusEvent& event);
     void PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback);
 };
 } // namespace OHOS::Ace::NG

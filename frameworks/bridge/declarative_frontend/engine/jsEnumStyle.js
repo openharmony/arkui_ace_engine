@@ -3515,3 +3515,9 @@ let AxisModel;
   AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
 })(AxisModel || (AxisModel = {}));
+
+let KeyProcessingMode;
+(function (KeyProcessingMode) {
+  KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
+  KeyProcessingMode[KeyProcessingMode.ANCESTOR_EVENT = 1] = 'ANCESTOR_EVENT';
+})(KeyProcessingMode || (KeyProcessingMode = {}));

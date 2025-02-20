@@ -267,6 +267,7 @@ public:
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) = 0;
     virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
+    virtual void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
@@ -307,6 +308,7 @@ public:
     virtual void DisableOnTouch() = 0;
     virtual void DisableOnKeyEvent() = 0;
     virtual void DisableOnKeyPreIme() {}
+    virtual void DisableOnKeyEventDispatch() {}
     virtual void DisableOnHover() = 0;
     virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;

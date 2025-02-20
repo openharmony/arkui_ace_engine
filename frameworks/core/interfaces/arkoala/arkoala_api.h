@@ -857,6 +857,7 @@ enum ArkUIEventSubKind {
     ON_PRE_DRAG,
     ON_KEY_PREIME,
     ON_FOCUS_AXIS,
+    ON_KEY_DISPATCH,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -2043,6 +2044,7 @@ struct ArkUICommonModifier {
     void (*setNodeBackdropBlur)(
         ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     ArkUIBackdropBlur (*getNodeBackdropBlur)(ArkUINodeHandle node);
+    void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
 };
@@ -5002,6 +5004,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*setCrossLanguageOptions)(ArkUINodeHandle node, bool attributeSetting);
     ArkUI_Bool (*getCrossLanguageOptions)(ArkUINodeHandle node);
     ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
+    void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);
 };
 
 struct ArkUINodeContentEvent {

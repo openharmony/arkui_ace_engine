@@ -17,7 +17,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/focus_axis_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
+#include "core/event/key_event.h"
+#include "core/components_ng/event/event_constants.h"
 namespace OHOS::Ace::NG {
 FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
 {
@@ -65,10 +66,36 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
     }
 }
 
+bool FocusEventHandler::HasCustomKeyEventDispatch(const FocusEvent& event)
+{
+    if (event.event.eventType != UIInputEventType::KEY) {
+        return false;
+    }
+    const KeyEvent& keyEvent = static_cast<const KeyEvent&>(event.event);
+    if (keyEvent.isPreIme) {
+        return false;
+    }
+    return GetOnKeyEventDispatchCallback() != nullptr;
+}
+
+bool FocusEventHandler::HandleCustomEventDispatch(const FocusEvent& event)
+{
+    auto onKeyEventDispatchCallback = GetOnKeyEventDispatchCallback();
+    if (onKeyEventDispatchCallback) {
+        const KeyEvent& keyEvent = static_cast<const KeyEvent&>(event.event);
+        auto info = KeyEventInfo(keyEvent);
+        return onKeyEventDispatchCallback(info);
+    }
+    return false;
+}
+
 bool FocusEventHandler::OnFocusEvent(const FocusEvent& event)
 {
     if (!IsCurrentFocus()) {
         return false;
+    }
+    if (HasCustomKeyEventDispatch(event)) {
+        return HandleCustomEventDispatch(event);
     }
     if (focusType_ == FocusType::SCOPE) {
         return OnFocusEventScope(event);
@@ -108,7 +135,24 @@ bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
         const FocusAxisEvent& focusAxisEvent = static_cast<const FocusAxisEvent&>(focusEvent.event);
         return HandleFocusAxisEvent(focusAxisEvent);
     }
+
+    auto keyProcessingMode = static_cast<KeyProcessingMode>(GetKeyProcessingMode());
+    if (keyProcessingMode == KeyProcessingMode::ANCESTOR_EVENT) {
+        return ret;
+    }
     return ret ? true : HandleFocusTravel(focusEvent);
+}
+
+int32_t FocusEventHandler::GetKeyProcessingMode()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+
+    return static_cast<int32_t>(focusManager->GetKeyProcessingMode());
 }
 
 bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension intension)
@@ -254,8 +298,8 @@ bool FocusEventHandler::OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& k
     auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
     if (onKeyEventCallback) {
-        onKeyEventCallback(info);
-        retCallback = info.IsStopPropagation();
+        auto result = onKeyEventCallback(info);
+        retCallback = info.IsStopPropagation() || result;
         auto eventManager = pipeline->GetEventManager();
         PrintOnKeyEventUserInfo(keyEvent, retCallback);
     }
