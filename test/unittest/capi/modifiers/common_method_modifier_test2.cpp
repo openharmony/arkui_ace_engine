@@ -426,6 +426,57 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
 }
 
 /*
+ * @tc.name: setOnKeyEvent1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent1Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnKeyEvent1, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    struct CheckEvent {
+        int32_t resourceId = -1;
+        KeyCode code = KeyCode::KEY_UNKNOWN;
+    };
+    static const int32_t expectedResId = 123;
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
+        auto peer = reinterpret_cast<KeyEventPeer*>(parameter.ptr);
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetKeyEventAccessor();
+        auto info = peer->GetEventInfo();
+        ASSERT_NE(info, nullptr);
+        checkEvent = {
+            .resourceId = resourceId,
+            .code = info->GetKeyCode()
+        };
+        accessor->destroyPeer(peer);
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+    };
+
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, expectedResId);
+    modifier_->setOnKeyEvent1(node_, &arkCallback);
+
+    auto callOnKeyEvent = focusHub->GetOnKeyCallback();
+    ASSERT_NE(callOnKeyEvent, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_FN;
+    auto eventInfo = KeyEventInfo(keyEvent);
+    EXPECT_FALSE(checkEvent.has_value());
+    auto result = callOnKeyEvent(eventInfo);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(checkEvent->code, keyEvent.code);
+}
+
+/*
  * @tc.name: setPixelRoundTest
  * @tc.desc:
  * @tc.type: FUNC

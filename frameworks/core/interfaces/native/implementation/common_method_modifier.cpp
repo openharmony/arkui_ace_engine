@@ -2632,9 +2632,18 @@ void OnKeyEvent1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnKeyEvent1(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::DisableOnKeyEvent(frameNode);
+    } else {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
+            PipelineContext::SetCallBackNode(node);
+            const auto event = Converter::ArkKeyEventSync(info);
+            auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
+            return Converter::Convert<bool>(arkResult);
+        };
+        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
+    }
 }
 void OnDigitalCrownImpl(Ark_NativePointer node,
                         const Opt_Callback_CrownEvent_Void* value)
