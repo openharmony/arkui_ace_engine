@@ -83,7 +83,8 @@
         "src/media_cached_image_modifier.ts",
         "src/symbol_glyph_modifier.ts",
         "src/symbol_span_modifier.ts",
-        "src/container_span_modifier.ts"
+        "src/container_span_modifier.ts",
+        "src/indicator_component_modifier.ts"
     ],
     "compilerOptions": {
         "module": "none",

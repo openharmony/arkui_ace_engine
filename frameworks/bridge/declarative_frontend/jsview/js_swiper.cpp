@@ -72,6 +72,7 @@ SwiperModel* SwiperModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
+WeakPtr<JSIndicatorController> JSSwiper::jSIndicatorController_;
 namespace {
 
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
@@ -686,6 +687,30 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetHoverShow(false);
     }
 }
+
+void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+
+    auto* jsIndicatorController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSIndicatorController>();
+    if (!jsIndicatorController) {
+        return;
+    }
+    jSIndicatorController_ = jsIndicatorController;
+    SwiperModel::GetInstance()->SetBindIndicator(true);
+    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    jsIndicatorController->SetSwiperNode(targetNode);
+}
+
+void JSSwiper::ResetSwiperNode()
+{
+    if (jSIndicatorController_.Upgrade()) {
+        jSIndicatorController_.Upgrade()->ResetSwiperNode();
+    }
+}
+
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -696,9 +721,11 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
+    SwiperModel::GetInstance()->SetBindIndicator(false);
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
+        ResetSwiperNode();
 
         JSRef<JSVal> typeParam = obj->GetProperty("type");
         if (typeParam->IsString()) {
@@ -714,6 +741,8 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
                 SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
+        } else if (typeParam->IsUndefined()) {
+            SetIndicatorController(info);
         } else {
             SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
             JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);

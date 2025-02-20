@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_INDICATOR_SWIPER_INDICATOR_ACCESSIBILITY_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_INDICATOR_SWIPER_INDICATOR_ACCESSIBILITY_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDICATOR_ACCESSIBILITY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDICATOR_ACCESSIBILITY_H
 
 #include "base/utils/utils.h"
-#include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class SwiperIndicatorAccessibilityProperty : public AccessibilityProperty {
-    DECLARE_ACE_TYPE(SwiperIndicatorAccessibilityProperty, AccessibilityProperty);
+class IndicatorAccessibilityProperty : public SwiperIndicatorAccessibilityProperty {
+    DECLARE_ACE_TYPE(IndicatorAccessibilityProperty, SwiperIndicatorAccessibilityProperty);
 
 public:
-    SwiperIndicatorAccessibilityProperty() = default;
+    IndicatorAccessibilityProperty() = default;
 
-    ~SwiperIndicatorAccessibilityProperty() override = default;
+    ~IndicatorAccessibilityProperty() override = default;
 
     int32_t GetCurrentIndex() const override;
 
@@ -36,15 +36,13 @@ public:
 
     int32_t GetCollectionItemCounts() const override;
 
-    std::string GetAccessibilityText() const override;
-
     AccessibilityValue GetAccessibilityValue() const override;
 
 protected:
-    virtual RefPtr<FrameNode> GetSwiperNode() const;
+    RefPtr<FrameNode> GetSwiperNode() const override;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorAccessibilityProperty);
+    ACE_DISALLOW_COPY_AND_MOVE(IndicatorAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG
 

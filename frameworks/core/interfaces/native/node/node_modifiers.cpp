@@ -54,6 +54,7 @@
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
+#include "core/interfaces/native/node/node_indicator_modifier.h"
 #include "core/interfaces/native/node/node_list_item_group_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
@@ -250,6 +251,7 @@ const ArkUINodeModifiers impl = {
 #endif
 
     NodeModifier::GetContainerSpanModifier,
+    NodeModifier::GetIndicatorComponentModifier,
 };
 } // namespace
 
