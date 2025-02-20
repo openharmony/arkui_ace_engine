@@ -814,7 +814,12 @@ public:
     ColorMode GetLocalColorMode() const;
 
     // Used to mark freeze and block dirty mark.
-    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
+    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false, bool isUserFreeze = false);
+
+    void SetUserFreeze(bool isUserFreeze);
+
+    bool IsUserFreeze();
+
     bool IsFreeze() const
     {
         return isFreeze_;
@@ -1046,6 +1051,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;
     bool isCrossLanguageAttributeSetting_ = false;
+    std::optional<bool> userFreeze_;
 };
 
 } // namespace OHOS::Ace::NG

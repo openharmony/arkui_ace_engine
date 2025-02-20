@@ -776,6 +776,9 @@ void FrameNode::DumpCommonInfo()
     }
     if (IsFreeze()) {
         DumpLog::GetInstance().AddDesc(std::string("Freeze: 1"));
+        if (IsUserFreeze()) {
+            DumpLog::GetInstance().AddDesc(std::string("UserFreeze: 1"));
+        }
     }
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")

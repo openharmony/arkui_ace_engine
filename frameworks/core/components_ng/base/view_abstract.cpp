@@ -5745,7 +5745,11 @@ void ViewAbstract::FreezeUINodeById(const std::string& id, bool isFreeze)
 {
     auto targetNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(id, true);
     CHECK_NULL_VOID(targetNode);
-    targetNode->SetFreeze(isFreeze, true);
+    auto pipeline = targetNode->GetContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOpenInvisibleFreeze(true);
+    }
+    targetNode->SetFreeze(isFreeze, true, true);
 }
 
 void ViewAbstract::FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze)
@@ -5753,7 +5757,11 @@ void ViewAbstract::FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze
     auto targetNodeElement = ElementRegister::GetInstance()->GetNodeById(uniqueId);
     auto targetNode = AceType::DynamicCast<NG::FrameNode>(targetNodeElement);
     CHECK_NULL_VOID(targetNode);
-    targetNode->SetFreeze(isFreeze, true);
+    auto pipeline = targetNode->GetContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOpenInvisibleFreeze(true);
+    }
+    targetNode->SetFreeze(isFreeze, true, true);
 }
 
 uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)
