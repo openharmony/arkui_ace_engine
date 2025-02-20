@@ -40,6 +40,20 @@ component3d_component_support_for_test = true
 plugin_components_support_for_test = true
 window_scene_support_for_test = false
 
+copy("copy_libxml2") {
+  sources = [ root_out_dir + "/thirdparty/libxml2/libxml2.so" ]
+  outputs = [ root_out_dir + "/tests/unittest/ace_engine/capi/libxml2.so" ]
+  external_deps = [ "libxml2:libxml2" ]
+}
+copy("copy_libxml2_unstripped") {
+  sources = [ root_out_dir +
+              "/lib.unstripped/clang_x64/thirdparty/libxml2/libxml2.so" ]
+  outputs =
+      [ root_out_dir +
+        "/exe.unstripped/clang_x64/tests/unittest/ace_engine/capi/libxml2.so" ]
+  external_deps = [ "libxml2:libxml2" ]
+}
+
 ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   testonly = true
   subsystem_name = ace_engine_subsystem
@@ -80,6 +94,13 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   sources += rebased_common_sources
   sources += rebased_generated_sources
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+
+  external_deps = [ "libxml2:libxml2" ]
+
+  deps += [
+    ":copy_libxml2",
+    ":copy_libxml2_unstripped",
+  ]
 
   if (defined(web_components_support_for_test) &&
       web_components_support_for_test) {

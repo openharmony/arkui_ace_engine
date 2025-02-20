@@ -18,11 +18,13 @@ ace_unittest("capi_all_accessors_test") {
   module_output = "capi"
   sources = [
     # place here your UT source code
+    "accessibility_hover_event_accessor_test.cpp",
     "accessor_test_fixtures.cpp",
     "accessor_test_utils.cpp",
     "action_sheet_accessor_test.cpp",
     "alert_dialog_accessor_test.cpp",
     "base_event_accessor_test.cpp",
+    "base_gesture_event_accessor_test.cpp",
     "calendar_accessor_test.cpp",
     "calendar_picker_dialog_accessor_test.cpp",
     "canvas_gradient_accessor_test.cpp",

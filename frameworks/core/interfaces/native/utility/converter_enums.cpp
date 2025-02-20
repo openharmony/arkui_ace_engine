@@ -55,6 +55,18 @@ void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
 }
 
 template<>
+void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src)
+{
+    switch (src) {
+        case ARK_DISMISS_REASON_PRESS_BACK : dst = BindSheetDismissReason::BACK_PRESSED; break;
+        case ARK_DISMISS_REASON_TOUCH_OUTSIDE: dst = BindSheetDismissReason::TOUCH_OUTSIDE; break;
+        case ARK_DISMISS_REASON_CLOSE_BUTTON: dst = BindSheetDismissReason::CLOSE_BUTTON; break;
+        case ARK_DISMISS_REASON_SLIDE_DOWN: dst = BindSheetDismissReason::SLIDE_DOWN; break;
+        default: LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src); break;
+    }
+}
+
+template<>
 void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 {
     switch (src) {
@@ -1036,6 +1048,18 @@ void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderSty
         case ARK_SLIDER_STYLE_IN_SET: dst = SliderModel::SliderMode::INSET; break;
         case ARK_SLIDER_STYLE_NONE: dst = SliderModel::SliderMode::NONE; break;
         default: LOGE("Unexpected enum value in Ark_SliderStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_AccessibilityHoverType& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_ENTER: dst = AccessibilityHoverAction::HOVER_ENTER; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_MOVE: dst = AccessibilityHoverAction::HOVER_MOVE; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT: dst = AccessibilityHoverAction::HOVER_EXIT; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL: dst = AccessibilityHoverAction::HOVER_CANCEL; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
     }
 }
 
