@@ -362,26 +362,25 @@ RefPtr<SpanString> RichEditorPattern::CreateStyledStringByTextStyle(
 {
     auto styledString = AceType::MakeRefPtr<SpanString>(insertValue);
     auto length = styledString->GetLength();
-    auto fontSpan = CreateFontSpanByTextStyle(updateSpanStyle, textStyle, length);
-    styledString->AddSpan(fontSpan);
-    auto decorationSpan = CreateDecorationSpanByTextStyle(updateSpanStyle, textStyle, length);
-    styledString->AddSpan(decorationSpan);
+    std::vector<RefPtr<SpanBase>> spans;
+    spans.push_back(CreateFontSpanByTextStyle(updateSpanStyle, textStyle, length));
+    spans.push_back(CreateDecorationSpanByTextStyle(updateSpanStyle, textStyle, length));
     if (updateSpanStyle.updateTextShadows.has_value()) {
-        auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(textStyle.GetTextShadows(), 0, length);
-        styledString->AddSpan(textShadowSpan);
+        spans.push_back(AceType::MakeRefPtr<TextShadowSpan>(textStyle.GetTextShadows(), 0, length));
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
-        auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>(textStyle.GetLineHeight(), 0, length);
-        styledString->AddSpan(lineHeightSpan);
+        spans.push_back(AceType::MakeRefPtr<LineHeightSpan>(textStyle.GetLineHeight(), 0, length));
     }
     if (updateSpanStyle.updateHalfLeading.has_value()) {
-        auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(textStyle.GetHalfLeading(), 0, length);
-        styledString->AddSpan(halfLeadingSpan);
+        spans.push_back(AceType::MakeRefPtr<HalfLeadingSpan>(textStyle.GetHalfLeading(), 0, length));
     }
     if (updateSpanStyle.updateLetterSpacing.has_value()) {
-        auto letterSpacingSpan = AceType::MakeRefPtr<LetterSpacingSpan>(textStyle.GetLetterSpacing(), 0, length);
-        styledString->AddSpan(letterSpacingSpan);
+        spans.push_back(AceType::MakeRefPtr<LetterSpacingSpan>(textStyle.GetLetterSpacing(), 0, length));
     }
+    if (updateSpanStyle.updateTextBackgroundStyle.has_value()) {
+        spans.push_back(AceType::MakeRefPtr<BackgroundColorSpan>(textStyle.GetTextBackgroundStyle(), 0, length));
+    }
+    styledString->BindWithSpans(spans);
     return styledString;
 }
 
