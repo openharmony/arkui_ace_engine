@@ -119,6 +119,8 @@ public:
         std::shared_ptr<TaskWrapper> taskWrapper, bool useCurrentEventRunner = false, bool isSubContainer = false,
         bool useNewPipeline = false);
 
+    AceContainer(int32_t instanceId, FrontendType type);
+
     ~AceContainer() override;
 
     bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -514,6 +516,9 @@ public:
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
     static bool RemoveOverlayBySubwindowManager(int32_t instanceId);
 
+    static bool CloseWindow(int32_t instanceId);
+    static bool HideWindow(int32_t instanceId);
+
     // ArkTsCard
     static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
 
@@ -809,6 +814,10 @@ public:
 
     void SetIsFocusActive(bool isFocusActive);
 
+    void SetFontScaleAndWeightScale(int32_t instanceId);
+
+    sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -819,7 +828,6 @@ private:
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
         float height, uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
-    sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> GetRuntimeContextInner() const;
 

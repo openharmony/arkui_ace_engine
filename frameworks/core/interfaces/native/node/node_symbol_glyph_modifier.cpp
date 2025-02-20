@@ -149,6 +149,14 @@ void SetSymbolGlyphInitialize(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
     SymbolModelNG::SetSymbolGlyphInitialize(frameNode, symbolId);
 }
 
+void SetCustomSymbolGlyphInitialize(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string fontFamilyStr(fontFamily);
+    SymbolModelNG::SetCustomSymbolGlyphInitialize(frameNode, symbolId, fontFamilyStr.c_str());
+}
+
 void ResetSymbolGlyphInitialize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -222,6 +230,7 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         .setEffectStrategy = SetEffectStrategy,
         .resetEffectStrategy = ResetEffectStrategy,
         .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
         .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
         .updateSymbolEffect = UpdateSymbolEffect,
         .setMinFontScale = SetMinFontScale,
@@ -250,6 +259,7 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
         .setEffectStrategy = SetEffectStrategy,
         .resetEffectStrategy = ResetEffectStrategy,
         .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
         .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
         .setMinFontScale = SetMinFontScale,
         .resetMinFontScale = ResetMinFontScale,

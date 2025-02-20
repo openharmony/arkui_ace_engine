@@ -1309,13 +1309,13 @@ void ListLayoutAlgorithm::FixPredictSnapPos()
     int32_t curIndex = -1; // here invalid.
     switch (scrollSnapAlign_) {
         case ScrollSnapAlign::START:
-            FindPredictSnapIndexInItemPositionsStart(predictEndPos + currentOffset_, predictIndex, curIndex);
+            FindPredictSnapIndexInItemPositionsStart(predictEndPos, predictIndex, curIndex);
             break;
         case ScrollSnapAlign::CENTER:
-            FindPredictSnapIndexInItemPositionsCenter(predictEndPos + currentOffset_, predictIndex, curIndex);
+            FindPredictSnapIndexInItemPositionsCenter(predictEndPos, predictIndex, curIndex);
             break;
         case ScrollSnapAlign::END:
-            FindPredictSnapIndexInItemPositionsEnd(predictEndPos + currentOffset_, predictIndex, curIndex);
+            FindPredictSnapIndexInItemPositionsEnd(predictEndPos, predictIndex, curIndex);
             break;
         default:
             return;
@@ -1343,8 +1343,8 @@ void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>&
     int32_t endIndex = FindPredictSnapEndIndexInItemPositions(predictEndPos, scrollSnapAlign_);
     if (GetStartIndex() <= endIndex && endIndex <= GetEndIndex()) {
         predictEndPos = CalculatePredictSnapEndPositionByIndex(endIndex, scrollSnapAlign_);
-        predictSnapOffset_ = totalOffset_ - predictEndPos + currentOffset_;
-        predictSnapEndPos_ = predictEndPos - currentOffset_;
+        predictSnapOffset_ = totalOffset_ - predictEndPos;
+        predictSnapEndPos_ = predictEndPos;
     } else {
         if (IsUniformHeightProbably()) {
             if (scrollSnapAlign_ == ScrollSnapAlign::START) {

@@ -283,6 +283,7 @@ void SubwindowOhos::InitContainer()
         OHOS::Rosen::WMError ret;
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
             std::to_string(windowId_), windowOption, parentWindow->GetContext(), ret);
+        window_->RegisterWindowAttachStateChangeListener(new MenuWindowSceneListener(WeakClaim(this)));
         if (!window_ || ret != OHOS::Rosen::WMError::WM_OK) {
             SetIsRosenWindowCreate(false);
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
@@ -442,7 +443,7 @@ std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& 
             "update ace view width : %{public}d,  height : %{public}d, density : %{public}f,childContainerId : "
             "%{public}d",
             width, height, density, childContainerId);
-        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        auto container = Platform::AceContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
         container->SetFontScaleAndWeightScale(childContainerId);
         auto ret = subwindowOhos->InitToastServiceConfig();
@@ -657,6 +658,7 @@ void SubwindowOhos::ShowWindow(bool needFocus)
             needFocus, static_cast<int32_t>(ret));
     }
     ret = window_->Show(0, false, needFocus);
+    attachState_ = MenuWindowState::ATTACHING;
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Show subwindow id:%{public}u failed with WMError: %{public}d",
             window_->GetWindowId(), static_cast<int32_t>(ret));
@@ -744,6 +746,7 @@ void SubwindowOhos::HideWindow()
         ContainerModalUnFocus();
     }
     OHOS::Rosen::WMError ret = window_->Hide();
+    detachState_ = MenuWindowState::DETACHING;
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     if (!parentContainer) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
@@ -992,9 +995,11 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
         overlay->CleanMenuInSubWindow(targetId);
         overlay->RemoveFilter();
     }
-    overlay->EraseMenuInfo(targetId);
     HideWindow();
-    context->FlushPipelineImmediately();
+    if (overlay->GetMenuNode(targetId)) {
+        context->FlushPipelineImmediately();
+    }
+    overlay->EraseMenuInfo(targetId);
     if (inWindow) {
         HideEventColumn();
     }
@@ -1268,10 +1273,10 @@ void SubwindowOhos::HideSubWindowNG()
     CHECK_NULL_VOID(container);
     if (container->IsDialogContainer()) {
         if (IsToastWindow()) {
-            Platform::DialogContainer::HideWindow(Container::CurrentId());
+            Platform::AceContainer::HideWindow(Container::CurrentId());
         } else {
-            Platform::DialogContainer::CloseWindow(Container::CurrentId());
-            Platform::DialogContainer::DestroyContainer(Container::CurrentId());
+            Platform::AceContainer::CloseWindow(Container::CurrentId());
+            Platform::AceContainer::DestroyContainer(Container::CurrentId());
         }
     } else {
         auto context = container->GetPipelineContext();
@@ -1361,9 +1366,9 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     }
 #endif
 
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, false);
-    pipelineContext->SetupRootElement();
+    pipelineContext->SetupSubRootElement();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     if (parentContainer) {
         auto parentPipeline = parentContainer->GetPipelineContext();
@@ -1590,7 +1595,7 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
         ContainerScope scope(childContainerId);
-        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        auto container = Platform::AceContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
         container->SetFontScaleAndWeightScale(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
@@ -1808,7 +1813,7 @@ void SubwindowOhos::ShowActionMenuForService(
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
         ContainerScope scope(childContainerId);
-        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        auto container = Platform::AceContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
         container->SetFontScaleAndWeightScale(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);

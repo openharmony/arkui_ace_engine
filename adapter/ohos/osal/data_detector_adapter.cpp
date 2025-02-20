@@ -333,7 +333,7 @@ void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
         }
         AISpan aiSpan;
         aiSpan.start = entity.charOffset;
-        aiSpan.end = aiSpan.start + static_cast<int32_t>(entity.text.length());
+        aiSpan.end = aiSpan.start + static_cast<int32_t>(UtfUtils::Str8DebugToStr16(entity.text).length());
         aiSpan.content = entity.text;
         aiSpan.type = TextDataDetectType::URL;
         aiSpanMap_[aiSpan.start] = aiSpan;

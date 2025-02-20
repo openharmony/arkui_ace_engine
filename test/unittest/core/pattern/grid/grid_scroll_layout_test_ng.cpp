@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -1900,5 +1901,109 @@ HWTEST_F(GridScrollLayoutTestNg, TestLayoutColumn001, TestSize.Level1)
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
+}
+
+/**
+ * @tc.name: Test Calculate CacheCount
+ * @tc.desc: Test Calculate CacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, CachedCount001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    model.SetLayoutOptions({});
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto* wrapper = AceType::RawPtr(frameNode_);
+    auto cache = algo->CalculateCachedCount(wrapper, 2);
+
+    EXPECT_EQ(cache.first, 6);
+    EXPECT_EQ(cache.second, 6);
+
+    for (int32_t i = 0; i < 10; i++) {
+        pattern_->ScrollBy(ITEM_MAIN_SIZE);
+        FlushUITasks();
+        auto cache = algo->CalculateCachedCount(wrapper, 2);
+        EXPECT_EQ(cache.first, 6);
+        EXPECT_EQ(cache.second, 6);
+    }
+}
+
+/**
+ * @tc.name: Test Calculate CacheCount
+ * @tc.desc: Test Calculate CacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, CachedCount002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 1, 2, 3, 4, 12 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto cacheStart = algo->CalculateStartCachedCount(option, 2);
+    auto cacheEnd = algo->CalculateEndCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 0);
+    EXPECT_EQ(cacheEnd, 4);
+
+    algo->info_.startIndex_ = 1;
+    algo->info_.startMainLineIndex_ = 1;
+    algo->info_.endIndex_ = 4;
+    algo->info_.endMainLineIndex_ = 4;
+    cacheStart = algo->CalculateStartCachedCount(option, 2);
+    cacheEnd = algo->CalculateEndCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 1);
+    EXPECT_EQ(cacheEnd, 6);
+
+    algo->info_.startIndex_ = 4;
+    algo->info_.startMainLineIndex_ = 4;
+    algo->info_.endIndex_ = 11;
+    algo->info_.endMainLineIndex_ = 7;
+    cacheStart = algo->CalculateStartCachedCount(option, 2);
+    cacheEnd = algo->CalculateEndCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 2);
+    EXPECT_EQ(cacheEnd, 4);
+}
+
+/**
+ * @tc.name: Test Calculate CacheCount
+ * @tc.desc: Test Calculate CacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, CachedCount003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 9, 10, 11, 12 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto cacheStart = algo->CalculateStartCachedCount(option, 2);
+    auto cacheEnd = algo->CalculateEndCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 0);
+    EXPECT_EQ(cacheEnd, 2);
 }
 } // namespace OHOS::Ace::NG

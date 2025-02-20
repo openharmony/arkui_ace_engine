@@ -36,6 +36,13 @@ enum class ToastWindowType {
     TOAST_IN_TYPE_SYSTEM_FLOAT,
     TOAST_WINDOW_COUNT
 };
+enum class MenuWindowState : int32_t {
+    DEFAULT = 0,
+    ATTACHING = 1,
+    ATTACHED = 2,
+    DETACHING = 3,
+    DETACHED = 4
+};
 
 enum class SubwindowType {
     TYPE_SYSTEM_TOP_MOST_TOAST = 0,
@@ -227,6 +234,8 @@ public:
     virtual void ResizeDialogSubwindow() = 0;
     virtual uint64_t GetDisplayId() = 0;
     virtual bool IsSameDisplayWithParentWindow(bool useInitializedId = false) = 0;
+    virtual OHOS::Ace::MenuWindowState GetAttachState() = 0;
+    virtual OHOS::Ace::MenuWindowState GetDetachState() = 0;
 
 private:
     int32_t subwindowId_ = 0;

@@ -175,10 +175,6 @@ public:
     {
         outBoundary_ = outBoundary;
     }
-    void SetIsOutOfBoundary(bool isOutOfBoundary)
-    {
-        isOutOfBoundary_ = isOutOfBoundary;
-    }
     void SetPosition(const Dimension& position)
     {
         position_ = position;
@@ -644,7 +640,6 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
-    bool isOutOfBoundary_ = false; // whether bar in the spring state
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;

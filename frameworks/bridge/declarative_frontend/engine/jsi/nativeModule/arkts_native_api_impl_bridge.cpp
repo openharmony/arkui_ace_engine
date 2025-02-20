@@ -4550,6 +4550,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnSelected));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnSelected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnSelected));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCachedMaxCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetCachedMaxCount));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCachedMaxCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetCachedMaxCount));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
 

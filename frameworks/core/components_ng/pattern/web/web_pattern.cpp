@@ -5964,6 +5964,7 @@ void WebPattern::OnWindowHide()
 
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    CHECK_NULL_VOID(delegate_);
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);
     switch (type) {

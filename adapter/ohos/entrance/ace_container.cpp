@@ -287,6 +287,16 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
+{
+    auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+    taskExecutorImpl->InitPlatformThread(true);
+    taskExecutor_ = taskExecutorImpl;
+    GetSettings().useUIAsJSThread = true;
+    GetSettings().usePlatformAsUIThread = true;
+    GetSettings().usingSharedRuntime = true;
+}
+
 AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
@@ -2456,11 +2466,12 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         }
     };
 
-    auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
+    auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_,
+        isDialogContainer = IsDialogContainer()]() {
         if (callback != nullptr) {
             callback(AceType::DynamicCast<PipelineContext>(context));
         }
-        if (!isSubContainer) {
+        if (!isSubContainer && !isDialogContainer) {
             context->SetupRootElement();
         }
     };
@@ -2781,6 +2792,14 @@ void AceContainer::CheckAndSetFontFamily()
     } else {
         fontManager->SetFontFamily(familyName.c_str(), path.c_str());
     }
+}
+
+void AceContainer::SetFontScaleAndWeightScale(int32_t instanceId)
+{
+    float fontScale = SystemProperties::GetFontScale();
+    float fontWeightScale = SystemProperties::GetFontWeightScale();
+    Container::SetFontScale(instanceId, fontScale);
+    Container::SetFontWeightScale(instanceId, fontWeightScale);
 }
 
 void AceContainer::SetFontScaleAndWeightScale(
@@ -3956,4 +3975,39 @@ void AceContainer::SetIsFocusActive(bool isFocusActive)
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetIsFocusActive(isFocusActive);
 }
+
+bool AceContainer::CloseWindow(int32_t instanceId)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "AceContainer CloseWindow begin");
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_RETURN(container, false);
+    auto window = container->GetUIWindowInner();
+    CHECK_NULL_RETURN(window, false);
+    OHOS::Rosen::WMError ret = window->Close();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "AceContainer CloseWindow Failed to close the window.");
+        return false;
+    }
+    sptr<OHOS::Rosen::Window> uiWindow = nullptr;
+    AceContainer::SetUIWindow(instanceId, uiWindow);
+    return true;
+}
+
+bool AceContainer::HideWindow(int32_t instanceId)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "AceContainer HideWindow begin");
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_RETURN(container, false);
+    auto window = container->GetUIWindowInner();
+    CHECK_NULL_RETURN(window, false);
+    OHOS::Rosen::WMError ret = window->Hide();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "AceContainer HideWindow Failed to hide the window.");
+        return false;
+    }
+    sptr<OHOS::Rosen::Window> uiWindow = nullptr;
+    AceContainer::SetUIWindow(instanceId, uiWindow);
+    return true;
+}
+
 } // namespace OHOS::Ace::Platform

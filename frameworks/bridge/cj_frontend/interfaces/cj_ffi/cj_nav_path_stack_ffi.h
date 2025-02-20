@@ -108,7 +108,9 @@ public:
     void InitNavPathIndex(const std::vector<std::string>& pathNames)
     {
         popArray_.clear();
-        for (int i = 0; i < pathArray_.size() && i < pathNames.size(); i++) {
+        for (int i = 0;
+            static_cast<unsigned long>(i) < pathArray_.size() && static_cast<unsigned long>(i) < pathNames.size();
+            i++) {
             if (pathNames[i] == pathArray_[i].name) {
                 pathArray_[i].index = i;
             }

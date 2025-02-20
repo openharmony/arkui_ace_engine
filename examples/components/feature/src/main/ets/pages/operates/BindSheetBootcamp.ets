@@ -15,33 +15,75 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
-import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+import { BlockTag } from 'common/src/main/ets/model/BlockTag';
+import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 
 @Component
 export struct BindSheetBootcamp {
   @Require @Prop title: ResourceStr
   @State showParameters: boolean = false;
-  @State isShowBindSheet: boolean = false;
-  @State enablePreferType: boolean = false;
-  @State preferType: SheetType = SheetType.BOTTOM;
-  @State enableMaskColor: boolean = false;
-  @State maskColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background');
-  @State enableBackgroundColorColor: boolean = false;
-  @State backgroundColorColor: ResourceColor = Color.White;
-  @State enableShadowStatus: boolean = false;
-  @State shadowStatus: ShadowStyle = ShadowStyle.OUTER_FLOATING_SM;
-  @State enableBorderWidth: boolean = false;
-  @State borderWidthValue: number = 0;
-  @State enableBorderColor: boolean = false;
-  @State borderColorValue: ResourceColor = $r('sys.color.ohos_id_color_emphasize');
-  @State enableSheetHeight: boolean = false;
-  @State sheetHeight: SheetSize | Length = SheetSize.LARGE;
-  @State enableSheetDetents: boolean = false;
-  @State sheetDetents: SheetSize | Length = SheetSize.LARGE;
-  @State enableRadiusLengthValue: boolean = false;
-  @State radiusLengthValue: number = 32;
-  @State enableRadiusLengthUnit: boolean = false;
-  @State radiusLengthUnit: LengthUnit = LengthUnit.VP;
+  @State compBindSheetIsShow: boolean = false
+  @State enableCompBindSheetOptionsHeight: boolean = false
+  @State compBindSheetOptionsHeight: SheetSize = SheetSize.LARGE
+  @State enableCompBindSheetOptionsDetents: boolean = false
+  @State compBindSheetOptionsDetents: [(SheetSize | Length), (SheetSize | Length)?, (SheetSize | Length)?] =
+    [SheetSize.LARGE]
+  @State enableCompBindSheetOptionsPreferType: boolean = false
+  @State compBindSheetOptionsPreferType: SheetType = SheetType.BOTTOM
+  @State enableCompBindSheetOptionsShowClose: boolean = false
+  @State compBindSheetOptionsShowClose: boolean = true
+  @State enableCompBindSheetOptionsDragBar: boolean = false
+  @State compBindSheetOptionsDragBar: boolean = false
+  @State enableCompBindSheetOptionsBlurStyle: boolean = false
+  @State compBindSheetOptionsBlurStyle: BlurStyle = BlurStyle.NONE
+  @State enableCompBindSheetOptionsMaskColor: boolean = false
+  @State compBindSheetOptionsMaskColor: ResourceColor | undefined = undefined
+  @State enableCompBindSheetOptionsTitleTitle: boolean = false
+  @State compBindSheetOptionsTitleTitle: boolean = false
+  @State enableCompBindSheetOptionsTitleSubtitle: boolean = false
+  @State compBindSheetOptionsTitleSubtitle: boolean = false
+  @State enableCompBindSheetOptionsEnableOutsideInteractive: boolean = false
+  @State compBindSheetOptionsEnableOutsideInteractive: boolean = false
+  @State enableCompBindSheetOptionsBorderWidth: boolean = false
+  @State compBindSheetOptionsBorderWidth: number = 0
+  @State enableCompBindSheetOptionsBorderColor: boolean = false
+  @State compBindSheetOptionsBorderColor: ResourceColor = Color.Black
+  @State enableCompBindSheetOptionsBorderStyle: boolean = false
+  @State compBindSheetOptionsBorderStyle: BorderStyle = BorderStyle.Solid
+  @State enableCompBindSheetOptionWidth: boolean = false
+  @State compBindSheetOptionsWidth: number = 200
+  @State enableCompBindSheetOptionShadow: boolean = false
+  @State compBindSheetOptionShadow: ShadowStyle = ShadowStyle.OUTER_DEFAULT_XS
+  @State enableCompBindSheetOptionMode: boolean = false
+  @State compBindSheetOptionMode: SheetMode = SheetMode.OVERLAY
+  @State enableCompBindSheetOptionScrollSizeMode: boolean = false
+  @State compBindSheetOptionScrollSizeMode: ScrollSizeMode = ScrollSizeMode.FOLLOW_DETENT
+  @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
+  @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+
+  compEventTriggeredLog(value: string) {
+    let time = formatDate(new Date(Date.now()))
+    this.listEventTriggeredTagsTemp.push(
+      new BlockTag(time, value)
+    )
+    setTimeout(() => {
+      if (AppStorage.get('Block')) {
+        this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+          this.listEventTriggeredTagsTemp
+        );
+        this.listEventTriggeredTagsTemp = [];
+      } else {
+        if (this.listEventTriggeredTagsTemp) {
+          this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+            this.listEventTriggeredTagsTemp
+          );
+        }
+        if (this.listEventTriggeredTags) {
+          this.listEventTriggeredTagsTemp = [];
+        }
+      }
+    }, 200)
+  }
 
   build() {
     NavDestination() {
@@ -61,31 +103,70 @@ export struct BindSheetBootcamp {
   }
 
   @Builder
+  bindSheetBuilder() {
+    Text('bindSheet')
+  }
+
+  @Builder
   Content() {
     Column() {
       Button('点击唤出半模态界面')
         .onClick(() => {
-          this.isShowBindSheet = true;
+          this.compBindSheetIsShow = !this.compBindSheetIsShow
         })
-        .bindSheet($$this.isShowBindSheet, this.SheetBuilder(), {
-          title: { title: this.title },
-          height: useEnabled(this.enableSheetHeight, this.sheetHeight),
-          detents: useEnabled(this.enableSheetDetents, [this.sheetDetents]),
-          preferType: useEnabled(this.enablePreferType, this.preferType),
-          maskColor: useEnabled(this.enableMaskColor, this.maskColor),
-          shadow: useEnabled(this.enableShadowStatus, this.shadowStatus),
-          borderWidth: useEnabled(this.enableBorderWidth, this.borderWidthValue),
-          borderColor: useEnabled(this.enableBorderColor, this.borderColorValue),
-          backgroundColor: useEnabled(this.enableBackgroundColorColor, this.backgroundColorColor),
-          radius: new LengthMetrics(useEnabled(this.enableRadiusLengthValue, this.radiusLengthValue),
-            useEnabled(this.enableRadiusLengthUnit, this.radiusLengthUnit)),
-        })
-    }
-  }
-
-  @Builder
-  SheetBuilder() {
-    Scroll() {
+        .bindSheet(
+          this.compBindSheetIsShow, this.bindSheetBuilder(),
+          {
+            shouldDismiss: () => {
+              this.compBindSheetIsShow = false
+              this.compEventTriggeredLog('BindSheet:shouldDismiss()')
+            },
+            height: useEnabled(this.enableCompBindSheetOptionsHeight, this.compBindSheetOptionsHeight),
+            detents: useEnabled(this.enableCompBindSheetOptionsDetents, this.compBindSheetOptionsDetents),
+            preferType: useEnabled(this.enableCompBindSheetOptionsPreferType, this.compBindSheetOptionsPreferType),
+            showClose: useEnabled(this.enableCompBindSheetOptionsShowClose, this.compBindSheetOptionsShowClose),
+            dragBar: useEnabled(this.enableCompBindSheetOptionsDragBar, this.compBindSheetOptionsDragBar),
+            blurStyle: useEnabled(this.enableCompBindSheetOptionsBlurStyle, this.compBindSheetOptionsBlurStyle),
+            maskColor: useEnabled(this.enableCompBindSheetOptionsMaskColor, this.compBindSheetOptionsMaskColor),
+            title: {
+              title: useEnabled(this.enableCompBindSheetOptionsTitleTitle, this.compBindSheetOptionsTitleTitle) ?
+                'title' : '',
+              subtitle: useEnabled(this.enableCompBindSheetOptionsTitleSubtitle,
+                this.compBindSheetOptionsTitleSubtitle) ? 'subtitle' : ''
+            },
+            enableOutsideInteractive: useEnabled(this.enableCompBindSheetOptionsEnableOutsideInteractive,
+              this.compBindSheetOptionsEnableOutsideInteractive),
+            borderWidth: useEnabled(this.enableCompBindSheetOptionsBorderWidth,
+              this.compBindSheetOptionsBorderWidth),
+            borderColor: useEnabled(this.enableCompBindSheetOptionsBorderColor,
+              this.compBindSheetOptionsBorderColor),
+            borderStyle: useEnabled(this.enableCompBindSheetOptionsBorderStyle,
+              this.compBindSheetOptionsBorderStyle),
+            width: useEnabled(this.enableCompBindSheetOptionWidth, this.compBindSheetOptionsWidth),
+            shadow: useEnabled(this.enableCompBindSheetOptionShadow, this.compBindSheetOptionShadow),
+            mode: useEnabled(this.enableCompBindSheetOptionMode, this.compBindSheetOptionMode),
+            scrollSizeMode: useEnabled(this.enableCompBindSheetOptionScrollSizeMode,
+              this.compBindSheetOptionScrollSizeMode),
+            onWillDismiss: () => {
+              this.compEventTriggeredLog('BindSheet:onWillDismiss()')
+            },
+            onWillSpringBackWhenDismiss: () => {
+              this.compEventTriggeredLog('BindSheet:onWillSpringBackWhenDismiss()')
+            },
+            onHeightDidChange: () => {
+              this.compEventTriggeredLog('BindSheet:onHeightDidChange()')
+            },
+            onDetentsDidChange: () => {
+              this.compEventTriggeredLog('BindSheet:onDetentsDidChange()')
+            },
+            onWidthDidChange: () => {
+              this.compEventTriggeredLog('BindSheet:onWidthDidChange()')
+            },
+            onTypeDidChange: () => {
+              this.compEventTriggeredLog('BindSheet:onTypeDidChange()')
+            }
+          }
+        )
     }
   }
 
@@ -93,10 +174,33 @@ export struct BindSheetBootcamp {
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
+
         RadioBlock({
-          title: '半模态页面的样式',
-          isEnabled: this.enablePreferType,
-          value: this.preferType,
+          title: 'sheetOptions.height',
+          isEnabled: $enableCompBindSheetOptionsHeight,
+          value: $compBindSheetOptionsHeight,
+          dataSource: [
+            { label: 'MEDIUM', value: SheetSize.MEDIUM },
+            { label: 'LARGE', value: SheetSize.LARGE },
+            { label: 'FIT_CONTENT', value: SheetSize.FIT_CONTENT },
+          ]
+        })
+
+        RadioBlock({
+          title: 'sheetOptions.detents',
+          isEnabled: $enableCompBindSheetOptionsDetents,
+          value: $compBindSheetOptionsDetents,
+          dataSource: [
+            { label: 'MEDIUM,LARGE,FIT_CONTENT', value: [SheetSize.MEDIUM, SheetSize.LARGE, SheetSize.FIT_CONTENT] },
+            { label: 'LARGE,FIT_CONTENT', value: [SheetSize.LARGE, SheetSize.FIT_CONTENT] },
+            { label: 'FIT_CONTENT', value: SheetSize.FIT_CONTENT },
+          ]
+        })
+
+        RadioBlock({
+          title: 'sheetOptions.preferType',
+          isEnabled: $enableCompBindSheetOptionsPreferType,
+          value: $compBindSheetOptionsPreferType,
           dataSource: [
             { label: 'BOTTOM', value: SheetType.BOTTOM },
             { label: 'CENTER', value: SheetType.CENTER },
@@ -105,93 +209,149 @@ export struct BindSheetBootcamp {
         })
 
         RadioBlock({
-          title: '阴影',
-          isEnabled: this.enableShadowStatus,
-          value: this.shadowStatus,
+          title: 'sheetOptions.showClose',
+          isEnabled: $enableCompBindSheetOptionsShowClose,
+          value: $compBindSheetOptionsShowClose,
           dataSource: [
-            { label: '超小阴影', value: ShadowStyle.OUTER_DEFAULT_XS },
-            { label: '小阴影', value: ShadowStyle.OUTER_DEFAULT_SM },
-            { label: '中阴影', value: ShadowStyle.OUTER_DEFAULT_MD },
-            { label: '大阴影', value: ShadowStyle.OUTER_DEFAULT_LG },
-            { label: '浮动小阴影', value: ShadowStyle.OUTER_FLOATING_SM },
-            { label: '浮动中阴影', value: ShadowStyle.OUTER_FLOATING_MD },
+            { label: 'true', value: true },
+            { label: 'false', value: false },
+          ]
+        })
+
+        RadioBlock({
+          title: 'sheetOptions.dragBar',
+          isEnabled: $enableCompBindSheetOptionsDragBar,
+          value: $compBindSheetOptionsDragBar,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false },
+          ]
+        })
+
+        RadioBlock({
+          title: 'sheetOptions.blurStyle',
+          isEnabled: $enableCompBindSheetOptionsBlurStyle,
+          value: $compBindSheetOptionsBlurStyle,
+          dataSource: [
+            { label: 'Thin', value: BlurStyle.Thin },
+            { label: 'Regular', value: BlurStyle.Regular },
+            { label: 'Thick', value: BlurStyle.Thick },
+            { label: 'BACKGROUND_THIN', value: BlurStyle.BACKGROUND_THIN },
+            { label: 'BACKGROUND_REGULAR', value: BlurStyle.BACKGROUND_REGULAR },
+            { label: 'BACKGROUND_THICK', value: BlurStyle.BACKGROUND_THICK },
+            { label: 'BACKGROUND_ULTRA_THICK', value: BlurStyle.BACKGROUND_ULTRA_THICK },
+            { label: 'NONE', value: BlurStyle.NONE },
+            { label: 'COMPONENT_ULTRA_THIN', value: BlurStyle.COMPONENT_ULTRA_THIN },
+            { label: 'COMPONENT_THIN', value: BlurStyle.COMPONENT_THIN },
+            { label: 'COMPONENT_REGULAR', value: BlurStyle.COMPONENT_REGULAR },
+            { label: 'COMPONENT_THICK', value: BlurStyle.COMPONENT_THICK },
+            { label: 'COMPONENT_ULTRA_THICK', value: BlurStyle.COMPONENT_ULTRA_THICK },
+          ]
+        })
+
+        ColorBlock({
+          title: 'sheetOptions.maskColor',
+          isEnabled: $enableCompBindSheetOptionsMaskColor,
+          color: $compBindSheetOptionsMaskColor
+        })
+
+        RadioBlock({
+          title: 'sheetOptions.title.title',
+          isEnabled: $enableCompBindSheetOptionsTitleTitle,
+          value: $compBindSheetOptionsTitleTitle,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false },
+          ]
+        })
+
+        RadioBlock({
+          title: 'sheetOptions.title.subtitle',
+          isEnabled: $enableCompBindSheetOptionsTitleSubtitle,
+          value: $compBindSheetOptionsTitleSubtitle,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false },
+          ]
+        })
+
+        RadioBlock({
+          title: 'sheetOptions.enableOutsideInteractive',
+          isEnabled: $enableCompBindSheetOptionsEnableOutsideInteractive,
+          value: $compBindSheetOptionsEnableOutsideInteractive,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false },
           ]
         })
 
         SliderBlock({
-          title: '边框宽度',
-          isEnabled: this.enableBorderWidth,
-          value: this.borderWidthValue,
+          title: 'sheetOptions.borderWidth',
+          isEnabled: $enableCompBindSheetOptionsBorderWidth,
+          value: $compBindSheetOptionsBorderWidth,
           min: 0,
-          max: 5
+          max: 32
         })
 
         ColorBlock({
-          title: '边框颜色',
-          isEnabled: this.enableBorderColor,
-          color: this.borderColorValue,
-        })
-
-        ColorBlock({
-          title: '背景蒙层颜色',
-          isEnabled: this.enableMaskColor,
-          color: this.maskColor,
-        })
-
-        ColorBlock({
-          title: '背景色',
-          isEnabled: this.enableBackgroundColorColor,
-          color: this.backgroundColorColor,
+          title: 'sheetOptions.borderColor',
+          isEnabled: $enableCompBindSheetOptionsBorderColor,
+          color: $compBindSheetOptionsBorderColor
         })
 
         RadioBlock({
-          title: '半模态高度',
-          isEnabled: this.enableSheetHeight,
-          value: this.sheetHeight,
+          title: 'sheetOptions.borderStyle',
+          isEnabled: $enableCompBindSheetOptionsBorderStyle,
+          value: $compBindSheetOptionsBorderStyle,
           dataSource: [
-            { label: 'MEDIUM', value: SheetSize.MEDIUM },
-            { label: 'LARGE', value: SheetSize.LARGE },
-            { label: 'FIT_CONTENT', value: SheetSize.FIT_CONTENT },
-            { label: '1000vp', value: 1000 },
-            { label: '700vp', value: 700 },
-            { label: '250vp', value: 250 },
-          ]
-        })
-
-        RadioBlock({
-          title: '切换高度档位的最大值',
-          isEnabled: this.enableSheetDetents,
-          value: this.sheetDetents,
-          dataSource: [
-            { label: 'MEDIUM', value: SheetSize.MEDIUM },
-            { label: 'LARGE', value: SheetSize.LARGE },
-            { label: 'FIT_CONTENT', value: SheetSize.FIT_CONTENT },
-            { label: '1000vp', value: 1000 },
-            { label: '700vp', value: 700 },
-            { label: '250vp', value: 250 },
+            { label: 'Dotted', value: BorderStyle.Dotted },
+            { label: 'Dashed', value: BorderStyle.Dashed },
+            { label: 'Solid', value: BorderStyle.Solid }
           ]
         })
 
         SliderBlock({
-          title: '圆角半径值',
-          isEnabled: this.enableRadiusLengthValue,
-          value: this.radiusLengthValue,
-          min: -10,
-          max: 900,
+          title: 'sheetOptions.width',
+          isEnabled: $enableCompBindSheetOptionWidth,
+          value: $compBindSheetOptionsBorderWidth,
+          min: 0,
+          max: 32
         })
 
         RadioBlock({
-          title: '圆角半径单位',
-          isEnabled: this.enableRadiusLengthUnit,
-          value: this.radiusLengthUnit,
+          title: 'sheetOptions.shadow',
+          isEnabled: $enableCompBindSheetOptionShadow,
+          value: $compBindSheetOptionShadow,
           dataSource: [
-            { label: 'px', value: LengthUnit.PX },
-            { label: 'vp', value: LengthUnit.VP },
-            { label: 'fp', value: LengthUnit.FP },
-            { label: 'percent', value: LengthUnit.PERCENT },
-            { label: 'lpx', value: LengthUnit.LPX },
+            { label: 'OUTER_DEFAULT_XS', value: ShadowStyle.OUTER_DEFAULT_XS },
+            { label: 'OUTER_DEFAULT_SM', value: ShadowStyle.OUTER_DEFAULT_SM },
+            { label: 'OUTER_DEFAULT_MD', value: ShadowStyle.OUTER_DEFAULT_MD },
+            { label: 'OUTER_DEFAULT_LG', value: ShadowStyle.OUTER_DEFAULT_LG },
+            { label: 'OUTER_FLOATING_SM', value: ShadowStyle.OUTER_FLOATING_SM },
+            { label: 'OUTER_FLOATING_MD', value: ShadowStyle.OUTER_FLOATING_MD },
           ]
         })
+
+        RadioBlock({
+          title: 'sheetOptions.mode',
+          isEnabled: $enableCompBindSheetOptionMode,
+          value: $compBindSheetOptionMode,
+          dataSource: [
+            { label: 'OVERLAY', value: SheetMode.OVERLAY },
+            { label: 'EMBEDDED', value: SheetMode.EMBEDDED },
+          ]
+        })
+
+        RadioBlock({
+          title: 'sheetOptions.scrollSizeMode',
+          isEnabled: $enableCompBindSheetOptionScrollSizeMode,
+          value: $compBindSheetOptionScrollSizeMode,
+          dataSource: [
+            { label: 'FOLLOW_DETENT', value: ScrollSizeMode.FOLLOW_DETENT },
+            { label: 'CONTINUOUS', value: ScrollSizeMode.CONTINUOUS },
+          ]
+        })
+
       }.width('100%')
     }.height('50%')
   }

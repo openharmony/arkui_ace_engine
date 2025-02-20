@@ -47,7 +47,6 @@ const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const INDEX_ZERO = 0;
 const INDEX_ONE = 1;
 const INDEX_TWO = 2;
-const DEFAULT_FONT_SCALE = 1;
 const SINGLE_LINE_NUM = 1;
 const DOUBLE_LINE_NUM = 2;
 const RESOURCE_TYPE_SYMBOL = 40000;

@@ -1146,7 +1146,6 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         UpdateBorderRadius();
         scrollBar_->SetReverse(IsReverse());
-        scrollBar_->SetIsOutOfBoundary(IsOutOfBoundary());
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight, GetScrollSource());
         scrollBar_->MarkNeedRender();
         CreateScrollBarOverlayModifier();

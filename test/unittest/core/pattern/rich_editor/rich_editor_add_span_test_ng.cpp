@@ -23,7 +23,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
+const std::string SYMBOL_FONT_FAMILY = "Symbol_Test_CustomSymbol";
 class RichEditorAddSpanTestNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
@@ -360,6 +360,51 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. test add symbol span
+     */
+    auto index1 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index1, 0);
+    auto index2 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index2, 1);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 2);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: AddSymbolSpan002
+ * @tc.desc: test add symbol span for custom symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize custom symbol span properties
+     */
+    TextStyle style;
+    style.SetFontSize(FONT_SIZE_VALUE);
+    style.SetFontWeight(FONT_WEIGHT_VALUE);
+    style.SetSymbolColorList(SYMBOL_COLOR_LIST_1);
+    style.SetRenderStrategy(RENDER_STRATEGY_SINGLE);
+    style.SetEffectStrategy(EFFECT_STRATEGY_NONE);
+    style.SetSymbolType(SymbolType::CUSTOM);
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    style.SetFontFamilies(fontFamilies);
+
+    SymbolSpanOptions options;
+    options.symbolId = SYMBOL_ID;
+    options.style = style;
+
+    /**
+     * @tc.steps: step3. test add custom symbol span
      */
     auto index1 = richEditorController->AddSymbolSpan(options);
     EXPECT_EQ(index1, 0);

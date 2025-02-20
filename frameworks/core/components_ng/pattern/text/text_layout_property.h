@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace::NG {
 #define ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(group, name, type, changeFlag) \
@@ -196,6 +197,8 @@ public:
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, SymbolColorList, std::vector<Color>, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
+        FontStyle, SymbolType, SymbolType, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, SymbolRenderingStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);

@@ -1896,6 +1896,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect): TabsAttribute;
     pageFlipMode(value: PageFlipMode): TabsAttribute;
+    cachedMaxCount(count: number, mode: CacheMode): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

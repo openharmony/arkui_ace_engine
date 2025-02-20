@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -144,7 +145,7 @@ RichEditorPattern::RichEditorPattern() :
     styledString_->SetSpanWatcher(WeakClaim(this));
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
-    floatingCaretState_.UpdateOriginCaretColor();
+    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -1243,13 +1244,13 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
     CHECK_NULL_VOID(options.style.has_value());
 
     TextStyle textStyle = options.style.value();
-    spanNode->UpdateTextColor(textStyle.GetTextColor());
+    spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
     spanNode->UpdateFontSize(textStyle.GetFontSize());
     spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
     spanNode->UpdateFontWeight(textStyle.GetFontWeight());
     spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
     spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
-    spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
+    spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
     spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
     spanNode->UpdateTextShadow(textStyle.GetTextShadows());
     spanNode->UpdateHalfLeading(textStyle.GetHalfLeading());
@@ -1315,6 +1316,8 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->UpdateSymbolColorList(options.style.value().GetSymbolColorList());
         spanNode->UpdateSymbolRenderingStrategy(options.style.value().GetRenderStrategy());
         spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
+        spanNode->UpdateSymbolType(options.style.value().GetSymbolType());
+        spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = u"  ";
@@ -1983,7 +1986,7 @@ void RichEditorPattern::UpdateTextStyle(
     CHECK_NULL_VOID(host);
     UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextColor.has_value()) {
-        spanNode->UpdateTextColor(textStyle.GetTextColor());
+        spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
         spanNode->GetSpanItem()->useThemeFontColor = false;
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
@@ -2026,7 +2029,7 @@ void RichEditorPattern::UpdateDecoration(
         spanNode->GetSpanItem()->useThemeDecorationColor = false;
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
-        spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
+        spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
@@ -4743,20 +4746,38 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 
 void RichEditorPattern::OnColorConfigurationUpdate()
 {
+    auto colorMode = GetColorMode();
+    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
+    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+        OnCommonColorChange();
+    }
+}
+
+bool RichEditorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    IF_PRESENT(magnifierController_, SetColorModeChange(true));
+    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
+    OnCommonColorChange();
+    return false;
+}
+
+void RichEditorPattern::OnCommonColorChange()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(theme);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto displayColorMode = GetDisplayColorMode();
+    COLOR_MODE_LOCK(displayColorMode);
     const auto& themeTextStyle = theme->GetTextStyle();
     auto themeTextColor = themeTextStyle.GetTextColor();
     auto themeTextDecorationColor = themeTextStyle.GetTextDecorationColor();
     textLayoutProperty->UpdateTextColor(themeTextColor);
     textLayoutProperty->UpdateTextDecorationColor(themeTextDecorationColor);
-
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, TextColor=%{public}s, DecorationColor=%{public}s",
-        themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, ColorMode=%{public}d, TextColor=%{public}s, DecorationColor=%{public}s",
+        displayColorMode, themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
 
     const auto& spans = host->GetChildren();
     for (const auto& uiNode : spans) {
@@ -4770,8 +4791,9 @@ void RichEditorPattern::OnColorConfigurationUpdate()
         CHECK_NULL_CONTINUE(spanNode);
         auto spanItem = spanNode->GetSpanItem();
         CHECK_NULL_CONTINUE(spanItem);
-        IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColor(themeTextColor));
-        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(themeTextDecorationColor));
+        IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColorWithoutCheck(themeTextColor));
+        IF_TRUE(spanItem->useThemeDecorationColor, 
+            spanNode->UpdateTextDecorationColorWithoutCheck(themeTextDecorationColor));
         spanNode->UpdateColorByResourceId();
     }
     paragraphCache_.Clear();
@@ -4780,7 +4802,6 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
 
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
-    floatingCaretState_.UpdateOriginCaretColor();
     auto scrollBar = GetScrollBar();
     auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollBar && scrollbarTheme);
@@ -5470,8 +5491,8 @@ void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
     auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
     Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
-    spanNode->UpdateTextColor(textColor);
-    spanNode->UpdateTextDecorationColor(textColor);
+    spanNode->UpdateTextColorWithoutCheck(textColor);
+    spanNode->UpdateTextDecorationColorWithoutCheck(textColor);
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::u16string& insertValue)
@@ -9677,10 +9698,10 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
         placeholderNode->UpdateItalicFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
     }
     if (layoutProperty->HasPlaceholderTextColor()) {
-        placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
+        placeholderNode->UpdateTextColorWithoutCheck(layoutProperty->GetPlaceholderTextColor().value());
     } else {
         auto theme = GetTheme<RichEditorTheme>();
-        placeholderNode->UpdateTextColor(theme ? theme->GetPlaceholderColor() : Color());
+        placeholderNode->UpdateTextColorWithoutCheck(theme ? theme->GetPlaceholderColor() : Color());
     }
 
     auto spanItem = placeholderNode->GetSpanItem();

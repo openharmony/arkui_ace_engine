@@ -583,7 +583,125 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         FireWillHideEvent(lastCurrentIndex);
     }
 
+    UpdateItemsLatestSwitched();
     UpdateIgnoreBlankOffsetWithIndex();
+}
+
+void SwiperPattern::UpdateItemsLatestSwitched()
+{
+    if (!hasTabsAncestor_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    auto cachedMaxCount = tabsLayoutProperty->GetCachedMaxCountValue(-1);
+    auto cacheMode = tabsLayoutProperty->GetCacheModeValue(TabsCacheMode::CACHE_BOTH_SIDE);
+    if (cachedMaxCount < 0 || cachedMaxCount >= RealTotalCount() || cacheMode != TabsCacheMode::CACHE_LATEST_SWITCHED) {
+        itemsLatestSwitched_.clear();
+        return;
+    }
+
+    auto indexNeedInsert = -1;
+    if (IsUseCustomAnimation()) {
+        auto props = GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(props);
+        indexNeedInsert = customAnimationToIndex_.value_or(props->GetIndexValue(0));
+    } else if (jumpIndex_) {
+        indexNeedInsert = jumpIndex_.value();
+    } else if (targetIndex_) {
+        indexNeedInsert = targetIndex_.value();
+    }
+    if (indexNeedInsert < 0) {
+        return;
+    }
+
+    itemsLatestSwitched_.remove(indexNeedInsert);
+    itemsLatestSwitched_.push_back(indexNeedInsert);
+    if (static_cast<int32_t>(itemsLatestSwitched_.size()) > (cachedMaxCount + 1)) {
+        itemsLatestSwitched_.pop_front();
+    }
+}
+
+void SwiperPattern::HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex)
+{
+    if (!hasTabsAncestor_) {
+        return;
+    }
+    itemsNeedClean_.clear();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    auto realTotalCount = RealTotalCount();
+    auto cachedMaxCount = tabsLayoutProperty->GetCachedMaxCountValue(-1);
+    if (cachedMaxCount < 0 || cachedMaxCount >= realTotalCount) {
+        return;
+    }
+    auto cacheMode = tabsLayoutProperty->GetCacheModeValue(TabsCacheMode::CACHE_BOTH_SIDE);
+    auto useCustomAnimation = IsUseCustomAnimation();
+    for (int32_t index = 0; index < realTotalCount; ++index) {
+        if (cacheMode == TabsCacheMode::CACHE_BOTH_SIDE) {
+            if (useCustomAnimation && ((index >= startIndex - cachedMaxCount && index <= startIndex + cachedMaxCount) ||
+                                          (index >= endIndex - cachedMaxCount && index <= endIndex + cachedMaxCount))) {
+                continue;
+            } else if (startIndex > endIndex ||
+                       (index >= startIndex - cachedMaxCount && index <= endIndex + cachedMaxCount)) {
+                continue;
+            }
+        } else if (cacheMode == TabsCacheMode::CACHE_LATEST_SWITCHED) {
+            if (std::find(itemsLatestSwitched_.begin(), itemsLatestSwitched_.end(), index) !=
+                itemsLatestSwitched_.end()) {
+                    continue;
+                }
+        }
+
+        itemsNeedClean_.insert(index);
+    }
+
+    PostIdleTaskToCleanTabContent();
+}
+
+void SwiperPattern::PostIdleTaskToCleanTabContent()
+{
+    if (itemsNeedClean_.empty()) {
+        return;
+    }
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddPredictTask([weak = WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+
+        std::set<int32_t> itemsHasClean;
+        for (const auto& index : pattern->itemsNeedClean_) {
+            if (GetSysTimestamp() > deadline) {
+                break;
+            }
+            itemsHasClean.insert(index);
+            auto child = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(index));
+            if (!child || child->IsActive()) {
+                continue;
+            }
+            auto tabContentPattern = AceType::DynamicCast<TabContentPattern>(child->GetPattern<TabContentPattern>());
+            if (tabContentPattern) {
+                tabContentPattern->CleanChildren();
+            }
+        }
+        for (const auto& index : itemsHasClean) {
+            pattern->itemsNeedClean_.erase(index);
+        }
+        if (!pattern->itemsNeedClean_.empty()) {
+            pattern->PostIdleTaskToCleanTabContent();
+        }
+    });
 }
 
 void SwiperPattern::UpdateTargetCapture(bool forceUpdate)
@@ -1002,6 +1120,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     if (props->GetIsCustomAnimation().value_or(false)) {
         needUnmountIndexs_ = algo->GetNeedUnmountIndexs();
+        auto currentIndex = props->GetIndexValue(0);
+        HandleTabsCachedMaxCount(currentIndex, customAnimationToIndex_.value_or(currentIndex));
         return false;
     }
     if (SupportSwiperCustomAnimation()) {
@@ -1012,6 +1132,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     UpdateLayoutProperties(algo);
     PostIdleTask(GetHost());
+    HandleTabsCachedMaxCount(startIndex_, endIndex_);
 
     if (!itemPosition_.empty()) {
         const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
@@ -2013,6 +2134,9 @@ bool SwiperPattern::IsInFastAnimation() const
 {
     if (!NeedFastAnimation()) {
         return false;
+    }
+    if (targetIndex_) {
+        return true;
     }
     return propertyAnimationIsRunning_;
 }

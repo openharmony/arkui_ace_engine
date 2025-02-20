@@ -263,6 +263,13 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const N
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
         AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindow);
+    } else if (subwindow->GetDetachState() == MenuWindowState::DETACHING) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "recreate subwindow");
+        RemoveSubwindow(containerId, SubwindowType::TYPE_MENU);
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+        AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindow);
     }
     subwindow->ShowMenuNG(menuNode, menuParam, targetNode, offset);
 }
@@ -281,6 +288,13 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     }
     auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     if (!IsSubwindowExist(subwindow)) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+        AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindow);
+    } else if (subwindow->GetDetachState() == MenuWindowState::DETACHING) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "recreate subwindow");
+        RemoveSubwindow(containerId, SubwindowType::TYPE_MENU);
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
@@ -472,6 +486,13 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
             CHECK_NULL_VOID(menu);
             auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
             if (!manager->IsSubwindowExist(subwindow)) {
+                subwindow = Subwindow::CreateSubwindow(containerId);
+                subwindow->InitContainer();
+                CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+                manager->AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindow);
+            } else if (subwindow->GetDetachState() == MenuWindowState::DETACHING) {
+                TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "recreate subwindow");
+                manager->RemoveSubwindow(containerId, SubwindowType::TYPE_MENU);
                 subwindow = Subwindow::CreateSubwindow(containerId);
                 subwindow->InitContainer();
                 CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
