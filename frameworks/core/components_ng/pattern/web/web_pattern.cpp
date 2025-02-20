@@ -2248,7 +2248,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             delegate_->LoadDataWithRichText();
         }
     }
-    
+
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         return true;
     }
@@ -2966,8 +2966,13 @@ void WebPattern::OnModifyDone()
                 TAG_LOGD(AceLogTag::ACE_WEB, "[getSurfaceId] set surfaceId is %{public}s", surfaceId.c_str());
             }
         }
+
+        UpdateJavaScriptOnDocumentStartByOrder();
+        UpdateJavaScriptOnDocumentEndByOrder();
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
+        UpdateJavaScriptOnHeadReadyByOrder();
+
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -3469,7 +3474,7 @@ void WebPattern::OnSelectHandleStart(const GestureEvent& event, bool isFirst)
     CHECK_NULL_VOID(pattern);
     const std::shared_ptr<SelectOverlayInfo>& info = pattern->GetSelectOverlayInfo();
     RectF handleRect = ChangeHandleHeight(info, event, isFirst);
-    
+
     TouchInfo touchPoint;
     touchPoint.id = 0;
     touchPoint.x = handleRect.GetX() - webOffset_.GetX();
@@ -6031,23 +6036,6 @@ bool WebPattern::IsDefaultFocusNodeExist()
     return result;
 }
 
-void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
-{
-    onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
-    if (delegate_) {
-        UpdateJavaScriptOnDocumentStart();
-        delegate_->JavaScriptOnDocumentStart();
-    }
-}
-
-void WebPattern::UpdateJavaScriptOnDocumentStart()
-{
-    if (delegate_ && onDocumentStartScriptItems_.has_value()) {
-        delegate_->SetJavaScriptItems(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START);
-        onDocumentStartScriptItems_ = std::nullopt;
-    }
-}
-
 void WebPattern::InitSlideUpdateListener()
 {
     auto host = GetHost();
@@ -6175,18 +6163,100 @@ RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
     return paint;
 }
 
+void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
+{
+    onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItemsByOrder_ = std::nullopt;
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentStart();
+        delegate_->JavaScriptOnDocumentStart();
+    }
+}
+
+void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        delegate_->JavaScriptOnDocumentStartByOrder();
+    }
+}
+
+void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentEndByOrder();
+        delegate_->JavaScriptOnDocumentEndByOrder();
+    }
+}
+
+void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        UpdateJavaScriptOnHeadReadyByOrder();
+        delegate_->JavaScriptOnHeadReadyByOrder();
+    }
+}
+
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptItemsByOrder_ = std::nullopt;
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
         delegate_->JavaScriptOnDocumentEnd();
     }
 }
 
+void WebPattern::UpdateJavaScriptOnDocumentStart()
+{
+    if (delegate_ && onDocumentStartScriptItems_.has_value() && !onDocumentStartScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItems(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START);
+        onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentStartByOrder()
+{
+    if (delegate_ && onDocumentStartScriptItems_.has_value() && onDocumentStartScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START,
+            onDocumentStartScriptItemsByOrder_.value());
+        onDocumentStartScriptItems_ = std::nullopt;
+        onDocumentStartScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentEndByOrder()
+{
+    if (delegate_ && onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END,
+            onDocumentEndScriptItemsByOrder_.value());
+        onDocumentEndScriptItems_ = std::nullopt;
+        onDocumentEndScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnHeadReadyByOrder()
+{
+    if (delegate_ && onHeadReadyScriptItems_.has_value() && onHeadReadyScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onHeadReadyScriptItems_.value(), ScriptItemType::DOCUMENT_HEAD_READY,
+            onHeadReadyScriptItemsByOrder_.value());
+        onHeadReadyScriptItems_ = std::nullopt;
+        onHeadReadyScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
 void WebPattern::UpdateJavaScriptOnDocumentEnd()
 {
-    if (delegate_ && onDocumentEndScriptItems_.has_value()) {
+    CHECK_NULL_VOID(delegate_);
+    if (onDocumentEndScriptItems_.has_value() && !onDocumentEndScriptItemsByOrder_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
         onDocumentEndScriptItems_ = std::nullopt;
     }

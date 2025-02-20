@@ -150,6 +150,9 @@ public:
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void OptimizeParserBudgetEnabled(bool enable);
+    static void RunJavaScriptOnDocumentStart(const JSCallbackInfo& args);
+    static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
+    static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
@@ -175,7 +178,8 @@ protected:
         const JSRef<JSVal>& keyboardOpt, WebKeyboardOption& keyboardOption);
 
 private:
-    static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems);
+    static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems,
+        ScriptItemsByOrder& scriptItemsByOrder);
     static bool CheckNestedScrollMode(const int32_t& modeValue);
 };
 } // namespace OHOS::Ace::Framework
