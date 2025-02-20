@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <list>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
@@ -55,34 +56,16 @@ public:
 
     FrameNode* InitPivotItem(FillDirection direction);
 
-    RefPtr<FrameNode> GetChildByIndex(uint32_t index) const
-    {
-        auto iter = indexToNode_.find(index);
-        if (iter != indexToNode_.end()) {
-            return iter->second.Upgrade();
-        }
-        return nullptr;
-    }
+    RefPtr<FrameNode> GetChildByIndex(uint32_t index) const;
 
-    FrameNode* GetChildPtrByIndex(uint32_t index)
-    {
-        FrameNode* node = nullptr;
-        auto iter = indexToNode_.find(index);
-        if (iter != indexToNode_.end()) {
-            node = iter->second.Upgrade().GetRawPtr();
-            if (node == nullptr) {
-                indexToNode_.erase(iter);
-            }
-        }
-        return node;
-    }
+    FrameNode* GetChildPtrByIndex(uint32_t index);
 
     // return the mark item which new item will insert after or before.
     FrameNode* NeedMoreElements(FrameNode* markItem, FillDirection direction);
 
     void RegisterUpdater(std::function<void(int32_t, void*)>&& updater)
     {
-        updater_ = std::move(updater);
+        updaters_.emplace_back(updater); // need to figure out when to detach updaters
     }
 
     void SetTotalCount(int32_t totalCount)
@@ -98,7 +81,12 @@ public:
     void Prepare();
 
 private:
-    void RequestRecompose();
+    /**
+     * @brief Call updaters with @c markIdx to request recomposition.
+     *
+     * @param markIdx
+     */
+    void RequestRecompose(int32_t markIdx) const;
 
     SizeF size_ = { 0.0f, 0.0f };
     RefPtr<FillAlgorithm> fillAlgorithm_;
@@ -107,13 +95,15 @@ private:
     int32_t markIndex_ = -1;
     int32_t totalCount_ = 0;
 
-    std::function<void(int32_t, void*)> updater_;
+    using FrontendUpdater = std::function<void(int32_t, void*)>;
+    std::list<FrontendUpdater> updaters_;
+
     std::unordered_map<int32_t, WeakPtr<FrameNode>> indexToNode_;
     std::unordered_map<FrameNode*, int32_t> nodeToIndex_;
     std::unordered_set<int32_t> filled_; // to record measured items during Fill
 
     Axis axis_ = Axis::VERTICAL;
-    bool rangeMode_ = false; // true  if providing item range to frontend directly
+    bool rangeMode_ = false;   // true if providing item range to frontend directly
     bool jumpPending_ = false; // will perform a jump on the next recomposition
 };
 } // namespace OHOS::Ace::NG

@@ -37,7 +37,7 @@ void ScrollWindowAdapter::UpdateMarkItem(int32_t index)
     markIndex_ = index;
     jumpPending_ = true;
     fillAlgorithm_->MarkJump();
-    RequestRecompose();
+    RequestRecompose(index);
 }
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
@@ -120,9 +120,9 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
     fillAlgorithm_->OnSlidingOffsetUpdate(delta);
     if (rangeMode_) {
         bool res = fillAlgorithm_->OnSlidingOffsetUpdate(size_, axis_, delta);
-        if (res && updater_) {
+        if (res) {
             auto range = fillAlgorithm_->GetRange();
-            updater_(range.first, nullptr); // placeholder
+            RequestRecompose(range.first);
         }
         return res;
     }
@@ -139,15 +139,17 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
     LOGD("need to load");
     markIndex_ = fillAlgorithm_->GetMarkIndex();
 
-    RequestRecompose();
+    RequestRecompose(markIndex_);
     return true;
 }
 
-void ScrollWindowAdapter::RequestRecompose()
+void ScrollWindowAdapter::RequestRecompose(int32_t markIdx) const
 {
-    if (updater_) {
-        // nullptr to mark the first item
-        updater_(markIndex_, nullptr);
+    for (auto&& updater : updaters_) {
+        if (updater) {
+            // nullptr to mark the first item
+            updater(markIdx, nullptr);
+        }
     }
 }
 
@@ -175,7 +177,29 @@ void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
 
     if (fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::END)) {
         markIndex_ = fillAlgorithm_->GetMarkIndex();
-        RequestRecompose();
+        RequestRecompose(markIndex_);
     }
+}
+
+FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
+{
+    FrameNode* node = nullptr;
+    auto iter = indexToNode_.find(index);
+    if (iter != indexToNode_.end()) {
+        node = iter->second.Upgrade().GetRawPtr();
+        if (node == nullptr) {
+            indexToNode_.erase(iter);
+        }
+    }
+    return node;
+}
+
+RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index) const
+{
+    auto iter = indexToNode_.find(index);
+    if (iter != indexToNode_.end()) {
+        return iter->second.Upgrade();
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG
