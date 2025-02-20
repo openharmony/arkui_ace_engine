@@ -76,7 +76,7 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
     RefPtr<UINode> customNode;
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(value->builder);
     if (arkBuilder) {
-        customNode = CallbackHelper(arkBuilder.value(), frameNode).BuildSync(node);
+        customNode = CallbackHelper(arkBuilder.value()).BuildSync(node);
     }
     if (customNode) {
         RefreshModelNG::SetCustomBuilder(frameNode, customNode);

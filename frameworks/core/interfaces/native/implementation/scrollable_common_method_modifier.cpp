@@ -147,7 +147,7 @@ void OnWillScrollImpl(Ark_NativePointer node,
         arkCallback = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
     }
     if (arkCallback) {
-        auto modelCallback = [callback = CallbackHelper(*arkCallback, frameNode)]
+        auto modelCallback = [callback = CallbackHelper(*arkCallback)]
             (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
                 ScrollFrameResult {
             auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);

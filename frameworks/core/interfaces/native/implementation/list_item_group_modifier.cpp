@@ -51,14 +51,14 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     ListItemGroupModelNG::SetStyle(frameNode, style);
     auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
     if (header.has_value()) {
-        auto builder = [callback = CallbackHelper(header.value(), frameNode), node]() -> RefPtr<UINode> {
+        auto builder = [callback = CallbackHelper(header.value()), node]() -> RefPtr<UINode> {
             return callback.BuildSync(node);
         };
         ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
     if (footer.has_value()) {
-        auto builder = [callback = CallbackHelper(footer.value(), frameNode), node]() -> RefPtr<UINode> {
+        auto builder = [callback = CallbackHelper(footer.value()), node]() -> RefPtr<UINode> {
             return callback.BuildSync(node);
         };
         ListItemGroupModelNG::SetFooter(frameNode, std::move(builder));

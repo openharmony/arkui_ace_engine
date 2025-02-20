@@ -67,7 +67,7 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
         auto arkIndicatorBuilder = Converter::OptConvert<CustomNodeBuilder>(options.indicatorBuilder);
         if (arkIndicatorBuilder) {
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto customBuilder = [callback = CallbackHelper(arkIndicatorBuilder.value(), frameNode), node,
+            auto customBuilder = [callback = CallbackHelper(arkIndicatorBuilder.value()), node,
                 weakNode]() {
                 PipelineContext::SetCallBackNode(weakNode);
                 auto uiNode = callback.BuildSync(node);

@@ -40,7 +40,20 @@ ExtensionCompanionNode* GetCompanion(Ark_NodeHandle nodePtr)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
     CHECK_NULL_RETURN(frameNode, nullptr);
-    return AceType::DynamicCast<ExtensionCompanionNode>(frameNode->GetExtensionHandler());
+    auto ret = AceType::DynamicCast<ExtensionCompanionNode>(frameNode->GetExtensionHandler());
+    if (ret == nullptr) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto rootNode = pipeline->GetRootElement();
+        CHECK_NULL_RETURN(rootNode, nullptr);
+        ret = AceType::DynamicCast<ExtensionCompanionNode>(rootNode->GetExtensionHandler());
+        if (ret == nullptr) {
+            auto companion = AceType::MakeRefPtr<ExtensionCompanionNode>(0, 0, nullptr);
+            rootNode->SetExtensionHandler(companion);
+            ret = AceType::RawPtr(companion);
+        }
+    }
+    return ret;
 }
 
 Ark_Float32 GetDensity(int deviceId)

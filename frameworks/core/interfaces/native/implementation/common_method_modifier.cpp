@@ -351,7 +351,7 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const Opt_ContextMenuOpt
             }
         },
         [&menuParam, menuOption, &previewBuildFunc, node, frameNode, weakNode](const CustomNodeBuilder& value) {
-            previewBuildFunc = [callback = CallbackHelper(value, frameNode), node, weakNode]() -> RefPtr<UINode> {
+            previewBuildFunc = [callback = CallbackHelper(value), node, weakNode]() -> RefPtr<UINode> {
                 PipelineContext::SetCallBackNode(weakNode);
                 return callback.BuildSync(node);
             };
@@ -546,7 +546,7 @@ DragDropInfo Ark_DragItemInfoToDragDropInfo(const Ark_DragItemInfo& src, Ark_Nat
     dst.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(src.pixelMap).value_or(nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     auto optBuilder = Converter::OptConvert<CustomNodeBuilder>(src.builder);
-    dst.customNode = optBuilder.has_value() ? CallbackHelper(optBuilder.value(), frameNode).BuildSync(node) : nullptr;
+    dst.customNode = optBuilder.has_value() ? CallbackHelper(optBuilder.value()).BuildSync(node) : nullptr;
     return dst;
 }
 
@@ -1892,7 +1892,7 @@ void OnChildTouchTestImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onTouchTestFunc = [callback = CallbackHelper(*value, frameNode)](
+    auto onTouchTestFunc = [callback = CallbackHelper(*value)](
         const std::vector<NG::TouchTestInfo>& touchInfo
     ) -> NG::TouchResult {
         std::vector<NG::TouchTestInfo> touchInfoUpd = touchInfo;
@@ -2662,7 +2662,7 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
         ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
     } else {
         auto weakNode = AceType::WeakClaim(frameNode);
-        auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](KeyEventInfo& info)
+        auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info)
             -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::ArkKeyEventSync(info);
@@ -3563,7 +3563,7 @@ void OnDragStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onDragStart = [callback = CallbackHelper(*value, frameNode), weakNode]
+    auto onDragStart = [callback = CallbackHelper(*value), weakNode]
         (const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) -> DragDropInfo {
         DragDropInfo result;
         CHECK_NULL_RETURN(info, result);
@@ -3572,7 +3572,7 @@ void OnDragStartImpl(Ark_NativePointer node,
 
         auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
             if (auto fnode = weakNode.Upgrade(); fnode) {
-                result.customNode = CallbackHelper(val, fnode.GetRawPtr()).BuildSync(fnode.GetRawPtr());
+                result.customNode = CallbackHelper(val).BuildSync(fnode.GetRawPtr());
             }
         };
         auto parseDragI = [&result](const Ark_DragItemInfo& value) {
@@ -3697,7 +3697,7 @@ void DragPreviewImpl(Ark_NativePointer node,
             optConvValue = std::optional<DragDropInfo>(convValue);
         },
         [node, frameNode, &optConvValue](const CustomNodeBuilder& val) {
-            DragDropInfo convValue = {.customNode = CallbackHelper(val, frameNode).BuildSync(node)};
+            DragDropInfo convValue = {.customNode = CallbackHelper(val).BuildSync(node)};
             optConvValue = std::optional<DragDropInfo>(convValue);
         },
         [node, &optConvValue](const Ark_DragItemInfo& val) {
@@ -4171,7 +4171,7 @@ void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto builder = [callback = CallbackHelper(*value, frameNode), node]() -> RefPtr<UINode> {
+    auto builder = [callback = CallbackHelper(*value), node]() -> RefPtr<UINode> {
         return callback.BuildSync(node);
     };
     ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
@@ -4279,7 +4279,7 @@ void OnGestureJudgeBeginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onGestureJudgefunc = [callback = CallbackHelper(*value, frameNode), node = weakNode](
+    auto onGestureJudgefunc = [callback = CallbackHelper(*value), node = weakNode](
             const RefPtr<NG::GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& baseGestureInfo
         ) -> GestureJudgeResult {
         GestureJudgeResult defVal = GestureJudgeResult::CONTINUE;
@@ -4309,7 +4309,7 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback_);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onGestureRecognizerJudgefunc = [callback = CallbackHelper(*callback_, frameNode), node = weakNode](
+    auto onGestureRecognizerJudgefunc = [callback = CallbackHelper(*callback_), node = weakNode](
             const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
             const std::list<RefPtr<NG::NGGestureRecognizer>>& others
@@ -4342,7 +4342,7 @@ void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto shouldBuiltInRecognizerParallelWithFunc = [callback = CallbackHelper(*value, frameNode), node = weakNode](
+    auto shouldBuiltInRecognizerParallelWithFunc = [callback = CallbackHelper(*value), node = weakNode](
         const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
     ) -> RefPtr<NG::NGGestureRecognizer> {
         PipelineContext::SetCallBackNode(node);
@@ -4377,7 +4377,7 @@ void OnTouchInterceptImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onTouchIntercept = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](
+    auto onTouchIntercept = [arkCallback = CallbackHelper(*value), node = weakNode](
         TouchEventInfo& info) -> HitTestMode {
         const auto event = Converter::ArkTouchEventSync(info);
         auto resultOpt = arkCallback.InvokeWithOptConvertResult<
@@ -4447,7 +4447,7 @@ void BackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto customNode = CallbackHelper(*builder, frameNode).BuildSync(node);
+    auto customNode = CallbackHelper(*builder).BuildSync(node);
     CHECK_NULL_VOID(customNode);
     auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
     auto optAlign = options ? Converter::OptConvert<Alignment>(*options) : std::nullopt;
@@ -4736,7 +4736,7 @@ void OverlayImpl(Ark_NativePointer node,
                 overlay->content = Converter::Convert<std::string>(src);
             },
             [node, frameNode, &overlay](const CustomNodeBuilder& src) {
-                overlay->content = CallbackHelper(src, frameNode).BuildSync(node);
+                overlay->content = CallbackHelper(src).BuildSync(node);
             },
             [](const Ark_ComponentContent& src) {
                 LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
@@ -4812,7 +4812,7 @@ void BindPopupImpl(Ark_NativePointer node,
             popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);
             if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
-                customNode = CallbackHelper(value.builder, frameNode).BuildSync(node);
+                customNode = CallbackHelper(value.builder).BuildSync(node);
             }
             g_onWillDismissPopup(value.onWillDismiss, popupParam);
         },
@@ -4856,7 +4856,7 @@ void BindMenuBase(Ark_NativePointer node,
             ViewAbstractModelNG::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
         },
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value, frameNode), node]() {
+            auto builder = [callback = CallbackHelper(value), node]() {
                 auto uiNode = callback.BuildSync(node);
                 ViewStackProcessor::GetInstance()->Push(uiNode);
             };
@@ -4888,7 +4888,7 @@ void BindContextMenu0Impl(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.isShow = false;
     auto type = Converter::OptConvert<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
-    auto builder = [callback = CallbackHelper(*content, frameNode), node]() {
+    auto builder = [callback = CallbackHelper(*content), node]() {
         auto uiNode = callback.BuildSync(node);
         ViewStackProcessor::GetInstance()->Push(uiNode);
     };
@@ -4915,7 +4915,7 @@ void BindContextMenu1Impl(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.isShow = Converter::Convert<bool>(isShown);
     ResponseType type = ResponseType::LONG_PRESS;
-    auto builder = [callback = CallbackHelper(*content, frameNode), node]() {
+    auto builder = [callback = CallbackHelper(*content), node]() {
         auto uiNode = callback.BuildSync(node);
         ViewStackProcessor::GetInstance()->Push(uiNode);
     };
@@ -4940,7 +4940,7 @@ void BindContentCover0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     bool isShowValue = Converter::Convert<bool>(isShow);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto buildFunc = [arkCallback = CallbackHelper(*builder, frameNode), weakNode, node]() -> RefPtr<UINode> {
+    auto buildFunc = [arkCallback = CallbackHelper(*builder), weakNode, node]() -> RefPtr<UINode> {
         PipelineContext::SetCallBackNode(weakNode);
         return arkCallback.BuildSync(node);
     };
@@ -4960,7 +4960,7 @@ void BindContentCover1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     bool isShowValue = Converter::Convert<bool>(isShow);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto buildFunc = [arkCallback = CallbackHelper(*builder, frameNode), weakNode, node]() -> RefPtr<UINode> {
+    auto buildFunc = [arkCallback = CallbackHelper(*builder), weakNode, node]() -> RefPtr<UINode> {
         PipelineContext::SetCallBackNode(weakNode);
         return arkCallback.BuildSync(node);
     };
@@ -4997,7 +4997,7 @@ void BindSheetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(builder);
     bool isShowValue = Converter::Convert<Ark_Boolean>(isShow);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto buildFunc = [callback = CallbackHelper(*builder, frameNode), node, weakNode]() {
+    auto buildFunc = [callback = CallbackHelper(*builder), node, weakNode]() {
         PipelineContext::SetCallBackNode(weakNode);
         auto uiNode = callback.BuildSync(node);
         ViewStackProcessor::GetInstance()->Push(uiNode);
@@ -5018,7 +5018,7 @@ void BindSheetImpl(Ark_NativePointer node,
                 sheetStyle.sheetSubtitle = OptConvert<std::string>(value.title);
             },
             [frameNode, node, &callbacks](const CustomNodeBuilder& value) {
-                callbacks.titleBuilderFunction = [callback = CallbackHelper(value, frameNode), node]() {
+                callbacks.titleBuilderFunction = [callback = CallbackHelper(value), node]() {
                     auto uiNode = callback.BuildSync(node);
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };

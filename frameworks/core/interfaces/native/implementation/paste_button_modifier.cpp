@@ -85,7 +85,7 @@ void OnClickImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value, frameNode), frameNode](GestureEvent& info) {
+    auto onEvent = [arkCallback = CallbackHelper(*value), frameNode](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
 #ifdef SECURITY_COMPONENT_ENABLE
         auto secEventValue = info.GetSecCompHandleEvent();

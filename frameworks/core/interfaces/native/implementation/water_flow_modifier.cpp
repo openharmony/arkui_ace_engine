@@ -68,7 +68,7 @@ void SetWaterFlowOptionsImpl(Ark_NativePointer node,
     if (convValue) {
         auto optFooter = Converter::OptConvert<CustomNodeBuilder>(convValue.value().footer);
         if (optFooter) {
-            auto builder = [callback = CallbackHelper(optFooter.value(), frameNode), node]() -> RefPtr<UINode> {
+            auto builder = [callback = CallbackHelper(optFooter.value()), node]() -> RefPtr<UINode> {
                 return callback.BuildSync(node);
             };
             WaterFlowModelNG::SetFooter(frameNode, std::move(builder));
@@ -254,7 +254,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollFrameEvent = [callback = CallbackHelper(*value, frameNode)](
+    auto onScrollFrameEvent = [callback = CallbackHelper(*value)](
         Dimension offset, ScrollState state) -> ScrollFrameResult {
         ScrollFrameResult result;
         Ark_Number arkOffset = Converter::ArkValue<Ark_Number>(offset);
