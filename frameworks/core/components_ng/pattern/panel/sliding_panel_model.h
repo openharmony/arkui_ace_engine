@@ -37,21 +37,21 @@ public:
     virtual void SetPanelType(PanelType type) = 0;
     virtual void SetPanelMode(PanelMode mode) = 0;
     virtual void SetHasDragBar(bool hasDragBar) = 0;
-    virtual void SetCustomHeight(const CalcDimension& customHeight) {};
+    virtual void SetCustomHeight(const CalcDimension& customHeight) {}
     virtual void SetMiniHeight(const Dimension& miniHeight) = 0;
     virtual void SetHalfHeight(const Dimension& halfHeight) = 0;
     virtual void SetFullHeight(const Dimension& fullHeight) = 0;
     virtual void SetIsShow(bool isShow) = 0;
-    virtual void SetShowCloseIcon(bool showCloseIcon) {};
+    virtual void SetShowCloseIcon(bool showCloseIcon) {}
     virtual void SetBackgroundMask(const Color& backgroundMask) = 0;
     virtual void SetBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetOnSizeChange(std::function<void(const BaseEventInfo*)>&& changeEvent) = 0;
     virtual void SetOnHeightChange(std::function<void(const float)>&& onHeightChange) = 0;
-    virtual void Pop();
-    virtual void SetBorderColor(const Color& borderColor);
-    virtual void SetBorderWidth(const Dimension& borderWidth);
-    virtual void SetBorderStyle(const BorderStyle& borderStyle);
-    virtual void SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth);
+    virtual void Pop() = 0;
+    virtual void SetBorderColor(const Color& borderColor) = 0;
+    virtual void SetBorderWidth(const Dimension& borderWidth) = 0;
+    virtual void SetBorderStyle(const BorderStyle& borderStyle) = 0;
+    virtual void SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth) = 0;
     virtual void SetModeChangeEvent(std::function<void(const BaseEventInfo*)>&& modeChangeEvent) = 0;
 
 private:

@@ -25,19 +25,19 @@ public:
     static MenuModel* GetInstance();
     virtual ~MenuModel() = default;
 
-    virtual void Create();
-    virtual void SetFontSize(const Dimension& fontSize);
-    virtual void SetFontWeight(FontWeight weight);
-    virtual void SetFontStyle(Ace::FontStyle style);
-    virtual void SetFontColor(const std::optional<Color>& color);
-    virtual void SetFontFamily(const std::vector<std::string> &families);
+    virtual void Create() = 0;
+    virtual void SetFontSize(const Dimension& fontSize) = 0;
+    virtual void SetFontWeight(FontWeight weight) = 0;
+    virtual void SetFontStyle(Ace::FontStyle style) = 0;
+    virtual void SetFontColor(const std::optional<Color>& color) = 0;
+    virtual void SetFontFamily(const std::vector<std::string> &families) = 0;
     virtual void ResetFontFamily() {};
-    virtual void SetWidth(const Dimension& width);
-    virtual void SetBorderRadius(const Dimension& radius);
-    virtual void ResetBorderRadius() {};
+    virtual void SetWidth(const Dimension& width) = 0;
+    virtual void SetBorderRadius(const Dimension& radius) = 0;
+    virtual void ResetBorderRadius() {}
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
-        const std::optional<Dimension>& radiusBottomRight);
+        const std::optional<Dimension>& radiusBottomRight) = 0;
     virtual void SetExpandingMode(const NG::SubMenuExpandingMode& expandingMode) {};
     virtual void SetItemDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetItemGroupDivider(const V2::ItemDivider& divider) = 0;

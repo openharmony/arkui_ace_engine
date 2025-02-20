@@ -36,42 +36,42 @@ public:
     static SideBarContainerModel* GetInstance();
     virtual ~SideBarContainerModel() = default;
 
-    virtual void Create();
-    virtual void SetSideBarContainerType(SideBarContainerType type);
-    virtual void SetShowSideBar(bool isShow);
-    virtual void SetShowControlButton(bool showControlButton);
-    virtual void ParseAndSetWidth(WidthType widthType, Dimension& width);
-    virtual void SetSideBarWidth(const Dimension& sideBarWidth);
-    virtual void SetMinSideBarWidth(const Dimension& minSideBarWidth);
-    virtual void SetMaxSideBarWidth(const Dimension& maxSideBarWidth);
-    virtual void SetAutoHide(bool autoHide);
-    virtual void SetSideBarPosition(SideBarPosition sideBarPosition);
-    virtual void SetControlButtonWidth(const Dimension& width);
-    virtual void SetControlButtonHeight(const Dimension& height);
-    virtual void SetControlButtonLeft(const Dimension& left);
+    virtual void Create() = 0;
+    virtual void SetSideBarContainerType(SideBarContainerType type) = 0;
+    virtual void SetShowSideBar(bool isShow) = 0;
+    virtual void SetShowControlButton(bool showControlButton) = 0;
+    virtual void ParseAndSetWidth(WidthType widthType, Dimension& width) = 0;
+    virtual void SetSideBarWidth(const Dimension& sideBarWidth) = 0;
+    virtual void SetMinSideBarWidth(const Dimension& minSideBarWidth) = 0;
+    virtual void SetMaxSideBarWidth(const Dimension& maxSideBarWidth) = 0;
+    virtual void SetAutoHide(bool autoHide) = 0;
+    virtual void SetSideBarPosition(SideBarPosition sideBarPosition) = 0;
+    virtual void SetControlButtonWidth(const Dimension& width) = 0;
+    virtual void SetControlButtonHeight(const Dimension& height) = 0;
+    virtual void SetControlButtonLeft(const Dimension& left) = 0;
     virtual void ResetControlButtonLeft() {}
-    virtual void SetControlButtonTop(const Dimension& top);
+    virtual void SetControlButtonTop(const Dimension& top) = 0;
     virtual void SetControlButtonShowIconInfo(
-        const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+        const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) = 0;
     virtual void SetControlButtonHiddenIconInfo(
-        const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+        const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) = 0;
     virtual void SetControlButtonSwitchingIconInfo(
-        const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
-    virtual void ResetControlButtonIconInfo();
-    virtual void SetOnChange(std::function<void(const bool)>&& onChange);
-    virtual void SetDividerStrokeWidth(const Dimension& strokeWidth);
-    virtual void SetDividerColor(const Color& color);
-    virtual void SetDividerStartMargin(const Dimension& startMargin);
-    virtual void SetDividerEndMargin(const Dimension& endMargin);
-    virtual void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent);
-    virtual void SetMinContentWidth(const Dimension& minContentWidth);
-    virtual void ResetControlButton();
+        const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) = 0;
+    virtual void ResetControlButtonIconInfo() = 0;
+    virtual void SetOnChange(std::function<void(const bool)>&& onChange) = 0;
+    virtual void SetDividerStrokeWidth(const Dimension& strokeWidth) = 0;
+    virtual void SetDividerColor(const Color& color) = 0;
+    virtual void SetDividerStartMargin(const Dimension& startMargin) = 0;
+    virtual void SetDividerEndMargin(const Dimension& endMargin) = 0;
+    virtual void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent) = 0;
+    virtual void SetMinContentWidth(const Dimension& minContentWidth) = 0;
+    virtual void ResetControlButton() = 0;
 
 private:
     static std::unique_ptr<SideBarContainerModel> instance_;
     static std::mutex mutex_;
 
-    virtual void MarkNeedInitRealSideBarWidth();
+    virtual void MarkNeedInitRealSideBarWidth() = 0;
 };
 } // namespace OHOS::Ace::NG
 

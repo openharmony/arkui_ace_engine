@@ -41,8 +41,8 @@ public:
     virtual void SetNavigationStack() = 0;
     virtual void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) = 0;
     virtual void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
-        std::function<void(RefPtr<NG::NavigationStack>)> updater) {};
-    virtual void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
+        std::function<void(RefPtr<NG::NavigationStack>)> updater) {}
+    virtual void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) {}
     virtual void SetNavigationStackProvided(bool provided) = 0;
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false)
@@ -59,17 +59,17 @@ public:
     virtual void SetHideNavBar(bool hideNavBar) = 0;
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-        const std::vector<std::string>& nameList);
+        const std::vector<std::string>& nameList) = 0;
     virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual bool NeedSetItems() = 0;
     virtual void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
-    virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
+    virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {}
     virtual void SetToolbarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) = 0;
-    virtual void GetMenuItems(std::list<RefPtr<AceType>>& items) {};
+    virtual void GetMenuItems(std::list<RefPtr<AceType>>& items) {}
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) = 0;
@@ -80,15 +80,15 @@ public:
     virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
     virtual void SetMinContentWidth(const Dimension& value) = 0;
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
-    virtual void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onNavigationModeChange);
+    virtual void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onNavigationModeChange) = 0;
     virtual void SetNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;
     virtual RefPtr<NG::NavigationStack> GetNavigationStack() = 0;
     virtual void SetMenuCount(int32_t menuCount) = 0;
-    virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition);
-    virtual void SetIsCustomAnimation(bool isCustom);
-    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
-    virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
+    virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition) = 0;
+    virtual void SetIsCustomAnimation(bool isCustom) = 0;
+    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {}
+    virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {}
     virtual void SetRecoverable(bool recoverable) {}
     virtual void SetEnableDragBar(bool recoverable) {}
 

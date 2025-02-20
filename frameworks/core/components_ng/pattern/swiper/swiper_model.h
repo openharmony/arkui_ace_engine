@@ -97,45 +97,45 @@ public:
     static SwiperModel* GetInstance();
     virtual ~SwiperModel() = default;
 
-    virtual RefPtr<SwiperController> Create();
-    virtual void SetDirection(Axis axis);
-    virtual void SetIndex(uint32_t index);
+    virtual RefPtr<SwiperController> Create() = 0;
+    virtual void SetDirection(Axis axis) = 0;
+    virtual void SetIndex(uint32_t index) = 0;
     virtual void SetIndicatorInteractive(bool interactive) {}
-    virtual void SetAutoPlay(bool autoPlay);
-    virtual void SetAutoPlayInterval(uint32_t interval);
-    virtual void SetDuration(uint32_t duration);
-    virtual void SetCurve(const RefPtr<Curve>& curve);
-    virtual void SetLoop(bool loop);
-    virtual void SetEnabled(bool enabled);
-    virtual void SetDisableSwipe(bool disableSwipe);
-    virtual void SetEdgeEffect(EdgeEffect EdgeEffect);
-    virtual void SetDisplayMode(SwiperDisplayMode displayMode);
-    virtual void SetDisplayCount(int32_t displayCount);
+    virtual void SetAutoPlay(bool autoPlay) = 0;
+    virtual void SetAutoPlayInterval(uint32_t interval) = 0;
+    virtual void SetDuration(uint32_t duration) = 0;
+    virtual void SetCurve(const RefPtr<Curve>& curve) = 0;
+    virtual void SetLoop(bool loop) = 0;
+    virtual void SetEnabled(bool enabled) = 0;
+    virtual void SetDisableSwipe(bool disableSwipe) = 0;
+    virtual void SetEdgeEffect(EdgeEffect EdgeEffect) = 0;
+    virtual void SetDisplayMode(SwiperDisplayMode displayMode) = 0;
+    virtual void SetDisplayCount(int32_t displayCount) = 0;
     virtual void ResetDisplayCount() {}
-    virtual void SetMinSize(const Dimension& minSize);
-    virtual void SetShowIndicator(bool showIndicator);
-    virtual void SetItemSpace(const Dimension& itemSpace);
-    virtual void SetCachedCount(int32_t cachedCount);
-    virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
+    virtual void SetMinSize(const Dimension& minSize) = 0;
+    virtual void SetShowIndicator(bool showIndicator) = 0;
+    virtual void SetItemSpace(const Dimension& itemSpace) = 0;
+    virtual void SetCachedCount(int32_t cachedCount) = 0;
+    virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) = 0;
     virtual void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart) {}
     virtual void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd) {}
     virtual void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) {}
     virtual void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) {}
     virtual void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) {}
 
-    virtual void SetRemoteMessageEventId(RemoteCallback&& remoteCallback);
+    virtual void SetRemoteMessageEventId(RemoteCallback&& remoteCallback) = 0;
     virtual void SetOnClick(
-        std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value);
-    virtual void SetMainSwiperSizeWidth();
-    virtual void SetMainSwiperSizeHeight();
-    virtual void SetIndicatorStyle(const SwiperParameters& swiperParameters);
+        std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value) = 0;
+    virtual void SetMainSwiperSizeWidth() = 0;
+    virtual void SetMainSwiperSizeHeight() = 0;
+    virtual void SetIndicatorStyle(const SwiperParameters& swiperParameters) = 0;
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
     virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
     virtual void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) {}
     virtual void SetNextMargin(const Dimension& nextMargin, bool ignoreBlank) {}
-    virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
+    virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent) = 0;
     virtual void SetIndicatorIsBoolean(bool isBoolean) {}
     virtual void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
     virtual void SetDisplayArrow(bool displayArrow) {}

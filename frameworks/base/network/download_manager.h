@@ -52,13 +52,13 @@ public:
 
     virtual ~DownloadManager() = default;
 
-    virtual bool Download(const std::string& url, std::vector<uint8_t>& dataOut);
-    virtual bool Download(const std::string& url, const std::shared_ptr<DownloadResult>& result);
+    virtual bool Download(const std::string& url, std::vector<uint8_t>& dataOut) = 0;
+    virtual bool Download(const std::string& url, const std::shared_ptr<DownloadResult>& result) = 0;
     virtual bool DownloadAsync(
-        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId) = 0;
     virtual bool DownloadSync(
-        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
-    virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId);
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId) = 0;
+    virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId) = 0;
 
 private:
     static std::unique_ptr<DownloadManager> instance_;
