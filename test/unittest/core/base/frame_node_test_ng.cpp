@@ -402,7 +402,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg006, TestSize.Level1)
 
     FRAME_NODE->ProcessOffscreenNode(FRAME_NODE3);
     FRAME_NODE->GetTransformRectRelativeToWindow();
-    FRAME_NODE->GetPaintRectOffsetToPage();
+    FRAME_NODE->GetPaintRectOffsetToStage();
 
     float x = 1.0;
     float y = 1.0;

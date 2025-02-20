@@ -119,8 +119,8 @@ bool SharedTransitionExchange::CreateAnimation()
 
 bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest)
 {
-    auto destOffset = dest->GetPaintRectOffsetToPage();
-    auto srcOffset = src->GetPaintRectOffsetToPage();
+    auto destOffset = dest->GetPaintRectOffsetToStage();
+    auto srcOffset = src->GetPaintRectOffsetToStage();
     TAG_LOGD(AceLogTag::ACE_ANIMATION,
         "Translate animation get Offset, share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
         srcOffset.ToString().c_str(), destOffset.ToString().c_str());
