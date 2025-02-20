@@ -17,11 +17,10 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/date_util.h"
-#include "core/components/calendar/calendar_data_adapter.h"
-#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -51,6 +50,23 @@ constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
 constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 } // namespace
+
+FocusPattern CalendarDialogPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+    CHECK_NULL_RETURN(calendarTheme, FocusPattern());
+    auto focusColor = pickerTheme->GetFocusColor();
+    FocusPaintParam focusPaintParams;
+    focusPaintParams.SetPaintColor(focusColor);
+    auto focusPaintWidth = calendarTheme->GetCalendarDayKeyFocusedPenWidth();
+    focusPaintParams.SetPaintWidth(focusPaintWidth);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+}
+
 void CalendarDialogPattern::OnModifyDone()
 {
     LinearLayoutPattern::OnModifyDone();
