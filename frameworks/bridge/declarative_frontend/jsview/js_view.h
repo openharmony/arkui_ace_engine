@@ -93,6 +93,15 @@ public:
         LOGE("jsViewFunction_ is null");
     }
 
+    void FireOnNewParam(const std::string &newParam)
+    {
+        if (jsViewFunction_) {
+            ACE_SCORING_EVENT("OnNewParam");
+            return jsViewFunction_->ExecuteOnNewParam(newParam);
+        }
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "fire onNewParam failed, jsViewFunction_ is null!");
+    }
+
     virtual void RenderJSExecution(int64_t deadline, bool& isTimeout);
 
     virtual void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) {};

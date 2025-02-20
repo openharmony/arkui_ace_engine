@@ -191,6 +191,19 @@ public:
     virtual int32_t GetRecoveredDestinationMode(int32_t index) { return false; }
     virtual int32_t GetSize() const { return -1; }
 
+    // could be optimized...
+    virtual bool HasSingletonMoved()
+    {
+        return false;
+    }
+
+    virtual bool IsTopFromSingletonMoved()
+    {
+        return false;
+    }
+
+    virtual void ResetSingletonMoved() {}
+
     const WeakPtr<UINode>& GetNavigationNode()
     {
         return navigationNode_;

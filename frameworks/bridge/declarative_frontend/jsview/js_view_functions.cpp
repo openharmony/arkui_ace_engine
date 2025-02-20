@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace::Framework {
 const std::string EMPTY_STATUS_DATA = "empty_status_data";
+const std::string JS_STRINGIFIED_UNDEFINED = "undefined";
 
 #ifdef USE_ARK_ENGINE
 
@@ -468,6 +469,11 @@ void ViewFunctions::InitViewFunctions(
     if (jsOnFormRecoverFunc->IsFunction()) {
         jsOnFormRecoverFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecoverFunc);
     }
+
+    JSRef<JSVal> jsOnNewParam = jsObject->GetProperty("onNewParam");
+    if (jsOnNewParam->IsFunction()) {
+        jsOnNewParam_ = JSRef<JSFunc>::Cast(jsOnNewParam);
+    }
 }
 
 ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction)
@@ -797,5 +803,19 @@ void ViewFunctions::ExecuteOnFormRecover(const std::string& statusData)
     auto jsData = JSRef<JSVal>::Make(ToJSValue(data));
     auto func = jsOnFormRecoverFunc_.Lock();
     func->Call(jsObject_.Lock(), 1, &jsData);
+}
+
+void ViewFunctions::ExecuteOnNewParam(const std::string& newParam)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsOnNewParam_.IsEmpty()) {
+        return;
+    }
+    auto argv = JSRef<JSVal>::Make();
+    if (!newParam.empty() && newParam != JS_STRINGIFIED_UNDEFINED) {
+        argv = JSRef<JSObject>::New()->ToJsonObject(newParam.c_str());
+    }
+    auto func = jsOnNewParam_.Lock();
+    func->Call(jsObject_.Lock(), 1, &argv);
 }
 } // namespace OHOS::Ace::Framework

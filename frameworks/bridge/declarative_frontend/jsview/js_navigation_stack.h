@@ -122,6 +122,10 @@ public:
     void SetRecoveryFromReplaceDestination(int32_t index, bool value) override;
     bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex) override;
 
+    bool HasSingletonMoved() override;
+    bool IsTopFromSingletonMoved() override;
+    void ResetSingletonMoved() override;
+
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;

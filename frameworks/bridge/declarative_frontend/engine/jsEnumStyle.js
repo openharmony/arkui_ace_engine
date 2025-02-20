@@ -2252,6 +2252,7 @@ class NavPathInfo {
     this.isEntry = isEntry;
     this.fromRecovery = false;
     this.mode = undefined;
+    this.singletonMoved = false;
   }
 }
 
@@ -2273,6 +2274,7 @@ class NavPathStack {
     this.parentStack = undefined;
     this.popArray = [];
     this.interception = undefined;
+    this.hasSingletonMoved = false;
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {
@@ -2395,6 +2397,8 @@ class NavPathStack {
         this.pathArray[index].onPop = info.onPop;
         this.pathArray[index].needUpdate = true;
         this.pathArray[index].isEntry = info.isEntry;
+        this.pathArray[index].singletonMoved = true;
+        this.hasSingletonMoved = true;
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {

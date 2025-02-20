@@ -82,6 +82,7 @@ public:
     void ExecutePrebuildComponent();
     void ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase);
     bool ExecuteIsEnablePrebuildInMultiFrame();
+    void ExecuteOnNewParam(const std::string &newParam);
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -137,8 +138,9 @@ private:
     JSWeak<JSFunc> jsPrebuildComponent_;
     JSWeak<JSFunc> jsSetPrebuildPhase_;
     JSWeak<JSFunc> jsIsEnablePrebuildInMultiFrame_;
-    JSWeak<JSFunc>jsOnFormRecycleFunc_;
-    JSWeak<JSFunc>jsOnFormRecoverFunc_;
+    JSWeak<JSFunc> jsOnFormRecycleFunc_;
+    JSWeak<JSFunc> jsOnFormRecoverFunc_;
+    JSWeak<JSFunc> jsOnNewParam_;
 
     JSExecutionContext context_;
 };

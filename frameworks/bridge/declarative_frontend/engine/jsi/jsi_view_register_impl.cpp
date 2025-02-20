@@ -340,6 +340,12 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
             }
             return false;
         });
+        pagePattern->SetOnNewParam([weak = Referenced::WeakClaim(view)](const std::string& newParam) {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnNewParam(newParam);
+            }
+        });
         auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
 
         pagePattern->SetPageTransitionFunc(

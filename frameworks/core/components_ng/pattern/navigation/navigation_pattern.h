@@ -482,6 +482,7 @@ public:
     }
 
 private:
+    void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
     void UpdateSystemBarStyleOnTopNavPathChange(
@@ -634,6 +635,7 @@ private:
     bool enableDragBar_ = false;
     SizeF navigationSize_;
     std::optional<NavBarPosition> preNavBarPosition_;
+    bool topFromSingletonMoved_ = false;
 };
 
 } // namespace OHOS::Ace::NG
