@@ -23,8 +23,6 @@ class ArkThemeWhiteList {
         'AlphabetIndexer',
         'Badge',
         'Button',
-        'Checkbox',
-        'CheckboxGroup',
         'DataPanel',
         'LoadingProgress',
         'Menu',
