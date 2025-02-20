@@ -386,8 +386,10 @@ void NavDestinationPattern::DumpInfo()
 bool NavDestinationPattern::OverlayOnBackPressed()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true, false);
-    return overlayManager_->RemoveOverlay(true);
+    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
+        return overlayManager_->RemoveOverlay(true);
+    }
+    return false;
 }
 
 bool NavDestinationPattern::NeedIgnoreKeyboard()

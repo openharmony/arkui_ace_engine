@@ -1822,6 +1822,26 @@ ArkUI_Int32 RegisterOnWillDismissWithUserData(
     return CustomDialog::RegisterOnWillDialogDismissWithUserData(handler, userData, callback);
 }
 
+ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetKeyboardAvoidDistance(handle, distance, unit);
+}
+
+ArkUI_Int32 SetDialogLevelMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
+{
+    return CustomDialog::SetLevelMode(handle, mode);
+}
+
+ArkUI_Int32 SetDialogLevelUniqueId(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId)
+{
+    return CustomDialog::SetLevelUniqueId(handle, uniqueId);
+}
+
+ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
+{
+    return CustomDialog::SetImmersiveMode(handle, mode);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     static const ArkUIDialogAPI dialogImpl = {
@@ -1842,7 +1862,11 @@ const ArkUIDialogAPI* GetDialogAPI()
         ShowDialog,
         CloseDialog,
         RegisterOnWillDialogDismiss,
-        RegisterOnWillDismissWithUserData
+        RegisterOnWillDismissWithUserData,
+        SetKeyboardAvoidDistance,
+        SetDialogLevelMode,
+        SetDialogLevelUniqueId,
+        SetDialogImmersiveMode,
     };
     return &dialogImpl;
 }

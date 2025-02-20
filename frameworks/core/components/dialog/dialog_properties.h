@@ -104,6 +104,16 @@ enum class KeyboardAvoidMode {
     NONE,
 };
 
+enum class LevelMode {
+    OVERLAY = 0,
+    EMBEDDED,
+};
+
+enum class ImmersiveMode {
+    DEFAULT = 0,
+    EXTEND,
+};
+
 class DialogAlignmentUtils {
 public:
     static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment)
@@ -276,6 +286,9 @@ struct DialogProperties {
     WordBreak wordBreak = WordBreak::BREAK_ALL;
 
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 struct PromptDialogAttr {
@@ -312,6 +325,9 @@ struct PromptDialogAttr {
     std::function<void()> onWillDisappear;
     std::function<void(DialogProperties&)> onLanguageChange;
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 } // namespace OHOS::Ace

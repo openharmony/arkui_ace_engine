@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,23 +14,12 @@
  */
 
 #include "interfaces/napi/kits/promptaction/prompt_action.h"
-#include "interfaces/napi/kits/utils/napi_utils.h"
-
-extern const char _binary_promptaction_js_start[];
-extern const char _binary_promptaction_abc_start[];
-#if !defined(IOS_PLATFORM)
-extern const char _binary_promptaction_js_end[];
-extern const char _binary_promptaction_abc_end[];
-#else
-extern const char* _binary_promptaction_js_end;
-extern const char* _binary_promptaction_abc_end;
-#endif
 
 namespace OHOS::Ace::Napi {
 static constexpr uint32_t DEFAULT = 0;
 static constexpr uint32_t TOP_MOST = 1;
 static constexpr uint32_t SYSTEM_TOP_MOST = 2;
-static napi_value PromptActionExport(napi_env env, napi_value exports)
+static napi_value PromptExport(napi_env env, napi_value exports)
 {
     napi_value showMode = nullptr;
     napi_create_object(env, &showMode);
@@ -55,40 +44,19 @@ static napi_value PromptActionExport(napi_env env, napi_value exports)
     return exports;
 }
 
-extern "C" __attribute__((visibility("default"))) void NAPI_promptaction_GetJSCode(const char** buf, int* bufLen)
-{
-    if (buf != nullptr) {
-        *buf = _binary_promptaction_js_start;
-    }
-
-    if (bufLen != nullptr) {
-        *bufLen = _binary_promptaction_js_end - _binary_promptaction_js_start;
-    }
-}
-
-extern "C" __attribute__((visibility("default"))) void NAPI_promptaction_GetABCCode(const char** buf, int* buflen)
-{
-    if (buf != nullptr) {
-        *buf = _binary_promptaction_abc_start;
-    }
-    if (buflen != nullptr) {
-        *buflen = _binary_promptaction_abc_end - _binary_promptaction_abc_start;
-    }
-}
-
-static napi_module_with_js promptActionModule = {
+// compatible with api8
+static napi_module promptModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_register_func = PromptActionExport,
-    .nm_modname = "promptAction",
+    .nm_register_func = PromptExport,
+    .nm_modname = "prompt",
     .nm_priv = ((void*)0),
-    .nm_get_abc_code = NAPI_promptaction_GetABCCode,
-    .nm_get_js_code = NAPI_promptaction_GetJSCode,
+    .reserved = { 0 },
 };
 
-extern "C" __attribute__((constructor)) void PromptActionRegister()
+extern "C" __attribute__((constructor)) void PromptRegister()
 {
-    napi_module_with_js_register(&promptActionModule);
+    napi_module_register(&promptModule);
 }
 } // namespace OHOS::Ace::Napi
