@@ -798,6 +798,8 @@ private:
     void PopLevelOrder(const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetPrevNodeWithOrder(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetPrevOverlayNodeWithOrder(std::optional<double> levelOrder);
+    RefPtr<FrameNode> GetBottomOrderFirstNode(std::optional<double> levelOrder);
+    RefPtr<FrameNode> GetBottomOrderFirstOverlayNode(std::optional<double> levelOrder);
     bool IsNeedChangeFocus(std::optional<double> levelOrder);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);

@@ -400,6 +400,19 @@ void UINode::MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINod
     AfterMountToParent();
 }
 
+void UINode::MountToParentBefore(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChildBefore(AceType::Claim(this), siblingNode);
+    if (parent->IsInDestroying()) {
+        parent->SetChildrenInDestroying();
+    }
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
+    AfterMountToParent();
+}
+
 void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     OnConfigurationUpdate(configurationChange);
