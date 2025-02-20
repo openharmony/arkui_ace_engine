@@ -139,25 +139,27 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
     InitTabBarProperty();
     AnimationOption option;
     delay = LessNotEqual(std::abs(translate), size) ? 0 : delay;
-    option.SetDelay(delay);
-    auto duration = SHOW_TAB_BAR_DURATION * (std::abs(translate) / size);
-    option.SetDuration(duration);
-    option.SetCurve(SHOW_TAB_BAR_CURVE);
-    option.SetFrameRateRange(SHOW_TAB_BAR_FRAME_RATE_RANGE);
+    if (delay == 0) {
+        option.SetDelay(delay);
+        auto duration = SHOW_TAB_BAR_DURATION * (std::abs(translate) / size);
+        option.SetDuration(duration);
+        option.SetCurve(SHOW_TAB_BAR_CURVE);
+        option.SetFrameRateRange(SHOW_TAB_BAR_FRAME_RATE_RANGE);
 
-    showTabBarProperty_->Set(translate);
-    auto propertyCallback = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->showTabBarProperty_->Set(0.0f);
-    };
-    auto finishCallback = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isTabBarShowing_ = false;
-    };
-    AnimationUtils::Animate(option, propertyCallback, finishCallback);
-    isTabBarShowing_ = true;
+        showTabBarProperty_->Set(translate);
+        auto propertyCallback = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->showTabBarProperty_->Set(0.0f);
+        };
+        auto finishCallback = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->isTabBarShowing_ = false;
+        };
+        AnimationUtils::Animate(option, propertyCallback, finishCallback);
+        isTabBarShowing_ = true;
+    }
 }
 
 void TabBarPattern::InitTabBarProperty()
