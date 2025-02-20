@@ -2872,7 +2872,7 @@ void WebDelegate::ratioStrToFloatV2(const std::string& str)
     }
 }
 
-void SetPartitionPoints(std::vector<float>& partition)
+void WebDelegate::SetPartitionPoints(std::vector<float>& partition)
 {
     if (isHalfFrame_) {
         TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to half frame rate:%{public}f", halfFrameRateVisibleRatio_);
