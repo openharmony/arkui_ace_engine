@@ -617,7 +617,7 @@ void OnMarqueeStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto modelCallback = [callbackHelper = CallbackHelper(*value, frameNode)](int32_t marqueeState) {
+    auto modelCallback = [callbackHelper = CallbackHelper(*value)](int32_t marqueeState) {
         auto arkMarqueeState = Converter::ArkValue<Ark_MarqueeState>(marqueeState);
         callbackHelper.Invoke(arkMarqueeState);
     };
@@ -685,7 +685,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto optSpanType = Converter::OptConvert<TextSpanType>(spanType);
     auto convResponseType = Converter::Convert<TextResponseType>(responseType);
-    auto convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
+    auto convBuildFunc = [callback = CallbackHelper(*content), node]() {
         auto builderNode = callback.BuildSync(node);
         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };

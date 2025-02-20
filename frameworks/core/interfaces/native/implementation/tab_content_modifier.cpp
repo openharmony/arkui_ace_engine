@@ -236,7 +236,7 @@ void TabBar0Impl(Ark_NativePointer node,
     } else if (auto arkText = std::get_if<Ark_Resource>(&options.value()); arkText) {
         label = Converter::OptConvert<std::string>(*arkText);
     } else if (auto arkText = std::get_if<CustomNodeBuilder>(&options.value()); arkText) {
-        builder = [callback = CallbackHelper(*arkText, frameNode), node]() {
+        builder = [callback = CallbackHelper(*arkText), node]() {
             auto builderNode = callback.BuildSync(node);
             NG::ViewStackProcessor::GetInstance()->Push(builderNode);
         };

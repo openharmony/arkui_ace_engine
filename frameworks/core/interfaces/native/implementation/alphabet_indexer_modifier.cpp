@@ -203,7 +203,7 @@ void OnRequestPopupDataImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [callback = CallbackHelper(*value, frameNode)](const int32_t selected) ->
+    auto onEvent = [callback = CallbackHelper(*value)](const int32_t selected) ->
         std::vector<std::string> {
         auto arkValue = Converter::ArkValue<Ark_Number>(selected);
         std::vector<std::string> result;

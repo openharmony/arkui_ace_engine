@@ -522,7 +522,7 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
+    auto onWillInsert = [callback = CallbackHelper(*value)](const InsertValueInfo& value) -> bool {
         Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
@@ -555,7 +555,7 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
+    auto onWillDelete = [callback = CallbackHelper(*value)](const DeleteValueInfo& value) -> bool {
         Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
@@ -687,7 +687,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     auto keyboardOptions = options ? Converter::OptConvert<Ark_KeyboardOptions>(*options) : std::nullopt;
     bool supportAvoidance = keyboardOptions &&
         Converter::OptConvert<bool>(keyboardOptions.value().supportAvoidance).value_or(false);
-    auto uiNode = CallbackHelper(*value, frameNode).BuildSync(node);
+    auto uiNode = CallbackHelper(*value).BuildSync(node);
     auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode);
     TextFieldModelNG::SetCustomKeyboard(
         frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);

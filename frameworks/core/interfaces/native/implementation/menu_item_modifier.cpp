@@ -92,7 +92,7 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
             menuItemProps.buildFunc = std::nullopt;
             auto builderOpt = Converter::OptConvert<CustomNodeBuilder>(value0.builder);
             if (builderOpt.has_value()) {
-                auto builder = [callback = CallbackHelper(builderOpt.value(), frameNode), node]() -> RefPtr<UINode> {
+                auto builder = [callback = CallbackHelper(builderOpt.value()), node]() -> RefPtr<UINode> {
                     return callback.BuildSync(node);
                 };
                 menuItemProps.buildFunc = builder;
@@ -115,7 +115,7 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
         },
         [frameNode, node](const CustomNodeBuilder& value1) {
             RefPtr<UINode> customNode;
-            customNode = CallbackHelper(value1, frameNode).BuildSync(node);
+            customNode = CallbackHelper(value1).BuildSync(node);
             if (customNode) {
                 MenuItemModelNG::AddChild(frameNode, customNode);
             }

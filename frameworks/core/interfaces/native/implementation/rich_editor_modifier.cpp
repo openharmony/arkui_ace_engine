@@ -260,7 +260,7 @@ void AboutToIMEInputImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode),
+    auto onCallback = [arkCallback = CallbackHelper(*value),
         frameNode](const RichEditorInsertValue& param) -> bool {
         Converter::ConvContext ctx;
         Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param, &ctx);
@@ -300,8 +300,7 @@ void AboutToDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value,
-        frameNode), frameNode](const RichEditorDeleteValue& param) -> bool {
+    auto onCallback = [arkCallback = CallbackHelper(*value), frameNode](const RichEditorDeleteValue& param) -> bool {
         auto data = Converter::ArkValue<Ark_RichEditorDeleteValue>(param);
         auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
@@ -335,7 +334,7 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onPaste = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) -> void {
+    auto onPaste = [arkCallback = CallbackHelper(*value)](NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto keeper = CallbackKeeper::Claim([&event]() {
             event.SetPreventDefault(true);
@@ -416,7 +415,7 @@ void OnSubmitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode), frameNode](int32_t param1,
+    auto onCallback = [arkCallback = CallbackHelper(*value)](int32_t param1,
         NG::TextFieldCommonEvent& param2) {
         auto enterKey = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(param1));
         const auto event = Converter::ArkSubmitEventSync(param2);
@@ -430,7 +429,7 @@ void OnWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value, frameNode),
+    auto onCallback = [arkCallback = CallbackHelper(*value),
         frameNode](const RichEditorChangeValue& param) -> bool {
         auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param);
         LOGW("OnWillChangeImpl :: Ark_RichEditorChangeValue don't fully filled from RichEditorChangeValue");
@@ -460,7 +459,7 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCut = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) {
+    auto onCut = [arkCallback = CallbackHelper(*value)](NG::TextCommonEvent& event) {
         Converter::ConvContext ctx;
         auto keeper = CallbackKeeper::Claim([&event]() {
             event.SetPreventDefault(true);
@@ -478,7 +477,7 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [arkCallback = CallbackHelper(*value, frameNode), frameNode](NG::TextCommonEvent& event) {
+    auto onCopy = [arkCallback = CallbackHelper(*value)](NG::TextCommonEvent& event) {
         Converter::ConvContext ctx;
         auto keeper = CallbackKeeper::Claim([&event]() {
             event.SetPreventDefault(true);
@@ -556,7 +555,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     auto span = aceSpanType.value_or(TextSpanType::NONE);
     std::function<void()> convBuildFunc;
     if (content) {
-        convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
+        convBuildFunc = [callback = CallbackHelper(*content), node]() {
             auto builderNode = callback.BuildSync(node);
             NG::ViewStackProcessor::GetInstance()->Push(builderNode);
         };
@@ -579,7 +578,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     if (convValue) {
         supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);
     }
-    auto builder = [callback = CallbackHelper(*value, frameNode), node]() {
+    auto builder = [callback = CallbackHelper(*value), node]() {
         auto builderNode = callback.BuildSync(node);
         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };

@@ -236,7 +236,7 @@ void DescriptionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto builderNode = CallbackHelper(*value, frameNode).BuildSync(node);
+    auto builderNode = CallbackHelper(*value).BuildSync(node);
     GaugeModelNG::SetDescription(frameNode, builderNode);
 }
 void TrackShadowImpl(Ark_NativePointer node,

@@ -381,7 +381,7 @@ Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
             auto pattern = controller ? controller->GetPattern().Upgrade() : nullptr;
             auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
             auto frameNode = frameNodeWeakPtr ? frameNodeWeakPtr.GetRawPtr() : nullptr;
-            auto customNode = CallbackHelper(*value, frameNode).BuildSync(frameNode);
+            auto customNode = CallbackHelper(*value).BuildSync(frameNode);
             auto customFrameNode = reinterpret_cast<FrameNode*>(customNode.GetRawPtr());
             if (customFrameNode) {
                 result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());
