@@ -187,7 +187,7 @@ void SliderModelNG::SetBlockSize(const Dimension& width, const Dimension& height
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     SizeT<Dimension> blockSize;
     auto theme = pipeline->GetTheme<SliderTheme>();

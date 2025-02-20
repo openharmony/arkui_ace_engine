@@ -145,7 +145,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, focusPattern);
         auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
         CHECK_NULL_RETURN(selectTheme, focusPattern);

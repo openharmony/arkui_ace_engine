@@ -82,7 +82,7 @@ public:
         bubbleRenderProperty->Put("primaryButtonShow", GetPrimaryButtonShow().value_or(false));
         bubbleRenderProperty->Put("secondaryButtonShow", GetSecondaryButtonShow().value_or(false));
 
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<PopupTheme>() : nullptr;
         auto defaultMaskColor = theme ? theme->GetMaskColor() : Color();
         bubbleRenderProperty->Put("maskColor", GetMaskColor().value_or(defaultMaskColor).ToString().c_str());

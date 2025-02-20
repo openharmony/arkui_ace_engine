@@ -744,7 +744,7 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<ArcIndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -815,7 +815,7 @@ void ArcIndexerPattern::UpdateChildNodeStyle(int32_t index)
     CHECK_NULL_VOID(layoutProperty);
     auto child = host->GetChildByIndex(index);
     CHECK_NULL_VOID(child);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -840,7 +840,7 @@ void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &node
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -898,7 +898,7 @@ void ArcIndexerPattern::SetFocusIndexStyle(int32_t index, const std::string &nod
     auto paintProperty = host->GetPaintProperty<ArcIndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     UpdateChildBoundary(childNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -1095,7 +1095,7 @@ void ArcIndexerPattern::UpdateBubbleBackgroundView()
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<ArcIndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     BlurStyleOption styleOption;
@@ -1116,7 +1116,7 @@ void ArcIndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -1159,7 +1159,7 @@ void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -1260,7 +1260,7 @@ void ArcIndexerPattern::ArcIndexerPressInAnimation()
     option.SetCurve(Curves::SHARP);
     AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
@@ -1279,7 +1279,7 @@ void ArcIndexerPattern::ArcIndexerPressOutAnimation()
     option.SetCurve(Curves::SHARP);
     AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);

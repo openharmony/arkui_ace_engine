@@ -1289,7 +1289,7 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CloseSelectOverlay();
 
     auto id = frameNode->GetId();
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
@@ -2245,7 +2245,7 @@ bool ImagePattern::IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const R
 
 bool ImagePattern::IsFormRender()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->IsFormRender();
 }

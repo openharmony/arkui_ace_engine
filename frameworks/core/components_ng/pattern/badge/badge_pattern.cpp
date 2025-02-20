@@ -77,7 +77,7 @@ void BadgePattern::OnModifyDone()
         badgeVisible = true;
     }
     auto circleSize = layoutProperty->GetBadgeCircleSize();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
