@@ -366,7 +366,7 @@ private:
     void InitTextFontFamily();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void RegisterWindowStateChangedCallback();
-    void UnregisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
     void OnWindowHide() override;
     void OnWindowShow() override;
 

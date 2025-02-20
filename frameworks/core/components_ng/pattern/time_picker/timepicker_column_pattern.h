@@ -425,7 +425,7 @@ private:
     void AddHotZoneRectToText();
     void InitTextFontFamily();
     void RegisterWindowStateChangedCallback();
-    void UnregisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
     void OnWindowHide() override;
     void OnWindowShow() override;
 
