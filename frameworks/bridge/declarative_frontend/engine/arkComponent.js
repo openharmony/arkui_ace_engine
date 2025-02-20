@@ -1261,7 +1261,7 @@ class BackgroundImageResizableModifier extends ModifierWithKey {
         sliceLeft = tempSlice.left;
         sliceRight = tempSlice.right;
       }
-      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceLeft, sliceTop, sliceRight, sliceBottom);
     }
   }
   checkObjectDiff() {
