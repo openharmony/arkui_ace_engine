@@ -109,8 +109,7 @@ enum class SheetKeyboardAvoidMode {
 };
 
 struct SheetStyle {
-    std::optional<Dimension> height;
-    std::optional<SheetMode> sheetMode;
+    SheetHeight sheetHeight;
     std::optional<bool> showDragBar;
     std::optional<bool> showCloseIcon;
     std::optional<bool> isTitleBuilder;
@@ -134,10 +133,11 @@ struct SheetStyle {
     std::optional<bool> enableHoverMode;
     std::optional<HoverModeAreaType> hoverModeArea;
     std::optional<NG::BorderRadiusProperty> radius;
+    std::optional<SheetHeight> detentSelection;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
-        return (height == sheetStyle.height && sheetMode == sheetStyle.sheetMode &&
+        return (sheetHeight == sheetStyle.sheetHeight &&
                 showDragBar == sheetStyle.showDragBar && showCloseIcon == sheetStyle.showCloseIcon &&
                 isTitleBuilder == sheetStyle.isTitleBuilder && sheetType == sheetStyle.sheetType &&
                 backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
@@ -149,19 +149,21 @@ struct SheetStyle {
                 instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode &&
                 sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode &&
                 enableHoverMode == sheetStyle.enableHoverMode &&
-                hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius);
+                hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius &&
+                detentSelection == sheetStyle.detentSelection);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
     {
-        if (sheetStyle.height.has_value() && !sheetStyle.sheetMode.has_value()) {
-            height = sheetStyle.height;
-            sheetMode.reset();
-        } else if (!sheetStyle.height.has_value() && sheetStyle.sheetMode.has_value()) {
-            sheetMode = sheetStyle.sheetMode;
-            height.reset();
+        if (sheetStyle.sheetHeight.height.has_value() && !sheetStyle.sheetHeight.sheetMode.has_value()) {
+            sheetHeight.height = sheetStyle.sheetHeight.height;
+            sheetHeight.sheetMode.reset();
+        } else if (!sheetStyle.sheetHeight.height.has_value() && sheetStyle.sheetHeight.sheetMode.has_value()) {
+            sheetHeight.sheetMode = sheetStyle.sheetHeight.sheetMode;
+            sheetHeight.height.reset();
         } else {
-            sheetMode = sheetStyle.sheetMode.has_value() ? sheetStyle.sheetMode : sheetMode;
+            sheetHeight.sheetMode = sheetStyle.sheetHeight.sheetMode.has_value() ?
+                sheetStyle.sheetHeight.sheetMode : sheetHeight.sheetMode;
         }
         showDragBar = sheetStyle.showDragBar.has_value() ? sheetStyle.showDragBar : showDragBar;
         showCloseIcon = sheetStyle.showCloseIcon.has_value() ? sheetStyle.showCloseIcon : showCloseIcon;
@@ -186,6 +188,7 @@ struct SheetStyle {
         enableHoverMode = sheetStyle.enableHoverMode.has_value() ? sheetStyle.enableHoverMode : enableHoverMode;
         hoverModeArea = sheetStyle.hoverModeArea.has_value() ? sheetStyle.hoverModeArea : hoverModeArea;
         radius = sheetStyle.radius.has_value() ? sheetStyle.radius : radius;
+        detentSelection = sheetStyle.detentSelection.has_value() ? sheetStyle.detentSelection : detentSelection;
     }
 };
 } // namespace OHOS::Ace::NG
