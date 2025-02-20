@@ -649,15 +649,28 @@ HWTEST_F(FrameNodeAccessorTest, DISABLED_GetOpacityTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetPositionToWindowWithTransformDefaultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformDefaultTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
+    auto position =
+        Converter::Convert<std::pair<Dimension, Dimension>>(accessor_->getPositionToWindowWithTransform(peer_));
+    EXPECT_EQ(std::get<0>(position).Value(), 0.00);
+    EXPECT_EQ(std::get<1>(position).Value(), 0.00);
+}
+
+/**
  * @tc.name: GetPositionToWindowWithTransformTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeAccessorTest, DISABLED_GetPositionToWindowWithTransformTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
-    // wait for a correct return type
-    accessor_->getPositionToWindowWithTransform(peer_);
+    // set and get another return value
 }
 
 } // namespace OHOS::Ace::NG
