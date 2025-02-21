@@ -1132,7 +1132,7 @@ public:
         isDeleteRsNode_ = isDelete;
     }
  
-    bool GetIsDelete() {
+    bool GetIsDelete() const {
         return isDeleteRsNode_;
     }
 
@@ -1140,7 +1140,7 @@ public:
         hasPositionZ_ = hasPositionZ;
     }
  
-    bool HasPositionZ() {
+    bool HasPositionZ() const {
         return hasPositionZ_;
     }
 
