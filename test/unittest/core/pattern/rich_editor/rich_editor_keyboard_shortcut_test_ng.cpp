@@ -518,6 +518,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextThemeFontSize101, TestSize.Lev
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     context->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     auto theme = context->GetTheme<TextTheme>();
     ASSERT_NE(theme, nullptr);
     auto ret = richEditorPattern->GetTextThemeFontSize();
