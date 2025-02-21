@@ -1285,6 +1285,11 @@ public:
     }
     bool CheckVisibleOrActive() override;
 
+    void SetNeedLazyLayout(bool value)
+    {
+        layoutProperty_->SetNeedLazyLayout(value);
+    }
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;

@@ -3120,6 +3120,15 @@ struct ArkUINodeContainerModifier {
     void (*clean)(ArkUINodeHandle node);
 };
 
+struct ArkUILazyGridLayoutModifier {
+    void (*setColumnsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap);
+    void (*resetColumnsGap)(ArkUINodeHandle node);
+    void (*setRowsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap);
+    void (*resetRowsGap)(ArkUINodeHandle node);
+    void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
+    void (*resetColumnsTemplate)(ArkUINodeHandle node);
+};
+
 struct ArkUITimepickerModifier {
     ArkUI_CharPtr (*getTimepickerSelected)(ArkUINodeHandle node);
     void (*setTimepickerSelected)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
@@ -6029,6 +6038,7 @@ struct ArkUINodeModifiers {
     const ArkUIThemeModifier* (*getThemeModifier)();
     const ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
     const ArkUIIndicatorComponentModifier* (*getIndicatorComponentModifier)();
+    const ArkUILazyGridLayoutModifier* (*getLazyGridLayoutModifier)();
 };
 
 // same as inner defines in property.h

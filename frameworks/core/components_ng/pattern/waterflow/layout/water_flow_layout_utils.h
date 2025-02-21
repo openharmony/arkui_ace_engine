@@ -34,6 +34,8 @@ public:
     };
     static LayoutConstraintF CreateChildConstraint(const ConstraintParams& params,
         const RefPtr<WaterFlowLayoutProperty>& props, const RefPtr<LayoutWrapper>& child);
+    static LayoutConstraintF CreateChildConstraint(const ConstraintParams& params, const ViewPosReference& posRef,
+        const RefPtr<WaterFlowLayoutProperty>& props, const RefPtr<LayoutWrapper>& child);
 
     /**
      * @brief Measure self before measuring children.
