@@ -1279,4 +1279,14 @@ void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
     accessibilityHoverPriority_ = hoverPriority;
 }
 
+void AccessibilityProperty::SetFocusDrawLevel(int32_t drawLevel)
+{
+    focusDrawLevel_ = static_cast<FocusDrawLevel>(drawLevel);
+}
+
+int32_t AccessibilityProperty::GetFocusDrawLevel()
+{
+    return static_cast<int32_t>(focusDrawLevel_);
+}
+
 } // namespace OHOS::Ace::NG

@@ -197,6 +197,11 @@ enum class AccessibilitySamePageMode {
     FULL_SILENT = 1,
 };
 
+enum class FocusDrawLevel {
+    SELF = 0,
+    TOP = 1,
+};
+
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };
