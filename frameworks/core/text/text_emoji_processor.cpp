@@ -280,7 +280,7 @@ std::u16string TextEmojiProcessor::SubU16string(
     if (rangeLength == 0) {
         return u"";
     }
-    return content.substr(range.startIndex, rangeLength);
+    return content.substr(static_cast<uint32_t>(range.startIndex), static_cast<uint32_t>(rangeLength));
 }
 
 TextEmojiSubStringRange TextEmojiProcessor::CalSubU16stringRange(
@@ -343,7 +343,7 @@ int32_t TextEmojiProcessor::GetEmojiLengthBackward(std::u32string& u32Content,
         }
         ++startIndex;
     } while (1);
-    std::u16string temp = u16Content.substr(0, startIndex);
+    std::u16string temp = u16Content.substr(0, static_cast<uint32_t>(startIndex));
     u32Content = UtfUtils::Str16ToStr32(temp);
     return GetEmojiLengthAtEnd(u32Content, false);
 }
