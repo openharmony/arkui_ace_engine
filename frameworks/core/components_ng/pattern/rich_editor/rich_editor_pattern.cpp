@@ -2785,6 +2785,7 @@ void RichEditorPattern::CreateAndShowSingleHandle()
     selectOverlay_->SetIsSingleHandle(true);
     textSelector_.Update(caretPosition_);
     CalculateHandleOffsetAndShowOverlay();
+    UpdateSelectionType(GetSpansInfo(caretPosition_, caretPosition_, GetSpansMethod::ONSELECT));
     selectOverlay_->ProcessOverlay({ .animation = true });
 }
 
@@ -7936,11 +7937,10 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
 }
 
 void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
-    std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
-    std::function<void()>& onDisappear)
+    std::function<void()>& menuBuilder, const SelectMenuParam& menuParam)
 {
     TextPattern::BindSelectionMenu(
-        richEditorType, type, menuBuilder, { .onAppear = onAppear, .onDisappear = onDisappear });
+        richEditorType, type, menuBuilder, menuParam);
 }
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
@@ -8053,6 +8053,9 @@ void RichEditorPattern::UpdateSelectMenuInfo(SelectMenuInfo& menuInfo)
         inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
 #endif
     menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput && !customKeyboardBuilder_;
+    if (textResponseType_.has_value()) {
+        menuInfo.responseType = static_cast<int32_t>(textResponseType_.value());
+    }
 }
 
 bool RichEditorPattern::IsShowSelectMenuUsingMouse()
