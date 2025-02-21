@@ -276,10 +276,10 @@ void GetXComponentSurfaceRect(ArkUINodeHandle node, ArkUI_Int32& offsetX, ArkUI_
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::GetXComponentSurfaceRect(frameNode, surfaceRectOffsetX, surfaceRectOffsetY,
         surfaceRectWidth, surfaceRectHeight);
-    offsetX = static_cast<ArkUI_Uint32>(surfaceRectOffsetX);
-    offsetY = static_cast<ArkUI_Uint32>(surfaceRectOffsetY);
-    surfaceWidth = static_cast<ArkUI_Uint32>(surfaceRectWidth);
-    surfaceHeight = static_cast<ArkUI_Uint32>(surfaceRectHeight);
+    offsetX = static_cast<ArkUI_Int32>(surfaceRectOffsetX);
+    offsetY = static_cast<ArkUI_Int32>(surfaceRectOffsetY);
+    surfaceWidth = static_cast<ArkUI_Int32>(surfaceRectWidth);
+    surfaceHeight = static_cast<ArkUI_Int32>(surfaceRectHeight);
 }
 
 void ResetXComponentSurfaceRect(ArkUINodeHandle node)
