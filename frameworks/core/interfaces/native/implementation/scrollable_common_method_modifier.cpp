@@ -170,9 +170,13 @@ void OnDidScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetOnDidScroll(frameNode, convValue);
-    LOGE("ScrollableCommonMethodModifier::OnDidScrollImpl is not implemented");
+    auto call = [arkCallback = CallbackHelper(*value)](
+        Dimension offset, ScrollState stateIn) {
+            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
+            auto offsetVal = Converter::ArkValue<Ark_Number>(offset);
+            arkCallback.Invoke(offsetVal, offsetVal, state);
+    };
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(call));
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       const Callback_Void* value)

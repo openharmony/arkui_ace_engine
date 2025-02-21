@@ -363,4 +363,69 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStopTest, TestSize.Level
     ASSERT_TRUE(checkData.has_value());
     EXPECT_EQ(checkData.value(), contextId);
 }
+
+
+/*
+ * @tc.name: OnDidScroll_SetCallback
+ * @tc.desc: Test OnDidScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct resultData {
+        Ark_Int32 resourceId;
+        Ark_Number x;
+        Ark_Number y;
+        Ark_ScrollState state;
+    };
+    static std::optional<resultData> result;
+
+    auto callback = [](
+        const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState) {
+            result = {resourceId, xOffset, yOffset, scrollState};
+    };
+
+    auto id = Converter::ArkValue<Ark_Int32>(123);
+
+    auto apiCall = Converter::ArkValue<ScrollOnScrollCallback>(callback, id);
+    ASSERT_FALSE(eventHub->GetOnDidScroll());
+
+    ASSERT_NE(modifier_->setOnDidScroll, nullptr);
+    modifier_->setOnDidScroll(node_, &apiCall);
+
+    ASSERT_TRUE(eventHub->GetOnDidScroll());
+    int offsetIn = 333;
+    Dimension offset(offsetIn);
+    eventHub->GetOnDidScroll()(offset, ScrollState::SCROLL);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_SCROLL, result.value().state);
+    auto resultValX = Converter::Convert<int>(result.value().x);
+    auto resultValY = Converter::Convert<int>(result.value().y);
+    EXPECT_EQ(offsetIn, resultValX);
+    EXPECT_EQ(offsetIn, resultValY);
+    EXPECT_EQ(id, result.value().resourceId);
+}
+
+/**
+ * @tc.name: OnDidScroll_SetNullCallback
+ * @tc.desc: Test OnDidScrolleImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, OnDidScroll_SetNullCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ASSERT_NE(modifier_->setOnDidScroll, nullptr);
+    modifier_->setOnDidScroll(node_, nullptr);
+    ASSERT_FALSE(eventHub->GetOnDidScroll());
+}
+
 } // namespace OHOS::Ace::NG

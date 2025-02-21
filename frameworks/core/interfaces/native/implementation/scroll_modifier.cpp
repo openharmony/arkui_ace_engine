@@ -187,11 +187,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto callValue = Converter::OptConvert<ScrollOnScrollCallback>(*value);
-    if (!callValue.has_value()) {
-        return;
-    }
-    auto call = [arkCallback = CallbackHelper(callValue.value())](
+    auto call = [arkCallback = CallbackHelper(*value)](
         Dimension xIn, Dimension yIn, ScrollState stateIn) {
             auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
             auto x = Converter::ArkValue<Ark_Number>(xIn);
