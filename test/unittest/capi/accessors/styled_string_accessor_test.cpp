@@ -821,7 +821,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshallingTest, Tes
     ASSERT_TRUE(encodeResult);
     auto data = tlvData.data();
     size_t bufferSize = tlvData.size();
-    std::string testBuffer(data, data+bufferSize);
+    std::string testBuffer(data, data + bufferSize);
     ASSERT_FALSE(testBuffer.empty());
 
     struct CheckEvent {
@@ -831,7 +831,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshallingTest, Tes
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onUnmarshalling = [](const Ark_Int32 resourceId,
         const Opt_StyledString value, const Opt_Array_String error) {
-        auto peer = reinterpret_cast<StyledStringPeer*>(value.value.ptr);
+        auto arkPeer = Converter::OptConvert<Ark_StyledString>(value);
+        ASSERT_TRUE(arkPeer.has_value());
+        auto peer = reinterpret_cast<StyledStringPeer*>(arkPeer->ptr);
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetStyledStringAccessor();
         ASSERT_NE(accessor, nullptr);
