@@ -96,6 +96,7 @@ struct CustomKeyboardOffsetInfo {
     float inAniStartOffset = 0.0f;
     float outAniEndOffset = 0.0f;
 };
+
 struct OverlayManagerInfo {
     bool renderRootOverlay = true;
 };
