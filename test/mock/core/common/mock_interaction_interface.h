@@ -72,6 +72,10 @@ public:
 
     MOCK_METHOD(int32_t, SetDraggableState, (bool state), (override));
 
+    MOCK_METHOD(int32_t, GetAppDragSwitchState, (bool& state), (override));
+
+    MOCK_METHOD(void, SetDraggableStateAsync, (bool state, int64_t downTime), (override));
+
 private:
     std::function<void()> gDragOutCallback = nullptr;
     int gStartDrag = 0;
