@@ -600,6 +600,10 @@ public:
         endShowCached_ = end;
     }
 
+    int32_t GetHistoryTotalCount() const
+    {
+        return historicalTotalCount_;
+    }
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
