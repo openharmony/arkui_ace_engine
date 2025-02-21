@@ -888,9 +888,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelPop001, TestSize.Level1)
     tabBarNode_->focusHub_ = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(tabBarNode_)));
     ASSERT_NE(tabBarNode_->focusHub_, nullptr);
     tabBarPattern_->OnModifyDone();
-    tabBarPattern_->swiperController_->removeTabBarEventCallback_();
-    tabBarPattern_->swiperController_->addTabBarEventCallback_();
-    EXPECT_NE(tabBarPattern_->swiperController_, nullptr);
+    swiperController_->GetRemoveTabBarEventCallback()();
+    swiperController_->GetAddTabBarEventCallback()();
+    EXPECT_NE(swiperController_, nullptr);
 }
 
 /**
@@ -1511,7 +1511,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelLabelStyle001, TestSize.Level1)
     /**
      * @tc.steps: step2. check label style after swipeTo.
      */
-    SwipeToWithoutAnimation(0);
+    ChangeIndex(0);
     EXPECT_EQ(textLayoutProperty1->GetFontWeight(), FontWeight::MEDIUM);
     EXPECT_EQ(textLayoutProperty1->GetTextColor(), tabTheme->GetSubTabTextOnColor());
     EXPECT_EQ(textLayoutProperty2->GetFontWeight(), FontWeight::NORMAL);
@@ -1560,7 +1560,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelIconStyle001, TestSize.Level1)
     /**
      * @tc.steps: step2. check icon style after swipeTo.
      */
-    SwipeToWithoutAnimation(0);
+    ChangeIndex(0);
     EXPECT_EQ(imagePaintProperty1->GetSvgFillColor().value(), tabTheme->GetBottomTabIconOn());
     EXPECT_EQ(imagePaintProperty2->GetSvgFillColor().value(), tabTheme->GetBottomTabIconOff());
 }
