@@ -1495,6 +1495,7 @@ public:
     bool GetOriginCaretPosition(OffsetF& offset) const;
     void ResetOriginCaretPosition() override;
     bool RecordOriginCaretPosition() override;
+    float GetFontSizePx();
 
 protected:
     virtual void InitDragEvent();
