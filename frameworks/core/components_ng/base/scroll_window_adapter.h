@@ -56,9 +56,7 @@ public:
 
     FrameNode* InitPivotItem(FillDirection direction);
 
-    RefPtr<FrameNode> GetChildByIndex(uint32_t index) const;
-
-    FrameNode* GetChildPtrByIndex(uint32_t index);
+    RefPtr<FrameNode> GetChildByIndex(uint32_t index);
 
     // return the mark item which new item will insert after or before.
     FrameNode* NeedMoreElements(FrameNode* markItem, FillDirection direction);
@@ -78,9 +76,11 @@ public:
         return totalCount_;
     }
 
-    void Prepare();
+    void Prepare(uint32_t offset);
 
 private:
+    FrameNode* GetChildPtrByIndex(uint32_t index);
+
     /**
      * @brief Call updaters with @c markIdx to request recomposition.
      *
@@ -103,6 +103,7 @@ private:
     std::unordered_set<int32_t> filled_; // to record measured items during Fill
 
     Axis axis_ = Axis::VERTICAL;
+    uint32_t offset_ = 0; // offset of current LazyForEach in node tree
     bool rangeMode_ = false;   // true if providing item range to frontend directly
     bool jumpPending_ = false; // will perform a jump on the next recomposition
 };

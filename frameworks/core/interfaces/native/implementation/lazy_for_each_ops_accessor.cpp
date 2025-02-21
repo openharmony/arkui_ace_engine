@@ -81,7 +81,7 @@ void PrepareImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
     auto* scrollWindowAdapter = frameNode->GetScrollWindowAdapter();
     CHECK_NULL_VOID(scrollWindowAdapter);
-    scrollWindowAdapter->Prepare();
+    scrollWindowAdapter->Prepare(0);
 }
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()

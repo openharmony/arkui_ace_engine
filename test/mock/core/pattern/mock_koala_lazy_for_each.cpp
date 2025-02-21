@@ -38,7 +38,7 @@ void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
     VisibleRange visibleRange(parent_, s, s);
     int32_t index = s;
 
-    parent_->GetScrollWindowAdapter()->Prepare();
+    parent_->GetScrollWindowAdapter()->Prepare(0);
     while (true) {
         if (index < 0 || index >= totalCnt_) {
             break;
@@ -88,7 +88,7 @@ void MockKoalaLazyForEach::RangeModeUpdate(int32_t s, int32_t e)
         parent_->AddChild(item);
     }
     range_ = { s, e };
-    parent_->GetScrollWindowAdapter()->Prepare();
+    parent_->GetScrollWindowAdapter()->Prepare(0);
 }
 
 void MockKoalaLazyForEach::Update(int32_t s, void* pointer)
