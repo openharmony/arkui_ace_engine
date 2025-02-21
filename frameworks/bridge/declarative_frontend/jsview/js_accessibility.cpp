@@ -328,4 +328,20 @@ std::string JSAccessibilityAbstract::GetRoleByType(AccessibilityRoleType roleTyp
     }
     return "";
 }
+
+void JSViewAbstract::JsAccessibilityFocusDrawLevel(const JSCallbackInfo& info)
+{
+    int32_t drawLevel = 0;
+    JSRef<JSVal> arg = info[0];
+    do {
+        if (!arg->IsNumber()) {
+            break;
+        }
+        if (arg->ToNumber<int32_t>() > 1) {
+            break;
+        }
+        drawLevel = arg->ToNumber<int32_t>();
+    } while (false);
+    ViewAbstractModel::GetInstance()->SetAccessibilityFocusDrawLevel(drawLevel);
+}
 }

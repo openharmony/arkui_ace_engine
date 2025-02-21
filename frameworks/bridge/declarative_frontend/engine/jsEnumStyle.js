@@ -3822,6 +3822,12 @@ let AccessibilitySamePageMode;
   AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
 })(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));
 
+let FocusDrawLevel;
+(function (FocusDrawLevel) {
+  FocusDrawLevel[FocusDrawLevel.SELF = 0] = 'SELF';
+  FocusDrawLevel[FocusDrawLevel.TOP = 1] = 'TOP';
+})(FocusDrawLevel || (FocusDrawLevel = {}));
+
 let TextMenuShowMode;
 (function (TextMenuShowMode) {
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';

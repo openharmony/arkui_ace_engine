@@ -753,6 +753,15 @@ void ViewAbstractModelNG::SetAccessibilityScrollTriggerable(bool triggerable, bo
     }
 }
 
+void ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetFocusDrawLevel(drawLevel);
+}
+
 void ViewAbstractModelNG::SetAccessibilityRole(const std::string& role, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -909,6 +918,14 @@ void ViewAbstractModelNG::SetAccessibilityScrollTriggerable(FrameNode* frameNode
     } else {
         accessibilityProperty->SetUserScrollTriggerable(triggerable);
     }
+}
+
+void ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetFocusDrawLevel(drawLevel);
 }
 
 void ViewAbstractModelNG::SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue)

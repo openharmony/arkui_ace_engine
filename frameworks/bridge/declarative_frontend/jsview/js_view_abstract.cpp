@@ -7033,6 +7033,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityUseSamePage", &JSViewAbstract::JsAccessibilityUseSamePage);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityScrollTriggerable",
                                           &JSViewAbstract::JsAccessibilityScrollTriggerable);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityFocusDrawLevel",
+                                          &JSViewAbstract::JsAccessibilityFocusDrawLevel);
 
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);

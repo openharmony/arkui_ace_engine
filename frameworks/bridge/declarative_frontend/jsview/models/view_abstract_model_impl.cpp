@@ -1669,4 +1669,7 @@ void ViewAbstractModelImpl::SetAccessibilityUseSamePage(bool isFullSilent)
 void ViewAbstractModelImpl::SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue)
 {}
 
+void ViewAbstractModelImpl::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
+{}
+
 } // namespace OHOS::Ace::Framework

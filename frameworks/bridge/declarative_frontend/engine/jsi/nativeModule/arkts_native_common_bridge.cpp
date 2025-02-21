@@ -1495,6 +1495,7 @@ bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue
 
 const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySamePageMode::SEMI_SILENT,
     AccessibilitySamePageMode::FULL_SILENT };
+const std::vector<FocusDrawLevel> FOCUS_DRAW_LEVEL = { FocusDrawLevel::SELF, FocusDrawLevel::TOP };
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -6150,6 +6151,37 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityScrollTriggerable(ArkUIRu
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityScrollTriggerable(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetAccessibilityFocusDrawLevel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+
+    if (secondArg->IsUndefined() || !secondArg->IsNumber()) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityFocusDrawLevel(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t intValue = secondArg->Int32Value(vm);
+    if (intValue >= 0 && intValue < static_cast<int32_t>(FOCUS_DRAW_LEVEL.size())) {
+        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityFocusDrawLevel(nativeNode, intValue);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityFocusDrawLevel(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityFocusDrawLevel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityFocusDrawLevel(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
