@@ -653,6 +653,8 @@ public:
     void ColumnPatternInitHapticController();
     void ColumnPatternStopHaptic();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool IsStartEndTimeDefined();
+
 private:
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
         const std::string &id, bool focus, const std::function<void(const std::string&)>& call);
@@ -702,7 +704,6 @@ private:
     void HandleMinColumnChange(const PickerTime& value);
     uint32_t ParseHourOf24(uint32_t hourOf24) const;
     PickerTime AdjustTime(const PickerTime& time);
-    bool IsStartEndTimeDefined();
     void HourChangeBuildTimeRange();
     void MinuteChangeBuildTimeRange(uint32_t hourOf24);
     void RecordHourAndMinuteOptions();
