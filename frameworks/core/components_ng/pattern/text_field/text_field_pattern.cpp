@@ -4201,6 +4201,48 @@ void TextFieldPattern::CalcCounterAfterFilterInsertValue(
     HandleCountStyle();
 }
 
+void TextFieldPattern::NotifyImfFinishTextPreview()
+{
+    if (!HasFocus()) {
+        return;
+    }
+#if defined(ENABLE_STANDARD_INPUT)
+    int32_t caretIndex = selectController_->GetCaretIndex();
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        u"", caretIndex, caretIndex);
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "notify imf that textfield exit textPreview");
+#endif
+}
+
+int32_t TextFieldPattern::InsertValueByController(const std::string& insertValue, int32_t offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, offset);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
+    NotifyImfFinishTextPreview();
+    int32_t originLength =
+        static_cast<int32_t>(contentController_->GetTextValue().length());
+    bool hasInsertValue =
+        contentController_->InsertValue(offset, insertValue);
+    int32_t caretMoveLength =
+        abs(static_cast<int32_t>(contentController_->GetTextValue().length()) - originLength);
+    if (layoutProperty->HasMaxLength()) {
+        CalcCounterAfterFilterInsertValue(originLength, insertValue,
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
+    }
+    int32_t newCaretIndex = offset + caretMoveLength;
+    selectController_->UpdateCaretIndex(newCaretIndex);
+    selectController_->MoveCaretToContentRect(newCaretIndex);
+    UpdateObscure(insertValue, hasInsertValue);
+    UpdateEditingValueToRecord();
+    TwinklingByFocus();
+    CloseSelectOverlay(true);
+    ScrollToSafeArea();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    return selectController_->GetCaretIndex();
+}
+
 void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
 {
     auto insertValue = info.insertValue;
@@ -8895,7 +8937,7 @@ bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
     return false;
 }
 
-void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
+void TextFieldPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
 {
     auto length = static_cast<int32_t>(contentController_->GetWideText().length());
     if (start > end) {
@@ -8908,12 +8950,16 @@ void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
     }
     GetEmojiSubStringRange(start, end);
     auto value = contentController_->GetSelectedValue(start, end);
-    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
-    CHECK_NULL_VOID(isDelete);
+    if (isIME) {
+        auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+        CHECK_NULL_VOID(isDelete);
+    }
     ResetObscureTickCountDown();
     CheckAndUpdateRecordBeforeOperation();
     Delete(start, end);
-    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    if (isIME) {
+        AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    }
     showCountBorderStyle_ = false;
     HandleCountStyle();
 }
@@ -9262,5 +9308,13 @@ bool TextFieldPattern::RecordOriginCaretPosition()
     }
     originCaretPosition_ = selectController_->GetCaretRect().GetOffset();
     return originCaretPosition_.NonNegative();
+}
+
+SelectionInfo TextFieldPattern::GetSelection()
+{
+    SelectionInfo selection;
+    selection.SetSelectionStart(selectController_->GetStartIndex());
+    selection.SetSelectionEnd(selectController_->GetEndIndex());
+    return selection;
 }
 } // namespace OHOS::Ace::NG
