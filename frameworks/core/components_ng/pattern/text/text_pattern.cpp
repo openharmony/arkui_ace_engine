@@ -5043,7 +5043,7 @@ void TextPattern::OnTextOverflowChanged()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
+    if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
         return;
     }
     auto pipeline = GetContext();
