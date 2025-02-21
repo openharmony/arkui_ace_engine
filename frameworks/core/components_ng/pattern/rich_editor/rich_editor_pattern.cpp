@@ -7521,6 +7521,7 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
 
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    selectOverlay_->UpdateMenuOnWindowSizeChanged(type);
     CHECK_NULL_VOID(type == WindowSizeChangeReason::ROTATION);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
