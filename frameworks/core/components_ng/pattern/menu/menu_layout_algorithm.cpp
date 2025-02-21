@@ -673,6 +673,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateChildConstraintByDevice(menuPattern, childConstraint, constraint.value());
 
     auto parentItem = menuPattern->GetParentMenuItem();
+    UpdateSelectFocus(layoutWrapper, childConstraint);
     CalculateIdealSize(layoutWrapper, childConstraint, padding, idealSize, parentItem);
 }
 
@@ -742,6 +743,45 @@ void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern
     }
     childConstraint.minSize.SetWidth(minWidth);
     childConstraint.maxSize.SetWidth(maxWidth);
+}
+
+void MenuLayoutAlgorithm::UpdateSelectFocus(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->IsSelectMenu()) {
+        return;
+    }
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto childHost = child->GetHostNode();
+        CHECK_NULL_VOID(childHost);
+        // when use contentModifier the origin scroll node should be hide.
+        auto needHide = pattern->UseContentModifier() && childHost->GetId() != pattern->GetBuilderId();
+        auto layoutProperty = childHost->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(needHide ? VisibleType::GONE : VisibleType::VISIBLE);
+        auto focusHub = childHost->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetShow(!needHide);
+        // when use contentModifier the default focus should change to the first custom node.
+        if (childHost->GetChildren().empty()) {
+            return;
+        }
+        auto columnChild = childHost->GetChildAtIndex(0);
+        CHECK_NULL_VOID(columnChild);
+        if (columnChild->GetChildren().empty()) {
+            return;
+        }
+        auto optionChild = columnChild->GetChildAtIndex(0);
+        CHECK_NULL_VOID(optionChild);
+        auto optionNode = AceType::DynamicCast<FrameNode>(optionChild);
+        CHECK_NULL_VOID(optionNode);
+        auto optionFocusHub = optionNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(optionFocusHub);
+        optionFocusHub->SetIsDefaultFocus(!needHide);
+    }
 }
 
 void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
