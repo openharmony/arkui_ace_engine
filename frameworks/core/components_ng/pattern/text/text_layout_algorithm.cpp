@@ -29,6 +29,26 @@ constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
+uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
+{
+    double minTextSizeHeight = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    if (LessOrEqual(minTextSizeHeight, 0.0)) {
+        minTextSizeHeight = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
+    double lineHeight = minTextSizeHeight;
+    if (textStyle.HasHeightOverride()) {
+        lineHeight = textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT
+                            ? textStyle.GetLineHeight().ConvertToPxWithSize(contentConstraint.maxSize.Height())
+                            : textStyle.GetLineHeight().ConvertToPxDistribute(
+                                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
+    // plus extraLine to ensure maxlines -1 is the next maxline to try for layout
+    uint32_t maxLines = contentConstraint.maxSize.Height() / (lineHeight) + 1;
+    return std::max(maxLines, static_cast<uint32_t>(0));
+}
 }; // namespace
 
 TextLayoutAlgorithm::TextLayoutAlgorithm(
@@ -675,6 +695,10 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
     }
 
     CHECK_NULL_RETURN(paragraphManager_, false);
+    if (textStyle.GetMaxLines() == UINT32_MAX) {
+        uint32_t maxLines = GetAdaptedMaxLines(textStyle, contentConstraint);
+        textStyle.SetMaxLines(maxLines);
+    }
     auto lineCount = static_cast<uint32_t>(paragraphManager_->GetLineCount());
     lineCount = std::max(std::min(textStyle.GetMaxLines(), lineCount), static_cast<uint32_t>(0));
     textStyle.SetMaxLines(lineCount);
