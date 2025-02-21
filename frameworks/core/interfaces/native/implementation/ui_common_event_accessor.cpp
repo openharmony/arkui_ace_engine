@@ -96,7 +96,6 @@ void SetOnDisappearImpl(UICommonEventPeer* peer,
 void SetOnKeyEventImpl(UICommonEventPeer* peer,
                        const Opt_Callback_KeyEvent_Void* callback_)
 {
-
 }
 void SetOnFocusImpl(UICommonEventPeer* peer,
                     const Opt_Callback_Void* callback_)
