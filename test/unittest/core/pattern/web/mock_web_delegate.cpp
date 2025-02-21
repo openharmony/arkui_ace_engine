@@ -880,7 +880,7 @@ void WebDelegate::WebHandleTouchpadFlingEvent(
 {}
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY) {}
 void WebDelegate::WebHandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY,
-    const std::vector<int32_t>& pressedCodes)
+    const std::vector<int32_t>& pressedCodes, const int32_t source)
 {}
 bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
 {
