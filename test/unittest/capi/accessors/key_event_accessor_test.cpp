@@ -25,6 +25,18 @@ using namespace testing;
 using namespace testing::ext;
 using namespace AccessorTestFixtures;
 
+namespace {
+const std::vector<std::pair<KeyAction, Ark_KeyType>> getTypeTestPlan = {
+    { KeyAction::DOWN, ARK_KEY_TYPE_DOWN },
+    { KeyAction::UP, ARK_KEY_TYPE_UP },
+};
+
+const std::vector<std::pair<SourceType, Ark_KeySource>> getKeySourceTestPlan = {
+    { SourceType::KEYBOARD, Ark_KeySource::ARK_KEY_SOURCE_KEYBOARD },
+    { SourceType::NONE, Ark_KeySource::ARK_KEY_SOURCE_UNKNOWN },
+};
+} // namespace
+
 class KeyEventAccessorTest
     : public AccessorTestBase<GENERATED_ArkUIKeyEventAccessor,
         &GENERATED_ArkUIAccessors::getKeyEventAccessor, KeyEventPeer> {
@@ -99,19 +111,18 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateInvalidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getTypeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getTypeValidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getType, nullptr);
-}
 
-/**
- * @tc.name: getTypeInvalidTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getTypeInvalidTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->getType, nullptr);
+    for (auto& [value, expected]: getTypeTestPlan) {
+        KeyEvent event;
+        event.action = value;
+        ASSERT_TRUE(eventInfo_);
+        *eventInfo_ = KeyEventInfo(event);
+        auto result = accessor_->getType(peer_);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
@@ -264,19 +275,18 @@ HWTEST_F(KeyEventAccessorTest, setKeyTextInvalidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getKeySourceValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getKeySourceValidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeySource, nullptr);
-}
 
-/**
- * @tc.name: getKeySourceInvalidTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getKeySourceInvalidTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->getKeySource, nullptr);
+    for (auto& [value, expected]: getKeySourceTestPlan) {
+        KeyEvent event;
+        event.sourceType = value;
+        ASSERT_TRUE(eventInfo_);
+        *eventInfo_ = KeyEventInfo(event);
+        auto result = accessor_->getKeySource(peer_);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
