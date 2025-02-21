@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -42,11 +43,14 @@ enum class BindSheetDismissReason {
     CLOSE_BUTTON,
     SLIDE_DOWN,
 };
-class ACE_EXPORT SheetPresentationPattern :
-    public LinearLayoutPattern, public PopupBasePattern, public FocusView,
-        public NestableScrollContainer, public AutoFillTriggerStateHolder{
-    DECLARE_ACE_TYPE(SheetPresentationPattern,
-        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer, AutoFillTriggerStateHolder);
+class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern,
+                                            public PopupBasePattern,
+                                            public FocusView,
+                                            public NestableScrollContainer,
+                                            public AutoFillTriggerStateHolder,
+                                            public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern, FocusView,
+        NestableScrollContainer, AutoFillTriggerStateHolder, IAvoidInfoListener);
 
 public:
     SheetPresentationPattern(
@@ -724,6 +728,9 @@ private:
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnRegisterAvoidInfoChangeListener(FrameNode* hostNode);
 
     void RegisterHoverModeChangeCallback();
     void InitScrollProps();

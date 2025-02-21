@@ -1803,7 +1803,10 @@ void UIExtensionPattern::RegisterGetAvoidInfoCallback()
         auto avoidInfoMgr = context->GetAvoidInfoManager();
         CHECK_NULL_RETURN(avoidInfoMgr, -1);
         AAFwk::Want avoidInfoWant;
-        avoidInfoMgr->BuildAvoidInfo(pattern->GetAvoidInfo(), avoidInfoWant);
+        const auto& info = pattern->GetAvoidInfo();
+        avoidInfoMgr->BuildAvoidInfo(info, avoidInfoWant);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UECPattern send avoidInfo: %{public}s.", info.ToString().c_str());
         pattern->SendBusinessData(UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE,
             std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
         return 0;
