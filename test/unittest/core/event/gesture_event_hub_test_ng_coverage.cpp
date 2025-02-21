@@ -441,4 +441,120 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage010, TestSize
     defaultScale = gestureEventHub->GetDefaultPixelMapScale(frameNode, gestureEvent, true, pixelMap);
     EXPECT_EQ(defaultScale, 2.0f);
 }
+
+/**
+ * @tc.name: GestureEventHubTestCoverage011
+ * @tc.desc: test GetPreScaledPixelMapIfExist
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage011, TestSize.Level1)
+{
+    DragDropInfo dragDropInfo;
+    dragDropInfo.onlyForLifting = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->SetDragPreview(dragDropInfo);
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    gestureEventHub->InitDragDropEvent();
+    EXPECT_EQ(gestureEventHub->GetPreScaledPixelMapIfExist(0.0f, pixelMap), pixelMap);
+}
+
+/**
+ * @tc.name: GestureEventHubTestCoverage012
+ * @tc.desc: test GetDefaultPixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gestureEventHub, gestureEvent and pixelMap.
+     */
+    DragDropInfo dragDropInfo;
+    dragDropInfo.onlyForLifting = true;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->SetDragPreview(dragDropInfo);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    GestureEvent gestureEvent;
+    gestureEvent.SetSourceDevice(SourceType::TOUCH);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+
+    /**
+     * @tc.steps: step4. test onlyForLifting.
+     */
+    gestureEventHub->menuPreviewScale_ = 2.0f;
+    auto defaultScale = gestureEventHub->GetDefaultPixelMapScale(frameNode, gestureEvent, true, pixelMap);
+    EXPECT_EQ(defaultScale, 1.05f);
+}
+
+/**
+ * @tc.name: GestureEventHubTestCoverage013
+ * @tc.desc: Test GetDragDropInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. set onDragStart for eventHub
+     */
+    auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+        DragDropInfo dragDropInfo;
+        auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+        dragEvent->SetData(unifiedData);
+        auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        dragDropInfo.customNode = customNode;
+        dragDropInfo.extraInfo = "user set extraInfo";
+        return dragDropInfo;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+    ;
+
+    /**
+     * @tc.steps: step3. set dragPreview for frameNode
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragDropInfo dragPreviewDropInfo;
+    dragPreviewDropInfo.extraInfo = "drag preview extraInfo";
+    auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragPreviewDropInfo.customNode = customNode;
+    dragPreviewDropInfo.onlyForLifting = true;
+    frameNode->SetDragPreview(dragPreviewDropInfo);
+
+    /**
+     * @tc.steps: step4. call GetDragDropInfo function
+     *            case: textDraggable is false, and component is image
+     * @tc.expected: dragPreviewInfo.customNode is not null, extraInfo is 'drag preview extraInfo'.
+     */
+    GestureEvent info;
+    DragDropInfo dragPreviewInfo;
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    gestureEventHub->InitDragDropEvent();
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
+    gestureEventHub->SetTextDraggable(true);
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
+    EXPECT_TRUE(dragDropInfo.customNode);
+    EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
+    EXPECT_FALSE(dragPreviewInfo.customNode);
+    ASSERT_NE(dragPreviewInfo.extraInfo, "");
+}
 } // namespace OHOS::Ace::NG
