@@ -91,6 +91,7 @@ namespace OHOS::Ace::NG::Converter {
     public:
         Ark_String Store(const std::string_view& src);
         void *Allocate(std::size_t size);
+        void Clear();
         template<typename T>
         T AllocateArray(std::size_t size)
         {
@@ -102,6 +103,9 @@ namespace OHOS::Ace::NG::Converter {
     private:
         std::vector<std::unique_ptr<std::byte[]>> storage_;
     };
+
+    inline ConvContext g_frameContext;
+    constexpr auto FC = &g_frameContext;
 
     // Basic types
     inline void AssignArkValue(Ark_Boolean& dst, const bool& src)
@@ -312,12 +316,12 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // Array with context
-    template<typename To, typename From>
-    void AssignArkValue(To& dst, const std::vector<From>& src, ConvContext *ctx)
+    template<typename To, typename Cont>
+    std::enable_if_t<IsArray<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
         using Val = std::remove_pointer_t<decltype(dst.array)>;
         dst = ctx->AllocateArray<To>(src.size());
-        std::transform(src.begin(), src.end(), dst.array, [ctx](const From& src) {
+        std::transform(src.begin(), src.end(), dst.array, [ctx](const typename Cont::value_type& src) {
             return ArkValue<Val>(src, ctx);
         });
     }
@@ -537,10 +541,10 @@ namespace OHOS::Ace::NG::Converter {
         using Val = std::remove_pointer_t<decltype(T().array)>;
         std::vector<Val> data_;
     public:
-        template<typename P>
-        explicit ArkArrayHolder(const std::vector<P>& data)
+        template<typename C>
+        explicit ArkArrayHolder(const C& data)
         {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
+            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const typename C::value_type& src) {
                 if constexpr (std::is_void_v<U>) {
                     return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
                 } else {
@@ -548,28 +552,7 @@ namespace OHOS::Ace::NG::Converter {
                 }
             });
         }
-        template<std::size_t N, typename P>
-        explicit ArkArrayHolder(const std::array<P, N>& data)
-        {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
-                if constexpr (std::is_void_v<U>) {
-                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-                } else {
-                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
-                }
-            });
-        }
-        template<typename P>
-        ArkArrayHolder(const P *data, std::size_t size)
-        {
-            std::transform(data, data + size, std::back_inserter(data_), [](const P& src) {
-                if constexpr (std::is_void_v<U>) {
-                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-                } else {
-                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
-                }
-            });
-        }
+
         template<typename P>
         explicit ArkArrayHolder(std::initializer_list<P> data)
         {
@@ -581,8 +564,6 @@ namespace OHOS::Ace::NG::Converter {
                 }
             });
         }
-        template<typename P>
-        explicit ArkArrayHolder(const std::list<P>& data) {}
 
         T ArkValue() &
         {
