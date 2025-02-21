@@ -5428,6 +5428,11 @@ void RosenRenderContext::DumpInfo()
                                                .append(anchor->GetY().ToString().c_str()));
         }
     }
+    if (disappearingTransitionCount_) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("transitionCnt:").append(std::to_string(disappearingTransitionCount_))
+        );
+    }
 }
 
 void RosenRenderContext::DumpAdvanceInfo()
