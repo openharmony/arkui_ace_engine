@@ -19,5 +19,5 @@
 #include "core/components_ng/base/frame_node.h"
 
 struct UICommonEventPeer {
-    OHOS::Ace::NG::FrameNode* node;
+    OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> node = nullptr;
 };
