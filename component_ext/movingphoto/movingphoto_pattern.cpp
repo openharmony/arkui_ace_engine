@@ -1166,15 +1166,11 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-        autoAndRepeatLevel_ = PlaybackMode::NONE;
-        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
         Pause();
-        StopAnimation();
     }
+    autoAndRepeatLevel_ = PlaybackMode::NONE;
+    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     ResetMediaPlayer();
-    if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
-        autoAndRepeatLevel_ = PlaybackMode::AUTO;
-    }
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
         UpdateAnalyzerOverlay();
     }
