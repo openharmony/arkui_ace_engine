@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_CONTROLLED_ANIMATOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_CONTROLLED_ANIMATOR_H
 
+#include <chrono>
 #include "ui/base/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "core/animation/animation_pub.h"
@@ -81,7 +82,7 @@ private:
     std::vector<PictureInfo> pictureInfos_;
     int32_t runningIdx_ = 0;
     bool needFireRepeatEvent_ = false;
-    bool isFirstRun_ = false;
+    bool isFirstRun_ = true;
 
     AnimatorEvent startEvent_;
     AnimatorEvent stopEvent_;
@@ -92,9 +93,15 @@ private:
     AnimatorEvent innerRepeatEvent_;
     AnimatorEvent cancelEvent_;
 
-    void PostPlayTask(int32_t idx, int32_t iteration, int32_t idxOffset = 1);
+    void PostPlayTask(int32_t idx, int32_t iteration, int32_t idxOffset = 1, int32_t elapsedTime = 0.0);
     IndexChangeListener playbackListener_;
     CancelableCallback<void()> currentPostTask_;
+    // Records the start time of the current playback task.
+    std::chrono::time_point<std::chrono::steady_clock> currentTaskStartTime_;
+    // Tracks whether the playback was in forward order when paused (true for Backward, false for Forward).
+    bool elapsedTimeReversedStatus_ = false;
+    // Stores the elapsed time of the current playback, used to calculate remaining time.
+    int32_t elapsedTime_ = 0.0f;
 };
 
 } // namespace OHOS::Ace

@@ -15,20 +15,9 @@
 #include "core/components_ng/pattern/image_animator/controlled_animator.h"
 
 #include <utility>
-#include "ui/base/referenced.h"
-#include "ui/base/utils/utils.h"
-#include "base/log/ace_trace.h"
-#include "base/thread/task_executor.h"
 #include "core/animation/animation_pub.h"
-#include "core/common/container.h"
-#include "core/components_ng/image_provider/image_utils.h"
 
 namespace OHOS::Ace {
-
-namespace {
-// Forever animation
-static constexpr int32_t ANIMATION_INFINITE { -1 };
-} // namespace
 
 void ControlledAnimator::SetControlStatus(ControlStatus controlStatus)
 {
@@ -146,48 +135,9 @@ void ControlledAnimator::AddListener(IndexChangeListener listener)
     playbackListener_ = std::move(listener);
 }
 
-// This function is guaranteed to be executed on the main thread.
 void ControlledAnimator::PostPlayTask(int32_t idx, int32_t iteration, int32_t idxOffset, int32_t elapsedTime)
 {
-    if (iteration >= iteration_ && iteration_ != ANIMATION_INFINITE) {
-        Finish();
-        return;
-    }
-    ACE_SCOPED_TRACE("ControlledAnimator postPlayTask %d-%d-%d-%d", idx, iteration, idxOffset, elapsedTime);
-    runningIdx_ = idx;
-    if (needFireRepeatEvent_) {
-        needFireRepeatEvent_ = false;
-        if (repeatEvent_) {
-            repeatEvent_();
-        }
-        if (innerRepeatEvent_) {
-            innerRepeatEvent_();
-            innerRepeatEvent_ = nullptr;
-        }
-    }
-    playbackListener_(pictureInfos_[idx].second);
-    // records the task start time, and calculates the remaining playback time for the current frame.
-    currentTaskStartTime_ = std::chrono::steady_clock::now();
-    // If elapsedTime is less than to 0, it indicates the playback order is reversed compared to the last time,
-    // so the current playback duration should be the same as the previous duration. Otherwise, the current playback
-    // duration is the total duration minus the previously elapsed time.
-    auto runningTime = elapsedTime < 0 ? static_cast<int32_t>(-elapsedTime)
-                                       : static_cast<int32_t>(pictureInfos_[idx].first * GetDuration() - elapsedTime);
-    idx += idxOffset;
-    // Sets needFireRepeatEvent_ to true when the current iteration ends,
-    // indicating that the repeat callback should be triggered in the next iteration.
-    if (idx == static_cast<int32_t>(pictureInfos_.size()) || idx == -1) {
-        ++iteration;
-        needFireRepeatEvent_ = true;
-        idx = (idx == -1) ? static_cast<int32_t>(pictureInfos_.size()) - 1 : 0;
-    }
-    currentPostTask_.Reset([weak = WeakClaim(this), idx, iteration, idxOffset] {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self);
-        self->PostPlayTask(idx, iteration, idxOffset);
-    });
-    NG::ImageUtils::PostDelayedTaskToUI(
-        currentPostTask_, runningTime, "ArkUIImageAnimatorPostPlayTask", Container::CurrentId(), PriorityType::VIP);
+    return;
 }
 
 int32_t ControlledAnimator::GetIteration() const
@@ -251,7 +201,6 @@ void ControlledAnimator::Backward()
 void ControlledAnimator::Cancel()
 {
     if (!iteration_ || controlStatus_ == ControlledAnimator::ControlStatus::IDLE || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already initial, do not need pause again.");
         return;
     }
     if (cancelEvent_) {
@@ -271,7 +220,6 @@ void ControlledAnimator::Cancel()
 void ControlledAnimator::Pause()
 {
     if (!iteration_ || controlStatus_ == ControlledAnimator::ControlStatus::PAUSED || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already paused, do not need pause again.");
         return;
     }
     if (pauseEvent_) {
@@ -310,7 +258,6 @@ void ControlledAnimator::MovePictureToRightPosition(bool checkWithFillMode)
 void ControlledAnimator::Finish()
 {
     if (!iteration_ || controlStatus_ == ControlStatus::STOPPED || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already stopped, do not need pause again.");
         return;
     }
     if (stopEvent_) {
