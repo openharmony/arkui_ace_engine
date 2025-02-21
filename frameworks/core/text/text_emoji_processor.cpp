@@ -194,6 +194,9 @@ EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
         startIndex = index;
         return EmojiRelation::IN_EMOJI;
     } else if (emojiBackwardLengthU16 == 0 && emojiForwardLengthU16 > 1) {
+        if (index > 0 && u16Content[index - 1] == u'\u200D') {
+            return EmojiRelation::IN_EMOJI;
+        }
         return EmojiRelation::BEFORE_EMOJI;
     } else if (emojiBackwardLengthU16 > 1 && emojiBackwardLengthU16 == emojiForwardLengthU16) {
         // emoji exists before index
