@@ -525,7 +525,7 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HandleAIWrite001
+ * @tc.name: HandleAIWrite002
  * @tc.desc: test HandleOnAIWrite
  * @tc.type: FUNC
  */
@@ -547,6 +547,7 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
     auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
     spanStr->EncodeTlv(buff);
     pattern_->HandleAIWriteResult(0, 5, buff);
+    pattern_->BeforeCreateLayoutWrapper();
     auto contentController = pattern_->GetTextContentController();
     auto sentenceContent = contentController->GetSelectedValue(0, spanStr->GetLength());
     ASSERT_EQ(sentenceContent, spanStr->GetString());

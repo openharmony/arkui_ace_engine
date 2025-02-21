@@ -448,9 +448,9 @@ void SearchPattern::InitTextFieldValueChangeEvent()
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->GetOnChange()) {
-        auto searchChangeFunc = [weak = AceType::WeakClaim(this)](const std::string& value, PreviewText& previewText) {
+        auto searchChangeFunc = [weak = AceType::WeakClaim(this)](const ChangeValueInfo& info) {
             auto searchPattern = weak.Upgrade();
-            searchPattern->UpdateChangeEvent(value);
+            searchPattern->UpdateChangeEvent(info.value);
         };
         eventHub->SetOnChange(std::move(searchChangeFunc));
     }
@@ -761,17 +761,13 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(!textFieldPattern->IsDragging());
     CHECK_NULL_VOID(!textFieldPattern->IsHandleDragging());
     focusChoice_ = FocusChoice::SEARCH;
-    textFieldPattern->InitEditingValueText("");
+    textFieldPattern->ClearTextContent();
     textFieldPattern->SetTextChangedAtCreation(true);
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateValue("");
-    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-    PreviewText previewText {};
-    eventHub->FireOnChange("", previewText);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();

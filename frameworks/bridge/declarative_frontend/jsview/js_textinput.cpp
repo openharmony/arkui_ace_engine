@@ -84,6 +84,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSecurityStateChange", &JSTextField::SetOnSecurityStateChange);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
+    JSClass<JSTextInput>::StaticMethod("onWillChange", &JSTextField::SetOnWillChange);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextInput>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
     JSClass<JSTextInput>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);
