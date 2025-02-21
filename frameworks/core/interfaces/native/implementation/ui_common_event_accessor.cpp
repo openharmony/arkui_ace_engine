@@ -135,7 +135,7 @@ void SetOnHoverImpl(UICommonEventPeer* peer,
     if (arkOnHover) {
         auto onHover = [arkCallback = CallbackHelper(arkOnHover.value())](bool isHover, HoverInfo& info) {
             auto hoverEvent = Converter::ArkHoverEventSync(info);
-            Ark_Boolean arkIsHover = Converter::ArkValue<bool>(isHover);
+            auto arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
             arkCallback.Invoke(arkIsHover, hoverEvent.ArkValue());
         };
         ViewAbstract::SetOnHover(peer->node, std::move(onHover));
@@ -169,16 +169,15 @@ void SetOnVisibleAreaApproximateChangeImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(options);
     CHECK_NULL_VOID(peer->node);
     auto arkOnVisibleChange = Converter::OptConvert<VisibleAreaChangeCallback>(*event);
-    if (arkOnVisibleChange) {
-        auto onVisibleChange = [arkCallback = CallbackHelper(arkOnVisibleChange.value())]
-        (bool isExpanding, double currentRatio) {
-            auto arkIsExpanding = Converter::ArkValue<Ark_Boolean>(isExpanding);
-            auto arkCurrentRatio = Converter::ArkValue<Ark_Number>(currentRatio);
-            arkCallback.Invoke(arkIsExpanding, arkCurrentRatio);
-        };
-        std::vector<double> ratioList = Converter::Convert<std::vector<double>>(options->ratios);
-        ViewAbstract::SetOnVisibleChange(peer->node, std::move(onVisibleChange), ratioList);
-    }
+    CHECK_NULL_VOID(arkOnVisibleChange);
+    auto onVisibleChange = [arkCallback = CallbackHelper(arkOnVisibleChange.value())]
+    (bool isExpanding, double currentRatio) {
+        auto arkIsExpanding = Converter::ArkValue<Ark_Boolean>(isExpanding);
+        auto arkCurrentRatio = Converter::ArkValue<Ark_Number>(currentRatio);
+        arkCallback.Invoke(arkIsExpanding, arkCurrentRatio);
+    };
+    std::vector<double> ratioList = Converter::Convert<std::vector<double>>(options->ratios);
+    ViewAbstract::SetOnVisibleChange(peer->node, std::move(onVisibleChange), ratioList);
 }
 } // UICommonEventAccessor
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor()
