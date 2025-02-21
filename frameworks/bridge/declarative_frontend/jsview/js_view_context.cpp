@@ -1013,6 +1013,10 @@ int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
             auto targetComponentIdNode =
                 ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(componentId);
             CHECK_NULL_RETURN(targetComponentIdNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
+            if (targetComponentIdNode->GetInspectorId().value_or("") == targetIdString) {
+                targetId = targetComponentIdNode->GetId();
+                return ERROR_CODE_NO_ERROR;
+            }
             auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
             CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
             targetId = targetNode->GetId();
@@ -1218,9 +1222,10 @@ void JSViewContext::JSOpenMenu(const JSCallbackInfo& info)
     }
     JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
     auto ret = JSViewAbstract::OpenMenu(menuParam, menuContentNode, targetId);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1260,9 +1265,10 @@ void JSViewContext::JSUpdateMenu(const JSCallbackInfo& info)
         return;
     }
     auto ret = JSViewAbstract::UpdateMenu(menuParam, menuContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1279,9 +1285,10 @@ void JSViewContext::JSCloseMenu(const JSCallbackInfo& info)
         return;
     }
     auto ret = JSViewAbstract::CloseMenu(menuContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
