@@ -3703,9 +3703,7 @@ void AceContainer::NotifyDensityUpdate(double density)
     if (frontend) {
         frontend->FlushReload();
     }
-    if (fullUpdate) {
-        UpdateResourceDensity(density);
-    }
+    UpdateResourceDensity(density, fullUpdate);
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);
 }
@@ -3780,14 +3778,14 @@ void AceContainer::UpdateResourceOrientation(int32_t orientation)
     SetResourceConfiguration(resConfig);
 }
 
-void AceContainer::UpdateResourceDensity(double density)
+void AceContainer::UpdateResourceDensity(double density, bool isUpdateResConfig)
 {
     auto resConfig = GetResourceConfiguration();
     resConfig.SetDensity(density);
-    if (SystemProperties::GetResourceDecoupling()) {
+    SetResourceConfiguration(resConfig);
+    if (SystemProperties::GetResourceDecoupling() && isUpdateResConfig) {
         ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
     }
-    SetResourceConfiguration(resConfig);
 }
 
 void AceContainer::RegisterUIExtDataConsumer()
