@@ -3044,6 +3044,12 @@ let MenuAlignType;
   MenuAlignType[MenuAlignType.END = 2] = 'END';
 })(MenuAlignType || (MenuAlignType = {}));
 
+let AvoidanceMode;
+(function (AvoidanceMode) {
+  AvoidanceMode[AvoidanceMode.COVER_TARGET = 0] = 'COVER_TARGET';
+  AvoidanceMode[AvoidanceMode.AVOID_AROUND_TARGET = 1] = 'AVOID_AROUND_TARGET';
+})(AvoidanceMode || (AvoidanceMode = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';

@@ -19815,6 +19815,10 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
+  avoidance(mode) {
+    modifierWithKey(this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
+    return this;
+  }
   menuBackgroundColor(value) {
     modifierWithKey(
       this._modifiersWithKeys, MenuBackgroundColorModifier.identity, MenuBackgroundColorModifier, value);
@@ -20019,6 +20023,22 @@ class MenuAlignModifier extends ModifierWithKey {
   }
 }
 MenuAlignModifier.identity = Symbol('selectMenuAlign');
+class AvoidanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetAvoidance(node);
+    } else {
+      getUINativeModule().select.setAvoidance(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+AvoidanceModifier.identity = Symbol('selectAvoidance');
 class SelectDividerModifier extends ModifierWithKey {
   constructor(value) {
       super(value);

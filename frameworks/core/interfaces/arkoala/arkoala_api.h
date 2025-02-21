@@ -5151,6 +5151,8 @@ struct ArkUISelectModifier {
     void (*resetSelectDirection)(ArkUINodeHandle node);
     void (*setSelectDividerStyle)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo);
     void (*resetSelectDividerStyle)(ArkUINodeHandle node);
+    void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
+    void (*resetAvoidance)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/
