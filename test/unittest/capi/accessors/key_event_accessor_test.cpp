@@ -112,6 +112,8 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateInvalidTest, TestSize.Level1)
  */
 HWTEST_F(KeyEventAccessorTest, getTypeValidTest, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->getType, nullptr);
+
     for (auto& [value, expected]: getTypeTestPlan) {
         KeyEvent event;
         event.action = value;
@@ -274,6 +276,8 @@ HWTEST_F(KeyEventAccessorTest, setKeyTextInvalidTest, TestSize.Level1)
  */
 HWTEST_F(KeyEventAccessorTest, getKeySourceValidTest, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->getKeySource, nullptr);
+
     for (auto& [value, expected]: getKeySourceTestPlan) {
         KeyEvent event;
         event.sourceType = value;
