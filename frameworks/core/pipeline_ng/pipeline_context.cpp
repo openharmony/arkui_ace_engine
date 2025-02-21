@@ -5004,7 +5004,7 @@ void PipelineContext::OpenFrontendAnimation(
         FlushUITasks();
     }
     auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback);
-    if (IsFormRender()) {
+    if (IsFormRenderExceptDynamicComponent()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
             SetFormAnimationStartTime(GetMicroTickCount());

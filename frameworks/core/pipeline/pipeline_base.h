@@ -784,6 +784,11 @@ public:
         return isFormRender_;
     }
 
+    bool IsFormRenderExceptDynamicComponent() const
+    {
+        return isFormRender_ && !isDynamicRender_;
+    }
+
     void SetIsDynamicRender(bool isDynamicRender)
     {
         isDynamicRender_ = isDynamicRender;
