@@ -138,8 +138,8 @@ bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::s
             } },
         { SVG_PRIMITIVE_UNITS,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.primitiveUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
-                    SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+                attr.primitiveUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
+                    SvgLengthScaleUnit::USER_SPACE_ON_USE;
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgFilterAttribute& attr) {
