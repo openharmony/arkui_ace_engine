@@ -60,6 +60,14 @@ const char* TransitionTypeToString(NavigationSystemTransitionType type)
             return "NavigationSystemTransitionType.TITLE";
         case NavigationSystemTransitionType::CONTENT:
             return "NavigationSystemTransitionType.CONTENT";
+        case NavigationSystemTransitionType::FADE:
+            return "NavigationSystemTransitionType.FADE";
+        case NavigationSystemTransitionType::EXPLODE:
+            return "NavigationSystemTransitionType.EXPLODE";
+        case NavigationSystemTransitionType::SLIDE_RIGHT:
+            return "NavigationSystemTransitionType.SLIDE_RIGHT";
+        case NavigationSystemTransitionType::SLIDE_BOTTOM:
+            return "NavigationSystemTransitionType.SLIDE_BOTTOM";
         default:
             return "NavigationSystemTransitionType.DEFAULT";
     }
