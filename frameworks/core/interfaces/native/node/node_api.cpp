@@ -2329,7 +2329,8 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
     SpanString* spanString = new SpanString(u"");
-    spanString->DecodeTlvExt(vec, spanString);
+    std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
+    spanString->DecodeTlvExt(vec, spanString, std::move(unmarshallCallback));
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
