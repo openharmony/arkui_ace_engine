@@ -7149,7 +7149,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
         auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(
             JSRef<JSObject>(jsDrawModifier), JSRef<JSFunc>::Cast(drawMethod));
 
-        return GetDrawCallback(jsDrawFunc, execCtx);
+        return GetDrawCallback(jsDrawFunc, execCtx, jsDrawModifier);
     };
 
     drawModifier->drawBehindFunc = getDrawModifierFunc("drawBehind");
@@ -8981,12 +8981,14 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
 }
 
 std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(
-    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier)
 {
-    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx](
+    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx, modifier](
                                                                          NG::DrawingContext& context) -> void {
         JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
+        if (modifier->IsEmpty()) {
+            return;
+        }
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         objectTemplate->SetInternalFieldCount(1);
         JSRef<JSObject> contextObj = objectTemplate->NewInstance();
