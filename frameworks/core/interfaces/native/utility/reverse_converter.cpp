@@ -52,6 +52,11 @@ Ark_String ConvContext::Store(const std::string_view& src)
     return result;
 }
 
+void ConvContext::Clear()
+{
+    storage_.clear();
+}
+
 void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
 {
     const auto& localOffset = src.GetTarget().area.GetOffset();
