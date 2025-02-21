@@ -582,7 +582,11 @@ bool ImageAnimatorPattern::IsFormRender()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->IsFormRender();
+
+    auto container = Container::Current();
+    bool isDynamicComponent = container && container->IsDynamicRender() &&
+                              container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    return pipeline->IsFormRender() && !isDynamicComponent;
 }
 
 void ImageAnimatorPattern::UpdateFormDurationByRemainder()
