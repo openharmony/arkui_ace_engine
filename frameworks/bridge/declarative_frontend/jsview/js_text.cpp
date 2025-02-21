@@ -929,7 +929,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     // TextResponseType
-    int32_t resquiredParameterCount = 3;
+    uint32_t resquiredParameterCount = 3;
     JSRef<JSVal> argsResponse = info[resquiredParameterCount - 1];
     NG::TextResponseType responseType = NG::TextResponseType::LONG_PRESS;
     if (argsResponse->IsNumber()) {
