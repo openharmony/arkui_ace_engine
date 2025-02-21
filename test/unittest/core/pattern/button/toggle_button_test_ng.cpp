@@ -170,6 +170,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest002, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. pattern OnModifyDone and OnClick.
@@ -210,6 +211,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest003, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. pattern OnModifyDone and OnClick.
@@ -279,6 +281,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest005, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. pattern OnModifyDone.
@@ -311,6 +314,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest006, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. pattern InitClickEvent.
@@ -340,6 +344,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest007, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. Creat child node but not set font size.
@@ -553,6 +558,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest013, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. test toggleButtonPattern SetFocusButtonStyle function.
@@ -605,6 +611,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest014, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. Creat child node but not set font size.
@@ -656,6 +663,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest015, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. Creat child node but not set font size.
@@ -706,6 +714,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest016, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. Creat child node but not set font size.
@@ -777,6 +786,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest017, TestSize.Level1)
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
      * @tc.steps: step3. Creat child node but not set font size.
