@@ -4561,6 +4561,9 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
         swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
         swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
         swiperParameters_->maxDisplayCountVal = 0;
+        swiperParameters_->dimSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+        swiperParameters_->ignoreSizeValue = false;
+        swiperParameters_->setIgnoreSizeValue = false;
     }
     return swiperParameters_;
 }
@@ -4580,6 +4583,8 @@ std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParamete
         swiperDigitalParameters_->fontWeight = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
         swiperDigitalParameters_->selectedFontWeight =
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
+        swiperDigitalParameters_->ignoreSizeValue = false;
+        swiperDigitalParameters_->setIgnoreSizeValue = false;
     }
     return swiperDigitalParameters_;
 }
@@ -4751,7 +4756,8 @@ void SwiperPattern::UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode)
     paintProperty->UpdateSelectedColor(
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(isCustomSize_);
-
+    paintProperty->UpdateSpace(swiperParameters->dimSpace.value_or(swiperIndicatorTheme->GetIndicatorDotItemSpace()));
+    paintProperty->UpdateIgnoreSize(swiperParameters->ignoreSizeValue.value_or(false));
     MarkDirtyNodeSelf();
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

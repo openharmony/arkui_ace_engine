@@ -1940,8 +1940,16 @@ class Indicator {
     this.rightValue = value;
     return this;
   }
-  bottom(value) {
-    this.bottomValue = value;
+  bottom(...args) {
+    if (args.length === 1) {
+      this.bottomValue = args[0];
+      this.setIgnoreSizeValue = false;
+    }
+    if (args.length == 2) {
+      this.bottomValue = args[0];
+      this.ignoreSizeValue = args[1];
+      this.setIgnoreSizeValue = true;
+    }
     return this;
   }
   start(value) {
@@ -1995,6 +2003,10 @@ class DotIndicator extends Indicator {
   }
   maxDisplayCount(value) {
     this.maxDisplayCountValue = value;
+    return this;
+  }
+  space(value) {
+    this.spaceValue = value;
     return this;
   }
 }

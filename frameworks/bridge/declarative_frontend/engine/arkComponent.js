@@ -17677,6 +17677,8 @@ class ArkDotIndicator extends DotIndicator {
     this.colorValue = undefined;
     this.selectedColorValue = undefined;
     this.maxDisplayCountValue = undefined;
+    this.spaceValue = undefined;
+    this.ignoreSizeValue = undefined;
   }
   isEqual(another) {
     return (this.type === another.type &&
@@ -17691,7 +17693,9 @@ class ArkDotIndicator extends DotIndicator {
       this.maskValue === another.maskValue &&
       this.colorValue === another.colorValue &&
       this.selectedColorValue === another.selectedColorValue &&
-      this.maxDisplayCountValue === another.maxDisplayCountValue);
+      this.maxDisplayCountValue === another.maxDisplayCountValue &&
+      this.spaceValue === another.spaceValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue);
   }
 }
 class ArkDigitIndicator extends DigitIndicator {
@@ -17706,6 +17710,7 @@ class ArkDigitIndicator extends DigitIndicator {
     this.selectedFontColorValue = undefined;
     this.digitFontValue = undefined;
     this.selectedDigitFontValue = undefined;
+    this.ignoreSizeValue = undefined;
   }
   isEqual(another) {
     return (this.type === another.type &&
@@ -17714,7 +17719,8 @@ class ArkDigitIndicator extends DigitIndicator {
       this.rightValue === another.rightValue &&
       this.bottomValue === another.bottomValue &&
       this.digitFontValue === another.digitFontValue &&
-      this.selectedDigitFontValue === another.selectedDigitFontValue);
+      this.selectedDigitFontValue === another.selectedDigitFontValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue);
   }
 }
 class ArkDigitFont {
@@ -30259,6 +30265,9 @@ class SwiperIndicatorModifier extends ModifierWithKey {
       let selectedDigitFontSize;
       let selectedDigitFontWeight;
       let maxDisplayCount;
+      let space;
+      let ignoreSize;
+      let setIgnoreSize;
       if (typeof this.value === 'boolean') {
         getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
       }
@@ -30275,8 +30284,12 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         color = this.value.colorValue;
         selectedColor = this.value.selectedColorValue;
         maxDisplayCount = this.value.maxDisplayCountValue;
+        space = this.value.spaceValue;
+        ignoreSize = this.value.ignoreSizeValue;
+        setIgnoreSize = this.value.setIgnoreSizeValue;
         getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
-          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount);
+          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount, space, ignoreSize,
+          setIgnoreSize);
       }
       else if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
         left = this.value.leftValue;
@@ -30285,6 +30298,8 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         bottom = this.value.bottomValue;
         fontColor = this.value.fontColorValue;
         selectedFontColor = this.value.selectedFontColorValue;
+        ignoreSize = this.value.ignoreSizeValue;
+        setIgnoreSize = this.value.setIgnoreSizeValue;
         let arkDigitFont = new ArkDigitFont();
         if (typeof this.value.digitFontValue === 'object') {
           digitFontSize = this.value.digitFontValue.size;
@@ -30295,7 +30310,7 @@ class SwiperIndicatorModifier extends ModifierWithKey {
           selectedDigitFontWeight = arkDigitFont.parseFontWeight(this.value.selectedDigitFontValue.weight);
         }
         getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDigitIndicator', fontColor, selectedFontColor, digitFontSize,
-          digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom);
+          digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom, ignoreSize, setIgnoreSize);
       }
       else {
         getUINativeModule().swiper.setSwiperIndicator(node, 'IndicatorComponentController', this.value );
@@ -30317,7 +30332,11 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         !isBaseOrResourceEqual(this.stageValue.maskValue, this.value.maskValue) ||
         !isBaseOrResourceEqual(this.stageValue.colorValue, this.value.colorValue) ||
         !isBaseOrResourceEqual(this.stageValue.selectedColorValue, this.value.selectedColorValue) ||
-        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue));
+        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue) ||
+        !isBaseOrResourceEqual(this.stageValue.spaceValue, this.value.spaceValue) ||
+        !isBaseOrResourceEqual(this.stageValue.ignoreSizeValue, this.value.ignoreSizeValue) ||
+        !isBaseOrResourceEqual(this.stageValue.setIgnoreSizeValue, this.value.setIgnoreSizeValue)
+      );
     }
     else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
       return (!isBaseOrResourceEqual(this.stageValue.fontColorValue, this.value.fontColorValue) ||
@@ -30325,6 +30344,8 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         !isBaseOrResourceEqual(this.stageValue.digitFontValue.size, this.value.digitFontValue.size) ||
         !isBaseOrResourceEqual(this.stageValue.digitFontValue.weight, this.value.digitFontValue.weight) ||
         !isBaseOrResourceEqual(this.stageValue.selectedDigitFontValue.size, this.value.selectedDigitFontValue.size) ||
+        !isBaseOrResourceEqual(this.stageValue.ignoreSizeValue, this.value.ignoreSizeValue) ||
+        !isBaseOrResourceEqual(this.stageValue.setIgnoreSizeValue, this.value.setIgnoreSizeValue) ||
         !isBaseOrResourceEqual(this.stageValue.selectedDigitFontValue.weight, this.value.selectedDigitFontValue.weight));
     }
     else {
@@ -30802,6 +30823,7 @@ class IndicatorComponentStyleModifier extends ModifierWithKey {
       let selectedDigitFontSize;
       let selectedDigitFontWeight;
       let maxDisplayCount;
+      let space;
       if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
         left = this.value.leftValue;
         top = this.value.topValue;
@@ -30833,8 +30855,9 @@ class IndicatorComponentStyleModifier extends ModifierWithKey {
         color = this.value.colorValue;
         selectedColor = this.value.selectedColorValue;
         maxDisplayCount = this.value.maxDisplayCountValue;
+        space = this.value.spaceValue;
         getUINativeModule().indicatorComponent.setStyle(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
-          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount);
+          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount, space);
       }
     }
   }
@@ -30850,7 +30873,9 @@ class IndicatorComponentStyleModifier extends ModifierWithKey {
         !isBaseOrResourceEqual(this.stageValue.maskValue, this.value.maskValue) ||
         !isBaseOrResourceEqual(this.stageValue.colorValue, this.value.colorValue) ||
         !isBaseOrResourceEqual(this.stageValue.selectedColorValue, this.value.selectedColorValue) ||
-        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue));
+        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue) ||
+        !isBaseOrResourceEqual(this.stageValue.spaceValue, this.value.spaceValue)
+      );
     }
     else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
       return (!isBaseOrResourceEqual(this.stageValue.fontColorValue, this.value.fontColorValue) ||

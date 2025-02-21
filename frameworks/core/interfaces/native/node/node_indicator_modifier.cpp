@@ -47,6 +47,7 @@ constexpr int32_t DOT_INDICATOR_RIGHT = 10;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 11;
 constexpr int32_t DOT_INDICATOR_INFO_SIZE = 11;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 12;
+constexpr int32_t DOT_INDICATOR_SPACE = 13;
 namespace {
 
 std::optional<Dimension> ParseIndicatorDimension(const std::string& value)
@@ -183,6 +184,7 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     auto maskValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MASK);
     auto colorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_COLOR);
     auto selectedColorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SELECTED_COLOR);
+    auto spaceValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SPACE);
     CHECK_NULL_RETURN(frameNode, SwiperParameters());
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
@@ -211,6 +213,10 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     if (!maxDisplayCount.empty()) {
         indicatorParameters.maxDisplayCountVal = StringUtils::StringToInt(maxDisplayCount);
     }
+    auto space = StringUtils::StringToCalcDimension(spaceValue, false, DimensionUnit::VP);
+    bool parseSpaceOk = !spaceValue.empty() && space.Unit() != DimensionUnit::PERCENT;
+    auto defaultSpaceSize = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+    indicatorParameters.dimSpace = (parseSpaceOk && !(space < 0.0_vp)) ? space : defaultSpaceSize;
     return indicatorParameters;
 }
 

@@ -8312,6 +8312,8 @@ int32_t SetSwiperDigitIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem
             indicatorProp.fontWeight = ArkUIOptionalUint { indicator->fontWeight.isSet, indicator->fontWeight.value };
             indicatorProp.selectedFontWeight =
                 ArkUIOptionalUint { indicator->selectedFontWeight.isSet, indicator->selectedFontWeight.value };
+            indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet,
+                indicator->ignoreSizeValue.value };
         } else {
             return ERROR_CODE_PARAM_INVALID;
         }
@@ -8345,6 +8347,8 @@ int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     indicatorProp.dimTop = ArkUIOptionalFloat { indicator->dimTop.isSet, indicator->dimTop.value };
     indicatorProp.dimRight = ArkUIOptionalFloat { indicator->dimRight.isSet, indicator->dimRight.value };
     indicatorProp.dimBottom = ArkUIOptionalFloat { indicator->dimBottom.isSet, indicator->dimBottom.value };
+    indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet,
+        indicator->ignoreSizeValue.value };
     if (indicator->type == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         indicatorProp.type = ArkUISwiperIndicatorType::DOT;
         indicatorProp.itemWidth = ArkUIOptionalFloat { indicator->itemWidth.isSet, indicator->itemWidth.value };
@@ -8359,6 +8363,8 @@ int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             ArkUIOptionalUint { indicator->selectedColorValue.isSet, indicator->selectedColorValue.value };
         indicatorProp.maxDisplayCount =
         ArkUIOptionalInt { indicator->maxDisplayCount.isSet, indicator->maxDisplayCount.value };
+        indicatorProp.dimSpace =
+            ArkUIOptionalFloat { indicator->dimSpace.isSet, indicator->dimSpace.value };
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }

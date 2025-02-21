@@ -1508,6 +1508,8 @@ struct ArkUISwiperIndicator {
     ArkUIOptionalUint colorValue;
     ArkUIOptionalUint selectedColorValue;
     ArkUIOptionalInt maxDisplayCount;
+    ArkUIOptionalFloat dimSpace;
+    ArkUIOptionalInt ignoreSizeValue;
 };
 
 struct ArkUISwiperDigitIndicator {
@@ -1523,6 +1525,7 @@ struct ArkUISwiperDigitIndicator {
     ArkUIOptionalFloat selectedFontSize;
     ArkUIOptionalUint fontWeight;
     ArkUIOptionalUint selectedFontWeight;
+    ArkUIOptionalInt ignoreSizeValue;
 };
 
 struct ArkUISwiperArrowStyle {

@@ -2028,10 +2028,11 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, Tes
     paintMethod->mouseClickIndex_ = 10;
     LinearVector<float> itemHalfSizes = { 5.0f, 5.0f, 10.0f, 10.0f };
     Dimension paddingSide = Dimension(5.0f);
+    Dimension indicatorDotItemSpace = Dimension(8.0f);
     /**
      * @tc.expected: PaintHoverIndicator longPointCenterX_ first eq 177.0f
      */
-    paintMethod->PaintHoverIndicator(itemHalfSizes, paddingSide);
+    paintMethod->PaintHoverIndicator(itemHalfSizes, paddingSide, indicatorDotItemSpace);
     EXPECT_NEAR(paintMethod->longPointCenterX_.first, 177.0f, 0.001f);
 }
 } // namespace OHOS::Ace::NG
