@@ -6922,6 +6922,8 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
 
     if (accessibilityId > 0) {
         focusedAccessibilityId_ = accessibilityId;
+    } else if (focusedAccessibilityId_ == -1) {
+        return;
     }
     RectT<int32_t> rect;
     if (focusedAccessibilityId_ <= 0) {
