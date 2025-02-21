@@ -91,6 +91,7 @@ namespace OHOS::Ace::NG::Converter {
     public:
         Ark_String Store(const std::string_view& src);
         void *Allocate(std::size_t size);
+        void Clear();
         template<typename T>
         T AllocateArray(std::size_t size)
         {
@@ -102,6 +103,9 @@ namespace OHOS::Ace::NG::Converter {
     private:
         std::vector<std::unique_ptr<std::byte[]>> storage_;
     };
+
+    inline ConvContext g_frameContext;
+    constexpr auto FC = &g_frameContext;
 
     // Basic types
     inline void AssignArkValue(Ark_Boolean& dst, const bool& src)
@@ -146,10 +150,10 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
+    void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
     void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);
-    void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
     void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src);
@@ -170,9 +174,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
-    void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx);
     void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
+    void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
     void AssignArkValue(Ark_Length& dst, const Dimension& src);
     void AssignArkValue(Ark_Length& dst, const double& src);
@@ -224,11 +228,11 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
-    void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
     void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
+    void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_SheetType& dst, const SheetType& src);
     void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
@@ -311,12 +315,12 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // Array with context
-    template<typename To, typename From>
-    void AssignArkValue(To& dst, const std::vector<From>& src, ConvContext *ctx)
+    template<typename To, typename Cont>
+    std::enable_if_t<IsArray<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
         using Val = std::remove_pointer_t<decltype(dst.array)>;
         dst = ctx->AllocateArray<To>(src.size());
-        std::transform(src.begin(), src.end(), dst.array, [ctx](const From& src) {
+        std::transform(src.begin(), src.end(), dst.array, [ctx](const typename Cont::value_type& src) {
             return ArkValue<Val>(src, ctx);
         });
     }
@@ -536,10 +540,10 @@ namespace OHOS::Ace::NG::Converter {
         using Val = std::remove_pointer_t<decltype(T().array)>;
         std::vector<Val> data_;
     public:
-        template<typename P>
-        explicit ArkArrayHolder(const std::vector<P>& data)
+        template<typename C>
+        explicit ArkArrayHolder(const C& data)
         {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
+            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const typename C::value_type& src) {
                 if constexpr (std::is_void_v<U>) {
                     return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
                 } else {
@@ -547,28 +551,7 @@ namespace OHOS::Ace::NG::Converter {
                 }
             });
         }
-        template<std::size_t N, typename P>
-        explicit ArkArrayHolder(const std::array<P, N>& data)
-        {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
-                if constexpr (std::is_void_v<U>) {
-                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-                } else {
-                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
-                }
-            });
-        }
-        template<typename P>
-        ArkArrayHolder(const P *data, std::size_t size)
-        {
-            std::transform(data, data + size, std::back_inserter(data_), [](const P& src) {
-                if constexpr (std::is_void_v<U>) {
-                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-                } else {
-                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
-                }
-            });
-        }
+
         template<typename P>
         explicit ArkArrayHolder(std::initializer_list<P> data)
         {
@@ -580,8 +563,6 @@ namespace OHOS::Ace::NG::Converter {
                 }
             });
         }
-        template<typename P>
-        explicit ArkArrayHolder(const std::list<P>& data) {}
 
         T ArkValue() &
         {

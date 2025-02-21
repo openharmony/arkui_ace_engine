@@ -107,15 +107,6 @@ HWTEST_F(ReverseConvertorTest, ArrayTypes, TestSize.Level1)
     EXPECT_EQ(stringArrayResult.array[1].chars, "5678"sv);
     EXPECT_EQ(stringArrayResult.array[1].length, 4);
 
-    std::string_view svArray[] = {"ghi", "9012"};
-    Converter::ArkArrayHolder<Array_String> arrayHolder(svArray, 2);
-    stringArrayResult = arrayHolder.ArkValue();
-    EXPECT_EQ(stringArrayResult.length, 2);
-    EXPECT_EQ(stringArrayResult.array[0].chars, "ghi"sv);
-    EXPECT_EQ(stringArrayResult.array[0].length, 3);
-    EXPECT_EQ(stringArrayResult.array[1].chars, "9012"sv);
-    EXPECT_EQ(stringArrayResult.array[1].length, 4);
-
     auto asArray = std::array{Converter::ArkValue<Ark_String>("jkl"), Converter::ArkValue<Ark_String>("3456")};
     Converter::ArkArrayHolder<Array_String> arrayHolder1(asArray);
     stringArrayResult = arrayHolder1.ArkValue();
@@ -243,11 +234,13 @@ HWTEST_F(ReverseConvertorTest, WithContext, TestSize.Level1)
     EXPECT_EQ(stringResult.length, 4);
 
     std::vector<std::string> vec{"abc", "1234"};
-    auto stringArrayResult = Converter::ArkValue<Array_String>(vec, &ctx);
+    auto stringArrayResult = Converter::ArkValue<Array_String>(vec, Converter::FC);
     EXPECT_EQ(stringArrayResult.length, 2);
     EXPECT_EQ(stringArrayResult.array[0].chars, "abc"sv);
     EXPECT_EQ(stringArrayResult.array[0].length, 3);
     EXPECT_EQ(stringArrayResult.array[1].chars, "1234"sv);
     EXPECT_EQ(stringArrayResult.array[1].length, 4);
+
+    Converter::FC->Clear();
 }
 } // namespace OHOS::Ace::NG
