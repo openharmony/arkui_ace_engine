@@ -83,6 +83,7 @@ public:
     virtual void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) {}
     virtual void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) {}
+    virtual void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

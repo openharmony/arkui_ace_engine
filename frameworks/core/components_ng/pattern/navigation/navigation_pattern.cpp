@@ -725,6 +725,8 @@ void NavigationPattern::UpdateNavPathList()
     CHECK_NULL_VOID(navigationStack_);
     auto pathNames = navigationStack_->GetAllPathName();
     auto indexes = navigationStack_->GetAllPathIndex();
+    topFromSingletonMoved_ = navigationStack_->IsTopFromSingletonMoved();
+    navigationStack_->ResetSingletonMoved();
     navigationStack_->InitNavPathIndex(pathNames);
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
     NavPathList navPathList;
@@ -839,7 +841,9 @@ void NavigationPattern::RefreshNavDestination()
     isBackPage_ = newTopNavPath.has_value() ?
         navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
 #endif
-    std::string navDestinationName = "";
+    if (topFromSingletonMoved_) {
+        FireOnNewParam(newTopNavPath.has_value() ? newTopNavPath->second : nullptr);
+    }
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preLastStandardIndex);
 
     // close keyboard
@@ -864,9 +868,7 @@ void NavigationPattern::RefreshNavDestination()
         firstNavDesNode->MarkModifyDone();
     }
 
-    if (newTopNavPath.has_value()) {
-        navDestinationName = newTopNavPath->first;
-    }
+    std::string navDestinationName = newTopNavPath.has_value() ? newTopNavPath->first : "";
     pipeline->AddPredictTask([weak = WeakClaim(this), weakNode = WeakPtr<FrameNode>(hostNode),
         navDestinationName](int64_t deadline, bool canUseLongPredictTask) {
             auto navigationPattern = weak.Upgrade();
@@ -3496,5 +3498,19 @@ void NavigationPattern::FireNavigationLifecycle(const RefPtr<UINode>& uiNode, Na
                 NavigationGroupNode::GetNavDestinationNode(navigationStack->Get())), lifecycle, reason);
         }
     }
+}
+
+void NavigationPattern::FireOnNewParam(const RefPtr<UINode>& uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto navDestination = DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
+    CHECK_NULL_VOID(navDestination);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto navPathInfo = navDestinationPattern->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnNewParam(navPathInfo->GetParamObj());
 }
 } // namespace OHOS::Ace::NG

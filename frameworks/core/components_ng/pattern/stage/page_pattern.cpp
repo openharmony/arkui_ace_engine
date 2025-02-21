@@ -929,7 +929,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
         TAG_LOGI(AceLogTag::ACE_ROUTER, "inPage transition type is invalid");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish inPage transition.", GetPageUrl().c_str());
     isPageInTransition_ = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewShow();
