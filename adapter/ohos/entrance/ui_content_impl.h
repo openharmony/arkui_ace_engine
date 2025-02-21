@@ -399,6 +399,7 @@ public:
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+    void EnableContainerModalCustomGesture(bool enable) override;
 
 private:
     UIContentErrorCode InitializeInner(

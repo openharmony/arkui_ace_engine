@@ -183,7 +183,9 @@ Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 
 bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 {
-    if (!SystemProperties::GetNeedAvoidWindow()) {
+    // compatibleModeInPc needAvoidWindow
+    bool compatibleModeInPc = rsWindow->GetCompatibleModeInPc();
+    if (!SystemProperties::GetNeedAvoidWindow() && !compatibleModeInPc) {
         return false;
     }
 
@@ -4734,5 +4736,21 @@ bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uin
                 data, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
         }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprty");
     return true;
+}
+
+void UIContentImpl::EnableContainerModalCustomGesture(bool enable)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, enable]() {
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            NG::ContainerModalPattern::EnableContainerModalCustomGesture(pipelineContext, enable);
+        },
+        TaskExecutor::TaskType::UI, "EnableContainerModalCustomGesture");
 }
 } // namespace OHOS::Ace

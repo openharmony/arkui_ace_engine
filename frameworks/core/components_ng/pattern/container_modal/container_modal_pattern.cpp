@@ -861,12 +861,16 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
     auto column = GetColumnNode();
     CHECK_NULL_VOID(column);
     auto eventHub = column->GetOrCreateGestureEventHub();
-    auto func = [](const std::vector<TouchTestInfo>& touchInfo) -> TouchResult {
+    bool defaultResEnable = enableContainerModalCustomGesture_;
+    auto func = [defaultResEnable](const std::vector<TouchTestInfo>& touchInfo) -> TouchResult {
         TouchResult touchRes;
         TouchResult defaultRes;
         touchRes.strategy = TouchTestStrategy::FORWARD_COMPETITION;
         defaultRes.strategy = TouchTestStrategy::DEFAULT;
         defaultRes.id = "";
+        if (defaultResEnable) {
+            return defaultRes;
+        }
         for (auto info : touchInfo) {
             if (info.id.compare(CONTAINER_MODAL_STACK_ID) == 0) {
                 touchRes.id = info.id;
@@ -999,5 +1003,21 @@ void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimens
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
     row->MarkModifyDone();
     row->MarkDirtyNode();
+}
+
+void ContainerModalPattern::EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable)
+{
+    CHECK_NULL_VOID(pipeline);
+    if (!pipeline || pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetEnableContainerModalCustomGesture(enable);
+    containerPattern->InitColumnTouchTestFunc();
 }
 } // namespace OHOS::Ace::NG
