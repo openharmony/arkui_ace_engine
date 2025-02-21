@@ -2135,7 +2135,7 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
             posMap_->GetPos(itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
     } else {
         if (isJump || needReEstimateOffset_) {
-            auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
+            auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis(), itemStartIndex_);
             calculate.GetEstimateHeightAndOffset(GetHost());
             currentOffset_ = calculate.GetEstimateOffset();
             relativeOffset = 0;
@@ -2275,7 +2275,7 @@ void ListPattern::UpdateScrollBarOffset()
         currentOffset = currentOffset_;
         estimatedHeight = listTotalHeight_;
     } else {
-        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
+        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis(), itemStartIndex_);
         calculate.GetEstimateHeightAndOffset(GetHost());
         currentOffset = calculate.GetEstimateOffset();
         estimatedHeight = calculate.GetEstimateHeight();
@@ -3077,7 +3077,7 @@ SizeF ListPattern::GetChildrenExpandedSize()
     if (childrenSize_) {
         estimatedHeight = listTotalHeight_;
     } else if (!itemPosition_.empty()) {
-        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, axis);
+        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, axis, itemStartIndex_);
         calculate.GetEstimateHeightAndOffset(GetHost());
         estimatedHeight = calculate.GetEstimateHeight();
     }
