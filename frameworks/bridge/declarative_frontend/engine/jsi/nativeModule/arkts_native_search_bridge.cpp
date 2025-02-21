@@ -540,12 +540,12 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
     auto theme = themeManager->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-    CalcDimension size = theme->GetFontSize();
+    CalcDimension size = theme->GetButtonFontSize();
     if (ArkTSUtils::ParseJsDimensionVpNG(vm, threeArg, size) && size.Unit() != DimensionUnit::PERCENT &&
         GreatOrEqual(size.Value(), 0.0)) {
         ArkTSUtils::ParseJsDimensionFp(vm, threeArg, size);
     } else {
-        size = theme->GetFontSize();
+        size = theme->GetButtonFontSize();
     }
     value.sizeValue = size.Value();
     value.sizeUnit = static_cast<int8_t>(size.Unit());

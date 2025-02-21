@@ -298,12 +298,12 @@ CalcSize SearchLayoutAlgorithm::searchButtonCalcSize(const RefPtr<SearchTheme>& 
 {
     // calculate theme space from search button to font
     auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-                       searchTheme->GetFontSize().ConvertToPxDistribute(minFontScale, maxFontScale);
+                       searchTheme->GetButtonFontSize().ConvertToPxDistribute(minFontScale, maxFontScale);
     // calculate search button height
     auto defaultButtonHeight =
         searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
     auto searchButtonHeight = std::max(defaultButtonHeight,
-        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPxDistribute(
+        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetButtonFontSize()).ConvertToPxDistribute(
             minFontScale, maxFontScale) + spaceHeight);
     searchButtonHeight = std::min(searchButtonHeight, searchHeight_);
     CalcSize searchButtonCalcSize;
