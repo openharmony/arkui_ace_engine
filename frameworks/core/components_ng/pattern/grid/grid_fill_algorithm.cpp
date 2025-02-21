@@ -70,12 +70,18 @@ void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* no
 {
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     filler.FillMatrixOnly(index);
+    if (!node->CheckNeedForceMeasureAndLayout()) {
+        return;
+    }
     const auto pos = info_.GetItemPos(index);
     filler.MeasureItem(params_, node, index, pos.first, pos.second);
 }
 
 void GridFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
+    if (!node->CheckNeedForceMeasureAndLayout()) {
+        return;
+    }
     // matrix is ready
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     const auto pos = info_.GetItemPos(index);
