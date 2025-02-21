@@ -16,6 +16,8 @@
 #pragma once
 
 #include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
 
 struct UICommonEventPeer {
+    OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> node = nullptr;
 };
