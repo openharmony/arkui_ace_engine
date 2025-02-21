@@ -52,7 +52,6 @@ const Dimension LINE_WIDTH = 1.5_vp;
 const int32_t RATE = 2;
 const PickerTime START_DEFAULT_TIME = PickerTime(0, 0, 0);
 const PickerTime END_DEFAULT_TIME = PickerTime(23, 59, 59);
-const int32_t WRONG_INDEX = -1;
 const uint32_t INDEX_AM_0 = 0;
 const uint32_t INDEX_PM_1 = 1;
 const uint32_t INDEX_HOUR_STRAT = 0;
@@ -833,8 +832,8 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
     if (!GetHour24() && tag == amPmColumn) {
         // update Hour column option after changing ampm column
         // and set corresponding new index based on old value
-        auto newIndex = GetOptionsIndex(hourColumn, oldHourValue_);
-        if (newIndex == WRONG_INDEX) {
+        uint32_t newIndex = INDEX_HOUR_STRAT;
+        if (!GetOptionsIndex(hourColumn, oldHourValue_, newIndex)) {
             auto uintOldHour = StringUtils::StringToUint(oldHourValue_);
             if (((IsAmJudgeByAmPmColumn(amPmColumn) && uintOldHour == AM_PM_HOUR_12) ? INDEX_HOUR_STRAT : uintOldHour) <
                 startTime_.GetHour()) {
@@ -855,8 +854,8 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
     }
     MinuteChangeBuildTimeRange(currentHourOf24);
     if (tag != minuteColumn) {
-        auto newIndex = GetOptionsIndex(minuteColumn, oldMinuteValue_);
-        if (newIndex == WRONG_INDEX) {
+        uint32_t newIndex = INDEX_MINUTE_STRAT;
+        if (!GetOptionsIndex(minuteColumn, oldMinuteValue_, newIndex)) {
             if (StringUtils::StringToUint(oldMinuteValue_) < startTime_.GetMinute()) {
                 newIndex = INDEX_MINUTE_STRAT;
             } else {
@@ -1242,19 +1241,21 @@ const std::string& TimePickerRowPattern::GetOptionsValue(const RefPtr<FrameNode>
     return options_[frameNode][optionIndex];
 }
 
-int32_t TimePickerRowPattern::GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value)
+bool TimePickerRowPattern::GetOptionsIndex(
+    const RefPtr<FrameNode>& frameNode, const std::string& value, uint32_t& columnIndex)
 {
-    auto columnIndex = WRONG_INDEX;
-    CHECK_NULL_RETURN(frameNode, columnIndex);
+    CHECK_NULL_RETURN(frameNode, false);
+    bool result = false;
     auto columnFound = options_.find(frameNode);
     if (columnFound != options_.end()) {
         for (const auto& option : columnFound->second) {
             if (option.second == value) {
                 columnIndex = option.first;
+                result = true;
             }
         }
     }
-    return columnIndex;
+    return result;
 }
 
 std::string TimePickerRowPattern::GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode)
