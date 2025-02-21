@@ -394,10 +394,8 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
 
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        if (info[0]->IsNull() || info[0]->IsUndefined()) {
-            SelectModel::GetInstance()->ResetFontColor();
-            return;
-        }
+        SelectModel::GetInstance()->ResetFontColor();
+        return;
     }
 
     SelectModel::GetInstance()->SetFontColor(textColor);
@@ -410,10 +408,7 @@ void JSSelect::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        if (info[0]->IsNull() || info[0]->IsUndefined()) {
-            SelectModel::GetInstance()->ResetBackgroundColor();
-            return;
-        }
+        backgroundColor = Color::TRANSPARENT;
     }
 
     SelectModel::GetInstance()->BackgroundColor(backgroundColor);
