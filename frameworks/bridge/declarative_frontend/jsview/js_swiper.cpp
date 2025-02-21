@@ -521,6 +521,23 @@ std::optional<Dimension> JSSwiper::ParseIndicatorDimension(const JSRef<JSVal>& v
     return indicatorDimension;
 }
 
+std::optional<Dimension> JSSwiper::ParseIndicatorBottom(const JSRef<JSVal>& bottomValue, bool hasIgnoreSize)
+{
+    std::optional<Dimension> bottom;
+    if (bottomValue->IsUndefined()) {
+        return bottom;
+    }
+    if (!hasIgnoreSize) {
+        bottom = ParseIndicatorDimension(bottomValue);
+        return bottom;
+    } else {
+        CalcDimension dimBottom;
+        bool parseOk = ParseLengthMetricsToDimension(bottomValue, dimBottom);
+        dimBottom = parseOk && dimBottom.ConvertToPx() >= 0.0f ? dimBottom : 0.0_vp;
+        return dimBottom;
+    }
+}
+
 SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> leftValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT_VALUE));
@@ -534,6 +551,10 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     JSRef<JSVal> selectedItemWidthValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_WIDTH_VALUE));
     JSRef<JSVal> selectedItemHeightValue =
         obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_HEIGHT_VALUE));
+    JSRef<JSVal> spaceValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SPACE_VALUE));
+    JSRef<JSVal> ignoreSizeValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::IGNORE_SIZE_VALUE));
+    JSRef<JSVal> setIgnoreSizeValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SET_IGNORE_SIZE_VALUE));
+    
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -542,12 +563,32 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimLeft = ParseIndicatorDimension(leftValue);
     swiperParameters.dimTop = ParseIndicatorDimension(topValue);
     swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
-    swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
+    auto hasIgnoreSizeValue = false;
+    
+    if (setIgnoreSizeValue->IsBoolean()) {
+        hasIgnoreSizeValue = setIgnoreSizeValue->ToBoolean();
+        swiperParameters.setIgnoreSizeValue = hasIgnoreSizeValue;
+    }
+
+    if (ignoreSizeValue->IsBoolean()) {
+        auto ignoreSize = ignoreSizeValue->ToBoolean();
+        swiperParameters.ignoreSizeValue = ignoreSize;
+    }
+    swiperParameters.dimBottom = ParseIndicatorBottom(bottomValue, hasIgnoreSizeValue);
     CalcDimension dimStart;
     CalcDimension dimEnd;
+    CalcDimension dimSpace;
+
     std::optional<Dimension> indicatorDimension;
     swiperParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
     swiperParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+ 
+    auto parseSpaceOk = ParseLengthMetricsToDimension(spaceValue, dimSpace) &&
+        (dimSpace.Unit() !=  DimensionUnit::PERCENT) ;
+    auto defalutSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+    swiperParameters.dimSpace =  (parseSpaceOk && !(dimSpace < 0.0_vp)) ? dimSpace : defalutSpace;
+    bool ignoreSize = ignoreSizeValue->IsBoolean() ? ignoreSizeValue->ToBoolean() : false;
+    swiperParameters.ignoreSizeValue = ignoreSize;
 
     CalcDimension dimPosition;
     bool parseItemWOk =
@@ -629,6 +670,8 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColorValue");
     JSRef<JSVal> digitFontValue = obj->GetProperty("digitFontValue");
     JSRef<JSVal> selectedDigitFontValue = obj->GetProperty("selectedDigitFontValue");
+    JSRef<JSVal> ignoreSizeValue = obj->GetProperty("ignoreSizeValue");
+    JSRef<JSVal> setIgnoreSizeValue = obj->GetProperty("setIgnoreSizeValue");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -637,12 +680,19 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     digitalParameters.dimLeft = ParseIndicatorDimension(dotLeftValue);
     digitalParameters.dimTop = ParseIndicatorDimension(dotTopValue);
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
-    digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
+
+    bool hasIgnoreSizeValue = setIgnoreSizeValue->IsBoolean() ? setIgnoreSizeValue->ToBoolean() : false;
+    digitalParameters.dimBottom = ParseIndicatorBottom(dotBottomValue, hasIgnoreSizeValue);
     std::optional<Dimension> indicatorDimension;
     CalcDimension dimStart;
     CalcDimension dimEnd;
     digitalParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
     digitalParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+    
+    if (ignoreSizeValue->IsBoolean()) {
+        auto ignoreSize = ignoreSizeValue->ToBoolean();
+        digitalParameters.ignoreSizeValue = ignoreSize;
+    }
 
     Color fontColor;
     auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
@@ -861,6 +911,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         JSRef<JSVal> maskValue = obj->GetProperty("mask");
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
+        JSRef<JSVal> ignoreSizeValue = obj->GetProperty("ignoreSize");
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -881,6 +932,12 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         if (maskValue->IsBoolean()) {
             auto mask = maskValue->ToBoolean();
             swiperParameters.maskValue = mask;
+        }
+        if (ignoreSizeValue->IsBoolean()) {
+            auto ignoreSize = ignoreSizeValue->ToBoolean();
+            swiperParameters.ignoreSizeValue = ignoreSize;
+        } else {
+            swiperParameters.ignoreSizeValue = false;
         }
         Color colorVal;
         parseOk = ParseJsColor(colorValue, colorVal);

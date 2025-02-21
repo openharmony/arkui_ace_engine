@@ -3386,6 +3386,43 @@ int32_t OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(ArkUI_SwiperIndicator* indic
 int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indicator);
 
 /**
+ * @brief Sets whether to ignore the size of the indicator for {@link OH_ArkUI_SwiperIndicator_SetBottomPosition}.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param ignoreSize Whether to ignore the size of the indicator. The value 1 means to ignore, and 0 means the opposite.
+ * The default value is 0.
+ * @since 16
+*/
+void OH_ArkUI_SwiperIndicator_SetIgnoreSizeOfBottom(ArkUI_SwiperIndicator* indicator, int32_t ignoreSize);
+
+/**
+ * @brief Obtains whether to ignore the size of the indicator for {@link OH_ArkUI_SwiperIndicator_SetBottomPosition}.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns whether to ignore the size of the indicator.
+ * @since 16
+*/
+int32_t OH_ArkUI_SwiperIndicator_GetIgnoreSizeOfBottom(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the space between the dots of the navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param space the space between the dots of the navigation indicator, the default value is 8vp.
+ * @since 16
+*/
+void OH_ArkUI_SwiperIndicator_SetSpace(ArkUI_SwiperIndicator* indicator, float space);
+
+/**
+ * @brief Obtains the space between the dots of the navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return the space between the dots of the navigation indicator
+ * @since 16
+*/
+float OH_ArkUI_SwiperIndicator_GetSpace(ArkUI_SwiperIndicator* indicator);
+
+/**
  * @brief Creates a digital indicator.
  *
  * @return Returns the pointer to the new indicator.
@@ -3581,6 +3618,25 @@ ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetSelectedFontWeight(ArkUI_Swipe
  * @since 16
  */
 void OH_ArkUI_SwiperDigitIndicator_Destroy(ArkUI_SwiperDigitIndicator *indicator);
+
+/**
+ * @brief Sets whether to ignore the size of the indicator for {@link OH_ArkUI_SwiperDigitIndicator_SetBottomPosition}.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param ignoreSize Whether to ignore the size of the indicator. The value 1 means to ignore, and 0 means the opposite.
+ * The default value is 0.
+ * @since 16
+*/
+void OH_ArkUI_SwiperDigitIndicator_SetIgnoreSizeOfBottom(ArkUI_SwiperDigitIndicator* indicator, int32_t ignoreSize);
+
+/**
+ * @brief Obtains whether to ignore the size of the indicator for {@link OH_ArkUI_SwiperDigitIndicator_SetBottomPosition}.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return Returns whether to ignore the size of the indicator.
+ * @since 16
+*/
+int32_t OH_ArkUI_SwiperDigitIndicator_GetIgnoreSizeOfBottom(ArkUI_SwiperDigitIndicator* indicator);
 
 /**
  * @brief Creates a arrow style for swiper.

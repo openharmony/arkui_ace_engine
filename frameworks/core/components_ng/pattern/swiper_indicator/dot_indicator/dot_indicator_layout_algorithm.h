@@ -59,6 +59,8 @@ private:
     static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     float indicatorWidth_ = 0.0f;
     float indicatorHeight_ = 0.0f;
+    float ignorSizeIndicatorWidth_ = 0.0f;
+    float ignorSizeIndicatorHeight_ = 0.0f;
     bool isHoverOrPress_ = false;
     bool isSingle_ = false;
     PointF hoverPoint_;

@@ -1086,7 +1086,7 @@ class ArkDotIndicator extends DotIndicator {
   leftValue: Length | undefined;
   topValue: Length | undefined;
   rightValue: Length | undefined;
-  bottomValue: Length | undefined;
+  bottomValue: Length | LengthMetrics | undefined;
   itemWidthValue: Length | undefined;
   itemHeightValue: Length | undefined;
   selectedItemWidthValue: Length | undefined;
@@ -1095,6 +1095,9 @@ class ArkDotIndicator extends DotIndicator {
   colorValue: ResourceColor | undefined;
   selectedColorValue: ResourceColor | undefined;
   maxDisplayCountValue: ResourceColor | undefined;
+  spaceValue: LengthMetrics | undefined;
+  ignoreSizeValue: boolean | undefined;
+  setIgnoreSizeValue : boolean;
 
   constructor() {
     super();
@@ -1111,6 +1114,9 @@ class ArkDotIndicator extends DotIndicator {
     this.colorValue = undefined;
     this.selectedColorValue = undefined;
     this.maxDisplayCountValue = undefined;
+    this.spaceValue = undefined;
+    this.ignoreSizeValue = undefined;
+    this.setIgnoreSizeValue = undefined;
   }
 
   isEqual(another: ArkDotIndicator): boolean {
@@ -1127,7 +1133,10 @@ class ArkDotIndicator extends DotIndicator {
       this.maskValue === another.maskValue &&
       this.colorValue === another.colorValue &&
       this.selectedColorValue === another.selectedColorValue &&
-      this.maxDisplayCountValue === another.maxDisplayCountValue
+      this.maxDisplayCountValue === another.maxDisplayCountValue &&
+      this.spaceValue === another.spaceValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue &&
+      this.setIgnoreSizeValue === another.setIgnoreSizeValue
     );
   }
 }
@@ -1137,11 +1146,13 @@ class ArkDigitIndicator extends DigitIndicator {
   leftValue: Length | undefined;
   topValue: Length | undefined;
   rightValue: Length | undefined;
-  bottomValue: Length | undefined;
+  bottomValue: Length | LengthMetrics | undefined;
   fontColorValue: ResourceColor | undefined;
   selectedFontColorValue: ResourceColor | undefined;
   digitFontValue: ArkDigitFont | undefined;
   selectedDigitFontValue: ArkDigitFont | undefined;
+  ignoreSizeValue: boolean | undefined;
+  setIgnoreSizeValue : boolean;
 
   constructor() {
     super();
@@ -1154,6 +1165,8 @@ class ArkDigitIndicator extends DigitIndicator {
     this.selectedFontColorValue = undefined;
     this.digitFontValue = undefined;
     this.selectedDigitFontValue = undefined;
+    this.ignoreSizeValue = undefined;
+    this.setIgnoreSizeValue = undefined;
   }
 
   isEqual(another: ArkDigitIndicator): boolean {
@@ -1164,7 +1177,9 @@ class ArkDigitIndicator extends DigitIndicator {
       this.rightValue === another.rightValue &&
       this.bottomValue === another.bottomValue &&
       this.digitFontValue === another.digitFontValue &&
-      this.selectedDigitFontValue === another.selectedDigitFontValue
+      this.selectedDigitFontValue === another.selectedDigitFontValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue &&
+      this.setIgnoreSizeValue === another.setIgnoreSizeValue
     );
   }
 }

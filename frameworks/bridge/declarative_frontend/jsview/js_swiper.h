@@ -66,6 +66,7 @@ protected:
         const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
     static std::optional<Dimension> ParseIndicatorDimension(const JSRef<JSVal>& value);
+    static std::optional<Dimension> ParseIndicatorBottom(const JSRef<JSVal>& bottomValue, bool hasIgnoreSize);
     static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
     static bool GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters);
     static void SetNestedScroll(const JSCallbackInfo& info);
