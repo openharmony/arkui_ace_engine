@@ -16,7 +16,6 @@
 #include "core/event/axis_event.h"
 
 #include "base/input_manager/input_manager.h"
-#include "core/common/ace_application_info.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace {
@@ -261,9 +260,6 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.deviceId = GetDeviceId();
     // modifierkeystates
     axisEvent.modifierKeyState = CalculateModifierKeyState(GetPressedKeyCodes());
-    // check for api version
-    axisEvent.axisSupportSourceTypeAndSourceTool =
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN);
     return axisEvent;
 }
 
