@@ -120,7 +120,6 @@ const Ark_LeadingMarginPlaceholder TEST_PSPM_LEADING_MARGIN {
 };
 
 const int EXPECTED_NODE_ID = 777;
-const int TEST_CONTAINER_ID = 888;
 
 const std::vector<Ace::SpanType> SPAN_TYPE_TEST_VALUES = {
     Ace::SpanType::Font,
@@ -769,7 +768,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshallingTest, Tes
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onUnmarshalling = [](const Ark_Int32 resourceId,
         const Opt_StyledString value, const Opt_Array_String error) {
-        auto peer = reinterpret_cast<StyledStringPeer*>(value.value.ptr);
+        auto peer = value.value;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetStyledStringAccessor();
         ASSERT_NE(accessor, nullptr);

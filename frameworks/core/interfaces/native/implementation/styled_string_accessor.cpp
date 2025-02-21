@@ -515,7 +515,7 @@ void UnmarshallingImpl(const Ark_Buffer* buffer,
     auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
         (StyledStringPeer* peer, const StringArray& errors) {
         Converter::ArkArrayHolder<Array_String> errorHolder(errors);
-        arkCallback.Invoke(Converter::ArkValue<Opt_StyledString>(*peer), errorHolder.OptValue<Opt_Array_String>());
+        arkCallback.Invoke(Converter::ArkValue<Opt_StyledString>(peer), errorHolder.OptValue<Opt_Array_String>());
     };
 
     auto str = Converter::Convert<std::string>(*buffer);
