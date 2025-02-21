@@ -1937,7 +1937,7 @@ HWTEST_F(WebPatternPartTwoTest, OnAttachContext_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnAttachContext(pipelineContext.GetRawPtr());
+    webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     MockPipelineContext::TearDown();
     EXPECT_EQ(webPattern->instanceId_, 0);
 
@@ -1967,7 +1967,7 @@ HWTEST_F(WebPatternPartTwoTest, OnAttachContext_002, TestSize.Level1)
     webPattern->renderSurface_ = nullptr;
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnAttachContext(pipelineContext.GetRawPtr());
+    webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     MockPipelineContext::TearDown();
     EXPECT_EQ(webPattern->instanceId_, 0);
 

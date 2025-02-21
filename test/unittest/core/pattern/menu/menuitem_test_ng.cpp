@@ -391,7 +391,7 @@ HWTEST_F(MenuItemTestNg, MenuItemViewTestNg002, TestSize.Level1)
 
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
-    FrameNode *frameNode = itemNode.GetRawPtr();
+    FrameNode *frameNode = Referenced::RawPtr(itemNode);
     CHECK_NULL_VOID(frameNode);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
@@ -441,7 +441,7 @@ HWTEST_F(MenuItemTestNg, MenuItemViewTestNg003, TestSize.Level1)
 
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
-    FrameNode *frameNode = itemNode.GetRawPtr();
+    FrameNode *frameNode = Referenced::RawPtr(itemNode);
     CHECK_NULL_VOID(frameNode);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
@@ -689,7 +689,7 @@ HWTEST_F(MenuItemTestNg, MenuItemSetSelectIconSymbolNg002, TestSize.Level1)
 
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
-    FrameNode *frameNode = itemNode.GetRawPtr();
+    FrameNode *frameNode = Referenced::RawPtr(itemNode);
     CHECK_NULL_VOID(frameNode);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);

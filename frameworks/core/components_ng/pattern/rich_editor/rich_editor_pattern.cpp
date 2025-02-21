@@ -855,7 +855,7 @@ void RichEditorPattern::AddSpanHoverEvent(
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
-    auto hoverTask = [weak = WeakClaim(spanItem.GetRawPtr()), tag](bool isHover, HoverInfo& info) {
+    auto hoverTask = [weak = WeakClaim(Referenced::RawPtr(spanItem)), tag](bool isHover, HoverInfo& info) {
         auto item = weak.Upgrade();
         if (item && item->onHover) {
             TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "[%{public}s] onHover status :[%{public}d]", tag.c_str(), isHover);
@@ -975,7 +975,7 @@ void RichEditorPattern::HandleImageHoverEvent(const MouseInfo& mouseInfo)
             lastHoverInfo_ = info;
             return;
         }
-        CHECK_NULL_VOID(lastHoverSpanItem_.GetRawPtr() != imageSpanItem.GetRawPtr());
+        CHECK_NULL_VOID(Referenced::RawPtr(lastHoverSpanItem_) != Referenced::RawPtr(imageSpanItem));
         imageSpanItem->onHover_(true, info);
         lastHoverSpanItem_->onHover_(false, info);
         lastHoverSpanItem_ = imageSpanItem;
@@ -3110,7 +3110,9 @@ void RichEditorPattern::HandleBlurEvent()
 {
     auto reason = GetBlurReason();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d, blur reason=%{public}d", frameId_, reason);
-    ClearOnFocusTextField(GetHost().GetRawPtr());
+    auto host = GetHost();
+    ClearOnFocusTextField(RawPtr(host));
+    host.Reset();
     IF_PRESENT(multipleClickRecognizer_, Stop());
     CHECK_NULL_VOID(showSelect_ || !IsSelected());
     isLongPress_ = false;

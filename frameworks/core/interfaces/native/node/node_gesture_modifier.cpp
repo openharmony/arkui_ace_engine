@@ -704,7 +704,7 @@ ArkUINodeHandle touchRecognizerGetNodeHandle(void* recognizer)
     TouchEventTarget* touchEventTarget = iter->first;
     auto frameNode = touchEventTarget->GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, nullptr);
-    return reinterpret_cast<ArkUINodeHandle>(frameNode.GetRawPtr());
+    return reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(frameNode));
 }
 
 ArkUI_Bool touchRecognizerCancelTouch(void* recognizer)

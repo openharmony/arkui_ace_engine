@@ -112,7 +112,7 @@ RefPtr<ProgressModifier> ProgressTestNg::CreateProgressModifier()
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
     auto progressNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     CHECK_NULL_RETURN(progressNode, nullptr);
-    FrameNode* frameNode = progressNode.GetRawPtr();
+    FrameNode* frameNode = Referenced::RawPtr(progressNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto progressPattern = progressNode->GetPattern<ProgressPattern>();
     CHECK_NULL_RETURN(progressPattern, nullptr);
@@ -1194,7 +1194,7 @@ HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest001, TestSize.Level1)
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
     auto progressNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(progressNode, nullptr);
-    FrameNode* frameNode = progressNode.GetRawPtr();
+    FrameNode* frameNode = Referenced::RawPtr(progressNode);
     CHECK_NULL_VOID(frameNode);
     auto progressPattern = progressNode->GetPattern<ProgressPattern>();
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
@@ -1255,7 +1255,7 @@ HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest002, TestSize.Level1)
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
     auto progressNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(progressNode, nullptr);
-    FrameNode* frameNode = progressNode.GetRawPtr();
+    FrameNode* frameNode = Referenced::RawPtr(progressNode);
     CHECK_NULL_VOID(frameNode);
     auto progressPattern = progressNode->GetPattern<ProgressPattern>();
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();

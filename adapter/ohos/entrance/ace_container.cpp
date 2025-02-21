@@ -3728,24 +3728,24 @@ void AceContainer::RenderLayoutBoundary(bool isDebugBoundary)
 void AceContainer::AddWatchSystemParameter()
 {
     auto task = [weak = WeakClaim(this)] {
-        auto weakPtr = weak.Upgrade();
-        CHECK_NULL_VOID(weakPtr);
-        auto container = static_cast<void*>(weakPtr.GetRawPtr());
+        auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
+        auto rawPtr = static_cast<void*>(Referenced::RawPtr(container));
+        CHECK_NULL_VOID(rawPtr);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_TRACE_LAYOUT_KEY, container, SystemProperties::EnableSystemParameterTraceLayoutCallback);
+            ENABLE_TRACE_LAYOUT_KEY, rawPtr, SystemProperties::EnableSystemParameterTraceLayoutCallback);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_TRACE_INPUTEVENT_KEY, container, SystemProperties::EnableSystemParameterTraceInputEventCallback);
-        SystemProperties::AddWatchSystemParameter(ENABLE_SECURITY_DEVELOPERMODE_KEY, container,
+            ENABLE_TRACE_INPUTEVENT_KEY, rawPtr, SystemProperties::EnableSystemParameterTraceInputEventCallback);
+        SystemProperties::AddWatchSystemParameter(ENABLE_SECURITY_DEVELOPERMODE_KEY, rawPtr,
             SystemProperties::EnableSystemParameterSecurityDevelopermodeCallback);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_DEBUG_STATEMGR_KEY, container, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
+            ENABLE_DEBUG_STATEMGR_KEY, rawPtr, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_DEBUG_BOUNDARY_KEY, container, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
-        SystemProperties::AddWatchSystemParameter(ENABLE_PERFORMANCE_MONITOR_KEY, container,
+            ENABLE_DEBUG_BOUNDARY_KEY, rawPtr, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+        SystemProperties::AddWatchSystemParameter(ENABLE_PERFORMANCE_MONITOR_KEY, rawPtr,
             SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
         SystemProperties::AddWatchSystemParameter(
-            IS_FOCUS_ACTIVE_KEY, container, SystemProperties::OnFocusActiveChanged);
+            IS_FOCUS_ACTIVE_KEY, rawPtr, SystemProperties::OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }

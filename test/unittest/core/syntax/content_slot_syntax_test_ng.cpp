@@ -97,20 +97,20 @@ HWTEST_F(ContentSlotSyntaxTestNg, ContentSlotSyntaxTest001, TestSize.Level1)
     const auto* contentModifier = NodeModifier::GetNodeContentModifier();
     auto childFrameNode1 = FrameNode::CreateFrameNode("frameNode1", -1, AceType::MakeRefPtr<Pattern>());
     contentModifier->addChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(childFrameNode1.GetRawPtr()));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)));
     auto children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == NUM_1 && children.front()->GetTag() == "frameNode1");
 
     auto childFrameNode2 = FrameNode::CreateFrameNode("frameNode2", -1, AceType::MakeRefPtr<Pattern>());
     contentModifier->insertChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(childFrameNode2.GetRawPtr()), 0);
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)), 0);
     children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == NUM_2 && children.front()->GetTag() == "frameNode2");
 
     contentModifier->removeChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(childFrameNode1.GetRawPtr()));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)));
     contentModifier->removeChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(childFrameNode2.GetRawPtr()));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)));
     children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == 0);
 }
@@ -236,7 +236,7 @@ HWTEST_F(ContentSlotSyntaxTestNg, AttachToNode001, TestSize.Level1)
     EXPECT_GT(nodeContent->children_.size(), 0);
     auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     nodeContent->nodeSlot_ = childNode;
-    UINode* uiNode = childNode.GetRawPtr();
+    UINode* uiNode = Referenced::RawPtr(childNode);
     ASSERT_NE(uiNode, nullptr);
     uiNode->onMainTree_ = true;
 
@@ -273,9 +273,9 @@ HWTEST_F(ContentSlotSyntaxTestNg, AttachToNode002, TestSize.Level1)
      */
     auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     nodeContent->nodeSlot_ = node;
-    UINode* uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode().GetRawPtr();
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(uiNode, nullptr);
-    nodeContent->AttachToNode(uiNode);
+    nodeContent->AttachToNode(AceType::RawPtr(uiNode));
     EXPECT_EQ(nodeContent->children_.size(), 0);
     nodeContent->DetachFromNode();
 }
@@ -305,7 +305,7 @@ HWTEST_F(ContentSlotSyntaxTestNg, AddNode001, TestSize.Level1)
     auto childNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(childNode, nullptr);
     nodeContent->nodeSlot_ = childNode;
-    UINode* uiNode = childNode.GetRawPtr();
+    UINode* uiNode = Referenced::RawPtr(childNode);
     ASSERT_NE(uiNode, nullptr);
 
     /**
@@ -345,7 +345,7 @@ HWTEST_F(ContentSlotSyntaxTestNg, RemoveNode001, TestSize.Level1)
     auto childNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(childNode, nullptr);
     nodeContent->nodeSlot_ = childNode;
-    UINode* uiNode = childNode.GetRawPtr();
+    UINode* uiNode = Referenced::RawPtr(childNode);
     ASSERT_NE(uiNode, nullptr);
 
     /**
@@ -361,7 +361,7 @@ HWTEST_F(ContentSlotSyntaxTestNg, RemoveNode001, TestSize.Level1)
      * @tc.expected: the size of children  is no change
      */
     auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    UINode* uiNodeOhter = node.GetRawPtr();
+    UINode* uiNodeOhter = Referenced::RawPtr(node);
     nodeContent->RemoveNode(uiNodeOhter);
     EXPECT_EQ(size, nodeContent->children_.size());
 }

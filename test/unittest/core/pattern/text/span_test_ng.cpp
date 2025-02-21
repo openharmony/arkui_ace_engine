@@ -1048,7 +1048,7 @@ HWTEST_F(SpanTestNg, SymbolSpanPropertyTest005, TestSize.Level1)
      */
     auto node = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
 
-    auto* frameNode = reinterpret_cast<FrameNode*>(node.GetRawPtr());
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
 
     ASSERT_NE(frameNode, nullptr);
     SymbolSpanModelNG::InitialCustomSymbol(frameNode, SYMBOL_ID, SYMBOL_SPAN_FONT_FAMILY.c_str());
@@ -1172,9 +1172,9 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
      */
     Font font;
     std::optional<Dimension> fontSize;
-    UINode* uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode().GetRawPtr();
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     spanModelNG.SetFont(font);
-    spanModelNG.SetFont(uiNode, font);
+    spanModelNG.SetFont(AceType::RawPtr(uiNode), font);
     EXPECT_EQ(spanNode->GetFontSize(), fontSize);
     /**
      * @tc.steps: step3. Set Font, call SetFont
@@ -1184,7 +1184,7 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
     font.fontWeight = FontWeight::BOLD;
     font.fontFamilies = FONT_FAMILY_VALUE;
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
-    spanModelNG.SetFont(uiNode, font);
+    spanModelNG.SetFont(AceType::RawPtr(uiNode), font);
     /**
      * @tc.steps: step4. Gets the relevant properties of the Font
      * @tc.expected: Check the font value

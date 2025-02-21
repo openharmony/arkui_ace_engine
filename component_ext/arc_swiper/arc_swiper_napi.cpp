@@ -267,7 +267,7 @@ static napi_value GetSwiperContentTransitionProxyJsObject(napi_env env,
     napi_value funcValue = nullptr;
     g_proxy = proxy;
     funcValue = ExtNapiUtils::CreateFunction(env, funName, strlen(funName),
-                                             FinishTransition, (void*)g_proxy.GetRawPtr());
+                                             FinishTransition, (void*)Referenced::RawPtr(g_proxy));
     ExtNapiUtils::SetNamedProperty(env, jsObject, funName, funcValue);
 
     return jsObject;

@@ -718,7 +718,7 @@ HWTEST_F(TextTestEightNg, GetSuitableSizeLD001, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     double stepSize = 0.0;
     auto result = rowLayoutAlgorithm->GetSuitableSizeLD(
-        textStyle, content, contentConstraint, layoutWrapper.GetRawPtr(), stepSize);
+        textStyle, content, contentConstraint, Referenced::RawPtr(layoutWrapper), stepSize);
     EXPECT_FALSE(result.first);
 }
 
@@ -742,7 +742,7 @@ HWTEST_F(TextTestEightNg, GetSuitableSizeLD002, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     double stepSize = 1.0;
     auto result = rowLayoutAlgorithm->GetSuitableSizeLD(
-        textStyle, content, contentConstraint, layoutWrapper.GetRawPtr(), stepSize);
+        textStyle, content, contentConstraint, Referenced::RawPtr(layoutWrapper), stepSize);
     EXPECT_FALSE(result.first);
 }
 

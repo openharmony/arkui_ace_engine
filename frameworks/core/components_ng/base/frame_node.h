@@ -376,7 +376,7 @@ public:
 
     bool HasVirtualNodeAccessibilityProperty() override
     {
-        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNodePtr()) {
+        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNode()) {
             return true;
         }
         return false;

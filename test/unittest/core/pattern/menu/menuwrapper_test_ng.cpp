@@ -1853,7 +1853,8 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg001, TestSize.Level1)
     function(canvas);
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     function(canvas);
-    wrapperNode->context_ = PipelineContext::GetCurrentContext().GetRawPtr();
+    auto context = PipelineContext::GetCurrentContext();
+    wrapperNode->context_ = AceType::RawPtr(context);
     auto pipline = wrapperNode->GetContext();
     ASSERT_NE(pipline, nullptr);
     auto menuTheme = pipline->GetTheme<MenuTheme>();

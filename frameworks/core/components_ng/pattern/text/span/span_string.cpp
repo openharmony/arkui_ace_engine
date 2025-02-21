@@ -881,7 +881,7 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
 RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
 {
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
-    SpanString* spanString = spanStr.GetRawPtr();
+    SpanString* spanString = Referenced::RawPtr(spanStr);
     std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
     DecodeTlvExt(buff, spanString, std::move(unmarshallCallback));
     return spanStr;
@@ -892,7 +892,7 @@ RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff,
     int32_t instanceId)
 {
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
-    SpanString* spanString = spanStr.GetRawPtr();
+    SpanString* spanString = Referenced::RawPtr(spanStr);
     DecodeTlvExt(buff, spanString, std::move(unmarshallCallback), instanceId);
     return spanStr;
 }
@@ -979,7 +979,7 @@ void SpanString::DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& curs
 void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr)
 {
     CHECK_NULL_VOID(spanStr);
-    DecodeSpanItemListExt(buff, cursor, spanStr.GetRawPtr());
+    DecodeSpanItemListExt(buff, cursor, Referenced::RawPtr(spanStr));
 }
 
 void SpanString::UpdateSpansMap()

@@ -5081,7 +5081,7 @@ void FrameNode::RecordExposureInner()
     if (!pipeline) {
         auto piplineRef = PipelineContext::GetContextByContainerId(exposureProcessor_->GetContainerId());
         if (!piplineRef) {
-            pipeline = piplineRef.GetRawPtr();
+            pipeline = Referenced::RawPtr(piplineRef);
         }
     }
     CHECK_NULL_VOID(pipeline);

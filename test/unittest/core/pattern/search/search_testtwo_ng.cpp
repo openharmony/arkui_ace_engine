@@ -1849,7 +1849,7 @@ HWTEST_F(SearchTestTwoNg, CalcSearchWidth001, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = columnLayoutWrapper;
     LayoutConstraintT<float> layoutConstraintT;
     SearchLayoutAlgorithm searchLayoutAlgorithm;
-    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, layoutWrapper.GetRawPtr());
+    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(result, 0.0f);
 }
 
@@ -1871,7 +1871,7 @@ HWTEST_F(SearchTestTwoNg, CalcSearchWidth002, TestSize.Level1)
     layoutConstraintT.percentReference.SetWidth(100.0f);
     layoutConstraintT.maxSize.SetWidth(150.0f);
     SearchLayoutAlgorithm searchLayoutAlgorithm;
-    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, layoutWrapper.GetRawPtr());
+    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(result, 100.0f);
 }
 
@@ -1894,7 +1894,7 @@ HWTEST_F(SearchTestTwoNg, CalcSearchWidth003, TestSize.Level1)
     layoutConstraintT.maxSize.SetWidth(150.0f);
     layoutConstraintT.minSize.SetWidth(200.0f);
     SearchLayoutAlgorithm searchLayoutAlgorithm;
-    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, layoutWrapper.GetRawPtr());
+    auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(result, 200.0f);
 }
 } // namespace OHOS::Ace::NG

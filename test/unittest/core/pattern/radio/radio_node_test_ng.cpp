@@ -396,7 +396,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest007, TestSize.Level1)
     /**
      * @tc.steps: step4. Set parameters to radioModelNG builderFunc
      */
-    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), node);
+    radioModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), node);
     pattern->FireBuilder();
     /**
      * @tc.steps: step5. Test customNode
@@ -435,7 +435,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest008, TestSize.Level1)
     /**
      * @tc.steps: step3. Set parameters to radioModelNG builderFunc
      */
-    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), nullptr);
+    radioModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), nullptr);
     pattern->FireBuilder();
     /**
      * @tc.steps: step4. Test customNode
@@ -516,7 +516,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest010, TestSize.Level1)
     /**
      * @tc.steps: step4. Set parameters to radioModelNG builderFunc
      */
-    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), node);
+    radioModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), node);
     pattern->FireBuilder();
     /**
      * @tc.steps: step5. Test customNode
@@ -529,7 +529,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest010, TestSize.Level1)
     /**
      * @tc.steps: step6. change builder func nullptr
      */
-    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), nullptr);
+    radioModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), nullptr);
     pattern->FireBuilder();
     /**
      * @tc.steps: step7. Test UseContentModifier

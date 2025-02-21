@@ -70,7 +70,7 @@ void GetShadowInfoArray(
     auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(dragAction->instanceId);
     for (auto& pixelMap : dragAction->pixelMapList) {
         double scale = 1.0;
-        if (pixelMap.GetRawPtr()) {
+        if (Referenced::RawPtr(pixelMap)) {
             if (pixelMap->GetWidth() > minScaleWidth && dragAction->previewOption.isScaleEnabled) {
                 scale = minScaleWidth / pixelMap->GetWidth();
             }

@@ -512,7 +512,7 @@ HWTEST_F(ImagePatternTestNg, OnAreaChangedInner001, TestSize.Level1)
     imagePattern->OnAreaChangedInner();
     imagePattern->selectOverlay_->Close();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -1270,13 +1270,13 @@ HWTEST_F(ImagePatternTestNg, ImageHandleCopyTest001, TestSize.Level1)
 
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->HandleCopy();
-    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
 
     /**
      * @tc.steps: step5. HandleCopy again.
      */
     imagePattern->HandleCopy();
-    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
 }
 
 /**

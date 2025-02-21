@@ -1337,7 +1337,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc072, TestSize.Level1)
     auto manager = pattern->GetHost()->GetContextRefPtr()->GetTextFieldManager();
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
-    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    RefPtr<UINode> element = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode));
     ASSERT_NE(element, nullptr);
     element->tag_ = V2::SHEET_WRAPPER_TAG;
     textFieldNode->SetParent(element, false);
@@ -1391,11 +1391,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc074, TestSize.Level1)
     auto manager = pattern1->GetHost()->GetContextRefPtr()->GetTextFieldManager();
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
-    RefPtr<UINode> element1 = AceType::Claim<UINode>(textFieldNode1.GetRawPtr());
+    RefPtr<UINode> element1 = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode1));
     ASSERT_NE(element1, nullptr);
     element1->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     textFieldNode1->SetParent(element1);
-    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(textFieldNode2.GetRawPtr());
+    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode2));
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVIGATION_VIEW_ETS_TAG;
     element1->SetParent(navigationNode);
@@ -1429,11 +1429,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc075, TestSize.Level1)
     auto manager = pattern1->GetHost()->GetContextRefPtr()->GetTextFieldManager();
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
-    RefPtr<UINode> element1 = AceType::Claim<UINode>(textFieldNode1.GetRawPtr());
+    RefPtr<UINode> element1 = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode1));
     ASSERT_NE(element1, nullptr);
     element1->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     textFieldNode1->SetParent(element1);
-    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(textFieldNode2.GetRawPtr());
+    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode2));
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     element1->SetParent(navigationNode);
@@ -1469,11 +1469,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc076, TestSize.Level1)
     auto manager = pattern1->GetHost()->GetContextRefPtr()->GetTextFieldManager();
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
-    RefPtr<UINode> element1 = AceType::Claim<UINode>(textFieldNode1.GetRawPtr());
+    RefPtr<UINode> element1 = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode1));
     ASSERT_NE(element1, nullptr);
     element1->tag_ = V2::NAVBAR_ETS_TAG;
     textFieldNode1->SetParent(element1);
-    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(textFieldNode2.GetRawPtr());
+    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode2));
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVBAR_ETS_TAG;
     element1->SetParent(navigationNode);
@@ -1628,7 +1628,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc081, TestSize.Level1)
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
     MockContainer::SetUp();
-    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    RefPtr<UINode> element = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode));
     ASSERT_NE(element, nullptr);
     element->tag_ = "Panel";
     textFieldNode->SetParent(element, false);
@@ -1656,7 +1656,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc082, TestSize.Level1)
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
     MockContainer::SetUp();
-    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    RefPtr<UINode> element = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode));
     ASSERT_NE(element, nullptr);
     element->tag_ = "SheetPage";
     textFieldNode->SetParent(element, false);
@@ -1742,7 +1742,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc086, TestSize.Level1)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    RefPtr<UINode> element = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode));
     keyboard->children_.emplace_back(element);
     RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
     ASSERT_NE(safeAreaManager, nullptr);

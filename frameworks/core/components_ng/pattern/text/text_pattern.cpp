@@ -1762,7 +1762,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
     auto localLocation = info.GetLocalLocation();
     if (isAutoScrollByMouse_ && GetHost()) {
         NG::PointF localPoint(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-        NG::NGGestureRecognizer::Transform(localPoint, WeakClaim(GetHost().GetRawPtr()), true);
+        NG::NGGestureRecognizer::Transform(localPoint, GetHost(), true);
         localLocation.SetX(localPoint.GetX());
         localLocation.SetY(localPoint.GetY());
     }
@@ -4740,7 +4740,7 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
     spans_ = styledString_->GetSpanItems();
     ProcessSpanString();
     styledString_->AddCustomSpan();
-    styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
+    styledString_->SetFramNode(WeakClaim(Referenced::RawPtr(host)));
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -5071,7 +5071,7 @@ void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
         CHECK_NULL_VOID(host);
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         NG::PointF localPoint(lastLeftMouseMoveLocation_.GetX(), lastLeftMouseMoveLocation_.GetY());
-        NG::NGGestureRecognizer::Transform(localPoint, WeakClaim(host.GetRawPtr()), true);
+        NG::NGGestureRecognizer::Transform(localPoint, WeakClaim(Referenced::RawPtr(host)), true);
         Offset textOffset = { localPoint.GetX() - textPaintOffset.GetX(), localPoint.GetY() - textPaintOffset.GetY() };
         CHECK_NULL_VOID(pManager_);
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
