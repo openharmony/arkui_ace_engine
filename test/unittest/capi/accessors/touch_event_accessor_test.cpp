@@ -23,6 +23,16 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+const std::vector<std::pair<TouchType, Ark_TouchType>> getTypeTestPlan = {
+    { TouchType::DOWN, Ark_TouchType::ARK_TOUCH_TYPE_DOWN },
+    { TouchType::UP, Ark_TouchType::ARK_TOUCH_TYPE_UP },
+    { TouchType::MOVE, Ark_TouchType::ARK_TOUCH_TYPE_MOVE },
+    { TouchType::CANCEL, Ark_TouchType::ARK_TOUCH_TYPE_CANCEL },
+    { TouchType::UNKNOWN, static_cast<Ark_TouchType>(-1) },
+};
+} // namespace
+
 class TouchEventAccessorTest
     : public AccessorTestBase<GENERATED_ArkUITouchEventAccessor,
         &GENERATED_ArkUIAccessors::getTouchEventAccessor, TouchEventPeer> {
@@ -82,6 +92,27 @@ HWTEST_F(TouchEventAccessorTest, GetPreventDefaultTest, TestSize.Level1)
     checkWithName("Hyperlink", true);
 
     CallbackKeeper::ReleaseReverseCallback<Callback_Void>(callback);
+}
+
+/**
+ * @tc.name: GetTypeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventAccessorTest, GetTypeTest, TestSize.Level1)
+{
+    for (auto& [value, expected]: getTypeTestPlan) {
+        TouchEventInfo* eventInfo = peer_->GetEventInfo();
+        ASSERT_NE(eventInfo, nullptr);
+        *eventInfo = TouchEventInfo("unknown");
+
+        TouchLocationInfo locationInfo(0);
+        locationInfo.SetTouchType(value);
+        eventInfo->AddChangedTouchLocationInfo(std::move(locationInfo));
+
+        auto result = accessor_->getType(peer_);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 }
