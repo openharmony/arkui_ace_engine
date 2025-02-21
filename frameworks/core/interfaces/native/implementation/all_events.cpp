@@ -385,6 +385,11 @@ void onTerminatedImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void onErrorImpl(Ark_Int32 nodeId,
+                 const Ark_BusinessError err)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 namespace FolderStack {
 void onFolderStateChangeImpl(Ark_Int32 nodeId,
@@ -1909,6 +1914,11 @@ void onReleaseImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void onErrorImpl(Ark_Int32 nodeId,
+                 const Ark_BusinessError err)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onTerminatedImpl(Ark_Int32 nodeId,
                       const Ark_TerminationInfo parameter)
 {
@@ -2072,6 +2082,7 @@ const GENERATED_ArkUIEmbeddedComponentEventsReceiver* GetEmbeddedComponentEvents
 {
     static const GENERATED_ArkUIEmbeddedComponentEventsReceiver GENERATED_ArkUIEmbeddedComponentEventsReceiverImpl {
         EmbeddedComponent::onTerminatedImpl,
+        EmbeddedComponent::onErrorImpl,
     };
 
     return &GENERATED_ArkUIEmbeddedComponentEventsReceiverImpl;
@@ -2698,6 +2709,7 @@ const GENERATED_ArkUIUIExtensionComponentEventsReceiver* GetUIExtensionComponent
         UIExtensionComponent::onRemoteReadyImpl,
         UIExtensionComponent::onResultImpl,
         UIExtensionComponent::onReleaseImpl,
+        UIExtensionComponent::onErrorImpl,
         UIExtensionComponent::onTerminatedImpl,
     };
 

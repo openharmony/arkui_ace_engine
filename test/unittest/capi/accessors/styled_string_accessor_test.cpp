@@ -343,6 +343,7 @@ public:
         return accessor_->ctor(value, styles);
     }
 
+    Ark_VMContext vmContext_ = nullptr;
 private:
     V1 settings;
 };
@@ -784,7 +785,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshallingTest, Tes
     auto akrBuffer = Converter::ArkValue<Ark_Buffer>(testBuffer, nullptr);
 
     EXPECT_FALSE(checkEvent.has_value());
-    accessor_->unmarshalling(&akrBuffer, &arkCallback);
+    accessor_->unmarshalling(vmContext_, &akrBuffer, &arkCallback);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
     EXPECT_EQ(peer_->spanString->GetString(), checkEvent->value);

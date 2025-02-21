@@ -215,7 +215,6 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor();
-const GENERATED_ArkUIErrorCallbackAccessor* GetErrorCallbackAccessor();
 const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor();
 const GENERATED_ArkUIBaseShapeAccessor* GetBaseShapeAccessor();
 const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor();
@@ -502,7 +501,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetWebviewControllerAccessor,
         GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
         GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
-        GetErrorCallbackAccessor,
         GetCommonShapeAccessor,
         GetBaseShapeAccessor,
         GetRectShapeAccessor,

@@ -88,7 +88,6 @@ generated_sources = [
   "implementation/ellipse_modifier.cpp",
   "implementation/ellipse_shape_accessor.cpp",
   "implementation/embedded_component_modifier.cpp",
-  "implementation/error_callback_accessor.cpp",
   "implementation/event_emulator_accessor.cpp",
   "implementation/event_result_accessor.cpp",
   "implementation/event_target_info_accessor.cpp",

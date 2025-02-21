@@ -371,6 +371,8 @@ typedef struct Ark_SheetTitleOptions Ark_SheetTitleOptions;
 typedef struct Opt_SheetTitleOptions Opt_SheetTitleOptions;
 typedef struct Ark_Union_SheetSize_Length Ark_Union_SheetSize_Length;
 typedef struct Opt_Union_SheetSize_Length Opt_Union_SheetSize_Length;
+typedef struct Ark_AnimationRange_Number Ark_AnimationRange_Number;
+typedef struct Opt_AnimationRange_Number Opt_AnimationRange_Number;
 typedef struct TransitionEffectPeer TransitionEffectPeer;
 typedef struct TransitionEffectPeer* Ark_TransitionEffect;
 typedef struct Opt_TransitionEffect Opt_TransitionEffect;
@@ -1368,8 +1370,6 @@ typedef struct Opt_BaseShape Opt_BaseShape;
 typedef struct CommonShapePeer CommonShapePeer;
 typedef struct CommonShapePeer* Ark_CommonShape;
 typedef struct Opt_CommonShape Opt_CommonShape;
-typedef struct Ark_BusinessError Ark_BusinessError;
-typedef struct Opt_BusinessError Opt_BusinessError;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
 typedef struct AsyncCallback_image_PixelMap_Void AsyncCallback_image_PixelMap_Void;
@@ -2332,6 +2332,10 @@ typedef struct Ark_FolderStackOptions Ark_FolderStackOptions;
 typedef struct Opt_FolderStackOptions Opt_FolderStackOptions;
 typedef struct Ark_FlexOptions Ark_FlexOptions;
 typedef struct Opt_FlexOptions Opt_FlexOptions;
+typedef struct Ark_BusinessError Ark_BusinessError;
+typedef struct Opt_BusinessError Opt_BusinessError;
+typedef struct ErrorCallback ErrorCallback;
+typedef struct Opt_ErrorCallback Opt_ErrorCallback;
 typedef struct Ark_TerminationInfo Ark_TerminationInfo;
 typedef struct Opt_TerminationInfo Opt_TerminationInfo;
 typedef struct Callback_TerminationInfo_Void Callback_TerminationInfo_Void;
@@ -2705,9 +2709,6 @@ typedef struct Ark_ShapeSize Ark_ShapeSize;
 typedef struct Opt_ShapeSize Opt_ShapeSize;
 typedef struct Ark_Union_RectShapeOptions_RoundRectShapeOptions Ark_Union_RectShapeOptions_RoundRectShapeOptions;
 typedef struct Opt_Union_RectShapeOptions_RoundRectShapeOptions Opt_Union_RectShapeOptions_RoundRectShapeOptions;
-typedef struct ErrorCallbackPeer ErrorCallbackPeer;
-typedef struct ErrorCallbackPeer* Ark_ErrorCallback;
-typedef struct Opt_ErrorCallback Opt_ErrorCallback;
 typedef struct GlobalScope_ohos_arkui_performanceMonitorPeer GlobalScope_ohos_arkui_performanceMonitorPeer;
 typedef struct GlobalScope_ohos_arkui_performanceMonitorPeer* Ark_GlobalScope_ohos_arkui_performanceMonitor;
 typedef struct Opt_GlobalScope_ohos_arkui_performanceMonitor Opt_GlobalScope_ohos_arkui_performanceMonitor;
@@ -5903,7 +5904,10 @@ typedef struct Opt_Array_Array_String {
     Array_Array_String value;
 } Opt_Array_Array_String;
 typedef struct Ark_LocalizedPadding {
-    Ark_String stub;
+    Opt_LengthMetrics top;
+    Opt_LengthMetrics end;
+    Opt_LengthMetrics bottom;
+    Opt_LengthMetrics start;
 } Ark_LocalizedPadding;
 typedef struct Opt_LocalizedPadding {
     Ark_Tag tag;
@@ -6211,6 +6215,14 @@ typedef struct Opt_Union_SheetSize_Length {
     Ark_Tag tag;
     Ark_Union_SheetSize_Length value;
 } Opt_Union_SheetSize_Length;
+typedef struct Ark_AnimationRange_Number {
+    Ark_Number value0;
+    Ark_Number value1;
+} Ark_AnimationRange_Number;
+typedef struct Opt_AnimationRange_Number {
+    Ark_Tag tag;
+    Ark_AnimationRange_Number value;
+} Opt_AnimationRange_Number;
 typedef struct Opt_TransitionEffect {
     Ark_Tag tag;
     Ark_TransitionEffect value;
@@ -7124,9 +7136,9 @@ typedef struct Opt_Callback_DismissContentCoverAction_Void {
     Callback_DismissContentCoverAction_Void value;
 } Opt_Callback_DismissContentCoverAction_Void;
 typedef struct Ark_ContextMenuAnimationOptions {
-    Opt_CustomObject scale;
+    Opt_AnimationRange_Number scale;
     Opt_TransitionEffect transition;
-    Opt_CustomObject hoverScale;
+    Opt_AnimationRange_Number hoverScale;
 } Ark_ContextMenuAnimationOptions;
 typedef struct Opt_ContextMenuAnimationOptions {
     Ark_Tag tag;
@@ -10404,16 +10416,6 @@ typedef struct Opt_CommonShape {
     Ark_Tag tag;
     Ark_CommonShape value;
 } Opt_CommonShape;
-typedef struct Ark_BusinessError {
-    Ark_String name;
-    Ark_String message;
-    Opt_String stack;
-    Ark_Number code;
-} Ark_BusinessError;
-typedef struct Opt_BusinessError {
-    Ark_Tag tag;
-    Ark_BusinessError value;
-} Opt_BusinessError;
 typedef struct Ark_SnapshotOptions {
     Opt_Number scale;
     Opt_Boolean waitUntilRenderFinished;
@@ -14399,6 +14401,25 @@ typedef struct Opt_FlexOptions {
     Ark_Tag tag;
     Ark_FlexOptions value;
 } Opt_FlexOptions;
+typedef struct Ark_BusinessError {
+    Ark_String name;
+    Ark_String message;
+    Opt_String stack;
+    Ark_Number code;
+} Ark_BusinessError;
+typedef struct Opt_BusinessError {
+    Ark_Tag tag;
+    Ark_BusinessError value;
+} Opt_BusinessError;
+typedef struct ErrorCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_BusinessError err);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_BusinessError err);
+} ErrorCallback;
+typedef struct Opt_ErrorCallback {
+    Ark_Tag tag;
+    ErrorCallback value;
+} Opt_ErrorCallback;
 typedef struct Ark_TerminationInfo {
     Ark_Number code;
     Opt_Want want;
@@ -15858,10 +15879,6 @@ typedef struct Opt_Union_RectShapeOptions_RoundRectShapeOptions {
     Ark_Tag tag;
     Ark_Union_RectShapeOptions_RoundRectShapeOptions value;
 } Opt_Union_RectShapeOptions_RoundRectShapeOptions;
-typedef struct Opt_ErrorCallback {
-    Ark_Tag tag;
-    Ark_ErrorCallback value;
-} Opt_ErrorCallback;
 typedef struct Opt_GlobalScope_ohos_arkui_performanceMonitor {
     Ark_Tag tag;
     Ark_GlobalScope_ohos_arkui_performanceMonitor value;
@@ -16832,7 +16849,7 @@ typedef struct GENERATED_ArkUIEmbeddedComponentModifier {
     void (*setOnTerminated)(Ark_NativePointer node,
                             const Callback_TerminationInfo_Void* value);
     void (*setOnError)(Ark_NativePointer node,
-                       Ark_ErrorCallback value);
+                       const ErrorCallback* value);
 } GENERATED_ArkUIEmbeddedComponentModifier;
 
 typedef struct GENERATED_ArkUIFlexModifier {
@@ -19392,7 +19409,7 @@ typedef struct GENERATED_ArkUIUIExtensionComponentModifier {
     void (*setOnRelease)(Ark_NativePointer node,
                          const Callback_Number_Void* value);
     void (*setOnError)(Ark_NativePointer node,
-                       Ark_ErrorCallback value);
+                       const ErrorCallback* value);
     void (*setOnTerminated)(Ark_NativePointer node,
                             const Callback_TerminationInfo_Void* value);
 } GENERATED_ArkUIUIExtensionComponentModifier;
@@ -19451,7 +19468,9 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
                           const Callback_RangeUpdate* updater);
     void (*SetCurrentIndex)(Ark_NativePointer node,
                             Ark_Int32 index);
-    void (*Prepare)(Ark_NativePointer node);
+    void (*Prepare)(Ark_NativePointer node,
+                    Ark_Int32 itemCount,
+                    Ark_Int32 offset);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
 typedef struct GENERATED_ArkUISystemOpsAccessor {
@@ -19518,14 +19537,6 @@ typedef struct GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor 
                                  Ark_PerfMonitorSourceType sourceType,
                                  const Ark_Number* time);
 } GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor;
-
-typedef struct GENERATED_ArkUIErrorCallbackAccessor {
-    void (*destroyPeer)(Ark_ErrorCallback peer);
-    Ark_ErrorCallback (*ctor)();
-    Ark_NativePointer (*getFinalizer)();
-    void (*invoke)(Ark_ErrorCallback peer,
-                   const Ark_BusinessError* err);
-} GENERATED_ArkUIErrorCallbackAccessor;
 
 typedef struct GENERATED_ArkUICommonShapeAccessor {
     void (*destroyPeer)(Ark_CommonShape peer);
@@ -22110,6 +22121,8 @@ typedef struct GENERATED_ArkUIDatePickerEventsReceiver {
 typedef struct GENERATED_ArkUIEmbeddedComponentEventsReceiver {
     void (*onTerminated)(Ark_Int32 nodeId,
                          const Ark_TerminationInfo parameter);
+    void (*onError)(Ark_Int32 nodeId,
+                    const Ark_BusinessError err);
 } GENERATED_ArkUIEmbeddedComponentEventsReceiver;
 
 typedef struct GENERATED_ArkUIFolderStackEventsReceiver {
@@ -22834,6 +22847,8 @@ typedef struct GENERATED_ArkUIUIExtensionComponentEventsReceiver {
                      const Ark_Literal_Number_code_Want_want parameter);
     void (*onRelease)(Ark_Int32 nodeId,
                       const Ark_Number index);
+    void (*onError)(Ark_Int32 nodeId,
+                    const Ark_BusinessError err);
     void (*onTerminated)(Ark_Int32 nodeId,
                          const Ark_TerminationInfo parameter);
 } GENERATED_ArkUIUIExtensionComponentEventsReceiver;
@@ -22974,7 +22989,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIWebviewControllerAccessor* (*getWebviewControllerAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* (*getGlobalScope_ohos_arkui_componentSnapshotAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* (*getGlobalScope_ohos_arkui_performanceMonitorAccessor)();
-    const GENERATED_ArkUIErrorCallbackAccessor* (*getErrorCallbackAccessor)();
     const GENERATED_ArkUICommonShapeAccessor* (*getCommonShapeAccessor)();
     const GENERATED_ArkUIBaseShapeAccessor* (*getBaseShapeAccessor)();
     const GENERATED_ArkUIRectShapeAccessor* (*getRectShapeAccessor)();
