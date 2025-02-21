@@ -231,6 +231,16 @@ public:
     void SetOptimizeParserBudgetEnabled(bool enable) override;
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
+
+    static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
+    static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
+    static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
+    static void SetMixedMode(FrameNode* frameNode, MixedModeContent mixedMode);
+    static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    static void SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode);
+    static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
+    static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
+    static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

@@ -124,7 +124,14 @@
 #include "core/interfaces/native/node/form_component_modifier.h"
 #endif
 
+#ifdef WEB_SUPPORTED
+#include "core/interfaces/native/node/web_modifier.h"
+#endif
+
 using namespace OHOS::Ace::NG;
+
+#define MODIFIER_COUNTS 14
+#define BLANK_LINES 6
 
 extern "C" {
 const ArkUINodeModifiers* GetArkUINodeModifiers()
@@ -267,7 +274,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSwiperControllerModifier = NodeModifier::GetSwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetGestureModifier, // GestureModifier
         .getBadgeModifier = NodeModifier::GetBadgeModifier, // BadgeModifier
+    #ifdef WEB_SUPPORTED
+        .getWebModifier = NodeModifier::GetWebModifier, // WebModifier
+    #else
         .getWebModifier = nullptr, // WebModifier
+    #endif
         .getRefreshModifier = NodeModifier::GetRefreshModifier, // RefreshModifier
         .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
         .getSearchControllerModifier = nullptr, // SearchControllerModifier
@@ -293,7 +304,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
         .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(impl, 13, 0, 0); // don't move this line.  13: ifdef count.
+    CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;
 }
 
@@ -440,7 +451,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSwiperControllerModifier = NodeModifier::GetCJUISwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetCJUIGestureModifier, // GestureModifier
         .getBadgeModifier = nullptr, // BadgeModifier
+    #ifdef WEB_SUPPORTED
+        .getWebModifier = NodeModifier::GetCJUIWebModifier, // WebModifier
+    #else
         .getWebModifier = nullptr, // WebModifier
+    #endif
         .getRefreshModifier = NodeModifier::GetCJUIRefreshModifier, // RefreshModifier
         .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
         .getSearchControllerModifier = nullptr, // SearchControllerModifier
@@ -464,7 +479,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
 
         .getContainerSpanModifier = NodeModifier::GetCJUIContainerSpanModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(modifiers, 13, 6, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(modifiers, MODIFIER_COUNTS, BLANK_LINES, 0); // don't move this line
     return &modifiers;
 }
 }
