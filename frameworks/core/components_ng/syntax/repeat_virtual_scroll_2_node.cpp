@@ -259,11 +259,6 @@ bool RepeatVirtualScroll2Node::RebuildL1(int32_t start, int32_t end, int32_t nSt
                 "out of L1: index %{public}d, node %{public}s with child id %{public}d",
                 index, caches_.DumpUINode(cacheItem->node_).c_str(), frameNode->GetId());
 
-            // move active node into L2 cached. check transition flag.
-            // Animations support need to modify here
-            if (!cacheItem->isOnRenderTree_) {
-                return false;
-            }
             if (node->OnRemoveFromParent(true)) {
                 // OnRemoveFromParent returns true means the child can be removed from tree immediately.
                 repeatNode->RemoveDisappearingChild(node);
@@ -299,9 +294,6 @@ bool RepeatVirtualScroll2Node::ProcessActiveL2Nodes()
             TAG_LOGD(AceLogTag::ACE_REPEAT,
                 "spare node %{public}s: apply SetActive(false) & SetJSViewActive(false)",
                 caches_.DumpCacheItem(cacheItem).c_str());
-        }
-        if (!cacheItem->isOnRenderTree_) {
-            return;
         }
         if (cacheItem->node_->OnRemoveFromParent(true)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
@@ -513,7 +505,7 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndexImpl(
 
 int32_t RepeatVirtualScroll2Node::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool /*isExpanded*/)
 {
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "GetFrameNodeIndex ");
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "GetFrameNodeIndex.");
     const std::optional<IndexType>& indexOpt = caches_.GetL1Index4Node(node);
     return indexOpt.has_value() ? indexOpt.value() : -1;
 }
