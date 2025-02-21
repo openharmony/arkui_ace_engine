@@ -153,8 +153,9 @@ void ScrollWindowAdapter::RequestRecompose(int32_t markIdx) const
     }
 }
 
-void ScrollWindowAdapter::Prepare()
+void ScrollWindowAdapter::Prepare(uint32_t offset)
 {
+    offset_ = offset;
     filled_.clear();
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
     if (jumpPending_) {

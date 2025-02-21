@@ -76,7 +76,7 @@ public:
         return totalCount_;
     }
 
-    void Prepare();
+    void Prepare(uint32_t offset);
 
 private:
     FrameNode* GetChildPtrByIndex(uint32_t index);
