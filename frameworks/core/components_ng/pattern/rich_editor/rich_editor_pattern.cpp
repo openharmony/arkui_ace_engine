@@ -10886,13 +10886,6 @@ TextStyle RichEditorPattern::GetDefaultTextStyle()
     return style;
 }
 
-bool RichEditorPattern::IsShowTranslate()
-{
-    auto richEditorTheme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_RETURN(richEditorTheme, false);
-    return richEditorTheme->GetTranslateIsSupport();
-}
-
 bool RichEditorPattern::IsTextEditableForStylus() const
 {
     auto host = GetHost();
@@ -10910,6 +10903,13 @@ bool RichEditorPattern::IsTextEditableForStylus() const
         return false;
     }
     return true;
+}
+
+bool RichEditorPattern::IsShowTranslate()
+{
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, false);
+    return richEditorTheme->GetTranslateIsSupport();
 }
 
 bool RichEditorPattern::IsShowAIWrite()
