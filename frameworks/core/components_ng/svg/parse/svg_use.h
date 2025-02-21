@@ -50,6 +50,7 @@ private:
         WeakPtr<SvgNode> node_;
     };
     SvgAttributes useAttr_;
+    bool isDrawingPath_ = false;
 };
 
 } // namespace OHOS::Ace::NG
