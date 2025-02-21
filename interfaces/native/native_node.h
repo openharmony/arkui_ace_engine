@@ -1881,7 +1881,7 @@ typedef enum {
      * .value[2].f32：grayscale blur settings that control the darkness of the white color.\n
      * The value range is [0, 127].\n
      *
-     * @since 16
+     * @since 15
      */
     NODE_BACKDROP_BLUR = 99,
 
