@@ -841,8 +841,8 @@ void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
 {
     auto focusHub = GetFocusHub();
     if (IsSelected()) {
-        selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex());
-        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex());
+        selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex(), false);
+        selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex(), false);
         return;
     }
     if (focusHub && !focusHub->IsCurrentFocus() && !obscuredChange_) {
