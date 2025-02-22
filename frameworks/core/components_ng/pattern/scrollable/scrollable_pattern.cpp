@@ -1241,8 +1241,15 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
 {
 #ifdef ARKUI_CIRCLE_FEATURE
-    if (isRoundScroll_) {
-        return AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+    if (isRoundScroll_ && scrollBar_) {
+        auto arcScrollBarOverlayModifier = AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_);
+        if (arcScrollBar) {
+            arcScrollBarOverlayModifier->SetPositionMode(arcScrollBar->GetPositionMode());
+            arcScrollBarOverlayModifier->SetArcRect(arcScrollBar->GetArcActiveRect());
+            arcScrollBarOverlayModifier->SetBackgroundArcRect(arcScrollBar->GetArcBarRect());
+        }
+        return arcScrollBarOverlayModifier;
     }
 #endif
     return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
