@@ -555,8 +555,8 @@ class SearchOnPasteModifier extends ModifierWithKey<(value: string, event: Paste
   }
 }
 
-class SearchOnChangeModifier extends ModifierWithKey<(value: string) => void> {
-  constructor(value: (value: string) => void) {
+class SearchOnChangeModifier extends ModifierWithKey<(value: ChangeValueInfo) => void> {
+  constructor(value: (value: ChangeValueInfo) => void) {
     super(value);
   }
   static identity = Symbol('searchOnChange');
@@ -632,6 +632,19 @@ class SearchInitializeModifier extends ModifierWithKey<SearchParam> {
   }
 }
 
+class SearchOnWillChangeModifier extends ModifierWithKey<Callback<ChangeValueInfo, boolean>> {
+  constructor(value: Callback<ChangeValueInfo, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnWillChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnWillChange(node);
+    } else {
+      getUINativeModule().search.setOnWillChange(node, this.value);
+    }
+  }
+}
 
 class SearchOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
   constructor(value: Callback<InsertValue, boolean>) {
@@ -789,7 +802,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchOnContentScrollModifier, callback);
     return this;
   }
-  onChange(callback: (value: string) => void): SearchAttribute {
+  onChange(callback: (value: ChangeValueInfo) => void): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchOnChangeModifier.identity,
       SearchOnChangeModifier, callback);
     return this;
@@ -934,6 +947,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   textIndent(value: Dimension): this {
     modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
+    return this;
+  }
+  onWillChange(callback: Callback<ChangeValueInfo, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillChangeModifier.identity, SearchOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback: Callback<InsertValue, boolean>): this {

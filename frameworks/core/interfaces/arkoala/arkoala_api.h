@@ -3464,6 +3464,8 @@ struct ArkUITextAreaModifier {
     void (*resetStopBackPress)(ArkUINodeHandle node);
     void (*setTextAreaKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
     void (*resetTextAreaKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setTextAreaOnWillChange)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetTextAreaOnWillChange)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3670,6 +3672,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
     ArkUI_Int32 (*getTextInputKeyboardAppearance)(ArkUINodeHandle node);
     void (*resetTextInputKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setTextInputOnWillChange)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetTextInputOnWillChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -4317,6 +4321,8 @@ struct ArkUISearchModifier {
     void (*resetStopBackPress)(ArkUINodeHandle node);
     void (*setSearchKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
     void (*resetSearchKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setSearchOnWillChange)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetSearchOnWillChange)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

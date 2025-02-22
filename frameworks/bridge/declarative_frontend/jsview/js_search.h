@@ -47,6 +47,8 @@ public:
     static void OnSubmit(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
     static void OnChange(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
+    static void SetOnWillChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnScroll(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);

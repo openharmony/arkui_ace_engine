@@ -979,7 +979,7 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     searchModelInstance.SetHeight(Dimension(2.5, DimensionUnit::VP));
 
     //test SetOnChange
-    searchModelInstance.SetOnChange([](const std::string str, PreviewText previewText) {});
+    searchModelInstance.SetOnChange([](const ChangeValueInfo& changeValueInfo) {});
     EXPECT_NE(eventHub->GetOnChange(), nullptr);
 
     //test SetOnTextSelectionChange

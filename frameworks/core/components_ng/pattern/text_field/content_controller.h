@@ -78,6 +78,11 @@ public:
         content_ = value;
     }
 
+    void SetTextValueOnly(const std::string& value)
+    {
+        content_ = value;
+    }
+
     void Reset()
     {
         content_ = "";
