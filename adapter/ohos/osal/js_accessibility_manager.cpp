@@ -1487,6 +1487,18 @@ int32_t GetLastPageId(const RefPtr<NG::PipelineContext>& ngPipeline)
     CHECK_NULL_RETURN(page, -1);
     return page->GetPageId();
 }
+
+void AddHasRegisteredHover(const RefPtr<NG::FrameNode>& node, ExtraElementInfo& extraElementInfo)
+{
+    CHECK_NULL_VOID(node);
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputEventHub = eventHub->GetInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
+    if (inputEventHub->HasAccessibilityHoverEvent()) {
+        extraElementInfo.SetExtraElementInfo("hasRegisteredHover", true);
+    }
+}
 } // namespace
 
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
@@ -1600,6 +1612,14 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetGrid(gridInfo);
     ExtraElementInfo extraElementInfo {};
     accessibilityProperty->GetAllExtraElementInfo(extraElementInfo);
+    AddHasRegisteredHover(node, extraElementInfo);
+    if (node->IsAccessibilityVirtualNode()) {
+        auto parentUinode = node->GetVirtualNodeParent().Upgrade();
+        if (parentUinode) {
+            auto parentFrame = AceType::DynamicCast<NG::FrameNode>(parentUinode);
+            AddHasRegisteredHover(parentFrame, extraElementInfo);
+        }
+    }
     nodeInfo.SetExtraElement(extraElementInfo);
 
     int32_t row = accessibilityProperty->GetCollectionItemInfo().row;
