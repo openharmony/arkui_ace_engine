@@ -58,9 +58,12 @@ struct CJNavigationToolbarOptions {
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationCreate();
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationCreateWithPathInfos(int64_t pathInfos);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetNavDestination(void (*builder)(const char*));
-CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitle(
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitle(const char* title);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitleWithBuilder(void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetSubTitle(const char* subTitle);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitleWithOptions(
     const char* title, bool withOptions, CJNavigationTitleOptions options);
-CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitleWithBuilder(
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitleWithBuilderWithOptions(
     void (*builder)(), bool withOptions, CJNavigationTitleOptions options);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitleWithCommon(
     const char* mainTitle, const char* subTitle, bool withOptions, CJNavigationTitleOptions options);
@@ -69,9 +72,11 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitleWithCustom(
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetMenus(VectorNavigationItemHandle menus);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetMenusWithBuilder(void (*builder)());
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetTitleMode(int32_t titleMode);
-CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBar(
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBar(VectorNavigationItemHandle toolBars);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilder(void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithOptions(
     VectorNavigationItemHandle toolBars, bool withOptions, CJNavigationToolbarOptions options);
-CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilder(
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilderWithOptions(
     void (*builder)(), bool withOptions, CJNavigationToolbarOptions options);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideToolBar(bool isHide);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide);

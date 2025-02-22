@@ -183,7 +183,30 @@ void FfiOHOSAceFrameworkNavigationSetNavDestination(void (*builder)(const char*)
     }
 }
 
-void FfiOHOSAceFrameworkNavigationSetTitle(const char* title, bool withOptions, CJNavigationTitleOptions options)
+void FfiOHOSAceFrameworkNavigationSetTitle(const char *title)
+{
+    NavigationModel::GetInstance()->SetTitle(title);
+}
+
+void FfiOHOSAceFrameworkNavigationSetTitleWithBuilder(void (*builder)())
+{
+    auto builderFunc = CJLambda::Create(builder);
+    RefPtr<NG::UINode> customNode;
+    {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    NavigationModel::GetInstance()->SetCustomTitle(customNode);
+}
+
+void FfiOHOSAceFrameworkNavigationSetSubTitle(const char *subTitle)
+{
+    NavigationModel::GetInstance()->SetSubtitle(subTitle);
+}
+
+void FfiOHOSAceFrameworkNavigationSetTitleWithOptions(
+    const char* title, bool withOptions, CJNavigationTitleOptions options)
 {
     NavigationModel::GetInstance()->ParseCommonTitle(false, true, "", title);
     if (withOptions) {
@@ -193,7 +216,7 @@ void FfiOHOSAceFrameworkNavigationSetTitle(const char* title, bool withOptions, 
     }
 }
 
-void FfiOHOSAceFrameworkNavigationSetTitleWithBuilder(
+void FfiOHOSAceFrameworkNavigationSetTitleWithBuilderWithOptions(
     void (*builder)(), bool withOptions, CJNavigationTitleOptions options)
 {
     CalcDimension titleHeight;
@@ -268,7 +291,27 @@ void FfiOHOSAceFrameworkNavigationSetTitleMode(int32_t titleMode)
     NavigationModel::GetInstance()->SetTitleMode(static_cast<NG::NavigationTitleMode>(titleMode));
 }
 
-void FfiOHOSAceFrameworkNavigationSetToolBar(
+void FfiOHOSAceFrameworkNavigationSetToolBar(VectorNavigationItemHandle toolBars)
+{
+    const auto &toolBarVector = *reinterpret_cast<std::vector<NavigationItem> *>(toolBars);
+    std::vector<NG::BarItem> toolBarItems;
+    ParseToolbarItems(toolBarVector, toolBarItems);
+    NavigationModel::GetInstance()->SetToolBarItems(std::move(toolBarItems));
+}
+
+void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilder(void (*builder)())
+{
+    auto builderFunc = CJLambda::Create(builder);
+    RefPtr<NG::UINode> customNode;
+    {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    NavigationModel::GetInstance()->SetCustomToolBar(customNode);
+}
+
+void FfiOHOSAceFrameworkNavigationSetToolBarWithOptions(
     VectorNavigationItemHandle toolBars, bool withOptions, CJNavigationToolbarOptions options)
 {
     const auto& toolBarVector = *reinterpret_cast<std::vector<NavigationItem>*>(toolBars);
@@ -282,7 +325,7 @@ void FfiOHOSAceFrameworkNavigationSetToolBar(
     }
 }
 
-void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilder(
+void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilderWithOptions(
     void (*builder)(), bool withOptions, CJNavigationToolbarOptions options)
 {
     auto builderFunc = CJLambda::Create(builder);
