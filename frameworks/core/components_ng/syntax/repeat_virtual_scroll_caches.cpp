@@ -464,6 +464,7 @@ void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
 
         // don't fire OnRecycle here, as we manage reuse/recycle indepedently
         RemoveKeyFromL1(keyIter->second, false);
+        isModified_ = true;
     }
 }
 
