@@ -663,7 +663,6 @@ ArkUI_Float32 GetTextAreaLetterSpacing(ArkUINodeHandle node)
     return TextFieldModelNG::GetLetterSpacing(frameNode).ConvertToFp();
 }
 
-
 void SetTextAreaLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1773,10 +1772,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert, SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
         SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete, SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText,
         GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions, SetTextAreaWidth,
-        ResetTextAreaWidth, SetTextAreaEnableHapticFeedback, ResetTextAreaEnableHapticFeedback,
-        GetTextAreaLetterSpacing, GetTextAreaEnablePreviewText,
-        SetStopBackPress, ResetStopBackPress, SetTextAreaKeyboardAppearance, ResetTextAreaKeyboardAppearance,
-        SetTextAreaOnWillChange, ResetTextAreaOnWillChange };
+        ResetTextAreaWidth, SetTextAreaEnableHapticFeedback, ResetTextAreaEnableHapticFeedback, SetStopBackPress,
+        ResetStopBackPress, SetTextAreaKeyboardAppearance, ResetTextAreaKeyboardAppearance,
+        GetTextAreaLetterSpacing, GetTextAreaEnablePreviewText, SetTextAreaOnWillChange, ResetTextAreaOnWillChange };
     return &modifier;
 }
 
@@ -1975,10 +1973,6 @@ void ResetOnTextAreaChange(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnChange(node);
 }
-void ResetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node)
-{
-    GetTextAreaModifier()->resetTextAreaOnChange(node);
-}
 void ResetOnTextAreaPaste(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnPaste(node);
@@ -2087,6 +2081,10 @@ void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
+}
+void ResetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnChange(node);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
