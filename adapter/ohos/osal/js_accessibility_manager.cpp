@@ -2773,7 +2773,7 @@ bool JsAccessibilityManager::UnsubscribeStateObserver(int eventType)
     return ret == RET_OK;
 }
 
-AccessibilityWorkMode JsAccessibilityManager::GetAccessibilityWorkMode()
+AccessibilityWorkMode JsAccessibilityManager::GenerateAccessibilityWorkMode()
 {
     AccessibilityWorkMode accessibilityWorkMode;
     auto client = AccessibilitySystemAbilityClient::GetInstance();

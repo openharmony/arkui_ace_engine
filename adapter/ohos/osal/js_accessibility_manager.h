@@ -338,7 +338,7 @@ public:
         const RefPtr<PipelineBase>& context) override;
     void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
 
-    AccessibilityWorkMode GetAccessibilityWorkMode() override;
+    AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
 
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
     void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
