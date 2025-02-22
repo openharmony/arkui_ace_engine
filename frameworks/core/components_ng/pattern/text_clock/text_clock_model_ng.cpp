@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -93,6 +94,11 @@ void TextClockModelNG::ResetTextColor()
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
+    auto textClockNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(textClockNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(textClockNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    TextModelNG::ResetTextColor(Referenced::RawPtr<FrameNode>(textNode));
 }
 
 void TextClockModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -208,6 +214,10 @@ void TextClockModelNG::ResetFontColor(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    TextModelNG::ResetTextColor(Referenced::RawPtr<FrameNode>(textNode));
 }
 
 void TextClockModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
