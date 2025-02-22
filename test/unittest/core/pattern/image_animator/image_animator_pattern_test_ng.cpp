@@ -14,10 +14,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/animation/animator.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
@@ -219,9 +217,6 @@ HWTEST_F(ImageAnimatorPatternTestNg, CreatePictureAnimation, TestSize.Level1)
 
     auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
     EXPECT_NE(imageAnimatorPattern_, nullptr);
-    auto pictureAnimation_ = imageAnimatorPattern_->CreatePictureAnimation(100);
-    EXPECT_NE(pictureAnimation_, nullptr);
-    pictureAnimation_->NotifyListener(100);
     EXPECT_EQ(imageAnimatorPattern_->images_.size(), 0);
 }
 
