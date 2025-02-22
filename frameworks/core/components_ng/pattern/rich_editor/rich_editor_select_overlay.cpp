@@ -266,6 +266,7 @@ RectF RichEditorSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
         GetGlobalRectWithTransform(intersectRect);
     }
+    ApplySelectAreaWithKeyboard(intersectRect);
     return intersectRect;
 }
 
