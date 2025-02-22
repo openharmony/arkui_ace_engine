@@ -252,7 +252,7 @@ public:
     {
         return isStackSubmenuHeader_;
     }
-    RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
+    RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const PointF& position);
     RefPtr<FrameNode> GetEmbeddedMenu() const
     {
         return embeddedMenu_;

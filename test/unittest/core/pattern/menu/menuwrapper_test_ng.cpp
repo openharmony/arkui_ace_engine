@@ -910,15 +910,15 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     ASSERT_NE(menuItemPattern2, nullptr);
 
     wrapperPattern->IncreaseEmbeddedSubMenuCount();
-    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
     subMenu->MountToParent(wrapperNode);
 
     menu->GetLayoutProperty<MenuLayoutProperty>()->UpdateExpandingMode(SubMenuExpandingMode::STACK);
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 }
 
