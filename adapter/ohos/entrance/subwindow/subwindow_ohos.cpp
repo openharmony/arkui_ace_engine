@@ -1446,6 +1446,7 @@ bool SubwindowOhos::InitToastServiceConfig()
 
 bool SubwindowOhos::CreateEventRunner()
 {
+    std::lock_guard<std::mutex> lock(eventRunnerMutex_);
     if (!eventLoop_) {
         eventLoop_ = AppExecFwk::EventRunner::Create("Subwindow_Toast_Dialog");
         CHECK_NULL_RETURN(eventLoop_, false);
