@@ -402,6 +402,6 @@ HWTEST_F(WindowSceneTest, OnAddRemoveSnapshot, TestSize.Level1)
     windowScene->OnAddSnapshot();
     windowScene->OnRemoveSnapshot();
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_NE(windowScene->IsSnapshotSizeChanged(), false);
+    EXPECT_EQ(windowScene->session_->GetSnapshot(), nullptr);
 }
 } // namespace OHOS::Ace::NG
