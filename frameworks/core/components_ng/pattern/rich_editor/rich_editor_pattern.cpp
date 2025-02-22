@@ -6974,6 +6974,9 @@ void RichEditorPattern::ResetTouchAndMoveCaretState()
         isCursorAlwaysDisplayed_ = false;
         IF_TRUE(isEditing_, StartTwinkling());
     }
+    StopAutoScroll();
+    CheckScrollable();
+    UpdateScrollBarOffset();
     moveCaretState_.Reset();
     StartFloatingCaretLand();
 }
@@ -7032,14 +7035,21 @@ void RichEditorPattern::HandleTouchMove(const TouchLocationInfo& info)
     CHECK_NULL_VOID(moveCaretState_.isTouchCaret && caretTwinkling_);
     if (!moveCaretState_.isMoveCaret) {
         auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
-        if (GreatNotEqual(moveDistance, moveCaretState_.minDistance.ConvertToPx())) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Move caret start id= %{public}d", info.GetFingerId());
-            moveCaretState_.isMoveCaret = true;
-            moveCaretState_.touchFingerId = info.GetFingerId();
-            ShowCaretWithoutTwinkling();
-        }
+        IF_TRUE(GreatNotEqual(moveDistance, moveCaretState_.minDistance.ConvertToPx()),
+            OnMoveCaretStart(info.GetFingerId()));
     }
     UpdateCaretByTouchMove(offset);
+}
+
+void RichEditorPattern::OnMoveCaretStart(int32_t fingerId)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Move caret start id=%{public}d", fingerId);
+    moveCaretState_.isMoveCaret = true;
+    moveCaretState_.touchFingerId = fingerId;
+    scrollable_ = false;
+    SetScrollEnabled(scrollable_);
+    UpdateScrollBarOffset();
+    ShowCaretWithoutTwinkling();
 }
 
 void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
@@ -7056,12 +7066,13 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     SetCaretTouchMoveOffset(offset);
-    MoveCaretToContentRect();
     CalcAndRecordLastClickCaretInfo(textOffset);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     auto floatingCaretCenter =
         Offset(floatingCaretState_.touchMoveOffset->GetX(), caretOffset.GetY() + caretHeight / 2);
     SetMagnifierOffsetWithAnimation(floatingCaretCenter);
+    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::CARET, .showScrollbar = true };
+    AutoScrollByEdgeDetection(param, OffsetF(offset.GetX(), offset.GetY()), EdgeDetectionStrategy::OUT_BOUNDARY);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -9118,48 +9129,34 @@ void RichEditorPattern::OnAutoScroll(AutoScrollParam param)
 {
     if (param.showScrollbar) {
         auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            scrollBar->PlayScrollBarAppearAnimation();
-        }
+        IF_PRESENT(scrollBar, PlayScrollBarAppearAnimation());
         param.showScrollbar = false;
     }
-
-    if (param.autoScrollEvent == AutoScrollEvent::HANDLE) {
-        auto newOffset = MoveTextRect(param.offset);
-        if (param.isFirstHandle) {
-            MoveSecondHandle(newOffset);
-        } else {
-            MoveFirstHandle(newOffset);
+    CHECK_NULL_VOID(param.autoScrollEvent != AutoScrollEvent::NONE);
+    auto newOffset = MoveTextRect(param.offset);
+    switch (param.autoScrollEvent) {
+        case AutoScrollEvent::CARET:
+            break;
+        case AutoScrollEvent::HANDLE: {
+            param.isFirstHandle ? MoveSecondHandle(newOffset) : MoveFirstHandle(newOffset);
+            selectOverlay_->OnHandleMove(param.handleRect, param.isFirstHandle);
+            break;
         }
-        selectOverlay_->OnHandleMove(param.handleRect, param.isFirstHandle);
-        if (NearEqual(newOffset, 0.0f)) {
+        case AutoScrollEvent::DRAG:
+            break;
+        case AutoScrollEvent::MOUSE: {
+            auto textOffset = ConvertTouchOffsetToTextOffset(param.eventOffset);
+            int32_t extend = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
+            UpdateSelector(textSelector_.baseOffset, extend);
+            SetCaretPosition(std::max(textSelector_.baseOffset, extend));
+            break;
+        }
+        default:
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "Unsupported auto scroll event type");
             return;
-        }
-        ScheduleAutoScroll(param);
-        return;
     }
-
-    if (param.autoScrollEvent == AutoScrollEvent::DRAG) {
-        auto newOffset = MoveTextRect(param.offset);
-        if (NearEqual(newOffset, 0.0f)) {
-            return;
-        }
-        ScheduleAutoScroll(param);
-        return;
-    }
-
-    if (param.autoScrollEvent == AutoScrollEvent::MOUSE) {
-        auto newOffset = MoveTextRect(param.offset);
-        auto textOffset =
-            Offset(param.eventOffset.GetX() - GetTextRect().GetX(), param.eventOffset.GetY() - GetTextRect().GetY());
-        int32_t extend = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
-        UpdateSelector(textSelector_.baseOffset, extend);
-        SetCaretPosition(std::max(textSelector_.baseOffset, extend));
-        if (NearEqual(newOffset, 0.0f)) {
-            return;
-        }
-        ScheduleAutoScroll(param);
-    }
+    CHECK_NULL_VOID(!NearEqual(newOffset, 0.0f));
+    ScheduleAutoScroll(param);
 }
 
 void RichEditorPattern::StopAutoScroll()
