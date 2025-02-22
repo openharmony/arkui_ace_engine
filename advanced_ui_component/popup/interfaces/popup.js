@@ -99,10 +99,10 @@ export const a1 = {
             start: LengthMetrics.vp(12),
             end: LengthMetrics.vp(12)
         },
-        symbolStyle: new SymbolGlyphModifier({  "id": -1,  "type": 40000, params: ['sys.symbol.xmark'],"bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+        symbolStyle: new SymbolGlyphModifier({ 'id': -1, 'type': 40000, params: ['sys.symbol.xmark'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         f1: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        backgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
         symbolSize: 18
     },
 };
