@@ -44,7 +44,8 @@ void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
     iconWrap_ = iconWrap;
     bool isSymbolIcon = iconWrap->GetHostTag() == V2::SYMBOL_ETS_TAG;
     if (isSymbolIcon &&
-        property->GetSymbolIconStyle().value_or(-1) == static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+        static_cast<int32_t>(property->GetSymbolIconStyle().value_or(-1)) ==
+        static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
         return;
     } else if (!isSymbolIcon && property->GetIconStyle().value_or(-1) ==
         static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
