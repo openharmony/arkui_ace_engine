@@ -329,7 +329,6 @@ private:
         const PaddingPropertyF& padding);
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
-    void HandleTabsCachedMaxCount(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex);
     void MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void LayoutCustomAnimation(LayoutWrapper* layoutWrapper) const;
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, SwiperItemInfo> pos);
@@ -372,6 +371,7 @@ private:
     void AdjustItemPositionOnCachedShow();
     void AdjustOffsetOnForward(float currentEndPos);
     void AdjustOffsetOnBackward(float currentStartPos);
+    float GetHeightForDigit(LayoutWrapper* layoutWrapper, float height) const;
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;

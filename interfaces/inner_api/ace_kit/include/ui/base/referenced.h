@@ -63,12 +63,6 @@ public:
         return ptr.rawPtr_;
     }
 
-    template<class T>
-    static T* UnsafeRawPtr(const WeakPtr<T>& ptr)
-    {
-        return ptr.unsafeRawPtr_;
-    }
-
     void IncRefCount()
     {
         refCounter_->IncStrongRef();
@@ -451,14 +445,6 @@ public:
     bool operator<(const WeakPtr<O>& other) const
     {
         return refCounter_ < other.refCounter_;
-    }
-
-    inline T* GetRawPtr() const
-    {
-        if (Invalid()) {
-            return nullptr;
-        }
-        return unsafeRawPtr_;
     }
 
 private:

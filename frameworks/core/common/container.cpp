@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -217,22 +217,27 @@ void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
 
 RefPtr<DisplayInfo> Container::GetDisplayInfo()
 {
-    return DisplayInfoUtils::GetInstance().GetDisplayInfo(currentDisplayId_);
+    return displayManager_->GetDisplayInfo(currentDisplayId_);
 }
 
 void Container::InitIsFoldable()
 {
-    DisplayInfoUtils::GetInstance().InitIsFoldable();
+    displayManager_->InitIsFoldable();
 }
 
 bool Container::IsFoldable()
 {
-    return DisplayInfoUtils::GetInstance().IsFoldable();
+    return displayManager_->GetIsFoldable();
 }
 
 FoldStatus Container::GetCurrentFoldStatus()
 {
-    return DisplayInfoUtils::GetInstance().GetCurrentFoldStatus();
+    return displayManager_->GetCurrentFoldStatus();
+}
+
+std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
+{
+    return displayManager_->GetCurrentFoldCreaseRegion();
 }
 
 void Container::DestroyToastSubwindow(int32_t instanceId)
@@ -250,7 +255,7 @@ void Container::DestroyToastSubwindow(int32_t instanceId)
 void Container::DestroySelectOverlaySubwindow(int32_t instanceId)
 {
     auto subwindow = SubwindowManager::GetInstance()->GetSelectOverlaySubwindow(instanceId);
-    if (subwindow && subwindow->IsToastSubWindow()) {
+    if (subwindow && subwindow->GetIsSelectOverlaySubWindow()) {
         subwindow->DestroyWindow();
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Destroy selectOverlay subwindow, instanceId is %{public}d", instanceId);
     }
@@ -336,5 +341,13 @@ bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
 #else
     return false;
 #endif
+}
+bool Container::CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
+{
+    auto container = GetContainer(currentId);
+    CHECK_NULL_RETURN(container, defaultRes);
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, defaultRes);
+    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace

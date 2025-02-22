@@ -119,6 +119,7 @@ std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
         swiperParameters_->maskValue = false;
         swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
         swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+        swiperParameters_->dimSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     }
     return swiperParameters_;
 }
@@ -218,7 +219,9 @@ void IndicatorPattern::SaveDotIndicatorProperty()
         auto dimValue = swiperParameters->dimEnd.value();
         isRtl ? layoutProperty->UpdateLeft(dimValue) : layoutProperty->UpdateRight(dimValue);
     }
-
+    if (swiperParameters->dimSpace.has_value()) {
+        layoutProperty->UpdateSpace(swiperParameters->dimSpace.value());
+    }
     UpdatePaintProperty();
 }
 
@@ -245,6 +248,7 @@ void IndicatorPattern::UpdatePaintProperty()
     paintProperty->UpdateSelectedColor(
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(isCustomSize_);
+    paintProperty->UpdateSpace(swiperParameters->dimSpace.value_or(swiperIndicatorTheme->GetIndicatorDotItemSpace()));
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -259,7 +263,9 @@ void IndicatorPattern::OnModifyDone()
         }
         currentIndexInSingleMode_ = initialIndex;
     }
-
+    if (currentIndexInSingleMode_ > RealTotalCount() - 1) {
+        currentIndexInSingleMode_ = 0;
+    }
     auto indicatorNode = GetHost();
     CHECK_NULL_VOID(indicatorNode);
     if (GetIndicatorType() == SwiperIndicatorType::DOT) {
@@ -331,7 +337,7 @@ bool IndicatorPattern::GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& f
 
 void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
 {
-    if (!IsLoop()) {
+    if (!IsLoop() || IsHover() || IsPressed()) {
         if (index >= RealTotalCount()) {
             SetCurrentIndexInSingleMode(RealTotalCount() - 1);
             return;

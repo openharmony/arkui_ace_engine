@@ -114,6 +114,19 @@ void ChainAnimation::SetDelta(float delta, float overOffset)
     timestamp_ = timestamp;
 }
 
+bool ChainAnimation::HasSpaceDelta() const
+{
+    return !NearZero(nodes_.at(1)->GetSpaceDelta());
+}
+
+void ChainAnimation::ResetSpaceDelta()
+{
+    for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
+        nodes_[i]->SetSpaceDelta(0);
+        nodes_[-i]->SetSpaceDelta(0);
+    }
+}
+
 void ChainAnimation::TickAnimation()
 {
     auto context = PipelineBase::GetCurrentContext();

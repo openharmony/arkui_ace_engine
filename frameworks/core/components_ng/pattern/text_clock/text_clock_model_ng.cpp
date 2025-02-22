@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,14 @@ void TextClockModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
+void TextClockModelNG::ResetTextColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextClockLayoutProperty, TextColor, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
+}
+
 void TextClockModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, ItalicFontStyle, value);
@@ -146,9 +154,9 @@ RefPtr<FrameNode> TextClockModelNG::CreateFrameNode(int32_t nodeId)
     }
     auto pipeline = textClockNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto textTheme = pipeline->GetTheme<TextTheme>(textClockNode->GetThemeScopeId());
     if (textTheme) {
-        InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyle());
+        InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyleClock());
     }
     return textClockNode;
 }
@@ -191,6 +199,15 @@ void TextClockModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+}
+
+void TextClockModelNG::ResetFontColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextClockLayoutProperty, TextColor, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
 }
 
 void TextClockModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)

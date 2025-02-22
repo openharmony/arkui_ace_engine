@@ -46,14 +46,15 @@ public:
     }
 
     static std::shared_ptr<TestingShaderEffect> CreateLinearGradient(const TestingPoint& /* startPt */,
-        const TestingPoint& /* endPt */, const std::vector<uint32_t>& /* colors */, const std::vector<float>& /* pos */,
-        TileMode /* mode */)
+        const TestingPoint& /* endPt */, const std::vector<uint32_t>& /* colors */,
+        const std::vector<float>& /* pos */, TileMode /* mode */, const TestingMatrix* matrix = nullptr)
     {
         return std::make_shared<TestingShaderEffect>();
     }
 
     static std::shared_ptr<TestingShaderEffect> CreateRadialGradient(const TestingPoint& centerPt, scalar radius,
-        const std::vector<ColorQuad>& colors, const std::vector<scalar>& pos, TileMode mode)
+        const std::vector<ColorQuad>& colors, const std::vector<scalar>& pos, TileMode mode,
+        const TestingMatrix* matrix = nullptr)
     {
         return std::make_shared<TestingShaderEffect>();
     }

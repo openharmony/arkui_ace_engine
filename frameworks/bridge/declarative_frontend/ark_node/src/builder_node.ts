@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="../../state_mgmt/src/lib/common/ace_console.native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 
@@ -155,11 +156,13 @@ class JSBuilderNode extends BaseNode {
   public createOrGetNode(elmtId: number, builder: () => object): object {
     const entry = this.updateFuncByElmtId.get(elmtId);
     if (entry === undefined) {
-      throw new Error(`fail to create node, elmtId is illegal`);
+      aceConsole.warn(0, `BUILDER_NOD: fail to create node, elmtId is illegal`);
+      return builder();
     }
     let updateFuncRecord: UpdateFuncRecord = (typeof entry === 'object') ? entry : undefined;
     if (updateFuncRecord === undefined) {
-      throw new Error(`fail to create node, the api level of app does not supported`);
+      aceConsole.warn(0, `BUILDER_NOD: fail to create node, the api level of app does not supported`);
+      return builder();
     }
     let nodeInfo = updateFuncRecord.node;
     if (nodeInfo === undefined) {

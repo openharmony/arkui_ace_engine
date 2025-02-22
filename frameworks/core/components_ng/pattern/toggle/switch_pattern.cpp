@@ -77,7 +77,7 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    switchTheme_ = pipeline->GetTheme<SwitchTheme>();
+    switchTheme_ = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
     InitPanEvent(gestureHub);
     InitTouchEvent();
     InitMouseEvent();
@@ -427,11 +427,11 @@ void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
     Color onBgColor = switchTheme_->GetActiveColor();
     Color offBgColor = switchTheme_->GetInactiveColor();
     if (isOn) {
-        if (!switchPaintProperty->HasSelectedColor() || switchPaintProperty->GetSelectedColor() == onBgColor) {
+        if (switchPaintProperty->HasSelectedColor() && switchPaintProperty->GetSelectedColor() == onBgColor) {
             switchPaintProperty->UpdateSelectedColor(onBgColor);
         }
     } else {
-        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == offBgColor) {
+        if (switchPaintProperty->HasUnselectedColor() && switchPaintProperty->GetUnselectedColor() == offBgColor) {
             Color bgColor = isFocus_ ? switchTheme_->GetFocusedBGColorUnselected() : switchTheme_->GetInactiveColor();
             switchPaintProperty->UpdateUnselectedColor(bgColor);
         }
@@ -535,17 +535,11 @@ void SwitchPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto switchPattern = weak.Upgrade();
         CHECK_NULL_VOID(switchPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH &&
-            (info.IsPreventDefault() || switchPattern->isTouchPreventDefault_)) {
-            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "swich preventDefault successfully");
-            switchPattern->isTouchPreventDefault_ = false;
-            return;
-        }
         switchPattern->OnClick();
     };
 
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickAfterEvent(clickListener_);
+    gesture->AddClickEvent(clickListener_);
 }
 
 void SwitchPattern::InitTouchEvent()
@@ -560,9 +554,6 @@ void SwitchPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto switchPattern = weak.Upgrade();
         CHECK_NULL_VOID(switchPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
-            switchPattern->isTouchPreventDefault_ = info.IsPreventDefault();
-        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             switchPattern->OnTouchDown();
         }
@@ -572,7 +563,7 @@ void SwitchPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchAfterEvent(touchListener_);
+    gesture->AddTouchEvent(touchListener_);
 }
 
 void SwitchPattern::InitMouseEvent()
@@ -775,7 +766,7 @@ void SwitchPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(switchTheme);
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
@@ -783,8 +774,24 @@ void SwitchPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
-    switchModifier->InitializeParam();
+    switchModifier->InitializeParam(host->GetThemeScopeId());
     host->MarkDirtyNode();
+    host->SetNeedCallChildrenUpdate(false);
+}
+
+bool SwitchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+
+    if (!paintProperty->HasSelectedColor() || !paintProperty->HasSwitchPointColor()) {
+        result = true;
+    }
+
+    return result;
 }
 
 void SwitchPattern::SetSwitchIsOn(bool ison)

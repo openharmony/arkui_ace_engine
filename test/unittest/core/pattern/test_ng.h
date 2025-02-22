@@ -61,6 +61,14 @@ public:
     AssertionResult IsExistAndActive(const RefPtr<FrameNode>& frameNode, int32_t index);
     AssertionResult IsExistAndInActive(const RefPtr<FrameNode>& frameNode, int32_t index);
 
+    AssertionResult IsEqual(Color actual, Color expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
+    }
+
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {
         if (NearEqual(actual, expected)) {

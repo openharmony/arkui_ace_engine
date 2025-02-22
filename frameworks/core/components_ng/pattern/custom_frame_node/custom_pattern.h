@@ -35,6 +35,11 @@ public:
         CHECK_NULL_RETURN(focusHub, FocusPattern());
         return { focusHub->GetFocusType(), focusHub->GetFocusable() };
     }
+
+    bool ReusedNodeSkipMeasure() override
+    {
+        return AceApplicationInfo::GetInstance().IsReusedNodeSkipMeasure();
+    }
 };
 } // namespace OHOS::Ace::NG
 

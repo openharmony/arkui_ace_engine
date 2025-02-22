@@ -279,7 +279,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
 
     void ClearMultiSelect() override;
-    bool IsItemSelected(const GestureEvent& info) override;
+    bool IsItemSelected(float offsetX, float offsetY) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);

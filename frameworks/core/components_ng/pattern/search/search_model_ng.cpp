@@ -954,6 +954,9 @@ void SearchModelNG::SetType(TextInputType value)
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
+        auto pattern = textFieldHost->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsFilterChanged(true);
     }
     layoutProperty->UpdateTextInputType(value);
     textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1083,7 +1086,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     std::u16string defaultText = u"Search";
     textLayoutProperty->UpdateContent(defaultText);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
-    textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
+    textLayoutProperty->UpdateFontSize(searchTheme->GetButtonFontSize());
     textLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     textLayoutProperty->UpdateMaxLines(1);
 
@@ -1159,9 +1162,10 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
+    textLayoutProperty->UpdateFontSize(searchTheme->GetButtonFontSize());
     auto cancelButtonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     cancelButtonLayoutProperty->UpdateType(ButtonType::CIRCLE);
+    cancelButtonLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     cancelButtonEvent->SetEnabled(false);
@@ -2068,6 +2072,9 @@ void SearchModelNG::SetType(FrameNode* frameNode, TextInputType value)
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
+        auto pattern = textFieldHost->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsFilterChanged(true);
     }
     layoutProperty->UpdateTextInputType(value);
     textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

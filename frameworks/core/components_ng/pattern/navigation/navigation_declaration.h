@@ -33,6 +33,14 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
     return pipeline->GetTheme<NavigationBarTheme>();
 }
 
+
+inline RefPtr<NavigationBarTheme> NavigationGetTheme(int32_t themeScopeId)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<NavigationBarTheme>(themeScopeId);
+}
+
 // TODO：move some items to theme
 // title bar back button
 constexpr const char* BACK_BUTTON = "Back";
@@ -270,6 +278,7 @@ struct NavDestinationTransition {
 
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(
     NavigationOperation operation, bool isEnter)>;
+using NavDestinationOnNewParamCallback = std::function<void(napi_value param)>;
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

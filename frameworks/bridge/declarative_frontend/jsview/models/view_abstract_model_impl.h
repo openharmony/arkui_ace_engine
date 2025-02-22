@@ -197,6 +197,7 @@ public:
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
+    void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
@@ -257,6 +258,7 @@ public:
     void DisableOnCrownEvent() override {};
 #endif
     void DisableOnHover() override {};
+    void DisableOnHoverMove() override {};
     void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};
     void DisableOnAxisEvent() override {};
@@ -294,6 +296,19 @@ public:
 
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
+
+    int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
+    {
+        return 0;
+    };
+    int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
+    int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override {};
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
@@ -328,6 +343,8 @@ public:
     void ResetOnAccessibilityFocus() override;
     void SetAccessibilityDefaultFocus() override;
     void SetAccessibilityUseSamePage(bool isFullSilent) override;
+    void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
+    void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}

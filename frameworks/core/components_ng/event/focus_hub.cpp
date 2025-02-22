@@ -226,7 +226,23 @@ bool FocusHub::HandleEvent(const NonPointerEvent& event)
     bool rightArrowPressed = focusEvent.intension == FocusIntension::RIGHT;
     hasForwardMovement_ = (tabOnlyPressed || rightArrowPressed);
 
+    auto keyProcessingMode = static_cast<KeyProcessingMode>(GetKeyProcessingMode());
+    if (keyProcessingMode == KeyProcessingMode::ANCESTOR_EVENT) {
+        if (!OnFocusEvent(focusEvent)) {
+            return HandleFocusNavigation(focusEvent);
+        }
+        return true;
+    }
     return OnFocusEvent(focusEvent);
+}
+
+bool FocusHub::HandleFocusNavigation(const FocusEvent& event)
+{
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    if (lastFocusNode && lastFocusNode->IsCurrentFocus() && lastFocusNode->HandleFocusNavigation(event)) {
+        return true;
+    }
+    return HandleFocusTravel(event);
 }
 
 bool FocusHub::HandleFocusTravel(const FocusEvent& event)
@@ -1680,6 +1696,7 @@ bool FocusHub::PaintAllFocusState()
         return onPaintFocusStateCallback_();
     }
     if (focusStyleType_ != FocusStyleType::NONE) {
+        focusManager->SetLastFocusStateNode(AceType::Claim(this));
         return false;
     }
 

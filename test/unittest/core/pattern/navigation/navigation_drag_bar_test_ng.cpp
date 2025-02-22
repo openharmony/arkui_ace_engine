@@ -72,6 +72,7 @@ void NavigationDragBarTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 void NavigationDragBarTestNg::CreateNavigationModel()
@@ -122,6 +123,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest002, TestSize.Level1)
      * @tc.steps: step1. create NavigationGroupNode.
      */
     CreateNavigationModel();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -169,6 +171,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest003, TestSize.Level1)
      * @tc.steps: step1. create NavigationGroupNode.
      */
     CreateNavigationModel();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -204,6 +207,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest004, TestSize.Level1)
      * @tc.steps: step1. create NavigationGroupNode and dragBar.
      */
     CreateNavigationModel();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -242,6 +246,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest005, TestSize.Level1)
      * @tc.steps: step1. create NavigationGroupNode and dragBar.
      */
     CreateNavigationModel();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);

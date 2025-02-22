@@ -104,7 +104,6 @@ public:
 
     virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
-    FrameNode* GetUnsafeHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
     virtual bool NeedDebugBoundary() const
@@ -769,6 +768,16 @@ public:
     {
         return OffsetF();
     }
+
+    virtual bool AddNodeToRsTree()
+    {
+        return false;
+    }
+
+    virtual void SetDrawNode() {}
+
+    virtual void SetDrawNodeChangeCallback() {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

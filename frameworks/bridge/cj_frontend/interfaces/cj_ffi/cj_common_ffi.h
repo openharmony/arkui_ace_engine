@@ -309,6 +309,14 @@ struct CJBaseEvent {
     int64_t deviceId;
 };
 
+struct NativeFont {
+    double size;
+    int32_t sizeUnit;
+    const char* weight;
+    const char* family;
+    uint32_t style;
+};
+
 struct AtCPackage;
 
 struct AtCOHOSAceFrameworkCJInstanceLoadEntryParams {
@@ -356,7 +364,23 @@ struct AtCPackage {
     void (*atCOHOSAceFrameworkLazyForEachFuncsDataChangeListenerUnregister)(int64_t self, int64_t idx) = nullptr;
 };
 
+struct AtCXComponentCallback {
+    void (*atCXComponentControllerOnSurfaceCreated)(int64_t self, int64_t idx) = nullptr;
+    void (*atCXComponentControllerOnSurfaceChanged)(int64_t self, int64_t idx, CJRectResult rect) = nullptr;
+    void (*atCXComponentControllerOnSurfaceDestroyed)(int64_t self, int64_t idx) = nullptr;
+};
+
+struct AtCPackageV2 {
+    void (*atCOHOSAceFrameworkRemoteViewOnDidBuild)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewAboutToReuse)(int64_t self, const char* params) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewAboutToRecycle)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewRecycleSelf)(int64_t self, const char* params) = nullptr;
+};
+
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs);
+CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncsV2(void (*callback)(AtCPackageV2* cjFuncs));
+
+CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCallback cjCtrFuncs);
 
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
 

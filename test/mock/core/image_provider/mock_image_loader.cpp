@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include <chrono>
 
 #include "core/image/image_loader.h"
+
 namespace OHOS::Ace {
 RefPtr<MockImageLoader> g_loader;
 
@@ -42,11 +43,7 @@ std::string ImageLoader::RemovePathHead(const std::string& uri)
     return uri.substr(0);
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& /*uri*/)
-#else
 std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& /* uri */)
-#endif
 {
     return nullptr;
 }

@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
 #include "base/utils/system_properties.h"
+#include "core/common/ace_engine.h"
 #include "core/common/ai/text_translation_adapter.h"
 #include "core/common/share/text_share_adapter.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -1559,11 +1561,26 @@ void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason
 {
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto container = AceEngine::Get().GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto isExpandDisplay = selectTheme->GetExpandDisplay();
+    auto isFreeMultiWindow = container->IsFreeMultiWindow();
+    if (!isFreeMultiWindow && !isExpandDisplay) {
+        return;
+    }
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     if (overlayManager->IsRightClickSubWindowMenu()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
-    } else if (overlayManager->IsSeletctOverlaySubWindowMenu()) {
+    } else if (overlayManager->IsSelectOverlaySubWindowMenu()) {
+        if (SystemProperties::IsSuperFoldDisplayDevice()) {
+            CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
+            return;
+        }
         if (overlayManager->IsMenuShow()) {
             HideMenu(true);
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");

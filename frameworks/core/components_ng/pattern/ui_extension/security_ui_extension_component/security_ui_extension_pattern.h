@@ -126,16 +126,19 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info) const override;
     
     int32_t GetInstanceIdFromHost() const;
-    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
-    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
+    bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
     void OnUIExtBusinessReceiveReply(
         UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void OnUIExtBusinessReceive(UIContentBusinessCode code, const AAFwk::Want& data);
     void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
     void RegisterUIExtBusinessConsumeReplyCallback(
         UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
-    void TransferAccessibilityRectInfo();
+    void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 
 private:
     void InitializeAccessibility();

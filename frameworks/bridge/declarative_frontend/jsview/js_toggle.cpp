@@ -17,18 +17,16 @@
 
 #include <cstddef>
 #include <string>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_toggle_theme.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -143,7 +141,6 @@ void JSToggle::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseToggleIsOnObject(info, changeEventVal);
     }
-    JSToggleTheme::ApplyTheme(NG::ToggleType(toggleType_));
 }
 
 void JSToggle::JsWidth(const JSCallbackInfo& info)
@@ -194,9 +191,7 @@ void JSToggle::JsHeight(const JSCallbackInfo& info)
 
 void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    auto switchTheme = GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     auto defaultHeight = switchTheme->GetHeight();
     auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
@@ -257,9 +252,7 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Toggle.onChange");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Toggle.onChange");
     };
     ToggleModel::GetInstance()->OnChange(std::move(onChange));
     args.ReturnSelf();
@@ -285,14 +278,12 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         return;
     }
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        auto theme = GetTheme<SwitchTheme>();
-        if (theme) {
-            color = theme->GetPointColor();
-        }
+    std::optional<Color> switchPointColor;
+    if (ParseJsColor(info[0], color)) {
+        switchPointColor = color;
     }
 
-    ToggleModel::GetInstance()->SetSwitchPointColor(color);
+    ToggleModel::GetInstance()->SetSwitchPointColor(switchPointColor);
 }
 
 void JSToggle::JsPadding(const JSCallbackInfo& info)
@@ -415,6 +406,9 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSToggle::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSToggle][pop]", &JSToggle::Pop);
+    }
     ToggleModel::GetInstance()->Pop();
 }
 

@@ -392,6 +392,17 @@ std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
     return result;
 }
 
+void SafeAreaManager::SetKeyboardInfo(float height)
+{
+    SetRawKeyboardHeight(height);
+    keyboardOrientation_ = -1;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    keyboardOrientation_ = static_cast<int32_t>(displayInfo->GetRotation());
+}
+
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
 {
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {

@@ -123,7 +123,7 @@ public:
     void SetupRootElement() override;
 
     // This is used for subwindow, when the subwindow is created,a new subRootElement will be built
-    void SetupSubRootElement() override;
+    RefPtr<Element> SetupSubRootElement();
     RefPtr<DialogComponent> ShowDialog(
         const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag = "");
     void CloseContextMenu();
@@ -855,6 +855,7 @@ private:
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
     void FlushTouchEvents();
+    bool OnKeyEvent(const NonPointerEvent& nonPointerEvent);
 
     template<typename T>
     struct NodeCompare {

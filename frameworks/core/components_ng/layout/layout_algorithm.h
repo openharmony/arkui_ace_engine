@@ -173,7 +173,7 @@ public:
 
     bool GetPercentWidth() const
     {
-        return percentHeight_;
+        return percentWidth_;
     }
 
     void SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm);

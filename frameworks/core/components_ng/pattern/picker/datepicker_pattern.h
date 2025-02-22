@@ -326,6 +326,7 @@ public:
 
     void SetDateOrder(std::string dateOrder)
     {
+        isDateOrderChange_ = dateOrder != dateOrder_;
         dateOrder_ = dateOrder;
     }
 
@@ -762,6 +763,7 @@ public:
 
     void ColumnPatternInitHapticController();
     void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
+    void ColumnPatternStopHaptic();
 
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
@@ -810,6 +812,8 @@ private:
     bool OnCrownEvent(const CrownEvent& event);
 #endif
     void InitFocusKeyEvent();
+    void FlushChildNodes();
+
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -870,6 +874,7 @@ private:
     bool isPicker_ = false;
     bool isFiredDateChange_ = false;
     bool isForceUpdate_ = false;
+    bool isDateOrderChange_ = false;
     std::optional<std::string> firedDateStr_;
     void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float &leftTotalColumnWidth, float childSize);
     bool CheckFocusID(int32_t childSize);

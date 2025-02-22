@@ -28,6 +28,7 @@
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 #include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
@@ -222,8 +223,10 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
     int32_t GetInstanceIdFromHost() const;
-    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
-    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
+    bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
     void OnUIExtBusinessReceiveReply(
         UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void OnUIExtBusinessReceive(UIContentBusinessCode code, const AAFwk::Want& data);
@@ -243,8 +246,18 @@ public:
     void NotifyHostWindowMode(Rosen::WindowMode mode);
     void NotifyHostWindowMode();
 
-    void TransferAccessibilityRectInfo();
+    void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
+
+    const ContainerModalAvoidInfo& GetAvoidInfo() const
+    {
+        return avoidInfo_;
+    }
+    void SetAvoidInfo(const ContainerModalAvoidInfo& info)
+    {
+        avoidInfo_ = info;
+    }
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -335,6 +348,7 @@ private:
     void InitBusinessDataHandleCallback();
     void RegisterEventProxyFlagCallback();
 
+    void RegisterGetAvoidInfoCallback();
     void RegisterReplyPageModeCallback();
     void UpdateFrameNodeState();
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
@@ -407,6 +421,8 @@ private:
 
     bool isWindowModeFollowHost_ = false;
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
+
+    ContainerModalAvoidInfo avoidInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

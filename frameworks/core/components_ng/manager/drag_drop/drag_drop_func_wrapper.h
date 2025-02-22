@@ -39,6 +39,9 @@ class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
     static int32_t StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
     static void SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId);
+    static int32_t RequestDragEndPending();
+    static int32_t NotifyDragResult(int32_t requestId, int32_t result);
+    static int32_t NotifyDragEndPendingDone(int32_t requestId);
     static void DecideWhetherToStopDragging(const DragPointerEvent& pointerEvent,
         const std::string& extraParams, int32_t currentPointerId, int32_t containerId);
     static void UpdateDragPreviewOptionsFromModifier(
@@ -74,7 +77,7 @@ public:
     static OffsetF GetFrameNodeOffsetToWindow(
         const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode, float width, float height);
     static OffsetF GetPointRelativeToMainWindow(const Point& point);
-    static void HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
+    static void HandleOnDragEvent(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
 
     // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
@@ -96,6 +99,7 @@ public:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     static void RecordMenuWrapperNodeForDrag(int32_t targetId);
     static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
+    static void TrySetDraggableStateAsync(const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
 
     // modifier
     static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);

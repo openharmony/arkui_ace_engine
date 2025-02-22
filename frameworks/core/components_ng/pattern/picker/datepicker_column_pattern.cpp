@@ -94,7 +94,7 @@ void DatePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (hapticController_) {
         hapticController_->Stop();
     }
-    UnregisterWindowStateChangedCallback();
+    UnregisterWindowStateChangedCallback(frameNode);
 }
 
 void DatePickerColumnPattern::OnModifyDone()
@@ -185,13 +185,12 @@ void DatePickerColumnPattern::RegisterWindowStateChangedCallback()
     pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
-void DatePickerColumnPattern::UnregisterWindowStateChangedCallback()
+void DatePickerColumnPattern::UnregisterWindowStateChangedCallback(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
 
 void DatePickerColumnPattern::OnWindowHide()
@@ -205,6 +204,11 @@ void DatePickerColumnPattern::OnWindowHide()
 void DatePickerColumnPattern::OnWindowShow()
 {
     isShow_ = true;
+}
+
+void DatePickerColumnPattern::StopHaptic()
+{
+    stopHaptic_ = true;
 }
 
 void DatePickerColumnPattern::ParseTouchListener()
@@ -298,6 +302,7 @@ RefPtr<TouchEventImpl> DatePickerColumnPattern::CreateItemTouchEventListener()
     auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->stopHaptic_ = false;
         auto isToss = pattern->GetTossStatus();
         if (info.GetTouches().empty()) {
             return;
@@ -340,12 +345,12 @@ void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
 
 void DatePickerColumnPattern::OnTouchDown()
 {
+    SetSelectedMark();
     PlayPressAnimation(pressColor_);
 }
 
 void DatePickerColumnPattern::OnTouchUp()
 {
-    SetSelectedMark();
     if (hoverd_) {
         PlayPressAnimation(GetButtonHoverColor());
     } else {
@@ -355,6 +360,12 @@ void DatePickerColumnPattern::OnTouchUp()
 
 void DatePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
 {
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    CHECK_EQUAL_VOID(pickerTheme->IsCircleDial(), true);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blend = host->GetParent();
@@ -930,7 +941,7 @@ bool DatePickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    if (hapticController_ && isEnableHaptic_) {
+    if (hapticController_ && isEnableHaptic_ && !stopHaptic_) {
         hapticController_->PlayOnce();
     }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
@@ -1333,7 +1344,7 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
     if (hapticController_ && isShow_) {
-        if (isEnableHaptic_) {
+        if (isEnableHaptic_ && !stopHaptic_) {
             hapticController_->HandleDelta(dragDelta);
         }
     }
@@ -1348,6 +1359,9 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
                                                                 : optionProperties_[midIndex].nextDistance;
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));

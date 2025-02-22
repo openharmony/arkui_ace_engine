@@ -36,6 +36,12 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float MAX_FONT_SCALE = 2.0f;
 constexpr Dimension ICON_MAX_SIZE = 40.0_vp;
+constexpr Dimension DEFAULT_ICON_HOT_ZONE = 40.0_vp;
+constexpr Dimension ICON_CONTAINER_HOVER_PADDING = 4.0_vp;
+constexpr Dimension ICON_UNDERLINE_CONTAINER_HOVER_PADDING = 8.0_vp;
+constexpr Dimension ICON_FOCUS_PADDING = 2.0_vp;
+constexpr int HALF_SPACE = 2;
+constexpr int DOUBLE_PADDING = 2;
 } // namespace
 
 // TextInputResponseArea begin
@@ -203,6 +209,68 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     return stackNode;
 }
 
+void PasswordResponseArea::AddIconHotZoneRect()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    CHECK_NULL_VOID(stackNode_);
+    auto stackGeometryNode = stackNode_->GetGeometryNode();
+    CHECK_NULL_VOID(stackGeometryNode);
+    auto stackRect = stackGeometryNode->GetFrameRect();
+
+    auto iconSize = stackRect.Width() - GetIconRightOffset();
+    auto hotZoneHeight = DEFAULT_ICON_HOT_ZONE.ConvertToPx();
+    hotZoneHeight = passwordHoverSize_ > hotZoneHeight ? passwordHoverSize_ : hotZoneHeight;
+    auto hotZoneX = - (hotZoneHeight - iconSize) / HALF_SPACE;
+    auto hotZoneY = - (hotZoneHeight - iconSize) / HALF_SPACE;
+
+    OffsetF hotZoneOffset;
+    hotZoneOffset.SetX(hotZoneX);
+    hotZoneOffset.SetY(hotZoneY);
+    SizeF hotZoneSize;
+    hotZoneSize.SetWidth(hotZoneHeight);
+    hotZoneSize.SetHeight(hotZoneHeight);
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+
+    std::vector<DimensionRect> mouseRegion;
+    mouseRegion.emplace_back(hotZoneRegion);
+
+    auto stackGestureHub = stackNode_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(stackGestureHub);
+    stackGestureHub->SetMouseResponseRegion(mouseRegion);
+
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(hotZoneRegion);
+    stackGestureHub->SetResponseRegion(responseRegion);
+}
+
+void PasswordResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
+{
+    CHECK_NULL_VOID(stackNode_);
+    auto stackGeometryNode = stackNode_->GetGeometryNode();
+    CHECK_NULL_VOID(stackGeometryNode);
+    auto stackRect = stackGeometryNode->GetFrameRect();
+    auto textInputNode = stackNode_->GetParentFrameNode();
+    CHECK_NULL_VOID(textInputNode);
+    auto textInputRect = textInputNode->GetGeometryNode()->GetFrameRect();
+    auto iconSize = stackRect.Height();
+    auto defaultRectHeight = textInputRect.Height() - DOUBLE_PADDING * ICON_CONTAINER_HOVER_PADDING.ConvertToPx();
+    auto rectHeight = iconSize > defaultRectHeight ? iconSize : defaultRectHeight;
+    auto hoverRectHeight = rectHeight > textInputRect.Height() ? textInputRect.Height() : rectHeight;
+    passwordHoverSize_ = hoverRectHeight;
+    RectF rect;
+    if (isFocus) {
+        hoverRectHeight = hoverRectHeight - ICON_FOCUS_PADDING.ConvertToPx();
+    }
+
+    rect = RectF(stackRect.GetX() - (hoverRectHeight - iconSize) / HALF_SPACE, stackRect.GetY() +
+        (stackRect.Height() - hoverRectHeight) / HALF_SPACE, hoverRectHeight, hoverRectHeight);
+    paintRect.SetRect(rect);
+}
+
 void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
@@ -358,7 +426,9 @@ SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
     if (!IsShowPasswordIcon()) {
         return SizeF(0, 0);
     }
-    return TextInputResponseArea::Measure(layoutWrapper, index);
+    auto textInputMeasure = TextInputResponseArea::Measure(layoutWrapper, index);
+    AddIconHotZoneRect();
+    return textInputMeasure;
 }
 
 void PasswordResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
@@ -381,7 +451,11 @@ float PasswordResponseArea::GetIconSize()
     CHECK_NULL_RETURN(themeManager, 0.0f);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
-    return static_cast<float>(textFieldTheme->GetIconSize().ConvertToPx());
+    auto iconSize = textFieldTheme->GetIconSize().ConvertToPx();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        iconSize = textFieldTheme->GetPasswordIconSize().ConvertToPx();
+    }
+    return static_cast<float>(iconSize);
 }
 
 float PasswordResponseArea::GetIconRightOffset()
@@ -396,6 +470,10 @@ float PasswordResponseArea::GetIconRightOffset()
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = textFieldTheme->GetPadding();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        auto passwordIconPadding = textFieldTheme->GetPasswordIconPadding();
+        return static_cast<float>(passwordIconPadding.ConvertToPx());
+    }
     return static_cast<float>(themePadding.Left().ConvertToPx());
 }
 
@@ -499,6 +577,9 @@ void PasswordResponseArea::UpdateSymbolSource()
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(currentSymbolId));
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        symbolProperty->UpdateFontSize(textFieldTheme->GetPasswordIconSize());
+    }
     UpdateSymbolColor();
 
     symbolNode->MarkModifyDone();
@@ -633,7 +714,86 @@ void CleanNodeResponseArea::InitResponseArea()
 
 SizeF CleanNodeResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
-    return TextInputResponseArea::Measure(layoutWrapper, index);
+    auto textInputMeasure = TextInputResponseArea::Measure(layoutWrapper, index);
+    AddIconHotZoneRect();
+    return textInputMeasure;
+}
+
+void CleanNodeResponseArea::AddIconHotZoneRect()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    CHECK_NULL_VOID(cleanNode_);
+    auto iconSize = GetIconSize();
+    auto hotZoneHeight = DEFAULT_ICON_HOT_ZONE.ConvertToPx();
+    hotZoneHeight = cancelHoverSize_ > hotZoneHeight ? cancelHoverSize_ : hotZoneHeight;
+    auto hotZoneX = - (hotZoneHeight - iconSize) / HALF_SPACE;
+    auto hotZoneY = - (hotZoneHeight - iconSize) / HALF_SPACE;
+
+    OffsetF hotZoneOffset;
+    hotZoneOffset.SetX(hotZoneX);
+    hotZoneOffset.SetY(hotZoneY);
+    SizeF hotZoneSize;
+    hotZoneSize.SetWidth(hotZoneHeight);
+    hotZoneSize.SetHeight(hotZoneHeight);
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+
+    std::vector<DimensionRect> mouseRegion;
+    mouseRegion.emplace_back(hotZoneRegion);
+
+    auto stackGestureHub = cleanNode_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(stackGestureHub);
+    stackGestureHub->SetMouseResponseRegion(mouseRegion);
+
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(hotZoneRegion);
+    stackGestureHub->SetResponseRegion(responseRegion);
+}
+
+void CleanNodeResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
+{
+    CHECK_NULL_VOID(cleanNode_);
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto stackGeometryNode = cleanNode_->GetGeometryNode();
+    CHECK_NULL_VOID(stackGeometryNode);
+    auto stackRect = stackGeometryNode->GetFrameRect();
+    auto textInputNode = cleanNode_->GetParentFrameNode();
+    CHECK_NULL_VOID(textInputNode);
+    auto textInputRect = textInputNode->GetGeometryNode()->GetFrameRect();
+    auto iconSize = GetIconSize();
+    auto defaultRectHeight = textInputRect.Height() - DOUBLE_PADDING * ICON_CONTAINER_HOVER_PADDING.ConvertToPx();
+    if (textFieldLayoutProperty->GetShowUnderlineValue(false)) {
+        defaultRectHeight = textInputRect.Height() - DOUBLE_PADDING *
+            ICON_UNDERLINE_CONTAINER_HOVER_PADDING.ConvertToPx();
+    }
+    auto rectHeight = iconSize > defaultRectHeight ? iconSize : defaultRectHeight;
+    auto hoverRectHeight = rectHeight > textInputRect.Height() ? textInputRect.Height() : rectHeight;
+    cancelHoverSize_ = hoverRectHeight;
+    RectF rect;
+    if (isFocus) {
+        hoverRectHeight = hoverRectHeight - ICON_FOCUS_PADDING.ConvertToPx();
+    }
+
+    rect = RectF(stackRect.GetX() - (hoverRectHeight - iconSize) / HALF_SPACE,
+        stackRect.GetY() + (stackRect.Height() - hoverRectHeight) / HALF_SPACE, hoverRectHeight, hoverRectHeight);
+    paintRect.SetRect(rect);
+}
+
+float GetCancelButtonPadding(const RefPtr<TextFieldTheme> textFieldTheme)
+{
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    auto themePadding = textFieldTheme->GetPadding();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        auto cancelButtonPadding = textFieldTheme->GetCancelIconPadding();
+        return static_cast<float>(cancelButtonPadding.ConvertToPx());
+    }
+    return static_cast<float>(themePadding.Left().ConvertToPx());
 }
 
 bool CleanNodeResponseArea::IsShowClean() const
@@ -736,6 +896,9 @@ void CleanNodeResponseArea::SetCancelSymbolIconSize()
     auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        symbolProperty->UpdateFontSize(textFieldTheme->GetCancelIconSize());
+    }
 }
 
 CalcDimension CleanNodeResponseArea::GetSymbolDefaultSize()
@@ -789,7 +952,12 @@ void CleanNodeResponseArea::UpdateSymbolSource()
         symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     }
 
-    auto fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
+    Dimension fontSize;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetCancelIconSize());
+    } else {
+        fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
+    }
     if (GreatOrEqualCustomPrecision(fontSize.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
         fontSize = ICON_MAX_SIZE;
     }
@@ -847,8 +1015,7 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
         CHECK_NULL_VOID(themeManager);
         auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(textFieldTheme);
-        auto themePadding = textFieldTheme->GetPadding();
-        auto rightOffset = static_cast<float>(themePadding.Left().ConvertToPx());
+        auto rightOffset = GetCancelButtonPadding(textFieldTheme);
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto frameSize = geometryNode->GetFrameSize();

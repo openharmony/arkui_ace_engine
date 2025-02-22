@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,11 +48,7 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::ARC_DOT) {
-            return MakeRefPtr<CircleDotIndicatorPaintProperty>();
-        }
-
-        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        if (swiperIndicatorType_ == SwiperIndicatorType::DOT) {
             return MakeRefPtr<DotIndicatorPaintProperty>();
         } else {
             return MakeRefPtr<PaintProperty>();
@@ -239,6 +235,11 @@ public:
     {
         return 0.0;
     }
+    virtual float GetEndAngle(const PointF& conter, const PointF& point, float startAngle)
+    {
+        return 0.0;
+    }
+    virtual void UpadateStartAngle() {};
     virtual void InitAccessibilityFocusEvent(){};
     virtual Axis GetDirection() const;
     virtual bool GetDotCurrentOffset(OffsetF& offset, float indicatorWidth, float indicatorHeight);

@@ -130,6 +130,8 @@ const RIGHT_ONLY_RADIO_WIDTH = '30vp';
 const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
 const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
 const ACCESSIBILITY_LEVEL_AUTO = 'auto';
+const ACCESSIBILITY_LEVEL_YES = 'yes';
+const ACCESSIBILITY_LEVEL_NO = 'no';
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 const ICON_SIZE_MAP: Map<number, number> = new Map([
@@ -616,7 +618,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(param.icon?.action)
-    .accessibilityLevel(param.icon?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel, param.icon?.action))
     .accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''))
     .accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''))
     .flexShrink(0)
@@ -727,7 +729,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
-    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
     .accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''))
     .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
@@ -773,7 +775,7 @@ struct OperateItemStruct {
           }
         }
       })
-      .accessibilityLevel(this.radio?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel, this.radio?.onChange))
       .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
       .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
@@ -817,7 +819,7 @@ struct OperateItemStruct {
           }
         }
       })
-      .accessibilityLevel(this.checkBox?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel, this.checkBox?.onChange))
       .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
       .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
@@ -844,7 +846,7 @@ struct OperateItemStruct {
           this.switchState = !this.switchState;
         })
         .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
-        .accessibilityLevel(this.switch?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+        .accessibilityLevel(getAccessibilityLevelOnChange(this.switch?.accessibilityLevel, this.switch?.onChange))
         .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''))
         .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''))
     }
@@ -1004,7 +1006,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
-    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
     .accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`)
     .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
@@ -1076,6 +1078,40 @@ function getAccessibilityText(resource: ResourceStr): string {
     hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
     return '';
   }
+}
+
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (value: boolean) => void): string {
+  if (accessibilityLevel) {
+    return accessibilityLevel;
+  }
+  if (onChange) {
+    return ACCESSIBILITY_LEVEL_YES;
+  }
+  return ACCESSIBILITY_LEVEL_NO;
+}
+
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: () => void): string {
+  if (accessibilityLevel) {
+    return accessibilityLevel;
+  }
+  if (onAction) {
+    return ACCESSIBILITY_LEVEL_YES;
+  }
+  return ACCESSIBILITY_LEVEL_NO;
 }
 
 @Component

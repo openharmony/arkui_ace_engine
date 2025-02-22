@@ -72,6 +72,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
+    CheckMousePendingRecognizersState(touchPoint);
     CleanRefereeBeforeTouchTest(touchPoint, needAppend);
     ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
@@ -962,6 +963,26 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
             isStopTouchEvent = !entry->HandleMultiContainerEvent(touchEvent);
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+        }
+    }
+}
+
+void EventManager::DispatchTouchCancelToRecognizer(
+    TouchEventTarget* touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items)
+{
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::CANCEL;
+    touchEvent.isFalsified = true;
+    for (auto& item : items) {
+        touchEvent.originalId = item.first;
+        touchEvent.id = item.first;
+        touchEventTarget->HandleMultiContainerEvent(touchEvent);
+        eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(touchEventTarget), "",
+            std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+
+        touchTestResults_[item.first].erase(item.second);
+        if (touchTestResults_[item.first].empty()) {
+            touchTestResults_.erase(item.first);
         }
     }
 }
@@ -1908,6 +1929,8 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     TouchEvent falsifyEvent = touchPoint;
     falsifyEvent.isFalsified = true;
     falsifyEvent.type = TouchType::CANCEL;
+    falsifyEvent.sourceType = SourceType::TOUCH;
+    falsifyEvent.isInterpolated = true;
     auto downFingerIds = downFingerIds_;
     for (const auto& iter : downFingerIds) {
         falsifyEvent.id = iter.first;
@@ -2122,6 +2145,26 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
     } else {
         return false;
     }
+}
+
+void EventManager::AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer)
+{
+    mousePendingRecognizers_.emplace_back(recognizer);
+}
+
+void EventManager::CheckMousePendingRecognizersState(const TouchEvent& event)
+{
+    if (!mousePendingRecognizers_.empty() && event.sourceType == SourceType::MOUSE) {
+        for (const auto& item : mousePendingRecognizers_) {
+            auto recognizer = item.Upgrade();
+            if (!recognizer || (recognizer->GetRefereeState() != NG::RefereeState::PENDING &&
+                             recognizer->GetRefereeState() != NG::RefereeState::PENDING_BLOCKED)) {
+                continue;
+            }
+            recognizer->CheckPendingRecognizerIsInAttachedNode(event);
+        }
+    }
+    mousePendingRecognizers_.clear();
 }
 
 } // namespace OHOS::Ace

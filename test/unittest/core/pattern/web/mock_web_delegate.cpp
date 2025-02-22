@@ -880,7 +880,7 @@ void WebDelegate::WebHandleTouchpadFlingEvent(
 {}
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY) {}
 void WebDelegate::WebHandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY,
-    const std::vector<int32_t>& pressedCodes)
+    const std::vector<int32_t>& pressedCodes, const int32_t source)
 {}
 bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
 {
@@ -1031,7 +1031,7 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset) {}
 void WebDelegate::SetTouchEventInfo(
     std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent, TouchEventInfo& touchEventInfo)
 {}
-void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) {}
+
 bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
     return false;
@@ -1206,6 +1206,7 @@ void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
     const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
 {}
 void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {}
 bool WebDelegate::IsActivePolicyDisable()
 {
     return false;
@@ -1213,4 +1214,8 @@ bool WebDelegate::IsActivePolicyDisable()
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
+std::string WebDelegate::GetCurrentLanguage()
+{
+    return "";
+}
 } // namespace OHOS::Ace

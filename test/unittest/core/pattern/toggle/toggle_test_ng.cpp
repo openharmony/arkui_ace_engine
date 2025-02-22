@@ -378,6 +378,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest008, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SwitchTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SwitchTheme>()));
     switchPattern->OnModifyDone();
 
     // update layoutProperty and execute OnModifyDone again
@@ -586,6 +587,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkboxTheme));
 
     toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
     toggleModelNG.SetSelectedColor(selectedColor);
@@ -606,6 +608,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto toggleButtonTheme = AceType::MakeRefPtr<ToggleTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toggleButtonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(toggleButtonTheme));
 
     toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
     toggleModelNG.SetSelectedColor(selectedColor);
@@ -614,7 +617,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     auto buttonPaintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
     EXPECT_NE(buttonPaintProperty, nullptr);
-    EXPECT_EQ(buttonPaintProperty->GetSelectedColor(), toggleButtonTheme->GetCheckedColor());
+    EXPECT_NE(buttonPaintProperty->GetSelectedColor(), toggleButtonTheme->GetCheckedColor());
 
     /**
      * @tc.steps: step3. test switch
@@ -623,6 +626,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     toggleModelNG.SetSelectedColor(selectedColor);
@@ -633,7 +637,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
     EXPECT_NE(switchPattern, nullptr);
     auto switchPaintProperty = switchPattern->GetPaintProperty<SwitchPaintProperty>();
     EXPECT_NE(switchPaintProperty, nullptr);
-    EXPECT_EQ(switchPaintProperty->GetSelectedColor(), switchTheme->GetActiveColor());
+    EXPECT_NE(switchPaintProperty->GetSelectedColor(), switchTheme->GetActiveColor());
 }
 
 /**
@@ -664,6 +668,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0012, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     MarginProperty margin;
     margin.left = CalcLength(PADDING.ConvertToPx());
@@ -772,6 +777,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0018, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     MarginProperty margin;
     margin.left = CalcLength(PADDING.ConvertToPx());
@@ -827,6 +833,7 @@ HWTEST_F(ToggleTestNg, ToggleLayoutTest001, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGH;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = CONTAINER_SIZE;
@@ -882,7 +889,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
      */
-    RefPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = switchFrameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
     auto switchPaintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
     EXPECT_NE(switchPaintProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -897,6 +905,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGH;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -916,7 +925,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
  */
 HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
 {
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, SELECTED_COLOR, 0.0f);
+    auto switchModifier =
+        AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, SELECTED_COLOR, SWITCH_POINT_COLOR, 0.0f);
     SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
     switchModifier->SetSize(toggleSize);
     switchModifier->hoverColor_ = Color::RED;
@@ -957,7 +967,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest004, TestSize.Level1)
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(switchFrameNode, nullptr);
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, IS_ON, SELECTED_COLOR, 0.0f);
+    auto switchModifier =
+        AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, IS_ON, SELECTED_COLOR, SWITCH_POINT_COLOR, 0.0f);
     SwitchPaintMethod switchPaintMethod = SwitchPaintMethod();
     switchPaintMethod.switchModifier_ = switchModifier;
     /**
@@ -980,6 +991,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest004, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGH;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_EQ(switchModifier, switchPaintMethod.GetContentModifier(paintWrapper));
     switchPaintMethod.UpdateContentModifier(paintWrapper);
@@ -1000,7 +1012,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest003, TestSize.Level1)
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(switchFrameNode, nullptr);
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, IS_ON, SELECTED_COLOR, 0.0f);
+    auto switchModifier =
+        AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, IS_ON, SELECTED_COLOR, SWITCH_POINT_COLOR, 0.0f);
 
     auto switchTheme = MockPipelineContext::GetCurrent()->GetTheme<SwitchTheme>();
     ASSERT_NE(switchTheme, nullptr);
@@ -1019,7 +1032,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest003, TestSize.Level1)
  */
 HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
 {
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, SELECTED_COLOR, 0.0f);
+    auto switchModifier =
+        AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, SELECTED_COLOR, SWITCH_POINT_COLOR, 0.0f);
     SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
     switchModifier->SetSize(toggleSize);
     switchModifier->hoverColor_ = Color::RED;

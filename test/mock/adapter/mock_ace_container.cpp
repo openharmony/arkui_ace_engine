@@ -61,7 +61,7 @@ uint32_t AceContainer::GetWindowType() const
     return DEFAULT_WINDOW_TYPE;
 }
 
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }
@@ -75,4 +75,15 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration) {}
 
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
+
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
+}
+
+void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 } // namespace OHOS::Ace::Platform

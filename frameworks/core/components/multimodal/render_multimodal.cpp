@@ -16,6 +16,7 @@
 #include "core/components/multimodal/render_multimodal.h"
 
 #include "core/components/multimodal/multimodal_component.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

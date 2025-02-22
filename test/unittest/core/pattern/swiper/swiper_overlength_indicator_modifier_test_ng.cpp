@@ -692,8 +692,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
      */
     paintMethod->turnPageRate_ = 1;
     value = paintMethod->CalculatePointCenterX(itemHalfSizes, margin, padding, space, index);
-    EXPECT_NEAR(52.0f, value.first, 0.001f);
-    EXPECT_NEAR(92.0f, value.second, 0.001f);
+    EXPECT_NEAR(20.0f, value.first, 0.001f);
+    EXPECT_NEAR(60.0f, value.second, 0.001f);
 }
 
 /**

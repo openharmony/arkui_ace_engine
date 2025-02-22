@@ -163,6 +163,16 @@ public:
         lastFrameNode_ = node;
     }
 
+    void SetReentrantLimit(const bool reentrantLimit)
+    {
+        reentrantLimit_ = reentrantLimit;
+    }
+
+    bool IsReentrantLimit() const
+    {
+        return reentrantLimit_;
+    }
+
     void SaveCurrentFocusNodeSize(const RefPtr<NG::FrameNode>& currentFocusNode)
     {
         if (currentFocusNode->IsAccessibilityVirtualNode()) {
@@ -179,20 +189,17 @@ public:
     int RegisterInteractionOperation(int windowId);
     void DeregisterInteractionOperation();
 
-    bool HandleAccessibilityEvent(
-        std::shared_ptr<OHOS::Accessibility::AccessibilitySystemAbilityClient>& client,
-        const Accessibility::AccessibilityEventInfo& eventInfo);
-    bool HandleAccessibilityEventForUEA(
-        std::shared_ptr<OHOS::Accessibility::AccessibilitySystemAbilityClient>& client,
-        const Accessibility::AccessibilityEventInfo& eventInfo);
-    bool HandleAccessibilityEventForHost(
-        std::shared_ptr<OHOS::Accessibility::AccessibilitySystemAbilityClient>& client,
-        const Accessibility::AccessibilityEventInfo& eventInfo, const int32_t pageId);
+    bool IsSendAccessibilityEvent(const AccessibilityEvent& accessibilityEvent);
+    bool IsSendAccessibilityEventForUEA(
+        const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId);
+    bool IsSendAccessibilityEventForHost(AccessibilityEvent accessibilityEvent, const int32_t pageId,
+        const std::string componentType);
+    void GetComponentTypeAndPageIdByNodeId(const int64_t nodeId, const RefPtr<PipelineBase>& context,
+        std::string& componentType, int32_t& pageId);
+
     void SendCacheAccessibilityEvent(int32_t instanceId);
     void SendCacheAccessibilityEventForHost(const int32_t pageId);
     void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) override;
-    bool SendEvent(std::shared_ptr<OHOS::Accessibility::AccessibilitySystemAbilityClient>& client,
-        const Accessibility::AccessibilityEventInfo& eventInfo);
 
     std::list<WeakPtr<NG::FrameNode>>& GetDefaultFocusList()
     {
@@ -331,7 +338,7 @@ public:
         const RefPtr<PipelineBase>& context) override;
     void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
 
-    AccessibilityWorkMode GetAccessibilityWorkMode() override;
+    AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
 
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
     void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
@@ -677,15 +684,12 @@ private:
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
     std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;
-
+    bool reentrantLimit_ = false;
     std::string pageMode_;
-    std::vector<Accessibility::AccessibilityEventInfo> cacheEventVec_;
-    mutable std::mutex cacheEventVecMutex_;
+    std::vector<AccessibilityEvent> cacheEventVec_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
-    mutable std::mutex defaultFocusListMutex_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
-    mutable std::mutex extensionComponentStatusVecMutex_;
-    std::unordered_map<int32_t, std::optional<Accessibility::AccessibilityEventInfo>> pageIdEventMap_;
+    std::unordered_map<int32_t, std::optional<AccessibilityEvent>> pageIdEventMap_;
     AccessibilityParentRectInfo uecRectInfo_;
 };
 

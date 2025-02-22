@@ -129,6 +129,10 @@ template("ace_core_interfaces_native_node") {
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      sources += [ "node/web_modifier.cpp" ]
+    }
     if (is_arkui_x) {
       deps += [
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",

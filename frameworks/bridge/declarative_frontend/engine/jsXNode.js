@@ -52,6 +52,7 @@ class BaseNode extends __JSBaseNode__ {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="../../state_mgmt/src/lib/common/ace_console.native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 class BuilderNode {
@@ -179,11 +180,13 @@ class JSBuilderNode extends BaseNode {
     createOrGetNode(elmtId, builder) {
         const entry = this.updateFuncByElmtId.get(elmtId);
         if (entry === undefined) {
-            throw new Error(`fail to create node, elmtId is illegal`);
+            aceConsole.warn(0, `BUILDER_NOD: fail to create node, elmtId is illegal`);
+            return builder();
         }
         let updateFuncRecord = (typeof entry === 'object') ? entry : undefined;
         if (updateFuncRecord === undefined) {
-            throw new Error(`fail to create node, the api level of app does not supported`);
+            aceConsole.warn(0, `BUILDER_NOD: fail to create node, the api level of app does not supported`);
+            return builder();
         }
         let nodeInfo = updateFuncRecord.node;
         if (nodeInfo === undefined) {
@@ -765,8 +768,8 @@ class NodeController {
  */
 var ExpandMode;
 (function (ExpandMode) {
-    ExpandMode[ExpandMode["EXPAND"] = 0] = "EXPAND";
-    ExpandMode[ExpandMode["NOT_EXPAND"] = 1] = "NOT_EXPAND";
+    ExpandMode[ExpandMode["NOT_EXPAND"] = 0] = "NOT_EXPAND";
+    ExpandMode[ExpandMode["EXPAND"] = 1] = "EXPAND";
     ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
 })(ExpandMode || (ExpandMode = {}));
 class FrameNode {
@@ -1672,21 +1675,21 @@ class typeNode {
         return creator(context, options);
     }
     static getAttribute(node, nodeType) {
-        if (node === undefined || node === null || node.getNodeType() != nodeType) {
+        if (node === undefined || node === null || node.getNodeType() !== nodeType) {
             return undefined;
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {
             return undefined;
         }
         let attribute = __attributeMap__.get(nodeType);
-        if (attribute === undefined || attribute == null) {
+        if (attribute === undefined || attribute === null) {
             return undefined;
         }
         return attribute(node);
     }
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
-            node.getNodeType() != nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+            node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
             throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {

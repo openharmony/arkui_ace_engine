@@ -17,6 +17,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
@@ -267,11 +268,17 @@ void JSGesture::Create(const JSCallbackInfo& info)
 
 void JSGesture::Finish()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSGesture][pop]", &JSGesture::Finish);
+    }
     GestureModel::GetInstance()->Finish();
 }
 
 void JSGesture::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSGesture][pop]", &JSGesture::Pop);
+    }
     GestureModel::GetInstance()->Pop();
 }
 

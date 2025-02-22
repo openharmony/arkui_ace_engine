@@ -257,7 +257,7 @@ sptr<IRemoteObject> AceContainer::GetParentToken()
 {
     return parentToken_;
 }
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }
@@ -291,5 +291,15 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
 bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
 {
     return true;
+}
+
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
+
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
 }
 } // namespace OHOS::Ace::Platform

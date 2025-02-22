@@ -748,6 +748,15 @@ std::string GetItemContent(const std::string& id, const std::string& content)
     return content;
 }
 
+void CloseOverlayIfNecessary(const RefPtr<SelectOverlayManager>& overlayManager)
+{
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->DestroySelectOverlay(true);
+    auto contentOverlayManager = overlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    contentOverlayManager->CloseCurrent(true, CloseReason::CLOSE_REASON_TOOL_BAR);
+}
+
 std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOptionsParam>& menuOptionItems,
     const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex)
 {
@@ -788,7 +797,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 systemEvent();
             }
             if (!systemEvent && !result) {
-                overlayManager->DestroySelectOverlay(true);
+                CloseOverlayIfNecessary(overlayManager);
             }
         };
         params.emplace_back(
@@ -1504,10 +1513,9 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptions(bool isAttachToMoreButton,
     if (!moreOrBackSymbol_) {
         moreOrBackSymbol_ = BuildMoreOrBackSymbol();
     }
-    if (isAttachToMoreButton) {
-        backButton_->RemoveChild(moreOrBackSymbol_);
-    } else {
-        moreButton_->RemoveChild(moreOrBackSymbol_);
+    auto button = isAttachToMoreButton ? backButton_ : moreButton_;
+    if (button) {
+        button->RemoveChild(moreOrBackSymbol_);
     }
     moreOrBackSymbol_->MountToParent(isAttachToMoreButton ? moreButton_ : backButton_);
     auto layoutProperty = moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
@@ -2950,6 +2958,9 @@ void SelectOverlayNode::OnCustomSelectMenuAppear()
     auto info = pattern->GetSelectOverlayInfo();
     CHECK_NULL_VOID(info);
     bool isHideMenu = info->menuInfo.menuDisable || !info->menuInfo.menuIsShow;
+    if (isHideMenu) {
+        eventHub->FireMenuVisibilityChangeEvent(true);
+    }
     eventHub->FireMenuVisibilityChangeEvent(!isHideMenu);
 }
 

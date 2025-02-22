@@ -21,6 +21,7 @@
 #include "base/log/jank_frame_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
@@ -71,8 +72,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             onVsync();
             return;
         }
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     if (window->GetSurfaceNode()) {

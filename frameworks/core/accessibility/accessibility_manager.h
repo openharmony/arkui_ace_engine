@@ -22,7 +22,6 @@
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_provider.h"
 #include "core/accessibility/accessibility_utils.h"
-#include "core/pipeline/base/base_composed_component.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -32,9 +31,12 @@ class AccessibilityElementOperator;
 
 namespace OHOS::Ace::NG {
 class WebPattern;
+class FrameNode;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
+
+class ComposedElement;
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
@@ -319,7 +321,7 @@ public:
 
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
 
-    virtual AccessibilityWorkMode GetAccessibilityWorkMode()
+    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
     {
         return AccessibilityWorkMode();
     }

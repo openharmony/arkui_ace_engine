@@ -190,31 +190,6 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestRichEditorMoveCaretAnywhere001
- * @tc.desc: test MoveCaretAnywhere
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorMoveCaretAnywhere001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richOffset = Offset(50, 30);
-    auto tempCaretOffset_ =
-        AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)->caretOffset_;
-    richEditorPattern->isMoveCaretAnywhere_ = true;
-    richEditorPattern->MoveCaretAnywhere(richOffset);
-    auto caretOffsetNew = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)->caretOffset_;
-    EXPECT_TRUE(richEditorPattern->isMoveCaretAnywhere_);
-}
-
-/**
  * @tc.name: TestRichEditorUpdateSelectionByTouchMove001
  * @tc.desc: test UpdateSelectionByTouchMove
  * @tc.type: FUNC
@@ -234,28 +209,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorUpdateSelectionByTouchMove001, Test
     richEditorPattern->UpdateSelectionByTouchMove(richOffset);
     auto host = richEditorPattern->GetHost();
     ASSERT_NE(host, nullptr);
-    ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_MEASURE_SELF, 0);
-}
-
-/**
- * @tc.name: TestRichEditorShowCaretNoTwinkling001
- * @tc.desc: test ShowCaretNoTwinkling
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorShowCaretNoTwinkling001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richOffset = Offset(44, 50);
-    richEditorPattern->ShowCaretNoTwinkling(richOffset);
-    EXPECT_EQ(richEditorPattern->caretVisible_, true);
+    ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_RENDER, 0);
 }
 
 /**

@@ -16,6 +16,7 @@
 #include "core/components/tool_bar/tool_bar_item_element.h"
 
 #include "core/components/tool_bar/render_tool_bar_item.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

@@ -176,8 +176,6 @@ export struct TextPickerBootcamp {
   @State compFlexBasis: number | string = 'auto';
   @State enableCompDirection: boolean = false;
   @State compDirection: Direction = Direction.Auto;
-  @State enableHapticFeedback: boolean = false;
-  @State hapticFeedback: boolean = true;
 
   private fruits: string[] = ['apple1', 'orange2', 'peach3', 'grape4']
 
@@ -1159,7 +1157,6 @@ export struct TextPickerBootcamp {
           .gradientHeight(useEnabled(this.enableGradientHeight, this.gradientHeight))
           .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
           .direction(useEnabled(this.enableCompDirection, this.compDirection))
-          .enableHapticFeedback(useEnabled(this.enableHapticFeedback, this.hapticFeedback))
           .onChange((value: string | string[], index: number | number[]) => {
             this.eventTriggeredLog('滑动选中TextPicker文本内容事件触发')
           })
@@ -2224,16 +2221,6 @@ export struct TextPickerBootcamp {
             { label: 'Auto', value: Direction.Auto },
             { label: 'Ltr', value: Direction.Ltr },
             { label: 'Rtl', value: Direction.Rtl }
-          ]
-        })
-        
-        RadioBlock({
-          title: 'hapticFeedback',
-          isEnabled: this.enableHapticFeedback,
-          value: this.hapticFeedback,
-          dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false }
           ]
         })
 

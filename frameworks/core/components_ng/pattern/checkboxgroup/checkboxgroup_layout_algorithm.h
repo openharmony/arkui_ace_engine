@@ -43,7 +43,7 @@ private:
     float verticalPadding_ = 0.0f;
     Dimension defaultPaddingSize_;
 
-    void InitializeParam();
+    void InitializeParam(uint32_t themeScopeId);
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupLayoutAlgorithm);
 };

@@ -287,9 +287,15 @@ bool CalculateExpImpl(const std::vector<std::string>& rpnexp, const std::functio
     return true;
 }
 
-double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc)
+double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc,
+    const std::vector<std::string>& lengthString)
 {
-    std::vector<std::string> rpnexp = ConvertDal2Rpn(expression);
+    std::vector<std::string> rpnexp;
+    if (!lengthString.empty()) {
+        rpnexp = lengthString;
+    } else {
+        rpnexp = ConvertDal2Rpn(expression);
+    }
     std::vector<Dimension> result;
     double opRes = 0.0;
     auto ret = CalculateExpImpl(rpnexp, calcFunc, result, opRes);

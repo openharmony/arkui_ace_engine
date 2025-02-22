@@ -94,6 +94,8 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
+    void MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
+    void MountToParentBefore(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;
@@ -268,7 +270,7 @@ public:
 
     void SetHostPageIdByParent(int32_t id)
     {
-        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG) {
+        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG || tag_ == V2::STAGE_ETS_TAG) {
             return;
         }
         hostPageId_ = id;
@@ -310,6 +312,11 @@ public:
     bool IsInDestroying() const
     {
         return isInDestroying_;
+    }
+
+    bool IsDestroyingState() const
+    {
+        return isDestroyingState_;
     }
 
     void SetChildrenInDestroying();
@@ -807,7 +814,12 @@ public:
     ColorMode GetLocalColorMode() const;
 
     // Used to mark freeze and block dirty mark.
-    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
+    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false, bool isUserFreeze = false);
+
+    void SetUserFreeze(bool isUserFreeze);
+
+    bool IsUserFreeze();
+
     bool IsFreeze() const
     {
         return isFreeze_;
@@ -821,6 +833,11 @@ public:
     void setIsCNode(bool createByCapi)
     {
         isCNode_ = createByCapi;
+    }
+
+    bool IsReusableNode() const
+    {
+        return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_ || isArkTsRenderNode_;
     }
 
     virtual RefPtr<UINode> GetCurrentPageRootNode()
@@ -861,12 +878,28 @@ public:
     bool IsAllowReusableV2Descendant() const;
 
     bool HasSkipNode();
-    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus) {}
+    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+    {
+        isDestroyingState_ = isDestroying;
+    }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
     bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
     {
         return apiVersion_ >= static_cast<int32_t>(version);
     }
+
+    bool IsArkTsRenderNode() const
+    {
+        return isArkTsRenderNode_;
+    }
+
+    void SetIsArkTsRenderNode(bool isArkTsRenderNode)
+    {
+        isArkTsRenderNode_ = isArkTsRenderNode;
+    }
+
+    void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -977,6 +1010,7 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isArkTsRenderNode_ = false;
     bool isTraversing_ = false;
     bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
@@ -991,6 +1025,7 @@ private:
     bool useOffscreenProcess_ = false;
 
     bool isCNode_ = false;
+    bool isDestroyingState_ = false;
     bool isAllowAddChildBelowModalUec_ = true;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
@@ -1016,6 +1051,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;
     bool isCrossLanguageAttributeSetting_ = false;
+    std::optional<bool> userFreeze_;
 };
 
 } // namespace OHOS::Ace::NG

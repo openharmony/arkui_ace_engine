@@ -127,6 +127,11 @@ public:
         return styledString_;
     }
 
+    void ClearStyledString()
+    {
+        styledString_ = nullptr;
+    }
+
     void CloseSelectionMenu();
 
     void SetStyledString(const JSCallbackInfo& info);

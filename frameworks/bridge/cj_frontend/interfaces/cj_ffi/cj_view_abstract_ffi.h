@@ -33,15 +33,10 @@ using VectorFloat64Ptr = void*;
 
 namespace OHOS::Ace::Framework {
 
-static RefPtr<PipelineBase> GetPipelineContext()
-{
-    auto currentObj = Container::Current();
-    CHECK_NULL_RETURN(currentObj, nullptr);
-    return currentObj->GetPipelineContext();
-}
+RefPtr<PipelineBase> GetPipelineContext();
 
 template<typename T>
-static RefPtr<T> GetTheme()
+RefPtr<T> GetTheme()
 {
     auto pipelineContext = GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -137,6 +132,106 @@ struct CJBindCustomPopup {
     NativeOptionInt64 transition;
     NativeOptionCallback1Param onWillDismiss;
     bool followTransformOfTarget;
+};
+
+struct NativePosition {
+    double x;
+    double y;
+};
+
+struct NativeBorderRadiuses {
+    double topLeftRadiuses;
+    int32_t topLeftUnit;
+    double topRightRadiuses;
+    int32_t topRightUnit;
+    double bottomLeftRadiuses;
+    int32_t bottomLeftUnit;
+    double bottomRightRadiuses;
+    int32_t bottomRightUnit;
+};
+
+struct NativeOptionRadius {
+    bool hasValue;
+    NativeBorderRadiuses value;
+};
+
+struct NativeMargin {
+    double top;
+    int32_t topUnit;
+    double right;
+    int32_t rightUnit;
+    double bottom;
+    int32_t bottomUnit;
+    double left;
+    int32_t leftUnit;
+};
+
+struct NativeOptionMargin {
+    bool hasValue;
+    NativeMargin value;
+};
+
+struct CJContextMenuAnimationOptions {
+    NativeOptionFloat64 scaleFrom;
+    NativeOptionFloat64 scaleTo;
+    NativeOptionInt64 transition;
+    NativeOptionFloat64 hoverScaleFrom;
+    NativeOptionFloat64 hoverScaleTo;
+};
+
+struct NativeOptionCJContextMenuAnimationOptions {
+    bool hasValue;
+    CJContextMenuAnimationOptions value;
+};
+
+struct CJContextMenuOptions {
+    NativePosition offset;
+    NativeOptionInt32 placement;
+    bool enableArrow;
+    NativeLength arrowOffset;
+    NativeOptionCallBack preview;
+    NativeOptionCJContextMenuAnimationOptions previewAnimationOptions;
+    NativeOptionCallBack onAppear;
+    NativeOptionCallBack onDisappear;
+    NativeOptionCallBack aboutToAppear;
+    NativeOptionCallBack aboutToDisappear;
+    uint32_t backgroundColor;
+    int32_t backgroundBlurStyle;
+    NativeOptionInt64 transition;
+    NativeOptionRadius borderRadius;
+    NativeOptionMargin layoutRegionMargin;
+};
+
+struct CJMenuOptions {
+    NativePosition offset;
+    NativeOptionInt32 placement;
+    bool enableArrow;
+    NativeLength arrowOffset;
+    NativeOptionCallBack preview;
+    NativeOptionCJContextMenuAnimationOptions previewAnimationOptions;
+    NativeOptionCallBack onAppear;
+    NativeOptionCallBack onDisappear;
+    NativeOptionCallBack aboutToAppear;
+    NativeOptionCallBack aboutToDisappear;
+    uint32_t backgroundColor;
+    int32_t backgroundBlurStyle;
+    NativeOptionInt64 transition;
+    NativeOptionRadius borderRadius;
+    NativeOptionMargin layoutRegionMargin;
+    NativeOptionCString title;
+    NativeOptionBool showInSubWindow;
+};
+
+struct NativeMenuElement {
+    NativeOptionCString value;
+    NativeOptionCString icon;
+    NativeOptionBool enabled;
+    NativeOptionCallBack action;
+};
+
+struct CArrNativeMenuElement {
+    NativeMenuElement* head;
+    int32_t size;
 };
 
 struct NativeShadowOptions {
@@ -554,6 +649,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindMenu(
     VectorMenuValuePtr vectorMenuValue, void (*menuActionCallback)(const char*));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomMenu(void (*builder)());
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindContextMenu(void (*builder)(), int32_t responseType);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindMenuElement(CArrNativeMenuElement elements, CJMenuOptions options);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindContextMenuOption(
+    void (*builder)(), int32_t responseType, CJContextMenuOptions options);
 struct CColors {
     uint32_t color;
     double location;

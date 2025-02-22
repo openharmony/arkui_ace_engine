@@ -846,6 +846,7 @@ public:
     void UpdateTextAutosizing(bool isTextAutosizing);
     void UpdateMetaViewport(bool isMetaViewportEnabled);
     void UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay);
+    void UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -863,7 +864,7 @@ public:
         const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     void WebHandleAxisEvent(const double& x, const double& y,
-        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes);
+        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes, const int32_t source);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     bool SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboardEvent>& keyboardEvent);
@@ -1039,7 +1040,6 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
-    void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     void SetDragResizeStartFlag(bool isDragResizeStart);
@@ -1176,6 +1176,8 @@ public:
 
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
+    std::string GetCurrentLanguage();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1258,6 +1260,7 @@ private:
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
     void UnregisterAvoidAreaChangeListener(int32_t instanceId);
+    NG::SafeAreaInsets GetCombinedSafeArea();
     void OnSafeInsetsChange();
     void EnableHardware();
 #endif
@@ -1374,7 +1377,6 @@ private:
     std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
-    bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
     double resizeVisibleWidth_ = -1.0;
@@ -1394,6 +1396,7 @@ private:
     bool isDragResizeStart_ = false;
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
+    bool enableFollowSystemFontWeight_ = false;
 #endif
 };
 

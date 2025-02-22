@@ -107,8 +107,12 @@ void ToggleModelImpl::SetSelectedColor(const std::optional<Color>& selectedColor
         return;
     }
 }
-void ToggleModelImpl::SetSwitchPointColor(const Color& switchPointColor)
+void ToggleModelImpl::SetSwitchPointColor(const std::optional<Color>& switchPointColor)
 {
+    if (!switchPointColor.has_value()) {
+        return;
+    }
+    Color color = switchPointColor.value();
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto switchComponent = AceType::DynamicCast<SwitchComponent>(mainComponent);
     if (!switchComponent) {
@@ -116,7 +120,7 @@ void ToggleModelImpl::SetSwitchPointColor(const Color& switchPointColor)
         return;
     }
 
-    switchComponent->SetPointColor(switchPointColor);
+    switchComponent->SetPointColor(color);
 }
 void ToggleModelImpl::OnChange(NG::ChangeEvent&& onChange)
 {

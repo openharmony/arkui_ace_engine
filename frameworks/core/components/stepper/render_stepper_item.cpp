@@ -15,6 +15,8 @@
 
 #include "core/components/stepper/render_stepper_item.h"
 
+#include "core/event/ace_event_helper.h"
+
 namespace OHOS::Ace {
 
 void RenderStepperItem::Update(const RefPtr<Component>& component)

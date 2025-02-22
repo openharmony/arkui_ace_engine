@@ -154,12 +154,16 @@ public:
 
     bool PercentWidth() const
     {
-        return width_ && width_->GetDimension().Unit() == DimensionUnit::PERCENT;
+        return width_ && (width_->GetDimension().Unit() == DimensionUnit::PERCENT ||
+                             (width_->GetDimension().Unit() == DimensionUnit::CALC &&
+                                 width_->CalcValue().find("%") != std::string::npos));
     }
 
     bool PercentHeight() const
     {
-        return height_ && height_->GetDimension().Unit() == DimensionUnit::PERCENT;
+        return height_ && (height_->GetDimension().Unit() == DimensionUnit::PERCENT ||
+                              (height_->GetDimension().Unit() == DimensionUnit::CALC &&
+                                  height_->CalcValue().find("%") != std::string::npos));
     }
 
     std::string ToString() const
@@ -184,12 +188,18 @@ struct MeasureProperty {
     std::optional<CalcSize> minSize;
     std::optional<CalcSize> maxSize;
     std::optional<CalcSize> selfIdealSize;
+    std::optional<CalcSize> preMinSize;
+    std::optional<CalcSize> preMaxSize;
+    std::optional<CalcSize> preSelfIdealSize;
 
     void Reset()
     {
         minSize.reset();
         maxSize.reset();
         selfIdealSize.reset();
+        preMinSize.reset();
+        preMaxSize.reset();
+        preSelfIdealSize.reset();
     }
 
     bool operator==(const MeasureProperty& measureProperty) const

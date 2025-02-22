@@ -145,6 +145,21 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
     }
 }
 
+void ToastPattern::FoldStatusChangedAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+    option.SetCurve(curve);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    AnimationUtils::Animate(option, [host, context]() {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        context->FlushUITasks();
+    });
+}
+
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     CHECK_NULL_RETURN(dirty, false);
@@ -190,10 +205,7 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         CHECK_NULL_RETURN(subContext, false);
         subContext->Animate(option, option.GetCurve(), func);
     } else {
-        // animation effect of the toast position change
-        AnimationOption option;
-        auto translationCurve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
-        context->Animate(option, translationCurve, func);
+        func();
     }
     return true;
 }
@@ -337,7 +349,9 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
-    PopupBasePattern::BeforeCreateLayoutWrapper();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        PopupBasePattern::BeforeCreateLayoutWrapper();
+    }
 
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
@@ -449,10 +463,8 @@ void ToastPattern::OnAttachToFrameNode()
         pipeline->RegisterHalfFoldHoverChangedCallback([weak = WeakClaim(this)](bool isHoverMode) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
             if (isHoverMode != pattern->isHoverMode_) {
-                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                pattern->FoldStatusChangedAnimation();
             }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);

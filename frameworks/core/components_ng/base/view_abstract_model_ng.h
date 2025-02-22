@@ -996,6 +996,11 @@ public:
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     }
 
+    void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) override
+    {
+        ViewAbstract::SetOnHoverMove(std::move(onHoverMoveEventFunc));
+    }
+
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override
     {
         ViewAbstract::SetOnAccessibilityHover(std::move(onAccessibilityHoverEventFunc));
@@ -1321,6 +1326,19 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
+    int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
+    {
+        return ViewAbstract::OpenMenu(menuParam, customNode, targetId);
+    }
+    int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::UpdateMenu(menuParam, customNode);
+    }
+    int32_t CloseMenu(const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::CloseMenu(customNode);
+    }
+
     void BindMenuGesture(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
 
@@ -1376,6 +1394,8 @@ public:
     void ResetOnAccessibilityFocus() override;
     void SetAccessibilityDefaultFocus() override;
     void SetAccessibilityUseSamePage(bool isFullSilent) override;
+    void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
+    void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1436,6 +1456,11 @@ public:
     void DisableOnHover() override
     {
         ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnHoverMove() override
+    {
+        ViewAbstract::DisableOnHoverMove();
     }
 
     void DisableOnAccessibilityHover() override
@@ -1592,6 +1617,8 @@ public:
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
     static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
     static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
+    static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);
+    static void SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

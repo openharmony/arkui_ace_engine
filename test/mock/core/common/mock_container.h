@@ -79,6 +79,11 @@ public:
         isScenceBoardWindow_ = isScenceBoardWindow;
     }
 
+    bool IsCrossAxisWindow()
+    {
+        return isCrossAxisWindow_;
+    }
+
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
@@ -118,6 +123,7 @@ private:
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
     bool isScenceBoardWindow_ = false;
+    bool isCrossAxisWindow_ = false;
     RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
 };
 } // namespace OHOS::Ace

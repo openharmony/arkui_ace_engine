@@ -15,6 +15,8 @@
 
 #include "core/common/frontend.h"
 
+#include "base/thread/task_executor.h"
+
 namespace OHOS::Ace {
 Frontend::~Frontend()
 {
@@ -31,8 +33,7 @@ bool Frontend::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Frontend Task to JS thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::JS, "ArkUIFrontendRelease",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::JS, "ArkUIFrontendRelease");
     }
 }
 
@@ -48,5 +49,10 @@ std::string Frontend::stateToString(int state)
         "UNDEFINE",
     };
     return stateMap[state];
+}
+
+RefPtr<TaskExecutor> Frontend::GetTaskExecutor() const
+{
+    return taskExecutor_;
 }
 } // namespace OHOS::Ace

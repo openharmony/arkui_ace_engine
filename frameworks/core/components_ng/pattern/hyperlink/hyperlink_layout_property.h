@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/utils/utf_helper.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -59,7 +60,22 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        json->PutExtAttr("color", propColor_.value_or(Color::BLUE).ColorToString().c_str(), filter);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (propColor_.has_value()) {
+                json->PutExtAttr("color", propColor_.value().ColorToString().c_str(), filter);
+            } else {
+                auto host = GetHost();
+                CHECK_NULL_VOID(host);
+                auto pipeline = host->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                auto themeManager = pipeline->GetThemeManager();
+                CHECK_NULL_VOID(themeManager);
+                auto theme = themeManager->GetTheme<HyperlinkTheme>();
+                json->PutExtAttr("color", theme->GetTextColor().ColorToString().c_str(), filter);
+            }
+        } else {
+            json->PutExtAttr("color", propColor_.value_or(Color::BLUE).ColorToString().c_str(), filter);
+        }
         json->PutExtAttr("address", propAddress_.value_or("").c_str(), filter);
     }
 

@@ -65,6 +65,7 @@ public:
     void SetStrokeRadius(float strokeRaidus);
     void SetUseContentModifier(bool useContentModifier);
     void SetIsRightToLeft(bool value);
+    void UpdateProgress();
     void SetCapsuleBorderRadius(float borderRadius);
     void SetIsHovered(bool value);
     void SetIsPressed(bool value);
@@ -165,6 +166,7 @@ private:
     RefPtr<PropertyBool> smoothEffect_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> isRightToLeft_;
+    RefPtr<PropertyBool> progressUpdate_;
     RefPtr<PropertyFloat> capsuleBorderRadius_;
 
     Color hoverBlendColor_;

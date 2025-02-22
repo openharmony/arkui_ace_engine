@@ -1416,11 +1416,21 @@ void CalendarPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
     json->PutExtAttr("start", calendarData_.startDate.ToString(false).c_str(), filter);
     json->PutExtAttr("end", calendarData_.endDate.ToString(false).c_str(), filter);
+    json->PutExtAttr("markToday", calendarData_.markToday ? "true" : "false", filter);
+    std::string disabledDateRangeStr = "";
+    for (const auto& range : calendarData_.disabledDateRange) {
+        disabledDateRangeStr += range.first.ToString(false) + "," + range.second.ToString(false) + ",";
+    }
+    if (!disabledDateRangeStr.empty() && disabledDateRangeStr.back() == ',') {
+        disabledDateRangeStr.pop_back();
+    }
+    json->PutExtAttr("disabledDateRange", disabledDateRangeStr.c_str(), filter);
 }
 
 void CalendarPickerPattern::SetMarkToday(bool isMarkToday)
 {
     isMarkToday_ = isMarkToday;
+    calendarData_.markToday = isMarkToday;
 }
 
 bool CalendarPickerPattern::GetMarkToday()

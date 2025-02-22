@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -672,6 +672,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.expected: parent and child reach bottom, parent over scroll
      */
     MockAnimationManager::GetInstance().SetTicks(2);
+    listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 1000);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -772,6 +773,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
      * @tc.expected: start fling animation
      */
     MockAnimationManager::GetInstance().SetTicks(3);
+    listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, -252);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -1083,6 +1085,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->onShow_ = true;
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
+    listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 0);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);

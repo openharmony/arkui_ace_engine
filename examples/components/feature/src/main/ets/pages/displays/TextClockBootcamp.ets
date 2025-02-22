@@ -2137,6 +2137,9 @@ export struct TextClockBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .onDateChange((value: number) => {
+          this.compEventTriggeredLog('时间变化回调onDateChange触发')
+        })
     }.justifyContent(FlexAlign.Start)
   }
 

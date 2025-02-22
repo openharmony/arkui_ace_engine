@@ -195,6 +195,7 @@ enum class InputReason {
 struct PreviewTextInfo {
     std::u16string text;
     PreviewRange range;
+    bool isIme;
 };
 
 struct InsertCommandInfo {
@@ -708,6 +709,7 @@ public:
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::u16string content);
     bool InitValueText(std::u16string content);
+    void HandleButtonMouseEvent(const RefPtr<TextInputResponseArea>& responseArea, bool isHover);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -1667,6 +1669,11 @@ public:
     void AddInsertCommand(const std::u16string& insertValue, InputReason reason);
     void AddInputCommand(const InputCommandInfo& inputCommandInfo);
     void ExecuteInputCommand(const InputCommandInfo& inputCommandInfo);
+    void SetIsFilterChanged(bool isFilterChanged)
+    {
+        isFilterChanged_ = isFilterChanged;
+    }
+    float GetFontSizePx();
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1722,10 +1729,13 @@ private:
     bool OnWillChangePreDelete(const std::u16string& oldContent, uint32_t start, uint32_t end);
     bool OnWillChangePreInsert(const std::u16string& insertValue, const std::u16string& oldContent,
         uint32_t start, uint32_t end);
+    void RecoverTextValueAndCaret(const std::u16string& oldValue, TextRange caretIndex);
     void OnAfterModifyDone() override;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
+    void HandleCancelButtonTouchDown(const RefPtr<TextInputResponseArea>& responseArea);
+    void HandleCancelButtonTouchUp();
     void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const TouchLocationInfo& info);
     void InitDisableColor();
@@ -1749,6 +1759,8 @@ private:
     void OnScrollEndCallback() override;
     bool CheckSelectAreaVisible();
     void InitMouseEvent();
+    void InitCancelButtonMouseEvent();
+    void InitPasswordButtonMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
     void UpdateHoverStyle(bool isHover);
@@ -1776,6 +1788,7 @@ private:
     void CursorMoveOnClick(const Offset& offset);
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
+    void CancelDelayProcessOverlay();
     void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
@@ -1981,9 +1994,11 @@ private:
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<TouchEventImpl> imageTouchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
+    RefPtr<InputEvent> imageHoverEvent_;
     RefPtr<LongPressEvent> longPressEvent_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
 
@@ -2183,6 +2198,7 @@ private:
     TextRange callbackRangeAfter_;
     std::u16string callbackOldContent_;
     PreviewText callbackOldPreviewText_;
+    bool isFilterChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

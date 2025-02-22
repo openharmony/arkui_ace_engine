@@ -332,11 +332,6 @@ public:
         onWillChangeEvent_ = std::move(func);
     }
 
-    bool HaveOnWillChangeEvent()
-    {
-        return onWillChangeEvent_ != nullptr;
-    }
-
     bool FireOnWillChangeEvent(const ChangeValueInfo& info)
     {
         if (onWillChangeEvent_) {

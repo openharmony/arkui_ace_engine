@@ -246,6 +246,22 @@ void JSViewAbstract::JsAccessibilityChecked(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetAccessibilityChecked(checked, resetValue);
 }
 
+void JSViewAbstract::JsAccessibilityScrollTriggerable(const JSCallbackInfo& info)
+{
+    bool scrollTriggerable = false;
+    bool resetValue = false;
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined()) {
+        resetValue = true;
+    } else if (arg->IsBoolean()) {
+        scrollTriggerable = arg->ToBoolean();
+    } else {
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetAccessibilityScrollTriggerable(scrollTriggerable, resetValue);
+}
+
 void JSViewAbstract::JsAccessibilityRole(const JSCallbackInfo& info)
 {
     bool resetValue = false;
@@ -311,5 +327,21 @@ std::string JSAccessibilityAbstract::GetRoleByType(AccessibilityRoleType roleTyp
         return it->second;
     }
     return "";
+}
+
+void JSViewAbstract::JsAccessibilityFocusDrawLevel(const JSCallbackInfo& info)
+{
+    int32_t drawLevel = 0;
+    JSRef<JSVal> arg = info[0];
+    do {
+        if (!arg->IsNumber()) {
+            break;
+        }
+        if (arg->ToNumber<int32_t>() > 1) {
+            break;
+        }
+        drawLevel = arg->ToNumber<int32_t>();
+    } while (false);
+    ViewAbstractModel::GetInstance()->SetAccessibilityFocusDrawLevel(drawLevel);
 }
 }

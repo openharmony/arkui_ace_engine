@@ -99,6 +99,9 @@ public:
             paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
         strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
         progressModifier_->SetStrokeRadius(strokeRadius);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            progressModifier_->UpdateProgress();
+        }
         SetCapsuleBorderRadius(paintWrapper);
         UpdateCapsuleProgress(paintWrapper);
     }

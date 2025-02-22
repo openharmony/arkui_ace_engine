@@ -17,6 +17,11 @@ import display from '@ohos.display';
 import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node'
+import { SymbolGlyphModifier } from '@kit.ArkUI';
+
+const RESOURCE_TYPE_STRING = 10003;
+const RESOURCE_TYPE_FLOAT = 10002;
+const RESOURCE_TYPE_INTEGER = 10007;
 
 interface IconTheme {
   size: SizeOptions;
@@ -54,13 +59,13 @@ interface MessageTheme {
 
 interface CloseButtonTheme {
   size: SizeOptions;
-  image: ResourceStr;
-  imageSize: SizeOptions;
   margin: LocalizedMargin;
   padding: LocalizedPadding;
   fillColor: ResourceColor;
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
+  symbolStyle: SymbolGlyphModifier;
+  symbolSize: number;
 }
 
 interface WindowsTheme {
@@ -138,7 +143,6 @@ export const defaultTheme: PopupTheme = {
   },
   closeButton: {
     size: { width: 22, height: 22 },
-    imageSize: { width: 18, height: 18 },
     padding: {
       top: LengthMetrics.vp(2),
       bottom: LengthMetrics.vp(2),
@@ -151,10 +155,11 @@ export const defaultTheme: PopupTheme = {
       start: LengthMetrics.vp(12),
       end: LengthMetrics.vp(12)
     },
-    image: $r('sys.media.ohos_ic_public_cancel'),
+    symbolStyle: new SymbolGlyphModifier($r('sys.symbol.xmark')),
     fillColor: $r('sys.color.icon_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
-    backgroundColor: $r('sys.color.ohos_id_color_background_transparent')
+    backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
+    symbolSize: 18
   },
 };
 
@@ -188,7 +193,7 @@ export interface PopupOptions {
   showClose?: boolean | Resource;
   onClose?: () => void;
   buttons?: [PopupButtonOptions?, PopupButtonOptions?];
-  maxWidth?:Dimension;
+  maxWidth?: Dimension;
 }
 
 const noop = () => {
@@ -210,12 +215,51 @@ export function Popup(options: PopupOptions) {
   })
 }
 
+function isValidString(dimension: string, regex: RegExp): boolean {
+  const matches = dimension.match(regex);
+  if (!matches || matches.length < 3) {
+    return false;
+  }
+  const value = Number.parseFloat(matches[1]);
+  return value >= 0;
+}
+
+function isValidDimensionString(dimension: string): boolean {
+  return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
+}
+
+function isValidResource(context: Context | undefined, value: Resource) {
+  const resourceManager = context?.resourceManager;
+  if (value === void (0) || value === null || resourceManager === void (0)) {
+    return false;
+  }
+  if (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+    value.type !== RESOURCE_TYPE_FLOAT) {
+    return false;
+  }
+
+  if (value.type === RESOURCE_TYPE_INTEGER || value.type === RESOURCE_TYPE_FLOAT) {
+    if (resourceManager.getNumber(value.id) >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (value.type === RESOURCE_TYPE_STRING && !isValidDimensionString(resourceManager.getStringSync(value.id))) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 @Component
 export struct PopupComponent {
   private onClose: () => void = noop;
   private theme: PopupTheme = defaultTheme;
   @Prop icon: PopupIconOptions = { image: '' };
   @Prop maxWidth?: Dimension;
+  @Prop messageMaxWidth?: number = 0;
   @Prop title: PopupTextOptions = { text: '' };
   @Prop message: PopupTextOptions = { text: '' };
   @Prop popupDirection: Direction = Direction.Auto;
@@ -302,10 +346,6 @@ export struct PopupComponent {
     return this.theme.closeButton.size.height
   }
 
-  private getCloseButtonImage(): ResourceStr {
-    return this.theme.closeButton.image
-  }
-
   private getCloseButtonFillColor(): ResourceColor {
     return this.closeButtonFillColorWithTheme;
   }
@@ -322,12 +362,8 @@ export struct PopupComponent {
     return this.theme.closeButton.padding
   }
 
-  private getCloseButtonImageWidth(): Length | undefined {
-    return this.theme.closeButton.imageSize.width
-  }
-
-  private getCloseButtonImageHeight(): Length | undefined {
-    return this.theme.closeButton.imageSize.height
+  private getCloseButtonSymbolSize(): Length | undefined {
+    return this.theme.closeButton.symbolSize
   }
 
   private getMessageText(): string | Resource {
@@ -376,7 +412,7 @@ export struct PopupComponent {
     }
     if (this.showClose || this.showClose === void (0)) {
       if (this.messageMaxWidth != undefined) {
-        if(this.maxWidth > px2vp(defaultDisplaySync.width)) {
+        if (this.maxWidth != undefined && this.maxWidth > px2vp(defaultDisplaySync.width)) {
           textMaxWeight = px2vp(defaultDisplaySync.width)
         } else {
           textMaxWeight = this.messageMaxWidth
@@ -460,7 +496,8 @@ export struct PopupComponent {
 
   private getWindowsPadding(): LocalizedPadding {
     let top = this.theme.windows.padding.top;
-    let bottom = LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
+    let bottom =
+      LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
     let start = LengthMetrics.vp(this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
     let end = this.theme.windows.padding.end;
     let resolvedMaxWidth = this.toVp(this.maxWidth);
@@ -529,6 +566,7 @@ export struct PopupComponent {
     }
     return layoutWeight
   }
+
   private resourceToVp(value: Resource): number {
     try {
       if ((value as Resource).id !== -1) {
@@ -545,6 +583,12 @@ export struct PopupComponent {
 
   private toVp(value: Dimension | Length | undefined): number {
     let defaultDisplaySync: display.Display | undefined = undefined;
+    try {
+      defaultDisplaySync = display.getDefaultDisplaySync()
+    } catch (error) {
+      console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
+      return Number.NEGATIVE_INFINITY;
+    }
     if (value === void (0)) {
       return Number.NEGATIVE_INFINITY
     }
@@ -599,7 +643,7 @@ export struct PopupComponent {
     let applyMaxHeight: number | undefined = undefined;
     let applyMaxSize: ConstraintSizeOptions | undefined = undefined;
     let defaultDisplaySync: display.Display | undefined = undefined;
-    let maxWidthSize = 400；
+    let maxWidthSize = 400;
     try {
       defaultDisplaySync = display.getDefaultDisplaySync()
     } catch (error) {
@@ -609,13 +653,13 @@ export struct PopupComponent {
     }
     if (this.maxWidth !== undefined) {
       if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
-          maxWidthSize = px2vp(this.maxWidth);
+        maxWidthSize = px2vp(this.maxWidth);
       } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
-         maxWidthSize = POPUP_DEFAULT_MAXWIDTH
+        maxWidthSize = POPUP_DEFAULT_MAXWIDTH
       } else {
-          maxWidthSize = this.toVp(this.maxWidth);
+        maxWidthSize = this.toVp(this.maxWidth);
       }
-    } 
+    }
     if (px2vp(defaultDisplaySync.width) > maxWidthSize) {
       applyMaxWidth = maxWidthSize
     } else {
@@ -623,8 +667,8 @@ export struct PopupComponent {
         applyMaxWidth = px2vp(defaultDisplaySync.width)
       } else {
         // The previewer does not support the display interface to use abnormal values
-       applyMaxWidth = -1
-     }
+        applyMaxWidth = -1
+      }
     }
     if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480
@@ -632,7 +676,7 @@ export struct PopupComponent {
       applyMaxHeight = px2vp(defaultDisplaySync.height) - 40 - 40
     }
     applyMaxSize = { maxWidth: applyMaxWidth, maxHeight: applyMaxHeight }
-    this.messageMaxWidth = applyMaxHeight;
+    this.messageMaxWidth = applyMaxWidth;
     this.messageMaxWeight = this.getMessageMaxWeight()
     return applyMaxSize
   }
@@ -666,14 +710,14 @@ export struct PopupComponent {
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
             if (this.showClose || this.showClose === void (0)) {
               Button() {
-                Image(this.getCloseButtonImage())
+               SymbolGlyph()
+                  .fontColor([this.getCloseButtonFillColor()])
+                  .fontSize(this.getCloseButtonSymbolSize())
                   .direction(this.popupDirection)
+                  .attributeModifier(this.theme.closeButton.symbolStyle)
                   .focusable(true)
-                  .width(this.getCloseButtonImageWidth())
-                  .height(this.getCloseButtonImageHeight())
-                  .fillColor(this.getCloseButtonFillColor())
                   .draggable(false)
-              }
+                  }
               .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
               .height(this.getCloseButtonHeight())
@@ -719,7 +763,7 @@ export struct PopupComponent {
           .scrollBar(BarState.Auto)
           .scrollable(ScrollDirection.Vertical)
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
-          .edgeEffect(EdgeEffect.Spring)
+          .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false })
           Flex({ wrap: FlexWrap.Wrap }) {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
@@ -733,6 +777,8 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
               .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
@@ -762,6 +808,8 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
               .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
@@ -784,7 +832,12 @@ export struct PopupComponent {
           .margin(this.getButtonTextMargin())
           .flexGrow(1)
           .onAreaChange((_, rect) => {
-            this.buttonHeight = rect.height as number
+            if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+              (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+              this.buttonHeight = rect.height as number
+            } else {
+              this.buttonHeight = 0
+            }
           })
         }
         .direction(this.popupDirection)
@@ -793,7 +846,7 @@ export struct PopupComponent {
         Column() {
           Flex().height(0).onAreaChange((_, rect) => {
             this.titleHeight = rect.height as number
-           })
+          })
           Row() {
             Scroll() {
               Text(this.getMessageText())
@@ -808,7 +861,7 @@ export struct PopupComponent {
             }
             .direction(this.popupDirection)
             .layoutWeight(this.getLayoutWeight())
-            .edgeEffect(EdgeEffect.Spring)
+            .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false })
             .align(Alignment.TopStart)
             .padding(this.getMessagePadding())
             .scrollBar(BarState.Auto)
@@ -817,12 +870,13 @@ export struct PopupComponent {
 
             if (this.showClose || this.showClose === void (0)) {
               Button() {
-                Image(this.getCloseButtonImage())
+                SymbolGlyph()
+                  .fontColor([this.getCloseButtonFillColor()])
+                  .fontSize(this.getCloseButtonSymbolSize())
                   .direction(this.popupDirection)
+                  .attributeModifier(this.theme.closeButton.symbolStyle)
                   .focusable(true)
-                  .width(this.getCloseButtonImageWidth())
-                  .height(this.getCloseButtonImageHeight())
-                  .fillColor(this.getCloseButtonFillColor())
+                  .draggable(false)
               }
               .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
@@ -860,6 +914,8 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
               .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
@@ -889,6 +945,8 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
               .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
@@ -911,7 +969,12 @@ export struct PopupComponent {
           .margin(this.getButtonTextMargin())
           .flexGrow(1)
           .onAreaChange((_, rect) => {
-            this.buttonHeight = rect.height as number
+            if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+              (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+              this.buttonHeight = rect.height as number
+            } else {
+              this.buttonHeight = 0
+            }
           })
         }
         .direction(this.popupDirection)

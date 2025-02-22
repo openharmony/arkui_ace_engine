@@ -30,6 +30,11 @@ public:
     void ResetTranslate(int32_t nodeId) override;
     void SendTranslateResult(int32_t nodeId, std::string res) override;
     void ClearMap() override;
+    void SendPixelMap();
+    void GetAllPixelMap(RefPtr<NG::FrameNode> pageNode);
+    void TravelFindPixelMap(RefPtr<NG::UINode> currentNode);
+    void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
+    RefPtr<NG::UINode> FindTopNavDestination(RefPtr<NG::UINode> currentNode);
 
 private:
     std::map<int32_t, WeakPtr<NG::FrameNode>> listenerMap_;

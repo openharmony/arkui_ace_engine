@@ -85,6 +85,7 @@ void TextPattern::OnWindowHide()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowHide [%{public}d]", host->GetId());
+    PauseSymbolAnimation();
 }
 
 void TextPattern::OnWindowShow()
@@ -94,6 +95,7 @@ void TextPattern::OnWindowShow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowShow [%{public}d]", host->GetId());
+    ResumeSymbolAnimation();
 }
 
 void TextPattern::OnAttachToFrameNode()
@@ -117,6 +119,9 @@ void TextPattern::OnAttachToFrameNode()
     InitSurfacePositionChangedCallback();
     pipeline->AddWindowStateChangedCallback(host->GetId());
     pipeline->AddWindowSizeChangeCallback(host->GetId());
+    if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
+        ProcessVisibleAreaCallback();
+    }
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto theme = pipeline->GetTheme<TextTheme>();
@@ -354,7 +359,6 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
 
     if (IsDraggable(localOffset)) {
-        dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
         gestureHub->SetIsTextDraggable(true);
         return;
@@ -1135,8 +1139,9 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
         if (!item) {
             continue;
         }
-        auto selectedRects = GetSelectedRects(start, item->position);
-        start = item->position;
+        auto end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
+        auto selectedRects = GetSelectedRects(start, end);
+        start = end;
         for (auto&& rect : selectedRects) {
             if (!rect.IsInRegion(textOffset)) {
                 continue;
@@ -1394,7 +1399,8 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     CheckOnClickEvent(info);
-    if (!IsSelectableAndCopy() || textForDisplay_.empty()) {
+    auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+    if (!IsSelectableAndCopy() || (textSize == 0)) {
         return;
     }
     auto host = GetHost();
@@ -1807,7 +1813,7 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     CHECK_NULL_VOID(pManager_);
     if (shiftFlag_) {
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
-        HandleSelectionChange(textSelector_.baseOffset, end);
+        HandleSelectionChange(textSelector_.lastValidStart, end);
     } else {
         auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
         textSelector_.Update(start, start);
@@ -1847,7 +1853,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     CHECK_NULL_VOID(pManager_);
     auto start = textSelector_.baseOffset;
     auto end = textSelector_.destinationOffset;
-    if (!IsSelected() && !textSelector_.IsValid()) {
+    if (!IsSelected()) {
         start = -1;
         end = -1;
     }
@@ -1877,10 +1883,6 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
     if (!IsSelectableAndCopy()) {
         isMousePressed_ = false;
         leftMousePressed_ = false;
-        return;
-    }
-    if (blockPress_ && !shiftFlag_) {
-        dragBoxes_ = GetTextBoxes();
         return;
     }
     if (isMousePressed_) {
@@ -2034,7 +2036,7 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     if (keyEvent.IsCtrlWith(KeyCode::KEY_A)) {
         auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
         HandleSelectionChange(0, textSize);
-        CalculateHandleOffsetAndShowOverlay();
+        CloseSelectOverlay();
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2229,6 +2231,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
     ResetDragRecordSize(dragResultObjects_.empty() ? -1 : 1);
+    dragBoxes_ = GetTextBoxes();
     status_ = Status::DRAGGING;
     if (dragResultObjects_.empty() || !gestureHub->GetIsTextDraggable()) {
         return itemInfo;
@@ -2345,6 +2348,7 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
         return itemInfo;
     }
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    dragBoxes_ = GetTextBoxes();
     pattern->status_ = Status::DRAGGING;
     pattern->contentMod_->ChangeDragStatus();
     pattern->showSelect_ = false;
@@ -3574,11 +3578,70 @@ void TextPattern::OnVisibleChange(bool isVisible)
         if (textDetectEnable_) {
             dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
         }
+        PauseSymbolAnimation();
     } else {
         if (CanStartAITask()) {
             dataDetectorAdapter_->StartAITask();
         }
+        ResumeSymbolAnimation();
     }
+}
+
+void TextPattern::ProcessVisibleAreaCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnVisibleChange(visible);
+    };
+    std::vector<double> ratioList = { 0.0 };
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+}
+
+void TextPattern::PauseSymbolAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetIsLoopAnimation()) {
+        return;
+    }
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    if (!symbolEffectOptions.GetIsTxtActive()) {
+        return;
+    }
+    symbolEffectOptions.SetIsTxtActive(false);
+    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextPattern::ResumeSymbolAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetIsLoopAnimation()) {
+        return;
+    }
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    if (symbolEffectOptions.GetIsTxtActive()) {
+        return;
+    }
+    symbolEffectOptions.SetIsTxtActive(true);
+    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextPattern::InitSurfaceChangedCallback()
@@ -3593,17 +3656,23 @@ void TextPattern::InitSurfaceChangedCallback()
                 WindowSizeChangeReason type) {
                 auto pattern = weak.Upgrade();
                 if (pattern) {
-                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
                 }
             });
         UpdateSurfaceChangedCallbackId(callbackId);
     }
 }
 
-void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
+void TextPattern::HandleSurfaceChanged(
+    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type)
 {
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
+    }
+    if (type != WindowSizeChangeReason::DRAG) {
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->OnPropertyChangeMeasure();
     }
     CHECK_NULL_VOID(selectOverlay_->SelectOverlayIsOn());
     if (selectOverlay_->IsShowMouseMenu()) {
@@ -3712,6 +3781,54 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
         CHECK_NULL_VOID(gesture);
         gesture->SetHitTestMode(HitTestMode::HTMNONE);
         return;
+    }
+}
+
+void TextPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (pManager_) {
+        auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProp);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        std::stringstream ssColor;
+        std::stringstream ssSize;
+        if (textStyle_.has_value()) {
+            ssColor << "[FontColor: ";
+            ssColor << textStyle_->GetTextColor().ColorToString();
+            ssColor << " pro: ";
+            ssColor << (textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString()
+                                                       : "Na");
+            ssColor << " ForegroundColor: ";
+            ssColor << (renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString()
+                                                            : "Na");
+            ssColor << "]";
+
+            ssSize << "[FontSize: ";
+            ssSize << textStyle_->GetFontSize().ToString();
+            ssSize << " pro: ";
+            ssSize << (textLayoutProp->HasFontSize()
+                           ? textLayoutProp->GetFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
+                           : "Na");
+            ssSize << "]";
+        }
+        json->Put("TextInfo",
+            ("[content size: " + std::to_string(textLayoutProp->GetContent().value_or(u"").length()) +
+                "][contentRect :" + contentRect_.ToString() +
+                "][paragraphsInfo: size:" + std::to_string(pManager_->GetParagraphs().size()) + ",|didExc " +
+                std::to_string(pManager_->DidExceedMaxLines()) + ",|textWidth " +
+                std::to_string(pManager_->GetTextWidth()) + ",|height " + std::to_string(pManager_->GetHeight()) +
+                ",|maxwidth " + std::to_string(pManager_->GetMaxWidth()) + ",|maxIntrinsic " +
+                std::to_string(pManager_->GetMaxIntrinsicWidth()) + ",|lineCount " +
+                std::to_string(pManager_->GetLineCount()) + ",|longestLine " +
+                std::to_string(pManager_->GetLongestLine()) + ",|LineWithIndent " +
+                std::to_string(pManager_->GetLongestLineWithIndent()) +
+                "][spans size :" + std::to_string(spans_.size()) + "]" + ssColor.str() + ssSize.str())
+                .c_str());
+    } else {
+        json->Put("TextInfo", "pManager nullpter");
     }
 }
 
@@ -3919,17 +4036,17 @@ void TextPattern::DumpScaleInfo()
     auto followSystem = pipeline->IsFollowSystem();
     float maxFontScale = pipeline->GetMaxAppFontScale();
     auto halfLeading = pipeline->GetHalfLeading();
-    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
-    dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
-    dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
-    dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
-    dumpLog.AddDesc(std::string("ConfigHalfLeading: ").append(std::to_string(halfLeading)));
+    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale))
+        .append(std::string(", fontWeightScale: ")).append(std::to_string(fontWeightScale))
+        .append(std::string(", IsFollowSystem: ")).append(std::to_string(followSystem))
+        .append(std::string(", maxFontScale: ")).append(std::to_string(maxFontScale))
+        .append(std::string(", ConfigHalfLeading: ")).append(std::to_string(halfLeading)));
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     auto minFontScale = textLayoutProp->GetMinFontScale().value_or(0.0f);
-    dumpLog.AddDesc(std::string("minFontScale: ").append(std::to_string(minFontScale)));
     auto maxfontScale = textLayoutProp->GetMaxFontScale().value_or(static_cast<float>(INT32_MAX));
-    dumpLog.AddDesc(std::string("maxFontScale1: ").append(std::to_string(maxfontScale)));
+    dumpLog.AddDesc(std::string("minFontScale: ").append(std::to_string(minFontScale))
+        .append(std::string(", maxFontScale: ")).append(std::to_string(maxfontScale)));
     auto flag = textLayoutProp->HasHalfLeading();
     dumpLog.AddDesc(
         std::string("HalfLeading: ").append(flag ? std::to_string(textLayoutProp->GetHalfLeadingValue(false)) : "NA"));
@@ -4926,6 +5043,9 @@ void TextPattern::OnTextOverflowChanged()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
+        return;
+    }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto eventHub = host->GetEventHub<TextEventHub>();
@@ -4973,9 +5093,10 @@ void TextPattern::UpdateFontColor(const Color& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    if (children.empty() && spans_.empty() && contentMod_ && !NeedShowAIDetect()) {
-        contentMod_->TextColorModifier(value);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (children.empty() && spans_.empty() && !NeedShowAIDetect()) {
+        if (contentMod_) {
+            contentMod_->TextColorModifier(value);
+        }
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }

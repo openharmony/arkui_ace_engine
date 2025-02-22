@@ -27,6 +27,7 @@ constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
+constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
@@ -53,7 +54,6 @@ constexpr int32_t LONG_FRAME_END_EVENT = 1;
 constexpr char NAME[] = "name";
 constexpr char PID[] = "pid";
 constexpr char UID[] = "uid";
-constexpr char SCRTID[] = "scrTid";
 constexpr char BUNDLE_NAME[] = "bundleName";
 constexpr char ABILITY_NAME[] = "abilityName";
 constexpr char CLICK[] = "click";
@@ -84,14 +84,6 @@ void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& pay
     payload[UID] = std::to_string(aceApplicationInfo.GetUid());
     payload[BUNDLE_NAME] = aceApplicationInfo.GetPackageName();
     payload[ABILITY_NAME] = aceApplicationInfo.GetAbilityName();
-}
-
-void LoadReportConfig(
-    const ReportConfig& config, std::unordered_map<std::string, std::string>& payload)
-{
-    if (config.isReportTid) {
-        payload[SCRTID] = std::to_string(config.tid);
-    }
 }
 }
 
@@ -189,29 +181,49 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     }
 }
 
-void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::ResScheSyncEventReport(const uint32_t resType, const int64_t value,
+    const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    if (reportSyncEventFunc_ == nullptr) {
+        reportSyncEventFunc_ = LoadReportSyncEventFunc();
+    }
+    if (!reportSyncEventFunc_) {
+        return;
+    }
+    reportSyncEventFunc_(resType, value, payload, reply);
+}
+
+bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 0, payload, reply);
+    return reply["result"] == "\"true\"" ? true : false;
+}
+
+void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
 {
     switch (touchEvent.type) {
         case TouchType::DOWN:
-            HandleTouchDown(touchEvent, config);
+            HandleTouchDown(touchEvent);
             break;
         case TouchType::UP:
-            HandleTouchUp(touchEvent, config);
+            HandleTouchUp(touchEvent);
             break;
         case TouchType::MOVE:
-            HandleTouchMove(touchEvent, config);
+            HandleTouchMove(touchEvent);
             break;
         case TouchType::CANCEL:
-            HandleTouchCancel(touchEvent, config);
+            HandleTouchCancel(touchEvent);
             break;
         case TouchType::PULL_DOWN:
-            HandleTouchPullDown(touchEvent, config);
+            HandleTouchPullDown(touchEvent);
             break;
         case TouchType::PULL_UP:
-            HandleTouchPullUp(touchEvent, config);
+            HandleTouchPullUp(touchEvent);
             break;
         case TouchType::PULL_MOVE:
-            HandleTouchPullMove(touchEvent, config);
+            HandleTouchPullMove(touchEvent);
             break;
         default:
             break;
@@ -274,18 +286,21 @@ void ResSchedReport::OnKeyEvent(const KeyEvent& event)
 void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce)
 {
     if (enforce) {
-        lastTouchEvent_ = touchEvent;
-        curTouchEvent_ = touchEvent;
-    } else if (curTouchEvent_.GetOffset() != touchEvent.GetOffset()) {
-        lastTouchEvent_ = curTouchEvent_;
-        curTouchEvent_ = touchEvent;
+        lastTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        lastTouchEvent_.offset = touchEvent.GetOffset();
+        curTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        curTouchEvent_.offset = touchEvent.GetOffset();
+    } else if (curTouchEvent_.offset != touchEvent.GetOffset()) {
+        lastTouchEvent_.timeStamp = curTouchEvent_.timeStamp;
+        lastTouchEvent_.offset = curTouchEvent_.offset;
+        curTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        curTouchEvent_.offset = touchEvent.GetOffset();
     }
 }
 
-void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
-    LoadReportConfig(config, payload);
     payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     RecordTouchEvent(touchEvent, true);
@@ -300,10 +315,9 @@ void ResSchedReport::HandleKeyDown(const KeyEvent& event)
     ResSchedDataReport(RES_TYPE_KEY_EVENT, KEY_DOWN_EVENT, payload);
 }
 
-void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
-    LoadReportConfig(config, payload);
     RecordTouchEvent(touchEvent);
     payload[Ressched::NAME] = TOUCH;
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(lastTouchEvent_, curTouchEvent_));
@@ -321,48 +335,45 @@ void ResSchedReport::HandleKeyUp(const KeyEvent& event)
     ResSchedDataReport(RES_TYPE_KEY_EVENT, KEY_UP_EVENT, payload);
 }
 
-void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent);
-    averageDistance_ += curTouchEvent_.GetOffset() - lastTouchEvent_.GetOffset();
+    averageDistance_ += curTouchEvent_.offset - lastTouchEvent_.offset;
     if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE &&
         !isInSlide_ && isInTouch_) {
         std::unordered_map<std::string, std::string> payload;
-        LoadReportConfig(config, payload);
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSlide_ = true;
     }
 }
 
-void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
 {
     isInSlide_ = false;
     isInTouch_ = false;
     averageDistance_.Reset();
 }
 
-void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent, true);
     isInTouch_ = true;
 }
 
-void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
-    LoadReportConfig(config, payload);
     payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_PULL_UP_EVENT, payload);
     averageDistance_.Reset();
     isInTouch_ = false;
 }
 
-void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
 {
     if (!isInSlide_) {
         std::unordered_map<std::string, std::string> payload;
-        LoadReportConfig(config, payload);
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSlide_ = true;
@@ -370,12 +381,12 @@ void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent, const Rep
     RecordTouchEvent(touchEvent);
 }
 
-double ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
-    const TouchEvent& upEventInfo)
+double ResSchedReport::GetUpVelocity(const ResEventInfo& lastMoveInfo,
+    const ResEventInfo& upEventInfo)
 {
-    double distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
-    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(upEventInfo.GetTimeStamp() -
-        lastMoveInfo.GetTimeStamp()).count();
+    double distance = (upEventInfo.offset - lastMoveInfo.offset).GetDistance();
+    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(upEventInfo.timeStamp -
+        lastMoveInfo.timeStamp).count();
     if (time <= 0) {
         return 0.0f;
     }
@@ -423,20 +434,27 @@ void ResSchedReport::HandleAxisEnd(const AxisEvent& axisEvent)
 void ResSchedReport::RecordAxisEvent(const AxisEvent& axisEvent, bool enforce)
 {
     if (enforce) {
-        lastAxisEvent_ = axisEvent;
-        curAxisEvent_ = axisEvent;
+        lastAxisEvent_.timeStamp = axisEvent.time;
+        lastAxisEvent_.offset = axisEvent.ConvertToOffset();
+        lastAxisEvent_.sourceTool = axisEvent.sourceTool;
+        curAxisEvent_.timeStamp = axisEvent.time;
+        curAxisEvent_.offset = axisEvent.ConvertToOffset();
+        curAxisEvent_.sourceTool = axisEvent.sourceTool;
     } else if (axisEvent.ConvertToOffset().GetX() != 0 || axisEvent.ConvertToOffset().GetY() != 0) {
-        lastAxisEvent_ = curAxisEvent_;
-        curAxisEvent_ = axisEvent;
+        lastAxisEvent_.timeStamp = curAxisEvent_.timeStamp;
+        lastAxisEvent_.offset = curAxisEvent_.offset;
+        lastAxisEvent_.sourceTool = curAxisEvent_.sourceTool;
+        curAxisEvent_.timeStamp = axisEvent.time;
+        curAxisEvent_.offset = axisEvent.ConvertToOffset();
+        curAxisEvent_.sourceTool = axisEvent.sourceTool;
     }
 }
 
-double ResSchedReport::GetAxisUpVelocity(const AxisEvent& lastAxisEvent, const AxisEvent& curAxisEvent)
+double ResSchedReport::GetAxisUpVelocity(const ResEventInfo& lastAxisEvent, const ResEventInfo& curAxisEvent)
 {
-    double distance = sqrt(pow(curAxisEvent.ConvertToOffset().GetX(), SQUARE) +
-        pow(curAxisEvent.ConvertToOffset().GetY(), SQUARE));
-    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(curAxisEvent.time -
-        lastAxisEvent.time).count();
+    double distance = curAxisEvent.offset.GetDistance();
+    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(curAxisEvent.timeStamp -
+        lastAxisEvent.timeStamp).count();
     if (time <= 0) {
         return 0.0;
     }

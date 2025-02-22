@@ -677,6 +677,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("bindToScrollable", &JSNavDestination::BindToScrollable);
     JSClass<JSNavDestination>::StaticMethod("bindToNestedScrollable", &JSNavDestination::BindToNestedScrollable);
     JSClass<JSNavDestination>::StaticMethod("customTransition", &JSNavDestination::SetCustomTransition);
+    JSClass<JSNavDestination>::StaticMethod("onNewParam", &JSNavDestination::SetOnNewParam);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -761,6 +762,23 @@ void JSNavDestination::SetOnInactive(const JSCallbackInfo& info)
         func->ExecuteJS(1, params);
     };
     NavDestinationModel::GetInstance()->SetOnInactive(std::move(onInactiveCallback));
+    info.ReturnSelf();
+}
+
+void JSNavDestination::SetOnNewParam(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto onNewParam = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onNewParamCallback = [execCtx = info.GetExecutionContext(), func = std::move(onNewParam)](napi_value param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.onNewParam");
+        JSRef<JSVal> params[1];
+        params[0] = JsConverter::ConvertNapiValueToJsVal(param);
+        func->ExecuteJS(1, params);
+    };
+    NavDestinationModel::GetInstance()->SetOnNewParam(std::move(onNewParamCallback));
     info.ReturnSelf();
 }
 } // namespace OHOS::Ace::Framework

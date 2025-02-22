@@ -59,12 +59,19 @@ RSRecordingPath SvgUse::AsPath(const SvgLengthScaleRule& lengthRule)
         LOGE("href is empty");
         return {};
     }
+    if (isDrawingPath_) {
+        LOGW("SvgUse::AsPath draw path is still in processing");
+        return RSRecordingPath();
+    }
+    isDrawingPath_ = true;
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
 
     AttributeScope scope(refSvgNode);
     refSvgNode->InheritAttr(attributes_);
-    return refSvgNode->AsPath(lengthRule);
+    auto path = refSvgNode->AsPath(lengthRule);
+    isDrawingPath_ = false;
+    return path;
 }
 
 void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
@@ -93,6 +100,18 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
     refSvgNode->Draw(canvas, layout, color);
 }
 
+void SvgUse::ApplyOpacity(RSCanvas& canvas)
+{
+    if (!attributes_.hasOpacity) {
+        LOGD("SvgUse::ApplyOpacity has no opacity");
+        return;
+    }
+    RSBrush brush;
+    brush.SetAlphaF(attributes_.opacity);
+    RSSaveLayerOps slo(nullptr, &brush);
+    canvas.SaveLayer(slo);
+}
+
 void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
 {
     auto svgContext = svgContext_.Upgrade();
@@ -108,7 +127,8 @@ void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
         canvas.Translate(useX, useY);
     }
     AttributeScope scope(refSvgNode);
-    refSvgNode->InheritUseAttr(attributes_);
+    refSvgNode->InheritAttr(attributes_);
+    ApplyOpacity(canvas);
     refSvgNode->Draw(canvas, lengthRule);
 }
 

@@ -332,13 +332,10 @@ void TabsModelNG::SetIndex(int32_t index)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
     if (index < 0) {
         index = 0;
     }
-    tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->SetClickRepeat(false);
+    tabBarPattern->UpdateIndicator(index);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
     auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);

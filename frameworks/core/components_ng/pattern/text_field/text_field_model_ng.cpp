@@ -130,6 +130,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->RegisterWindowSizeCallback();
     pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -291,6 +292,9 @@ void TextFieldModelNG::SetType(TextInputType value)
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsFilterChanged(true);
     }
     if (layoutProperty) {
         layoutProperty->UpdateTextInputType(value);
@@ -1146,6 +1150,9 @@ void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsFilterChanged(true);
         layoutProperty->UpdateTypeChanged(true);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value, frameNode);

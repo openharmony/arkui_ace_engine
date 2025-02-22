@@ -568,7 +568,7 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
 
     // If item is close, we simply scroll to it instead of triggering a reset/jump, which would change the layout.
     bool closeToView = info_->ItemCloseToView(jumpIdx);
-    if (closeToView) {
+    if (!inView && closeToView) {
         MeasureToTarget(jumpIdx);
     }
 
