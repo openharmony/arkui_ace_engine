@@ -1518,6 +1518,8 @@ public:
     bool GetOriginCaretPosition(OffsetF& offset) const;
     void ResetOriginCaretPosition() override;
     bool RecordOriginCaretPosition() override;
+    float GetFontSizePx();
+
     SelectionInfo GetSelection();
     void AddInsertCommand(const std::string& insertValue, InputReason reason);
     void AddInputCommand(const InputCommandInfo& inputCommandInfo);
