@@ -108,8 +108,8 @@ public:
     void FireOnInputFilterError(const std::u16string& value) const
     {
         if (onInputFilterError_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On filter error %{private}s",
-                UtfUtils::Str16DebugToStr8(value).c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On filter error size %{public}zu",
+                UtfUtils::Str16DebugToStr8(value).size());
             onInputFilterError_(value);
         }
     }
@@ -224,7 +224,7 @@ public:
     void FireOnCopy(const std::u16string& value)
     {
         if (onCopy_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On copy %{private}s", UtfUtils::Str16DebugToStr8(value).c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On copy size %{public}zu", UtfUtils::Str16DebugToStr8(value).size());
             onCopy_(value);
         }
     }
@@ -237,7 +237,7 @@ public:
     void FireOnCut(const std::u16string& value)
     {
         if (onCut_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On cut %{private}s", UtfUtils::Str16DebugToStr8(value).c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On cut size %{public}zu", UtfUtils::Str16DebugToStr8(value).size());
             onCut_(value);
         }
     }
@@ -250,7 +250,7 @@ public:
     void FireOnPaste(const std::u16string& value)
     {
         if (onPaste_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On paste %{private}s", UtfUtils::Str16DebugToStr8(value).c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On paste size %{public}zu", UtfUtils::Str16DebugToStr8(value).size());
             onPaste_(value);
         }
     }
