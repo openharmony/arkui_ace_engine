@@ -1442,4 +1442,11 @@ float DragDropFuncWrapper::GetPixelMapScale(const RefPtr<FrameNode>& frameNode)
     }
     return scale;
 }
+
+bool DragDropFuncWrapper::IsTextCategoryComponent(const std::string& frameTag)
+{
+    return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+           frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG ||
+           frameTag == V2::RICH_EDITOR_ETS_TAG;
+}
 } // namespace OHOS::Ace::NG

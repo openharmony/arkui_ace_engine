@@ -78,6 +78,7 @@ public:
         const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode, float width, float height);
     static OffsetF GetPointRelativeToMainWindow(const Point& point);
     static void HandleOnDragEvent(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
+    static bool IsTextCategoryComponent(const std::string& frameTag);
 
     // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
