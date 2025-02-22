@@ -317,7 +317,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0056, TestSize.Level1)
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::LEFT));
     EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::SHIFT_TAB));
-    focusHub->focusAlgorithm_.getNextFocusNode = [](FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&) {};
+    focusHub->focusAlgorithm_.getNextFocusNode = [](FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)
+        -> bool { return false; };
     EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::TAB));
 }
 

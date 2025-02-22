@@ -572,6 +572,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
      */
     focusHub->SetFocusType(FocusType::NODE);
     focusHub->OnFocus();
+    focusHub->currentFocus_ = true;
     bool flagCbk1 = false;
     bool flagCbk2 = false;
     focusHub->onFocusInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
@@ -1408,6 +1409,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableFocus001, TestSize.Level1)
     std::string result;
     auto onFocus = [&result]() { result = RESULT_SUCCESS_ONE; };
     focusHub->SetOnFocusCallback(onFocus);
+    focusHub->currentFocus_ = true;
     EXPECT_NE(focusHub->GetOnFocusCallback(), nullptr);
 
     focusHub->OnFocus();
@@ -1426,6 +1428,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableFocus001, TestSize.Level1)
      */
     auto onFocus2 = [&result]() { result = RESULT_SUCCESS_TWO; };
     focusHub->SetOnFocusCallback(onFocus2);
+    focusHub->currentFocus_ = true;
     EXPECT_NE(focusHub->GetOnFocusCallback(), nullptr);
 
     focusHub->OnFocus();
