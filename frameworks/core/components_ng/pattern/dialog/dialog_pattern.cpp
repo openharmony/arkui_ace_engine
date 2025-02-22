@@ -1818,6 +1818,33 @@ void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
     }
 }
 
+void DialogPattern::UpdateHostWindowRect()
+{
+    CHECK_NULL_VOID(isUIExtensionSubWindow_);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto currentId = pipeline->GetInstanceId();
+    if (currentId < MIN_SUBCONTAINER_ID) {
+        return;
+    }
+
+    auto needUpdate = true;
+    if (SystemProperties::IsSuperFoldDisplayDevice()) {
+        auto container = AceEngine::Get().GetContainer(currentId);
+        auto isHalfFold = container && container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow();
+    }
+
+    if (needUpdate) {
+        InitHostWindowRect();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void DialogPattern::InitHostWindowRect()
 {
     if (!dialogProperties_.isShowInSubWindow) {
