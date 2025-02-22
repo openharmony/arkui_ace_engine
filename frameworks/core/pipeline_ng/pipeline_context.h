@@ -214,7 +214,19 @@ public:
     // Do mouse event actively.
     void FlushMouseEvent();
 
+    void HandleTouchHoverOut(const TouchEvent& point);
+
     void FlushMouseEventVoluntarily();
+
+    void FlushMouseEventForHover();
+
+    void FlushMouseEventInVsync();
+
+    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo) override;
+
+    void SetIsWindowSizeChangeFlag(bool result) override;
+
+    void SetIsTransFlag(bool result);
 
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
@@ -1314,6 +1326,9 @@ private:
 
     int32_t curFocusNodeId_ = -1;
 
+    bool isTransFlag_ = false;
+    bool isWindowSizeChangeFlag = false;
+    SourceType lastSourceType_ = SourceType::NONE;
     bool preIsHalfFoldHoverStatus_ = false;
     bool isHoverModeChanged_ = false;
 

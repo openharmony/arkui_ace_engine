@@ -99,10 +99,8 @@ bool IsTouchExplorationEnabled(const RefPtr<FrameNode>& root)
 
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event)
 {
-    if (root == nullptr ||
-        !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
-        !IsTouchExplorationEnabled(root) ||
-        event.sourceType != SourceType::MOUSE) {
+    if (root == nullptr || !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) || event.sourceType != SourceType::MOUSE || event.mockFlushEvent) {
         return;
     }
     AccessibilityHoverEventType type = AccessibilityHoverEventType::MOVE;

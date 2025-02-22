@@ -113,8 +113,10 @@ struct MouseEvent final : public PointerEvent {
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
     std::vector<MouseEvent> history;
+    WeakPtr<NG::FrameNode> node;
     bool isInjected = false;
     bool isPrivacyMode = false;
+    bool isMockWindowTransFlag = false;
 
     Offset GetOffset() const
     {

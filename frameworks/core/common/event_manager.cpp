@@ -1356,6 +1356,9 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
+    if (event.mockFlushEvent) {
+        return false;
+    }
     const static std::set<MouseAction> validAction = {
         MouseAction::PRESS,
         MouseAction::RELEASE,
@@ -1556,7 +1559,8 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
             currHoverEndNode++;
         }
         if (std::find(lastHoverTestResults_.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
-            if (!event.mockFlushEvent && !hoverResult->HandleHoverEvent(true, event)) {
+            if (!(event.action == MouseAction::WINDOW_LEAVE && event.mockFlushEvent) &&
+                !hoverResult->HandleHoverEvent(true, event)) {
                 lastHoverDispatchLength_ = iterCountCurr;
                 break;
             }

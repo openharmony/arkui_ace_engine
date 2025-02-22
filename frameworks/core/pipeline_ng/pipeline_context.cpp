@@ -661,15 +661,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     HandleOnAreaChangeEvent(nanoTimestamp);
     HandleVisibleAreaChangeEvent(nanoTimestamp);
 #endif
-    if (!mouseEvents_.empty()) {
-        FlushMouseEvent();
-        isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
-        mouseEvents_.clear();
-    } else if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT ||
-               isNeedFlushMouseEvent_ == MockFlushEventType::EXECUTE) {
-        FlushMouseEventVoluntarily();
-        isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
-    }
+    FlushMouseEventInVsync();
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
         window_->FlushAnimationStartTime(animationTimeStamp_);
@@ -2618,6 +2610,9 @@ void PipelineContext::OnTouchEvent(
     CHECK_RUN_ON(UI);
 
     HandlePenHoverOut(point);
+    if (eventManager_->GetGestureRefereeNG(nullptr)->CheckSourceTypeChange(lastSourceType_)) {
+        HandleTouchHoverOut(point);
+    }
 
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -3399,6 +3394,9 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
+    if (event.mockFlushEvent && event.action == MouseAction::WINDOW_LEAVE) {
+        lastMouseEvent_->isMockWindowTransFlag = true;
+    }
     lastMouseEvent_->x = event.x;
     lastMouseEvent_->y = event.y;
     lastMouseEvent_->button = event.button;
@@ -3406,13 +3404,16 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     lastMouseEvent_->sourceType = event.sourceType;
     lastMouseEvent_->time = event.time;
     lastMouseEvent_->touchEventId = event.touchEventId;
+    lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
+    lastMouseEvent_->pointerEvent = event.pointerEvent;
+    lastSourceType_ = event.sourceType;
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
     UpdateLastMoveEvent(event);
-
+    lastMouseEvent_->node = AceType::WeakClaim(AceType::RawPtr(node));
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE) {
 #ifdef IS_RELEASE_VERSION
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
@@ -3613,7 +3614,9 @@ void PipelineContext::OnFlushMouseEvent(
     for (auto iter = mouseEvents.rbegin(); iter != mouseEvents.rend(); ++iter) {
         auto scaleEvent = (*iter).CreateScaleEvent(GetViewScale());
         idToMousePoints.emplace(scaleEvent.id, scaleEvent);
-        idToMousePoints[scaleEvent.id].history.insert(idToMousePoints[scaleEvent.id].history.begin(), scaleEvent);
+        if (!iter->mockFlushEvent) {
+            idToMousePoints[scaleEvent.id].history.insert(idToMousePoints[scaleEvent.id].history.begin(), scaleEvent);
+        }
         nodeToMousePoints[node].emplace_back(idToMousePoints[scaleEvent.id]);
         needInterpolation = iter->action != MouseAction::MOVE ? false : true;
     }
@@ -5720,5 +5723,100 @@ void PipelineContext::GetAllPixelMap()
     auto pageNode = stageManager_->GetLastPage();
     CHECK_NULL_VOID(pageNode);
     uiTranslateManager_->GetAllPixelMap(pageNode);
+}
+
+void PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
+{
+    auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();
+    auto offSetPosY_ = displayWindowRectInfo_.Top() - displayWindowRectInfo.Top();
+    if (offSetPosX_ != 0.0 || offSetPosY_ != 0.0) {
+        if (lastMouseEvent_) {
+            lastMouseEvent_->x += offSetPosX_;
+            lastMouseEvent_->y += offSetPosY_;
+        }
+    }
+    displayWindowRectInfo_ = displayWindowRectInfo;
+}
+
+void PipelineContext::SetIsTransFlag(bool result)
+{
+    isTransFlag_ = result;
+}
+
+void PipelineContext::FlushMouseEventForHover()
+{
+    if (!isTransFlag_ || !lastMouseEvent_ || lastMouseEvent_->sourceType != SourceType::MOUSE ||
+        lastMouseEvent_->action == MouseAction::PRESS || lastSourceType_ == SourceType::TOUCH) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    if (lastMouseEvent_->isMockWindowTransFlag || isWindowSizeChangeFlag) {
+        return;
+    }
+    CHECK_RUN_ON(TaskExecutor::TaskType::UI);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    MouseEvent event;
+    event.x = lastMouseEvent_->x;
+    event.y = lastMouseEvent_->y;
+    event.screenX = lastMouseEvent_->screenX;
+    event.screenY = lastMouseEvent_->screenY;
+    event.button = lastMouseEvent_->button;
+    event.sourceType = lastMouseEvent_->sourceType;
+    event.action = lastMouseEvent_->action;
+    event.time = lastMouseEvent_->time;
+    event.touchEventId = lastMouseEvent_->touchEventId;
+    event.mockFlushEvent = true;
+    event.pointerEvent = lastMouseEvent_->pointerEvent;
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+    if (container->IsScenceBoardWindow()) {
+        eventManager_->MouseTest(event, lastMouseEvent_->node.Upgrade(), touchRestrict);
+    } else {
+        eventManager_->MouseTest(event, rootNode_, touchRestrict);
+    }
+    eventManager_->DispatchMouseHoverEventNG(event);
+    eventManager_->DispatchMouseHoverAnimationNG(event);
+}
+
+void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)
+{
+    if (point.sourceTool != SourceTool::FINGER || NearZero(point.force)) {
+        return;
+    }
+    lastSourceType_ = SourceType::TOUCH;
+    CHECK_RUN_ON(UI);
+    eventManager_->CleanHoverStatusForDragBegin();
+}
+
+void PipelineContext::SetIsWindowSizeChangeFlag(bool result)
+{
+    isWindowSizeChangeFlag = result;
+}
+
+void PipelineContext::FlushMouseEventInVsync()
+{
+    auto mouseEventSize = mouseEvents_.size();
+    if (!mouseEvents_.empty()) {
+        FlushMouseEvent();
+        isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
+        mouseEvents_.clear();
+    } else if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT ||
+               isNeedFlushMouseEvent_ == MockFlushEventType::EXECUTE) {
+        FlushMouseEventVoluntarily();
+        isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
+    }
+    if (!lastMouseEvent_) {
+        return;
+    }
+    if (isTransFlag_ && (mouseEventSize == 0 || lastMouseEvent_->mockFlushEvent)) {
+        FlushMouseEventForHover();
+        isWindowSizeChangeFlag = false;
+        isTransFlag_ = false;
+    }
 }
 } // namespace OHOS::Ace::NG
