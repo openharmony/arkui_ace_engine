@@ -138,6 +138,8 @@ public:
 
     bool CanReportChangeEvent(const PickerDate& pickerDate);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
 private:
     void OnModifyDone() override;
     void InitClickEvent();
