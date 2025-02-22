@@ -2355,7 +2355,7 @@ void FrameNode::RebuildRenderContextTree()
     }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
-    if (isDeleteRsNode) {
+    if (isDeleteRsNode_) {
         auto parentFrameNode = GetParentFrameNode();
         if (parentFrameNode) {
             parentFrameNode->MarkNeedSyncRenderTree();

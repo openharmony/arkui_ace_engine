@@ -273,15 +273,8 @@ std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNo
     CHECK_NULL_RETURN(node, nullptr);
     auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
     CHECK_NULL_RETURN(context, nullptr);
-    auto rsNode = context->GetRSNode();
-    if (node->GetIsDelete()) {
-        rsNode->SetDrawNode();
-        auto pipeline = node->GetContext();
-        if (pipeline) {
-            pipeline->FlushMessages();
-        }
-    }
-    return rsNode;
+    context->AddRsNodeForCapture();
+    return context->GetRSNode();
 }
 
 void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callback, const SnapshotOptions& options)

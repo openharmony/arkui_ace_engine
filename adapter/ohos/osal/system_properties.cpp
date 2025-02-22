@@ -255,7 +255,7 @@ int64_t GetDebugFlags()
 
 bool IsContainerDeleteFlag()
 {
-    return (system::GetParameter("persist.container.delete", "false") == "true");
+    return (system::GetParameter("persist.container.delete", "true") == "true");
 }
 
 bool IsLayoutDetectEnabled()
