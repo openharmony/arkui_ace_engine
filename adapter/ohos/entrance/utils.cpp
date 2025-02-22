@@ -18,7 +18,6 @@
 #include <regex>
 
 #include "wm/wm_common.h"
-#include "dm/dm_common.h"
 
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"

@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/ui_event_impl.h"
 
 #include <dlfcn.h>
-#include <string>
 
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"

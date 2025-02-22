@@ -14,14 +14,10 @@
  */
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
-#include <vector>
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
 #include "base/log/event_report.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace {
 #ifndef SYSTEM_CLIPBOARD_SUPPORTED

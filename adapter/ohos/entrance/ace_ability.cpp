@@ -22,7 +22,6 @@
 #include "form_utils_impl.h"
 #include "ohos/init_data.h"
 #include "ipc_skeleton.h"
-#include "res_config.h"
 #include "resource_manager.h"
 #include "session_info.h"
 #include "string_wrapper.h"
@@ -50,6 +49,7 @@
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
 #include "core/image/image_file_cache.h"
+
 namespace OHOS {
 namespace Ace {
 namespace {

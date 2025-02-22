@@ -15,12 +15,9 @@
 
 #include "injecting_executor.h"
 
-#include <chrono>
-#include <iostream>
 #include <thread>
 
 #include "input_manager.h"
-#include "pointer_event.h"
 
 namespace OHOS {
 namespace Ace {

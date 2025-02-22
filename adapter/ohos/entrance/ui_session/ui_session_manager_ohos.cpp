@@ -15,9 +15,6 @@
 
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 
-#include "ui_report_proxy.h"
-
-#include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
 std::mutex UiSessionManager::mutex_;
 std::shared_mutex UiSessionManager::reportObjectMutex_;

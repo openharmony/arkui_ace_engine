@@ -14,13 +14,10 @@
  */
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
-#include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/dump_log.h"
-#include "core/event/focus_axis_event.h"
-#include "core/event/non_pointer_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {

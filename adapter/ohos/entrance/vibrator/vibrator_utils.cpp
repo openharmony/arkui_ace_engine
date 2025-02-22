@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "core/common/vibrator/vibrator_utils.h"
-#include <vector>
 
 #include "vibrator_agent.h"
 

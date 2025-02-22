@@ -15,27 +15,14 @@
 
 #include "dynamic_component_renderer_impl.h"
 
-#include <iterator>
-#include <memory>
-
 #include "accessibility_element_info.h"
 
-#include "interfaces/inner_api/ace/ui_content.h"
-#include "native_engine/native_engine.h"
-
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
