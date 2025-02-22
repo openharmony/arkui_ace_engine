@@ -619,6 +619,7 @@ std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageS
 
     // check image orientation
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;
@@ -807,6 +808,7 @@ std::string AstcImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
     CHECK_NULL_RETURN(fd >= 0, "");
 
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;
