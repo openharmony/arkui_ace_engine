@@ -613,7 +613,7 @@ class TextAreaTextIndentModifier extends ModifierWithKey<Dimension> {
 }
 
 class TextAreaOnChangeModifier extends ModifierWithKey<(value: ChangeValueInfo) => void> {
-  constructor(value: (ChangeValueInfo: string) => void) {
+  constructor(value: (value: ChangeValueInfo) => void) {
     super(value);
   }
   static identity = Symbol('textAreaOnChange');

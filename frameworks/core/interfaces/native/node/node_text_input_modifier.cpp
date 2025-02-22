@@ -1085,6 +1085,29 @@ void ResetTextInputLineHeight(ArkUINodeHandle node)
     TextFieldModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetTextInputKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+ArkUI_Int32 GetTextInputKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetKeyboardAppearance(frameNode));
+}
+
+void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1133,29 +1156,6 @@ void ResetTextInputUserUnderlineColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     UserUnderlineColor userColor = UserUnderlineColor();
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
-}
-
-void SetTextInputKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
-    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
-}
-
-ArkUI_Int32 GetTextInputKeyboardAppearance(ArkUINodeHandle node)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetKeyboardAppearance(frameNode));
-}
-
-void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto value = KeyboardAppearance::NONE_IMMERSIVE;
-    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
 }
 
 void SetTextInputWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
@@ -1877,6 +1877,7 @@ void ResetTextInputOnWillChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
 }
+
 } // namespace
 
 namespace NodeModifier {
@@ -1937,9 +1938,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputEnablePreviewText, ResetTextInputEnablePreviewText,
         SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
         SetTextInputWidth, ResetTextInputWidth, SetTextInputEnableHapticFeedback, ResetTextInputEnableHapticFeedback,
-        GetTextInputLetterSpacing, GetTextInputEnablePreviewText,
         SetStopBackPress, ResetStopBackPress, SetTextInputKeyboardAppearance, GetTextInputKeyboardAppearance,
-        ResetTextInputKeyboardAppearance, SetTextInputOnWillChange, ResetTextInputOnWillChange };
+        ResetTextInputKeyboardAppearance, GetTextInputLetterSpacing, GetTextInputEnablePreviewText,
+        SetTextInputOnWillChange, ResetTextInputOnWillChange };
     return &modifier;
 }
 
@@ -2165,10 +2166,6 @@ void ResetOnTextInputChange(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnChange(node);
 }
-void ResetOnTextInputChangeWithPreviewText(ArkUINodeHandle node)
-{
-    GetTextInputModifier()->resetTextInputOnChange(node);
-}
 void ResetTextInputOnSubmit(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnSubmitWithEvent(node);
@@ -2280,6 +2277,10 @@ void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
+}
+void ResetOnTextInputChangeWithPreviewText(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnChange(node);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

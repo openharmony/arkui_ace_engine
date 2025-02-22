@@ -533,7 +533,7 @@ const RefPtr<ScrollablePattern> TextSelectOverlay::FindScrollableParent()
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
         auto scrollablePattern = parent->GetPattern<ScrollablePattern>();
-        if (scrollablePattern && scrollablePattern->IsScrollable()) {
+        if (scrollablePattern) {
             return scrollablePattern;
         }
         parent = parent->GetAncestorNodeOfFrame(true);

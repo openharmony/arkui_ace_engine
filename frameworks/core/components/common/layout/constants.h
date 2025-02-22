@@ -37,7 +37,7 @@ enum class ButtonType {
     DOWNLOAD,
     ICON,
     CUSTOM,
-    ROUNDED_RECTANGLE
+    ROUNDED_RECTANGLE,
 };
 
 enum class RectWidthStyle {
