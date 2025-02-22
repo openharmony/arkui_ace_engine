@@ -12,11 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="../../state_mgmt/src/lib/common/ace_console.native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
-
-type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
@@ -72,11 +69,9 @@ class BuilderNode {
 }
 
 class JSBuilderNode extends BaseNode {
-  private updateFuncByElmtId?: Map<number, UpdateFunc | UpdateFuncRecord>;
   private params_: Object;
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
-  private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
   private _nativeRef: NativeStrongRef;
   private _supportNestingBuilder: boolean;
   private _proxyObjectParam: Object;
@@ -85,7 +80,7 @@ class JSBuilderNode extends BaseNode {
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
-    this.updateFuncByElmtId = new Map();
+    this.updateFuncByElmtId = new UpdateFuncsByElmtId();
     this._supportNestingBuilder = false;
   }
   public reuse(param: Object): void {
@@ -130,46 +125,6 @@ class JSBuilderNode extends BaseNode {
   }
   public getCardId(): number {
     return -1;
-  }
-  public addChild(child: ViewPU): boolean {
-    if (this.childrenWeakrefMap_.has(child.id__())) {
-      return false;
-    }
-    this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
-    return true;
-  }
-  public getChildById(id: number) {
-    const childWeakRef = this.childrenWeakrefMap_.get(id);
-    return childWeakRef ? childWeakRef.deref() : undefined;
-  }
-  public updateStateVarsOfChildByElmtId(elmtId, params: Object): void {
-    if (elmtId < 0) {
-      return;
-    }
-    let child: ViewPU = this.getChildById(elmtId);
-    if (!child) {
-      return;
-    }
-    child.updateStateVars(params);
-    child.updateDirtyElements();
-  }
-  public createOrGetNode(elmtId: number, builder: () => object): object {
-    const entry = this.updateFuncByElmtId.get(elmtId);
-    if (entry === undefined) {
-      aceConsole.warn(0, `BUILDER_NOD: fail to create node, elmtId is illegal`);
-      return builder();
-    }
-    let updateFuncRecord: UpdateFuncRecord = (typeof entry === 'object') ? entry : undefined;
-    if (updateFuncRecord === undefined) {
-      aceConsole.warn(0, `BUILDER_NOD: fail to create node, the api level of app does not supported`);
-      return builder();
-    }
-    let nodeInfo = updateFuncRecord.node;
-    if (nodeInfo === undefined) {
-      nodeInfo = builder();
-      updateFuncRecord.node = nodeInfo;
-    }
-    return nodeInfo;
   }
   private isObject(param: Object): boolean {
     const typeName = Object.prototype.toString.call(param);
@@ -248,17 +203,13 @@ class JSBuilderNode extends BaseNode {
   private UpdateElement(elmtId: number): void {
     // do not process an Element that has been marked to be deleted
     const obj: UpdateFunc | UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
-    const updateFunc = (typeof obj === 'object') ? obj.updateFunc : null;
+    const updateFunc = (typeof obj === 'object') ? obj.getUpdateFunc() : null;
     if (typeof updateFunc === 'function') {
       updateFunc(elmtId, /* isFirstRender */ false);
       this.finishUpdateFunc();
     }
   }
 
-  protected purgeDeletedElmtIds(): void {
-    UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-  }
   public purgeDeleteElmtId(rmElmtId: number): boolean {
     const result = this.updateFuncByElmtId.delete(rmElmtId);
     if (result) {
@@ -300,6 +251,9 @@ class JSBuilderNode extends BaseNode {
       classObject && 'pop' in classObject ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
+      if (Utils.isApiVersionEQAbove(16)) {
+        ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+      }
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
       // enable V2 object deep observation
@@ -321,16 +275,16 @@ class JSBuilderNode extends BaseNode {
         ObserveV2.getObserve().stopRecordDependencies();
       }
       ViewStackProcessor.StopGetAccessRecording();
+      if (Utils.isApiVersionEQAbove(16)) {
+        ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
+      }
       __JSScopeUtil__.restoreInstanceId();
     };
 
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     // needs to move set before updateFunc.
     // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
-    this.updateFuncByElmtId.set(elmtId, {
-      updateFunc: updateFunc,
-      componentName: _componentName,
-    });
+    this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, classObject: classObject });
     UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
     try {
       updateFunc(elmtId, /* is first render */ true);
@@ -423,22 +377,6 @@ class JSBuilderNode extends BaseNode {
     // purging these elmtIds from state mgmt will make sure no more update function on any deleted child will be executed
     this.purgeDeletedElmtIds();
   }
-
-  public ifElseBranchUpdateFunction(branchId: number, branchfunc: () => void) {
-    const oldBranchid = If.getBranchId();
-    if (branchId === oldBranchid) {
-      return;
-    }
-    // branchId identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
-    // ifElseNode stores the most recent branch, so we can compare
-    // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
-    let removedChildElmtIds = new Array();
-    If.branchId(branchId, removedChildElmtIds);
-    //un-registers the removed child elementIDs using proxy
-    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
-    this.purgeDeletedElmtIds();
-    branchfunc();
-  }
   public getNodePtr(): NodePtr {
     return this.nodePtr_;
   }
@@ -486,4 +424,7 @@ class JSBuilderNode extends BaseNode {
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
     throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
   }
+  public ifElseBranchUpdateFunctionDirtyRetaken(): void {}
+  public forceCompleteRerender(deep: boolean): void {}
+  public forceRerenderNode(elmtId: number): void {}
 }

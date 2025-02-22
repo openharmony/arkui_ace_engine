@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/// <reference path="../../state_mgmt/distRelease/stateMgmt.d.ts" />
 enum NodeRenderType {
   RENDER_TYPE_DISPLAY = 0,
   RENDER_TYPE_TEXTURE,
@@ -38,12 +38,14 @@ declare class __JSBaseNode__ {
   onRecycleWithBindObject(): void;
   onReuseWithBindObject(object: Object): void;
 }
-
-class BaseNode extends __JSBaseNode__ {
+abstract class BaseNode extends ViewBuildNodeBase {
   protected instanceId_?: number;
   protected nodePtr_: NodePtr;
+  public builderBaseNode_: __JSBaseNode__;
   constructor(uiContext: UIContext, options?: RenderOptions) {
-    super(options);
+    super(false);
+    let baseNode = new __JSBaseNode__(options);
+    this.builderBaseNode_ = baseNode;
 
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
@@ -62,4 +64,33 @@ class BaseNode extends __JSBaseNode__ {
   updateInstance(uiContext: UIContext): void {
       this.instanceId_ = uiContext.instanceId_;
   }
+  create(builder: (...args: Object[]) => void, params: Object, update: (instanceId: number, nodePtr: NodePtr) => void,
+    updateConfiguration, supportLazyBuild: boolean): NodePtr {
+      return this.builderBaseNode_.create(builder.bind(this), params, update, updateConfiguration, supportLazyBuild);
+    }
+  finishUpdateFunc(): void {
+    return this.builderBaseNode_.finishUpdateFunc();
+  }
+  postTouchEvent(touchEvent: TouchEvent): boolean {
+    return this.builderBaseNode_.postTouchEvent(touchEvent);
+  }
+  disposeNode(): void {
+    return this.builderBaseNode_.disposeNode();
+  }
+  updateStart(): void {
+    return this.builderBaseNode_.updateStart();
+  }
+  updateEnd(): void {
+    return this.builderBaseNode_.updateEnd();
+  }
+  onRecycleWithBindObject(): void {
+    return this.builderBaseNode_.onRecycleWithBindObject();
+  }
+  onReuseWithBindObject(object: Object): void {
+    return this.builderBaseNode_.onReuseWithBindObject(object);
+  }
+  public abstract ifElseBranchUpdateFunctionDirtyRetaken(): void;
+  public abstract forceCompleteRerender(deep: boolean): void;
+  public abstract forceRerenderNode(elmtId: number): void;
+  public abstract purgeDeleteElmtId(rmElmtId: number): boolean;
 }
