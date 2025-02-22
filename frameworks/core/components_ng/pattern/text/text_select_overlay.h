@@ -99,6 +99,7 @@ protected:
 
 private:
     OffsetF GetHotPaintOffset();
+    bool GetRenderClipValue() const;
     OffsetF handleGlobalOffset_;
     bool isDraggingFirstHandle_ = true;
     OffsetF hostPaintOffset_;
