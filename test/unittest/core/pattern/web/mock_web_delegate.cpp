@@ -1218,4 +1218,7 @@ std::string WebDelegate::GetCurrentLanguage()
 {
     return "";
 }
+void WebDelegate::RegisterWebWindowFocusChangedListener() {}
+void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
+void WebDelegate::OnDragAttach() {}
 } // namespace OHOS::Ace

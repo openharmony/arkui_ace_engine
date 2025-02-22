@@ -609,6 +609,16 @@ private:
     WeakPtr<PipelineBase> context_;
 };
 
+class WebWindowFocusChangedListener : public Rosen::IWindowLifeCycle {
+public:
+    explicit WebWindowFocusChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    ~WebWindowFocusChangedListener() = default;
+
+    void AfterFocused() override;;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END = 1,
@@ -1178,6 +1188,12 @@ public:
 
     std::string GetCurrentLanguage();
 
+    void RegisterWebWindowFocusChangedListener();
+
+    void UnRegisterWebWindowFocusChangedListener();
+    
+    void OnDragAttach();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1388,6 +1404,7 @@ private:
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     int32_t instanceId_;
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
+    sptr<WebWindowFocusChangedListener> webWindowFocusChangedListener_ = nullptr;
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
