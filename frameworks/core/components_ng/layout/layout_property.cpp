@@ -1170,10 +1170,8 @@ void LayoutProperty::ResetCalcMinSize(bool resetWidth)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     if (resetWidth) {
         calcLayoutConstraint_->minSize.value().SetWidth(std::nullopt);
-        calcLayoutConstraint_->preMinSize.value().SetWidth(std::nullopt);
     } else {
         calcLayoutConstraint_->minSize.value().SetHeight(std::nullopt);
-        calcLayoutConstraint_->preMinSize.value().SetWidth(std::nullopt);
     }
 }
 
@@ -1189,10 +1187,8 @@ void LayoutProperty::ResetCalcMaxSize(bool resetWidth)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     if (resetWidth) {
         calcLayoutConstraint_->maxSize.value().SetWidth(std::nullopt);
-        calcLayoutConstraint_->preMaxSize.value().SetWidth(std::nullopt);
     } else {
         calcLayoutConstraint_->maxSize.value().SetHeight(std::nullopt);
-        calcLayoutConstraint_->preMaxSize.value().SetWidth(std::nullopt);
     }
 }
 
