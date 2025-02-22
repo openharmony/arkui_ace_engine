@@ -131,6 +131,9 @@ constexpr const char* DES_FIELD = "__NavdestinationField__";
 // font scale
 constexpr float STANDARD_FONT_SCALE = 1.0f;
 
+
+constexpr uint32_t BAR_ITEM_MARGIN_NUM = 2;
+
 enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,
