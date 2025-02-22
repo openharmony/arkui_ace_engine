@@ -1120,8 +1120,9 @@ class FrameNode {
     }
     getChildrenCount(isExpanded) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+        const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
         __JSScopeUtil__.restoreInstanceId();
+        return childrenCount;
     }
     getPositionToParent() {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
