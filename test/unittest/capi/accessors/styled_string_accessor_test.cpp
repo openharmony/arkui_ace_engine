@@ -119,6 +119,8 @@ const Ark_LeadingMarginPlaceholder TEST_PSPM_LEADING_MARGIN {
     .size = std::get<1>(TEST_TUPLE_DIMENSION_DIMENSION)
 };
 
+const int EXPECTED_NODE_ID = 777;
+
 const std::vector<Ace::SpanType> SPAN_TYPE_TEST_VALUES = {
     Ace::SpanType::Font,
     Ace::SpanType::Decoration,
@@ -288,6 +290,9 @@ namespace {
         }
     };
     Converter::ArkArrayHolder<Array_StyleOptions> holderStyles(testArrayStyles);
+}
+namespace GeneratedModifier {
+    const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 }
 
 using namespace testing;
@@ -740,13 +745,49 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling, 
 }
 
 /**
- * @tc.name:DISABLED_styledStringUnmarshalling
+ * @tc.name: styledStringUnmarshallingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringUnmarshalling, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshallingTest, TestSize.Level1)
 {
-    // not implement
+    ASSERT_NE(accessor_->unmarshalling, nullptr);
+
+    std::vector<uint8_t> tlvData;
+    auto encodeResult = peer_->spanString->EncodeTlv(tlvData);
+    ASSERT_TRUE(encodeResult);
+    auto data = tlvData.data();
+    size_t bufferSize = tlvData.size();
+    std::string testBuffer(data, data + bufferSize);
+    ASSERT_FALSE(testBuffer.empty());
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::string value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onUnmarshalling = [](const Ark_Int32 resourceId,
+        const Opt_StyledString value, const Opt_Array_String error) {
+        auto peer = Converter::OptConvert<Ark_StyledString>(value).value_or(nullptr);
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetStyledStringAccessor();
+        ASSERT_NE(accessor, nullptr);
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = peer->spanString->GetString()
+        };
+        accessor->destroyPeer(peer);
+    };
+
+    auto arkCallback = Converter::ArkValue<
+        Callback_Opt_StyledString_Opt_Array_String_Void>(onUnmarshalling, EXPECTED_NODE_ID);
+    auto akrBuffer = Converter::ArkValue<Ark_Buffer>(testBuffer, nullptr);
+
+    EXPECT_FALSE(checkEvent.has_value());
+    accessor_->unmarshalling(&akrBuffer, &arkCallback);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
+    EXPECT_EQ(peer_->spanString->GetString(), checkEvent->value);
 }
 
 /**
