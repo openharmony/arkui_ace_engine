@@ -611,6 +611,8 @@ public:
         isReDragStart_ = isReDragStart;
     }
 
+    bool CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId);
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);

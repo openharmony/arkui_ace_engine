@@ -58,6 +58,7 @@ constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
 constexpr float MIN_SPRING_RESPONSE = 0.05f;
 constexpr float DEL_SPRING_RESPONSE = 0.005f;
+constexpr float MIN_UI_EXTENSION_BOUNDARY_DISTANCE = 5.0f;
 constexpr int32_t RESERVED_DEVICEID_1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID_2 = 0xAAAAAAFE;
 constexpr uint32_t TASK_DELAY_TIME = 5 * 1000;
@@ -2063,6 +2064,11 @@ void DragDropManager::DoDragMoveAnimate(const DragPointerEvent& pointerEvent)
     isPullMoveReceivedForCurrentDrag_ = true;
     CHECK_NULL_VOID(info_.imageNode);
     auto containerId = Container::CurrentId();
+    if (CheckIsUIExtensionBoundary(pointerEvent.GetDisplayX(), pointerEvent.GetDisplayY(), containerId)) {
+        SetStartAnimation(false);
+        TransDragWindowToDragFwk(containerId);
+        return;
+    }
     auto overlayManager = GetDragAnimationOverlayManager(containerId);
     CHECK_NULL_VOID(overlayManager);
     auto point = pointerEvent.GetPoint();
@@ -2728,5 +2734,20 @@ bool DragDropManager::IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, in
 int32_t DragDropManager::CancelUDMFDataLoading(const std::string& key)
 {
     return UdmfClient::GetInstance()->Cancel(key);
+}
+
+bool DragDropManager::CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    if (!container->IsUIExtensionWindow()) {
+        return false;
+    }
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto rect = pipeline->GetCurrentWindowRect();
+    auto distance = std::min(std::min(x - rect.Left(), rect.Right() - x),
+        std::min(y - rect.Top(), rect.Bottom() - y));
+    return distance < MIN_UI_EXTENSION_BOUNDARY_DISTANCE;
 }
 } // namespace OHOS::Ace::NG

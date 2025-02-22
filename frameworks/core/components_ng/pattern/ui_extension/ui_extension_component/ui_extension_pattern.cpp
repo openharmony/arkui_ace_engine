@@ -1035,12 +1035,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
-    auto pointerAction = newPointerEvent->GetPointerAction();
-    if (!(pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
-        DispatchPointerEvent(newPointerEvent);
-    }
+    DispatchPointerEvent(newPointerEvent);
     if (focusState_ && newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         if (needReSendFocusToUIExtension_) {
             HandleFocusEvent();
@@ -1174,13 +1169,15 @@ void UIExtensionPattern::HandleDragEvent(const DragPointerEvent& info)
 {
     auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
+    std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+    CHECK_NULL_VOID(newPointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    Platform::CalculatePointerEvent(pointerEvent, host, true);
-    Platform::UpdatePointerAction(pointerEvent, info.action);
-    DispatchPointerEvent(pointerEvent);
+    Platform::CalculatePointerEvent(newPointerEvent, host, true);
+    Platform::UpdatePointerAction(newPointerEvent, info.action);
+    DispatchPointerEvent(newPointerEvent);
 }
 
 void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
