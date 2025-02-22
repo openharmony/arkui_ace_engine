@@ -2197,7 +2197,7 @@ typedef enum {
     /**
      * @error Internal error occurs, such as failure occurs because of the internal environment error,
      * or operation failed because of the internal execution failed.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_INTERNAL_ERROR = 100001,
     /** The component does not support specific attributes or events. */
@@ -2218,24 +2218,24 @@ typedef enum {
     ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
     /**
      * @error The snapshot taking is timeout.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002,
     /** The node is not on main tree. */
     ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
     /**
      * @error The node requesting focus is not focusable.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE = 150001,
     /**
      * @error The node requesting focus has unfocusable ancestor.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE_ANCESTOR = 150002,
     /**
      * @error The node requesting focus does not exists.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT = 150003,
     /** The component is not a scroll container. */
@@ -2259,15 +2259,15 @@ typedef enum {
     ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT = 180005,
     /** invalid styled string */
     ARKUI_ERROR_CODE_INVALID_STYLED_STRING = 180101,
+    /**
+     * @error The gesture recognizer type is not supported.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
     /** The uiContext is invalid. */
     ARKUI_ERROR_CODE_UI_CONTEXT_INVALID = 190001,
     /** The callback function is invalid. */
     ARKUI_ERROR_CODE_CALLBACK_INVALID = 190002,
-    /** 
-     * @error The gesture recognizer type is not supported. 
-     * @since 16
-     */
-    ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
     /**
      * @error operation is not allowed for current drag drop phase.
      * @since 16
@@ -2292,7 +2292,7 @@ typedef enum {
 /**
  * @brief Define an enum for the areas of the <b>ListItemGroup</b> component.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
     /** Outside the area of the <b>ListItemGroup</b> component. */
@@ -2367,7 +2367,7 @@ typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
 /**
  * @brief Defines the options for taking snapshot.
  *
- * @since 16
+ * @since 15
  */
 typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 
@@ -3386,6 +3386,43 @@ int32_t OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(ArkUI_SwiperIndicator* indic
 int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indicator);
 
 /**
+ * @brief Sets whether to ignore the size of the indicator for {@link OH_ArkUI_SwiperIndicator_SetBottomPosition}.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param ignoreSize Whether to ignore the size of the indicator. The value 1 means to ignore, and 0 means the opposite.
+ * The default value is 0.
+ * @since 16
+*/
+void OH_ArkUI_SwiperIndicator_SetIgnoreSizeOfBottom(ArkUI_SwiperIndicator* indicator, int32_t ignoreSize);
+
+/**
+ * @brief Obtains whether to ignore the size of the indicator for {@link OH_ArkUI_SwiperIndicator_SetBottomPosition}.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns whether to ignore the size of the indicator.
+ * @since 16
+*/
+int32_t OH_ArkUI_SwiperIndicator_GetIgnoreSizeOfBottom(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the space between the dots of the navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param space the space between the dots of the navigation indicator, the default value is 8vp.
+ * @since 16
+*/
+void OH_ArkUI_SwiperIndicator_SetSpace(ArkUI_SwiperIndicator* indicator, float space);
+
+/**
+ * @brief Obtains the space between the dots of the navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return the space between the dots of the navigation indicator
+ * @since 16
+*/
+float OH_ArkUI_SwiperIndicator_GetSpace(ArkUI_SwiperIndicator* indicator);
+
+/**
  * @brief Creates a digital indicator.
  *
  * @return Returns the pointer to the new indicator.
@@ -3581,6 +3618,25 @@ ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetSelectedFontWeight(ArkUI_Swipe
  * @since 16
  */
 void OH_ArkUI_SwiperDigitIndicator_Destroy(ArkUI_SwiperDigitIndicator *indicator);
+
+/**
+ * @brief Sets whether to ignore the size of the indicator for {@link OH_ArkUI_SwiperDigitIndicator_SetBottomPosition}.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @param ignoreSize Whether to ignore the size of the indicator. The value 1 means to ignore, and 0 means the opposite.
+ * The default value is 0.
+ * @since 16
+*/
+void OH_ArkUI_SwiperDigitIndicator_SetIgnoreSizeOfBottom(ArkUI_SwiperDigitIndicator* indicator, int32_t ignoreSize);
+
+/**
+ * @brief Obtains whether to ignore the size of the indicator for {@link OH_ArkUI_SwiperDigitIndicator_SetBottomPosition}.
+ *
+ * @param indicator The pointer to the digital indicator.
+ * @return Returns whether to ignore the size of the indicator.
+ * @since 16
+*/
+int32_t OH_ArkUI_SwiperDigitIndicator_GetIgnoreSizeOfBottom(ArkUI_SwiperDigitIndicator* indicator);
 
 /**
  * @brief Creates a arrow style for swiper.
@@ -4631,7 +4687,7 @@ float OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(ArkUI_ProgressLinearSty
  *
  * @return Returns the pointer to the created snapshot options object.If the object returns a null pointer,
  *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
- * @since 16
+ * @since 15
  */
 ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions();
 
@@ -4639,7 +4695,7 @@ ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions();
  * @brief Dispose a snapshot option object.
  *
  * @param snapshotOptions Indicates the pointer to the snapshot option.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
 
@@ -4650,7 +4706,7 @@ void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
  * @param scale Indicates the scale property to take the snapshot.
  * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
 

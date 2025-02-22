@@ -44,6 +44,9 @@ public:
     virtual void SetChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
     virtual void SetCheckboxStyle(CheckBoxStyle checkboxStyle) {};
+    virtual void ResetSelectedColor() {};
+    virtual void ResetUnSelectedColor() {};
+    virtual void ResetCheckMarkColor() {};
 
 private:
     static std::unique_ptr<CheckBoxModel> instance_;

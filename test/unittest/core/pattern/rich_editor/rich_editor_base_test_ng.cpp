@@ -575,6 +575,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
     richEditorTheme->textStyle_.SetTextColor(DEFAULT_TEXT_COLOR_VALUE);
     richEditorTheme->textStyle_.SetTextDecorationColor(DEFAULT_TEXT_COLOR_VALUE);
 

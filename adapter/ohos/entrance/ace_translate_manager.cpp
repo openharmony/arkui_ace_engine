@@ -20,8 +20,9 @@
 #include "base/json/json_util.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
-
 namespace OHOS::Ace {
 void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> node)
 {
@@ -57,6 +58,11 @@ void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
 
 void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isContinued)
 {
+    if (listenerMap_.empty()) {
+        UiSessionManager::GetInstance()->SendWebTextToAI(-1, "empty");
+    } else {
+        UiSessionManager::GetInstance()->SendWebTextToAI(-1, "non-empty");
+    }
     for (auto listener : listenerMap_) {
         auto frameNode = listener.second.Upgrade();
         if (!frameNode) {
@@ -133,7 +139,12 @@ void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelM
 
 void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 {
-    TravelFindPixelMap(pageNode);
+    auto topNavNode = FindTopNavDestination(pageNode);
+    if (topNavNode) {
+        TravelFindPixelMap(topNavNode);
+    } else {
+        TravelFindPixelMap(pageNode);
+    }
     SendPixelMap();
 }
 
@@ -152,4 +163,18 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
         TravelFindPixelMap(item);
     }
 }
+RefPtr<NG::UINode> UiTranslateManagerImpl::FindTopNavDestination(RefPtr<NG::UINode> currentNode)
+{
+    for (const auto& item : currentNode->GetChildren()) {
+        auto node = AceType::DynamicCast<NG::FrameNode>(item);
+        if (node && node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(node);
+            auto topChild = navigationGroupNode->GetTopDestination();
+            return topChild;
+        }
+        FindTopNavDestination(item);
+    }
+    return nullptr;
+}
+
 } // namespace OHOS::Ace

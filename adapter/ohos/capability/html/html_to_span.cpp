@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
@@ -691,6 +692,8 @@ void HtmlToSpan::HandleImgSpanOption(const Styles& styleMap, ImageSpanOptions& o
             options.imageAttribute->verticalAlign = StringToTextVerticalAlign(trimVal);
         } else if (key == "width" || key == "height") {
             HandleImageSize(key, trimVal, options);
+        } else if (key == "sync-load") {
+            options.imageAttribute->syncLoad = V2::ConvertStringToBool(trimVal);
         }
     }
 }
@@ -707,12 +710,17 @@ void HtmlToSpan::HandleImagePixelMap(const std::string& src, ImageSpanOptions& o
     ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
     auto image = ctx->MoveCanvasImage();
     if (image != nullptr) {
-        option.imagePixelMap = image->GetPixelMap();
+        auto pixelMap = image->GetPixelMap();
+        if (pixelMap) {
+            option.imagePixelMap = pixelMap;
+        }
     }
     if (option.imagePixelMap.has_value() && option.imagePixelMap.value() != nullptr) {
         auto pixel = option.imagePixelMap.value();
         LOGI("img height: %{public}d, width: %{public}d, size:%{public}d", pixel->GetHeight(),
             pixel->GetWidth(), pixel->GetByteCount());
+    } else {
+        option.image = src;
     }
 }
 
@@ -963,9 +971,13 @@ void HtmlToSpan::ToSpan(
     ParseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
     if (curNode->type == XML_ELEMENT_NODE) {
         if (htmlTag == "p") {
-            allContent += "\n";
-            childPos++;
-            ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+            if (curNode->parent == nullptr || curNode->parent->type != XML_ELEMENT_NODE ||
+                xmlStrcmp(curNode->parent->name, (const xmlChar*)"span") != 0) {
+                // The <p> contained in <span> is discarded. It is not considered as a standard writing method.
+                allContent += "\n";
+                childPos++;
+                ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+            }
         } else if (htmlTag == "img") {
             childPos++;
             ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);

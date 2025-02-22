@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/ng/entry_page_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -548,7 +549,7 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
+    if (overlayManager_->IsCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto taskExecutor = pipeline->GetTaskExecutor();
@@ -561,7 +562,7 @@ bool PagePattern::RemoveOverlay()
 bool PagePattern::IsNeedCallbackBackPressed()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    return overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), true);
+    return overlayManager_->IsCurrentNodeProcessRemoveOverlay(GetHost(), true);
 }
 
 void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
@@ -928,7 +929,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
         TAG_LOGI(AceLogTag::ACE_ROUTER, "inPage transition type is invalid");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish inPage transition.", GetPageUrl().c_str());
     isPageInTransition_ = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewShow();

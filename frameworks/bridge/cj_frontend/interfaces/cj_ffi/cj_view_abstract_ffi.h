@@ -33,15 +33,10 @@ using VectorFloat64Ptr = void*;
 
 namespace OHOS::Ace::Framework {
 
-static RefPtr<PipelineBase> GetPipelineContext()
-{
-    auto currentObj = Container::Current();
-    CHECK_NULL_RETURN(currentObj, nullptr);
-    return currentObj->GetPipelineContext();
-}
+RefPtr<PipelineBase> GetPipelineContext();
 
 template<typename T>
-static RefPtr<T> GetTheme()
+RefPtr<T> GetTheme()
 {
     auto pipelineContext = GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);

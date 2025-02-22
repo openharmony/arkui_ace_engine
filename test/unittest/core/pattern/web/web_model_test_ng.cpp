@@ -1600,28 +1600,6 @@ HWTEST_F(WebModelTestNg, SetIntelligentTrackingPreventionResultId001, TestSize.L
 }
 
 /**
- * @tc.name: SetSmoothDragResizeEnabled001
- * @tc.desc: Test web_model_ng.cpp
- * @tc.type: FUNC
- */
-HWTEST_F(WebModelTestNg, SetSmoothDragResizeEnabled001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-
-    WebModelNG webModelNG;
-    webModelNG.SetSmoothDragResizeEnabled(true);
-    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckSmoothDragResizeEnabled(true), true);
-#endif
-}
-
-/**
  * @tc.name: SetRenderProcessNotRespondingId002
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -2256,6 +2234,28 @@ HWTEST_F(WebModelTestNg, SetOnInterceptKeyEvent002, TestSize.Level1)
     KeyEventInfo keyEventInfo(keyEvent);
     interceptKeyEventCallback(keyEventInfo);
     MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetEnableFollowSystemFontWeight001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableFollowSystemFontWeight001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableFollowSystemFontWeight(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableFollowSystemFontWeight(true), true);
 #endif
 }
 } // namespace OHOS::Ace::NG

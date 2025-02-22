@@ -196,7 +196,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
                 pipeline->SetMinPlatformVersion(manifestParser->GetMinPlatformVersion());
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageUrl", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIRunPageUrl");
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
@@ -210,7 +210,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
             pageRouterManager->RunPage(content, params);
             auto pipeline = delegate->GetPipelineContext();
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageContent", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIRunPageContent");
 }
 
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
@@ -297,16 +297,14 @@ void FrontendDelegateDeclarativeNG::UpdateApplicationState(const std::string& pa
 {
     taskExecutor_->PostTask([updateApplicationState = updateApplicationState_, packageName,
                                 state] { updateApplicationState(packageName, state); },
-        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState");
 }
 
 void FrontendDelegateDeclarativeNG::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
     taskExecutor_->PostTask([onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow,
                                 data] { onWindowDisplayModeChanged(isShownInMultiWindow, data); },
-        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged");
 }
 
 void FrontendDelegateDeclarativeNG::NotifyAppStorage(
@@ -320,7 +318,7 @@ void FrontendDelegateDeclarativeNG::NotifyAppStorage(
             }
             jsEngine->NotifyAppStorage(key, value);
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage");
 }
 
 void FrontendDelegateDeclarativeNG::FireAccessibilityEvent(const AccessibilityEvent& accessibilityEvent)
@@ -549,10 +547,9 @@ void FrontendDelegateDeclarativeNG::NavigatePage(uint8_t type, const PageTarget&
     }
 }
 
-void FrontendDelegateDeclarativeNG::PostJsTask(
-    std::function<void()>&& task, const std::string& name, PriorityType priorityType)
+void FrontendDelegateDeclarativeNG::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name, priorityType);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
 const std::string& FrontendDelegateDeclarativeNG::GetAppID() const
@@ -600,8 +597,7 @@ void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, co
 {
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale");
 }
 
 void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc,
@@ -1435,8 +1431,6 @@ void FrontendDelegateDeclarativeNG::HideAllNodesOnOverlay()
 
 bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto overlayManager = context->GetOverlayManager();
@@ -1445,8 +1439,6 @@ bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayMa
 };
 std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarativeNG::GetOverlayManagerOptions()
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, std::nullopt);
     auto overlayManager = context->GetOverlayManager();

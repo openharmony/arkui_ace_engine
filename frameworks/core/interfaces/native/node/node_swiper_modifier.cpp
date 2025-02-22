@@ -56,6 +56,8 @@ constexpr int32_t DIGIT_INDICATOR_LEFT = 7;
 constexpr int32_t DIGIT_INDICATOR_TOP = 8;
 constexpr int32_t DIGIT_INDICATOR_RIGHT = 9;
 constexpr int32_t DIGIT_INDICATOR_BOTTOM = 10;
+constexpr int32_t DIGIT_INDICATOR_IGNORE_SIZE = 11;
+constexpr int32_t DIGIT_INDICATOR_SET_IGNORE_SIZE = 12;
 constexpr int32_t DOT_INDICATOR_ITEM_WIDTH = 1;
 constexpr int32_t DOT_INDICATOR_ITEM_HEIGHT = 2;
 constexpr int32_t DOT_INDICATOR_SELECTED_ITEM_WIDTH = 3;
@@ -69,6 +71,9 @@ constexpr int32_t DOT_INDICATOR_RIGHT = 10;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 11;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 12;
 constexpr int32_t DOT_INDICATOR_INFO_SIZE = 12;
+constexpr int32_t DOT_INDICATOR_SPACE = 13;
+constexpr int32_t DOT_INDICATOR_IGNORE_SIZE = 14;
+constexpr int32_t DOT_INDICATOR_SET_IGNORE_SIZE = 15;
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
@@ -205,30 +210,15 @@ void ParseMaxDisplayCount(const std::vector<std::string>& dotIndicatorInfo, Swip
     swiperParameters.maxDisplayCountVal = StringUtils::StringToInt(maxDisplayCount);
 }
 
-SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo)
+void ParseDotIndicatorSize(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo,
+    const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme, SwiperParameters& swiperParameters)
 {
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
     auto itemWidthValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_ITEM_WIDTH);
     auto itemHeightValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_ITEM_HEIGHT);
     auto selectedItemWidthValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SELECTED_ITEM_WIDTH);
     auto selectedItemHeightValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SELECTED_ITEM_HEIGHT);
-    auto maskValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MASK);
-    auto colorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_COLOR);
-    auto selectedColorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SELECTED_COLOR);
-    CHECK_NULL_RETURN(frameNode, SwiperParameters());
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
-    bool parseOk = false;
-    SwiperParameters swiperParameters;
-    auto leftValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_LEFT);
-    auto topValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_TOP);
-    auto rightValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_RIGHT);
-    auto bottomValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_BOTTOM);
-    swiperParameters.dimLeft = ParseIndicatorDimension(leftValue);
-    swiperParameters.dimTop = ParseIndicatorDimension(topValue);
-    swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
-    swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
     CalcDimension dimPosition = StringUtils::StringToCalcDimension(itemWidthValue, false, DimensionUnit::VP);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     bool parseItemWOk = !itemWidthValue.empty() && dimPosition.Unit() != DimensionUnit::PERCENT;
@@ -247,6 +237,45 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     } else {
         SwiperModelNG::SetIsIndicatorCustomSize(frameNode, true);
     }
+}
+
+void GetDotIndicatorSpaceAndIgnoreSize(const std::vector<std::string>& dotIndicatorInfo,
+    const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme, SwiperParameters& swiperParameters)
+{
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto spaceValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SPACE);
+    auto ignoreSize = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_IGNORE_SIZE);
+    auto setIgnoreSize = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SET_IGNORE_SIZE);
+
+    CalcDimension dimPosition = StringUtils::StringToCalcDimension(spaceValue, false, DimensionUnit::VP);
+    bool parseSpaceOk = !spaceValue.empty() && dimPosition.Unit() != DimensionUnit::PERCENT;
+    auto defaultSpaceSize = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+    swiperParameters.dimSpace = (parseSpaceOk && !(dimPosition < 0.0_vp)) ? dimPosition : defaultSpaceSize;
+
+    swiperParameters.ignoreSizeValue = (ignoreSize == "1" ? true : false);
+    swiperParameters.setIgnoreSizeValue = (setIgnoreSize == "1" ? true : false);
+}
+
+SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo)
+{
+    auto maskValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MASK);
+    auto colorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_COLOR);
+    auto selectedColorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SELECTED_COLOR);
+    CHECK_NULL_RETURN(frameNode, SwiperParameters());
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
+    bool parseOk = false;
+    SwiperParameters swiperParameters;
+    auto leftValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_LEFT);
+    auto topValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_TOP);
+    auto rightValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_RIGHT);
+    auto bottomValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_BOTTOM);
+    swiperParameters.dimLeft = ParseIndicatorDimension(leftValue);
+    swiperParameters.dimTop = ParseIndicatorDimension(topValue);
+    swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
+    swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
     if (maskValue != "2") {
         swiperParameters.maskValue = (maskValue == "1" ? true : false);
     }
@@ -255,7 +284,8 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = Color::ParseColorString(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
-
+    ParseDotIndicatorSize(frameNode, dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
+    GetDotIndicatorSpaceAndIgnoreSize(dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     ParseMaxDisplayCount(dotIndicatorInfo, swiperParameters);
 
     return swiperParameters;
@@ -310,6 +340,12 @@ SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator
     dimPosition = Dimension(indicator->selectedItemHeight.value, unit);
     bool parseSelectedItemHOk = indicator->selectedItemHeight.isSet && dimPosition.Unit() != DimensionUnit::PERCENT;
     swiperParameters.selectedItemHeight = (parseSelectedItemHOk && (dimPosition > 0.0_vp)) ? dimPosition : defaultSize;
+
+    auto defaultSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+    dimPosition = Dimension(indicator->dimSpace.value, unit);
+    bool parseSpaceOk = indicator->dimSpace.isSet && dimPosition.Unit() != DimensionUnit::PERCENT;
+    swiperParameters.dimSpace = (parseSpaceOk && !(dimPosition < 0.0_vp)) ? dimPosition : defaultSpace;
+
     if (!parseSelectedItemWOk && !parseSelectedItemHOk && !parseItemWOk && !parseItemHOk) {
         SwiperModelNG::SetIsIndicatorCustomSize(frameNode, false);
     } else {
@@ -322,6 +358,7 @@ SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator
         Color(indicator->selectedColorValue.value) : swiperIndicatorTheme->GetSelectedColor();
     swiperParameters.maxDisplayCountVal = indicator->maxDisplayCount.isSet == 1 ?
         indicator->maxDisplayCount.value : NUM_0;
+    swiperParameters.ignoreSizeValue = indicator->ignoreSizeValue.value == 1 ? true : false;
     return swiperParameters;
 }
 
@@ -362,6 +399,7 @@ SwiperDigitalParameters GetDigitIndicatorProps(FrameNode* frameNode, ArkUISwiper
     swiperDigitalParameters.selectedFontWeight =
         indicator->selectedFontWeight.isSet == 1 ? FontWeight(indicator->selectedFontWeight.value)
                                                  : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
+    swiperDigitalParameters.ignoreSizeValue = indicator->ignoreSizeValue.value == 1 ? true : false;
     return swiperDigitalParameters;
 }
 
@@ -421,6 +459,12 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     auto selectedDigitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT] == "-"
                                        ? ""
                                        : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
+    auto ignoreSize = digitIndicatorInfo[DIGIT_INDICATOR_IGNORE_SIZE] == "-" ? "" :
+        digitIndicatorInfo[DIGIT_INDICATOR_IGNORE_SIZE];
+    
+    auto setIgnoreSize = digitIndicatorInfo[DIGIT_INDICATOR_SET_IGNORE_SIZE] == "-" ? "" :
+        digitIndicatorInfo[DIGIT_INDICATOR_SET_IGNORE_SIZE];
+
     auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -438,6 +482,7 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     parseOk = Color::ParseColorString(selectedFontColorValue, fontColor);
     digitalParameters.selectedFontColor =
         parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    digitalParameters.ignoreSizeValue = (ignoreSize == "1" ? true : false);
     GetFontContent(digitFontSize, digitFontWeight, false, digitalParameters);
     GetFontContent(selectedDigitFontSize, selectedDigitFontWeight, true, digitalParameters);
     return digitalParameters;
@@ -1234,6 +1279,7 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
     props->dimRight = ArkUIOptionalFloat { hasValue, value };
     ParseIndicatorAttribute(params->dimBottom, hasValue, value);
     props->dimBottom = ArkUIOptionalFloat { hasValue, value };
+    props->ignoreSizeValue = ArkUIOptionalInt { 1, params->ignoreSizeValue.value_or(0) };
     if (props->type == ArkUISwiperIndicatorType::DOT) {
         props->type = ArkUISwiperIndicatorType::DOT;
         ParseIndicatorAttribute(params->itemWidth, hasValue, value);
@@ -1248,6 +1294,8 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
         props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
         props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
         props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
+        ParseIndicatorAttribute(params->dimSpace, hasValue, value);
+        props->dimSpace = ArkUIOptionalFloat { hasValue, value };
     }
 }
 
@@ -1284,6 +1332,7 @@ void GetSwiperDigitIndicator(ArkUINodeHandle node, ArkUISwiperDigitIndicator* pr
     props->dimRight = ArkUIOptionalFloat { hasValue, value };
     ParseIndicatorAttribute(params->dimBottom, hasValue, value);
     props->dimBottom = ArkUIOptionalFloat { hasValue, value };
+    props->ignoreSizeValue = ArkUIOptionalInt { 1, params->ignoreSizeValue.value_or(0) };
     if (props->type == ArkUISwiperIndicatorType::DIGIT) {
         props->fontColor = ArkUIOptionalUint { 1, params->fontColor.value().GetValue() };
         props->selectedFontColor = ArkUIOptionalUint { 1, params->selectedFontColor.value().GetValue() };

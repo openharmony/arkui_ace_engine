@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 
+#include <cstdio>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "base/image/file_uri_helper.h"
@@ -208,17 +209,18 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
     if (!RealPath(hapPath, realPath)) {
         return false;
     }
-    auto hapFd = open(realPath, O_RDONLY);
-    if (hapFd < 0) {
+    std::FILE* hapFp = std::fopen(realPath, "r");
+    if (hapFp == nullptr) {
         LOGE("Open hap file failed");
         return false;
     }
+    auto hapFd = fileno(hapFp);
     if (mediaPlayer_ && mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
-        close(hapFd);
+        std::fclose(hapFp);
         return false;
     }
-    close(hapFd);
+    std::fclose(hapFp);
     return true;
 }
 
@@ -288,17 +290,18 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
         return false;
     }
 
-    auto hapFd = open(realPath, O_RDONLY);
-    if (hapFd < 0) {
+    std::FILE* hapFp = std::fopen(realPath, "r");
+    if (hapFp == nullptr) {
         LOGE("Open hap file failed");
         return false;
     }
+    auto hapFd = fileno(hapFp);
     if (!mediaPlayer_ || mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
-        close(hapFd);
+        std::fclose(hapFp);
         return false;
     }
-    close(hapFd);
+    std::fclose(hapFp);
     return true;
 }
 
@@ -322,17 +325,18 @@ bool RosenMediaPlayer::RelativePathPlay(const std::string& filePath)
     if (!RealPath(hapPath, realPath)) {
         return false;
     }
-    auto hapFd = open(realPath, O_RDONLY);
-    if (hapFd < 0) {
+    std::FILE* hapFp = std::fopen(realPath, "r");
+    if (hapFp == nullptr) {
         LOGE("Open hap file failed");
         return false;
     }
+    auto hapFd = fileno(hapFp);
     if (mediaPlayer_ && mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
-        close(hapFd);
+        std::fclose(hapFp);
         return false;
     }
-    close(hapFd);
+    std::fclose(hapFp);
     return true;
 }
 
@@ -378,7 +382,12 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
         useFd = true;
     } else if (StringUtils::StartWith(filePath, "file://")) {
         filePath = FileUriHelper::GetRealPath(filePath);
-        fd = open(filePath.c_str(), O_RDONLY);
+        std::FILE* fp = std::fopen(filePath.c_str(), "r");
+        if (fp != nullptr) {
+            fd = fileno(fp);
+        } else {
+            LOGE("Open file %{public}s failed", filePath.c_str());
+        }
         useFd = true;
     } else if (StringUtils::StartWith(filePath, "resource:///")) {
         // file path: resources/base/media/xxx.xx --> resource:///xxx.xx

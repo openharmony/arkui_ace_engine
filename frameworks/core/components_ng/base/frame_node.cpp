@@ -51,6 +51,7 @@
 #endif
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -167,9 +168,10 @@ public:
         }
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(UiNode);
         auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(UiNode);
+        auto repeatVirtualScroll2Node = AceType::DynamicCast<RepeatVirtualScroll2Node>(UiNode);
         if (lazyForEachNode) {
             lazyForEachNode->BuildAllChildren();
-        } else if (repeatVirtualScrollNode) {
+        } else if (repeatVirtualScrollNode || repeatVirtualScroll2Node) {
             TAG_LOGE(AceLogTag::ACE_REPEAT, "repeatVirtualScroll not support in non scoll container!");
         } else {
             auto customNode = AceType::DynamicCast<CustomNode>(UiNode);
@@ -256,11 +258,12 @@ public:
     void ResetChildren(bool needResetChild = false)
     {
         if (inUse_) {
-            LOGF(
-                "[%{public}d:%{public}s] reset children while in use", hostNode_->GetId(), hostNode_->GetTag().c_str());
             if (SystemProperties::GetLayoutDetectEnabled()) {
-                abort();
+                LOGF_ABORT("[%{public}d:%{public}s] reset children while in use",
+                    hostNode_->GetId(), hostNode_->GetTag().c_str());
             } else {
+                LOGW("[%{public}d:%{public}s] reset children while in use",
+                    hostNode_->GetId(), hostNode_->GetTag().c_str());
                 LogBacktrace();
             }
             delayReset_ = true;
@@ -773,6 +776,9 @@ void FrameNode::DumpCommonInfo()
     }
     if (IsFreeze()) {
         DumpLog::GetInstance().AddDesc(std::string("Freeze: 1"));
+        if (IsUserFreeze()) {
+            DumpLog::GetInstance().AddDesc(std::string("UserFreeze: 1"));
+        }
     }
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")
@@ -2349,7 +2355,7 @@ void FrameNode::RebuildRenderContextTree()
     }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
-    if (isDeleteRsNode) {
+    if (isDeleteRsNode_) {
         auto parentFrameNode = GetParentFrameNode();
         if (parentFrameNode) {
             parentFrameNode->MarkNeedSyncRenderTree();
@@ -4383,7 +4389,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         auto size = geometryNode_->GetFrameSize();
-        geometryNode_->SetFrameSize(SizeF({ (int)(size.Width() + 0.5), (int)(size.Height() + 0.5) }));
+        geometryNode_->SetFrameSize(SizeF({ round(size.Width()), round(size.Height()) }));
     }
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);

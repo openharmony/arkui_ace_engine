@@ -1974,7 +1974,7 @@ void ViewAbstract::BindPopup(
         showInSubWindow = false;
     } else {
         // subwindow model needs to use subContainer to get popupInfo
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
         if (subwindow) {
             subwindow->GetPopupInfoNG(targetId, popupInfo);
         }
@@ -2028,7 +2028,8 @@ void ViewAbstract::BindPopup(
         } else {
             // erase popup in subwindow when target node destroy
             auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                    containerId, SubwindowType::TYPE_POPUP);
                 CHECK_NULL_VOID(subwindow);
                 auto overlayManager = subwindow->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
@@ -2090,7 +2091,7 @@ RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& 
     CHECK_NULL_RETURN(context, nullptr);
     if (GetTargetNodeIsInSubwindow(node)) {
         auto instanceId = context->GetInstanceId();
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_MENU);
         if (subwindow) {
             auto overlayManager = subwindow->GetOverlayManager();
             return overlayManager;
@@ -2135,7 +2136,7 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
     }
     if (!targetNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
-        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+        return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
     auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
     if (popupInfo.popupNode) {
@@ -2334,7 +2335,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     }
     if (!targetNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
-        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+        return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
     auto overlayManager = GetCurOverlayManager(customNode);
     CHECK_NULL_RETURN(overlayManager, ERROR_CODE_INTERNAL_ERROR);
@@ -2365,6 +2366,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     auto theme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, ERROR_CODE_INTERNAL_ERROR);
     auto expandDisplay = theme->GetExpandDisplay();
+    menuWrapperPattern->SetIsOpenMenu(true);
     if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuParam.positionOffset);
         return ERROR_CODE_NO_ERROR;
@@ -5743,7 +5745,11 @@ void ViewAbstract::FreezeUINodeById(const std::string& id, bool isFreeze)
 {
     auto targetNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(id, true);
     CHECK_NULL_VOID(targetNode);
-    targetNode->SetFreeze(isFreeze, true);
+    auto pipeline = targetNode->GetContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOpenInvisibleFreeze(true);
+    }
+    targetNode->SetFreeze(isFreeze, true, true);
 }
 
 void ViewAbstract::FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze)
@@ -5751,7 +5757,11 @@ void ViewAbstract::FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze
     auto targetNodeElement = ElementRegister::GetInstance()->GetNodeById(uniqueId);
     auto targetNode = AceType::DynamicCast<NG::FrameNode>(targetNodeElement);
     CHECK_NULL_VOID(targetNode);
-    targetNode->SetFreeze(isFreeze, true);
+    auto pipeline = targetNode->GetContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOpenInvisibleFreeze(true);
+    }
+    targetNode->SetFreeze(isFreeze, true, true);
 }
 
 uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)

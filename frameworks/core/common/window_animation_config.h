@@ -35,6 +35,17 @@ enum class WindowSizeChangeReason : uint32_t {
     SPLIT_TO_FULL,
     FULL_TO_FLOATING,
     FLOATING_TO_FULL,
+    PIP_START,
+    PIP_SHOW,
+    PIP_AUTO_START,
+    PIP_RATIO_CHANGE,
+    PIP_RESTORE,
+    UPDATE_DPI_SYNC,
+    DRAG_MOVE,
+    AVOID_AREA_CHANGE,
+    MAXIMIZE_TO_SPLIT,
+    SPLIT_TO_MAXIMIZE,
+    END,
 };
 } // namespace OHOS::Ace
 

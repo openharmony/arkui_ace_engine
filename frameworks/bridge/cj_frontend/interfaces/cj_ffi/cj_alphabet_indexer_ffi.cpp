@@ -144,6 +144,11 @@ void FfiOHOSAceFrameworkAlphabetIndexerPopupPosition(double x, double y)
     IndexerModel::GetInstance()->SetPopupPositionX(Dimension(x));
     IndexerModel::GetInstance()->SetPopupPositionY(Dimension(y));
 }
+void FfiOHOSAceFrameworkAlphabetIndexerPopupPositionWithUnit(double x, int32_t xUnit, double y, int32_t yUnit)
+{
+    IndexerModel::GetInstance()->SetPopupPositionX(Dimension(x, static_cast<DimensionUnit>(xUnit)));
+    IndexerModel::GetInstance()->SetPopupPositionY(Dimension(y, static_cast<DimensionUnit>(yUnit)));
+}
 void FfiOHOSAceFrameworkAlphabetIndexerOnSelected(void (*callback)(int32_t idx))
 {
     auto onSelected = [ffiCallback = CJLambda::Create(callback)](int64_t idx) { ffiCallback(idx); };

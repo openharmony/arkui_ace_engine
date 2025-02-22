@@ -168,21 +168,14 @@ void ResetSelectedColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
-    CheckBoxModelNG::SetSelectedColor(frameNode, checkBoxTheme->GetActiveColor());
+    CheckBoxModelNG::ResetSelectedColor(frameNode);
 }
 
 void ResetUnSelectedColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
-    CheckBoxModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
+    CheckBoxModelNG::ResetUnSelectedColor(frameNode);
 }
 
 void ResetCheckboxWidth(ArkUINodeHandle node)
@@ -222,7 +215,7 @@ void ResetMark(ArkUINodeHandle node)
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
 
-    CheckBoxModelNG::SetCheckMarkColor(frameNode, checkBoxTheme->GetPointColor());
+    CheckBoxModelNG::ResetCheckMarkColor(frameNode);
     CheckBoxModelNG::SetCheckMarkSize(
         frameNode, Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());

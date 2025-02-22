@@ -2021,12 +2021,6 @@ void WebDelegateCross::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t 
     // cross platform is not support now;
 }
 
-void WebDelegateCross::DragResize(
-    const double& width, const double& height, const double& preHeight, const double& preWidth)
-{
-    // cross platform is not support now;
-}
-
 void WebDelegateCross::UpdateOptimizeParserBudgetEnabled(const bool enable)
 {
     // cross platform is not support now;

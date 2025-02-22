@@ -805,6 +805,8 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode004, TestSize.Level
     EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
     EXPECT_NE(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
     EXPECT_FALSE(sheetPattern->isDismissProcess_);
+    auto focusHub = host->GetFocusHub();
+    focusHub->currentFocus_ = true;
     EXPECT_TRUE(sheetPattern->AvoidKeyboardBeforeTranslate());
     sheetPattern->AvoidKeyboardBySheetMode();
     SheetPresentationTestTwoNg::TearDownTestCase();

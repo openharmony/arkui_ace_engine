@@ -410,11 +410,9 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent011, TestSize.Level1)
     pattern_->HandleOnPaste();
     FlushLayoutTask(frameNode_);
     OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
-    expectOrder.time = 7;
-    expectOrder.willDelete = 2;
-    expectOrder.willChange = 6;
-    expectOrder.didDelete = 4;
-    expectOrder.onChange = 7;
+    expectOrder.time = 5;
+    expectOrder.willChange = 4;
+    expectOrder.onChange = 5;
     EXPECT_EQ(order, expectOrder);
 }
 

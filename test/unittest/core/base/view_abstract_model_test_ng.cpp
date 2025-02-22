@@ -229,7 +229,7 @@ HWTEST_F(ViewAbstractModelTestNg, BindContextMenuTest, TestSize.Level1)
     /**
      * @tc.steps: subwindow is null and does not enter BindContextMenuSingle.
      */
-    SubwindowManager::GetInstance()->RemoveSubwindow(Container::CurrentId());
+    SubwindowManager::GetInstance()->RemoveSubwindow(Container::CurrentId(), SubwindowType::TYPE_MENU);
     viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
     ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
 

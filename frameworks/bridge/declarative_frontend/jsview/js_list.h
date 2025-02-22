@@ -77,6 +77,7 @@ public:
     static void SetScrollSnapAlign(int32_t scrollSnapAlign);
     static void SetFriction(const JSCallbackInfo& info);
     static void MaintainVisibleContentPosition(const JSCallbackInfo& args);
+    static void SetStackFromEnd(const JSCallbackInfo& args);
 
     static void ItemDragStartCallback(const JSCallbackInfo& info);
     static void ItemDragEnterCallback(const JSCallbackInfo& info);

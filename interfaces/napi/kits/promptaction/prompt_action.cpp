@@ -31,7 +31,7 @@ namespace {
 const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = -1;
 const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 const int32_t CUSTOM_DIALOG_PARAM_NUM = 2;
-const int32_t BG_BLUR_STYLE_MAX_INDEX = 12;
+const int32_t BG_BLUR_STYLE_MAX_INDEX = 13;
 const int32_t PROMPTACTION_VALID_PRIMARY_BUTTON_NUM = 1;
 const int32_t OPEN_CUSTOM_DIALOG_WITH_CONTROLLER_PARAM_TOTAL = 3;
 const int32_t OPEN_CUSTOM_DIALOG_WITH_CONTROLLER_PARAM_MAND_COUNT = 2;
@@ -1331,14 +1331,6 @@ void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsy
     }
 }
 
-void GetLevelOrderApi(napi_env env, napi_value value, std::shared_ptr<PromptAsyncContext>& asyncContext)
-{
-    if (asyncContext->showInSubWindowBool) {
-        return;
-    }
-    napi_get_named_property(env, value, "levelOrder", &asyncContext->levelOrderApi);
-}
-
 void GetNapiNamedBoolProperties(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
     napi_valuetype valueType = napi_undefined;
@@ -1403,12 +1395,12 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "onWillDisappear", &asyncContext->onWillDisappear);
     napi_get_named_property(env, argv[index], "keyboardAvoidMode", &asyncContext->keyboardAvoidModeApi);
     napi_get_named_property(env, argv[index], "keyboardAvoidDistance", &asyncContext->keyboardAvoidDistanceApi);
+    napi_get_named_property(env, argv[index], "levelOrder", &asyncContext->levelOrderApi);
     napi_get_named_property(env, argv[index], "levelMode", &asyncContext->dialogLevelModeApi);
     napi_get_named_property(env, argv[index], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
     napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
-    GetLevelOrderApi(env, argv[index], asyncContext);
 }
 
 bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -1500,15 +1492,22 @@ void UpdatePromptAlignment(DialogAlignment& alignment)
     }
 }
 
-std::optional<double> GetLevelOrderParam(napi_env env, napi_value levelOrderApi)
+std::optional<double> GetLevelOrderParam(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
+    if (asyncContext->showInSubWindowBool) {
+        return std::nullopt;
+    }
+
+    napi_value levelOrderApi = asyncContext->levelOrderApi;
     NG::LevelOrder* levelOrder = nullptr;
     if (levelOrderApi) {
         napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
     }
-    CHECK_NULL_RETURN(levelOrder, std::nullopt);
 
-    double order = levelOrder->GetOrder();
+    double order = NG::LevelOrder::ORDER_DEFAULT;
+    if (levelOrder) {
+        order = levelOrder->GetOrder();
+    }
     return std::make_optional(order);
 }
 
@@ -1575,6 +1574,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "backgroundEffect", &asyncContext->effectOptionApi);
             napi_get_named_property(env, argv[0], "enableHoverMode", &asyncContext->enableHoverMode);
             napi_get_named_property(env, argv[0], "hoverModeArea", &asyncContext->hoverModeAreaApi);
+            napi_get_named_property(env, argv[0], "levelOrder", &asyncContext->levelOrderApi);
             napi_get_named_property(env, argv[0], "levelMode", &asyncContext->dialogLevelModeApi);
             napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
             napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
@@ -1606,7 +1606,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
             }
             GetDialogLevelModeAndUniqueId(env, asyncContext, dialogLevelMode, dialogLevelUniqueId, dialogImmersiveMode);
-            GetLevelOrderApi(env, argv[0], asyncContext);
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
@@ -1742,7 +1741,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .shadow = shadowProps,
         .hoverModeArea = hoverModeArea,
         .onLanguageChange = onLanguageChange,
-        .levelOrder = GetLevelOrderParam(asyncContext->env, asyncContext->levelOrderApi),
+        .levelOrder = GetLevelOrderParam(asyncContext->env, asyncContext),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
@@ -2051,6 +2050,8 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
     onWillDismiss = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]
         (const int32_t& info, const int32_t& instanceId) {
         if (onWillDismissRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillDismissFunc = nullptr;
             napi_value value = nullptr;
             napi_value funcValue = nullptr;
@@ -2066,6 +2067,7 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
             napi_set_named_property(env, paramObj, "reason", value);
             napi_get_reference_value(env, onWillDismissRef, &onWillDismissFunc);
             napi_call_function(env, nullptr, onWillDismissFunc, 1, &paramObj, nullptr);
+            napi_close_handle_scope(env, scope);
         }
     };
 }
@@ -2074,34 +2076,46 @@ PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<
 {
     auto onDidAppear = [env = asyncContext->env, onDidAppearRef = asyncContext->onDidAppearRef]() {
         if (onDidAppearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onDidAppearFunc = nullptr;
             napi_get_reference_value(env, onDidAppearRef, &onDidAppearFunc);
             napi_call_function(env, nullptr, onDidAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidAppearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onDidDisappear = [env = asyncContext->env, onDidDisappearRef = asyncContext->onDidDisappearRef]() {
         if (onDidDisappearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onDidDisappearFunc = nullptr;
             napi_get_reference_value(env, onDidDisappearRef, &onDidDisappearFunc);
             napi_call_function(env, nullptr, onDidDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidDisappearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillAppear = [env = asyncContext->env, onWillAppearRef = asyncContext->onWillAppearRef]() {
         if (onWillAppearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillAppearFunc = nullptr;
             napi_get_reference_value(env, onWillAppearRef, &onWillAppearFunc);
             napi_call_function(env, nullptr, onWillAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillAppearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillDisappear = [env = asyncContext->env, onWillDisappearRef = asyncContext->onWillDisappearRef]() {
         if (onWillDisappearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillDisappearFunc = nullptr;
             napi_get_reference_value(env, onWillDisappearRef, &onWillDisappearFunc);
             napi_call_function(env, nullptr, onWillDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillDisappearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     PromptDialogAttr promptDialogAttr = {
@@ -2268,7 +2282,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .onWillDisappear = lifeCycleAttr.onWillDisappear,
         .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
         .keyboardAvoidDistance = GetKeyboardAvoidDistanceProps(env, asyncContext),
-        .levelOrder = GetLevelOrderParam(env, asyncContext->levelOrderApi),
+        .levelOrder = GetLevelOrderParam(env, asyncContext),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode
@@ -2542,7 +2556,7 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
         napi_get_value_bool(env, asyncContext->enableHoverMode, &asyncContext->enableHoverModeBool);
     }
     napi_get_named_property(env, arg, "hoverModeArea", &asyncContext->hoverModeAreaApi);
-    GetLevelOrderApi(env, arg, asyncContext);
+    napi_get_named_property(env, arg, "levelOrder", &asyncContext->levelOrderApi);
     napi_get_named_property(env, arg, "backgroundBlurStyleOptions", &asyncContext->blurStyleOptionApi);
     napi_get_named_property(env, arg, "backgroundEffect", &asyncContext->effectOptionApi);
     napi_get_named_property(env, arg, "levelMode", &asyncContext->dialogLevelModeApi);

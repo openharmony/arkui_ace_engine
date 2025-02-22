@@ -37,8 +37,8 @@ namespace OHOS::Ace::NG {
 using namespace Framework;
 using OnNavigationAnimation = std::function<NavigationTransition(RefPtr<NavDestinationContext>,
         RefPtr<NavDestinationContext>, NavigationOperation)>;
-class NavigationPattern : public Pattern {
-    DECLARE_ACE_TYPE(NavigationPattern, Pattern);
+class NavigationPattern : public Pattern, public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(NavigationPattern, Pattern, IAvoidInfoListener);
 
 public:
     NavigationPattern();
@@ -199,6 +199,9 @@ public:
     void OnVisibleChange(bool isVisible) override;
 
     void OnColorConfigurationUpdate() override;
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void AddDragBarHotZoneRect();
 
     Dimension GetMinNavBarWidthValue() const
@@ -483,6 +486,7 @@ public:
     }
 
 private:
+    void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
     void UpdateSystemBarStyleOnTopNavPathChange(
@@ -575,9 +579,12 @@ private:
     RefPtr<FrameNode> CreateDragBarItemNode();
     void SetMouseStyle(MouseFormat format);
 
-    void RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
-    void UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
-    virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode);
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnregisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode, bool skipCheck = false);
+    void UpdateToobarFocusColor();
+    void UpdateDividerBackgroundColor();
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -634,6 +641,7 @@ private:
     bool enableDragBar_ = false;
     SizeF navigationSize_;
     std::optional<NavBarPosition> preNavBarPosition_;
+    bool topFromSingletonMoved_ = false;
 };
 
 } // namespace OHOS::Ace::NG

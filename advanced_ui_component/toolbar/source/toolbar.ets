@@ -293,10 +293,10 @@ export struct ToolBar {
       })
     }
     .accessibilityGroup(true)
-    .accessibilityText(this.toStringFormat(this.toolBarList[index]?.accessibilityText) ??
-    this.toStringFormat(this.toolBarList[index]?.content))
-    .accessibilityDescription(this.toStringFormat(this.toolBarList[index]?.accessibilityDescription) ?? '')
-    .accessibilityLevel(this.toStringFormat(this.toolBarList[index]?.accessibilityLevel) ?? 'auto')
+    .accessibilityText(this.toolBarList[index]?.accessibilityText as Resource ??
+      this.toolBarList[index]?.content as Resource)
+    .accessibilityDescription(this.toolBarList[index]?.accessibilityDescription as string ?? '')
+    .accessibilityLevel(this.toolBarList[index]?.accessibilityLevel ?? 'auto')
     .enabled(this.toolBarList[index]?.state !== ItemState.DISABLE)
     .width('100%')
     .height('100%')
@@ -362,22 +362,6 @@ export struct ToolBar {
       return this.toolBarList[index]?.activatedTextColor ?? this.toolBarTheme.fontActivatedPrimaryColor;
     }
     return this.toolBarList[index]?.textColor ?? this.toolBarTheme.fontPrimaryColor;
-  }
-
-  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
-    if (typeof resource === 'string' || typeof resource === 'undefined') {
-      return resource;
-    } else {
-      let resourceString: string = '';
-      try {
-        resourceString = getContext()?.resourceManager?.getStringSync(resource?.id);
-      } catch (err) {
-        let code: number = (err as BusinessError)?.code;
-        let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to toolBar toStringFormat, code: ${code}, message: ${message}`);
-      }
-      return resourceString;
-    }
   }
 
   private toLengthString(value: LengthMetrics | undefined): string {

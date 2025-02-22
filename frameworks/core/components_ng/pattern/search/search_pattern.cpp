@@ -911,6 +911,12 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
 
+    if (focusChoice_ == FocusChoice::SEARCH &&
+        (event.IsShiftWith(KeyCode::KEY_DPAD_LEFT) ||
+        event.IsShiftWith(KeyCode::KEY_DPAD_RIGHT))) {
+        return textFieldPattern->OnKeyEvent(event);
+    }
+
     // If the focus is on the search, press Enter to request keyboard.
     if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::SEARCH && !IsSearchAttached()) {
         RequestKeyboard();

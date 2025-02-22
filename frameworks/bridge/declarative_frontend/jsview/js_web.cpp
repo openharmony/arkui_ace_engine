@@ -1914,7 +1914,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
-    JSClass<JSWeb>::StaticMethod("enableSmoothDragResize", &JSWeb::EnableSmoothDragResize);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
@@ -2029,6 +2028,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
+    JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -3488,11 +3488,6 @@ void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     WebModel::GetInstance()->RegisterNativeEmbedRule(tag, type);
-}
-
-void JSWeb::EnableSmoothDragResize(bool isSmoothDragResizeEnabled)
-{
-    WebModel::GetInstance()->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
@@ -5629,5 +5624,10 @@ void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetWebMediaAVSessionEnabled(isEnabled);
+}
+
+void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
 }
 } // namespace OHOS::Ace::Framework

@@ -190,4 +190,73 @@ float ArcSwiperIndicatorPattern::ConvertAngleWithArcDirection(SwiperArcDirection
 
     return result;
 }
+
+float ArcSwiperIndicatorPattern::GetEndAngle(const PointF& conter, const PointF& point, float startAngle)
+{
+    float angle = GetAngleWithPoint(conter, point);
+    if (isUpageStartAngle_) {
+        if (angle < startAngle) {
+            isLeft_ = false;
+        } else {
+            isLeft_ = true;
+        }
+    }
+
+    if (isLeft_) {
+        if (angle < startAngle && !isUpdateCycle_ && CheckPointLocation(conter, point, isLeft_)) {
+            dragCycle_ += static_cast<int32_t>(FULL_CIRCLE_ANGLE);
+            isUpdateCycle_ = true;
+        } else if (angle > startAngle) {
+            isUpdateCycle_ = false;
+        }
+    } else {
+        if (angle > startAngle && !isUpdateCycle_ && CheckPointLocation(conter, point, isLeft_)) {
+            dragCycle_ -= static_cast<int32_t>(FULL_CIRCLE_ANGLE);
+            isUpdateCycle_ = true;
+        } else if (angle < startAngle) {
+            isUpdateCycle_ = false;
+        }
+    }
+    angle += dragCycle_;
+    if (isUpageStartAngle_) {
+        oldEndAngle_ = angle;
+        isUpageStartAngle_ = false;
+    }
+    if ((isLeft_ && angle < oldEndAngle_) || (!isLeft_ && angle > oldEndAngle_)) {
+        UpadateStartAngle();
+    } else {
+        oldEndAngle_ = angle;
+    }
+    return angle;
+}
+
+void ArcSwiperIndicatorPattern::UpadateStartAngle()
+{
+    dragCycle_ = 0;
+    isLeft_ = false;
+    isUpageStartAngle_ = true;
+    isUpdateCycle_ = false;
+    oldEndAngle_ = 0;
+}
+
+bool ArcSwiperIndicatorPattern::CheckPointLocation(const PointF& conter, const PointF& point, bool isLeft)
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, false);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, false);
+
+    float centerX = swiperPattern->GetDirection() == Axis::HORIZONTAL ? conter.GetX() : conter.GetY();
+    float centerY = swiperPattern->GetDirection() == Axis::HORIZONTAL ? conter.GetY() : conter.GetX();
+    float pointX = swiperPattern->GetDirection() == Axis::HORIZONTAL ? point.GetX() : point.GetY();
+    float pointY = swiperPattern->GetDirection() == Axis::HORIZONTAL ? point.GetY() : point.GetX();
+    if (isLeft && pointX > centerX && pointY < centerY) {
+        return true;
+    }
+    if (!isLeft && pointX < centerX && pointY < centerY) {
+        return true;
+    }
+
+    return false;
+}
 } // namespace OHOS::Ace::NG

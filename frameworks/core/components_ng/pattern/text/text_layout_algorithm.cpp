@@ -27,6 +27,28 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
+uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
+{
+    double minTextSizeHeight = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    if (LessOrEqual(minTextSizeHeight, 0.0)) {
+        minTextSizeHeight = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
+    double lineHeight = minTextSizeHeight;
+    if (textStyle.HasHeightOverride()) {
+        lineHeight = textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT
+                            ? textStyle.GetLineHeight().ConvertToPxWithSize(contentConstraint.maxSize.Height())
+                            : textStyle.GetLineHeight().ConvertToPxDistribute(
+                                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
+    // plus extraLine to ensure maxlines -1 is the next maxline to try for layout
+    uint32_t maxLines = contentConstraint.maxSize.Height() / (lineHeight) + 1;
+    return std::max(maxLines, static_cast<uint32_t>(0));
+}
 }; // namespace
 
 TextLayoutAlgorithm::TextLayoutAlgorithm(
@@ -349,16 +371,30 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
     symbolTextStyle.SetEffectStrategy(
         symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
-    symbolTextStyle.SetFontFamilies({ "HM Symbol" });
+    auto symbolType = textStyle.GetSymbolType();
+    symbolTextStyle.SetSymbolType(symbolType);
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = textStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        if (fontFamilies.empty()) {
+            return false;
+        }
+        symbolTextStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        symbolTextStyle.SetFontFamilies(fontFamilies);
+    }
     paragraph->PushStyle(symbolTextStyle);
     if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
         auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
         symbolEffectOptions.Reset();
         layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-        if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
-            auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
-            symboloptiOns.Reset();
-        }
     }
     paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
     paragraph->PopStyle();
@@ -659,6 +695,10 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
     }
 
     CHECK_NULL_RETURN(paragraphManager_, false);
+    if (textStyle.GetMaxLines() == UINT32_MAX) {
+        uint32_t maxLines = GetAdaptedMaxLines(textStyle, contentConstraint);
+        textStyle.SetMaxLines(maxLines);
+    }
     auto lineCount = static_cast<uint32_t>(paragraphManager_->GetLineCount());
     lineCount = std::max(std::min(textStyle.GetMaxLines(), lineCount), static_cast<uint32_t>(0));
     textStyle.SetMaxLines(lineCount);

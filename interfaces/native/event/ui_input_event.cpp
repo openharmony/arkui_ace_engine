@@ -139,6 +139,15 @@ int32_t HandleCHoverEventSourceType(const ArkUI_UIInputEvent* event)
     return hoverEvent->sourceType;
 }
 
+int32_t HandleAxisEventSourceType(const ArkUI_UIInputEvent* event)
+{
+    const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+    if (!axisEvent) {
+        return static_cast<int32_t>(UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    }
+    return static_cast<int32_t>(axisEvent->sourceType);
+}
+
 int32_t OH_ArkUI_UIInputEvent_GetSourceType(const ArkUI_UIInputEvent* event)
 {
     if (!event) {
@@ -151,6 +160,7 @@ int32_t OH_ArkUI_UIInputEvent_GetSourceType(const ArkUI_UIInputEvent* event)
         { C_FOCUS_AXIS_EVENT_ID, HandleCFocusAxisEventSourceType },
         { C_HOVER_EVENT_ID, HandleCHoverEventSourceType },
         { C_CLICK_EVENT_ID, HandleCClickEventSourceType },
+        { AXIS_EVENT_ID, HandleAxisEventSourceType },
     };
     auto it = eventHandlers.find(event->eventTypeId);
     if (it != eventHandlers.end()) {
@@ -214,6 +224,15 @@ int32_t HandleCFocusAxisEventToolType(const ArkUI_UIInputEvent* event)
     return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(focusAxisEvent->toolType);
 }
 
+int32_t HandleAxisEventToolType(const ArkUI_UIInputEvent* event)
+{
+    const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+    if (!axisEvent) {
+        return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+    }
+    return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(static_cast<int32_t>(axisEvent->sourceTool));
+}
+
 int32_t OH_ArkUI_UIInputEvent_GetToolType(const ArkUI_UIInputEvent* event)
 {
     if (!event) {
@@ -226,6 +245,7 @@ int32_t OH_ArkUI_UIInputEvent_GetToolType(const ArkUI_UIInputEvent* event)
         { C_FOCUS_AXIS_EVENT_ID, HandleCFocusAxisEventToolType },
         { C_HOVER_EVENT_ID, HandleCHoverEventToolType },
         { C_CLICK_EVENT_ID, HandleCClickEventToolType },
+        { AXIS_EVENT_ID, HandleAxisEventToolType },
     };
     auto it = eventHandlers.find(event->eventTypeId);
     if (it != eventHandlers.end()) {
@@ -2923,6 +2943,9 @@ int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI
 {
     if (!event) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!node) {
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     if (!event->isCloned) {
         return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;

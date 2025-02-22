@@ -346,4 +346,27 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutSkipMeasure001, TestSize.Level1)
     swiperLayoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(pattern_->contentMainSize_, sizeTmp);
 }
+
+/**
+ * @tc.name: SwiperLayoutGetHeightForDigit001
+ * @tc.desc: Test GetHeightForDigit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, SwiperLayoutGetHeightForDigit001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF{10.f, 20.f});
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    float height = swiperLayoutAlgorithm->GetHeightForDigit(&layoutWrapper, geometryNode->GetFrameSize().Height());
+    EXPECT_EQ(height, 20.f);
+}
 } // namespace OHOS::Ace::NG

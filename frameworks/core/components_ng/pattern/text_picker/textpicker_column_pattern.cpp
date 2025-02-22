@@ -85,7 +85,7 @@ void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (hapticController_) {
         hapticController_->Stop();
     }
-    UnregisterWindowStateChangedCallback();
+    UnregisterWindowStateChangedCallback(frameNode);
 }
 
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
@@ -199,13 +199,12 @@ void TextPickerColumnPattern::RegisterWindowStateChangedCallback()
     pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
-void TextPickerColumnPattern::UnregisterWindowStateChangedCallback()
+void TextPickerColumnPattern::UnregisterWindowStateChangedCallback(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
 
 void TextPickerColumnPattern::OnWindowHide()
@@ -1520,9 +1519,19 @@ void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float 
         auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
         currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
     }
+    bool isDragReverse = false;
+    if (GreatNotEqual(std::abs(enterDelta_), std::abs(scrollDelta))) {
+        isDragReverse = true;
+    }
+    enterDelta_ = (NearEqual(scrollDelta, shiftDistance)) ? 0.0 : scrollDelta;
     if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex &&
         !isOverScroll) {
         SetEnterIndex(currentEnterIndex);
+        HandleEnterSelectedAreaEventCallback(true);
+    }
+    if (isDragReverse && LessOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) &&
+        GetEnterIndex() != GetCurrentIndex() && !isOverScroll) {
+        SetEnterIndex(GetCurrentIndex());
         HandleEnterSelectedAreaEventCallback(true);
     }
 }

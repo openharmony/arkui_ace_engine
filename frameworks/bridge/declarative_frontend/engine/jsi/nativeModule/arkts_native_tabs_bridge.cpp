@@ -1130,4 +1130,40 @@ ArkUINativeModuleValue TabsBridge::ResetTabsOnSelected(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabsBridge::SetCachedMaxCount(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> countArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_2);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    int32_t count = 0;
+    if (countArg->IsNumber() && countArg->Int32Value(vm) >= 0) {
+        count = countArg->Int32Value(vm);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->resetCachedMaxCount(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t mode = 0;
+    if (modeArg->IsNumber()) {
+        mode = modeArg->Int32Value(vm);
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setCachedMaxCount(nativeNode, count, mode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetCachedMaxCount(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetCachedMaxCount(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

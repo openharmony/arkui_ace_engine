@@ -221,20 +221,32 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
 
 void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
 {
-    if (isTraversing_) {
+    if (!isTraversing_) {
+        return;
+    }
+
+    if (withAbort) {
         if (node) {
-            LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
-                "is traversing", node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+            LOGF_ABORT("Try to remove the child([%{public}s][%{public}d]) of "
+                "node [%{public}s][%{public}d] when its children is traversing",
+                node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
         } else {
-            LOGF("Try to remove all the children of node [%{public}s][%{public}d] when its children is traversing",
+            LOGF_ABORT("Try to remove all the children of "
+                "node [%{public}s][%{public}d] when its children is traversing",
                 GetTag().c_str(), GetId());
         }
-        OHOS::Ace::LogBacktrace();
-
-        if (withAbort) {
-            abort();
-        }
     }
+
+    if (node) {
+        LOGE("Try to remove the child([%{public}s][%{public}d]) of "
+            "node [%{public}s][%{public}d] when its children is traversing",
+            node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+    } else {
+        LOGE("Try to remove all the children of "
+            "node [%{public}s][%{public}d] when its children is traversing",
+            GetTag().c_str(), GetId());
+    }
+    OHOS::Ace::LogBacktrace();
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
@@ -388,6 +400,19 @@ void UINode::MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINod
     AfterMountToParent();
 }
 
+void UINode::MountToParentBefore(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChildBefore(AceType::Claim(this), siblingNode);
+    if (parent->IsInDestroying()) {
+        parent->SetChildrenInDestroying();
+    }
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
+    AfterMountToParent();
+}
+
 void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     OnConfigurationUpdate(configurationChange);
@@ -455,7 +480,7 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     static_assert(totalLengthLimit > childLengthLimit, "totalLengthLimit too small");
     constexpr size_t currentLengthLimit = totalLengthLimit - childLengthLimit;
 
-    LOGF("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
+    LOGE("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
         (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
 
     // log full childNode info in case of hilog length limit reached
@@ -475,7 +500,8 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     }
 
     if (SystemProperties::GetLayoutDetectEnabled()) {
-        abort();
+        LOGF_ABORT("LoopDetected: child[%{public}.*s] vs current[%{public}.*s]",
+            (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
     } else {
         LogBacktrace();
     }
@@ -528,6 +554,7 @@ void UINode::DoAddChild(
         child->AttachToMainTree(!addDefaultTransition, context_);
     }
     MarkNeedSyncRenderTree(true);
+    ProcessIsInDestroyingForReuseableNode(child);
 }
 
 void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
@@ -767,10 +794,26 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
-void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule)
+void UINode::SetUserFreeze(bool isUserFreeze)
+{
+    userFreeze_ = isUserFreeze;
+}
+
+bool UINode::IsUserFreeze()
+{
+    return userFreeze_.has_value() && userFreeze_.value();
+}
+
+void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule, bool isUserFreeze)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
+    if (isUserFreeze) {
+        SetUserFreeze(isUserFreeze);
+    } else if (IsUserFreeze()) {
+        return;
+    }
+
     auto isNeedUpdateFreezeVaule = context->IsOpenInvisibleFreeze() || isForceUpdateFreezeVaule;
     if (isNeedUpdateFreezeVaule && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
@@ -1994,5 +2037,15 @@ bool UINode::HasSkipNode()
         }
     }
     return false;
+}
+
+void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) || !child || !child->IsReusableNode()) {
+        return;
+    }
+    if (!IsInDestroying() && child->IsInDestroying()) {
+        child->SetDestroying(false, false);
+    }
 }
 } // namespace OHOS::Ace::NG

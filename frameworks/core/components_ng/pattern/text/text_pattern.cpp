@@ -85,6 +85,7 @@ void TextPattern::OnWindowHide()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowHide [%{public}d]", host->GetId());
+    PauseSymbolAnimation();
 }
 
 void TextPattern::OnWindowShow()
@@ -94,6 +95,7 @@ void TextPattern::OnWindowShow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowShow [%{public}d]", host->GetId());
+    ResumeSymbolAnimation();
 }
 
 void TextPattern::OnAttachToFrameNode()
@@ -117,6 +119,9 @@ void TextPattern::OnAttachToFrameNode()
     InitSurfacePositionChangedCallback();
     pipeline->AddWindowStateChangedCallback(host->GetId());
     pipeline->AddWindowSizeChangeCallback(host->GetId());
+    if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
+        ProcessVisibleAreaCallback();
+    }
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto theme = pipeline->GetTheme<TextTheme>();
@@ -1394,7 +1399,8 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     CheckOnClickEvent(info);
-    if (!IsSelectableAndCopy() || textForDisplay_.empty()) {
+    auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+    if (!IsSelectableAndCopy() || (textSize == 0)) {
         return;
     }
     auto host = GetHost();
@@ -1807,7 +1813,7 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     CHECK_NULL_VOID(pManager_);
     if (shiftFlag_) {
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
-        HandleSelectionChange(textSelector_.baseOffset, end);
+        HandleSelectionChange(textSelector_.lastValidStart, end);
     } else {
         auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
         textSelector_.Update(start, start);
@@ -1847,7 +1853,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     CHECK_NULL_VOID(pManager_);
     auto start = textSelector_.baseOffset;
     auto end = textSelector_.destinationOffset;
-    if (!IsSelected() && !textSelector_.IsValid()) {
+    if (!IsSelected()) {
         start = -1;
         end = -1;
     }
@@ -2030,7 +2036,7 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     if (keyEvent.IsCtrlWith(KeyCode::KEY_A)) {
         auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
         HandleSelectionChange(0, textSize);
-        CalculateHandleOffsetAndShowOverlay();
+        CloseSelectOverlay();
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -3572,11 +3578,70 @@ void TextPattern::OnVisibleChange(bool isVisible)
         if (textDetectEnable_) {
             dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
         }
+        PauseSymbolAnimation();
     } else {
         if (CanStartAITask()) {
             dataDetectorAdapter_->StartAITask();
         }
+        ResumeSymbolAnimation();
     }
+}
+
+void TextPattern::ProcessVisibleAreaCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnVisibleChange(visible);
+    };
+    std::vector<double> ratioList = { 0.0 };
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+}
+
+void TextPattern::PauseSymbolAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetIsLoopAnimation()) {
+        return;
+    }
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    if (!symbolEffectOptions.GetIsTxtActive()) {
+        return;
+    }
+    symbolEffectOptions.SetIsTxtActive(false);
+    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextPattern::ResumeSymbolAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() != V2::SYMBOL_ETS_TAG) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetIsLoopAnimation()) {
+        return;
+    }
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    if (symbolEffectOptions.GetIsTxtActive()) {
+        return;
+    }
+    symbolEffectOptions.SetIsTxtActive(true);
+    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextPattern::InitSurfaceChangedCallback()
@@ -4978,6 +5043,9 @@ void TextPattern::OnTextOverflowChanged()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
+        return;
+    }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto eventHub = host->GetEventHub<TextEventHub>();

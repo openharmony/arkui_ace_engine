@@ -128,6 +128,10 @@
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
 #endif
+#ifdef WEB_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_web_bridge.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 void RegisterRenderNodeBorderAndMaskAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
@@ -904,6 +908,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityScrollTriggerable));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityScrollTriggerable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityScrollTriggerable));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityFocusDrawLevel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityFocusDrawLevel));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityFocusDrawLevel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityFocusDrawLevel));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHoverEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetHoverEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHoverEffect"),
@@ -2970,6 +2978,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterBadgeAttributes(object, vm);
     RegisterScrollBarAttributes(object, vm);
     RegisterIndicatorComponentAttributes(object, vm);
+#ifdef WEB_SUPPORTED
+    RegisterWebAttributes(object, vm);
+#endif
     return object;
 }
 
@@ -4550,6 +4561,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnSelected));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnSelected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnSelected));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCachedMaxCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetCachedMaxCount));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCachedMaxCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetCachedMaxCount));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
 
@@ -5518,6 +5533,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListMaintainVisibleContentPosition));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListMaintainVisibleContentPosition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListMaintainVisibleContentPosition));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListStackFromEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListStackFromEnd));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListStackFromEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListStackFromEnd));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListNestedScroll));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListNestedScroll"),
@@ -5937,4 +5956,49 @@ void ArkUINativeModule::RegisterIndicatorComponentAttributes(Local<panda::Object
 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "indicatorComponent"), indicatorComponent);
 }
+
+#ifdef WEB_SUPPORTED
+void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto web = panda::ObjectRef::New(vm);
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setJavaScriptAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetJavaScriptAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetJavaScriptAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetJavaScriptAccess));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFileAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetFileAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFileAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetFileAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDomStorageAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetDomStorageAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDomStorageAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetDomStorageAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMixedMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetMixedMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMixedMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetMixedMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setZoomAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetZoomAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetZoomAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetZoomAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCacheMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetCacheMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCacheMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetCacheMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDarkMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetDarkMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDarkMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetDarkMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMultiWindowAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetMultiWindowAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMultiWindowAccess"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetMultiWindowAccessEnabled));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAllowWindowOpenMethod"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetAllowWindowOpenMethod));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAllowWindowOpenMethod"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetAllowWindowOpenMethod));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
+}
+#endif
+
 } // namespace OHOS::Ace::NG

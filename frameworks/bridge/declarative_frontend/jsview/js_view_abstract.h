@@ -291,6 +291,7 @@ public:
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
     static void JsSetFreeze(const JSCallbackInfo& info);
+    static void ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 
     // outer border
     static void ParseOuterBorderColor(const JSRef<JSVal>& args);
@@ -473,6 +474,7 @@ public:
     static void JsAccessibilityDefaultFocus(const JSCallbackInfo& info);
     static void JsAccessibilityUseSamePage(const JSCallbackInfo& info);
     static void JsAccessibilityScrollTriggerable(const JSCallbackInfo& info);
+    static void JsAccessibilityFocusDrawLevel(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -657,8 +659,14 @@ public:
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
     static bool CheckLength(
         const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
+    static bool CheckResource(RefPtr<ResourceObject> resourceObject,
+        RefPtr<ResourceWrapper> resourceWrapper);
+    static bool CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
+        std::uint32_t& symbolId);
     static bool ParseJsSymbolId(
         const JSRef<JSVal>& jsValue, uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
+    static void ParseJsSymbolCustomFamilyNames(std::vector<std::string>& customFamilyNames,
+        const JSRef<JSVal>& jsValue);
     static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result);
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
@@ -673,7 +681,7 @@ public:
     static void SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
-        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier);
 
     static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
         const JSRef<JSObject>& object, const JSExecutionContext& context);

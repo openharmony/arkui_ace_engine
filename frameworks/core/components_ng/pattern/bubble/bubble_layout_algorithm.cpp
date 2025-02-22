@@ -289,7 +289,8 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(child);
     measureChildSizeBefore_ = child->GetGeometryNode()->GetFrameSize();
     if (isHalfFoldHover_) {
-        SizeF size = SizeF(childLayoutConstraint.maxSize.Width(), static_cast<float>(wrapperRect_.Height()));
+        SizeF size = SizeF(childLayoutConstraint.maxSize.Width(),
+            static_cast<float>(std::floor(wrapperRect_.Height())));
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
     }
     // childSize_ and childOffset_ is used in Layout.
@@ -529,7 +530,7 @@ void BubbleLayoutAlgorithm::UpdateHostWindowRect()
         CHECK_NULL_VOID(container);
     }
     if (container->IsUIExtensionWindow()) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_POPUP);
         CHECK_NULL_VOID(subwindow);
         hostWindowRect_ = subwindow->GetUIExtensionHostWindowRect();
     }
@@ -559,7 +560,7 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
                 auto frameNode = frameNodeWK.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, frameNode->GetId(), containerId);
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, frameNode->GetId(), containerId);
             },
             TaskExecutor::TaskType::UI, "ArkUIPopupSetHotAreas");
     }

@@ -49,6 +49,9 @@ struct SwiperParameters {
     std::optional<Color> colorVal;
     std::optional<Color> selectedColorVal;
     std::optional<int32_t> maxDisplayCountVal;
+    std::optional<bool> ignoreSizeValue;
+    std::optional<bool> setIgnoreSizeValue;
+    std::optional<Dimension> dimSpace;
 };
 
 struct SwiperDigitalParameters {
@@ -64,6 +67,8 @@ struct SwiperDigitalParameters {
     std::optional<Dimension> selectedFontSize;
     std::optional<FontWeight> fontWeight;
     std::optional<FontWeight> selectedFontWeight;
+    std::optional<bool> ignoreSizeValue;
+    std::optional<bool> setIgnoreSizeValue;
 };
 
 struct SwiperArcDotParameters {

@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/common/frontend.h"

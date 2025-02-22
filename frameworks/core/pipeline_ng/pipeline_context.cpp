@@ -113,6 +113,16 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (avoidInfoMgr_) {
+        avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
+        avoidInfoMgr_->SetInstanceId(instanceId);
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        uiExtensionManager_->SetPipelineContext(WeakClaim(this));
+        uiExtensionManager_->SetInstanceId(instanceId);
+    }
+#endif
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -123,6 +133,16 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (avoidInfoMgr_) {
+        avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
+        avoidInfoMgr_->SetInstanceId(instanceId);
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        uiExtensionManager_->SetPipelineContext(WeakClaim(this));
+        uiExtensionManager_->SetInstanceId(instanceId);
+    }
+#endif
 }
 
 PipelineContext::PipelineContext()
@@ -130,6 +150,14 @@ PipelineContext::PipelineContext()
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (avoidInfoMgr_) {
+        avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        uiExtensionManager_->SetPipelineContext(WeakClaim(this));
+    }
+#endif
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
@@ -811,7 +839,6 @@ void PipelineContext::HandleSpecialContainerNode()
     for (auto positionZNodeId : positionZSet) {
         auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(positionZNodeId));
         if (!frameNode) {
-            DeletePositionZNode(positionZNodeId);
             continue;
         }
         auto parentNode = frameNode->GetParentFrameNode();
@@ -833,6 +860,7 @@ void PipelineContext::HandleSpecialContainerNode()
             overlayNode->GetRenderContext()->SetDrawNode();
         }
     }
+    ClearPositionZNodes();
 }
 
 void PipelineContext::FlushMessages()
@@ -1252,6 +1280,10 @@ void PipelineContext::SetupRootElement()
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
+    auto rootContext = rootNode_->GetRenderContext();
+    if (rootContext) {
+        rootContext->SetDrawNodeChangeCallback();
+    }
 }
 
 void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
@@ -1403,8 +1435,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         callback();
         FlushBuild();
     } else {
-        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUISurfaceChanged",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUISurfaceChanged");
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
@@ -1510,6 +1541,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
             StartWindowMaximizeAnimation(width, height, rsTransaction);
+            break;
+        }
+        case WindowSizeChangeReason::MAXIMIZE_TO_SPLIT:
+        case WindowSizeChangeReason::SPLIT_TO_MAXIMIZE: {
+            StartSplitWindowAnimation(width, height, type, rsTransaction);
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
@@ -1642,6 +1678,34 @@ void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t heig
     option.SetCurve(springMotion);
     auto weak = WeakClaim(this);
     Animate(option, springMotion, [width, height, weak]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "Root node start split window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
+        width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 300.0f, 33.0f);
+    AnimationOption option;
+    option.SetCurve(curve);
+    Animate(option, curve, [width, height, weak = WeakClaim(this)]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         pipeline->SetRootRect(width, height, 0.0);
@@ -2714,6 +2778,10 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
+        if (dragDropManager_ && dragDropManager_->IsDragging()) {
+            auto pointerEvent = DragPointerEvent(scalePoint.x, scalePoint.y, scalePoint.screenX, scalePoint.screenY);
+            dragDropManager_->DoDragMoveAnimate(pointerEvent);
+        }
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
         RequestFrame();
@@ -3374,6 +3442,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     }
     DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
+        if (dragDropManager_ && dragDropManager_->IsDragging() && event.pullAction != MouseAction::PULL_MOVE) {
+            auto pointerEvent = DragPointerEvent(event.x, event.y, event.screenX, event.screenY);
+            dragDropManager_->DoDragMoveAnimate(pointerEvent);
+        }
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
@@ -4940,7 +5012,7 @@ void PipelineContext::OpenFrontendAnimation(
         FlushUITasks();
     }
     auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback);
-    if (IsFormRender()) {
+    if (IsFormRenderExceptDynamicComponent()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
             SetFormAnimationStartTime(GetMicroTickCount());

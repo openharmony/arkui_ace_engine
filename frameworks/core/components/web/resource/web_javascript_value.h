@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 enum class WebHitTestType : int { EDIT = 0, EMAIL, HTTP, HTTP_IMG, IMG, MAP, PHONE, UNKNOWN };
 
 enum class WebJavaScriptBridgeError : int {
-    NO_ERROR = 0,
+    NO_ERROR0 = 0,
     UNKNOWN_OBJECT_ID,
     OBJECT_IS_GONE,
     METHOD_NOT_FOUND,

@@ -1935,7 +1935,7 @@ HWTEST_F(SearchTestTwoNg, testSearchUpdateDisableAndEnable, TestSize.Level1)
 
 /**
  * @tc.name: testSearchAccessibility
- * @tc.desc: search Accessibility PerformAction test Select ClearSelection and Copy.
+ * @tc.desc: searchAccessibility PerformAction test Select ClearSelection and Copy.
  * @tc.type: FUNC
  */
 HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
@@ -2056,7 +2056,7 @@ HWTEST_F(SearchTestTwoNg, testSearchChangeEvent, TestSize.Level1)
  * @tc.desc: Test search method
  * @tc.type: FUNC
  */
- HWTEST_F(SearchTestTwoNg, FrameNodeDropTestNg001, TestSize.Level1)
+ HWTEST_F(SearchTestTwoNg, searchDropTest, TestSize.Level1)
  {
      /**
     * @tc.steps: step1. Create search, get frameNode and pattern.

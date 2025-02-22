@@ -1508,6 +1508,8 @@ struct ArkUISwiperIndicator {
     ArkUIOptionalUint colorValue;
     ArkUIOptionalUint selectedColorValue;
     ArkUIOptionalInt maxDisplayCount;
+    ArkUIOptionalFloat dimSpace;
+    ArkUIOptionalInt ignoreSizeValue;
 };
 
 struct ArkUISwiperDigitIndicator {
@@ -1523,6 +1525,7 @@ struct ArkUISwiperDigitIndicator {
     ArkUIOptionalFloat selectedFontSize;
     ArkUIOptionalUint fontWeight;
     ArkUIOptionalUint selectedFontWeight;
+    ArkUIOptionalInt ignoreSizeValue;
 };
 
 struct ArkUISwiperArrowStyle {
@@ -2095,6 +2098,8 @@ struct ArkUICommonModifier {
     void (*resetAccessibilityUseSamePage)(ArkUINodeHandle node);
     void (*setAccessibilityScrollTriggerable)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAccessibilityScrollTriggerable)(ArkUINodeHandle node);
+    void (*setAccessibilityFocusDrawLevel)(ArkUINodeHandle node, ArkUI_Int32 drawLevel);
+    void (*resetAccessibilityFocusDrawLevel)(ArkUINodeHandle node);
     void (*setHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);
@@ -2824,6 +2829,9 @@ struct ArkUIListModifier {
     void (*setListMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool enabled);
     void (*resetListMaintainVisibleContentPosition)(ArkUINodeHandle node);
     ArkUI_Bool (*getListMaintainVisibleContentPosition)(ArkUINodeHandle node);
+    void (*setListStackFromEnd)(ArkUINodeHandle node, ArkUI_Bool enabled);
+    void (*resetListStackFromEnd)(ArkUINodeHandle node);
+    ArkUI_Bool (*getListStackFromEnd)(ArkUINodeHandle node);
     void (*setListFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetListFadingEdge)(ArkUINodeHandle node);
@@ -3401,6 +3409,8 @@ struct ArkUITabsModifier {
     void (*resetBarBackgroundEffect)(ArkUINodeHandle node);
     void (*setTabsOnSelected)(ArkUINodeHandle node, void* callback);
     void (*resetTabsOnSelected)(ArkUINodeHandle node);
+    void (*setCachedMaxCount)(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode);
+    void (*resetCachedMaxCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {
@@ -4093,7 +4103,24 @@ struct ArkUIWebModifier {
     void (*setWebOptions)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setWebSrcResources)(ArkUINodeHandle node, ArkUI_Int32 id, ArkUI_Int32 type, ArkUI_CharPtr name,
         ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
-    void (*setWebMixedMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setJavaScriptAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetJavaScriptAccess)(ArkUINodeHandle node);
+    void (*setFileAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetFileAccessEnabled)(ArkUINodeHandle node);
+    void (*setDomStorageAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetDomStorageAccessEnabled)(ArkUINodeHandle node);
+    void (*setMixedMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetMixedMode)(ArkUINodeHandle node);
+    void (*setZoomAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetZoomAccessEnabled)(ArkUINodeHandle node);
+    void (*setCacheMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetCacheMode)(ArkUINodeHandle node);
+    void (*setDarkMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDarkMode)(ArkUINodeHandle node);
+    void (*setMultiWindowAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetMultiWindowAccessEnabled)(ArkUINodeHandle node);
+    void (*setAllowWindowOpenMethod)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAllowWindowOpenMethod)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
@@ -4912,6 +4939,7 @@ struct ArkUISymbolGlyphModifier {
     void (*resetMinFontScale)(ArkUINodeHandle node);
     void (*setMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale);
     void (*resetMaxFontScale)(ArkUINodeHandle node);
+    void (*setCustomSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
 };
 
 struct ArkUISymbolSpanModifier {
@@ -4927,6 +4955,7 @@ struct ArkUISymbolSpanModifier {
     void (*setSymbolSpanEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);
     void (*resetSymbolSpanEffectStrategy)(ArkUINodeHandle node);
     void (*setSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId);
+    void (*setCustomSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
 };
 
 struct ArkUIComponent3DModifier {

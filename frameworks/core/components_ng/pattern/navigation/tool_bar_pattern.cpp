@@ -30,13 +30,13 @@ void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)
     }
 
     options_ = std::move(opt);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    UpdateBackgroundStyle(host);
+    UpdateBackgroundStyle();
 }
 
-void NavToolbarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
+void NavToolbarPattern::UpdateBackgroundStyle()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (options_.bgOptions.color.has_value()) {
@@ -182,6 +182,8 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
     CHECK_NULL_VOID(barItemNode);
     auto accessibilityProperty = barItemNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     std::string message = accessibilityProperty->GetAccessibilityText();
     if (barItemNode->IsMoreItemNode()) {
         auto theme = NavigationGetTheme();
@@ -195,7 +197,7 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
         }
         auto info = ImageSourceInfo("");
         info.SetResourceId(theme->GetMoreResourceId());
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, info);
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, info, host->GetThemeScopeId());
         return;
     }
     RefPtr<FrameNode> textNode = AceType::DynamicCast<FrameNode>(barItemNode->GetTextNode());
@@ -216,11 +218,11 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo, host->GetThemeScopeId());
         return;
     }
     auto imageSourceInfo = ImageSourceInfo("");
-    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo, host->GetThemeScopeId());
 }
 
 void NavToolbarPattern::SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host)
@@ -231,15 +233,20 @@ void NavToolbarPattern::SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& hos
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto theme = NavigationGetTheme();
+    auto theme = NavigationGetTheme(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     renderContext->UpdateBackgroundColor(theme->GetToolBarBgColor());
 }
 
 void NavToolbarPattern::OnColorConfigurationUpdate()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    UpdateBackgroundStyle(host);
+    UpdateBackgroundStyle();
 }
+
+bool NavToolbarPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    UpdateBackgroundStyle();
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

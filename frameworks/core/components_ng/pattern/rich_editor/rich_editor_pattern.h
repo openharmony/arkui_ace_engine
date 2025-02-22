@@ -23,6 +23,7 @@
 #include <string>
 
 #include "base/log/event_report.h"
+#include "base/utils/device_config.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -96,7 +97,7 @@ class OneStepDragController;
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
-enum class AutoScrollEvent { HANDLE, DRAG, MOUSE, NONE };
+enum class AutoScrollEvent { HANDLE, DRAG, MOUSE, NONE, CARET };
 enum class EdgeDetectionStrategy { OUT_BOUNDARY, IN_BOUNDARY, DISABLE };
 struct AutoScrollParam {
     AutoScrollEvent autoScrollEvent = AutoScrollEvent::NONE;
@@ -131,6 +132,29 @@ struct CaretOffsetInfo {
     float caretHeightLine = 0.0f;
 };
 enum class PositionType { DEFAULT, PARAGRAPH_START, PARAGRAPH_END, LINE_START, LINE_END };
+struct SysScale {
+    double dipScale = 1.0;
+    double logicScale = 1.0;
+    double fontScale = 1.0;
+    double fontWeightScale = 1.0;
+    bool operator==(const SysScale& rhs) const
+    {
+        return NearEqual(dipScale, rhs.dipScale)
+            && NearEqual(logicScale, rhs.logicScale)
+            && NearEqual(fontScale, rhs.fontScale)
+            && NearEqual(fontWeightScale, rhs.fontWeightScale);
+    }
+    bool operator!=(const SysScale& rhs) const
+    {
+        return !operator==(rhs);
+    }
+    std::string ToString()
+    {
+        std::stringstream ss;
+        ss << dipScale << ", " << logicScale << ", " << fontScale << ", " << fontWeightScale;
+        return ss.str();
+    }
+};
 
 class RichEditorPattern
     : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher {
@@ -225,9 +249,8 @@ public:
             touchMoveOffset.reset();
         }
 
-        void UpdateOriginCaretColor()
+        void UpdateOriginCaretColor(ColorMode colorMode)
         {
-            auto colorMode = SystemProperties::GetColorMode();
             originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
         }
 
@@ -342,7 +365,24 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_);
+        HandleSysScaleChanged();
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_, &paragraphCache_);
+    }
+
+    void HandleSysScaleChanged()
+    {
+        auto ctx = GetContext();
+        if (!ctx) {
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "context is nullptr, handle scale failed");
+            return;
+        }
+        SysScale sysScale{ ctx->GetDipScale(), ctx->GetLogicScale(), ctx->GetFontScale(), ctx->GetFontWeightScale() };
+        if (sysScale != lastSysScale_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "sys scale changed, %{public}s -> %{public}s",
+                lastSysScale_.ToString().c_str(), sysScale.ToString().c_str());
+            lastSysScale_ = sysScale;
+            paragraphCache_.Clear();
+        }
     }
 
     FocusPattern GetFocusPattern() const override
@@ -475,6 +515,7 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     bool IsIMEOperation(OperationType operationType);
+    void InsertValue(const std::string& insertValue, bool isIME = false) override;
     void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
     void InsertValueByOperationType(const std::u16string& insertValue,
         OperationType operationType = OperationType::DEFAULT);
@@ -698,7 +739,7 @@ public:
         return caretSpanIndex_;
     }
 
-    std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const override
+    std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const override
     {
         return paragraphs_.GetParagraphs();
     }
@@ -787,6 +828,8 @@ public:
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnCommonColorChange();
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
@@ -987,11 +1030,6 @@ public:
         return contentRect_;
     }
 
-    bool IsMoveCaretAnywhere() const
-    {
-        return isMoveCaretAnywhere_;
-    }
-
     void PreferredParagraph();
 
     const RefPtr<Paragraph>& GetPresetParagraph()
@@ -1137,17 +1175,31 @@ public:
         return *it;
     }
 
-protected:
-    bool CanStartAITask() override;
+    ColorMode GetColorMode()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(!host, host->GetLocalColorMode());
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, ColorMode::COLOR_MODE_UNDEFINED);
+        return context->GetLocalColorMode();
+    }
+
+    ColorMode GetDisplayColorMode()
+    {
+        auto colorMode = GetColorMode();
+        return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? SystemProperties::GetColorMode() : colorMode;
+    }
 
     template<typename T>
     RefPtr<T> GetTheme()
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
-        return pipelineContext->GetTheme<T>();
+        return pipelineContext->GetTheme<T>(GetThemeScopeId());
     }
 
+protected:
+    bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
@@ -1237,6 +1289,7 @@ private:
     void HandleTouchUpAfterLongPress();
     void HandleTouchCancelAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
+    void OnMoveCaretStart(int32_t fingerId);
     void UpdateCaretByTouchMove(const Offset& offset);
     void SetCaretTouchMoveOffset(const Offset& localOffset);
     RectF GetCaretBoundaryRect();
@@ -1426,8 +1479,6 @@ private:
     void SetAccessibilityEditAction();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
-    void MoveCaretAnywhere(const Offset& touchOffset);
-    void ShowCaretNoTwinkling(const Offset& textOffset);
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
@@ -1536,7 +1587,7 @@ private:
     std::u16string pasteStr_;
 
     // still in progress
-    ParagraphManager paragraphs_;
+    RichEditorParagraphManager paragraphs_;
     RefPtr<Paragraph> presetParagraph_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
@@ -1603,7 +1654,6 @@ private:
     bool isTextPreviewSupported_ = true;
     OffsetF movingHandleOffset_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
-    bool isMoveCaretAnywhere_ = false;
     std::vector<TimeStamp> clickInfo_;
     int32_t selectingFingerId_ = -1;
     bool isTouchSelecting_ = false;
@@ -1628,6 +1678,8 @@ private:
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
+    SysScale lastSysScale_;
 };
 } // namespace OHOS::Ace::NG
 

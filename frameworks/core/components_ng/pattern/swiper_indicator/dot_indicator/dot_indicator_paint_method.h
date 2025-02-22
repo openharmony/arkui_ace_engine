@@ -46,10 +46,12 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     virtual void PaintNormalIndicator(const PaintWrapper* paintWrapper);
     void PaintHoverIndicator(const PaintWrapper* paintWrapper);
-    void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide);
+    void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide,
+        const Dimension& indicatorDotItemSpace);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
     void CalculateNormalMargin(
-        const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount);
+        const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount,
+        const Dimension& indicatorDotItemSpace, bool ignoreSize);
     virtual std::pair<float, float> CalculatePointCenterX(
         const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index);
     void CalculateHoverIndex(const LinearVector<float>& itemHalfSizes);

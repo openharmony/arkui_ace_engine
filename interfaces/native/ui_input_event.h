@@ -64,6 +64,12 @@ typedef enum {
     ARKUI_UIINPUTEVENT_TYPE_TOUCH = 1,
     ARKUI_UIINPUTEVENT_TYPE_AXIS = 2,
     ARKUI_UIINPUTEVENT_TYPE_MOUSE = 3,
+    /**
+     * @brief key event.
+     *
+     * @since 16
+     */
+    ARKUI_UIINPUTEVENT_TYPE_KEY = 4,
 } ArkUI_UIInputEvent_Type;
 
 /**
@@ -229,7 +235,7 @@ enum {
 /**
  * @brief Enumerates the action types for axis events.
  *
- * @since 16
+ * @since 15
  */
 enum {
     /** The axis event is abnormal. */
@@ -247,7 +253,7 @@ enum {
 /**
  * @brief Defines interaction hand for touch event.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
     /** UnKnown. */
@@ -502,7 +508,7 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, ArkUI_InteractionHand *hand);
 
@@ -515,7 +521,7 @@ int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIndex(
     const ArkUI_UIInputEvent *event, int32_t pointerIndex, ArkUI_InteractionHand *hand);
@@ -548,7 +554,7 @@ float OH_ArkUI_PointerEvent_GetTouchAreaHeight(const ArkUI_UIInputEvent* event, 
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* event, uint32_t* pointerIndex);
 
@@ -779,7 +785,7 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
  *
  * @param event Indicates the pointer to the current UI input event.
  * @return Returns the action type of the current axis event.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event);
 
@@ -956,7 +962,7 @@ int32_t OH_ArkUI_UIInputEvent_GetModifierKeyStates(const ArkUI_UIInputEvent* eve
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
  * @return Returns the pressed time of a specific touch point; returns <b>0</b> if any parameter error occurs.
- * @since 16
+ * @since 15
  */
 int64_t OH_ArkUI_PointerEvent_GetPressedTimeByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
 
@@ -967,7 +973,7 @@ int64_t OH_ArkUI_PointerEvent_GetPressedTimeByIndex(const ArkUI_UIInputEvent* ev
  * @param event Indicates the pointer to the current UI input event.
  * @return Returns the X axis offset relative to the previous reported mouse pointer position;
  * returns <b>0.0f</b> if any parameter error occurs.
- * @since 16
+ * @since 15
  */
 float OH_ArkUI_MouseEvent_GetRawDeltaX(const ArkUI_UIInputEvent* event);
 
@@ -978,7 +984,7 @@ float OH_ArkUI_MouseEvent_GetRawDeltaX(const ArkUI_UIInputEvent* event);
  * @param event Indicates the pointer to the current UI input event.
  * @return Returns the Y axis offset relative to the previous reported mouse pointer position;
  * returns <b>0.0f</b> if any parameter error occurs.
- * @since 16
+ * @since 15
  */
 float OH_ArkUI_MouseEvent_GetRawDeltaY(const ArkUI_UIInputEvent* event);
 
@@ -992,7 +998,7 @@ float OH_ArkUI_MouseEvent_GetRawDeltaY(const ArkUI_UIInputEvent* event);
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the giving buffer is not enough.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_MouseEvent_GetPressedButtons(
     const ArkUI_UIInputEvent* event, int32_t* pressedButtons, int32_t* length);
@@ -1002,7 +1008,7 @@ int32_t OH_ArkUI_MouseEvent_GetPressedButtons(
  *
  * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
  * @return Returns the screen ID; returns <b>0</b> if any parameter error occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event);
 

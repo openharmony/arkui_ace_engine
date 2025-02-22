@@ -112,6 +112,7 @@ void CheckBoxGroupTestNG::SetUpTestCase()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
     MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
@@ -346,6 +347,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkboxTheme));
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
      */
@@ -990,6 +992,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest001, TestSize.Level1)
     OffsetF offset;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     checkBoxGroupModifier_->DrawTouchAndHoverBoard(canvas, size, offset);
 }
 
@@ -1021,6 +1025,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest004, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1053,6 +1059,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest005, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1085,6 +1093,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest006, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1151,6 +1161,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest008, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1552,6 +1564,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
     checkboxTheme->hotZoneHorizontalPadding_ = Dimension(COMPONENT_WIDTH / 4);
     checkboxTheme->hotZoneVerticalPadding_ = Dimension(COMPONENT_WIDTH / 4);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkboxTheme));
     auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
     ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
 
@@ -1632,6 +1645,9 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest022, TestSize.Level1)
      * @tc.steps: step2. Call touchCallback with different touchType.
      * @tc.expected: TouchCallback works correctly.
      */
+    checkBoxGroupPattern->InitTouchEvent();
+    ASSERT_NE(checkBoxGroupPattern->touchListener_, nullptr);
+    checkBoxGroupPattern->InitTouchEvent();
     auto touchCallback = checkBoxGroupPattern->touchListener_->GetTouchEventCallback();
     TouchLocationInfo touchLocationInfo(-1);
     touchLocationInfo.SetTouchType(TouchType::UP);
@@ -1831,16 +1847,15 @@ HWTEST_F(CheckBoxGroupTestNG, OnColorConfigurationUpdate001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     ASSERT_NE(checkBoxGroupPattern, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    ASSERT_NE(checkBoxTheme, nullptr);
-    checkBoxTheme->activeColor_ = Color::BLACK;
-    checkBoxTheme->inactiveColor_ = Color::BLACK;
-    checkBoxTheme->pointColor_ = Color::BLACK;
-    checkBoxGroupPattern->OnColorConfigurationUpdate();
     auto checkBoxGroupPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxGroupPaintProperty, nullptr);
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupSelectedColor(Color::BLACK);
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupSelectedColorFlagByUser(true);
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupUnSelectedColor(Color::BLACK);
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupUnSelectedColorFlagByUser(true);
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupCheckMarkColor(Color::BLACK);
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupCheckMarkColorFlagByUser(true);
+    checkBoxGroupPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupSelectedColor(), Color::BLACK);
     EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupUnSelectedColor(), Color::BLACK);
     EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupCheckMarkColor(), Color::BLACK);

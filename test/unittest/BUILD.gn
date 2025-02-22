@@ -342,6 +342,7 @@ ohos_source_set("ace_components_manager") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/frameworks/core/components_ng/manager/avoid_info/avoid_info_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
@@ -554,6 +555,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/animatable_color.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
@@ -674,6 +676,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/pattern/mock_app_bar_utils.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
     "$ace_root/test/mock/core/pattern/mock_container_modal_utils.cpp",
+    "$ace_root/test/mock/core/pattern/mock_controlled_animator.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animated_image.cpp",

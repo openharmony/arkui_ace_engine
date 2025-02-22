@@ -52,6 +52,7 @@ constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::debugEnabled_ = false;
+DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::containerDeleteFlag_ = false;
 bool SystemProperties::layoutDetectEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };

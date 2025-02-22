@@ -104,7 +104,6 @@ public:
 
     virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
-    FrameNode* GetUnsafeHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
     virtual bool NeedDebugBoundary() const
@@ -776,6 +775,8 @@ public:
     }
 
     virtual void SetDrawNode() {}
+
+    virtual void SetDrawNodeChangeCallback() {}
 
 protected:
     RenderContext() = default;

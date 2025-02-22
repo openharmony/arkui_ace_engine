@@ -71,15 +71,10 @@ const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_ico
 
 bool GestureEventHub::IsPixelMapNeedScale() const
 {
-    CHECK_NULL_RETURN(pixelMap_, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto width = pixelMap_->GetWidth();
-    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
-    if (!frameNode->GetDragPreviewOption().isScaleEnabled || width == 0 || width <= maxWidth) {
-        return false;
-    }
-    return true;
+    auto scale = DragDropFuncWrapper::GetPixelMapScale(frameNode);
+    return scale != 1.0f;
 }
 
 bool CheckNeedDragDropFrameworkStatus(const std::string& tag)
@@ -357,7 +352,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
     auto frameTag = frameNode->GetTag();
     auto coordinateX = frameNodeOffset_.GetX();
     auto coordinateY = frameNodeOffset_.GetY();
-    if (!innerRect.IsEmpty()) {
+    if (!innerRect.IsEmpty() && !NearZero(size.Width()) && !NearZero(size.Height())) {
         auto rateX = innerRect.Width() / size.Width();
         auto rateY = innerRect.Height() / size.Height();
         result.SetX(rateX * (coordinateX + innerRect.GetOffset().GetX() - info.GetGlobalLocation().GetX()));
@@ -702,8 +697,12 @@ void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefP
     TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropInfo is empty.");
     ACE_SCOPED_TRACE("drag: handling without preview");
     if (!dragDropInfo.pixelMap) {
-        GenerateMousePixelMap(info);
-        dragDropInfo.pixelMap = pixelMap_;
+        if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && GetTextDraggable() && pixelMap_) {
+            dragDropInfo.pixelMap = pixelMap_;
+        } else {
+            GenerateMousePixelMap(info);
+            dragDropInfo.pixelMap = pixelMap_;
+        }
     }
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !dragDropInfo.pixelMap) {
         TAG_LOGD(AceLogTag::ACE_DRAG, "no any pixmap got, get node snapshot final try");
@@ -903,8 +902,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
     bool isSwitchedToSubWindow = false;
     if (subWindow && TryDoDragStartAnimation(context, subWindow, info, data)) {
+        dragDropManager->SetIsReDragStart(pipeline != dragNodePipeline);
         isSwitchedToSubWindow = true;
     } else {
+        dragDropManager->SetIsReDragStart(false);
         HideMenu();
         DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     }

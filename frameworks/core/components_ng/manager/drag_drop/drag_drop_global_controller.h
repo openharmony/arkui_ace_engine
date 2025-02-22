@@ -56,6 +56,11 @@ public:
     int32_t NotifyDragResult(int32_t requestId, int32_t result);
     int32_t NotifyDragEndPendingDone(int32_t requestId);
 
+    // app global drag
+    void SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled);
+    bool IsAppGlobalDragEnabled() const;
+    bool IsAlreadyGetAppGlobalDrag() const;
+
     void SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus);
 
     DragStartRequestStatus GetDragStartRequestStatus();
@@ -86,6 +91,10 @@ private:
     int32_t requestId_ = -1;
     std::function<void(const DragRet&)> stopDragCallback_ = nullptr;
     DragRet dragResult_ = DragRet::DRAG_FAIL;
+
+    // app global drag
+    bool isAppGlobalDragEnabled_ = false;
+    bool isAlreadyGetAppGlobalDrag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

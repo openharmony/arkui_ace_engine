@@ -96,7 +96,7 @@ typedef enum {
      */
     ARKUI_NODE_XCOMPONENT_TEXTURE,
     /** Check box group.
-     *  @since 16
+     *  @since 15
      */
     ARKUI_NODE_CHECKBOX_GROUP = 21,
     /** Stack container. */
@@ -1881,7 +1881,7 @@ typedef enum {
      * .value[2].f32：grayscale blur settings that control the darkness of the white color.\n
      * The value range is [0, 127].\n
      *
-     * @since 16
+     * @since 15
      */
     NODE_BACKDROP_BLUR = 99,
 
@@ -3676,7 +3676,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: component name. \n
      * 
-     *@since 16
+     *@since 15
      */
     NODE_CHECKBOX_NAME = 11005,
 
@@ -3690,7 +3690,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: component name. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_CHECKBOX_GROUP = 11006,
 
@@ -4626,7 +4626,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: component name. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_CHECKBOX_GROUP_NAME  = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
 
@@ -4641,7 +4641,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: The value <b>1</b> means that the checkboxgroup is selected, and <b>0</b> means the opposite. \n
      * 
-     * @since 16
+     * @since 15
      */
     NODE_CHECKBOX_GROUP_SELECT_ALL = 21001,
 
@@ -4657,7 +4657,7 @@ typedef enum {
      * .value[0].u32: color of the checkboxgroup when it is selected, in 0xARGB format,
      * for example, <b>0xFF1122FF</b>.
      *
-     * @since 16
+     * @since 15
      */
     NODE_CHECKBOX_GROUP_SELECTED_COLOR = 21002,
     /**
@@ -4670,7 +4670,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.
      * 
-     * @since 16
+     * @since 15
      */
     NODE_CHECKBOX_GROUP_UNSELECTED_COLOR = 21003,
 
@@ -4688,7 +4688,7 @@ typedef enum {
      * .value[1].f32: size of the internal mark, in vp. \n
      * .value[2].f32: stroke width of the internal mark, in vp. The default value is <b>2</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_CHECKBOX_GROUP_MARK = 21004,
 
@@ -4702,7 +4702,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: component shape. The parameter type is {@link ArkUI_CheckboxShape}.
      *
-     * @since 16
+     * @since 15
      */
     NODE_CHECKBOX_GROUP_SHAPE = 21005,
 
@@ -4979,7 +4979,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: offset from the start of the content, in vp. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_SCROLL_CONTENT_START_OFFSET,
 
@@ -4992,7 +4992,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: offset from the end of the content, in vp. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_SCROLL_CONTENT_END_OFFSET,
 
@@ -5100,12 +5100,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: number of cached items in the list adapter. \n
      * .value[1]?.i32: whether to show cached items. The value <b>0</b> means to hide cached items, and <b>0</b> means
-     * to show cached items. The default value is <b>0</b>. This parameter is supported since API version 16. \n
+     * to show cached items. The default value is <b>0</b>. This parameter is supported since API version 15. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: number of cached items in the list adapter. \n
      * .value[1].i32: whether to show cached items. The value <b>0</b> means to hide cached items, and <b>0</b> means
-     * to show cached items. This parameter is supported since API version 16. \n
+     * to show cached items. This parameter is supported since API version 15. \n
      *
      */
     NODE_LIST_CACHED_COUNT,
@@ -5123,7 +5123,7 @@ typedef enum {
      * .value[2]?.i32：Specify the alignment of the sliding element with the current container,The parameter type is
      * {@link ArkUI_ScrollAlignment}, default value is ARKUI_SCROLL_ALIGNMENT_START. \n
      * .value[3]?.f32: extra offset, in vp. The default value is <b>0</b>.
-     * This parameter is supported since API version 16. \n
+     * This parameter is supported since API version 15. \n
      *
      */
     NODE_LIST_SCROLL_TO_INDEX,
@@ -5194,7 +5194,7 @@ typedef enum {
      * .value[3]?.i32: how the item to scroll to is aligned with the container. The parameter type is
      * {@link ArkUI_ScrollAlignment}. The default value is <b>ARKUI_SCROLL_ALIGNMENT_START</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_SCROLL_TO_INDEX_IN_GROUP = 1003010,
 
@@ -5215,7 +5215,7 @@ typedef enum {
      * .value[2].f32: maximum column width, in vp. \n
      * .value[3].f32: lane spacing, in vp. \n \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_LANES = 1003011,
 
@@ -5229,7 +5229,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      *.value[0].i32: alignment mode for the list snap position. The parameter type is {@link ArkUI_ScrollSnapAlign}.\n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_SCROLL_SNAP_ALIGN = 1003012,
 
@@ -5247,9 +5247,26 @@ typedef enum {
      * display area of the <b>List</b> component. The value <b>0</b> means not to maintain the visible content's
      * position, and <b>1</b> means the opposite. The default value is <b>0</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_MAINTAIN_VISIBLE_CONTENT_POSITION = 1003013,
+
+    /**
+     * @brief Sets the layout of the List component from the end.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>List</b> is layout from the end.
+     * The value <b>0</b> means not to layout from the end,
+     * and <b>1</b> means the opposite. The default value is <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>List</b> is layout from the end.
+     * The value <b>0</b> means not to layout from the end, and <b>1</b> means the opposite.
+     * The default value is <b>0</b>. \n
+     *
+     * @since 16
+     */
+    NODE_LIST_STACK_FROM_END = 1003014,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -5684,7 +5701,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .object: {@link ArkUI_NodeAdapter} object. \n
     *
-    * @since 16
+    * @since 15
     */
     NODE_LIST_ITEM_GROUP_NODE_ADAPTER = 1005004,
 
@@ -7133,7 +7150,7 @@ typedef enum {
      * 1: Some checkboxes are selected.
      * 2: No checkboxes are selected. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
 
@@ -7451,7 +7468,7 @@ typedef enum {
      * list item group.
      * If the end of the list display area is not on a list item, the value is <b>-1</b>. \n
      *
-     * @since 16
+     * @since 15
      */
     NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE,
     
@@ -8870,8 +8887,7 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node);
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node);
 
@@ -8883,9 +8899,8 @@ int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeH
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} C-API initialization error.
  *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The node is not mounted.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindowInfo** info);
 
@@ -9061,7 +9076,7 @@ int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         Returns {@link ARKUI_ERROR_CODE_INTERNAL_ERROR} if the snapshot taking failed will null pixelmap returned.
  *         Returns {@link ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT} if the snapshot taking is timeout.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions,
     OH_PixelmapNative** pixelmap);
@@ -9074,7 +9089,6 @@ int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* s
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
@@ -9087,7 +9101,6 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
@@ -9100,7 +9113,6 @@ int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
@@ -9113,7 +9125,6 @@ int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
@@ -9128,7 +9139,6 @@ int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node,
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,

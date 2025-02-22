@@ -159,7 +159,9 @@ public:
 
     void SetInactivePointColor(Color inactivePointColor)
     {
-        inactivePointColor_ = inactivePointColor;
+        if (inactivePointColor_) {
+            inactivePointColor_->Set(inactivePointColor);
+        }
     }
 
     void SetHoverRadius(Dimension hoverRadius)
@@ -258,7 +260,7 @@ private:
     Color shadowColor_;
     Color clickEffectColor_;
     Color hoverColor_;
-    Color inactivePointColor_;
+    RefPtr<PropertyColor> inactivePointColor_;
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

@@ -129,6 +129,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest001, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = CONTAINER_SIZE;
@@ -184,6 +185,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest002, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
     // different branch: update frameWidth = frameHeight = 0
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = SizeF(30, 10); //30 is width of toggle, 10 is height of toggle
@@ -238,6 +240,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest003, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     // different branch: update (frameWidth / frameHeight) > ratio = 1.8
     LayoutConstraintF layoutConstraintSize;
@@ -295,6 +298,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest004, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     // different branch: update (frameWidth / frameHeight) < ratio = 1.8
     LayoutConstraintF layoutConstraintSize;
@@ -352,6 +356,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest005, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     // different branch: update (frameWidth / frameHeight) = ratio = 1.8
     LayoutConstraintF layoutConstraintSize;
@@ -409,6 +414,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest006, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     // different branch: update width and height over constraint
     LayoutConstraintF layoutConstraintSize;
@@ -466,6 +472,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest007, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     // different branch: undefined selfIdealSize
     LayoutConstraintF layoutConstraintSize;
@@ -522,6 +529,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest008, TestSize.Level1)
     switchTheme->height_ = 180.0_px; //180.0_px is height of switchTheme
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     // different branch: undefined selfIdealSize
     LayoutConstraintF layoutConstraintSize;
@@ -578,6 +586,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest009, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     // different branch: update width and height illegal value
     LayoutConstraintF layoutConstraintSize;
@@ -636,6 +645,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest010, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     // different branch: update width and height illegal value
     LayoutConstraintF layoutConstraintSize;
@@ -690,6 +700,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest001, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -744,6 +755,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest002, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -790,6 +802,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest003, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->animatePointColor_->Get(), LinearColor(Color::BLACK));
@@ -834,6 +847,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest004, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -883,6 +897,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest005, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -931,6 +946,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest006, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -976,6 +992,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest007, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -1023,6 +1040,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest008, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -1079,6 +1097,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest009, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -1127,6 +1146,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest010, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -1174,6 +1194,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest011, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -1219,6 +1240,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest012, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGHT;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);

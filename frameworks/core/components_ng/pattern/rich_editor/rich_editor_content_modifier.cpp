@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 RichEditorContentModifier::RichEditorContentModifier(const std::optional<TextStyle>& textStyle,
-    const ParagraphManager* pManager, const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
+    RichEditorParagraphManager* const pManager, const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
     : TextContentModifier(textStyle, pattern), pManager_(pManager), pattern_(pattern)
 {
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
@@ -48,17 +48,35 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
         contentRect.GetY() + contentRect.Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto&& paragraphs = pManager_->GetParagraphs();
-    auto offset = richEditorPattern->GetTextRect().GetOffset();
-    for (auto&& info : paragraphs) {
-        info.paragraph->Paint(drawingContext.canvas, offset.GetX(), offset.GetY());
-        offset.AddY(info.paragraph->GetHeight());
-    }
-    canvas.Restore();
+    pManager_->CalPosyRange();
+    auto offset = richEditorPattern->GetTextRect().GetOffset(); // relative to component
 
     auto clipOffset = clipOffset_->Get();
     auto size = clipSize_->Get();
-    auto clipRect = RSRect(
-        clipOffset.GetX(), clipOffset.GetY(), clipOffset.GetX() + size.Width(), clipOffset.GetY() + size.Height());
+
+    auto clipTop = clipOffset.GetY();
+    auto clipBottom = clipTop + size.Height();
+    auto clipLeft = clipOffset.GetX();
+    auto clipRight = clipLeft + size.Width();
+
+    // Find the first paragraph whose bottom is within the content rect.
+    auto findFirstPara = [](const ParagraphManager::ParagraphInfo& info, float pos) { return info.bottomPos < pos; };
+    auto lb = std::lower_bound(paragraphs.begin(), paragraphs.end(), clipTop - offset.GetY(), findFirstPara);
+
+    // Find the last paragraph whose top is within the content rect.
+    auto findLastPara = [](float pos, const ParagraphManager::ParagraphInfo& info) { return pos < info.topPos; };
+    auto ub = std::upper_bound(paragraphs.begin(), paragraphs.end(), clipBottom - offset.GetY(), findLastPara);
+    if (ub != paragraphs.begin()) {
+        --ub;
+    }
+
+    for (auto iter = lb; iter <= ub && iter != paragraphs.end(); ++iter) {
+        auto& info = *iter;
+        info.paragraph->Paint(drawingContext.canvas, offset.GetX(), info.topPos + offset.GetY());
+    }
+    canvas.Restore();
+
+    auto clipRect = RSRect(clipLeft, clipTop, clipRight, clipBottom);
     drawingContext.canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     PaintCustomSpan(drawingContext);
 }

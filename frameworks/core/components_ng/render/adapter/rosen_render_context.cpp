@@ -112,6 +112,28 @@ constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_F
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 
+static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositionZ)
+{
+    if (!SystemProperties::GetContainerDeleteFlag()) {
+        return;
+    }
+    CHECK_NULL_VOID(rsNode);
+    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(rsNode->GetFrameNodeId());
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    CHECK_NULL_VOID(frameNode);
+    if (isPositionZ) {
+        frameNode->SetPositionZ(true);
+        auto pipeline = uiNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddPositionZNode(rsNode->GetFrameNodeId());
+        return;
+    }
+
+    if (frameNode->GetRenderContext()) {
+        frameNode->GetRenderContext()->AddNodeToRsTree();
+    }
+}
+
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
     static const LinearEnumMapNode<RenderFit, Rosen::Gravity> gravityMap[] = {
@@ -241,6 +263,11 @@ void RosenRenderContext::DetachModifiers()
     if (pipeline) {
         pipeline->RequestFrame();
     }
+}
+
+void RosenRenderContext::SetDrawNodeChangeCallback()
+{
+    Rosen::RSNode::SetDrawNodeChangeCallback(DrawNodeChangeCallback);
 }
 
 void RosenRenderContext::StartRecording()
@@ -1611,6 +1638,7 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale, bool i
     if (needScale) {
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
+    AddRsNodeForCapture();
     auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY,
         isOffline);
     if (!ret) {
@@ -1637,6 +1665,7 @@ bool RosenRenderContext::CreateThumbnailPixelMapAsyncTask(
     if (needScale) {
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
+    AddRsNodeForCapture();
     return RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, thumbnailCallback, scaleX, scaleY, true);
 }
 
@@ -3606,6 +3635,8 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
         InitAccessibilityFocusModidifer(paintRect, paintColor, borderWidthPx);
         UpdateDrawRegion(
             DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
+        rsNode_->AddModifier(accessibilityFocusStateModifier_);
+        accessibilityFocusStateModifier_->AttachAnimationRectProperty();
         RequestNextFrame();
         return;
     }
@@ -3613,6 +3644,7 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
         InitFocusStateModidifer(paintRect, paintColor, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
         rsNode_->AddModifier(focusStateModifier_);
+        focusStateModifier_->AttachAnimationRectProperty();
     } else {
         InitFocusAnimationModidifer(paintRect, paintColor, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusAnimationModifier_->GetOverlayRect());
@@ -3884,7 +3916,7 @@ bool RosenRenderContext::AddNodeToRsTree()
     auto rsNode = GetRsNodeByFrame(node);
     CHECK_NULL_RETURN(rsNode, false);
 
-    int rsNodeIndex = rsNode->GetChildren().size();
+    size_t rsNodeIndex = rsNode->GetChildren().size();
     for (auto& child : childNodes) {
         auto childRsNode = GetRsNodeByFrame(child);
         rsNode->AddChild(childRsNode, rsNodeIndex);
@@ -3916,6 +3948,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
 {
     CHECK_NULL_VOID(node);
     std::list<RefPtr<FrameNode>> childrenList;
+    auto pipeline = node->GetContext();
     node->GenerateOneDepthVisibleFrameWithTransition(childrenList);
     for (auto& child : childrenList) {
         auto rsChild = GetRsNodeByFrame(child);
@@ -3924,6 +3957,9 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
         if (rsChild && (rsChild->GetIsDrawn() || rsChild->GetType() != Rosen::RSUINodeType::CANVAS_NODE ||
                            childChildrenList.empty())) {
             childNodes.emplace_back(child);
+            if (pipeline && child->HasPositionZ()) {
+                pipeline->AddPositionZNode(child->GetId());
+            }
         } else {
             child->SetDeleteRsNode(true);
             GetLiveChildren(child, childNodes);
@@ -3940,9 +3976,25 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
             (rsoverlayNode->GetIsDrawn() || rsoverlayNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE ||
                 childChildrenList.empty())) {
             childNodes.emplace_back(overlayNode);
+            if (pipeline && overlayNode->HasPositionZ()) {
+                pipeline->AddPositionZNode(overlayNode->GetId());
+            }
         } else {
             overlayNode->SetDeleteRsNode(true);
             GetLiveChildren(overlayNode, childNodes);
+        }
+    }
+}
+
+void RosenRenderContext::AddRsNodeForCapture()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    if (host && host->GetIsDelete()) {
+        rsNode_->SetDrawNode();
+        auto pipeline = host->GetContext();
+        if (pipeline) {
+            pipeline->FlushMessages();
         }
     }
 }
@@ -5424,6 +5476,11 @@ void RosenRenderContext::DumpInfo()
                                                .append(std::string(",anchorY :"))
                                                .append(anchor->GetY().ToString().c_str()));
         }
+    }
+    if (disappearingTransitionCount_) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("transitionCnt:").append(std::to_string(disappearingTransitionCount_))
+        );
     }
 }
 

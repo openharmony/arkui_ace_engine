@@ -496,13 +496,13 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
 
     bool IsFocus() const
     {
@@ -862,11 +862,11 @@ private:
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     void WindowDrag(int32_t width, int32_t height);
-    void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
+    void OnEnableFollowSystemFontWeightUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
@@ -890,6 +890,7 @@ private:
     void SetFakeDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
+    void HandleTouchEvent(const TouchEventInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
     void WebSendMouseEvent(const MouseInfo& info, int32_t clickNum);
     bool HandleDoubleClickEvent(const MouseInfo& info);

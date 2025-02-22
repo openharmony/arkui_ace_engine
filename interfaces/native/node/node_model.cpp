@@ -480,6 +480,7 @@ void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 
 void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
     uiEvent.eventTypeId = C_KEY_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->keyEvent);
 }

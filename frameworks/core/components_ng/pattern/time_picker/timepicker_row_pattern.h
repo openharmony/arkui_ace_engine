@@ -707,7 +707,7 @@ private:
     void MinuteChangeBuildTimeRange(uint32_t hourOf24);
     void RecordHourAndMinuteOptions();
     void RecordHourMinuteValues();
-    int32_t GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value);
+    bool GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value, uint32_t& columnIndex);
     std::string GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode);
     std::string GetOptionsValueWithIndex(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
     void HandleColumnsChangeTimeRange(const RefPtr<FrameNode>& tag);

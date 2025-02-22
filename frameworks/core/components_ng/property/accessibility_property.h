@@ -62,6 +62,8 @@ using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 using GetWindowScenePositionImpl = std::function<void((WindowSceneInfo& windowSceneInfo))>;
 
+using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF& point)>;
+
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
@@ -489,6 +491,22 @@ public:
 
     std::string GetTextType() const;
 
+    // true means self and descendants will consume hover, do not search brothers
+    // false means self and descendants no need to be hovered, should search brothers
+    void SetAccessibilityHoverConsume(const OnAccessibilityHoverConsumeCheckImpl& accessibilityHoverConsumeCheckImpl)
+    {
+        accessibilityHoverConsumeCheckImpl_ = accessibilityHoverConsumeCheckImpl;
+    }
+
+    bool IsAccessibilityHoverConsume(const NG::PointF& point) const
+    {
+        if (!accessibilityHoverConsumeCheckImpl_) {
+            return true;
+        }
+
+        return accessibilityHoverConsumeCheckImpl_(point);
+    }
+
     class Level {
     public:
         inline static const std::string AUTO = "auto";
@@ -629,6 +647,8 @@ public:
     bool HasUserScrollTriggerable();
     bool IsUserScrollTriggerable();
     void ResetUserScrollTriggerable();
+    void SetFocusDrawLevel(int32_t drawLevel);
+    int32_t GetFocusDrawLevel();
 
 private:
     // node should be not-null
@@ -666,6 +686,10 @@ private:
 
     bool HasAction() const;
 
+    static bool CheckHoverConsumeByAccessibility(const RefPtr<FrameNode>& node);
+
+    static bool CheckHoverConsumeByComponent(const RefPtr<FrameNode>& node, const NG::PointF& point);
+
 protected:
     virtual void SetSpecificSupportAction() {}
     std::optional<std::string> propText_;
@@ -693,6 +717,7 @@ protected:
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     GetWindowScenePositionImpl getWindowScenePositionImpl_;
     OnAccessibilityFocusCallbackImpl onUserAccessibilityFocusCallbackImpl_;
+    OnAccessibilityHoverConsumeCheckImpl accessibilityHoverConsumeCheckImpl_;
 
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
@@ -725,6 +750,7 @@ protected:
     std::optional<int32_t> rangeMaxValue_;
     std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
+    FocusDrawLevel focusDrawLevel_ = FocusDrawLevel::SELF;
 };
 } // namespace OHOS::Ace::NG
 

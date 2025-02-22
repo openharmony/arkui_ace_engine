@@ -248,9 +248,14 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 
+int64_t GetDebugFlags()
+{
+    return system::GetIntParameter<int64_t>("persist.ace.debug.flags", 0);
+}
+
 bool IsContainerDeleteFlag()
 {
-    return (system::GetParameter("persist.container.delete", "false") == "true");
+    return (system::GetParameter("persist.container.delete", "true") == "true");
 }
 
 bool IsLayoutDetectEnabled()
@@ -482,6 +487,7 @@ bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+ACE_WEAK_SYM DebugFlags SystemProperties::debugFlags_ = GetDebugFlags();
 ACE_WEAK_SYM bool SystemProperties::containerDeleteFlag_ = IsContainerDeleteFlag();
 ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
@@ -636,6 +642,7 @@ void SystemProperties::InitDeviceInfo(
     paramDeviceType_ = ::GetDeviceType();
     needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
+    debugFlags_ = GetDebugFlags();
     layoutDetectEnabled_ = IsLayoutDetectEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);

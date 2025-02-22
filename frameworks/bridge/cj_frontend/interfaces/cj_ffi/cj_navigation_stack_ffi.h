@@ -21,6 +21,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_nav_path_stack_ffi.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
@@ -65,6 +66,7 @@ public:
     sptr<CJNavPathStack> GetDataSourceObj();
     int64_t GetDataSourceObjId();
     void SetNavDestBuilderFunc(std::function<void(std::string name, std::string param)> navDestBuilderFunc);
+    CJNavPathInfo CreatePathInfoWithNecessaryProperty(const RefPtr<NG::NavDestinationContext>& context);
     bool IsEmpty() override;
     void Pop() override;
     void Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo = nullptr) override;
@@ -82,8 +84,8 @@ public:
     void InitNavPathIndex(const std::vector<std::string>& pathNames) override;
     void SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId) override;
     bool CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
-    RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
-        const WeakPtr<NG::UINode>& node) override;
+    RefPtr<NG::UINode> CreateNodeByRouteInfo(
+        const RefPtr<NG::RouteInfo>& routeInfo, const WeakPtr<NG::UINode>& node) override;
     std::string GetRouteParam() const override;
     void OnAttachToParent(RefPtr<NG::NavigationStack> parent) override;
     void OnDetachFromParent() override;
@@ -116,8 +118,8 @@ private:
     void UpdateOnStateChangedCallback(sptr<CJNavPathStack> obj, std::function<void()> callback);
     CJNavPathInfo* GetPathInfo(int32_t index);
     std::vector<CJNavPathInfo> GetPathArray();
-    int32_t LoadDestination(const std::string& name, const std::string& param,
-        const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
+    int32_t LoadDestination(const std::string& name, const std::string& param, const WeakPtr<NG::UINode>& customNode,
+        RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const override;
     void SetCJParentStack(CJNavPathStack* parent);

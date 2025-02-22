@@ -76,6 +76,7 @@ void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> o
         return;
     }
 
+    properties.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
     auto levelOrderValue = obj->GetProperty("levelOrder");
     if (!levelOrderValue->IsObject()) {
         return;
@@ -102,7 +103,7 @@ void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> o
 static std::atomic<int32_t> controllerId = 0;
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 {
-    int argc = info.Length();
+    uint32_t argc = info.Length();
     if (argc > 1 && !info[0]->IsUndefined() && info[0]->IsObject() && !info[1]->IsUndefined() && info[1]->IsObject()) {
         JSRef<JSObject> constructorArg = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSObject> ownerObj = JSRef<JSObject>::Cast(info[1]);

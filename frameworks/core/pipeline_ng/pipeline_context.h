@@ -36,6 +36,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
@@ -900,6 +901,11 @@ public:
         return formGestureMgr_;
     }
 
+    const RefPtr<AvoidInfoManager>& GetAvoidInfoManager() const
+    {
+        return avoidInfoMgr_;
+    }
+
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
     {
         return recycleManager_;
@@ -1150,6 +1156,8 @@ protected:
     void StartWindowMaximizeAnimation(
         int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -1407,6 +1415,7 @@ private:
 
     int32_t preNodeId_ = -1;
 
+    RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();

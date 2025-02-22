@@ -682,8 +682,9 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             func->Execute(*clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::u16string label = u"";
-            if (!node.Invalid()) {
-                auto pattern = node.GetRawPtr()->GetPattern();
+            auto frameNode = node.Upgrade();
+            if (frameNode) {
+                auto pattern = frameNode->GetPattern();
                 CHECK_NULL_VOID(pattern);
                 auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
                 CHECK_NULL_VOID(layoutProperty);
@@ -785,9 +786,12 @@ void JSText::Create(const JSCallbackInfo& info)
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
     if (jsController) {
         jsController->SetController(controller);
-        auto styledString = jsController->GetStyledString();
-        if (styledString) {
-            controller->SetStyledString(styledString, false);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            auto styledString = jsController->GetStyledString();
+            if (styledString) {
+                controller->SetStyledString(styledString, false);
+                jsController->ClearStyledString();
+            }
         }
     }
 }
@@ -925,7 +929,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     // TextResponseType
-    int32_t resquiredParameterCount = 3;
+    uint32_t resquiredParameterCount = 3;
     JSRef<JSVal> argsResponse = info[resquiredParameterCount - 1];
     NG::TextResponseType responseType = NG::TextResponseType::LONG_PRESS;
     if (argsResponse->IsNumber()) {
@@ -1119,8 +1123,10 @@ void JSTextController::SetStyledString(const JSCallbackInfo& info)
     }
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
-    styledString_ = spanStringController;
     auto controller = controllerWeak_.Upgrade();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) && !controller) {
+        styledString_ = spanStringController;
+    }
     CHECK_NULL_VOID(controller);
     controller->SetStyledString(spanStringController, true);
     auto thisObj = info.This();

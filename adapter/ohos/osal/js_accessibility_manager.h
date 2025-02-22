@@ -163,6 +163,16 @@ public:
         lastFrameNode_ = node;
     }
 
+    void SetReentrantLimit(const bool reentrantLimit)
+    {
+        reentrantLimit_ = reentrantLimit;
+    }
+
+    bool IsReentrantLimit() const
+    {
+        return reentrantLimit_;
+    }
+
     void SaveCurrentFocusNodeSize(const RefPtr<NG::FrameNode>& currentFocusNode)
     {
         if (currentFocusNode->IsAccessibilityVirtualNode()) {
@@ -328,7 +338,7 @@ public:
         const RefPtr<PipelineBase>& context) override;
     void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
 
-    AccessibilityWorkMode GetAccessibilityWorkMode() override;
+    AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
 
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
     void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
@@ -674,7 +684,7 @@ private:
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
     std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;
-
+    bool reentrantLimit_ = false;
     std::string pageMode_;
     std::vector<AccessibilityEvent> cacheEventVec_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;

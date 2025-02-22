@@ -427,6 +427,7 @@ void UIExtensionPattern::OnConnect()
 void UIExtensionPattern::InitBusinessDataHandleCallback()
 {
     RegisterEventProxyFlagCallback();
+    RegisterGetAvoidInfoCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -534,7 +535,7 @@ void UIExtensionPattern::OnUeaAccessibilityEventAsync()
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     UpdateFrameNodeState();
-    TransferAccessibilityRectInfo(); // first connect need info UEC rect info
+    TransferAccessibilityRectInfo(true); // first connect need info UEC rect info
     if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
         UIEXT_LOGI("uec need notify register accessibility again %{public}d, %{public}d.",
             accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
@@ -698,7 +699,7 @@ public:
         CHECK_NULL_RETURN(pattern, false);
         if (state) {
             // first time turn on Accessibility, add TransferAccessibilityRectInfo
-            pattern->TransferAccessibilityRectInfo();
+            pattern->TransferAccessibilityRectInfo(true);
         }
         return true;
     }
@@ -731,6 +732,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
         pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->TransferAccessibilityRectInfo();
         pattern->DispatchDisplayArea(true);
     });
     foldDisplayCallBackId_ =
@@ -1033,12 +1035,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
-    auto pointerAction = newPointerEvent->GetPointerAction();
-    if (!(pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
-        DispatchPointerEvent(newPointerEvent);
-    }
+    DispatchPointerEvent(newPointerEvent);
     if (focusState_ && newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         if (needReSendFocusToUIExtension_) {
             HandleFocusEvent();
@@ -1172,13 +1169,15 @@ void UIExtensionPattern::HandleDragEvent(const DragPointerEvent& info)
 {
     auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
+    std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+    CHECK_NULL_VOID(newPointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    Platform::CalculatePointerEvent(pointerEvent, host, true);
-    Platform::UpdatePointerAction(pointerEvent, info.action);
-    DispatchPointerEvent(pointerEvent);
+    Platform::CalculatePointerEvent(newPointerEvent, host, true);
+    Platform::UpdatePointerAction(newPointerEvent, info.action);
+    DispatchPointerEvent(newPointerEvent);
 }
 
 void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
@@ -1789,6 +1788,29 @@ void UIExtensionPattern::RegisterReplyPageModeCallback()
     RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::SEND_PAGE_MODE, callback);
 }
 
+void UIExtensionPattern::RegisterGetAvoidInfoCallback()
+{
+    auto callback = [weak = WeakClaim(this)](const AAFwk::Want&) -> int32_t {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, -1);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, -1);
+        auto avoidInfoMgr = context->GetAvoidInfoManager();
+        CHECK_NULL_RETURN(avoidInfoMgr, -1);
+        AAFwk::Want avoidInfoWant;
+        const auto& info = pattern->GetAvoidInfo();
+        avoidInfoMgr->BuildAvoidInfo(info, avoidInfoWant);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UECPattern send avoidInfo: %{public}s.", info.ToString().c_str());
+        pattern->SendBusinessData(UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE,
+            std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
+        return 0;
+    };
+    RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::GET_AVOID_INFO, callback);
+}
+
 bool UIExtensionPattern::SendBusinessDataSyncReply(
     UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
@@ -1895,9 +1917,6 @@ void UIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
     if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeGeometryChange(flag))) {
         return;
     }
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        return;
-    }
     TransferAccessibilityRectInfo();
 }
 
@@ -1930,8 +1949,11 @@ AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
 }
 
 // Once enter this function, must calculate and transfer data to provider
-void UIExtensionPattern::TransferAccessibilityRectInfo()
+void UIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
 {
+    if (!(isForce || AceApplicationInfo::GetInstance().IsAccessibilityEnabled())) {
+        return;
+    }
     auto parentRectInfo = GetAccessibilityRectInfo();
     AAFwk::Want data;
     data.SetParam("left", parentRectInfo.left);

@@ -107,6 +107,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"

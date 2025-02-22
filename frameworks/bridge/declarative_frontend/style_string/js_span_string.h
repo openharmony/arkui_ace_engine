@@ -100,6 +100,7 @@ public:
     static void Marshalling(const JSCallbackInfo& info);
     static void Unmarshalling(const JSCallbackInfo& info);
 private:
+    static void MarshallingExtSpan(const JSCallbackInfo& info, std::vector<uint8_t>& buff);
     static void UnmarshallingExec(napi_env env, void *data);
     static void UnmarshallingComplete(napi_env env, napi_status status, void *data);
     ACE_DISALLOW_COPY_AND_MOVE(JSSpanString);

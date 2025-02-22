@@ -23,15 +23,11 @@ namespace {
 } // namespace
 
 SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float pointOffset, bool isSelect,
-    const Color& boardColor, float dragOffsetX)
+    const Color& boardColor, const Color& pointColor, float dragOffsetX)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-    CHECK_NULL_VOID(switchTheme);
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
-    animatePointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(switchTheme->GetPointColor()));
+    animatePointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(pointColor));
     pointOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(pointOffset);
     dragOffsetX_ = AceType::MakeRefPtr<PropertyFloat>(dragOffsetX);
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
@@ -59,7 +55,7 @@ SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float p
     AttachProperty(animateTrackRadius_);
 }
 
-void SwitchModifier::InitializeParam()
+void SwitchModifier::InitializeParam(int32_t themeScopeId)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -217,4 +213,14 @@ float SwitchModifier::GetSwitchWidth(const SizeF& contentSize) const
     return switchWidth;
 }
 
+int32_t SwitchPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const
+{
+    const int32_t defaultValue = 0;
+    CHECK_NULL_RETURN(paintWrapper, defaultValue);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultValue);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_RETURN(host, defaultValue);
+    return host->GetThemeScopeId();
+}
 } // namespace OHOS::Ace::NG

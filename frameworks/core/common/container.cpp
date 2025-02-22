@@ -342,4 +342,12 @@ bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
     return false;
 #endif
 }
+bool Container::CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
+{
+    auto container = GetContainer(currentId);
+    CHECK_NULL_RETURN(container, defaultRes);
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, defaultRes);
+    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace

@@ -1261,7 +1261,7 @@ class BackgroundImageResizableModifier extends ModifierWithKey {
         sliceLeft = tempSlice.left;
         sliceRight = tempSlice.right;
       }
-      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceLeft, sliceTop, sliceRight, sliceBottom);
     }
   }
   checkObjectDiff() {
@@ -3032,6 +3032,19 @@ class AccessibilityScrollTriggerableModifier extends ModifierWithKey {
   }
 }
 AccessibilityScrollTriggerableModifier.identity = Symbol('accessibilityScrollTriggerable');
+class AccessibilityFocusDrawLevelModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityFocusDrawLevel(node);
+    } else {
+      getUINativeModule().common.setAccessibilityFocusDrawLevel(node, this.value);
+    }
+  }
+}
+AccessibilityFocusDrawLevelModifier.identity = Symbol('accessibilityFocusDrawLevel');
 class HoverEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4625,6 +4638,10 @@ class ArkComponent {
     else {
       modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
     }
+    return this;
+  }
+  accessibilityFocusDrawLevel(value) {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityFocusDrawLevelModifier.identity, AccessibilityFocusDrawLevelModifier, value);
     return this;
   }
   obscured(reasons) {
@@ -17333,6 +17350,11 @@ class ArkScrollableBarModeOptions {
     return (this.value === another.value);
   }
 }
+class ArkTabsCachedMaxCount {
+  isEqual(another) {
+    return (this.value.count === another.count && this.value.mode === another.mode);
+  }
+}
 class ArkAlignRules {
   constructor() {
     this.left = undefined;
@@ -17677,6 +17699,8 @@ class ArkDotIndicator extends DotIndicator {
     this.colorValue = undefined;
     this.selectedColorValue = undefined;
     this.maxDisplayCountValue = undefined;
+    this.spaceValue = undefined;
+    this.ignoreSizeValue = undefined;
   }
   isEqual(another) {
     return (this.type === another.type &&
@@ -17691,7 +17715,9 @@ class ArkDotIndicator extends DotIndicator {
       this.maskValue === another.maskValue &&
       this.colorValue === another.colorValue &&
       this.selectedColorValue === another.selectedColorValue &&
-      this.maxDisplayCountValue === another.maxDisplayCountValue);
+      this.maxDisplayCountValue === another.maxDisplayCountValue &&
+      this.spaceValue === another.spaceValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue);
   }
 }
 class ArkDigitIndicator extends DigitIndicator {
@@ -17706,6 +17732,7 @@ class ArkDigitIndicator extends DigitIndicator {
     this.selectedFontColorValue = undefined;
     this.digitFontValue = undefined;
     this.selectedDigitFontValue = undefined;
+    this.ignoreSizeValue = undefined;
   }
   isEqual(another) {
     return (this.type === another.type &&
@@ -17714,7 +17741,8 @@ class ArkDigitIndicator extends DigitIndicator {
       this.rightValue === another.rightValue &&
       this.bottomValue === another.bottomValue &&
       this.digitFontValue === another.digitFontValue &&
-      this.selectedDigitFontValue === another.selectedDigitFontValue);
+      this.selectedDigitFontValue === another.selectedDigitFontValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue);
   }
 }
 class ArkDigitFont {
@@ -27451,25 +27479,30 @@ class ArkWebComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   javaScriptAccess(javaScriptAccess) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebJavaScriptAccessModifier.identity, WebJavaScriptAccessModifier, javaScriptAccess);
+    return this;
   }
   fileAccess(fileAccess) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebFileAccessModifier.identity, WebFileAccessModifier, fileAccess);
+    return this;
   }
   onlineImageAccess(onlineImageAccess) {
     throw new Error('Method not implemented.');
   }
   domStorageAccess(domStorageAccess) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebDomStorageAccessModifier.identity, WebDomStorageAccessModifier, domStorageAccess);
+    return this;
   }
   imageAccess(imageAccess) {
     throw new Error('Method not implemented.');
   }
   mixedMode(mixedMode) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebMixedModeModifier.identity, WebMixedModeModifier, mixedMode);
+    return this;
   }
   zoomAccess(zoomAccess) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebZoomAccessModifier.identity, WebZoomAccessModifier, zoomAccess);
+    return this;
   }
   geolocationAccess(geolocationAccess) {
     throw new Error('Method not implemented.');
@@ -27481,10 +27514,12 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   cacheMode(cacheMode) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebCacheModeModifier.identity, WebCacheModeModifier, cacheMode);
+    return this;
   }
   darkMode(mode) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebDarkModeModifier.identity, WebDarkModeModifier, mode);
+    return this;
   }
   forceDarkAccess(access) {
     throw new Error('Method not implemented.');
@@ -27634,7 +27669,8 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   multiWindowAccess(multiWindow) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebMultiWindowAccessModifier.identity, WebMultiWindowAccessModifier, multiWindow);
+    return this;
   }
   onInterceptKeyEvent(callback) {
     throw new Error('Method not implemented.');
@@ -27694,7 +27730,8 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   allowWindowOpenMethod(flag) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebAllowWindowOpenMethodModifier.identity, WebAllowWindowOpenMethodModifier, flag);
+    return this;
   }
   onAudioStateChanged(callback) {
     throw new Error('Method not implemented.');
@@ -27739,6 +27776,142 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
 }
+
+class WebJavaScriptAccessModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetJavaScriptAccess(node);
+      }
+      else {
+        getUINativeModule().web.setJavaScriptAccess(node, this.value);
+      }
+  }
+}
+WebJavaScriptAccessModifier.identity = Symbol('webJavaScriptAccessModifier');
+
+class WebFileAccessModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetFileAccess(node);
+      }
+      else {
+        getUINativeModule().web.setFileAccess(node, this.value);
+      }
+  }
+}
+WebFileAccessModifier.identity = Symbol('webFileAccessModifier');
+
+class WebDomStorageAccessModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetDomStorageAccess(node);
+      }
+      else {
+        getUINativeModule().web.setDomStorageAccess(node, this.value);
+      }
+  }
+}
+WebDomStorageAccessModifier.identity = Symbol('webDomStorageAccessModifier');
+
+class WebMixedModeModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetMixedMode(node);
+      }
+      else {
+        getUINativeModule().web.setMixedMode(node, this.value);
+      }
+  }
+}
+WebMixedModeModifier.identity = Symbol('webMixedModeModifier');
+
+class WebZoomAccessModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetZoomAccess(node);
+      }
+      else {
+        getUINativeModule().web.setZoomAccess(node, this.value);
+      }
+  }
+}
+WebZoomAccessModifier.identity = Symbol('webZoomAccessModifier');
+
+class WebCacheModeModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetCacheMode(node);
+      }
+      else {
+        getUINativeModule().web.setCacheMode(node, this.value);
+      }
+  }
+}
+WebCacheModeModifier.identity = Symbol('webCacheModeModifier');
+
+class WebDarkModeModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetDarkMode(node);
+      }
+      else {
+        getUINativeModule().web.setDarkMode(node, this.value);
+      }
+  }
+}
+WebDarkModeModifier.identity = Symbol('webDarkModeModifier');
+
+class WebMultiWindowAccessModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetMultiWindowAccess(node);
+      }
+      else {
+        getUINativeModule().web.setMultiWindowAccess(node, this.value);
+      }
+  }
+}
+WebMultiWindowAccessModifier.identity = Symbol('webMultiWindowAccessModifier');
+
+class WebAllowWindowOpenMethodModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().web.resetAllowWindowOpenMethod(node);
+      }
+      else {
+        getUINativeModule().web.setAllowWindowOpenMethod(node, this.value);
+      }
+  }
+}
+WebAllowWindowOpenMethodModifier.identity = Symbol('webAllowWindowOpenMethodModifier');
+
 // @ts-ignore
 if (globalThis.Web !== undefined) {
   globalThis.Web.attributeModifier = function (modifier) {
@@ -29083,6 +29256,19 @@ class ListMaintainVisibleContentPositionModifier extends ModifierWithKey {
   }
 }
 ListMaintainVisibleContentPositionModifier.identity = Symbol('listMaintainVisibleContentPosition');
+class ListStackFromEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListStackFromEnd(node);
+    } else {
+      getUINativeModule().list.setListStackFromEnd(node, this.value);
+    }
+  }
+}
+ListStackFromEndModifier.identity = Symbol('listStackFromEnd');
 class ListNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -29550,6 +29736,10 @@ class ArkListComponent extends ArkScrollable {
   maintainVisibleContentPosition(value) {
     modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
       ListMaintainVisibleContentPositionModifier, value);
+    return this;
+  }
+  stackFromEnd(value) {
+    modifierWithKey(this._modifiersWithKeys, ListStackFromEndModifier.identity, ListStackFromEndModifier, value);
     return this;
   }
   clip(value) {
@@ -30242,6 +30432,9 @@ class SwiperIndicatorModifier extends ModifierWithKey {
       let selectedDigitFontSize;
       let selectedDigitFontWeight;
       let maxDisplayCount;
+      let space;
+      let ignoreSize;
+      let setIgnoreSize;
       if (typeof this.value === 'boolean') {
         getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
       }
@@ -30258,8 +30451,12 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         color = this.value.colorValue;
         selectedColor = this.value.selectedColorValue;
         maxDisplayCount = this.value.maxDisplayCountValue;
+        space = this.value.spaceValue;
+        ignoreSize = this.value.ignoreSizeValue;
+        setIgnoreSize = this.value.setIgnoreSizeValue;
         getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
-          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount);
+          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount, space, ignoreSize,
+          setIgnoreSize);
       }
       else if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
         left = this.value.leftValue;
@@ -30268,6 +30465,8 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         bottom = this.value.bottomValue;
         fontColor = this.value.fontColorValue;
         selectedFontColor = this.value.selectedFontColorValue;
+        ignoreSize = this.value.ignoreSizeValue;
+        setIgnoreSize = this.value.setIgnoreSizeValue;
         let arkDigitFont = new ArkDigitFont();
         if (typeof this.value.digitFontValue === 'object') {
           digitFontSize = this.value.digitFontValue.size;
@@ -30278,7 +30477,7 @@ class SwiperIndicatorModifier extends ModifierWithKey {
           selectedDigitFontWeight = arkDigitFont.parseFontWeight(this.value.selectedDigitFontValue.weight);
         }
         getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDigitIndicator', fontColor, selectedFontColor, digitFontSize,
-          digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom);
+          digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom, ignoreSize, setIgnoreSize);
       }
       else {
         getUINativeModule().swiper.setSwiperIndicator(node, 'IndicatorComponentController', this.value );
@@ -30300,7 +30499,11 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         !isBaseOrResourceEqual(this.stageValue.maskValue, this.value.maskValue) ||
         !isBaseOrResourceEqual(this.stageValue.colorValue, this.value.colorValue) ||
         !isBaseOrResourceEqual(this.stageValue.selectedColorValue, this.value.selectedColorValue) ||
-        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue));
+        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue) ||
+        !isBaseOrResourceEqual(this.stageValue.spaceValue, this.value.spaceValue) ||
+        !isBaseOrResourceEqual(this.stageValue.ignoreSizeValue, this.value.ignoreSizeValue) ||
+        !isBaseOrResourceEqual(this.stageValue.setIgnoreSizeValue, this.value.setIgnoreSizeValue)
+      );
     }
     else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
       return (!isBaseOrResourceEqual(this.stageValue.fontColorValue, this.value.fontColorValue) ||
@@ -30308,6 +30511,8 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         !isBaseOrResourceEqual(this.stageValue.digitFontValue.size, this.value.digitFontValue.size) ||
         !isBaseOrResourceEqual(this.stageValue.digitFontValue.weight, this.value.digitFontValue.weight) ||
         !isBaseOrResourceEqual(this.stageValue.selectedDigitFontValue.size, this.value.selectedDigitFontValue.size) ||
+        !isBaseOrResourceEqual(this.stageValue.ignoreSizeValue, this.value.ignoreSizeValue) ||
+        !isBaseOrResourceEqual(this.stageValue.setIgnoreSizeValue, this.value.setIgnoreSizeValue) ||
         !isBaseOrResourceEqual(this.stageValue.selectedDigitFontValue.weight, this.value.selectedDigitFontValue.weight));
     }
     else {
@@ -30785,6 +30990,7 @@ class IndicatorComponentStyleModifier extends ModifierWithKey {
       let selectedDigitFontSize;
       let selectedDigitFontWeight;
       let maxDisplayCount;
+      let space;
       if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
         left = this.value.leftValue;
         top = this.value.topValue;
@@ -30816,8 +31022,9 @@ class IndicatorComponentStyleModifier extends ModifierWithKey {
         color = this.value.colorValue;
         selectedColor = this.value.selectedColorValue;
         maxDisplayCount = this.value.maxDisplayCountValue;
+        space = this.value.spaceValue;
         getUINativeModule().indicatorComponent.setStyle(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
-          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount);
+          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount, space);
       }
     }
   }
@@ -30833,7 +31040,9 @@ class IndicatorComponentStyleModifier extends ModifierWithKey {
         !isBaseOrResourceEqual(this.stageValue.maskValue, this.value.maskValue) ||
         !isBaseOrResourceEqual(this.stageValue.colorValue, this.value.colorValue) ||
         !isBaseOrResourceEqual(this.stageValue.selectedColorValue, this.value.selectedColorValue) ||
-        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue));
+        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue) ||
+        !isBaseOrResourceEqual(this.stageValue.spaceValue, this.value.spaceValue)
+      );
     }
     else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
       return (!isBaseOrResourceEqual(this.stageValue.fontColorValue, this.value.fontColorValue) ||
@@ -31105,6 +31314,13 @@ class ArkTabsComponent extends ArkComponent {
   }
   height(value) {
     modifierWithKey(this._modifiersWithKeys, TabHeightModifier.identity, TabHeightModifier, value);
+    return this;
+  }
+  cachedMaxCount(count, mode) {
+    let arkTabsCachedMaxCount = new ArkTabsCachedMaxCount();
+    arkTabsCachedMaxCount.count = count;
+    arkTabsCachedMaxCount.mode = mode;
+    modifierWithKey(this._modifiersWithKeys, CachedMaxCountModifier.identity, CachedMaxCountModifier, arkTabsCachedMaxCount);
     return this;
   }
 }
@@ -31538,6 +31754,22 @@ class TabHeightModifier extends ModifierWithKey {
     }
 }
 TabHeightModifier.identity = Symbol('tabHeight');
+class CachedMaxCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetCachedMaxCount(node);
+    } else {
+      getUINativeModule().tabs.setCachedMaxCount(node, this.value.count, this.value.mode);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.value.count === this.stageValue.count && this.value.mode === this.stageValue.mode);
+  }
+}
+CachedMaxCountModifier.identity = Symbol('cachedMaxCount');
 // @ts-ignore
 if (globalThis.Tabs !== undefined) {
   globalThis.Tabs.attributeModifier = function (modifier) {

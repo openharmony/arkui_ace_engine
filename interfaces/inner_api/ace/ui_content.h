@@ -518,6 +518,8 @@ public:
     {
         return false;
     }
+
+    virtual void EnableContainerModalCustomGesture(bool enable) {};
 };
 
 } // namespace OHOS::Ace

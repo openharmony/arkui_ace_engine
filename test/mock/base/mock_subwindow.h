@@ -104,7 +104,23 @@ public:
     MOCK_METHOD0(DestroyWindow, void());
     MOCK_METHOD0(ResizeDialogSubwindow, void());
     MOCK_METHOD0(GetDisplayId, uint64_t());
+    MOCK_METHOD1(IsSameDisplayWithParentWindow, bool(bool useInitializedId));
     MOCK_METHOD1(ShowSelectOverlay, bool(const RefPtr<NG::FrameNode>& overlayNode));
+    void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) {
+            return;
+        }
+    MOCK_METHOD1(HideSheetSubWindow, void(int32_t containerId));
+    MOCK_METHOD0(GetAttachState, MenuWindowState());
+    MOCK_METHOD0(GetDetachState, MenuWindowState());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

@@ -734,6 +734,8 @@ public:
         return Rect();
     }
 
+    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);

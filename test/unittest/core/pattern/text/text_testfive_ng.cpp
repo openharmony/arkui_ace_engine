@@ -29,7 +29,10 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::string SYMBOL_FONT_FAMILY = "Symbol_Test_CustomSymbol";
+constexpr int32_t DEFAULT_SYMBOL_ID = 983242;
+} // namespace
 
 class TextTestFiveNg : public TextBases {
 public:
@@ -1126,6 +1129,44 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSymbolTextStyle002
+ * @tc.desc: test text_layout_algorithm.cpp UpdateSymbolTextStyle function for custom symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateSymbolTextStyle002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(DEFAULT_SYMBOL_ID));
+
+    TextStyle textStyle;
+    ParagraphStyle paragraphStyle;
+    textStyle.SetSymbolType(SymbolType::SYSTEM);
+
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
+
+    textStyle.SetSymbolType(SymbolType::CUSTOM);
+
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), false);
+
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    textStyle.SetFontFamilies(fontFamilies);
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
+}
+
+/**
  * @tc.name: AdaptMinTextSize001
  * @tc.desc: test text_layout_algorithm.cpp AdaptMinTextSize function
  * @tc.type: FUNC
@@ -1946,6 +1987,44 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph001, TestSize.Level1)
     spanItem->fontStyle = std::move(oldFontStyle);
     spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
     EXPECT_EQ(callPushStyleCount, 1);
+}
+
+/**
+ * @tc.name: UpdateSymbolSpanParagraph002
+ * @tc.desc: test span_node.cpp UpdateSymbolSpanParagraph function for customSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    int32_t callPushStyleCount = 0;
+    EXPECT_CALL(*paragraph, PushStyle(_)).WillRepeatedly([&callPushStyleCount](){ callPushStyleCount++; });
+
+    EXPECT_EQ(callPushStyleCount, 0);
+
+    spanItem->fontStyle->UpdateFontSize(Dimension(1));
+    spanItem->fontStyle->UpdateSymbolType(SymbolType::SYSTEM);
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 1);
+
+    spanItem->fontStyle->UpdateSymbolType(SymbolType::CUSTOM);
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 1);
+
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    spanItem->fontStyle->UpdateFontFamily(fontFamilies);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 2);
 }
 
 /**

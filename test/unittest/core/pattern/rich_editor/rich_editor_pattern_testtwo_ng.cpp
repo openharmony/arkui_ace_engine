@@ -982,6 +982,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection004, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     pipeline->themeManager_ = theme;
 
     richEditorPattern->customKeyboardBuilder_ = []() {};
@@ -1022,6 +1023,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection005, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     pipeline->themeManager_ = theme;
 
     richEditorPattern->customKeyboardBuilder_ = []() {};
@@ -1061,6 +1063,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection006, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     pipeline->themeManager_ = theme;
 
     richEditorPattern->customKeyboardBuilder_ = []() {};

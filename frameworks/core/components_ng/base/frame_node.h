@@ -1129,11 +1129,19 @@ public:
     }
 
     void SetDeleteRsNode(bool isDelete) {
-        isDeleteRsNode = isDelete;
+        isDeleteRsNode_ = isDelete;
     }
  
-    bool GetIsDelete() {
-        return isDeleteRsNode;
+    bool GetIsDelete() const {
+        return isDeleteRsNode_;
+    }
+
+    void SetPositionZ(bool hasPositionZ) {
+        hasPositionZ_ = hasPositionZ;
+    }
+ 
+    bool HasPositionZ() const {
+        return hasPositionZ_;
     }
 
     void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
@@ -1514,7 +1522,8 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
-    bool isDeleteRsNode = false;
+    bool isDeleteRsNode_ = false;
+    bool hasPositionZ_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

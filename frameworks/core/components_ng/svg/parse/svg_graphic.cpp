@@ -568,13 +568,24 @@ void SvgGraphic::SetStrokeGradientStyle(double opacity)
 
 PaintType SvgGraphic::GetStrokeType()
 {
-    if (!attributes_.strokeState.GetHref().empty()) {
-        return GetHrefType(attributes_.strokeState.GetHref());
+    if (attributes_.strokeState.GetColor() == Color::TRANSPARENT) {
+        return PaintType::NONE;
     }
     if (attributes_.strokeState.HasColor()) {
         return PaintType::COLOR;
     }
-    return PaintType::NONE;
+    if (!attributes_.strokeState.GetHref().empty()) {
+        return GetHrefType(attributes_.strokeState.GetHref());
+    }
+    auto& gradient = attributes_.strokeState.GetGradient();
+    if (gradient.has_value()) {
+        auto href = gradient->GetHref();
+        if (!href.empty()) {
+            attributes_.strokeState.SetHref(href);
+            return GetHrefType(attributes_.strokeState.GetHref());
+        }
+    }
+    return PaintType::COLOR;
 }
 
 bool SvgGraphic::InitPenFill(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext,

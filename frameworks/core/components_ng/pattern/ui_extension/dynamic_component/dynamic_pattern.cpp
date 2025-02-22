@@ -270,18 +270,18 @@ bool DynamicPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     auto& node = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(node, false);
     auto size = node->GetContentSize();
-    float density = 1.0f;
-    int32_t orientation = 0;
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
-        orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
-    }
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
+    float density = pipeline->GetDensity();
+    int32_t orientation = 0;
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (container) {
+        orientation = static_cast<int32_t>(container->GetOrientation());
+    }
+
     auto animationOption = pipeline->GetSyncAnimationOption();
     auto parentGlobalOffset = dirty->GetParentGlobalOffsetWithSafeArea(true, true) +
         dirty->GetFrameRectWithSafeArea(true).GetOffset();
@@ -432,7 +432,7 @@ void DynamicPattern::InitializeAccessibility()
         accessibilityChildTreeCallback_->OnRegister(
             realHostWindowId, accessibilityManager->GetTreeId());
     }
-    PLATFORM_LOGI("SecurityUIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+    PLATFORM_LOGI("DynamicComponent: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
         accessibilityId, realHostWindowId);
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
 }
@@ -493,5 +493,36 @@ void DynamicPattern::ResetAccessibilityChildTreeCallback()
         accessibilityChildTreeCallback_->GetAccessibilityId());
     accessibilityChildTreeCallback_.reset();
     accessibilityChildTreeCallback_ = nullptr;
+}
+
+void DynamicPattern::OnVisibleChange(bool visible)
+{
+    PLATFORM_LOGI("The component is changing from '%{public}s' to '%{public}s'.",
+        isVisible_ ? "visible" : "invisible", visible ? "visible" : "invisible");
+    isVisible_ = visible;
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    if (isVisible_) {
+        dynamicComponentRenderer_->NotifyForeground();
+    } else {
+        dynamicComponentRenderer_->NotifyBackground();
+    }
+}
+
+void DynamicPattern::OnWindowShow()
+{
+    PLATFORM_LOGI("The window is being shown and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    if (isVisible_) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->NotifyForeground();
+    }
+}
+
+void DynamicPattern::OnWindowHide()
+{
+    PLATFORM_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    if (isVisible_) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->NotifyBackground();
+    }
 }
 } // namespace OHOS::Ace::NG

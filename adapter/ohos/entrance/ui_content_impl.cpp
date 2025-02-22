@@ -41,6 +41,8 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
+#include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -136,6 +138,8 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
+static bool g_isDynamicVsync = false;
+static bool g_isDragging = false;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -179,7 +183,9 @@ Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 
 bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 {
-    if (!SystemProperties::GetNeedAvoidWindow()) {
+    // compatibleModeInPc needAvoidWindow
+    bool compatibleModeInPc = rsWindow->GetCompatibleModeInPc();
+    if (!SystemProperties::GetNeedAvoidWindow() && !compatibleModeInPc) {
         return false;
     }
 
@@ -1687,6 +1693,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         ImageFileCache::GetInstance().SetCacheFileInfo();
         ImageFileCache::GetInstance().ClearAllCacheFiles();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+
+        auto task = [] {
+            bool dynamicVsync = false;
+            std::unordered_map<std::string, std::string> payload;
+            std::unordered_map<std::string, std::string> reply;
+            payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
+            payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
+            dynamicVsync = g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
+            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
+        };
+        BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
@@ -2748,13 +2766,6 @@ void BuildParsedConfig(Platform::ParsedConfig& parsedConfig,
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     CHECK_NULL_VOID(config);
-
-    auto dialogContainer = Platform::DialogContainer::GetContainer(instanceId_);
-    if (dialogContainer) {
-        UpdateDialogContainerConfig(config);
-        return;
-    }
-
     StoreConfiguration(config);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2772,8 +2783,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s",
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
-        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
 }
 
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
@@ -2831,6 +2841,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     bool reasonDragFlag = GetWindowSizeChangeReason(lastReason_, reason);
     lastReason_ = reason;
+
+    if (!g_isDragging && !g_isDynamicVsync && (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START)) {
+        OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(true);
+        ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(true)");
+        g_isDragging = true;
+    }
+
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
@@ -2894,12 +2912,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         updateDeviceOrientationTask();
         updateDisplayIdAndAreaTask();
     } else {
-        taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
-        taskExecutor->PostTask(std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI,
-            "ArkUIDeviceOrientation", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
-        taskExecutor->PostTask(std::move(updateDisplayIdAndAreaTask), TaskExecutor::TaskType::UI,
-            "ArkUIUpdateDisplayIdAndArea", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+        taskExecutor->PostTask(
+            std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
+        taskExecutor->PostTask(
+            std::move(updateDisplayIdAndAreaTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDisplayIdAndArea");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
 
@@ -2910,6 +2927,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         if (reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
             reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
             bool isDragging = reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START;
+            if (!g_isDynamicVsync && !isDragging) {
+                OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(false);
+                ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(false)");
+                g_isDragging = false;
+            }
             taskExecutor->PostTask(
                 [weak = AceType::WeakClaim(AceType::RawPtr(context)), isDragging]() {
                     auto pipelineContext = weak.Upgrade();
@@ -2997,14 +3019,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
         // When avoidAreas need updating, the task shouldn't be cancelled.
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
-            "ArkUIPromiseViewportConfig", TaskExecutor::TaskType::PLATFORM,
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            "ArkUIPromiseViewportConfig");
     } else {
         if (container->IsUIExtensionWindow()) {
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
         }
-        viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig",
-            TaskExecutor::TaskType::PLATFORM, TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
     viewportConfigMgr_->StoreConfig(aceViewportConfig);
     UIExtensionUpdateViewportConfig(config);
@@ -3122,8 +3142,8 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDecor)
         task();
     } else {
         updateDecorVisibleTask_ = SingleTaskExecutor::CancelableTask(std::move(task));
-        taskExecutor->PostTask(updateDecorVisibleTask_, TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(updateDecorVisibleTask_,
+            TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
     }
 }
 
@@ -3156,8 +3176,7 @@ void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
     if (uiTaskRunner.IsRunOnCurrentThread()) {
         task();
     } else {
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode");
     }
 }
 
@@ -3251,8 +3270,7 @@ void UIContentImpl::NotifyRotationAnimationEnd()
                 pipelineContext->StopWindowAnimation();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUINotifyRotationAnimationEnd",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUINotifyRotationAnimationEnd");
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
@@ -3673,8 +3691,7 @@ void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, s
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIGetResourcePaths",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIGetResourcePaths");
 }
 
 void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
@@ -3712,8 +3729,7 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
                 }
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISetResourcePaths",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUISetResourcePaths");
 }
 
 void UIContentImpl::SetIsFocusActive(bool isFocusActive)
@@ -3730,7 +3746,7 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->SetIsFocusActive(isFocusActive);
         },
-        TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");
 }
 
 void UIContentImpl::UpdateResource()
@@ -3739,8 +3755,8 @@ void UIContentImpl::UpdateResource()
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask([container]() { container->UpdateResource(); }, TaskExecutor::TaskType::UI,
-        "ArkUIUpdateResource", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    taskExecutor->PostTask([container]() { container->UpdateResource(); },
+        TaskExecutor::TaskType::UI, "ArkUIUpdateResource");
 }
 
 int32_t UIContentImpl::CreateModalUIExtension(
@@ -4465,29 +4481,6 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
     context->SetForceSplitEnable(isForceSplit, homePage);
 }
 
-void UIContentImpl::UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
-{
-    CHECK_NULL_VOID(config);
-    auto container = Platform::DialogContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weakContainer = WeakPtr<Platform::DialogContainer>(container), config, instanceId = instanceId_,
-            bundleName = bundleName_, moduleName = moduleName_]() {
-            auto container = weakContainer.Upgrade();
-            CHECK_NULL_VOID(container);
-            Platform::ParsedConfig parsedConfig;
-            parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            container->UpdateConfiguration(parsedConfig);
-            TAG_LOGI(AceLogTag::ACE_DIALOG,
-                "[%{public}d][%{public}s][%{public}s] UIContentImpl: UpdateDialogContainerConfig called End, "
-                "name:%{public}s",
-                instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
-}
-
 void UIContentImpl::ProcessDestructCallbacks()
 {
     for (auto& [_, callback] : destructCallbacks_) {
@@ -4592,9 +4585,14 @@ void UIContentImpl::UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTrans
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
+        [id = instanceId_, aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
             transform.posY, transform.scaleX, transform.scaleY)]() {
             aceContainer->SetSingleHandTransform(singleHandTransform);
+            auto context = NG::PipelineContext::GetContextByContainerId(id);
+            CHECK_NULL_VOID(context);
+            auto uiExtManager = context->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtManager);
+            uiExtManager->TransferAccessibilityRectInfo();
         }, TaskExecutor::TaskType::UI, "ArkUISetSingleHandTransform");
 }
 
@@ -4642,8 +4640,7 @@ std::shared_ptr<Rosen::RSNode> UIContentImpl::GetRSNodeByStringID(const std::str
             CHECK_NULL_VOID(renderContext);
             rsNode = renderContext->GetRSNode();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID");
     if (!rsNode) {
         LOGE("Cannot find RSNode by stringId: %{public}s", stringId.c_str());
     }
@@ -4663,8 +4660,7 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
             CHECK_NULL_VOID(frameNode);
             frameNode->SetTopWindowBoundary(true);
         },
-        TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 
 void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
@@ -4740,5 +4736,21 @@ bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uin
                 data, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
         }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprty");
     return true;
+}
+
+void UIContentImpl::EnableContainerModalCustomGesture(bool enable)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, enable]() {
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            NG::ContainerModalPattern::EnableContainerModalCustomGesture(pipelineContext, enable);
+        },
+        TaskExecutor::TaskType::UI, "EnableContainerModalCustomGesture");
 }
 } // namespace OHOS::Ace

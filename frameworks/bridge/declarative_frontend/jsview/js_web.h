@@ -160,7 +160,6 @@ public:
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);
     static void TextAutosizing(const JSCallbackInfo& args);
     static void EnableNativeVideoPlayer(const JSCallbackInfo& args);
-    static void EnableSmoothDragResize(bool isSmoothDragResizeEnabled);
     static void OnRenderProcessNotResponding(const JSCallbackInfo& args);
     static void OnRenderProcessResponding(const JSCallbackInfo& args);
     static void SelectionMenuOptions(const JSCallbackInfo& args);
@@ -172,6 +171,7 @@ public:
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void EnableHapticFeedback(const JSCallbackInfo& args);
     static void EnableWebAVSession(const JSCallbackInfo& args);
+    static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

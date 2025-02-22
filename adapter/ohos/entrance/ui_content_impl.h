@@ -365,8 +365,6 @@ public:
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
 
-    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
-
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
         destructCallbacks_.emplace(key, callback);
@@ -401,6 +399,7 @@ public:
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+    void EnableContainerModalCustomGesture(bool enable) override;
 
 private:
     UIContentErrorCode InitializeInner(

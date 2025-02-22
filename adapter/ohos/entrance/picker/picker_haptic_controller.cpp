@@ -18,6 +18,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+using std::chrono_literals::operator""s;
+using std::chrono_literals::operator""ms;
 const std::string AUDIO_TEST_URI = "/system/etc/arkui/timepicker.ogg";
 const std::string EFFECT_ID_NAME = "haptic.clock.timer";
 constexpr size_t SPEED_THRESHOLD_156_MM_PER_SEC = 156;

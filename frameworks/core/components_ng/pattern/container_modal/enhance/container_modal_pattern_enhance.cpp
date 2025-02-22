@@ -245,11 +245,8 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         EventHubOnModifyDone(customTitleRow);
         EventHubOnModifyDone(gestureRow);
         EventHubOnModifyDone(floatingTitleRow);
-        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
-    } else {
-        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
-    
+
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
@@ -548,8 +545,8 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNo
     CHECK_NULL_RETURN(menuList, nullptr);
     auto subWindowManger = SubwindowManager::GetInstance();
     CHECK_NULL_RETURN(subWindowManger, nullptr);
-    if ((!subWindowManger->GetSubwindow(Container::CurrentId()) ||
-            !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
+    auto menuSubwindow = subWindowManger->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    if ((!menuSubwindow || !menuSubwindow->GetShown())) {
         ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
         MenuParam menuParam {};
         menuParam.type = MenuType::CONTEXT_MENU;
@@ -668,6 +665,20 @@ void ContainerModalPatternEnhance::EnableTapGestureOnNode(
     }
 }
 
+void ContainerModalPatternEnhance::HandleGestureRowHitTestMode(RefPtr<FrameNode>& gestureRow)
+{
+    if (!gestureRow) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "gestureRow is not exist when HandleHitTestMode");
+        return;
+    }
+
+    if (enableContainerModalGesture_) {
+        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    } else {
+        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    }
+}
+
 void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "set event on container modal is %{public}d", isEnable);
@@ -677,11 +688,7 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
     auto floatingTitleRow = GetFloatingTitleRow();
     auto customTitleRow = GetCustomTitleRow();
     auto gestureRow = GetGestureRow();
-    if (enableContainerModalGesture_) {
-        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
-    } else {
-        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
-    }
+    HandleGestureRowHitTestMode(gestureRow);
     EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
     EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
     EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");

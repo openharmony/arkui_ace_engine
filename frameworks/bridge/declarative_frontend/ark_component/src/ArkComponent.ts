@@ -3215,6 +3215,20 @@ class AccessibilityScrollTriggerableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class AccessibilityFocusDrawLevelModifier extends ModifierWithKey<FocusDrawLevel> {
+  constructor(value: FocusDrawLevel) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityFocusDrawLevel');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityFocusDrawLevel(node);
+    } else {
+      getUINativeModule().common.setAccessibilityFocusDrawLevel(node, this.value);
+    }
+  }
+}
+
 class HoverEffectModifier extends ModifierWithKey<HoverEffect> {
   constructor(value: HoverEffect) {
     super(value);

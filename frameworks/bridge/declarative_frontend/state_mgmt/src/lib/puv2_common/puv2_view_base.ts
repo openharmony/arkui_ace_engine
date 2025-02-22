@@ -141,7 +141,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return NativeViewPartialUpdate.create(view);
   }
   
-  static createRecycle(componentCall: any, isRecycling: boolean, reuseId: string, callback: () => void): void {
+  static createRecycle(componentCall: object, isRecycling: boolean, reuseId: string, callback: () => void): void {
     return NativeViewPartialUpdate.createRecycle(componentCall, isRecycling, reuseId, callback);
   }
  
@@ -708,7 +708,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public createOrGetNode(elmtId: number, builder: () => ArkComponent): object {
     const entry = this.updateFuncByElmtId.get(elmtId);
     if (entry === undefined) {
-      throw new Error(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
+      stateMgmtConsole.warn(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
+      return builder();
     }
     let nodeInfo = entry.getNode();
     if (nodeInfo === undefined) {

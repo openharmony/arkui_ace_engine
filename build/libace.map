@@ -95,6 +95,8 @@
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;
       OHOS::Ace::NG::ViewAdvancedRegister::*;
+      "OHOS::Ace::AnimatableColor::AnimatableColor()";
+      "OHOS::Ace::AnimatableColor::~AnimatableColor()";
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -276,6 +278,8 @@
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
+      OHOS::Ace::UnParseFontFeatureSetting*;
+      OHOS::Ace::NG::ConvertToCalcPaddingProperty*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
       OHOS::Ace::AceScoringLog::*;
@@ -388,6 +392,7 @@
       OHOS::Ace::JsonUtil::*;
       OHOS::Ace::Recorder::*;
       OHOS::Ace::Referenced::*;
+      OHOS::Ace::SystemBarStyle::*;
       OHOS::Ace::Recorder::IsCacheAvaliable*;
       OHOS::Ace::Recorder::EventRecorder::*;
       OHOS::Ace::Recorder::EventParamsBuilder::*;
@@ -445,6 +450,7 @@
       OHOS::Ace::Kit::Text::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;
+      OHOS::Ace::NG::NavigationGroupNode::*;
       OHOS::Ace::NavDestinationModel::*;
       OHOS::Ace::NavDestinationModelNG::*;
 
@@ -498,7 +504,9 @@
       vtable?for?OHOS::Ace::NG::ScrollableModelNG;
       vtable?for?OHOS::Ace::NG::NavigationStack;
       vtable?for?OHOS::Ace::NG::CustomNode;
+      vtable?for?OHOS::Ace::NG::NavigationGroupNode;
       vtable?for?OHOS::Ace::NavDestinationModel;
+      vtable?for?OHOS::Ace::SystemBarStyle;
       vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;

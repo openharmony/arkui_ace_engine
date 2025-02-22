@@ -391,6 +391,7 @@ void FormPattern::SnapshotSurfaceNode()
     CHECK_NULL_VOID(externalContext);
     auto rsNode = externalContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
+    externalContext->AddRsNodeForCapture();
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<FormSnapshotCallback>(WeakClaim(this)));
 }

@@ -1077,9 +1077,6 @@ ArkThemeWhiteList.whiteList = [
     'AlphabetIndexer',
     'Badge',
     'Button',
-    'Checkbox',
-    'CheckboxGroup',
-    'Counter',
     'DataPanel',
     'LoadingProgress',
     'Menu',
@@ -1091,5 +1088,4 @@ ArkThemeWhiteList.whiteList = [
     'Scroll',
     'Swiper',
     'Text',
-    'Toggle',
 ];

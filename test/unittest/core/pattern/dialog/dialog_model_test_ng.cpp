@@ -1398,6 +1398,250 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogModelTestNg035
+ * @tc.desc: Test CreateDialogNode with dialogTransition effect and maskTransition effect.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DialogModelTestNg, DialogModelTestNg035, TestSize.Level1)
+ {
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    AnimationOption animationOption;
+    animationOption.SetDelay(10);
+
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    auto dialogTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+    auto maskTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+ 
+    DialogProperties dialogProps {
+        .type = DialogType::ALERT_DIALOG,
+        .title = TITLE,
+        .content = MESSAGE,
+        .openAnimation = animationOption,
+        .dialogTransitionEffect = dialogTransitionEffect,
+        .maskTransitionEffect = maskTransitionEffect,
+    };
+ 
+    ASSERT_NE(dialogProps.dialogTransitionEffect, nullptr);
+    ASSERT_NE(dialogProps.maskTransitionEffect, nullptr);
+    /**
+     * @tc.steps: step2. Create DialogNode.
+     * @tc.expected: DialogNode created successfully
+     */
+    rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.dialogTransitionEffect);
+    ASSERT_NE(rootNode, nullptr);
+
+    rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.maskTransitionEffect);
+    ASSERT_NE(rootNode, nullptr);
+}
+ 
+ /**
+  * @tc.name: DialogModelTestNg036
+  * @tc.desc: Test CreateDialogNode with no dialogTransition effect and maskTransition effect.
+  * @tc.type: FUNC
+  */
+ HWTEST_F(DialogModelTestNg, DialogModelTestNg036, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    AnimationOption animationOption;
+    animationOption.SetDelay(10);
+
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    DialogProperties dialogProps {
+        .type = DialogType::ALERT_DIALOG,
+        .title = TITLE,
+        .content = MESSAGE,
+        .openAnimation = animationOption,
+        .dialogTransitionEffect = nullptr,
+        .maskTransitionEffect = nullptr,
+    };
+ 
+    /**
+     * @tc.steps: step2. Create DialogNode.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto customDialog = DialogView::CreateDialogNode(dialogProps, nullptr);
+    ASSERT_NE(customDialog, nullptr);
+
+    auto customDialogPattern = customDialog->GetPattern<DialogPattern>();
+    ASSERT_NE(customDialogPattern, nullptr);
+    customDialogPattern->SetDialogProperties(dialogProps);
+
+    /**
+     * @tc.steps: step3. Call maskTransitionEffect from dialog.
+     * @tc.expected: transitionEffect is not nullptr.
+     */
+    auto dialogTransitionEffect = customDialogPattern->GetDialogProperties().dialogTransitionEffect;
+    ASSERT_EQ(dialogTransitionEffect, nullptr);
+    auto maskTransitionEffect = customDialogPattern->GetDialogProperties().maskTransitionEffect;
+    ASSERT_EQ(maskTransitionEffect, nullptr);
+}
+
+/**
+ * @tc.name: DialogModelTestNg037
+ * @tc.desc: Test ActionSheetModelNG's ShowActionSheet.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    ActionSheetModelNG actionSheetModelNg;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+    };
+ 
+    /**
+     * @tc.steps: step2. Call ShowActionSheet.
+     * @tc.expected: Check ShowActionSheet.
+     */
+    actionSheetModelNg.ShowActionSheet(props);
+    auto container = Container::Current();
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context->GetOverlayManager();
+    auto dialog = overlayManager->ShowDialog(props, nullptr, false);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+ 
+    dialogPattern->CallDialogWillAppearCallback();
+    dialogPattern->CallDialogDidAppearCallback();
+    dialogPattern->CallDialogWillDisappearCallback();
+    dialogPattern->CallDialogDidDisappearCallback();
+ 
+    EXPECT_EQ(onWillAppearFlag, true);
+    EXPECT_EQ(onDidAppearFlag, true);
+    EXPECT_EQ(onWillDisappearFlag, true);
+    EXPECT_EQ(onDidDisappearFlag, true);
+}
+  
+/**
+ * @tc.name: DialogModelTestNg038
+ * @tc.desc: Test AlertDialogModelNG's SetShowDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    AlertDialogModelNG alertDialogModelNg;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+    };
+  
+    /**
+     * @tc.steps: step2. Call SetShowDialog.
+     * @tc.expected: Check SetShowDialog.
+     */
+    alertDialogModelNg.SetShowDialog(props);
+    auto container = Container::Current();
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context->GetOverlayManager();
+    auto dialog = overlayManager->ShowDialog(props, nullptr, false);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+ 
+    dialogPattern->CallDialogWillAppearCallback();
+    dialogPattern->CallDialogDidAppearCallback();
+    dialogPattern->CallDialogWillDisappearCallback();
+    dialogPattern->CallDialogDidDisappearCallback();
+ 
+    EXPECT_EQ(onWillAppearFlag, true);
+    EXPECT_EQ(onDidAppearFlag, true);
+    EXPECT_EQ(onWillDisappearFlag, true);
+    EXPECT_EQ(onDidDisappearFlag, true);
+}
+  
+/**
+ * @tc.name: DialogModelTestNg039
+ * @tc.desc: Test CustomDialogControllerModelNG's SetOpenDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    CustomDialogControllerModelNG controllerModel;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+    };
+    WeakPtr<AceType> controller;
+    std::vector<WeakPtr<AceType>> dialogs;
+    bool pending;
+    bool isShown;
+    std::function<void()> cancelTask;
+    std::function<void()> buildFunc;
+    RefPtr<AceType> dialogComponent;
+    RefPtr<AceType> customDialog;
+    std::list<DialogOperation> dialogOperation;
+   
+    /**
+     * @tc.steps: step2. Call SetOpenDialog.
+     * @tc.expected: Check SetOpenDialog.
+     */
+    controllerModel.SetOpenDialog(props, controller, dialogs, pending,
+        isShown, std::move(cancelTask), std::move(buildFunc), dialogComponent, customDialog, dialogOperation);
+    auto container = Container::Current();
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context->GetOverlayManager();
+    auto dialog = overlayManager->ShowDialog(props, nullptr, false);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillAppearCallback();
+    dialogPattern->CallDialogDidAppearCallback();
+    dialogPattern->CallDialogWillDisappearCallback();
+    dialogPattern->CallDialogDidDisappearCallback();
+
+    EXPECT_EQ(onWillAppearFlag, true);
+    EXPECT_EQ(onDidAppearFlag, true);
+    EXPECT_EQ(onWillDisappearFlag, true);
+    EXPECT_EQ(onDidDisappearFlag, true);
+}
+
+/**
  * @tc.name: ComputeInnerLayoutSizeParam001
  * @tc.desc: Test ComputeInnerLayoutSizeParam function
  * @tc.type: FUNC

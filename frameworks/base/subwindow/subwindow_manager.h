@@ -31,15 +31,21 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace {
+constexpr int32_t INSTANCE_ID_BIT = 24;
+constexpr int32_t DISPLAY_ID_BIT = 16;
+constexpr int32_t INSTANCE_ID_MIN = -2;
 
 struct SubwindowKey {
     int32_t instanceId;
     uint64_t displayId;
     FoldStatus foldStatus;
+    SubwindowType windowType = SubwindowType::TYPE_DIALOG;
+    int32_t subwindowType;
 
     bool operator==(const SubwindowKey& other) const
     {
-        return other.instanceId == instanceId && other.displayId == displayId && other.foldStatus == foldStatus;
+        return other.instanceId == instanceId && other.displayId == displayId && other.foldStatus == foldStatus &&
+            other.windowType == windowType;
     }
 
     std::string ToString() const
@@ -47,6 +53,7 @@ struct SubwindowKey {
         auto json = JsonUtil::Create(true);
         json->Put("instanceId", instanceId);
         json->Put("displayId", (double)displayId);
+        json->Put("windowType", subwindowType);
         return json->ToString();
     }
 };
@@ -54,7 +61,9 @@ struct SubwindowKey {
 struct SubwindowKeyHashFunc {
     std::size_t operator()(const SubwindowKey& key) const
     {
-        return ((std::hash<uint64_t>()(key.instanceId) ^ (std::hash<uint64_t>()(key.displayId) << 1)) >> 1);
+        return (static_cast<std::size_t>(key.windowType) << INSTANCE_ID_BIT) |
+        (static_cast<std::size_t>(key.displayId) << DISPLAY_ID_BIT) |
+        (static_cast<std::size_t>(key.instanceId + INSTANCE_ID_MIN));
     }
 };
 
@@ -76,7 +85,7 @@ public:
     int32_t GetSubContainerId(int32_t parentContainerId);
 
     void AddSubwindow(int32_t instanceId, RefPtr<Subwindow>);
-    void RemoveSubwindow(int32_t instanceId);
+    void RemoveSubwindow(int32_t instanceId, SubwindowType windowType);
 
     // Get the subwindow of parent instance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
@@ -128,14 +137,14 @@ public:
     ACE_FORCE_EXPORT std::optional<double> GetBottomOrder();
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
-    void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);
+    void SetHotAreas(const std::vector<Rect>& rects, SubwindowType type, int32_t nodeId = -1, int32_t instanceId = -1);
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
     int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
-    void DeleteHotAreas(int32_t subwindowId, int32_t nodeId);
+    void DeleteHotAreas(int32_t subwindowId, int32_t nodeId, SubwindowType type);
 
     void ClearToastInSubwindow();
     ACE_FORCE_EXPORT void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
@@ -154,15 +163,13 @@ public:
     ACE_FORCE_EXPORT void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
-    void RequestFocusSubwindow(int32_t instanceId);
     ACE_FORCE_EXPORT void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
 
-    bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
-    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    void OnWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason);
     void HideSystemTopMostWindow();
     const RefPtr<Subwindow> GetSystemToastWindow(int32_t instanceId);
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
@@ -175,6 +182,20 @@ public:
     void SetRect(const NG::RectF& rect, int32_t instanceId);
     void FlushSubWindowUITasks(int32_t instanceId);
 
+    void OnUIExtensionWindowSizeChange(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    void OnHostWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason);
+    void HideSheetSubWindow(int32_t containerId);
+    void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode);
+
     int32_t ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode);
     void HideSelectOverlay(const int32_t instanceId);
     const RefPtr<Subwindow> GetSelectOverlaySubwindow(int32_t instanceId);
@@ -185,6 +206,9 @@ public:
     void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
     void OnDestroyContainer(int32_t subInstanceId);
+    const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType);
+    void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow);
+    const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
@@ -193,7 +217,8 @@ private:
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
         uint32_t mainWindowId);
     const std::vector<RefPtr<NG::OverlayManager>> GetAllSubOverlayManager();
-    SubwindowKey GetCurrentSubwindowKey(int32_t instanceId);
+    SubwindowKey GetCurrentSubwindowKey(int32_t instanceId, SubwindowType windowType);
+    void MarkSetSubwindowRect(const NG::RectF& rect, int32_t instanceId, SubwindowType type);
     void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
@@ -212,18 +237,13 @@ private:
     std::mutex instanceSubwindowMutex_;
     SubwindowMap instanceSubwindowMap_;
 
-    std::mutex toastMutex_;
-    SubwindowMixMap toastWindowMap_;
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
-    std::mutex systemToastMutex_;
-    SubwindowMixMap systemToastWindowMap_;
     Rect uiExtensionWindowRect_;
-    std::mutex selectOverlayMutex_;
-    SubwindowMixMap selectOverlayWindowMap_;
+    bool isSuperFoldDisplayDevice_ = false;
 };
 
 } // namespace OHOS::Ace

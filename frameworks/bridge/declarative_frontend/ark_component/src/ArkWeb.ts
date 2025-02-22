@@ -14,30 +14,160 @@
  */
 
 /// <reference path='./import.ts' />
+class WebJavaScriptAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webJavascriptAccess');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetJavaScriptAccess(node);
+    } else {
+      getUINativeModule().web.setJavaScriptAccess(node, this.value);
+    }
+  }
+}
+
+class WebFileAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webFileAccessModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetFileAccess(node);
+    } else {
+      getUINativeModule().web.setFileAccess(node, this.value);
+    }
+  }
+}
+
+class WebDomStorageAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webDomStorageAccessModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetDomStorageAccess(node);
+    } else {
+      getUINativeModule().web.setDomStorageAccess(node, this.value);
+    }
+  }
+}
+
+class WebMixedModeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webMixedMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetMixedMode(node);
+    } else {
+      getUINativeModule().web.setMixedMode(node, this.value);
+    }
+  }
+}
+
+class WebZoomAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webZoomAccessModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetZoomAccess(node);
+    } else {
+      getUINativeModule().web.setZoomAccess(node, this.value);
+    }
+  }
+}
+
+class WebCacheModeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webCacheModeModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetCacheMode(node);
+    } else {
+      getUINativeModule().web.setCacheMode(node, this.value);
+    }
+  }
+}
+
+class WebDarkModeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webDarkModeModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetDarkMode(node);
+    } else {
+      getUINativeModule().web.setDarkMode(node, this.value);
+    }
+  }
+}
+
+class WebMultiWindowAccessModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webMultiWindowAccessModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetMultiWindowAccess(node);
+    } else {
+      getUINativeModule().web.setMultiWindowAccess(node, this.value);
+    }
+  }
+}
+class WebAllowWindowOpenMethodModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webAllowWindowOpenMethodModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetAllowWindowOpenMethod(node);
+    } else {
+      getUINativeModule().web.setAllowWindowOpenMethod(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   javaScriptAccess(javaScriptAccess: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebJavaScriptAccessModifier.identity, WebJavaScriptAccessModifier, javaScriptAccess);
+    return this;
   }
   fileAccess(fileAccess: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebFileAccessModifier.identity, WebFileAccessModifier, fileAccess);
+    return this;
   }
   onlineImageAccess(onlineImageAccess: boolean): this {
     throw new Error('Method not implemented.');
   }
   domStorageAccess(domStorageAccess: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebDomStorageAccessModifier.identity, WebDomStorageAccessModifier, domStorageAccess);
+    return this;
   }
   imageAccess(imageAccess: boolean): this {
     throw new Error('Method not implemented.');
   }
   mixedMode(mixedMode: MixedMode): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebMixedModeModifier.identity, WebDarkModeModifier, mixedMode);
+    return this;
   }
   zoomAccess(zoomAccess: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebZoomAccessModifier.identity, WebZoomAccessModifier, zoomAccess);
+    return this;
   }
   geolocationAccess(geolocationAccess: boolean): this {
     throw new Error('Method not implemented.');
@@ -49,10 +179,12 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   cacheMode(cacheMode: CacheMode): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebCacheModeModifier.identity, WebCacheModeModifier, cacheMode);
+    return this;
   }
   darkMode(mode: WebDarkMode): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebDarkModeModifier.identity, WebDarkModeModifier, mode);
+    return this;
   }
   forceDarkAccess(access: boolean): this {
     throw new Error('Method not implemented.');
@@ -212,7 +344,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   multiWindowAccess(multiWindow: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebMultiWindowAccessModifier.identity, WebMultiWindowAccessModifier, multiWindow);
+    return this;
   }
   onInterceptKeyEvent(callback: (event: KeyEvent) => boolean): this {
     throw new Error('Method not implemented.');
@@ -272,7 +405,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     throw new Error('Method not implemented.');
   }
   allowWindowOpenMethod(flag: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebAllowWindowOpenMethodModifier.identity, WebAllowWindowOpenMethodModifier, flag);
+    return this;
   }
   onAudioStateChanged(callback: (event: { playing: boolean; }) => void): this {
     throw new Error('Method not implemented.');

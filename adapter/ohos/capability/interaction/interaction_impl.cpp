@@ -173,6 +173,16 @@ int32_t InteractionImpl::SetDraggableState(bool state)
     return InteractionManager::GetInstance()->SetDraggableState(state);
 }
 
+int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
+{
+    return InteractionManager::GetInstance()->GetAppDragSwitchState(state);
+}
+
+void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime)
+{
+    InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime);
+}
+
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
 {
     switch (style) {

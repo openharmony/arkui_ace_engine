@@ -771,6 +771,16 @@ public:
         lineBreakStrategy_ = breakStrategy;
     }
 
+    SymbolType GetSymbolType() const
+    {
+        return symbolType_;
+    }
+
+    void SetSymbolType(const SymbolType symbolType)
+    {
+        symbolType_ = symbolType;
+    }
+
     const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const
     {
         return symbolEffectOptions_;
@@ -832,6 +842,7 @@ private:
     bool heightOnly_ = false;
     std::u16string ellipsis_;
     std::string locale_;
+    SymbolType symbolType_ = SymbolType::SYSTEM;
 };
 
 namespace StringUtils {

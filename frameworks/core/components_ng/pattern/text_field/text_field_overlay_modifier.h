@@ -91,6 +91,9 @@ public:
         caretLanding_ = caretLanding;
     }
 
+    void SetHoverColorAndRects(const std::vector<RoundRect>& hoverRects, uint32_t hoverColor);
+    void ClearHoverColorAndRects();
+
 private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
@@ -137,6 +140,8 @@ private:
     RefPtr<AnimatablePropertyOffsetF> floatingCursorOffset_;
     RefPtr<PropertyBool> floatingCursorVisible_;
     RefPtr<PropertyBool> showOriginCursor_;
+    std::vector<RoundRect> hoverRects_;
+    RefPtr<PropertyInt> hoverColor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };

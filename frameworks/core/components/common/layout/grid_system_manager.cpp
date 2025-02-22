@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
+
+#include "base/json/json_util.h"
+#include "core/components/common/layout/grid_column_info.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {

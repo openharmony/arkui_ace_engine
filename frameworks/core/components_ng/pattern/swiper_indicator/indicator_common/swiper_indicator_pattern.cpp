@@ -28,12 +28,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
-constexpr Dimension INDICATOR_ITEM_SPACE_POINT = 8.0_vp;
 constexpr int32_t MULTIPLIER = 2;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 constexpr float HALF_FLOAT = 0.5f;
@@ -225,7 +223,9 @@ void SwiperIndicatorPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto allPointDiameterSum = isCustomSize ? itemWidth * static_cast<float>(maxDisplayCount - 1) + selectedItemWidth :
         itemWidth * static_cast<float>(maxDisplayCount + 1);
     auto indicatorHeightPadding = swiperTheme->GetIndicatorBgHeight().ConvertToPx();
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE_POINT.ConvertToPx()) * (maxDisplayCount - 1);
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(swiperTheme->GetIndicatorDotItemSpace());
+    auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (maxDisplayCount - 1);
     auto paddingSide = swiperTheme->GetIndicatorPaddingDot().ConvertToPx();
     auto focusPadding = swiperTheme->GetIndicatorFocusedPadding().ConvertToPx();
     auto width = allPointDiameterSum + allPointSpaceSum + MULTIPLIER * (paddingSide + focusPadding);
@@ -393,8 +393,10 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     auto isRtl = IsHorizontalAndRightToLeft();
     auto currentIndex = GetTouchCurrentIndex();
     auto margin = HandleTouchClickMargin();
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
     auto lengthBeforeCurrentIndex = margin + theme->GetIndicatorPaddingDot().ConvertToPx() +
-                                    (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
+                                    (indicatorDotItemSpace.ConvertToPx() + itemWidth) * currentIndex;
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = GetDirection();
     auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
@@ -605,7 +607,9 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float itemWidth = itemWidthValue * indicatorScale;
     float itemHeight = itemHeightValue * indicatorScale;
     float selectedItemWidth = selectedItemWidthValue * indicatorScale;
-    float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
+    float space = static_cast<float>(indicatorDotItemSpace.ConvertToPx());
     int32_t currentIndex = GetCurrentShownIndex();
     auto [itemCount, step] = CalculateStepAndItemCount();
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
@@ -737,6 +741,7 @@ void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 {
     dragStartPoint_ =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    UpadateStartAngle();
 }
 
 void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
@@ -796,7 +801,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         touchOffset = startAngle - endAngle;
         touchOffset = GetDirection() == Axis::HORIZONTAL ? touchOffset : -touchOffset;
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
@@ -849,7 +854,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         touchOffset = startAngle - endAngle;
         touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? touchOffset : -touchOffset;
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
@@ -971,7 +976,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         turnPageRateOffset = startAngle - endAngle;
         if (LessNotEqual(std::abs(turnPageRateOffset), GetIndicatorDragAngleThreshold(false))) {
             return;
@@ -1005,6 +1010,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - step);
         }
         dragStartPoint_ = dragPoint;
+        UpadateStartAngle();
     }
 }
 
@@ -1027,7 +1033,9 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
 
     int32_t itemCount = DisplayIndicatorTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
+    auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx() * (itemCount - 1));
     auto indicatorPadding = static_cast<float>(theme->GetIndicatorPaddingDot().ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto geometryNode = host->GetGeometryNode();

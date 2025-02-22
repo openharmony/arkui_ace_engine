@@ -573,7 +573,7 @@ void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::Frame
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    auto sideBarTheme = context->GetTheme<SideBarTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(sideBarTheme);
 
     auto buttonNode = CreateControlButton(sideBarTheme);
@@ -898,7 +898,7 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    auto sideBarTheme = context->GetTheme<SideBarTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(sideBarTheme);
     Color controlButtonColor = sideBarTheme->GetControlImageColor();
 
@@ -1331,7 +1331,7 @@ void SideBarContainerPattern::ShowDialogWithNode()
     CHECK_NULL_VOID(accessibilityProperty);
     auto text = accessibilityProperty->GetAccessibilityText();
 
-    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(text, imageInfo_);
+    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(text, imageInfo_, host->GetThemeScopeId());
 
     isDialogShow_ = true;
 }
@@ -1416,5 +1416,14 @@ void SideBarContainerPattern::SetMouseStyle(MouseFormat format)
     pipeline->SetMouseStyleHoldNode(frameNodeId);
     pipeline->ChangeMouseStyle(frameNodeId, format, windowId);
     pipeline->FreeMouseStyleHoldNode(frameNodeId);
+}
+
+bool SideBarContainerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto imgFrameNode = GetControlImageNode();
+    CHECK_NULL_RETURN(imgFrameNode, false);
+    UpdateControlButtonIcon();
+    imgFrameNode->MarkDirtyNode();
+    return false;
 }
 } // namespace OHOS::Ace::NG

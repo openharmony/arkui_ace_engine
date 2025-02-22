@@ -17,10 +17,8 @@
 
 #define private public
 
-#include "core/animation/animator.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
@@ -59,7 +57,6 @@ const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example
 
 const std::string STATUS_IDLE_STR = "AnimationStatus.Initial";
 const std::string FILLMODE_FORWARDS_STR = "FillMode.Forwards";
-const constexpr float NORMALIZED_DURATION_MAX { 1.0f };
 } // namespace
 
 class ImageAnimatorTestNg : public testing::Test {
@@ -399,7 +396,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_FALSE(startFlag);
+    EXPECT_TRUE(startFlag);
 
     /**
      * @tc.steps: step5. change IsReverse and use OnModifyDone to run Backward.
@@ -432,7 +429,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
      */
     auto pipeline = MockPipelineContext::GetCurrentContext();
     pipeline->SetIsFormRender(true);
-    imageAnimatorPattern->status_ = Animator::Status::RUNNING;
+    imageAnimatorPattern->status_ = ControlledAnimator::ControlStatus::RUNNING;
     imageAnimatorPattern->isFormAnimationEnd_ = true;
     imageAnimatorPattern->OnModifyDone();
     EXPECT_EQ(imageAnimatorPattern->formAnimationRemainder_, 1000);
@@ -494,7 +491,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest005, TestSize.Level1)
     EXPECT_TRUE(imageAnimatorPattern != nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_FALSE(pauseFlag);
+    EXPECT_TRUE(pauseFlag);
 }
 
 /**
@@ -555,7 +552,8 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest006, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imageAnimatorPattern->controlledAnimator_->GetControlStatus(),
+        static_cast<ControlledAnimator::ControlStatus>(STATE_START));
 
     /**
      * @tc.steps: step5. change imageAnimatorView's status and use OnModifyDone to run cancelEvent.
@@ -566,7 +564,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest006, TestSize.Level1)
     ImageAnimatorModelNG.SetState(STATE_DEFAULT);
     ImageAnimatorModelNG.SetFixedSize(FIXEDSIZE_CHANGED);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_FALSE(cancelFlag);
+    EXPECT_TRUE(cancelFlag);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     EXPECT_NE(imageFrameNode, nullptr);
     EXPECT_EQ(imageFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -636,7 +634,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest007, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_FALSE(startFlag);
+    EXPECT_TRUE(startFlag);
 
     /**
      * @tc.steps: step5. change imageAnimatorView's status and use OnModifyDone to run stoppedlEvent.
@@ -748,16 +746,6 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest009, TestSize.Level1)
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
     EXPECT_NE(imageAnimatorPattern, nullptr);
-
-    /**
-     * @tc.steps: step4. use OnModifyDone when image's duration is zero.
-     * @tc.expected: step4. PictureAnimation's duration is correct.
-     */
-
-    imageAnimatorPattern->AttachToFrameNode(frameNode);
-    auto pictureAnimation = imageAnimatorPattern->CreatePictureAnimation(imageAnimatorPattern->images_.size());
-    EXPECT_EQ(pictureAnimation->GetDuration(),
-        NORMALIZED_DURATION_MAX / static_cast<float>(imageAnimatorPattern->images_.size()));
 }
 
 /**
@@ -809,8 +797,8 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest010, TestSize.Level1)
     EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
-    EXPECT_EQ(imageAnimatorPattern->animator_->GetStatus(), static_cast<Animator::Status>(STATE_START));
-    EXPECT_TRUE(!imageAnimatorPattern->animator_->interpolators_.empty());
+    EXPECT_EQ(imageAnimatorPattern->controlledAnimator_->GetControlStatus(),
+        static_cast<ControlledAnimator::ControlStatus>(STATE_START));
     /**
      * @tc.steps: step4. change fixedSize and use OnModifyDone to run listerner.
      * @tc.expected: step4. check whether ImageSourceInfoValue, MarginProperty, CalcLayoutConstraint, MeasureType is
@@ -988,7 +976,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest012, TestSize.Level1)
     CreateImageAnimator(0);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    auto animator = pattern_->animator_;
+    auto animator = pattern_->controlledAnimator_;
     ASSERT_NE(animator, nullptr);
     /**
      * @tc.steps: step2. set is form render and set duration
@@ -1004,13 +992,13 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest012, TestSize.Level1)
      */
     pipeline->SetIsFormRender(true);
     pattern_->SetDuration(900);
-    EXPECT_EQ(animator->GetDuration(), DURATION_DEFAULT);
+    EXPECT_EQ(animator->GetDuration(), 900);
     /**
      * @tc.steps: step4. set is form render and set duration
      * @tc.expected: check duration is correct assign
      */
     pipeline->SetIsFormRender(true);
-    pattern_->animator_->status_ = Animator::Status::IDLE;
+    pattern_->controlledAnimator_->controlStatus_ = ControlledAnimator::ControlStatus::IDLE;
     pattern_->SetDuration(0);
     EXPECT_EQ(animator->GetDuration(), 0);
 }
@@ -1029,7 +1017,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest013, TestSize.Level1)
     CreateImageAnimator(0);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    auto animator = pattern_->animator_;
+    auto animator = pattern_->controlledAnimator_;
     ASSERT_NE(animator, nullptr);
     /**
      * @tc.steps: step2. set is form render and iteration
@@ -1054,7 +1042,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest014, TestSize.Level1)
     CreateImageAnimator(0);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    auto animator = pattern_->animator_;
+    auto animator = pattern_->controlledAnimator_;
     ASSERT_NE(animator, nullptr);
     /**
      * @tc.steps: step2. set is form render and set duration
@@ -1088,7 +1076,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest015, TestSize.Level1)
     CreateImageAnimator(0);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    auto animator = pattern_->animator_;
+    auto animator = pattern_->controlledAnimator_;
     ASSERT_NE(animator, nullptr);
     /**
      * @tc.steps: step2. set is form render and reset remainder
@@ -1115,7 +1103,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest016, TestSize.Level1)
     CreateImageAnimator(0);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    auto animator = pattern_->animator_;
+    auto animator = pattern_->controlledAnimator_;
     ASSERT_NE(animator, nullptr);
     /**
      * @tc.steps: step2. set whether is form render
@@ -1229,7 +1217,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest020, TestSize.Level1)
      */
     CreateImageAnimator(0);
     auto pipeline = MockPipelineContext::GetCurrentContext();
-    auto animator = pattern_->animator_;
+    auto animator = pattern_->controlledAnimator_;
 
     /**
      * @tc.steps: step2. set is form render and set duration

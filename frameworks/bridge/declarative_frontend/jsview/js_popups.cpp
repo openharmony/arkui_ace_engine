@@ -14,6 +14,7 @@
  */
 
 #include "base/utils/utils.h"
+#include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 #include "base/log/ace_scoring_log.h"
@@ -1132,11 +1133,11 @@ void JSViewAbstract::ParseContentPopupCommonParam(
 {
     CHECK_EQUAL_VOID(popupObj->IsEmpty(), true);
     CHECK_NULL_VOID(popupParam);
-    if (popupParam->GetTargetId().empty() || std::stoi(popupParam->GetTargetId()) < 0) {
+    int32_t targetId = StringUtils::StringToInt(popupParam->GetTargetId(), -1);
+    if (targetId < 0) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
         return;
     }
-    int32_t targetId = std::stoi(popupParam->GetTargetId());
     auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
     if (!targetNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist.");
@@ -1601,6 +1602,26 @@ void JSViewAbstract::ParseSheetStyle(
         TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet height in unnormal condition");
     }
     sheetStyle.sheetHeight = sheetStruct;
+
+    ParseSheetSubWindowValue(paramObj, sheetStyle);
+}
+
+void JSViewAbstract::ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    // parse sheet showInSubWindow
+    sheetStyle.showInSubWindow = false;
+    if (sheetStyle.showInPage == NG::SheetLevel::EMBEDDED) {
+        return;
+    }
+    auto showInSubWindowValue = paramObj->GetProperty("showInSubWindow");
+    if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+                "emulator or a real device instead.");
+#else
+        sheetStyle.showInSubWindow = showInSubWindowValue->ToBoolean();
+#endif
+    }
 }
 
 void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)

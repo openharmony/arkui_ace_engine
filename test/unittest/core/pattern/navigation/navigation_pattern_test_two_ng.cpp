@@ -60,9 +60,9 @@ public:
     MockNavigationPattern() : NavigationPattern() {}
     ~MockNavigationPattern() = default;
 
-    void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode) override
+    void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode, bool skipCheck = false) override
     {
-        NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(hostNode);
+        NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(hostNode, skipCheck);
         callTime_++;
     }
 
@@ -126,6 +126,7 @@ void NavigationPatternTestTwoNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 /**
