@@ -4943,6 +4943,9 @@ bool RichEditorPattern::InitPreviewText(const std::u16string& previewTextValue, 
     if (range.start != -1 || range.end != -1) {
         return ReplaceText(previewTextValue, range);
     }
+    // interrupt touch selecting when initialize preview text
+    ResetTouchSelectState();
+    IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     auto& record = previewTextRecord_;
     record.needReplacePreviewText = true;
     record.previewTextHasStarted = true;
