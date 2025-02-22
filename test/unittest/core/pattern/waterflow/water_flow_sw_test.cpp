@@ -108,4 +108,5 @@ HWTEST_F(WaterFlowSWTest, Footer001, TestSize.Level1)
     EXPECT_EQ(info_->newStartIndex_, -2);
     EXPECT_EQ(frameNode_->GetChildrenUpdated(), 1);
 }
+a
 } // namespace OHOS::Ace::NG
