@@ -741,7 +741,7 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
     if (eventHub->GetOnContentSizeChange()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto weak = WeakClaim(eventHub.GetRawPtr());
+        auto weak = WeakClaim(Referenced::RawPtr(eventHub));
         pipeline->AddAfterLayoutTask([textRect, weak]() {
             auto eventHub = weak.Upgrade();
             CHECK_NULL_VOID(eventHub);
@@ -5095,7 +5095,7 @@ void TextFieldPattern::UltralimitShake()
     CHECK_NULL_VOID(pipelineContext);
     AnimationUtils::Animate(
         option,
-        [weak = WeakClaim(context.GetRawPtr())]() {
+        [weak = WeakClaim(Referenced::RawPtr(context))]() {
             auto context = weak.Upgrade();
             CHECK_NULL_VOID(context);
             context->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -8413,7 +8413,7 @@ void TextFieldPattern::AfterLayoutProcessCleanResponse(
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([weak = WeakClaim(cleanNodeResponseArea.GetRawPtr())]() {
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(Referenced::RawPtr(cleanNodeResponseArea))]() {
         auto cleanNodeResponseArea = weak.Upgrade();
         CHECK_NULL_VOID(cleanNodeResponseArea);
         cleanNodeResponseArea->UpdateCleanNode(cleanNodeResponseArea->IsShow());

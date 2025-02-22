@@ -57,7 +57,7 @@ constexpr float MAX_FONT_SCALE = 2.5f;
 SymbolEffectOptions SYMBOL_EFFECT_OPTIONS =
     SymbolEffectOptions(OHOS::Ace::SymbolEffectType::BOUNCE, OHOS::Ace::ScopeType::WHOLE, OHOS::Ace::CommonSubType::UP);
 std::vector<Color> SYMBOL_COLOR_LIST = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
-const std::string SYMBOL_FONT_FAMILY = "Symbol_Test_CustomSymbol";
+const char* SYMBOL_FONT_FAMILY = "Symbol_Test_CustomSymbol";
 struct TestProperty {
     std::optional<Dimension> fontSizeValue = std::nullopt;
     std::optional<Ace::FontWeight> fontWeightValue = std::nullopt;
@@ -563,7 +563,7 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest012, TestSize.Level1)
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    SymbolModelNG::SetCustomSymbolGlyphInitialize(frameNode.GetRawPtr(), CREATE_VALUE, SYMBOL_FONT_FAMILY.c_str());
+    SymbolModelNG::SetCustomSymbolGlyphInitialize(AceType::RawPtr(frameNode), CREATE_VALUE, SYMBOL_FONT_FAMILY);
 
     /**
      * @tc.steps: step2. get symbol node and layoutProperty

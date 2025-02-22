@@ -1189,7 +1189,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternCalAndUpdateSelectOverlay, TestSize.Level
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->OpenSelectOverlay();
     imagePattern->CalAndUpdateSelectOverlay();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
     auto info = imagePattern->selectOverlay_->GetSelectOverlayMangerInfo();
     info.onHandleMoveDone(RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH), true);
     info.menuCallback.onCopy();
@@ -1225,7 +1225,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->OpenSelectOverlay();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -1331,7 +1331,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternHandleCopy, TestSize.Level1)
     ASSERT_NE(imagePattern->image_, nullptr);
 
     imagePattern->HandleCopy();
-    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
 }
 
 /**
@@ -1859,7 +1859,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner111, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->OpenSelectOverlay();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -1963,7 +1963,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner0054, TestSize.Level1)
     imagePattern->parentGlobalOffset_ = OffsetF(1, 1);
     imagePattern->OpenSelectOverlay();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**

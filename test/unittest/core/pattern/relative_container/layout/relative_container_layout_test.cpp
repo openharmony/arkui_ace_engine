@@ -91,9 +91,9 @@ HWTEST_F(RelativeContainerLayoutTest, LayoutTest, TestSize.Level1)
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
 
     // dependence: recordOffsetMap_
-    PrepareLayout(relativeContainer.GetRawPtr(), layoutAlgorithm);
+    PrepareLayout(Referenced::RawPtr(relativeContainer), layoutAlgorithm);
     // test Layout
-    layoutAlgorithm.Layout(relativeContainer.GetRawPtr());
+    layoutAlgorithm.Layout(Referenced::RawPtr(relativeContainer));
     // expect: row1.offset = (center, padding+border) = (100/2, 3+1) = (50, 4)
     EXPECT_EQ(row1->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(50, 4))
         << row1->GetGeometryNode()->GetMarginFrameOffset().ToString();

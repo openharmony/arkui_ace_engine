@@ -5834,7 +5834,7 @@ void OverlayManager::PlayKeyboardTransition(const RefPtr<FrameNode>& customKeybo
                     context->OnTransformTranslateUpdate({ 0.0f, finalOffset, 0.0f });
                 }
             },
-            [weak = WeakClaim(customKeyboard.GetRawPtr())]() {
+            [weak = WeakClaim(Referenced::RawPtr(customKeyboard))]() {
                 auto keyboard = weak.Upgrade();
                 CHECK_NULL_VOID(keyboard);
                 auto pipeline = keyboard->GetContext();

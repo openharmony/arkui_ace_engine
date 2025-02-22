@@ -1654,7 +1654,7 @@ HWTEST_F(SliderExTestNg, SliderValidRangeTest007, TestSize.Level1)
     frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
-    auto validRange = SliderModelNG::GetValidSlideRange(frameNode.GetRawPtr());
+    auto validRange = SliderModelNG::GetValidSlideRange(Referenced::RawPtr(frameNode));
     EXPECT_TRUE(validRange && validRange->HasValidValues());
     EXPECT_EQ(validRange->GetFromValue(), MIN_RANGE);
     EXPECT_EQ(validRange->GetToValue(), MAX_RANGE);
@@ -1894,8 +1894,8 @@ HWTEST_F(SliderExTestNg, SliderTrackBackgroundColor001, TestSize.Level1)
     defaultGradient.AddColor(gradientColor2);
     std::vector<GradientColor> defaultGradientColors = defaultGradient.GetColors();
 
-    SliderModelNG::SetTrackBackgroundColor(frameNode.GetRawPtr(), defaultGradient);
-    Gradient testGradient = SliderModelNG::GetTrackBackgroundColor(frameNode.GetRawPtr());
+    SliderModelNG::SetTrackBackgroundColor(Referenced::RawPtr(frameNode), defaultGradient);
+    Gradient testGradient = SliderModelNG::GetTrackBackgroundColor(Referenced::RawPtr(frameNode));
     std::vector<GradientColor> testGradientColors = testGradient.GetColors();
 
     EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());

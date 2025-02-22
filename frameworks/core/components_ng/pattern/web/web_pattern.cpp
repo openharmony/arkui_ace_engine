@@ -5511,7 +5511,7 @@ void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF&
     auto offsetX = offset.GetX() - root.GetX() + mouseHoveredX_ + TOOLTIP_MARGIN;
     auto offsetY = offset.GetY() - root.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
 
-    ScopedLayout scope(pipeline.GetRawPtr());
+    ScopedLayout scope(Referenced::RawPtr(pipeline));
     if (GreatNotEqual(offsetX + textWidth, root.Width())) {
         offsetX = root.Width() - textWidth;
     }

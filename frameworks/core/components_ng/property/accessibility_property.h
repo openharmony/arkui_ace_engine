@@ -471,9 +471,7 @@ public:
 
     void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node);
 
-    RefPtr<UINode> GetAccessibilityVirtualNode();
-
-    NG::UINode* GetAccessibilityVirtualNodePtr();
+    const RefPtr<UINode>& GetAccessibilityVirtualNode() const;
 
     bool HasAccessibilityVirtualNode() const;
 

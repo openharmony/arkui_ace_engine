@@ -666,7 +666,7 @@ ArkUISliderValidSlideRange GetSliderValidSlideRange(ArkUINodeHandle node)
     };
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, errorReturn);
-    auto rangeValue = SliderModelNG::GetValidSlideRange(frameNode).GetRawPtr();
+    auto rangeValue = SliderModelNG::GetValidSlideRange(frameNode);
     CHECK_NULL_RETURN(rangeValue && rangeValue->HasValidValues(), errorReturn);
     return { rangeValue->GetFromValue(), rangeValue->GetToValue() };
 }

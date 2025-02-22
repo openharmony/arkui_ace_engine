@@ -1590,7 +1590,7 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
         symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
-            auto symbolNode = node.GetRawPtr();
+            auto symbolNode = Referenced::RawPtr(node);
             SymbolModelNG::InitialSymbol(symbolNode, symbolId);
             SymbolModelNG::SetFontSize(symbolNode, symbolSize);
         };
@@ -1818,9 +1818,9 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
             auto symbolSize = textOverlayTheme->GetSymbolSize();
             symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
-                auto symbolNode = weak.Upgrade().GetRawPtr();
-                SymbolModelNG::InitialSymbol(symbolNode, symbolId);
-                SymbolModelNG::SetFontSize(symbolNode, symbolSize);
+                auto symbolNode = weak.Upgrade();
+                SymbolModelNG::InitialSymbol(RawPtr(symbolNode), symbolId);
+                SymbolModelNG::SetFontSize(RawPtr(symbolNode), symbolSize);
             };
         }
         auto param = OptionParam(content, GetSystemIconPath(item.id, item.icon.value_or(" ")), callback, symbol);

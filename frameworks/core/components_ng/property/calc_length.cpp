@@ -23,12 +23,7 @@ namespace OHOS::Ace::NG {
 ScaleProperty ScaleProperty::CreateScaleProperty(PipelineBase* context)
 {
     ScaleProperty scaleProperty;
-    PipelineBase* pipeline = nullptr;
-    if (context) {
-        pipeline = context;
-    } else {
-        pipeline = PipelineBase::GetCurrentContextSafely().GetRawPtr();
-    }
+    auto pipeline = context ? AceType::Claim(context) : PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, scaleProperty);
     scaleProperty.fpScale = pipeline->GetFontScale();
     scaleProperty.vpScale = static_cast<float>(pipeline->GetDipScale());

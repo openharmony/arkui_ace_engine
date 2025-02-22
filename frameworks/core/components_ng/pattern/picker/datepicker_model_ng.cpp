@@ -565,7 +565,7 @@ void DatePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedFontSize,
         ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
-    ResetDataPickerTextStyleColor(frameNode.GetRawPtr(), &DataPickerRowLayoutProperty::GetSelectedTextStyle);
+    ResetDataPickerTextStyleColor(Referenced::RawPtr(frameNode), &DataPickerRowLayoutProperty::GetSelectedTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedWeight, selectedStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -577,7 +577,7 @@ void DatePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, DisappearFontSize,
         ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
-    ResetDataPickerTextStyleColor(frameNode.GetRawPtr(), &DataPickerRowLayoutProperty::GetDisappearTextStyle);
+    ResetDataPickerTextStyleColor(Referenced::RawPtr(frameNode), &DataPickerRowLayoutProperty::GetDisappearTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, DisappearWeight, disappearStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -588,7 +588,7 @@ void DatePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontSize,
         ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
-    ResetDataPickerTextStyleColor(frameNode.GetRawPtr(), &DataPickerRowLayoutProperty::GetTextStyle);
+    ResetDataPickerTextStyleColor(Referenced::RawPtr(frameNode), &DataPickerRowLayoutProperty::GetTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Weight, normalStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontFamily, normalStyle.GetFontFamilies(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);

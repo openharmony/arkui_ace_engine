@@ -4003,7 +4003,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(topSheetNode, topSheetNode->GetGeometryNode(),
         topSheetNode->GetLayoutProperty());
-    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), layoutWrapper.GetRawPtr());
+    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     auto onWidthDidChangeFunc = [&widthVal](float width) { widthVal = width; };
     topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
     topSheetPattern->FireOnWidthDidChange(topSheetNode);
@@ -4403,10 +4403,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     auto maxSize = SizeF(10.0f, 10.0f);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(),
         sheetNode->GetLayoutProperty());
-    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), layoutWrapper.GetRawPtr());
+    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(width, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
     sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
-    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), layoutWrapper.GetRawPtr());
+    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(width, SHEET_POPUP_WIDTH.ConvertToPx());
 }
 

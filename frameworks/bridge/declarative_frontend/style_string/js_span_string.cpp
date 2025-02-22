@@ -784,7 +784,7 @@ void JSSpanString::ToHtml(const JSCallbackInfo& info)
     CHECK_NULL_VOID(spanString);
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
-    auto html = HtmlUtils::ToHtml(spanStringController.GetRawPtr());
+    auto html = HtmlUtils::ToHtml(Referenced::RawPtr(spanStringController));
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(ACE_TEXT, "Transfer StyledString %{public}s To Html", spanStringController->ToString().c_str());
     }

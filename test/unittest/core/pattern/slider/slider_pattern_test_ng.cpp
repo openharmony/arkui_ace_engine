@@ -1384,7 +1384,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
     ASSERT_NE(parent, nullptr);
     auto context = MockPipelineContext::GetCurrent();
     ASSERT_NE(context, nullptr);
-    frameNode->context_ = reinterpret_cast<PipelineContext*>(context.GetRawPtr());
+    frameNode->context_ = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(context));
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
@@ -1616,7 +1616,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest009, TestSize.Level1
     contentModifier->stepPointVec_ = HORIZONTAL_STEP_POINTS;
     auto context = MockPipelineContext::GetCurrent();
     ASSERT_NE(context, nullptr);
-    frameNode->context_ = reinterpret_cast<PipelineContext*>(context.GetRawPtr());
+    frameNode->context_ = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(context));
     sliderPattern->InitAccessibilityVirtualNodeTask();
     ASSERT_NE(sliderPattern->parentAccessibilityNode_, nullptr);
     EXPECT_EQ(sliderPattern->pointAccessibilityNodeVec_.size(), HORIZONTAL_STEP_POINTS.size());
@@ -1874,7 +1874,7 @@ HWTEST_F(SliderPatternTestNg, EnableHapticFeedbackTest001, TestSize.Level1)
     sliderModelNG.SetEnableHapticFeedback(false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    EXPECT_FALSE(sliderModelNG.GetEnableHapticFeedback(frameNode.GetRawPtr()));
+    EXPECT_FALSE(sliderModelNG.GetEnableHapticFeedback(Referenced::RawPtr(frameNode)));
 }
 
 /**

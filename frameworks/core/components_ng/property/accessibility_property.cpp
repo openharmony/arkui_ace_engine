@@ -1060,14 +1060,9 @@ void AccessibilityProperty::SaveAccessibilityVirtualNode(const RefPtr<UINode>& n
     accessibilityVirtualNode_ = node;
 }
 
-RefPtr<UINode> AccessibilityProperty::GetAccessibilityVirtualNode()
+const RefPtr<UINode>& AccessibilityProperty::GetAccessibilityVirtualNode() const
 {
     return accessibilityVirtualNode_;
-}
-
-NG::UINode* AccessibilityProperty::GetAccessibilityVirtualNodePtr()
-{
-    return Referenced::RawPtr(accessibilityVirtualNode_);
 }
 
 bool AccessibilityProperty::HasAccessibilityVirtualNode() const

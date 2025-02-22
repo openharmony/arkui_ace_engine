@@ -622,7 +622,7 @@ HWTEST_F(XComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
 
-    PipelineContext* context = frameNode->GetContextRefPtr().GetRawPtr();
+    PipelineContext* context = frameNode->GetContext();
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
                 SetInstanceId(context->GetInstanceId())).WillOnce(Return());
     pattern->OnAttachContext(context);

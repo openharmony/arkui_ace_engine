@@ -1925,10 +1925,10 @@ HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer, TestSize.Level1)
     EXPECT_EQ(touchTestResult.size(), fingerCnt);
     EXPECT_EQ(touchTestResult[0].size(), targetCnt);
     EXPECT_EQ(touchTestResult[1].size(), targetCnt);
-    eventManager->DispatchTouchCancelToRecognizer(targetRefs[0].GetRawPtr(), items[0]);
+    eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(targetRefs[0]), items[0]);
     EXPECT_EQ(touchTestResult.size(), fingerCnt);
     EXPECT_EQ(touchTestResult[1].size(), 1);
-    eventManager->DispatchTouchCancelToRecognizer(targetRefs[1].GetRawPtr(), items[1]);
+    eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(targetRefs[1]), items[1]);
     EXPECT_EQ(touchTestResult.size(), 0);
 }
 } // namespace OHOS::Ace::NG

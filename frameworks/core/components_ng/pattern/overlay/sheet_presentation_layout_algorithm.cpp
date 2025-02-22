@@ -645,7 +645,7 @@ void SheetPresentationLayoutAlgorithm::RemeasureForPopup(const RefPtr<LayoutWrap
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
-        auto childConstraint = CreateSheetChildConstraint(layoutProperty, layoutWrapper.GetRawPtr());
+        auto childConstraint = CreateSheetChildConstraint(layoutProperty, Referenced::RawPtr(layoutWrapper));
         layoutConstraint.percentReference = SizeF(sheetWidth_, sheetHeight_);
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);

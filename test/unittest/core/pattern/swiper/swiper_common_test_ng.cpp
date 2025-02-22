@@ -1847,7 +1847,7 @@ HWTEST_F(SwiperCommonTestNg, SetAutoPlayOptions001, TestSize.Level1)
     swiperPaintProperty->UpdateAutoPlay(true);
     SwiperAutoPlayOptions parameters;
     parameters.stopWhenTouched = false;
-    model.SetAutoPlayOptions(frameNode_.GetRawPtr(), parameters);
+    model.SetAutoPlayOptions(Referenced::RawPtr(frameNode_), parameters);
     EXPECT_FALSE(pattern_->IsStopWhenTouched());
     /**
      * @tc.steps: step4. Call HandleTouchDown when stopWhenTouched is false
