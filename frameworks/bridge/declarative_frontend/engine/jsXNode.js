@@ -802,7 +802,9 @@ class FrameNode {
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nativeRef = nativeRef;
         this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+        __JSScopeUtil__.restoreInstanceId();
         if (this._nodeId === -1) {
             return;
         }
@@ -871,11 +873,15 @@ class FrameNode {
     }
     convertToFrameNode(nodePtr, nodeId = -1) {
         if (nodeId === -1) {
+            __JSScopeUtil__.syncInstanceId(this.instanceId_);
             nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+            __JSScopeUtil__.restoreInstanceId();
         }
         if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
+            __JSScopeUtil__.syncInstanceId(this.instanceId_);
             let frameNode = new ProxyFrameNode(this.uiContext_);
             let node = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+            __JSScopeUtil__.restoreInstanceId();
             frameNode.setNodePtr(node);
             frameNode._nodeId = nodeId;
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
@@ -1055,7 +1061,10 @@ class FrameNode {
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getChildrenCount(isExpanded) {
-        return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+        __JSScopeUtil__.restoreInstanceId();
+        return childrenCount;
     }
     getPositionToParent() {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
@@ -1175,7 +1184,9 @@ class FrameNode {
         __JSScopeUtil__.restoreInstanceId();
     }
     layout(position) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+        __JSScopeUtil__.restoreInstanceId();
     }
     setNeedsLayout() {
         getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
