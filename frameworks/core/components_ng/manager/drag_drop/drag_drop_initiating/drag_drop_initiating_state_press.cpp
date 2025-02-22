@@ -138,7 +138,7 @@ void DragDropInitiatingStatePress::Init(int32_t currentState)
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (!params.isThumbnailCallbackTriggered) {
+    if (!params.isThumbnailCallbackTriggered && !gestureHub->GetTextDraggable()) {
         auto getPixelMapFinishCallback = [weak = AceType::WeakClaim(this)](
                                              RefPtr<PixelMap> pixelMap, bool immediately) {
             auto stateReady = weak.Upgrade();

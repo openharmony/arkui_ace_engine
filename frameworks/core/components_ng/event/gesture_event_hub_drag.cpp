@@ -55,15 +55,16 @@ constexpr int32_t MAX_BUILDER_DEPTH = 5;
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
 constexpr int32_t DEFAULT_DRAG_DROP_STATUS = 0;
 constexpr int32_t NEW_DRAG_DROP_STATUS = 1;
-const std::unordered_set<std::string> VALID_TAG = {
+const std::unordered_set<std::string> OLD_FRAMEWORK_TAG = {
     V2::WEB_ETS_TAG,
-    V2::GRID_ITEM_ETS_TAG,
-    V2::LIST_ITEM_ETS_TAG,
     V2::TEXTAREA_ETS_TAG,
     V2::TEXT_ETS_TAG,
     V2::TEXTINPUT_ETS_TAG,
     V2::SEARCH_Field_ETS_TAG,
     V2::RICH_EDITOR_ETS_TAG,
+};
+const std::unordered_set<std::string> VALID_TAG = {
+    V2::WEB_ETS_TAG,
 };
 constexpr int32_t HALF_PIXELMAP = 2;
 } // namespace
@@ -80,7 +81,8 @@ bool GestureEventHub::IsPixelMapNeedScale() const
 bool CheckNeedDragDropFrameworkStatus(const std::string& tag)
 {
     auto dragDropFrameworkStatus = SystemProperties::GetDragDropFrameworkStatus();
-    if (dragDropFrameworkStatus == DEFAULT_DRAG_DROP_STATUS) {
+    if (dragDropFrameworkStatus == DEFAULT_DRAG_DROP_STATUS &&
+        (OLD_FRAMEWORK_TAG.find(tag) != OLD_FRAMEWORK_TAG.end())) {
         return false;
     } else if ((dragDropFrameworkStatus == NEW_DRAG_DROP_STATUS) && (VALID_TAG.find(tag) != VALID_TAG.end())) {
         return false;

@@ -22,6 +22,8 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -32,8 +34,22 @@ void DragDropInitiatingStateReady::HandleOnDragStart(RefPtr<FrameNode> frameNode
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (!CheckStatusForPanActionBegin(frameNode, info)) {
         return;
+    }
+    if (gestureHub->GetTextDraggable()) {
+        auto pattern = frameNode->GetPattern<TextBase>();
+        if (pattern && (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE)) {
+            dragDropManager->ResetDragging();
+            gestureHub->SetIsTextDraggable(false);
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
+            DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+            return;
+        }
+        HandleTextDragCallback();
     }
     dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
     frameNode->MarkModifyDone();
@@ -42,8 +58,6 @@ void DragDropInitiatingStateReady::HandleOnDragStart(RefPtr<FrameNode> frameNode
     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(frameNode->GetId());
     UpdateDragPreviewOptionFromModifier();
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto gestureEvent = info;
     gestureHub->HandleOnDragStart(gestureEvent);
 }

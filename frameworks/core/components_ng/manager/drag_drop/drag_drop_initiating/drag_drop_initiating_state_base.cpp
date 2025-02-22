@@ -19,6 +19,8 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -199,6 +201,14 @@ bool DragDropInitiatingStateBase::CheckStatusForPanActionBegin(
         TAG_LOGI(AceLogTag::ACE_DRAG, "Drag node have been cleaned by backpress or click event, stop dragging.");
         return false;
     }
+    CHECK_NULL_RETURN(frameNode, false);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, false);
+    if (gestureHub->GetTextDraggable() && !gestureHub->GetIsTextDraggable()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
+        dragDropManager->ResetDragging();
+        return false;
+    }
     return true;
 }
 
@@ -213,5 +223,145 @@ int32_t DragDropInitiatingStateBase::GetCurDuration(const TouchEvent& touchEvent
         curDuration = curDuration < 0 ? 0: curDuration;
     }
     return curDuration;
+}
+
+void DragDropInitiatingStateBase::SetTextPixelMap()
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto pattern = frameNode->GetPattern<TextDragBase>();
+    CHECK_NULL_VOID(pattern);
+    auto dragNode = pattern->MoveDragNode();
+    pattern->CloseSelectOverlay();
+    CHECK_NULL_VOID(dragNode);
+    if (params.preScaledPixelMap) {
+        gestureHub->SetPixelMap(params.preScaledPixelMap);
+        params.preScaledPixelMap = nullptr;
+        return;
+    }
+    auto renderContext = dragNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pixelMap = renderContext->GetThumbnailPixelMap();
+    if (pixelMap) {
+        gestureHub->SetPixelMap(pixelMap);
+    } else {
+        gestureHub->SetPixelMap(nullptr);
+    }
+}
+
+std::function<void()> GetTextAnimationFinishCallback(
+    bool startDrag, const RefPtr<FrameNode>& frameNode, const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextDragBase>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto node = pattern->MoveDragNode();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto textDragPattern = node->GetPattern<TextDragPattern>();
+    CHECK_NULL_RETURN(textDragPattern, nullptr);
+    auto modifier = textDragPattern->GetOverlayModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern),
+               weakEvent = AceType::WeakClaim(AceType::RawPtr(gestureHub)),
+               weakModifier = WeakPtr<TextDragOverlayModifier>(modifier)] {
+        ContainerScope scope(id);
+        if (!startDrag) {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto modifier = weakModifier.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            pattern->ShowHandles(modifier->IsHandlesShow());
+        }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->RemovePixelMap();
+        TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
+        auto gestureHub = weakEvent.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        if (!gestureHub->IsPixelMapNeedScale() && dragDropManager && dragDropManager->IsDragging()) {
+            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        }
+        gestureHub->SetPixelMap(nullptr);
+    };
+}
+
+void DragDropInitiatingStateBase::HideTextAnimation(bool startDrag, double globalX, double globalY)
+{
+    TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent start hide text animation.");
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
+    if (!gestureHub->GetTextDraggable() || !isAllowedDrag) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Text is not draggable, stop set hide text animation.");
+        return;
+    }
+    auto removeColumnNode = GetTextAnimationFinishCallback(startDrag, frameNode, gestureHub);
+    AnimationOption option;
+    option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+    option.SetOnFinishEvent(removeColumnNode);
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto dragNode = manager->GetPixelMapNode();
+    CHECK_NULL_VOID(dragNode);
+    auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
+    auto frameWidth = dragFrame.Width();
+    auto frameHeight = dragFrame.Height();
+    auto pixelMap = gestureHub->GetPixelMap();
+    float scale = 1.0f;
+    if (pixelMap) {
+        scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+    }
+    auto context = dragNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateTransformScale(VectorF(1.0f, 1.0f));
+    AnimationUtils::Animate(
+        option,
+        [context, startDrag, globalX, globalY, frameWidth, frameHeight, scale]() {
+            if (startDrag) {
+                context->UpdatePosition(OffsetT<Dimension>(Dimension(globalX + frameWidth * PIXELMAP_WIDTH_RATE),
+                    Dimension(globalY + frameHeight * PIXELMAP_HEIGHT_RATE)));
+                context->UpdateTransformScale(VectorF(scale, scale));
+                context->OnModifyDone();
+            }
+        },
+        option.GetOnFinishEvent());
+}
+
+void DragDropInitiatingStateBase::HandleTextDragCallback()
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto pattern = frameNode->GetPattern<TextBase>();
+    if (pattern->BetweenSelectedPosition(params.touchOffset)) {
+        if (params.getTextThumbnailPixelMapCallback) {
+            params.getTextThumbnailPixelMapCallback(params.touchOffset);
+        }
+    } else if (!gestureHub->GetIsTextDraggable()) {
+        gestureHub->SetPixelMap(nullptr);
+    }
 }
 } // namespace OHOS::Ace::NG

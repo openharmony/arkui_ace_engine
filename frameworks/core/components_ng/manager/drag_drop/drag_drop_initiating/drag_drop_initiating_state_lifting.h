@@ -58,6 +58,7 @@ private:
     void SetGatherAnimation(const RefPtr<PipelineBase>& context);
     void SetGatherAnimation();
     void ResetNodeInMultiDrag();
+    void SetTextAnimation();
 };
 } // namespace OHOS::Ace::NG
 
