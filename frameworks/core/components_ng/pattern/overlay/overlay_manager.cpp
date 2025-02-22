@@ -2569,6 +2569,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
     BeforeShowDialog(dialog);
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
     auto levelOrder = dialogProps.levelOrder;
     if (dialogProps.transitionEffect != nullptr) {
         SetDialogTransitionEffect(dialog, levelOrder);
