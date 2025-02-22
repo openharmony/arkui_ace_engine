@@ -3194,17 +3194,17 @@ void WebDelegate::DragResize(const double& width, const double& height,
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebDragResize");
 }
 
-void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
-{
-    isSmoothDragResizeEnabled_ = isSmoothDragResizeEnabled;
-}
-
 bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
-    if (OHOS::system::GetDeviceType() != "2in1") {
-        isSmoothDragResizeEnabled_ = false;
+    if (!nweb_) {
+        return false;
     }
-    return isSmoothDragResizeEnabled_;
+    bool isBrowserUsage = nweb_->IsNWebEx();
+    if (OHOS::system::GetDeviceType() != "2in1" || !isBrowserUsage) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "Smooth drag resize only support browser in 2in1");
+        return false;
+    }
+    return true;
 }
 
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart)

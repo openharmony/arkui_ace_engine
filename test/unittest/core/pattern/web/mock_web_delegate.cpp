@@ -1031,7 +1031,7 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset) {}
 void WebDelegate::SetTouchEventInfo(
     std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent, TouchEventInfo& touchEventInfo)
 {}
-void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) {}
+
 bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
     return false;
