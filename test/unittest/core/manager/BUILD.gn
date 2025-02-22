@@ -13,6 +13,12 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+ace_unittest("avoid_info_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "avoid_info_manager_test_ng.cpp" ]
+}
+
 ace_unittest("drag_animation_helper_test_ng") {
   type = "new"
   module_output = "manager"
