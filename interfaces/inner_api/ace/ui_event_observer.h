@@ -26,6 +26,17 @@
 namespace OHOS::Ace {
 using OnInspectorTreeResult = std::function<void(const std::shared_ptr<std::string>)>;
 
+enum class InspectorInfoType: int32_t {
+    CONTENT = 0,
+    WINDOW_ID,
+    WEB_LANG,
+};
+
+enum class InspectorPageType: int32_t {
+    FOCUS = 0,
+    FOREGROUND,
+};
+
 struct ACE_FORCE_EXPORT TreeParams {
     bool isNewVersion = true;
     bool isVisibleOnly = false;
@@ -33,6 +44,10 @@ struct ACE_FORCE_EXPORT TreeParams {
     bool enableWeb = false;
     std::string webContentJs;
     bool isWindowIdOnly = false;
+    bool enableFullAttrs = false;
+    InspectorPageType inspectorType { InspectorPageType::FOCUS };
+    InspectorInfoType infoType { InspectorInfoType::CONTENT };
+    int32_t webId = 0;
 };
 
 class ACE_FORCE_EXPORT UIEventObserver {

@@ -114,14 +114,9 @@ public:
     void UpdateEventSwitch(const std::vector<bool>& eventSwitch);
     void UpdateWebIdentifier(const std::unordered_map<std::string, std::string> identifierMap);
 
-    void SetContainerChanged()
-    {
-        isFocusContainerChanged_ = true;
-    }
-
     void SetContainerInfo(const std::string& windowName, int32_t id, bool foreground);
     void SetFocusContainerInfo(const std::string& windowName, int32_t id);
-    int32_t GetContainerId();
+    int32_t GetContainerId(bool isFoucs = true);
     const std::string& GetPageUrl();
     const std::string& GetNavDstName() const;
     std::string GetCacheJsCode() const;
@@ -130,6 +125,7 @@ public:
     void HandleJavascriptItems(
         std::optional<WebJsItem>& scriptItems, std::optional<std::vector<std::string>>& orderScriptItems);
     bool IsMessageValid(const std::string& webCategory, const std::string& identifier);
+    void NotifyEventCacheEnd();
 
     void OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name = "");
     void OnPageHide(const std::string& pageUrl, const int64_t duration, const std::string& name = "");
@@ -139,6 +135,13 @@ public:
     void OnNavDstShow(EventParamsBuilder&& builder);
     void OnNavDstHide(EventParamsBuilder&& builder);
     void OnExposure(EventParamsBuilder&& builder);
+    void OnWebEvent(const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& params);
+    void OnAttachWeb(const RefPtr<NG::FrameNode>& node);
+    void OnDetachWeb(int32_t nodeId);
+    std::unordered_map<int32_t, WeakPtr<NG::FrameNode>>& GetWeakNodeMap()
+    {
+        return weakNodeCache_;
+    }
 
 private:
     EventRecorder();
@@ -150,7 +153,6 @@ private:
 
     int32_t containerId_ = -1;
     int32_t focusContainerId_ = -1;
-    int32_t containerCount_ = 0;
 
     std::string pageUrl_;
     std::string navDstName_;
@@ -163,6 +165,8 @@ private:
     std::optional<std::map<std::string, std::vector<std::string>>> cacheScriptItems_;
     std::optional<std::vector<std::string>> cacheOrderScriptItems_;
     std::unordered_map<std::string, std::string> webIdentifierMap_;
+
+    std::unordered_map<int32_t, WeakPtr<NG::FrameNode>> weakNodeCache_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventRecorder);
 };

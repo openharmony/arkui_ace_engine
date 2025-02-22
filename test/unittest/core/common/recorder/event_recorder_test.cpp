@@ -640,7 +640,7 @@ HWTEST_F(EventRecorderTest, EventRecorderTest011, TestSize.Level1)
     EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId() == 2, true);
     // windowName = "pages/Index",foreground = false
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, id, false);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId() == -1, true);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId() == 2, true);
 }
 
 /**
@@ -666,9 +666,12 @@ HWTEST_F(EventRecorderTest, EventRecorderTest012, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, SetContainerInfo001, TestSize.Level1)
 {
+    Recorder::EventRecorder::Get().containerId_ = 1;
+    Recorder::EventRecorder::Get().focusContainerId_ = 2;
     std::string windowName = "$HA_FLOAT_WINDOW$";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 2);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(false), 1);
 }
 
 /**
@@ -690,9 +693,11 @@ HWTEST_F(EventRecorderTest, SetContainerInfo002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, SetContainerInfo003, TestSize.Level1)
 {
+    Recorder::EventRecorder::Get().containerId_ = 1;
+    Recorder::EventRecorder::Get().focusContainerId_ = 2;
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, false);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 2);
 }
 
 /**
@@ -702,9 +707,11 @@ HWTEST_F(EventRecorderTest, SetContainerInfo003, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, SetFocusContainerInfo001, TestSize.Level1)
 {
+    Recorder::EventRecorder::Get().containerId_ = 1;
+    Recorder::EventRecorder::Get().focusContainerId_ = 2;
     std::string windowName = "$HA_FLOAT_WINDOW$";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 2);
 }
 
 /**
@@ -714,9 +721,11 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
 {
+    Recorder::EventRecorder::Get().containerId_ = 1;
+    Recorder::EventRecorder::Get().focusContainerId_ = 2;
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
-    EXPECT_NE(Recorder::EventRecorder::Get().GetContainerId(), 0);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 0);
 }
 
 /**
@@ -1339,13 +1348,11 @@ HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
 HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call the GetTree.
-     * @tc.expected: step1. GetTree success.
+     * @tc.steps: step1. call the Constructor.
+     * @tc.expected: step1. Constructor success.
      */
-    InspectorTreeCollector::Get().taskNum_ = 0;
-    InspectorTreeCollector::Get().GetTree([]() { InspectorTreeCollector::Get().GetJson()->Put("test", "123"); },
-        [](const std::shared_ptr<std::string> tree) { EXPECT_EQ(*tree, "{\"test\":\"123\"}"); });
-    EXPECT_TRUE(InspectorTreeCollector::Get().root_ != nullptr);
+    InspectorTreeCollector collector([](const std::shared_ptr<std::string> tree) {});
+    EXPECT_TRUE(collector.root_ != nullptr);
 }
 
 /**
@@ -1355,24 +1362,25 @@ HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest002, TestSize.Level1)
 {
-    InspectorTreeCollector::Get().taskNum_ = 0;
+    InspectorTreeCollector collector([](const std::shared_ptr<std::string> tree) {});
+    collector.taskNum_ = 0;
     /**
      * @tc.steps: step1. call the IncreaseTaskNum.
      * @tc.expected: step1. IncreaseTaskNum success.
      */
-    InspectorTreeCollector::Get().IncreaseTaskNum();
-    EXPECT_EQ(InspectorTreeCollector::Get().taskNum_, 1);
+    collector.IncreaseTaskNum();
+    EXPECT_EQ(collector.taskNum_, 1);
     /**
      * @tc.steps: step2. call the DecreaseTaskNum.
      * @tc.expected: step2. DecreaseTaskNum success.
      */
-    InspectorTreeCollector::Get().DecreaseTaskNum();
-    EXPECT_EQ(InspectorTreeCollector::Get().taskNum_, 0);
+    collector.DecreaseTaskNum();
+    EXPECT_EQ(collector.taskNum_, 0);
     /**
      * @tc.steps: step3. call the UpdateTaskNum.
      * @tc.expected: step3. UpdateTaskNum success.
      */
-    InspectorTreeCollector::Get().UpdateTaskNum(2);
-    EXPECT_EQ(InspectorTreeCollector::Get().taskNum_, 2);
+    collector.UpdateTaskNum(2);
+    EXPECT_EQ(collector.taskNum_, 2);
 }
 } // namespace OHOS::Ace

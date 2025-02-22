@@ -18,24 +18,9 @@
 #include <string>
 
 namespace OHOS::Ace::Recorder {
-InspectorTreeCollector& InspectorTreeCollector::Get()
+InspectorTreeCollector::InspectorTreeCollector(OnInspectorTreeResult&& callback) : onResultFunc_(std::move(callback))
 {
-    static InspectorTreeCollector instance;
-    return instance;
-}
-
-void InspectorTreeCollector::GetTree(GetInspectorTree&& getTreeFunc, OnInspectorTreeResult&& callback)
-{
-    if (taskNum_ != 0) {
-        onResultFuncList_.emplace_back(std::move(callback));
-        return;
-    }
     root_ = JsonUtil::Create(true);
-    taskNum_ = 0;
-    onResultFuncList_.emplace_back(std::move(callback));
-    IncreaseTaskNum();
-    getTreeFunc();
-    DecreaseTaskNum();
 }
 
 void InspectorTreeCollector::IncreaseTaskNum()
@@ -52,11 +37,8 @@ void InspectorTreeCollector::UpdateTaskNum(int32_t num)
 {
     taskNum_ += num;
     if (taskNum_ == 0) {
-        if (!onResultFuncList_.empty()) {
-            for (const auto& func : onResultFuncList_) {
-                func(std::make_shared<std::string>(root_->ToString()));
-            }
-            onResultFuncList_.clear();
+        if (onResultFunc_) {
+            onResultFunc_(std::make_shared<std::string>(root_->ToString()));
         }
         root_ = JsonUtil::Create(true);
     }

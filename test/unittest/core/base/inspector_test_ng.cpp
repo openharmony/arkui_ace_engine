@@ -496,7 +496,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
     int32_t containerId = 1;
-    std::string result = Inspector::GetSimplifiedInspector(containerId, { false }, true);
+    std::string result = Inspector::GetSimplifiedInspector(containerId, { false });
     EXPECT_NE(result, "");
     context->stageManager_ = nullptr;
 }

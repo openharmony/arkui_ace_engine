@@ -271,6 +271,7 @@ void EventController::CacheEventIfNeed(EventCategory category, int32_t eventType
     } else {
         hasCached_ = true;
         cacheEvents_.clear();
+        EventRecorder::Get().NotifyEventCacheEnd();
     }
 }
 
