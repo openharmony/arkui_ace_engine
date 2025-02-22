@@ -26,7 +26,6 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
@@ -36,11 +35,11 @@
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
-#include "frameworks/core/components/focus_animation/focus_animation_theme.h"
 #include "frameworks/core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class TextLayoutProperty;
 
 const auto TabBarPhysicalCurve = AceType::MakeRefPtr<InterpolatingSpring>(-1.0f, 1.0f, 228.0f, 30.f);
 

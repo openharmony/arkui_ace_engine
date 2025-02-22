@@ -17,6 +17,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
