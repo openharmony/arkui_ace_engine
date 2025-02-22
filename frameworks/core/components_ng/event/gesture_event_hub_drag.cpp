@@ -352,7 +352,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
     auto frameTag = frameNode->GetTag();
     auto coordinateX = frameNodeOffset_.GetX();
     auto coordinateY = frameNodeOffset_.GetY();
-    if (!innerRect.IsEmpty()) {
+    if (!innerRect.IsEmpty() && !NearZero(size.Width()) && !NearZero(size.Height())) {
         auto rateX = innerRect.Width() / size.Width();
         auto rateY = innerRect.Height() / size.Height();
         result.SetX(rateX * (coordinateX + innerRect.GetOffset().GetX() - info.GetGlobalLocation().GetX()));
