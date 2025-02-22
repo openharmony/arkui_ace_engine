@@ -1268,7 +1268,7 @@ void DragDropManager::HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, con
     auto windowId = container->GetWindowId();
     auto overlayManager = GetDragAnimationOverlayManager(container->GetInstanceId());
     if (overlayManager && !isDragFwkShow_) {
-        overlayManager->RemovePixelMap();
+        overlayManager->RemoveDragPixelMap();
         overlayManager->RemoveFilter();
         pipeline->FlushMessages();
     }
@@ -1334,9 +1334,7 @@ void DragDropManager::ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event,
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    if (!pipeline) {
-        return;
-    }
+    CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId, dragBehavior,
                                      pointerEventId = pointerEvent.pointerEventId, weak = WeakClaim(this)]() mutable {
         auto manager = weak.Upgrade();
