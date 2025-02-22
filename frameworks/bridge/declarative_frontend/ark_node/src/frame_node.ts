@@ -391,8 +391,9 @@ class FrameNode {
 
   getChildrenCount(isExpanded?: boolean): number {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
     __JSScopeUtil__.restoreInstanceId();
+    return childrenCount;
   }
 
   moveTo(targetParent: FrameNode, index?: number): void {
