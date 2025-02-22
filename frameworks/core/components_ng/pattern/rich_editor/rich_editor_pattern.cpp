@@ -134,10 +134,11 @@ const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 
 RichEditorPattern::RichEditorPattern() :
 #ifndef ACE_UNITTEST
-    isAPI14Plus(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN))
+    isAPI14Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)),
 #else
-    isAPI14Plus(true)
+    isAPI14Plus(true),
 #endif
+    isAPI16Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN))
 {
     selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(WeakClaim(this));
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
@@ -7647,8 +7648,15 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
     if (copyResultObjects.empty()) {
         return;
     }
-    for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
-        ProcessResultObject(pasteData, *resultObj);
+    // If the API version is greater or equal than 16, add records to clipboard in forward order
+    if (isAPI16Plus) {
+        for (auto resultObj = copyResultObjects.begin(); resultObj != copyResultObjects.end(); ++resultObj) {
+            ProcessResultObject(pasteData, *resultObj);
+        }
+    } else {
+        for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
+            ProcessResultObject(pasteData, *resultObj);
+        }
     }
     clipboard_->SetData(pasteData, copyOption_);
 }
