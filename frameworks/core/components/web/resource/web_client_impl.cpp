@@ -1271,4 +1271,29 @@ void WebClientImpl::OnScrollStart(const float x, const float y)
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnScrollStart(x, y);
 }
+
+bool WebClientImpl::OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+    OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result),
+        static_cast<int32_t>(error), certChainData);
+    auto task = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(task, false);
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnSslErrorRequest(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientSslErrorRequest");
+    return jsResult;
+}
 } // namespace OHOS::Ace

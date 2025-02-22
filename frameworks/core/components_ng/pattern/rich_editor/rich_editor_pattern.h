@@ -667,7 +667,7 @@ public:
         customKeyboardBuilder_ = keyboardBuilder;
     }
     void BindSelectionMenu(TextResponseType type, TextSpanType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+        const SelectMenuParam& menuParam);
     void ClearSelectionMenu()
     {
         selectionMenuMap_.clear();
@@ -920,7 +920,7 @@ public:
 
     bool InsertOrDeleteSpace(int32_t index) override;
 
-    void DeleteRange(int32_t start, int32_t end) override;
+    void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
     void HandleOnPageUp() override;
     void HandleOnPageDown() override;

@@ -109,6 +109,7 @@ enum class InputOperation {
     CURSOR_RIGHT,
     SET_PREVIEW_TEXT,
     SET_PREVIEW_FINISH,
+    INPUT,
 };
 
 enum {
@@ -176,14 +177,33 @@ enum class RequestFocusReason {
     MOUSE,
 };
 
+enum class InputReason {
+    NONE = 0,
+    IME,
+    PASTE,
+    CUT,
+    DRAG,
+    AUTO_FILL,
+    AI_WRITE,
+    CANCEL_BUTTON
+};
+
 struct PreviewTextInfo {
     std::string text;
     PreviewRange range;
+    bool isIme;
 };
 
-struct SourceAndValueInfo {
+struct InsertCommandInfo  {
     std::string insertValue;
-    bool isIME = false;
+    InputReason reason;
+};
+
+struct InputCommandInfo {
+    PreviewRange deleteRange;
+    int32_t insertOffset;
+    std::string insertValue;
+    InputReason reason;
 };
 
 struct TouchAndMoveCaretState {
@@ -289,7 +309,9 @@ public:
     uint32_t GetSCBSystemWindowId();
 
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
-    void InsertValueOperation(const SourceAndValueInfo& info);
+    void NotifyImfFinishTextPreview();
+    int32_t InsertValueByController(const std::string& insertValue, int32_t offset);
+    void ExecuteInsertValueCommand(const InsertCommandInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::string insertValue, int32_t maxLength);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     float MeasureCounterNodeHeight();
@@ -1253,6 +1275,7 @@ public:
 
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
     void CleanNodeResponseKeyEvent();
+    void ClearTextContent();
     bool IsUnderlineMode() const;
     bool IsInlineMode() const;
     bool IsShowError();
@@ -1431,7 +1454,7 @@ public:
 
     bool InsertOrDeleteSpace(int32_t index) override;
 
-    void DeleteRange(int32_t start, int32_t end) override;
+    void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
     bool SetCaretOffset(int32_t caretPostion) override;
 
@@ -1497,6 +1520,14 @@ public:
     bool RecordOriginCaretPosition() override;
     float GetFontSizePx();
 
+    SelectionInfo GetSelection();
+    void AddInsertCommand(const std::string& insertValue, InputReason reason);
+    void AddInputCommand(const InputCommandInfo& inputCommandInfo);
+    void ExecuteInputCommand(const InputCommandInfo& inputCommandInfo);
+    void SetIsFilterChanged(bool isFilterChanged)
+    {
+        isFilterChanged_ = isFilterChanged;
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1538,6 +1569,12 @@ private:
     void AfterIMEInsertValue(const std::string& insertValue);
     bool BeforeIMEDeleteValue(const std::string& deleteValue, TextDeleteDirection direction, int32_t offset);
     void AfterIMEDeleteValue(const std::string& deleteValue, TextDeleteDirection direction);
+    bool FireOnWillChange(const ChangeValueInfo& changeValueInfo);
+    bool OnWillChangePreSetValue(const std::string& newValue);
+    void RecoverTextValueAndCaret(const std::string& oldValue, TextRange caretIndex);
+    bool OnWillChangePreDelete(const std::string& oldContent, uint32_t start, uint32_t end);
+    bool OnWillChangePreInsert(const std::string& insertValue, const std::string& oldContent,
+        uint32_t start, uint32_t end);
     void OnAfterModifyDone() override;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
@@ -1891,7 +1928,8 @@ private:
 
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
-    std::queue<SourceAndValueInfo> insertValueOperations_;
+    std::queue<InsertCommandInfo> insertCommands_;
+    std::queue<InputCommandInfo> inputCommands_;
     std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
@@ -1931,6 +1969,10 @@ private:
     std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
+    TextRange callbackRangeBefore_;
+    TextRange callbackRangeAfter_;
+    std::string callbackOldContent_;
+    PreviewText callbackOldPreviewText_;
     std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     std::string lastTextValue_ = "";
@@ -1950,6 +1992,7 @@ private:
     float lastCaretPos_ = 0.0f;
     bool hasMousePressed_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    bool isFilterChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -32,6 +32,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -187,6 +188,10 @@ public:
     }
     virtual void StopEditing() {}
 
+    virtual int32_t AddText(std::string text, int32_t offset) { return 0; }
+    virtual void DeleteText(int32_t start, int32_t end) {}
+    virtual SelectionInfo GetSelection() { return {}; }
+
     void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
     {
         getCaretIndex_ = std::move(setGetCaretIndex);
@@ -292,7 +297,7 @@ public:
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
-    virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) = 0;
+    virtual void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
@@ -322,6 +327,7 @@ public:
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
     virtual void SetUserUnderlineColor(UserUnderlineColor userColor) {};
     virtual void SetShowCounter(bool value) {};
+    virtual void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) = 0;
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;

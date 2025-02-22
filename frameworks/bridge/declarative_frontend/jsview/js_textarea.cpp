@@ -64,6 +64,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("barState", &JSTextField::SetBarState);
     JSClass<JSTextArea>::StaticMethod("maxLines", &JSTextArea::SetMaxLines);
     JSClass<JSTextArea>::StaticMethod("style", &JSTextField::SetInputStyle);
+    JSClass<JSTextArea>::StaticMethod("onWillChange", &JSTextField::SetOnWillChange);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
     JSClass<JSTextArea>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);

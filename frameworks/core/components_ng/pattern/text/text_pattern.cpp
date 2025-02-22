@@ -987,7 +987,6 @@ bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
     }
     return false;
 }
-
 void TextPattern::InitUrlMouseEvent()
 {
     CHECK_NULL_VOID(!urlMouseEventInitialized_);
@@ -1080,6 +1079,7 @@ void TextPattern::HandleUrlTouchEvent(const TouchEventInfo& info)
         MarkDirtySelf();
     }
 }
+
 void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
     const ShowSelectOverlayFunc& showSelectOverlayFunc)
 
@@ -1300,6 +1300,12 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
         auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
         textSelector_.Update(start, start);
     }
+    // auto scroll.
+    scrollableParent_ = selectOverlay_->FindScrollableParent();
+    auto host = GetHost();
+    if (scrollableParent_.Upgrade() && host) {
+        host->RegisterNodeChangeListener();
+    }
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
@@ -1474,8 +1480,10 @@ void TextPattern::InitKeyEvent()
 void TextPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
 {
     bool flag = false;
-    if (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT)) {
-        flag = true;
+    if (keyEvent.action == KeyAction::DOWN) {
+        if (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT)) {
+            flag = true;
+        }
     }
     if (flag != shiftFlag_) {
         shiftFlag_ = flag;
@@ -1491,6 +1499,7 @@ void TextPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
 
 bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
+    UpdateShiftFlag(keyEvent);
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
@@ -1989,6 +1998,16 @@ void TextPattern::InitDragEvent()
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 }
 
+void TextPattern::OnDragMove(const RefPtr<Ace::DragEvent>& event)
+{
+    auto weakPtr = WeakClaim(this);
+    auto pattern = weakPtr.Upgrade();
+    if (pattern->status_ == Status::DRAGGING) {
+        CloseSelectOverlay();
+        pattern->showSelect_ = false;
+    }
+}
+
 void TextPattern::ClearDragEvent()
 {
     auto host = GetHost();
@@ -2003,16 +2022,6 @@ void TextPattern::ClearDragEvent()
     eventHub->SetDefaultOnDragStart(nullptr);
     eventHub->SetOnDragMove(nullptr);
     eventHub->SetOnDragEnd(nullptr);
-}
-
-void TextPattern::OnDragMove(const RefPtr<Ace::DragEvent>& event)
-{
-    auto weakPtr = WeakClaim(this);
-    auto pattern = weakPtr.Upgrade();
-    if (pattern->status_ == Status::DRAGGING) {
-        CloseSelectOverlay();
-        pattern->showSelect_ = false;
-    }
 }
 
 std::function<void(Offset)> TextPattern::GetThumbnailCallback()
@@ -4387,10 +4396,7 @@ void TextPattern::OnTextGenstureSelectionEnd()
 
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode)
 {
-    auto touchOffset = event.GetLocalLocation();
-    if (!isOverlayMode) {
-        touchOffset = event.GetGlobalLocation();
-    }
+    auto touchOffset = event.GetGlobalLocation();
     auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
     bool isChangeFirstHandle = isFirst ? (!textSelector_.StartGreaterDest()) : textSelector_.StartGreaterDest();
     if (isChangeFirstHandle) {

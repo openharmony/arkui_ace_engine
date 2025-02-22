@@ -2139,8 +2139,10 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
         (noAnimation) ? HideFrameNodeImmediately(FrameNodeType::SELECTMENU)
                       : ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
+        FireCustomMenuChangeEvent(false);
     } else {
         ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
+        FireCustomMenuChangeEvent(true);
     }
 
     if (isExtensionMenu_ && extensionMenu_) {

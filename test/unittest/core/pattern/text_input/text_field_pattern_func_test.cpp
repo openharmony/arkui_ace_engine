@@ -874,14 +874,15 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc051, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    SourceAndValueInfo info;
-    info.isIME = true;
     auto state = false;
     auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto callback = [&state](const InsertValueInfo& info){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
-    pattern->InsertValueOperation(info);
+    InsertCommandInfo info;
+    info.insertValue = "";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
     EXPECT_TRUE(state);
 }
 
@@ -901,12 +902,14 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc052, TestSize.Level1)
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
-    SourceAndValueInfo info;
-    info.isIME = true;
+
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
 
-    pattern->InsertValueOperation(info);
+    InsertCommandInfo info;
+    info.insertValue = "";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
     EXPECT_TRUE(state);
 }
 
@@ -925,12 +928,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc053, TestSize.Level1)
     auto state = false;
     auto callback = [&state](const DeleteValueInfo&){ state = true; };
     eventHub->SetOnDidDeleteEvent(callback);
-    SourceAndValueInfo info;
-    info.isIME = true;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
 
-    pattern->InsertValueOperation(info);
+    pattern->AddInsertCommand("", InputReason::IME);
     EXPECT_FALSE(pattern->cursorVisible_);
 }
 
@@ -1082,14 +1083,14 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc062, TestSize.Level1)
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = true;
-    while (!pattern->insertValueOperations_.empty()) {
-        pattern->insertValueOperations_.pop();
+    while (!pattern->insertCommands_.empty()) {
+        pattern->insertCommands_.pop();
     }
 
     pattern->focusIndex_ = FocuseIndex::TEXT;
     pattern->hasPreviewText_ = false;
     pattern->InsertValue("", true);
-    EXPECT_FALSE(pattern->insertValueOperations_.empty());
+    EXPECT_FALSE(pattern->insertCommands_.empty());
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc063, TestSize.Level1)
@@ -1300,5 +1301,33 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc071, TestSize.Level1)
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(AceType::MakeRefPtr<TextFieldPattern>());
     pattern->HandleTouchMove(location);
     EXPECT_TRUE(pattern->cursorVisible_);
+}
+
+/**
+ * @tc.name: TextPatternFunc092
+ * @tc.desc: test SetOnWillChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc092, TestSize.Level1)
+{
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto state = false;
+    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto callback = [&state](const ChangeValueInfo& info){ return (state = true); };
+    eventHub->SetOnWillChangeEvent(callback);
+
+    InsertCommandInfo info;
+    info.insertValue = "openharmony";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
+    EXPECT_TRUE(state);
 }
 } // namespace OHOS::Ace

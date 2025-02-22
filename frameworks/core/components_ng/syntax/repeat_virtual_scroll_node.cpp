@@ -70,7 +70,6 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
     totalCount_ = totalCount;
 }
 
-
 void RepeatVirtualScrollNode::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
@@ -80,7 +79,7 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
         cacheStart = 0;
         cacheEnd = 0;
     }
-    ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start [%d] - end [%d]; cacheStart: [%d], cacheEnd: [%d]",
+    ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start[%d] - end[%d]; cacheStart[%d], cacheEnd[%d]",
         start, end, cacheStart, cacheEnd);
     CheckActiveRange(start, end, cacheStart, cacheEnd);
 
@@ -325,6 +324,7 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
             "index %{public}d -> key '%{public}s' not in caches && needBuild==true, calling "
             "CreateOrUpdateFrameChild4Index ....",
             static_cast<int32_t>(index), key->c_str());
+
         // ask TS to update a Node, if possible
         // if no suitable node, request to crete a new node
         node4Index = caches_.UpdateFromL2(index);

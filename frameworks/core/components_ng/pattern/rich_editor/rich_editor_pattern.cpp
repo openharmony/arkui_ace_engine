@@ -1524,6 +1524,14 @@ void RichEditorPattern::CopyGestureOption(const RefPtr<SpanNode>& source, RefPtr
         auto tmpLongPressFunc = sourceItem->onLongPress;
         targetItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
+    if (sourceItem->onDoubleClick) {
+        auto tmpOnDoubleClick = sourceItem->onDoubleClick;
+        targetItem->SetDoubleClickEvent(std::move(tmpOnDoubleClick));
+    }
+    if (sourceItem->onHover) {
+        auto tmpHoverFunc = sourceItem->onHover;
+        targetItem->SetHoverEvent(std::move(tmpHoverFunc));
+    }
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
@@ -2777,6 +2785,7 @@ void RichEditorPattern::CreateAndShowSingleHandle()
     selectOverlay_->SetIsSingleHandle(true);
     textSelector_.Update(caretPosition_);
     CalculateHandleOffsetAndShowOverlay();
+    UpdateSelectionType(GetSpansInfo(caretPosition_, caretPosition_, GetSpansMethod::ONSELECT));
     selectOverlay_->ProcessOverlay({ .animation = true });
 }
 
@@ -7928,11 +7937,10 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
 }
 
 void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
-    std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
-    std::function<void()>& onDisappear)
+    std::function<void()>& menuBuilder, const SelectMenuParam& menuParam)
 {
     TextPattern::BindSelectionMenu(
-        richEditorType, type, menuBuilder, { .onAppear = onAppear, .onDisappear = onDisappear });
+        richEditorType, type, menuBuilder, menuParam);
 }
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
@@ -8045,6 +8053,9 @@ void RichEditorPattern::UpdateSelectMenuInfo(SelectMenuInfo& menuInfo)
         inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
 #endif
     menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput && !customKeyboardBuilder_;
+    if (textResponseType_.has_value()) {
+        menuInfo.responseType = static_cast<int32_t>(textResponseType_.value());
+    }
 }
 
 bool RichEditorPattern::IsShowSelectMenuUsingMouse()
@@ -10776,7 +10787,7 @@ bool RichEditorPattern::InsertOrDeleteSpace(int32_t index)
     return true;
 }
 
-void RichEditorPattern::DeleteRange(int32_t start, int32_t end)
+void RichEditorPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
 {
     if (start > end) {
         std::swap(start, end);

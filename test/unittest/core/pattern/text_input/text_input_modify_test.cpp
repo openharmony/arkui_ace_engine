@@ -816,6 +816,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback012, TestSize.Level1)
     accessibilityProperty->actionCutImpl_.operator()();
     accessibilityProperty->actionPasteImpl_.operator()();
     accessibilityProperty->actionClearSelectionImpl_.operator()();
+    pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijfghijklmnopqrstuvwxyz");
 }
 

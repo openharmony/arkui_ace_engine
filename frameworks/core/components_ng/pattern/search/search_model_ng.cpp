@@ -517,7 +517,7 @@ void SearchModelNG::SetOnSubmit(std::function<void(const std::string&, NG::TextF
     eventHub->SetOnSubmit(std::move(onSubmit));
 }
 
-void SearchModelNG::SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange)
+void SearchModelNG::SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();
     CHECK_NULL_VOID(searchTextField);
@@ -528,15 +528,15 @@ void SearchModelNG::SetOnChange(std::function<void(const std::string&, PreviewTe
     auto pattern = frameNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)),
-        onChange](const std::string& value, PreviewText& previewText) {
+        onChange](const ChangeValueInfo& info) {
         if (onChange) {
-            onChange(value, previewText);
+            onChange(info);
         }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
         CHECK_NULL_VOID(searchPattern);
-        searchPattern->UpdateChangeEvent(value + previewText.value);
+        searchPattern->UpdateChangeEvent(info.value + info.previewText.value);
     };
     eventHub->SetOnChange(std::move(searchChangeFunc));
 }
@@ -621,6 +621,15 @@ void SearchModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, N
         }
     };
     eventHub->SetOnPasteWithEvent(std::move(searchPasteFunc));
+}
+
+void SearchModelNG::SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChangeEvent(std::move(func));
 }
 
 void SearchModelNG::SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func)
@@ -745,6 +754,9 @@ void SearchModelNG::SetType(TextInputType value)
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
+        auto pattern = textFieldHost->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsFilterChanged(true);
     }
     layoutProperty->UpdateTextInputType(value);
     textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1597,7 +1609,7 @@ void SearchModelNG::SetOnSubmit(
     eventHub->SetOnSubmit(std::move(onSubmit));
 }
 
-void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange)
+void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const ChangeValueInfo&)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -1607,15 +1619,15 @@ void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const s
     auto pattern = frameNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)),
-        onChange](const std::string& value, PreviewText& previewText) {
+        onChange](const ChangeValueInfo& info) {
         if (onChange) {
-            onChange(value, previewText);
+            onChange(info);
         }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
         CHECK_NULL_VOID(searchPattern);
-        searchPattern->UpdateChangeEvent(value + previewText.value);
+        searchPattern->UpdateChangeEvent(info.value + info.previewText.value);
     };
     eventHub->SetOnChange(std::move(searchChangeFunc));
 }
@@ -1703,6 +1715,9 @@ void SearchModelNG::SetType(FrameNode* frameNode, TextInputType value)
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
+        auto pattern = textFieldHost->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsFilterChanged(true);
     }
     layoutProperty->UpdateTextInputType(value);
     textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1775,6 +1790,16 @@ RefPtr<TextFieldControllerBase> SearchModelNG::GetSearchController(FrameNode* fr
     auto pattern = frameNode->GetPattern<SearchPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetSearchController();
+}
+
+void SearchModelNG::SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChangeEvent(std::move(func));
 }
 
 void SearchModelNG::SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func)

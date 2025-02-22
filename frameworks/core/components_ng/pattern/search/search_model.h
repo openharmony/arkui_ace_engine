@@ -62,7 +62,7 @@ public:
     virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
     virtual void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit);
-    virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange);
+    virtual void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange);
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
@@ -73,6 +73,7 @@ public:
     virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func);
     virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func);
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func);
+    virtual void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func);
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetLetterSpacing(const Dimension& value) {};
