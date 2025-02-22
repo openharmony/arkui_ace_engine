@@ -1531,10 +1531,10 @@ void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo
     if (!sizeArg->IsUndefined() && !sizeArg->IsNull() &&
         Framework::JSViewAbstract::ParseJsDimensionVpNG(sizeArg, iconSize, false)) {
         if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
-            iconSize = theme->GetIconSize();
+            iconSize = theme->GetCancelIconSize();
         }
     } else {
-        iconSize = theme->GetIconSize();
+        iconSize = theme->GetCancelIconSize();
     }
 
     Color value;

@@ -10635,26 +10635,32 @@ void TextFieldPattern::InitCancelButtonMouseEvent()
     CHECK_NULL_VOID(imageTouchHub);
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask = [weak = WeakClaim(this), cleanNodeResponseArea = cleanNodeResponseArea_](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnHover(isHover);
-            pattern->HandleButtonMouseEvent(cleanNodeResponseArea, isHover);
-        }
+    auto imageHoverTask = [weak = WeakClaim(this),
+        cleanNodeResponseAreaWeak = WeakPtr<TextInputResponseArea>(cleanNodeResponseArea_)](bool isHover) {
+            auto cleanNodeResponseArea = cleanNodeResponseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(cleanNodeResponseArea);
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnHover(isHover);
+                pattern->HandleButtonMouseEvent(cleanNodeResponseArea, isHover);
+            }
     };
     imageHoverEvent_ = MakeRefPtr<InputEvent>(std::move(imageHoverTask));
     imageInputHub->AddOnHoverEvent(imageHoverEvent_);
 
-    auto imageTouchTask = [weak = WeakClaim(this), cleanNodeResponseArea = cleanNodeResponseArea_](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN) {
-            pattern->HandleCancelButtonTouchDown(cleanNodeResponseArea);
-        }
-        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            pattern->HandleCancelButtonTouchUp();
-        }
+    auto imageTouchTask = [weak = WeakClaim(this), cleanNodeResponseAreaWeak =
+        WeakPtr<TextInputResponseArea>(cleanNodeResponseArea_)](const TouchEventInfo& info) {
+            auto cleanNodeResponseArea = cleanNodeResponseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(cleanNodeResponseArea);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
+                pattern->HandleCancelButtonTouchDown(cleanNodeResponseArea);
+            }
+            if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+                pattern->HandleCancelButtonTouchUp();
+            }
     };
 
     imageTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(imageTouchTask));
@@ -10672,26 +10678,32 @@ void TextFieldPattern::InitPasswordButtonMouseEvent()
     CHECK_NULL_VOID(imageTouchHub);
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask = [weak = WeakClaim(this), responseArea = responseArea_](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnHover(isHover);
-            pattern->HandleButtonMouseEvent(responseArea, isHover);
-        }
+    auto imageHoverTask =
+        [weak = WeakClaim(this), responseAreaWeak = WeakPtr<TextInputResponseArea>(responseArea_)](bool isHover) {
+            auto responseArea = responseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(responseArea);
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnHover(isHover);
+                pattern->HandleButtonMouseEvent(responseArea, isHover);
+            }
     };
     imageHoverEvent_ = MakeRefPtr<InputEvent>(std::move(imageHoverTask));
     imageInputHub->AddOnHoverEvent(imageHoverEvent_);
 
-    auto imageTouchTask = [weak = WeakClaim(this), responseArea = responseArea_](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN) {
-            pattern->HandleCancelButtonTouchDown(responseArea);
-        }
-        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            pattern->HandleCancelButtonTouchUp();
-        }
+    auto imageTouchTask = [weak = WeakClaim(this), responseAreaWeak = WeakPtr<TextInputResponseArea>(responseArea_)]
+        (const TouchEventInfo& info) {
+            auto responseArea = responseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(responseArea);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
+                pattern->HandleCancelButtonTouchDown(responseArea);
+            }
+            if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+                pattern->HandleCancelButtonTouchUp();
+            }
     };
     imageTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(imageTouchTask));
     imageTouchHub->AddTouchEvent(imageTouchEvent_);
