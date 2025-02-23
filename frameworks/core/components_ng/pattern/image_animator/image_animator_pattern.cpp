@@ -331,6 +331,9 @@ void ImageAnimatorPattern::OnModifyDone()
         controlledAnimator_->AddInterpolator(CreatePictureAnimation(size));
         AdaptSelfSize();
         imagesChangedFlag_ = false;
+    } else if (isImagesSame_) {
+        AdaptSelfSize();
+        isImagesSame_ = false;
     }
     controlledAnimator_->SetIteration(GetIteration());
     if (firstUpdateEvent_) {
