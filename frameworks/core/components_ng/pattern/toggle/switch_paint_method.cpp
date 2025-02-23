@@ -215,12 +215,12 @@ float SwitchModifier::GetSwitchWidth(const SizeF& contentSize) const
 
 int32_t SwitchPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const
 {
-    const int32_t defaultValue = 0;
-    CHECK_NULL_RETURN(paintWrapper, defaultValue);
+    const int32_t defaultThemeScopeId = 0;
+    CHECK_NULL_RETURN(paintWrapper, defaultThemeScopeId);
     auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, defaultValue);
+    CHECK_NULL_RETURN(renderContext, defaultThemeScopeId);
     auto host = renderContext->GetHost();
-    CHECK_NULL_RETURN(host, defaultValue);
+    CHECK_NULL_RETURN(host, defaultThemeScopeId);
     return host->GetThemeScopeId();
 }
 } // namespace OHOS::Ace::NG

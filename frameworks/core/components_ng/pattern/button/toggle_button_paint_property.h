@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUTTON_TOGGLE_BUTTON_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -53,9 +55,16 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto toggleTheme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
+        CHECK_NULL_VOID(toggleTheme);
+        auto selectedColor = toggleTheme->GetCheckedColor();
         json->PutExtAttr("type", "ToggleType.Button", filter);
         json->PutExtAttr("isOn", propIsOn_.value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("selectedColor", propSelectedColor_.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("selectedColor", propSelectedColor_.value_or(selectedColor).ColorToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsOn, bool, PROPERTY_UPDATE_RENDER);
