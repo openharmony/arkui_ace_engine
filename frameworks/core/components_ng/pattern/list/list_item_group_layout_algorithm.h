@@ -388,7 +388,7 @@ public:
         prevTotalItemCount_ = prevTotalItemCount;
     }
 
-    void SetPrevTotalMainSize(int32_t prevTotalMainSize)
+    void SetPrevTotalMainSize(float prevTotalMainSize)
     {
         prevTotalMainSize_ = prevTotalMainSize;
     }
