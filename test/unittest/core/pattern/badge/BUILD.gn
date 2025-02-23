@@ -17,6 +17,6 @@ ace_unittest("badge_test_ng") {
   type = "new"
   sources = [
     "badge_layout_algorithm_test_ng.cpp",
-    "badge_test_ng.cpp"
+    "badge_test_ng.cpp",
   ]
 }
