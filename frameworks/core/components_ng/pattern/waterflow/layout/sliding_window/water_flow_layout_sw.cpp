@@ -45,13 +45,12 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
         FillBack(mainLen_, change, itemCnt_ - 1);
     }
 
-    if (canSkip_) {
-        info_->TryConvertLargeDeltaToJump(mainLen_, itemCnt_);
-    }
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
     } else if (info_->targetIndex_) {
         MeasureBeforeAnimation(*info_->targetIndex_);
+    } else if (canSkip_ && info_->TryConvertLargeDeltaToJump(mainLen_, itemCnt_)) {
+        MeasureOnJump(info_->jumpIndex_, ScrollAlign::START);
     } else {
         MeasureOnOffset(info_->delta_);
     }
