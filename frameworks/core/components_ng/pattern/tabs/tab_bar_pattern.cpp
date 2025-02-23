@@ -2060,7 +2060,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         CHECK_NULL_VOID(columnNode);
         auto columnId = columnNode->GetId();
         auto iter = tabBarType_.find(columnId);
-        if (iter != tabBarType_.end() && iter->second) {
+        if (iter != tabBarType_.end() && iter->second != TabBarParamType::NORMAL) {
             index++;
             continue;
         }
@@ -2182,6 +2182,21 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
     }
 }
 
+void TabBarPattern::AdjustSymbolStats(int32_t index)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+
+    for (int32_t i = 0; i < static_cast<int32_t>(tabBarNode->GetChildren().size()); i++) {
+        if (i == index) {
+            UpdateSymbolStats(index, -1);
+            continue;
+        }
+
+        UpdateSymbolStats(-1, i);
+    }
+}
+
 void TabBarPattern::UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode,
     RefPtr<TextLayoutProperty>& symbolProperty, int32_t index, std::string type)
 {
@@ -2265,7 +2280,8 @@ SelectedMode TabBarPattern::GetSelectedMode() const
 
 bool TabBarPattern::IsContainsBuilder()
 {
-    return std::any_of(tabBarType_.begin(), tabBarType_.end(), [](const auto& isBuilder) { return isBuilder.second; });
+    return std::any_of(tabBarType_.begin(), tabBarType_.end(),
+        [](const auto& isBuilder) { return isBuilder.second == TabBarParamType::CUSTOM_BUILDER; });
 }
 
 void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset)
