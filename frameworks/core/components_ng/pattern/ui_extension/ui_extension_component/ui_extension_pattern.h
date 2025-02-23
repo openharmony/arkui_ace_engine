@@ -118,6 +118,10 @@ public:
     void RegisterWindowSceneVisibleChangeCallback(const RefPtr<Pattern>& windowScenePattern);
     void UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId);
     void OnWindowSceneVisibleChange(bool visible);
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -313,6 +317,17 @@ private:
     void DispatchFocusState(bool focusState);
     void DispatchDisplayArea(bool isForce = false);
     void LogoutModalUIExtension();
+    bool IsMoving();
+    void UnRegisterEvent(int32_t instanceId);
+    void UnRegisterPipelineEvent(int32_t instanceId);
+    void UnRegisterPipelineEvent(
+        const RefPtr<PipelineContext>& pipeline, FrameNode* frameNode);
+    void UnRegisterUIExtensionManagerEvent(int32_t instanceId);
+    void RegisterEvent(int32_t instanceId);
+    void RegisterPipelineEvent(int32_t instanceId);
+    void RegisterPipelineEvent(const RefPtr<PipelineContext>& pipeline);
+    void RegisterUIExtensionManagerEvent(int32_t instanceId);
+    void UpdateSessionInstanceId(int32_t instanceId);
 
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode(PlaceholderType type);
@@ -395,6 +410,7 @@ private:
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
     bool isKeyAsync_ = false;
+    bool hasDetachContext_ = false;
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;

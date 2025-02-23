@@ -341,7 +341,7 @@ void DynamicPattern::OnDetachContext(PipelineContext *context)
 {
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
-    PLATFORM_LOGI("OnAttachContext instanceId: %{public}d.", instanceId);
+    PLATFORM_LOGI("OnDetachContext instanceId: %{public}d.", instanceId);
     UnRegisterPipelineEvent(instanceId);
 }
 
