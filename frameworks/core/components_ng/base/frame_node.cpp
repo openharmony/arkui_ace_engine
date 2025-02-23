@@ -264,7 +264,6 @@ public:
             } else {
                 LOGW("[%{public}d:%{public}s] reset children while in use",
                     hostNode_->GetId(), hostNode_->GetTag().c_str());
-                LogBacktrace();
             }
             delayReset_ = true;
             needResetChild_ = needResetChild;

@@ -158,6 +158,8 @@ const std::string LogWrapper::GetIdWithReason()
 }
 #endif
 
+static std::atomic<bool> skipBacktrace = false;
+
 void SetSkipBacktrace(bool inputFlag)
 {
     skipBacktrace.store(inputFlag);

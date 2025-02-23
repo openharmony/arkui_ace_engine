@@ -311,8 +311,6 @@ private:
     static LogLevel level_;
 };
 
-static std::atomic<bool> skipBacktrace = false;
-
 void SetSkipBacktrace(bool inputFlag);
 
 bool LogBacktrace(size_t maxFrameNums = 256);
