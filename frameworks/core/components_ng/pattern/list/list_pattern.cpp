@@ -233,9 +233,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
     contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
     contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
-    if (isStackFromEnd_) {
-        std::swap(contentStartOffset_, contentEndOffset_);
-    }
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
@@ -2818,6 +2815,7 @@ void ListPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("contentStartOffset:" + std::to_string(contentStartOffset_));
     DumpLog::GetInstance().AddDesc("contentEndOffset:" + std::to_string(contentEndOffset_));
     DumpLog::GetInstance().AddDesc("currentDelta:" + std::to_string(currentDelta_));
+    DumpLog::GetInstance().AddDesc("stackFromEnd:" + std::to_string(isStackFromEnd_));
     crossMatchChild_ ? DumpLog::GetInstance().AddDesc("crossMatchChild:true")
                      : DumpLog::GetInstance().AddDesc("crossMatchChild:false");
     smooth_ ? DumpLog::GetInstance().AddDesc("smooth:true") : DumpLog::GetInstance().AddDesc("smooth:false");

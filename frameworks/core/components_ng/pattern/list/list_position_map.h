@@ -440,10 +440,15 @@ public:
         return { end->first, end->second.mainPos + end->second.mainSize };
     }
 
-    void OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos, const float offset, const float contentSize)
+    void OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos, const float offset, const float contentSize,
+        bool isStackFromEnd = false)
     {
         if (NearZero(offset) || GreatOrEqual(contentSize, totalHeight_)) {
             return;
+        }
+        if (isStackFromEnd) {
+            beginIndex = totalItemCount_ - beginIndex - 1;
+            beginPos = contentSize - beginPos;
         }
         float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(beginIndex) : 0.0f;
         if (Positive(offset)) {
@@ -466,6 +471,10 @@ public:
                 rowInfo = GetRowEndIndexAndHeight(beginIndex);
                 chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(beginIndex) : 0.0f;
             }
+        }
+        if (isStackFromEnd) {
+            beginIndex = totalItemCount_ - beginIndex - 1;
+            beginPos = contentSize - beginPos;
         }
     }
 
@@ -509,6 +518,25 @@ public:
             rowHeight = posMap_[endIndex + 1].mainPos  - posMap_[endIndex].mainPos - space_;
         }
         return { endIndex, rowHeight };
+    }
+
+    void ReversePosMap()
+    {
+        totalHeight_ = 0.0f;
+        float curRowHeight = posMap_.begin()->second.mainSize;
+        std::map<int32_t, PositionInfo> posMap;
+        for (int32_t index = totalItemCount_ - 1; index >= 0; --index) {
+            auto posIndex = totalItemCount_ - index - 1;
+            posMap[posIndex] = {totalHeight_, posMap_[posIndex].mainSize};
+            if (!NearEqual(posMap_[index].mainPos, posMap_[index - 1].mainPos)) {
+                totalHeight_ += (curRowHeight + space_);
+                curRowHeight = 0.0f;
+            } else {
+                curRowHeight = std::max(posMap_[posIndex].mainSize, curRowHeight);
+            }
+        }
+        posMap_ = std::move(posMap);
+        totalHeight_ += curRowHeight;
     }
 protected:
     RefPtr<ListChildrenMainSize> childrenSize_;

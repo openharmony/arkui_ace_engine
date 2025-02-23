@@ -758,9 +758,9 @@ void ListLayoutAlgorithm::CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper,
     startPos = itemGroup->GetRefPos();
     ListItemInfo itemInfo;
     if (forwardLayout) {
-        itemInfo = { id, startPos, startPos + childrenSize_->GetChildSize(startIndex), isGroup };
+        itemInfo = { id, startPos, startPos + childrenSize_->GetChildSize(startIndex, isStackFromEnd_), isGroup };
     } else {
-        itemInfo = { id, startPos - childrenSize_->GetChildSize(startIndex), startPos, isGroup };
+        itemInfo = { id, startPos - childrenSize_->GetChildSize(startIndex, isStackFromEnd_), startPos, isGroup };
     }
     firstItemInfo_ = std::make_pair(startIndex, itemInfo);
 }
@@ -944,7 +944,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
             if (childrenSize_) {
                 CheckAndMeasureStartItem(layoutWrapper, startIndex, startPos, startItemIsGroup, true);
-                posMap_->OptimizeBeforeMeasure(startIndex, startPos, currentOffset_, contentMainSize_);
+                posMap_->OptimizeBeforeMeasure(startIndex, startPos, currentOffset_, contentMainSize_, isStackFromEnd_);
             }
             LayoutForward(layoutWrapper, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPositionWithChainOffset(), startMainPos_)) {
@@ -960,7 +960,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
             if (childrenSize_) {
                 CheckAndMeasureStartItem(layoutWrapper, endIndex, endPos, endItemIsGroup, false);
-                posMap_->OptimizeBeforeMeasure(endIndex, endPos, currentOffset_, contentMainSize_);
+                posMap_->OptimizeBeforeMeasure(endIndex, endPos, currentOffset_, contentMainSize_, isStackFromEnd_);
             }
             LayoutBackward(layoutWrapper, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
@@ -1055,7 +1055,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, startPos);
             wrapper->Measure(childLayoutConstraint_);
         }
-        float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
+        float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex, isStackFromEnd_) :
             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
         endPos = startPos + mainLen;
         itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
@@ -1094,7 +1094,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, endPos);
             wrapper->Measure(childLayoutConstraint_);
         }
-        float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
+        float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex, isStackFromEnd_) :
             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
         startPos = endPos - mainLen;
         itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
@@ -1663,7 +1663,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     FixItemLayoutOffset(layoutWrapper);
     LayoutHeader(layoutWrapper, paddingOffset_, crossSize);
     UpdateOverlay(layoutWrapper);
-    currentOffset_ = !isStackFromEnd_ ? currentOffset_ : -currentOffset_;
+    ProcessStackFromEnd();
     ReverseItemPosition(itemPosition_, totalItemCount_, contentMainSize_);
     totalOffset_ += currentOffset_;
     FixPredictSnapPos();
@@ -2602,6 +2602,9 @@ void ListLayoutAlgorithm::ProcessStackFromEnd()
             scrollAlign_ = ScrollAlign::END;
         } else if (scrollAlign_ == ScrollAlign::END) {
             scrollAlign_ = ScrollAlign::START;
+        }
+        if (posMap_ && GetLanes() > 1) {
+            posMap_->ReversePosMap();
         }
     }
 }

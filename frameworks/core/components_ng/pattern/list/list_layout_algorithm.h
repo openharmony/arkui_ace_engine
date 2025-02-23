@@ -372,7 +372,7 @@ public:
 
     virtual float GetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex)
     {
-        return childrenSize_->GetChildSize(childIndex);
+        return childrenSize_->GetChildSize(childIndex, isStackFromEnd_);
     }
 
     virtual int32_t GetLanes() const
@@ -613,6 +613,7 @@ protected:
     OffsetF paddingOffset_;
     bool isLayouted_ = true;
     std::function<float(int32_t)> chainOffsetFunc_;
+    bool isStackFromEnd_ = false;
 
     int32_t itemStartIndex_ = 0;
 
@@ -650,7 +651,6 @@ private:
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 
     float chainInterval_ = 0.0f;
-    bool isStackFromEnd_ = false;
 };
 } // namespace OHOS::Ace::NG
 
