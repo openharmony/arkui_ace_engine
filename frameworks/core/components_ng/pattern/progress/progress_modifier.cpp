@@ -304,7 +304,7 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     AnimationOption optionHead = AnimationOption();
     auto curveHead = AceType::MakeRefPtr<TailingHeadCurve>();
     optionHead.SetDuration(LOADING_ANIMATION_DURATION);
@@ -326,7 +326,7 @@ void ProgressModifier::StartRingLoadingTailAnimation()
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     AnimationOption optionTail = AnimationOption();
     auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.00f, 0.66f, 0.10f);
     optionTail.SetDuration(LOADING_ANIMATION_DURATION);
@@ -413,7 +413,7 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     isSweeping_ = true;
     AnimationOption option = AnimationOption();
     speed = NearZero(speed) ? 1.0f : speed;
@@ -581,7 +581,7 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     isSweeping_ = true;
     sweepingDate_->Set(0.0f);
     speed = NearZero(speed) ? 1.0f : speed;

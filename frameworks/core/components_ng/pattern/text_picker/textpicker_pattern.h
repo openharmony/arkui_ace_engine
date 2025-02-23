@@ -120,13 +120,7 @@ public:
         if (value.empty()) {
             return;
         }
-        range_.clear();
-        for (size_t i = 0; i < value.size(); i++) {
-            RangeContent content;
-            content.icon_ = value[i].icon_;
-            content.text_ = value[i].text_;
-            range_.emplace_back(content);
-        }
+        range_ = value;
     }
 
     std::vector<NG::RangeContent> GetRange() const

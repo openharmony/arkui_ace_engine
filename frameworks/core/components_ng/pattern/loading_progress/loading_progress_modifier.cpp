@@ -270,7 +270,7 @@ void LoadingProgressModifier::StartRecycleRingAnimation()
     AnimationOption option;
     option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
     option.SetCurve(previousStageCurve);
-    if (context->IsFormRender()) {
+    if (context->IsFormRender() && !IsDynamicComponent()) {
         option.SetIteration(1);
     } else {
         option.SetIteration(-1);
@@ -307,7 +307,7 @@ void LoadingProgressModifier::StartRecycleCometAnimation()
     AnimationOption option;
     option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
     option.SetCurve(curve);
-    if (context->IsFormRender()) {
+    if (context->IsFormRender() && !IsDynamicComponent()) {
         option.SetIteration(1);
     } else {
         option.SetIteration(-1);
@@ -425,7 +425,7 @@ void LoadingProgressModifier::StartRecycle()
         option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
         option.SetDelay(0);
         option.SetCurve(curve);
-        if (context->IsFormRender()) {
+        if (context->IsFormRender() && !IsDynamicComponent()) {
             option.SetIteration(1);
         } else {
             option.SetIteration(-1);

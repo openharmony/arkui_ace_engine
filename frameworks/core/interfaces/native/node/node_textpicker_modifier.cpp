@@ -31,7 +31,7 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr uint32_t MAX_SIZE = 12;
 constexpr float MAX_PERCENT = 100.0f;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
-std::string g_strValue;
+thread_local std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
