@@ -62,6 +62,10 @@ public:
 
     void SetImages(std::vector<ImageProperties>&& images)
     {
+        if (images_.size() == images.size() && images_ == images) {
+            isImagesSame_ = true;
+            return;
+        }
         images_ = std::move(images);
         durationTotal_ = 0;
         for (const auto& childImage : images_) {
@@ -189,6 +193,7 @@ private:
     bool isReverse_ = false;
     bool fixedSize_ = true;
 
+    bool isImagesSame_ = false;
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
     bool isLayouted_ = false;
