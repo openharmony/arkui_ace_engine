@@ -851,22 +851,23 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto isAllowedDrag = gestureEventHub->IsAllowedDrag(eventHub) && !gestureEventHub->GetTextDraggable();
+    auto isLiftingDisabled = targetNode->GetDragPreviewOption().isLiftingDisabled;
     if (targetNode->GetTag() == V2::TEXT_ETS_TAG && targetNode->IsDraggable() && !targetNode->IsCustomerSet()) {
         auto textPattern = targetNode->GetPattern<TextPattern>();
         if (textPattern && textPattern->GetCopyOptions() == CopyOptions::None) {
             isAllowedDrag = false;
         }
     }
-    if (menuParam.previewMode != MenuPreviewMode::NONE || isAllowedDrag) {
+    if (menuParam.previewMode != MenuPreviewMode::NONE || (isAllowedDrag && !isLiftingDisabled)) {
         SetFilter(targetNode, wrapperNode);
     }
     if (menuParam.previewMode == MenuPreviewMode::IMAGE ||
         (menuParam.previewMode == MenuPreviewMode::NONE && menuParam.menuBindType == MenuBindingType::LONG_PRESS &&
-            isAllowedDrag) ||
+            isAllowedDrag && !isLiftingDisabled) ||
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag) {
+    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag && !isLiftingDisabled) {
         CHECK_NULL_VOID(wrapperNode);
         auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
         CHECK_NULL_VOID(pixelMapNode);

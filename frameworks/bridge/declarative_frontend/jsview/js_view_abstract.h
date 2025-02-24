@@ -135,6 +135,11 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
+    static void ParseDragPreviewConfig(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
+    static void ParseDragPreviewValue(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo);
+    static void ParseDragPreviewBuilderNode(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo,
+        const JSRef<JSVal>& builder);
+    static void ParseDragInteractionOptions(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
     static NG::DragPreviewOption ParseDragPreviewOptions(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);

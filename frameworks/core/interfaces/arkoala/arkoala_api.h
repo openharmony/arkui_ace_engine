@@ -1465,6 +1465,7 @@ struct ArkUIDragPreViewOptions {
 struct ArkUIDragInteractionOptions {
     ArkUI_Bool isMultiSelectionEnabled;
     ArkUI_Bool defaultAnimationBeforeLifting;
+    ArkUI_Bool isLiftingDisabled;
 };
 
 struct ArkUIImageFrameInfo {
@@ -1538,6 +1539,9 @@ struct ArkUITransitionEffectOption {
 };
 struct ArkUIDragPreview {
     ArkUI_CharPtr inspectorId;
+    ArkUI_Bool onlyForLifting;
+    void* pixelMap;
+    ArkUI_CharPtr extraInfo;
 };
 
 struct ArkUIDragPreViewAndInteractionOptions {

@@ -6409,6 +6409,30 @@ void JSViewAbstract::JsSetDraggable(bool draggable)
     ViewAbstractModel::GetInstance()->SetDraggable(draggable);
 }
 
+void JSViewAbstract::ParseDragInteractionOptions(const JSCallbackInfo& info,
+    NG::DragPreviewOption& previewOption)
+{
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
+        auto multiSelection = interObj->GetProperty("isMultiSelectionEnabled");
+        if (multiSelection->IsBoolean()) {
+            previewOption.isMultiSelectionEnabled = multiSelection->ToBoolean();
+        }
+        auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
+        if (defaultAnimation->IsBoolean()) {
+            previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
+        }
+        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
+        if (dragPreview->IsBoolean()) {
+            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
+        }
+        auto isLiftingDisabled = interObj->GetProperty("isLiftingDisabled");
+        if (isLiftingDisabled->IsBoolean()) {
+            previewOption.isLiftingDisabled = isLiftingDisabled->ToBoolean();
+        }
+    }
+}
+
 NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackInfo& info)
 {
     NG::DragPreviewOption previewOption;
@@ -6435,21 +6459,7 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
 
     JSViewAbstract::SetDragNumberBadge(info, previewOption);
 
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
-        auto multiSelection = interObj->GetProperty("isMultiSelectionEnabled");
-        if (multiSelection->IsBoolean()) {
-            previewOption.isMultiSelectionEnabled = multiSelection->ToBoolean();
-        }
-        auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
-        if (defaultAnimation->IsBoolean()) {
-            previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
-        }
-        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
-        if (dragPreview->IsBoolean()) {
-            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
-        }
-    }
+    ParseDragInteractionOptions(info, previewOption);
 
     JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);
 
@@ -9143,13 +9153,23 @@ void JSViewAbstract::JsOnPreDrag(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnPreDrag(onPreDrag);
 }
 
-void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
+void JSViewAbstract::ParseDragPreviewConfig(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo)
 {
-    auto jsVal = info[0];
-    if ((!jsVal->IsObject()) && (!jsVal->IsString())) {
+    if (info.Length() <= 1) {
         return;
     }
-    NG::DragDropInfo dragPreviewInfo;
+    auto jsVal = info[1];
+    if (!jsVal->IsObject()) {
+        return;
+    }
+    auto config = JSRef<JSObject>::Cast(jsVal);
+    ParseJsBool(config->GetProperty("onlyForLifting"), dragPreviewInfo.onlyForLifting);
+    ParseJsBool(config->GetProperty("delayCreating"), dragPreviewInfo.delayCreating);
+}
+
+void JSViewAbstract::ParseDragPreviewValue(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo)
+{
+    auto jsVal = info[0];
     JSRef<JSVal> builder;
     JSRef<JSVal> pixelMap;
     JSRef<JSVal> extraInfo;
@@ -9170,19 +9190,46 @@ void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
     } else {
         return;
     }
+    ParseDragPreviewBuilderNode(info, dragPreviewInfo, builder);
+}
 
-    if (builder->IsFunction()) {
-        RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        if (builderFunc != nullptr) {
-            ViewStackModel::GetInstance()->NewScope();
-            {
-                ACE_SCORING_EVENT("dragPreview.builder");
-                builderFunc->Execute();
-            }
-            RefPtr<AceType> node = ViewStackModel::GetInstance()->Finish();
-            dragPreviewInfo.customNode = AceType::DynamicCast<NG::UINode>(node);
-        }
+void JSViewAbstract::ParseDragPreviewBuilderNode(const JSCallbackInfo& info, NG::DragDropInfo& dragPreviewInfo,
+    const JSRef<JSVal>& builder)
+{
+    if (!builder->IsFunction()) {
+        return;
     }
+    RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                         node = frameNode]() -> RefPtr<NG::UINode> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        ACE_SCORING_EVENT("dragPreview.builder");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute();
+        auto customNode = ViewStackModel::GetInstance()->Finish();
+        return AceType::DynamicCast<NG::UINode>(customNode);
+    };
+    if (!dragPreviewInfo.delayCreating) {
+        ViewStackModel::GetInstance()->NewScope();
+        {
+            dragPreviewInfo.customNode = buildFunc();
+        }
+    } else {
+        dragPreviewInfo.buildFunc = buildFunc;
+    }
+}
+
+void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
+{
+    auto jsVal = info[0];
+    if ((!jsVal->IsObject()) && (!jsVal->IsString())) {
+        return;
+    }
+    NG::DragDropInfo dragPreviewInfo;
+    ParseDragPreviewConfig(info, dragPreviewInfo);
+    ParseDragPreviewValue(info, dragPreviewInfo);
     ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 

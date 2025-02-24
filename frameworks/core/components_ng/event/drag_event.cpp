@@ -675,7 +675,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        if (!frameNode->GetDragPreviewOption().isDragPreviewEnabled) {
+        auto dragPreviewOption = frameNode->GetDragPreviewOption();
+        if (!dragPreviewOption.isDragPreviewEnabled || dragPreviewOption.isLiftingDisabled) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because disable drag preview");
             return;
         }
@@ -797,7 +798,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
                 gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
                 actuator->PrepareFinalPixelMapForDragThroughTouch(dragPreviewInfo.pixelMap, false);
-            } else if (dragPreviewInfo.customNode != nullptr) {
+            } else if (dragPreviewInfo.customNode || (dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc)) {
+                if (!dragPreviewInfo.customNode && dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc) {
+                    dragPreviewInfo.customNode = dragPreviewInfo.buildFunc();
+                }
+                frameNode->SetDragPreview(dragPreviewInfo);
 #if defined(PIXEL_MAP_SUPPORTED)
                 TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
                 auto callback = [id = Container::CurrentId(), pipeline, gestureHub, weak]
@@ -841,8 +846,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             } else {
                 actuator->GetThumbnailPixelMapAsync(gestureHub);
             }
+            auto dragPreviewOption = frameNode->GetDragPreviewOption();
             auto longPressRecognizer = actuator->longPressRecognizer_;
-            if (longPressRecognizer && longPressRecognizer->GetGestureDisposal() != GestureDisposal::REJECT) {
+            if (longPressRecognizer && longPressRecognizer->GetGestureDisposal() != GestureDisposal::REJECT &&
+                !dragPreviewOption.isLiftingDisabled) {
                 if (!CreateGatherNode(actuator)) {
                     actuator->isOnBeforeLiftingAnimation = false;
                     return;

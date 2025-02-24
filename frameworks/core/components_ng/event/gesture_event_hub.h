@@ -150,6 +150,9 @@ struct DragDropInfo {
     // The inspectorId acts as a preview surrogate identifier which is used
     // to retrieve a preview image for the item being dragged.
     std::string inspectorId;
+    std::function<RefPtr<UINode>()> buildFunc;
+    bool onlyForLifting = false;
+    bool delayCreating = false;
 };
 
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
@@ -657,6 +660,7 @@ public:
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
     void HandleNotallowDrag(const GestureEvent& info);
+    bool ParsePixelMapAsync(DragDropInfo& dragDropInfo, const DragDropInfo& dragPreviewInfo, const GestureEvent& info);
 
     RefPtr<DragEventActuator> GetDragEventActuator()
     {
