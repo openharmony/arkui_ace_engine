@@ -13,11 +13,20 @@
  * limitations under the License.
  */
 
+#include "base/utils/time_util.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+    constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+    constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+}
 namespace AnimationExtenderAccessor {
 void DestroyPeerImpl(Ark_AnimationExtender peer)
 {
@@ -46,9 +55,60 @@ void CloseImplicitAnimationImpl(Ark_NativePointer node)
 }
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope cope(currentId);
+    auto scopeDelegate = EngineHelper::GetCurrentDelegateSafely();
+    CHECK_NULL_VOID(scopeDelegate);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    auto timeInterval = (GetMicroTickCount() - pipelineContextBase->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+        timeInterval > DEFAULT_DURATION) {
+        TAG_LOGW(
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        return;
+    }
+    AnimationOption option = Converter::Convert<AnimationOption>(*param);
+    Validator::ValidateAnimationOption(option, pipelineContextBase->IsFormRender());
+    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+            option.GetDuration() > (DEFAULT_DURATION - timeInterval)) {
+        option.SetDuration(DEFAULT_DURATION - timeInterval);
+        TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
+            static_cast<long long>(DEFAULT_DURATION - timeInterval));
+    }
+    auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
+    std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
+        ContainerScope scope(currentId);
+        arkCallback.Invoke();
+    };
+    option.SetOnFinishEvent(onFinishEvent);
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        option.SetAllowRunningAsynchronously(true);
+    }
+    ViewContextModelNG::openAnimationInternal(option);
 }
+
 void CloseImplicitAnimationImpl()
 {
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope cope(currentId);
+    auto scopeDelegate = EngineHelper::GetCurrentDelegateSafely();
+    CHECK_NULL_VOID(scopeDelegate);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    auto timeInterval = (GetMicroTickCount() - pipelineContextBase->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+        timeInterval > DEFAULT_DURATION) {
+        TAG_LOGW(
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        return;
+    }
+    AnimationOption option;
+    ViewContextModelNG::closeAnimationInternal(option, true);
 }
 void StartDoubleAnimationImpl(Ark_NativePointer node,
                               const Ark_DoubleAnimationParam* param)
