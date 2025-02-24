@@ -67,11 +67,11 @@ HWTEST_F(RenderingContextSettingsAccessorTest, getAntialiasTest, TestSize.Level1
  */
 HWTEST_F(RenderingContextSettingsAccessorTest, setAntialiasTest, TestSize.Level1)
 {
-     for (const auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
-         accessor_->setAntialias(peer_, value);
-         auto result = peer_->antialias.value();
-         EXPECT_EQ(result, expected) <<
+    for (const auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
+        accessor_->setAntialias(peer_, value);
+        auto result = peer_->antialias.value();
+        EXPECT_EQ(result, expected) <<
             "Input value is: " << input << ", method: SetRepeat";
-     }
+    }
 }
 }
