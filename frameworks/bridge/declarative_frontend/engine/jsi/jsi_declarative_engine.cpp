@@ -597,13 +597,13 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // preload js views
-    JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
+    JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime, global);
 
     // preload js enums
     PreloadJsEnums(arkRuntime);
 
     // preload requireNative
-    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     JSMock::PreloadWorkerRequireNative(arkRuntime, global);
 }
 
