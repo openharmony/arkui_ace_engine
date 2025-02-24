@@ -39,6 +39,7 @@ public:
         const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
         const std::function<void(int32_t, int32_t)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(int32_t, int32_t)>& onMoveFromTo,
         const std::function<void()>& onPurge) = 0;
 
     virtual void RemoveNode(uint32_t rid) = 0;
@@ -47,7 +48,7 @@ public:
         int32_t repeatElmtId, uint32_t totalCount, int32_t invalidateContainerLayoutFromChildIndex) = 0;
     virtual void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t totalCount,
         uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index) = 0;
-    virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
+    virtual void OnMove(int32_t repeatElmtId, std::function<void(int32_t, int32_t)>&& onMove) = 0;
 
 private:
     static std::unique_ptr<RepeatVirtualScroll2Model> instance_;

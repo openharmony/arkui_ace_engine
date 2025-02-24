@@ -56,6 +56,33 @@
  *         needs to be exactly same in this function on TS side and on C++ side to ensure L1 info in TS and in C++ side
  *         reman in sync.
  *
+ * onMoveFromTo(moveFrom, moveTo) - called from C++, used for drag drop sorting
+ * - TS received moveFromTo from C++ and updated its own moveFromTo. Mainly used to do the following two things:
+ *   a) update its own moveFromTo.
+ *   b) reset its own moveFromTo.
+ * 
+ * How does the drag-drop-sorting work?
+ *    1)users long press the ListItem and drag starts
+ *    2)whenever the index of the dragged item changes, the translation table(this.moveFromTo_) takes care of fixing
+ *      the order. While drag is on-going we do not expect the app to make any changes to the array. If it does,
+ *      the visual result might not be what is expected
+ *    3)user drops item
+ *    4)FireOnMove resets the translation table
+ *    5)onMove callback to the application, application changes the array
+ *    6)frameWork observes array change, triggers rerender
+ *    7)Repeat rerender
+ * 
+ * why TS needs maintain moveFromTo_?
+ * - Mainly used to serve step_2 above
+ * - For a more specific description, please refer to the description above function "convertFromToIndex"
+ *  
+ * when onMoveFromTo will be called from C++?
+ * - When users drag item and move item without dropping, each order change will trig MoveData(function in C++).
+ *  For example, [a, b, c, d] shows in List, user drags item 'a' and move it after to 'c' without dropping.
+ *  During this period, MoveData(0, 1) and MoveData(1, 2) will be called separately, and this.onMoveFromTo_ will
+ *  be updated to [0, 1] and [0, 2] in sequence
+ * 
+ * 
  * onPurge called from C++  RepeatVirtualScrollNode::Purge in idle task
  *  ensure L1 side is within limits (cachedCount), deletes UINode subtrees that do not fit the permissible side
  *  cachedCount is defined for each templateId / ttype for for .each separately
@@ -239,7 +266,13 @@ class __RepeatVirtualScroll2Impl<T> {
 
     // factory for interface RepeatItem<T> objects
     private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
+
+    // register drag drop manager, only used for List
     private onMoveHandler_?: OnMoveHandler;
+
+    // update from C++ when MoveData happens
+    // reset from C++ when FireOnMove happens
+    private moveFromTo_?: [number, number] = undefined;
 
     // RepeatVirtualScrollNode elmtId
     private repeatElmtId_: number = -1;
@@ -309,6 +342,7 @@ class __RepeatVirtualScroll2Impl<T> {
     public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
         // params that can change
         this.arr_ = config.arr;
+        this.onMoveHandler_ = config.onMoveHandler;
 
         // if totalCountSpecified==false, then need to create dependency on array length
         // so when array length changes, will update totalCount. use totalCountFunc_ for this
@@ -344,7 +378,6 @@ class __RepeatVirtualScroll2Impl<T> {
             stateMgmtConsole.debug(`allowUpdate: ${this.allowUpdate_}`);
 
             this.mkRepeatItem_ = config.mkRepeatItem;
-            this.onMoveHandler_ = config.onMoveHandler;
 
             if (!this.itemGenFuncs_[RepeatEachFuncTtype]) {
                 throw new Error(`${this.constructor.name}(${this.repeatElmtId_}))` +
@@ -369,11 +402,12 @@ class __RepeatVirtualScroll2Impl<T> {
             onGetRid4Index: this.onGetRid4Index.bind(this),
             onRecycleItems: this.onRecycleItems.bind(this),
             onActiveRange: this.onActiveRange.bind(this),
+            onMoveFromTo: this.onMoveFromTo.bind(this),
             onPurge: this.onPurge.bind(this)
         });
 
-        // Why is this separate, can onMove be added to create?
-        RepeatVirtualScroll2Native.onMove(this.onMoveHandler_);
+        // init onMove
+        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_);
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) initialRender() data array length: `,
             `${this.arr_.length}, totalCount: ${this.totalCount_} - done`);
@@ -409,6 +443,10 @@ class __RepeatVirtualScroll2Impl<T> {
     private reRender(): void {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
             `${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
+
+        // update onMove
+        // scenario: developers control whether onMove exists or not dynamically. 
+        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_);
 
         const activeRangeFrom = this.activeRange_[0];
         const activeRangeTo = this.activeRange_[1];
@@ -931,15 +969,110 @@ class __RepeatVirtualScroll2Impl<T> {
         // avoid negative fromIndex
         fromIndex = Math.max(0, fromIndex);
         for (let index = fromIndex; index < toIndex; index++) {
-            if (index >= this.totalCount_ || !(index in this.activeDataItems_)) {
+            // when ListItem is being dragged without dropping, index will be mapped.
+            let indexMapped = this.convertFromToIndex(index);
+            if (indexMapped >= this.totalCount_ || !(indexMapped in this.activeDataItems_)) {
                 continue;
             }
-            if (this.activeDataItems_[index].state === ActiveDataItem.UINodeExists) {
-                this.dropFromL1ActiveNodes(index);
+            if (this.activeDataItems_[indexMapped].state === ActiveDataItem.UINodeExists) {
+                this.dropFromL1ActiveNodes(indexMapped);
             }
         }
         stateMgmtConsole.debug(`onRecycleItems(${fromIndex}...<${toIndex}) after applying changes: `,
             `\n${this.dumpSpareRid()}\n${this.dumpDataItems()}`);
+    }
+
+    private onMoveFromTo(moveFrom: number, moveTo: number): void {
+        moveFrom = Math.trunc(moveFrom);
+        moveTo = Math.trunc(moveTo);
+        if (!this.isNonNegative(moveFrom) || !this.isNonNegative(moveTo)) {
+            this.moveFromTo_ = undefined;
+            stateMgmtConsole.debug(`onMoveFromTo param invalid, reset moveFromTo.`);
+            return;
+        }
+        if (this.moveFromTo_) {
+            this.moveFromTo_[1] = moveTo;
+            if (this.moveFromTo_[1] == this.moveFromTo_[0]) {
+                this.moveFromTo_ = undefined;
+            }
+        } else {
+            this.moveFromTo_ = [moveFrom, moveTo];
+        }
+        if (this.moveFromTo_) {
+            stateMgmtConsole.debug(`onMoveFromTo updated (${this.moveFromTo_[0]}, ${this.moveFromTo_[1]})`);
+        } else {
+            stateMgmtConsole.debug(`onMoveFromTo data moved to original pos, reset moveFromTo.`);
+        }
+    }
+
+    private isNonNegative(index: number): boolean {
+        return (Number.isFinite(index) && index >= 0);
+    }
+
+    /**
+     * What is the effective time of these two function(convertFromToIndex, convertFromToIndexRevert)?
+     * - Only valid when ListItem is being dragged up and moved without dropping.
+     * - Otherwise, this.moveFromTo_ is undefined, nothing will be processed and the original index value
+     *  will be returned directly.
+     * 
+     * How does this function convert index value?
+     * - Look at this scenario.
+     * - If original arr is [a, b, c, d], and users long-press item 'a' and drag it up and move it to pos after 'c'
+     *  without dropping. What users see is [b, c, a, d]. Then this.moveFromTo_ is [0, 2].
+     * - If mapping index by convertFromToIndex:
+     *  index is 2, then the mappedIndex is 0.
+     *  index is 1, then the mappedIndex is 2.
+     *  index is 0, then the mappedIndex is 1.
+     * - If mapping index by convertFromToIndexRevert:
+     *  index is 0, then the mappedIndex is 2.
+     *  index is 1, then the mappedIndex is 0.
+     *  index is 2, then the mappedIndex is 1.
+     *  
+     * Why these two function is needed?
+     * - Simply put, they are used for onActiveRange and onRecycleItems when drag and drop sorting is on-going.
+     * - Specifically, also based on the scenario upon and List is scrolling at the same time:
+     *  a) if onActiveRange(1, 3) is being called, then, convertFromToIndexRevert is needed.
+     *      "onActiveRange" is iterating activeDataItems_ and need to map each index in it by convertFromToIndexRevert,
+     *      to judge mappedIndex whether is in active range. Otherwise, item 'a' whose index is 0 is not in active
+     *      range and will be deleted. But actually, item 'a' whose index is 0 has been dragged to index 2.
+     *      So item that need to be deleted is 'b', whose index is 1 and its mappedIndex is 0.
+     *  b) if onRecycleItems(0, 1) is being called, then, convertFromToIndex is needed.
+     *      "onRecycleItems(0, 1)" is iterating index from fromIndex to toIndex. In this scene, it needs to
+     *      map each index by convertFromToIndex. Otherwise, item 'a' whose index is 0 will be removed from L1.
+     *      But actually, item 'a' whose index is 0 has been dragged to index 2. So item that need to be removed
+     *      is 'b', whose index is 1 and its mappedIndex is 0.
+     */
+    private convertFromToIndex(index: number): number {
+        if (!this.moveFromTo_) {
+            return index;
+        }
+        if (this.moveFromTo_[1] == index) {
+            return this.moveFromTo_[0];
+        }
+        if (this.moveFromTo_[0] <= index && index < this.moveFromTo_[1]) {
+            return index + 1;
+        }
+        if (this.moveFromTo_[1] < index && index <= this.moveFromTo_[0]) {
+            return index - 1;
+        }
+        return index;
+    }
+
+    // used for onActiveRange. Specific instructions are provided above.
+    private convertFromToIndexRevert(index: number): number {
+        if (!this.moveFromTo_) {
+            return index;
+        }
+        if (this.moveFromTo_[0] == index) {
+            return this.moveFromTo_[1];
+        }
+        if (this.moveFromTo_[0] < index && index <= this.moveFromTo_[1]) {
+            return index - 1;
+        }
+        if (this.moveFromTo_[1] <= index && index < this.moveFromTo_[0]) {
+            return index + 1;
+        }
+        return index;
     }
 
     private dropFromL1ActiveNodes(index: number, invalidate : boolean = true): boolean {
@@ -995,12 +1128,14 @@ class __RepeatVirtualScroll2Impl<T> {
         // check which of the activeDataItems needs to be removed from L1 & activeDataItems
         let numberOfActiveItems = 0;
         for (let index = 0; index < this.activeDataItems_.length; index++) {
+            // when ListItem is being dragged without dropping, index will be mapped.
+            let indexMapped = this.convertFromToIndexRevert(index);
             if (!(index in this.activeDataItems_)) {
                 continue;
             }
 
             // same condition as in C++ RepeatVirtualScroll2Node::CheckNode4IndexInL1
-            let remainInL1 = (nStart <= index && index <= nEnd);
+            let remainInL1 = (nStart <= indexMapped && indexMapped <= nEnd);
             if (isLoop) {
                 remainInL1 = remainInL1 ||
                     (nStart > nEnd && (nStart <= index || index <= nEnd)) ||

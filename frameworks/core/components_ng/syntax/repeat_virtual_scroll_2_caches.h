@@ -175,6 +175,13 @@ public:
     void ForEachL1Node(const std::function<void(IndexType index, RIDType rid, const RefPtr<UINode>& node)>& cbFunc);
 
     /**
+     * iterate over L1 items and call cbFunc for each
+     * cbFunction is NOT allowed to add to or remove items from L1
+     * if moveFromTo_ exists, the original index order needs to be mapped
+     */
+    void ForEachL1NodeWithOnMove(const std::function<void(const RefPtr<UINode>& node)>& cbFunc);
+
+    /**
      * iterate over all rid -> CacheItems 's
      * cbFunction is NOT allowed to add to or remove CacheItems from cacheItem4Rid_
      */
@@ -212,6 +219,53 @@ public:
      * or NO_L1_INDEX(-1)
      */
     std::optional<IndexType> GetL1Index4RID(RIDType rid) const;
+
+    void UpdateMoveFromTo(IndexType from, IndexType to);
+    void ResetMoveFromTo()
+    {
+        moveFromTo_.reset();
+    }
+
+    // convert index by moveFromTo_.
+    IndexType ConvertFromToIndex(IndexType index) const
+    {
+        if (!moveFromTo_) {
+            return index;
+        }
+        if (moveFromTo_.value().second == index) {
+            return moveFromTo_.value().first;
+        }
+        if (moveFromTo_.value().first <= index && index < moveFromTo_.value().second) {
+            return index + 1;
+        }
+        if (moveFromTo_.value().second < index && index <= moveFromTo_.value().first) {
+            return index - 1;
+        }
+        return index;
+    }
+
+    // revert converted-index to origin index.
+    IndexType ConvertFromToIndexRevert(IndexType index) const
+    {
+        if (!moveFromTo_) {
+            return index;
+        }
+        if (moveFromTo_.value().first == index) {
+            return moveFromTo_.value().second;
+        }
+        if (moveFromTo_.value().first < index && index <= moveFromTo_.value().second) {
+            return index - 1;
+        }
+        if (moveFromTo_.value().second <= index && index < moveFromTo_.value().first) {
+            return index + 1;
+        }
+        return index;
+    }
+
+    bool IsMoveFromToExist() const
+    {
+        return moveFromTo_.has_value();
+    }
 
 private:
     /**
@@ -252,6 +306,9 @@ private:
 
     // TS function to call to purge
     std::function<void()> onPurge_;
+
+    // record (from, to), only valid during dragging item.
+    std::optional<std::pair<IndexType, IndexType>> moveFromTo_;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

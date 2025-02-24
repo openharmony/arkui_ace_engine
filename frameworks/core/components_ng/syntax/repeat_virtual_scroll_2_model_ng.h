@@ -32,6 +32,7 @@ public:
     void Create(uint32_t totalCount, const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
         const std::function<void(int32_t, int32_t)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(int32_t, int32_t)>& onMoveFromTo,
         const std::function<void()>& onPurge) override;
 
     void RemoveNode(uint32_t rid) override;
@@ -40,7 +41,7 @@ public:
         int32_t repeatElmtId, uint32_t totalCount, int32_t invalidateContainerLayoutFromChildIndex) override;
     void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t totalCount, uint32_t invalidateContainerLayoutFromChildIndex,
         std::map<int32_t, uint32_t>& l1Rd4Index) override;
-    void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override;
+    void OnMove(int32_t repeatElmtId, std::function<void(int32_t, int32_t)>&& onMove) override;
 };
 
 } // namespace OHOS::Ace::NG

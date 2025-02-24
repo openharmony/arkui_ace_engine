@@ -22,6 +22,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -34,6 +35,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void(IndexType, IndexType)>& onMoveFromTo,
     const std::function<void()>& onPurge)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(nodeId);
@@ -44,7 +46,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
         return node;
     }
     node = MakeRefPtr<RepeatVirtualScroll2Node>(nodeId, totalCount,
-        onGetRid4Index, onRecycleItems, onActiveRange, onPurge);
+        onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
 
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
@@ -54,10 +56,11 @@ RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, int32_t total
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void(IndexType, IndexType)>& onMoveFromTo,
     const std::function<void()>& onPurge)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount), caches_(onGetRid4Index),
-      onRecycleItems_(onRecycleItems), onActiveRange_(onActiveRange), onPurge_(onPurge),
-      postUpdateTaskHasBeenScheduled_(false)
+      onRecycleItems_(onRecycleItems), onActiveRange_(onActiveRange), onMoveFromTo_(onMoveFromTo),
+      onPurge_(onPurge), postUpdateTaskHasBeenScheduled_(false)
 {}
 
 void RepeatVirtualScroll2Node::DoSetActiveChildRange(
@@ -330,6 +333,7 @@ void RepeatVirtualScroll2Node::RequestSyncTree()
 
 /**
  * Currently NOT IN USE
+ * to do: if called by List, remember to adapt moveFromTo_.
  */
 void RepeatVirtualScroll2Node::DoSetActiveChildRange(
     const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
@@ -389,6 +393,7 @@ void RepeatVirtualScroll2Node::UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1
     forceRunDoSetActiveRange_ = true;
 }
 
+// fromRepeatItemIndex may not need adapt moveFromTo_
 void RepeatVirtualScroll2Node::RequestContainerReLayout(IndexType fromRepeatItemIndex)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT,
@@ -433,8 +438,8 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndex(
         static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
         static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
 
-    if (prevRecycleFrom > 0 && prevRecycleFrom <= static_cast<IndexType>(index) &&
-        static_cast<IndexType>(index) < prevRecycleTo) {
+    if (prevRecycleFrom_ > 0 && prevRecycleFrom_ <= static_cast<IndexType>(index) &&
+        static_cast<IndexType>(index) < prevRecycleTo_) {
         TAG_LOGD(AceLogTag::ACE_REPEAT,
             "REPEAT TRACE ABNORMAL... layout requesting index %{public}d) that was just informed to be recycled.",
             static_cast<int32_t>(index));
@@ -531,8 +536,13 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildren(bool /*no
     // can not modify l1_cache while iterating
     // GetChildren is overloaded, can not change it to non-const
     // need to order the child.
-    caches_.ForEachL1Node(
-        [&](IndexType index, RIDType rid, const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+    if (!caches_.IsMoveFromToExist()) {
+        caches_.ForEachL1Node(
+            [&](IndexType index, RIDType rid, const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+    } else {
+        caches_.ForEachL1NodeWithOnMove([&](const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+    }
+
     return children_;
 }
 
@@ -546,7 +556,7 @@ void RepeatVirtualScroll2Node::RecycleItems(int32_t from, int32_t to)
     if (from + 1 >= to) {
         return;
     }
-    if (from == prevRecycleFrom && to == prevRecycleTo) {
+    if (from == prevRecycleFrom_ && to == prevRecycleTo_) {
         return;
     }
     
@@ -567,8 +577,8 @@ void RepeatVirtualScroll2Node::RecycleItems(int32_t from, int32_t to)
 
     onRecycleItems_(from - startIndex_, to - startIndex_);
     
-    prevRecycleFrom = from;
-    prevRecycleTo = to;
+    prevRecycleFrom_ = from;
+    prevRecycleTo_ = to;
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s \n %{public}s", caches_.DumpUINodeCache().c_str(),
         caches_.DumpL1Rid4Index().c_str());
@@ -668,27 +678,82 @@ void RepeatVirtualScroll2Node::PaintDebugBoundaryTreeAll(bool flag)
 
 void RepeatVirtualScroll2Node::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
-    // To do
+    if (onMove && !onMoveEvent_) {
+        TAG_LOGI(AceLogTag::ACE_REPEAT, "activate onMove");
+        InitAllChildrenDragManager(true);
+    } else if (!onMove && onMoveEvent_) {
+        TAG_LOGI(AceLogTag::ACE_REPEAT, "deactivate onMove");
+        InitAllChildrenDragManager(false);
+    }
+    onMoveEvent_ = onMove;
 }
 
-// FOREAch
-void RepeatVirtualScroll2Node::MoveData(int32_t from, int32_t to) {
-    // to do
+void RepeatVirtualScroll2Node::MoveData(int32_t from, int32_t to)
+{
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "MoveData from: %{public}d to: %{public}d.", from, to);
+    caches_.UpdateMoveFromTo(from, to);
+    onMoveFromTo_(from, to);
+    children_.clear();
+    PostIdleTask();
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void RepeatVirtualScroll2Node::FireOnMove(int32_t from, int32_t to)
+{
+    TAG_LOGI(AceLogTag::ACE_REPEAT, "FireOnMove from: %{public}d to: %{public}d.", from, to);
+    caches_.ResetMoveFromTo();
+    // -1 used to reset moveFromTo_ in TS.
+    onMoveFromTo_(-1, -1);
+    ForEachBaseNode::FireOnMove(from, to);
+}
+
+
+void RepeatVirtualScroll2Node::InitDragManager(const RefPtr<FrameNode>& child)
+{
+    CHECK_NULL_VOID(child);
+    auto parentNode = GetParentFrameNode();
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+        return;
+    }
+    auto pattern = child->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitDragManager(AceType::Claim(this));
+}
+
+void RepeatVirtualScroll2Node::InitAllChildrenDragManager(bool init)
+{
+    auto parentNode = GetParentFrameNode();
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+        return;
+    }
+    const auto& children = GetChildren();
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        auto childNode = child->GetFrameChildByIndex(0, false);
+        auto listItem = AceType::DynamicCast<FrameNode>(childNode);
+        if (!listItem) {
+            continue;
+        }
+
+        auto pattern = listItem->GetPattern<ListItemPattern>();
+        if (!pattern) {
+            continue;
+        }
+        if (init) {
+            pattern->InitDragManager(AceType::Claim(this));
+        } else {
+            pattern->DeInitDragManager();
+        }
+    }
 }
 
 RefPtr<FrameNode> RepeatVirtualScroll2Node::GetFrameNode(int32_t index)
 {
     return AceType::DynamicCast<FrameNode>(GetFrameChildByIndex(index, false, false));
 }
-
-void RepeatVirtualScroll2Node::InitDragManager(const RefPtr<UINode>& child)
-{
-    // To do
-}
-
-void RepeatVirtualScroll2Node::InitAllChildrenDragManager(bool init)
-{
-    // To do
-}
-
 } // namespace OHOS::Ace::NG

@@ -54,6 +54,7 @@
  *     onGetRid4Index: (forIndex: number) => [number, number],
  *     onRecycleItems: (fromIndex: number, toIndex: number) => void,
  *     onActiveRange: (fromIndex: number, toIndex: number, isLoop: boolean) => void,
+ *     onMoveFromTo: (moveFrom: number, moveTo: number) => void,
  *     onPurge: () => void;
  *     onMoveHandler: (from: number, to: number) => void;
  *
@@ -96,12 +97,14 @@ public:
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge);
 
     RepeatVirtualScroll2Node(int32_t nodeId, int32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge);
 
     ~RepeatVirtualScroll2Node() override = default;
@@ -188,10 +191,11 @@ public:
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
+    void FireOnMove(int32_t from, int32_t to) override;
+    void InitDragManager(const RefPtr<FrameNode>& childNode);
+    void InitAllChildrenDragManager(bool init);
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
-    void InitDragManager(const RefPtr<UINode>& childNode);
-    void InitAllChildrenDragManager(bool init);
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
@@ -266,14 +270,15 @@ private:
     int32_t prevActiveRangeEnd_ = -1;
 
     // remove from final version
-    int32_t prevRecycleFrom = -1;
-    int32_t prevRecycleTo = -1;
+    int32_t prevRecycleFrom_ = -1;
+    int32_t prevRecycleTo_ = -1;
 
     // run next DoSetActiveChild range even if range unchanged
     bool forceRunDoSetActiveRange_ = false;
 
     std::function<void(IndexType, IndexType)> onRecycleItems_;
     std::function<void(int32_t, int32_t, bool)> onActiveRange_;
+    std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
 
     // true in the time from requesting idle / predict task until exec predict tsk.
