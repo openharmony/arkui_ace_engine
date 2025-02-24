@@ -837,9 +837,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
         mainPosition, correctVelocity);
     double frictionTmp = friction_;
     if (NearEqual(friction_, -1.0)) {
-        auto defaultFriction_ = isSlow_ ? SLOW_FRICTION : defaultFriction_;
+        auto defaultFriction = isSlow_ ? SLOW_FRICTION : defaultFriction_;
         double ret = SystemProperties::GetSrollableFriction();
-        frictionTmp = !NearZero(ret) ? ret : defaultFriction_;
+        frictionTmp = !NearZero(ret) ? ret : defaultFriction;
     }
     float friction = frictionTmp;
     initVelocity_ = correctVelocity;

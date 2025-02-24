@@ -689,7 +689,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.steps: step4. TickByVelocity
      * @tc.expected: Scroll spring animate back to top, remain velocity start list fling animation.
      */
-    MockPipelineContext::GetCurrent()->SetVsyncTime(scrollScrollable->lastVsyncTime_ + 50 * MS);
+    MockPipelineContext::GetCurrent()->SetVsyncTime(scrollScrollable->lastVsyncTime_ + 30 * MS);
     MockAnimationManager::GetInstance().TickByVelocity(-60);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -700,7 +700,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.steps: step5. Tick
      * @tc.expected: start list fling animation.
      */
-    float distance = 1200 / (0.6 * -FRICTION_SCALE);
+    float distance = 2000 / (SLOW_FRICTION * -FRICTION_SCALE);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -774,7 +774,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().SetTicks(3);
     listScrollable->lastMainDelta_ = 0.0;
-    DragEnd(listScrollable, -252);
+    DragEnd(listScrollable, -420);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
@@ -787,13 +787,13 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
-    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -60);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -50);
     MockPipelineContext::GetCurrent()->SetVsyncTime(scrollPattern->nestedScrollTimestamp_ + 50 * MS);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
-    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -110);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -90);
 
     /**
      * @tc.steps: step4. Scroll touch down
@@ -809,7 +809,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
-    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -110);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -90);
 }
 
 /**

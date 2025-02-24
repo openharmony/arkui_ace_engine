@@ -53,7 +53,9 @@ void ScrollableUtilsTestNG::DragEnd(float velocityDelta)
 {
     auto pattern = dragNode_->GetPattern<ScrollablePattern>();
     auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
-    float velocity = velocityDelta * FRICTION * -FRICTION_SCALE;
+    auto friction = std::abs(velocityDelta) < SLOW_FRICTION_THRESHOLD ? SLOW_FRICTION : FRICTION;
+    float scale = std::abs(velocityDelta) < SLOW_FRICTION_THRESHOLD ? SLOW_VELOCITY_SCALE : VELOCITY_SCALE;
+    float velocity = velocityDelta * friction * -FRICTION_SCALE / scale;
     dragInfo_.SetMainDelta(0);
     dragInfo_.SetMainVelocity(velocity);
     dragInfo_.SetGlobalPoint(dragInfo_.GetGlobalPoint());
