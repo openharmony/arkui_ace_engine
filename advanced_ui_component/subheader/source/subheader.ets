@@ -894,7 +894,6 @@ export struct SubHeader {
         .fontSize(RIGHT_SINGLE_ICON_SIZE)
         .fontColor([this.subHeaderTheme.iconArrowColor])
         .draggable(false)
-        .focusable(true)
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
     }
