@@ -26,12 +26,12 @@
 
 namespace OHOS::Ace::NG {
 
-void ScrollWindowAdapter::UpdateMarkItem(int32_t index)
+void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool reset)
 {
     if (index == LAST_ITEM) {
         index = totalCount_ - 1;
     }
-    if (markIndex_ == index) {
+    if (!reset && markIndex_ == index) {
         return;
     }
     markIndex_ = index;
@@ -205,11 +205,5 @@ FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
 RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
 {
     return Claim(GetChildPtrByIndex(index));
-}
-
-void ScrollWindowAdapter::NotifyChange(int32_t idx)
-{
-    jumpPending_ = true;
-    fillAlgorithm_->MarkJump(); // clear info and re-jump to current mark index
 }
 } // namespace OHOS::Ace::NG

@@ -43,7 +43,7 @@ public:
     /**
      * @param index of the latest pivot item.
      */
-    void UpdateMarkItem(int32_t index);
+    void UpdateMarkItem(int32_t index, bool reset);
 
     void UpdateViewport(const SizeF& size, Axis axis);
 
@@ -77,8 +77,6 @@ public:
     }
 
     void Prepare(uint32_t offset);
-
-    void NotifyChange(int32_t changeIdx);
 
 private:
     FrameNode* GetChildPtrByIndex(uint32_t index);

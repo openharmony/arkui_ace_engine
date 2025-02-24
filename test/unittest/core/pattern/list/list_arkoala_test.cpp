@@ -133,12 +133,10 @@ HWTEST_F(ListArkoalaTest, Reset001, TestSize.Level1)
 
     frameNode_->NotifyChange(40, 0, -1, LazyForEachNode::NotificationType::START_CHANGE_POSITION);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    frameNode_->GetScrollWindowAdapter()->NotifyChange(40);
     FlushLayoutTask(frameNode_);
 
     frameNode_->NotifyChange(52, 0, -1, LazyForEachNode::NotificationType::START_CHANGE_POSITION);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    frameNode_->GetScrollWindowAdapter()->NotifyChange(52);
     lazy_.NormalModeUpdate(50, nullptr);
     EXPECT_EQ(lazy_.GetRange(), std::pair(50, 64));
     FlushLayoutTask(frameNode_);

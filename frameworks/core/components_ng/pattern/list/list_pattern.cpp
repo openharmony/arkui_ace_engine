@@ -2723,6 +2723,7 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
+    UpdateLayoutRange(GetAxis(), startIndex, false);
 }
 
 void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)
