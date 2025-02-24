@@ -148,8 +148,20 @@ void OnErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA EmbeddedComponent.OnErrorImpl -> Method is not implemented, Ark_CustomObject is not supported!");
-    //EmbeddedComponentModelNG::SetOnError(frameNode, convValue);
+    auto instanceId = ContainerScope::CurrentId();
+    auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
+    auto onError = [arkCallback = CallbackHelper(*value), instanceId, weakNode](
+        int32_t code, const std::string& name, const std::string& message) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        arkCallback.Invoke(Ark_BusinessError{
+            .name  = Converter::ArkValue<Ark_String>(name),
+            .message = Converter::ArkValue<Ark_String>(message),
+            .code = Converter::ArkValue<Ark_Number>(code)});
+    };
+    UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
 #endif
 }
 } // EmbeddedComponentAttributeModifier
