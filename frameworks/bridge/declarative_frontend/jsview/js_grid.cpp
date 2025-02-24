@@ -119,6 +119,7 @@ void ParseGetGridItemSize(const JSCallbackInfo& info, JSRef<JSObject>& obj, Grid
         auto onGetIrregularSizeByIndex = [execCtx = info.GetExecutionContext(),
                                              func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
                                                  JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             GridItemSize gridItemSize;
             JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
             auto result = func->ExecuteJS(1, &itemIndex);
@@ -139,6 +140,7 @@ void ParseGetGridItemRect(const JSCallbackInfo& info, JSRef<JSObject>& obj, Grid
         auto onGetRectByIndex = [execCtx = info.GetExecutionContext(),
                                     func = AceType::MakeRefPtr<JsFunction>(
                                         JSRef<JSObject>(), JSRef<JSFunc>::Cast(getRectByIndex))](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             GridItemRect gridItemRect;
             JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
             auto result = func->ExecuteJS(1, &itemIndex);
