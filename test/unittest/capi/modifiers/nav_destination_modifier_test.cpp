@@ -18,9 +18,11 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -250,12 +252,29 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillHideTest, TestSize.Level1
 }
 
 /*
- * @tc.name: DISABLED_setOnBackPressedTest
+ * @tc.name: setOnBackPressedTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, DISABLED_setOnBackPressedTest, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto navGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navGroupNode, nullptr);
+    auto eventHub = navGroupNode->GetEventHub<NavDestinationEventHub>();
+
+    static const Ark_Int32 expectedResId = 123;
+    auto onBackPressed = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Callback_Boolean_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        Ark_Boolean param = Converter::ArkValue<Ark_Boolean>(true);
+        CallbackHelper(cbReturn).Invoke(param);
+    };
+    auto arkFunc = Converter::ArkValue<Callback_Boolean>(nullptr, onBackPressed, expectedResId);
+    modifier_->setOnBackPressed(node_, &arkFunc);
+    auto called = eventHub->FireOnBackPressedEvent();
+    EXPECT_TRUE(called);
 }
 
 /*

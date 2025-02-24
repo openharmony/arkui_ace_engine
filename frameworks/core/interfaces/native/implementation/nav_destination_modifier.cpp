@@ -27,8 +27,7 @@ namespace NavDestinationModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // We must create NavDestination as [Stack] (NavDestinationModelNG::CreateFrameNode(id))
-    auto frameNode = StackModelNG::CreateFrameNode(id);
+    auto frameNode = NavDestinationModelNG::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -86,10 +85,9 @@ void OnBackPressedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onBackPressedEvent = [arkCallback = CallbackHelper(*value)]() -> bool {
-        return true;
+        return arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>().value_or(false);
     };
     NavDestinationModelNG::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
-    LOGE("ARKOALA NavDestination.OnBackPressedImpl -> Method is not fully implemented.");
 }
 void ModeImpl(Ark_NativePointer node,
               Ark_NavDestinationMode value)
