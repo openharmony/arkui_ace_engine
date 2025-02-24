@@ -89,6 +89,7 @@ protected:
     std::function<void()> backCallback_;
     RefPtr<TaskExecutor> taskExecutor_;
     bool useFlushUITasks_ = false;
+    std::list<std::function<void()>> animationClosuresList_;
 };
 } // namespace OHOS::Ace::NG
 
