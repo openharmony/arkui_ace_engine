@@ -77,7 +77,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     OptionalSizeF frameSize;
     auto version10OrLarger =
-        PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
+        PipelineBase::GetCurrentContextSafelyWithCheck() && PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() > 9;
     do {
         // Use idea size first if it is valid.
         frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);

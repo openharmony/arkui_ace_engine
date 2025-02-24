@@ -79,12 +79,12 @@ ChainAnimation::ChainAnimation(float space, float maxSpace, float minSpace, RefP
         CHECK_NULL_VOID(chain);
         chain->TickAnimation();
     };
-    scheduler_ = AceType::MakeRefPtr<Scheduler>(callback, PipelineBase::GetCurrentContext());
+    scheduler_ = AceType::MakeRefPtr<Scheduler>(callback, PipelineBase::GetCurrentContextSafelyWithCheck());
 }
 
 void ChainAnimation::SetDelta(float delta, float overOffset)
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto timestamp = context->GetTimeFromExternalTimer();
     double duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
@@ -113,7 +113,7 @@ void ChainAnimation::SetDelta(float delta, float overOffset)
 
 void ChainAnimation::TickAnimation()
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto timestamp = context->GetTimeFromExternalTimer();
     auto duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
@@ -147,7 +147,7 @@ float ChainAnimation::GetValue(int32_t index)
 
 float ChainAnimation::GetValuePredict(int32_t index, float delta)
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, 0);
     auto timestamp = context->GetTimeFromExternalTimer();
     double duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);

@@ -836,7 +836,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
 {
     if (!snapController_) {
-        snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContextSafelyWithCheck());
         snapController_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             CHECK_NULL_VOID(scroll);

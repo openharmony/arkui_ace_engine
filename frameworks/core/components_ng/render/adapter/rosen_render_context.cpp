@@ -725,7 +725,7 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     CalcDimension value;
     value.SetValue(static_cast<double>(radius));
@@ -1039,7 +1039,7 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
         rsNode_->SetBackgroundFilter(nullptr);
         return;
     }
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     float radiusPx = context->NormalizeToPx(effectOption->radius);
 #ifndef USE_ROSEN_DRAWING
@@ -3007,8 +3007,8 @@ RectF RosenRenderContext::AdjustPaintRect()
     }
     if (HasOffset()) {
         auto offset = GetOffsetValue({});
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        if (PipelineBase::GetCurrentContextSafelyWithCheck() &&
+            PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
             offset += OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         }
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
@@ -3752,7 +3752,7 @@ void RosenRenderContext::ClearFocusState()
 {
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Clear focus state.");
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(focusStateModifier_);
 
@@ -3998,7 +3998,7 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
@@ -4023,7 +4023,7 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
@@ -4987,7 +4987,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         option.SetCurve(springCurve);
         option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         if (pipeline) {
             const int32_t nanoToMilliSeconds = 1000000;
             const int32_t minTransitionDuration = DEFAULT_ANIMATION_DURATION / 2;
@@ -5724,7 +5724,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             // transitionIn, reset to state before attaching in case of node reappear
             transitionEffect_->Attach(Claim(this), true);
         }
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
         auto parentOffset = frameNode->GetPaintRectOffset(true);

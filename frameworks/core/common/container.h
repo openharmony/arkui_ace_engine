@@ -534,14 +534,16 @@ public:
 
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
+        return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+               PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
+               static_cast<int32_t>(version);
     }
 
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
+        return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+               PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
+               static_cast<int32_t>(version);
     }
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
