@@ -358,14 +358,10 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
     auto indicatorPaddingSide = static_cast<float>(paddingSide.ConvertToPx());
     auto contentWidth = indicatorPaddingSide + allPointDiameterSum + allPointSpaceSum + indicatorPaddingSide;
     auto indicatorHeightPadding = indicatorTheme->GetIndicatorBgHeight().ConvertToPx();
-    float contentHeight = 0.0f;
-    if (ignoreSize) {
-        contentHeight = indicatorHeightPadding + indicatorHeightPadding;
-    } else {
-        contentHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
-        if (selectedItemHeight > itemHeight) {
-            contentHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
-        }
+
+    auto contentHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
+    if (selectedItemHeight > itemHeight) {
+        contentHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
     }
 
     float marginX = ((axis_ == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5;
