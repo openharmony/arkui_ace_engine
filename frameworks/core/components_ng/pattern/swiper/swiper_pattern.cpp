@@ -1562,7 +1562,7 @@ void SwiperPattern::FireSelectedEvent(int32_t currentIndex, int32_t targetIndex)
 
 void SwiperPattern::FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex)
 {
-    if (currentIndex == targetIndex) {
+    if (currentIndex == targetIndex || currentIndex != GetLoopIndex(currentIndex)) {
         return;
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
@@ -3799,7 +3799,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     propertyAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
     FireSelectedEvent(currentIndex_, nextIndex);
-    FireUnselectedEvent(currentIndex_, nextIndex);
+    FireUnselectedEvent(GetLoopIndex(currentIndex_), GetLoopIndex(nextIndex));
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), option);
     AnimationUtils::Animate(option, propertyUpdateCallback, finishCallback);
     AnimationCallbackInfo info;
