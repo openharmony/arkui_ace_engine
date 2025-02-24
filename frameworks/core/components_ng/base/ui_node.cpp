@@ -246,7 +246,7 @@ void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
             "node [%{public}s][%{public}d] when its children is traversing",
             GetTag().c_str(), GetId());
     }
-    OHOS::Ace::LogBacktrace();
+    LogBacktrace();
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
@@ -480,9 +480,6 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     static_assert(totalLengthLimit > childLengthLimit, "totalLengthLimit too small");
     constexpr size_t currentLengthLimit = totalLengthLimit - childLengthLimit;
 
-    LOGE("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
-        (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
-
     // log full childNode info in case of hilog length limit reached
     if (childNode.length() > childLengthLimit) {
         auto s = childNode.c_str();
@@ -503,6 +500,8 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
         LOGF_ABORT("LoopDetected: child[%{public}.*s] vs current[%{public}.*s]",
             (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
     } else {
+        LOGE("LoopDetected: child[%{public}.*s] vs current[%{public}.*s]",
+            (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
         LogBacktrace();
     }
 }

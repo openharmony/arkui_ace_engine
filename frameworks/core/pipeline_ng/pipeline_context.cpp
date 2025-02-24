@@ -5625,8 +5625,8 @@ bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& an
 bool PipelineContext::CheckThreadSafe()
 {
     CHECK_NULL_RETURN(taskExecutor_, true);
-    if (!isFormRender_ && !taskExecutor_->WillRunOnCurrentThread(OHOS::Ace::TaskExecutor::TaskType::UI)) {
-        OHOS::Ace::LogBacktrace();
+    if (!isFormRender_ && !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        LogBacktrace();
         return false;
     }
     return true;

@@ -22,8 +22,8 @@ namespace OHOS::Ace {
 LifeCycleCheckable::~LifeCycleCheckable()
 {
     if (usingCount_ && SystemProperties::DetectObjDestroyInUse()) {
-        LOGF_ABORT("this object is still in use by %{public}p, use_count=%{public}d",
-            lastStack_, usingCount_.load());
+        LOGF_ABORT("this object is still in use by %{public}p@%{public}p, use_count=%{public}d",
+            lastStack_ ? *(void**)lastStack_.load() : nullptr, lastStack_.load(), usingCount_.load());
     }
 }
 
