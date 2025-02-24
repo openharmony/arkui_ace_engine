@@ -937,7 +937,7 @@ private:
     void FireContentDidScrollEvent();
     void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
     void HandleSwiperCustomAnimation(float offset);
-    void CalculateAndUpdateItemInfo(float offset);
+    void CalculateAndUpdateItemInfo(float offset = 0.0f);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
     void UpdateTabBarAnimationDuration(int32_t index);
 
