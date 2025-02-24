@@ -19,7 +19,9 @@ ohos_unittest("html_convert_test") {
   sources = [
     "$ace_root/adapter/ohos/capability/html/html_to_span.cpp",
     "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
-    "html_convert_test.cpp",
+    "convert_test_tools.cpp",
+    "html_to_spanstring_test.cpp",
+    "spanstring_to_html_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
