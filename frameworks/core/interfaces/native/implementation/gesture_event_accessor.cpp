@@ -51,6 +51,10 @@ void SetRepeatImpl(Ark_GestureEvent peer,
     auto convValue = Converter::Convert<bool>(repeat);
     event->SetRepeat(convValue);
 }
+Array_FingerInfo GetFingerListImpl(Ark_GestureEvent peer)
+{
+    return {};
+}
 void SetFingerListImpl(Ark_GestureEvent peer,
                        const Array_FingerInfo* fingerList)
 {
@@ -285,6 +289,7 @@ const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
         GestureEventAccessor::GetFinalizerImpl,
         GestureEventAccessor::GetRepeatImpl,
         GestureEventAccessor::SetRepeatImpl,
+        GestureEventAccessor::GetFingerListImpl,
         GestureEventAccessor::SetFingerListImpl,
         GestureEventAccessor::GetOffsetXImpl,
         GestureEventAccessor::SetOffsetXImpl,

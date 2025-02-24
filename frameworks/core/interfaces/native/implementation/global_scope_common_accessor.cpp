@@ -402,44 +402,6 @@ Ark_Int32 Px2lpxImpl(const Ark_Number* value)
     double lpxValue = pxValue / windowConfig.designWidthScale;
     return static_cast<Ark_Int32>(lpxValue);
 }
-Ark_Boolean RequestFocusImpl(const Ark_String* value)
-{
-    bool result = false;
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Boolean>(result));
-    std::string inspectorKey = Converter::Convert<std::string>(*value);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Boolean>(result));
-    if (!pipelineContext->GetTaskExecutor()) {
-        return Converter::ArkValue<Ark_Boolean>(result);
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
-        TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
-    return Converter::ArkValue<Ark_Boolean>(result);
-}
-void SetCursorImpl(Ark_PointerStyle value)
-{
-    int32_t intValue = static_cast<int32_t>(value);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (!pipelineContext->GetTaskExecutor()) {
-        return;
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext, intValue]() { pipelineContext->SetCursor(intValue); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSetCursor");
-}
-void RestoreDefaultImpl()
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (!pipelineContext->GetTaskExecutor()) {
-        return;
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext]() { pipelineContext->RestoreDefault(); },
-        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
-}
 } // GlobalScope_commonAccessor
 const GENERATED_ArkUIGlobalScope_commonAccessor* GetGlobalScope_commonAccessor()
 {
@@ -457,9 +419,6 @@ const GENERATED_ArkUIGlobalScope_commonAccessor* GetGlobalScope_commonAccessor()
         GlobalScope_commonAccessor::Px2fpImpl,
         GlobalScope_commonAccessor::Lpx2pxImpl,
         GlobalScope_commonAccessor::Px2lpxImpl,
-        GlobalScope_commonAccessor::RequestFocusImpl,
-        GlobalScope_commonAccessor::SetCursorImpl,
-        GlobalScope_commonAccessor::RestoreDefaultImpl,
     };
     return &GlobalScope_commonAccessorImpl;
 }

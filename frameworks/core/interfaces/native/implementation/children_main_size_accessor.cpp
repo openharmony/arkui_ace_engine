@@ -37,7 +37,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SpliceImpl(Ark_ChildrenMainSize peer,
+void SpliceImpl(Ark_VMContext vmContext,
+                Ark_ChildrenMainSize peer,
                 const Ark_Number* start,
                 const Opt_Number* deleteCount,
                 const Opt_Array_Number* childrenSize)
@@ -68,7 +69,8 @@ void SpliceImpl(Ark_ChildrenMainSize peer,
 
     handler->ChangeData(convStart, delCount, floatArray);
 }
-void UpdateImpl(Ark_ChildrenMainSize peer,
+void UpdateImpl(Ark_VMContext vmContext,
+                Ark_ChildrenMainSize peer,
                 const Ark_Number* index,
                 const Ark_Number* childSize)
 {

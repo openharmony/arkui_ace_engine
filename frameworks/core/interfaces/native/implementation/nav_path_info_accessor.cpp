@@ -33,8 +33,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetNameImpl(Ark_NavPathInfo peer)
+Ark_String GetNameImpl(Ark_NavPathInfo peer)
 {
+    return {};
 }
 void SetNameImpl(Ark_NavPathInfo peer,
                  const Ark_String* name)

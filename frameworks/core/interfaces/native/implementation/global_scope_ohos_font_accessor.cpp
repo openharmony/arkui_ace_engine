@@ -18,11 +18,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace UrlStyleAccessor {
-void DestroyPeerImpl(Ark_UrlStyle peer)
+namespace GlobalScope_ohos_fontAccessor {
+void DestroyPeerImpl(Ark_GlobalScope_ohos_font peer)
 {
 }
-Ark_UrlStyle CtorImpl(const Ark_String* url)
+Ark_GlobalScope_ohos_font CtorImpl()
 {
     return {};
 }
@@ -30,23 +30,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_String GetUrlImpl(Ark_UrlStyle peer)
+void RegisterFontImpl(const Ark_FontOptions* options)
+{
+}
+Array_String GetSystemFontListImpl()
 {
     return {};
 }
-} // UrlStyleAccessor
-const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
+} // GlobalScope_ohos_fontAccessor
+const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
 {
-    static const GENERATED_ArkUIUrlStyleAccessor UrlStyleAccessorImpl {
-        UrlStyleAccessor::DestroyPeerImpl,
-        UrlStyleAccessor::CtorImpl,
-        UrlStyleAccessor::GetFinalizerImpl,
-        UrlStyleAccessor::GetUrlImpl,
+    static const GENERATED_ArkUIGlobalScope_ohos_fontAccessor GlobalScope_ohos_fontAccessorImpl {
+        GlobalScope_ohos_fontAccessor::DestroyPeerImpl,
+        GlobalScope_ohos_fontAccessor::CtorImpl,
+        GlobalScope_ohos_fontAccessor::GetFinalizerImpl,
+        GlobalScope_ohos_fontAccessor::RegisterFontImpl,
+        GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
     };
-    return &UrlStyleAccessorImpl;
+    return &GlobalScope_ohos_fontAccessorImpl;
 }
 
-struct UrlStylePeer {
-    virtual ~UrlStylePeer() = default;
+struct GlobalScope_ohos_fontPeer {
+    virtual ~GlobalScope_ohos_fontPeer() = default;
 };
 }

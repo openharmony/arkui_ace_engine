@@ -251,6 +251,7 @@ public:
 
     MockRichEditorController *mockRichEditorController_ = nullptr;
     RefPtr<MockRichEditorController> mockRichEditorControllerKeeper_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /**
@@ -459,7 +460,7 @@ HWTEST_F(RichEditorControllerAccessorTest, fromStyledStringTest, TestSize.Level1
     RefPtr<SpanStringBase> updateSpanStyle = Referenced::MakeRefPtr<SpanString>(TEST_VALUE);
     Ark_StyledString inValue = StyledStringPeer::Create(updateSpanStyle);
     EXPECT_CALL(*mockRichEditorController_, FromStyledString(updateSpanStyle)).Times(1);
-    accessor_->fromStyledString(peer_, inValue);
+    accessor_->fromStyledString(vmContext_, peer_, inValue);
     StyledStringPeer::Destroy(inValue);
 }
 
@@ -476,6 +477,6 @@ HWTEST_F(RichEditorControllerAccessorTest, toStyledStringTest, TestSize.Level1)
     options.end = TEST_END;
     auto value = Converter::ArkValue<Ark_RichEditorRange>(options);
     EXPECT_CALL(*mockRichEditorController_, ToStyledString(TEST_START, TEST_END)).Times(1);
-    accessor_->toStyledString(peer_, &value);
+    accessor_->toStyledString(vmContext_, peer_, &value);
 }
 } // namespace OHOS::Ace::NG

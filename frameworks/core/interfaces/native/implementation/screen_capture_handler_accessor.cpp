@@ -34,12 +34,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetOriginImpl(Ark_ScreenCaptureHandler peer)
+Ark_String GetOriginImpl(Ark_ScreenCaptureHandler peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetOrigin();
     // value need to be returned
     LOGE("ScreenCaptureHandlerAccessor::GetOriginImpl - return value need to be supported");
+    return {};
 }
 void GrantImpl(Ark_ScreenCaptureHandler peer,
                const Ark_ScreenCaptureConfig* config)

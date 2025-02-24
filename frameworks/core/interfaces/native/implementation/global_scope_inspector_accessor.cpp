@@ -30,12 +30,6 @@ Ark_CustomObject GetInspectorNodeByIdImpl(const Ark_Number* id)
 {
     return {};
 }
-void RegisterVsyncCallbackImpl(const Callback_String_Void* callback_)
-{
-}
-void UnregisterVsyncCallbackImpl()
-{
-}
 void SetAppBgColorImpl(const Ark_String* value)
 {
 }
@@ -46,8 +40,6 @@ const GENERATED_ArkUIGlobalScope_inspectorAccessor* GetGlobalScope_inspectorAcce
         GlobalScope_inspectorAccessor::DestroyPeerImpl,
         GlobalScope_inspectorAccessor::GetInspectorNodesImpl,
         GlobalScope_inspectorAccessor::GetInspectorNodeByIdImpl,
-        GlobalScope_inspectorAccessor::RegisterVsyncCallbackImpl,
-        GlobalScope_inspectorAccessor::UnregisterVsyncCallbackImpl,
         GlobalScope_inspectorAccessor::SetAppBgColorImpl,
     };
     return &GlobalScope_inspectorAccessorImpl;

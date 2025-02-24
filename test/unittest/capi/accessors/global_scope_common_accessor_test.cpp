@@ -226,44 +226,6 @@ HWTEST_F(GlobalScopeCommonAccessorTest, px2lpxTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: requestFocusTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GlobalScopeCommonAccessorTest, requestFocusTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->requestFocus, nullptr);
-
-    std::string inspectorKey = "inspectorKey";
-    Ark_String arkInspectorKey = Converter::ArkValue<Ark_String>(inspectorKey);
-
-    EXPECT_EQ(false, accessor_->requestFocus(&arkInspectorKey));
-    EXPECT_EQ(false, accessor_->requestFocus(nullptr));
-}
-
-/**
- * @tc.name: setCursorTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GlobalScopeCommonAccessorTest, setCursorTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setCursor, nullptr);
-    accessor_->setCursor(ARK_POINTER_STYLE_LOADING);
-}
-
-/**
- * @tc.name: restoreDefaultTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GlobalScopeCommonAccessorTest, restoreDefaultTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->restoreDefault, nullptr);
-    accessor_->restoreDefault();
-}
-
-/**
  * @tc.name: animateToTest
  * @tc.desc:
  * @tc.type: FUNC

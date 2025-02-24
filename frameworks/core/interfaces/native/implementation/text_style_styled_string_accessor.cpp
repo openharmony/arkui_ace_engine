@@ -30,8 +30,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
+Ark_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
 {
+    return {};
 }
 Ark_Int32 GetFontSizeImpl(Ark_TextStyle_styled_string peer)
 {

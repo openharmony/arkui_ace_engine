@@ -43,12 +43,13 @@ Array_Header GetRequestHeaderImpl(Ark_WebResourceRequest peer)
     LOGE("WebResourceRequestPeer::GetRequestHeaderImpl - return value need to be supported");
     return {};
 }
-void GetRequestUrlImpl(Ark_WebResourceRequest peer)
+Ark_String GetRequestUrlImpl(Ark_WebResourceRequest peer)
 {
-    CHECK_NULL_VOID(peer && peer->webRequest);
+    CHECK_NULL_RETURN(peer && peer->webRequest, {});
     peer->webRequest->GetUrl();
     // url need to be returned
     LOGE("WebResourceRequestPeer::GetRequestUrlImpl - return value need to be supported");
+    return {};
 }
 Ark_Boolean IsRequestGestureImpl(Ark_WebResourceRequest peer)
 {
@@ -65,12 +66,13 @@ Ark_Boolean IsRedirectImpl(Ark_WebResourceRequest peer)
     CHECK_NULL_RETURN(peer && peer->webRequest, false);
     return Converter::ArkValue<Ark_Boolean>(peer->webRequest->IsRedirect());
 }
-void GetRequestMethodImpl(Ark_WebResourceRequest peer)
+Ark_String GetRequestMethodImpl(Ark_WebResourceRequest peer)
 {
-    CHECK_NULL_VOID(peer && peer->webRequest);
+    CHECK_NULL_RETURN(peer && peer->webRequest, {});
     peer->webRequest->GetMethod();
     // method need to be returned
     LOGE("WebResourceRequestPeer::GetRequestMethodImpl - return value need to be supported");
+    return {};
 }
 } // WebResourceRequestAccessor
 const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor()

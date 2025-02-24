@@ -32,10 +32,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
-                   const Opt_String* type,
-                   const Opt_CustomObject* quality)
+Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
+                         const Opt_String* type,
+                         const Opt_Float32* quality)
 {
+    return {};
 }
 Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 {

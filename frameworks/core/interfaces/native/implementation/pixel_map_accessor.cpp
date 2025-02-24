@@ -40,21 +40,13 @@ void WriteBufferToPixelsImpl(Ark_PixelMap peer,
                              const Ark_Buffer* src)
 {
 }
-Ark_Int32 GetIsEditableImpl(Ark_PixelMap peer)
+Ark_Boolean GetIsEditableImpl(Ark_PixelMap peer)
 {
     return {};
 }
-void SetIsEditableImpl(Ark_PixelMap peer,
-                       Ark_Int32 isEditable)
-{
-}
-Ark_Int32 GetIsStrideAlignmentImpl(Ark_PixelMap peer)
+Ark_Boolean GetIsStrideAlignmentImpl(Ark_PixelMap peer)
 {
     return {};
-}
-void SetIsStrideAlignmentImpl(Ark_PixelMap peer,
-                              Ark_Int32 isStrideAlignment)
-{
 }
 } // PixelMapAccessor
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
@@ -66,9 +58,7 @@ const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
         PixelMapAccessor::ReadPixelsToBufferSyncImpl,
         PixelMapAccessor::WriteBufferToPixelsImpl,
         PixelMapAccessor::GetIsEditableImpl,
-        PixelMapAccessor::SetIsEditableImpl,
         PixelMapAccessor::GetIsStrideAlignmentImpl,
-        PixelMapAccessor::SetIsStrideAlignmentImpl,
     };
     return &PixelMapAccessorImpl;
 }

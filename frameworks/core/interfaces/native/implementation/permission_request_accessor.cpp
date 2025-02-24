@@ -39,12 +39,13 @@ void DenyImpl(Ark_PermissionRequest peer)
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Deny();
 }
-void GetOriginImpl(Ark_PermissionRequest peer)
+Ark_String GetOriginImpl(Ark_PermissionRequest peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetOrigin();
     // origin value need to be returned
     LOGE("PermissionRequestAccessor::GetOriginImpl - return value need to be supported");
+    return {};
 }
 Array_String GetAccessibleResourceImpl(Ark_PermissionRequest peer)
 {

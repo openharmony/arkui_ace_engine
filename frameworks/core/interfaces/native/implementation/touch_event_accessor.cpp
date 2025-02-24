@@ -61,9 +61,17 @@ void SetTypeImpl(Ark_TouchEvent peer,
                  Ark_TouchType type)
 {
 }
+Array_TouchObject GetTouchesImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
 void SetTouchesImpl(Ark_TouchEvent peer,
                     const Array_TouchObject* touches)
 {
+}
+Array_TouchObject GetChangedTouchesImpl(Ark_TouchEvent peer)
+{
+    return {};
 }
 void SetChangedTouchesImpl(Ark_TouchEvent peer,
                            const Array_TouchObject* changedTouches)
@@ -112,7 +120,9 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
         TouchEventAccessor::GetHistoricalPointsImpl,
         TouchEventAccessor::GetTypeImpl,
         TouchEventAccessor::SetTypeImpl,
+        TouchEventAccessor::GetTouchesImpl,
         TouchEventAccessor::SetTouchesImpl,
+        TouchEventAccessor::GetChangedTouchesImpl,
         TouchEventAccessor::SetChangedTouchesImpl,
         TouchEventAccessor::GetStopPropagationImpl,
         TouchEventAccessor::SetStopPropagationImpl,

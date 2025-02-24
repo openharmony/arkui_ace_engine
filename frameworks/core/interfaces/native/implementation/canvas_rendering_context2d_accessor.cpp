@@ -76,15 +76,15 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
-                   const Opt_String* type,
-                   const Opt_Number* quality)
+Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
+                         const Opt_String* type,
+                         const Opt_Float32* quality)
 {
-    CHECK_NULL_VOID(peer);
+    CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(type);
-    CHECK_NULL_VOID(quality);
+    CHECK_NULL_RETURN(peerImpl, {});
+    CHECK_NULL_RETURN(type, {});
+    CHECK_NULL_RETURN(quality, {});
     auto optType = Converter::OptConvert<std::string>(*type);
     Validator::ValidateNonEmpty(optType);
     auto optQuality = Converter::OptConvert<float>(*quality);
@@ -92,8 +92,10 @@ void ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
     auto imageType = optType.value_or(IMAGE_TYPE_DEFAULT);
     auto imageQuality = optQuality.value_or(IMAGE_QUALITY_DEFAULT);
     peerImpl->ToDataURL(imageType, imageQuality);
+    return {};
 }
-void StartImageAnalyzerImpl(Ark_CanvasRenderingContext2D peer,
+void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                            Ark_CanvasRenderingContext2D peer,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
@@ -107,7 +109,8 @@ void StopImageAnalyzerImpl(Ark_CanvasRenderingContext2D peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStopImageAnalyzer();
 }
-void OnOnAttachImpl(Ark_CanvasRenderingContext2D peer,
+void OnOnAttachImpl(Ark_VMContext vmContext,
+                    Ark_CanvasRenderingContext2D peer,
                     const Callback_Void* callback_)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
@@ -116,7 +119,8 @@ void OnOnAttachImpl(Ark_CanvasRenderingContext2D peer,
     auto arkCallback = CallbackHelper(*callback_);
     peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
-void OffOnAttachImpl(Ark_CanvasRenderingContext2D peer,
+void OffOnAttachImpl(Ark_VMContext vmContext,
+                     Ark_CanvasRenderingContext2D peer,
                      const Opt_Callback_Void* callback_)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
@@ -125,7 +129,8 @@ void OffOnAttachImpl(Ark_CanvasRenderingContext2D peer,
     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
-void OnOnDetachImpl(Ark_CanvasRenderingContext2D peer,
+void OnOnDetachImpl(Ark_VMContext vmContext,
+                    Ark_CanvasRenderingContext2D peer,
                     const Callback_Void* callback_)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
@@ -134,7 +139,8 @@ void OnOnDetachImpl(Ark_CanvasRenderingContext2D peer,
     auto arkCallback = CallbackHelper(*callback_);
     peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
-void OffOnDetachImpl(Ark_CanvasRenderingContext2D peer,
+void OffOnDetachImpl(Ark_VMContext vmContext,
+                     Ark_CanvasRenderingContext2D peer,
                      const Opt_Callback_Void* callback_)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);

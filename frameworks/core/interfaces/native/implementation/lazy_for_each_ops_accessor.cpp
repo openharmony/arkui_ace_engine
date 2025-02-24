@@ -75,7 +75,7 @@ void SetCurrentIndexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void PrepareImpl(Ark_NativePointer node)
+void PrepareImpl(Ark_NativePointer node, Ark_Int32, Ark_Int32)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

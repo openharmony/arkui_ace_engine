@@ -18,11 +18,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace UrlStyleAccessor {
-void DestroyPeerImpl(Ark_UrlStyle peer)
+namespace SystemOpsAccessor {
+void DestroyPeerImpl(Ark_SystemOps peer)
 {
 }
-Ark_UrlStyle CtorImpl(const Ark_String* url)
+Ark_SystemOps CtorImpl()
 {
     return {};
 }
@@ -30,23 +30,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_String GetUrlImpl(Ark_UrlStyle peer)
+Ark_NativePointer StartFrameImpl()
 {
     return {};
 }
-} // UrlStyleAccessor
-const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
+void EndFrameImpl(Ark_NativePointer root)
 {
-    static const GENERATED_ArkUIUrlStyleAccessor UrlStyleAccessorImpl {
-        UrlStyleAccessor::DestroyPeerImpl,
-        UrlStyleAccessor::CtorImpl,
-        UrlStyleAccessor::GetFinalizerImpl,
-        UrlStyleAccessor::GetUrlImpl,
+}
+} // SystemOpsAccessor
+const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
+{
+    static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
+        SystemOpsAccessor::DestroyPeerImpl,
+        SystemOpsAccessor::CtorImpl,
+        SystemOpsAccessor::GetFinalizerImpl,
+        SystemOpsAccessor::StartFrameImpl,
+        SystemOpsAccessor::EndFrameImpl,
     };
-    return &UrlStyleAccessorImpl;
+    return &SystemOpsAccessorImpl;
 }
 
-struct UrlStylePeer {
-    virtual ~UrlStylePeer() = default;
+struct SystemOpsPeer {
+    virtual ~SystemOpsPeer() = default;
 };
 }

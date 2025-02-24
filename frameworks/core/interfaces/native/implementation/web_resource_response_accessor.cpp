@@ -39,12 +39,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetResponseDataImpl(Ark_WebResourceResponse peer)
+Ark_String GetResponseDataImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetData();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseDataImpl - return value need to be supported");
+    return {};
 }
 Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
 {
@@ -52,26 +53,29 @@ Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceRes
     LOGE("WebResourceResponseAccessor::GetResponseDataExImpl - return value need to be supported");
     return {};
 }
-void GetResponseEncodingImpl(Ark_WebResourceResponse peer)
+Ark_String GetResponseEncodingImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetEncoding();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseEncodingImpl - return value need to be supported");
+    return {};
 }
-void GetResponseMimeTypeImpl(Ark_WebResourceResponse peer)
+Ark_String GetResponseMimeTypeImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetMimeType();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseMimeTypeImpl - return value need to be supported");
+    return {};
 }
-void GetReasonMessageImpl(Ark_WebResourceResponse peer)
+Ark_String GetReasonMessageImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetReason();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetReasonMessageImpl - return value need to be supported");
+    return {};
 }
 Array_Header GetResponseHeaderImpl(Ark_WebResourceResponse peer)
 {

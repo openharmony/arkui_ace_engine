@@ -34,12 +34,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetErrorInfoImpl(Ark_WebResourceError peer)
+Ark_String GetErrorInfoImpl(Ark_WebResourceError peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetInfo();
     // info need to be returned
     LOGE("WebResourceErrorAccessor::GetErrorInfoImpl - return value need to be supported");
+    return {};
 }
 Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
 {

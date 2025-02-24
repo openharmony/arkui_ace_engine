@@ -958,10 +958,11 @@ void SetGlobalAlphaImpl(Ark_CanvasRenderer peer,
     }
     peerImpl->TriggerSetGlobalAlphaImpl(alpha);
 }
-void GetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer)
+Ark_String GetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetGlobalCompositeOperationImpl method should return "
         "object with specific type");
+    return {};
 }
 void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
                                      const Ark_String* globalCompositeOperation)
@@ -993,9 +994,10 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(strokeStyle);
     LOGE("ARKOALA CanvasRendererAccessor::SetStrokeStyleImpl input Union includes same type members");
 }
-void GetFilterImpl(Ark_CanvasRenderer peer)
+Ark_String GetFilterImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetFilterImpl method should return object with specific type");
+    return {};
 }
 void SetFilterImpl(Ark_CanvasRenderer peer,
                    const Ark_String* filter)
@@ -1152,9 +1154,10 @@ void SetShadowBlurImpl(Ark_CanvasRenderer peer,
     auto blur = static_cast<double>(Converter::Convert<float>(*shadowBlur));
     peerImpl->TriggerSetShadowBlurImpl(blur);
 }
-void GetShadowColorImpl(Ark_CanvasRenderer peer)
+Ark_String GetShadowColorImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowColorImpl method should return object with specific type");
+    return {};
 }
 void SetShadowColorImpl(Ark_CanvasRenderer peer,
                         const Ark_String* shadowColor)
@@ -1220,9 +1223,10 @@ void SetDirectionImpl(Ark_CanvasRenderer peer,
     auto dir = Converter::Convert<TextDirection>(*direction);
     peerImpl->SetTextDirection(dir);
 }
-void GetFontImpl(Ark_CanvasRenderer peer)
+Ark_String GetFontImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetFontImpl method should return object with specific type");
+    return {};
 }
 void SetFontImpl(Ark_CanvasRenderer peer,
                  const Ark_String* font)

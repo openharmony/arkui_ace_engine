@@ -45,26 +45,29 @@ Ark_Int32 YImpl(Ark_WebContextMenuParam peer)
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     return static_cast<Ark_Int32>(peer->handler->GetYCoord());
 }
-void GetLinkUrlImpl(Ark_WebContextMenuParam peer)
+Ark_String GetLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetLinkUrl();
     // value need to be returned
     LOGE("WebContextMenuParamAccessor::GetLinkUrlImpl - return value need to be supported");
+    return {};
 }
-void GetUnfilteredLinkUrlImpl(Ark_WebContextMenuParam peer)
+Ark_String GetUnfilteredLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetUnfilteredLinkUrl();
     // value need to be returned
     LOGE("WebContextMenuParamAccessor::GetUnfilteredLinkUrlImpl - return value need to be supported");
+    return {};
 }
-void GetSourceUrlImpl(Ark_WebContextMenuParam peer)
+Ark_String GetSourceUrlImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetSourceUrl();
     // value need to be returned
     LOGE("WebContextMenuParamAccessor::GetSourceUrlImpl - return value need to be supported");
+    return {};
 }
 Ark_Boolean ExistsImageContentsImpl(Ark_WebContextMenuParam peer)
 {
@@ -79,12 +82,13 @@ Ark_ContextMenuMediaType GetMediaTypeImpl(Ark_WebContextMenuParam peer)
     LOGE("WebContextMenuParamAccessor::GetMediaTypeImpl - return value need to be supported");
     return {};
 }
-void GetSelectionTextImpl(Ark_WebContextMenuParam peer)
+Ark_String GetSelectionTextImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetSelectionText();
     // value need to be returned
     LOGE("WebContextMenuParamAccessor::GetSelectionTextImpl - return value need to be supported");
+    return {};
 }
 Ark_ContextMenuSourceType GetSourceTypeImpl(Ark_WebContextMenuParam peer)
 {

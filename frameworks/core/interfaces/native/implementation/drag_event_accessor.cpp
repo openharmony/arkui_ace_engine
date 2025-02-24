@@ -128,7 +128,8 @@ void SetDataImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(unifiedData);
     peer->dragInfo->SetData(unifiedData->unifiedData);
 }
-Ark_UnifiedData GetDataImpl(Ark_DragEvent peer)
+Ark_UnifiedData GetDataImpl(Ark_VMContext vmContext,
+                            Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->dragInfo, nullptr);
@@ -204,7 +205,8 @@ Ark_Int32 GetVelocityImpl(Ark_DragEvent peer)
         arkVelocity.f32);
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
 }
-Ark_Boolean GetModifierKeyStateImpl(Ark_DragEvent peer,
+Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
+                                    Ark_DragEvent peer,
                                     const Array_String* keys)
 {
     auto defaultValue = ArkValue<Ark_Boolean>(false);

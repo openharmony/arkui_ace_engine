@@ -40,9 +40,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetTagImpl(Ark_GestureRecognizer peer)
+Ark_String GetTagImpl(Ark_GestureRecognizer peer)
 {
     LOGE("ARKOALA GestureRecognizerAccessor.GetTagImpl -> Incorrect return value!");
+    return {};
 }
 Ark_GestureControl_GestureType GetTypeImpl(Ark_GestureRecognizer peer)
 {

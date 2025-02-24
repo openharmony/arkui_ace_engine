@@ -132,7 +132,8 @@ void PushPath1Impl(Ark_NavPathStack peer,
     navStack->Nav::PathStack::PushPath(convNavInfo, convNavOptions);
     peer->InvokeUpdateCallback();
 }
-void PushDestination0Impl(Ark_NavPathStack peer,
+void PushDestination0Impl(Ark_VMContext vmContext,
+                          Ark_NavPathStack peer,
                           Ark_NavPathInfo info,
                           const Opt_Boolean* animated,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
@@ -151,7 +152,8 @@ void PushDestination0Impl(Ark_NavPathStack peer,
     navStack->Nav::PathStack::PushDestination(convNavInfo, Nav::Options{std::nullopt, convAnimated});
     peer->InvokeUpdateCallback();
 }
-void PushDestination1Impl(Ark_NavPathStack peer,
+void PushDestination1Impl(Ark_VMContext vmContext,
+                          Ark_NavPathStack peer,
                           Ark_NavPathInfo info,
                           const Opt_NavigationOptions* options,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
@@ -209,7 +211,8 @@ void PushPathByName1Impl(Ark_NavPathStack peer,
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     navStack->Nav::PathStack::PushPathByName(convName, convParam, convOnPop, convAnimated);
 }
-void PushDestinationByName0Impl(Ark_NavPathStack peer,
+void PushDestinationByName0Impl(Ark_VMContext vmContext,
+                                Ark_NavPathStack peer,
                                 const Ark_String* name,
                                 const Ark_CustomObject* param,
                                 const Opt_Boolean* animated,
@@ -231,7 +234,8 @@ void PushDestinationByName0Impl(Ark_NavPathStack peer,
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     navStack->Nav::PathStack::PushDestinationByName(convName, convParam, Nav::OnPopCallback(), convAnimated);
 }
-void PushDestinationByName1Impl(Ark_NavPathStack peer,
+void PushDestinationByName1Impl(Ark_VMContext vmContext,
+                                Ark_NavPathStack peer,
                                 const Ark_String* name,
                                 const Ark_CustomObject* param,
                                 const Callback_PopInfo_Void* onPop,
@@ -276,7 +280,8 @@ void ReplacePath1Impl(Ark_NavPathStack peer,
                       const Opt_NavigationOptions* options)
 {
 }
-void ReplaceDestinationImpl(Ark_NavPathStack peer,
+void ReplaceDestinationImpl(Ark_VMContext vmContext,
+                            Ark_NavPathStack peer,
                             Ark_NavPathInfo info,
                             const Opt_NavigationOptions* options,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)

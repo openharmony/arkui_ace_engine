@@ -86,6 +86,7 @@ public:
 
     MockListScrollController *mockListScrollerController_ = nullptr;
     RefPtr<MockListScrollController> mockListScrollerControllerKeeper_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 static std::vector<std::tuple<int32_t, Ark_Number>> indexValues = {
@@ -149,28 +150,28 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestValidValuesTest, TestSiz
         index = std::get<0>(value);
         arkIndex = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-        accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
+        accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
     }
 
     for (auto&& value: indexInGroupValues) {
         indexInGroup = std::get<0>(value);
         arkIndexInGroup = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-        accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
+        accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
     }
 
     for (auto&& value: alignValues) {
         align = std::get<0>(value);
         arkAlign = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-        accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
+        accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
     }
 
     for (auto&& value: smoothValues) {
         smooth = std::get<0>(value);
         arkSmooth = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-        accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
+        accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
     }
 }
 
@@ -197,7 +198,7 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestIndexInvalidValuesTest, 
         index = std::get<0>(value);
         arkIndex = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-        accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
+        accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
     }
 
     index = std::get<0>(indexValues[0]);
@@ -207,15 +208,15 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestIndexInvalidValuesTest, 
         indexInGroup = std::get<0>(value);
         arkIndexInGroup = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-        accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
+        accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
     }
 
     indexInGroup = std::get<0>(indexInGroupValues[0]);
     arkIndexInGroup = std::get<1>(indexInGroupValues[0]);
 
     EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(0);
-    accessor_->scrollToItemInGroup(peer_, nullptr, &arkIndexInGroup, &arkSmooth, &arkAlign);
-    accessor_->scrollToItemInGroup(peer_, &arkIndex, nullptr, &arkSmooth, &arkAlign);
+    accessor_->scrollToItemInGroup(vmContext_, peer_, nullptr, &arkIndexInGroup, &arkSmooth, &arkAlign);
+    accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, nullptr, &arkSmooth, &arkAlign);
 }
 
 /**
@@ -241,13 +242,13 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestSmoothInvalidValuesTest,
         smooth = std::get<0>(value);
         arkSmooth = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-        accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
+        accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
     }
 
     smooth = std::get<0>(smoothValues[0]);
 
     EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-    accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, nullptr, &arkAlign);
+    accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, nullptr, &arkAlign);
 }
 
 /**
@@ -273,13 +274,13 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestAlignInvalidValuesTest, 
         align = std::get<0>(value);
         arkAlign = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-        accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
+        accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, &arkAlign);
     }
 
     align = ScrollAlign::NONE;
 
     EXPECT_CALL(*mockListScrollerController_, JumpToItemInGroup(index, indexInGroup, smooth, align, 3)).Times(1);
-    accessor_->scrollToItemInGroup(peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, nullptr);
+    accessor_->scrollToItemInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup, &arkSmooth, nullptr);
 }
 
 /**
@@ -303,7 +304,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestValidValuesTes
         expectedRect = Rect(index, index, indexInGroup, indexInGroup);
         EXPECT_CALL(*mockListScrollerController_,
             GetItemRectInGroup(index, indexInGroup)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getItemRectInGroup(peer_, &arkIndex, &arkIndexInGroup);
+        accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
         // wait for return value type change from Ark_NativePointer to another type
         // which is acceptable to "rect" data
         Rect rc;
@@ -320,7 +321,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestValidValuesTes
         expectedRect = Rect(index, index, indexInGroup, indexInGroup);
         EXPECT_CALL(*mockListScrollerController_,
             GetItemRectInGroup(index, indexInGroup)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getItemRectInGroup(peer_, &arkIndex, &arkIndexInGroup);
+        accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
         // wait for return value type change from Ark_NativePointer to another type
         // which is acceptable to "rect" data
         Rect rc;
@@ -348,7 +349,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestInvalidValuesT
         arkIndex = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_,
             GetItemRectInGroup(index, indexInGroup)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getItemRectInGroup(peer_, &arkIndex, &arkIndexInGroup);
+        accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
         // wait for return value type change from Ark_NativePointer to another type
         // which is acceptable to "rect" data
         Rect rc;
@@ -363,7 +364,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestInvalidValuesT
         arkIndexInGroup = std::get<1>(value);
         EXPECT_CALL(*mockListScrollerController_,
             GetItemRectInGroup(index, indexInGroup)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getItemRectInGroup(peer_, &arkIndex, &arkIndexInGroup);
+        accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
         // wait for return value type change from Ark_NativePointer to another type
         // which is acceptable to "rect" data
         Rect rc;
@@ -374,14 +375,14 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestInvalidValuesT
     arkIndexInGroup = std::get<1>(indexInGroupValues[0]);
 
     EXPECT_CALL(*mockListScrollerController_, GetItemRectInGroup(index, indexInGroup)).Times(0);
-    accessor_->getItemRectInGroup(peer_, nullptr, &arkIndexInGroup);
+    accessor_->getItemRectInGroup(vmContext_, peer_, nullptr, &arkIndexInGroup);
     // wait for return value type change from Ark_NativePointer to another type
     // which is acceptable to "rect" data
     Rect rc;
     EXPECT_TRUE(rc == expectedRect);
 
     EXPECT_CALL(*mockListScrollerController_, GetItemRectInGroup(index, indexInGroup)).Times(0);
-    accessor_->getItemRectInGroup(peer_, &arkIndex, nullptr);
+    accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, nullptr);
     // wait for return value type change from Ark_NativePointer to another type
     // which is acceptable to "rect" data
     EXPECT_TRUE(rc == expectedRect);
@@ -407,7 +408,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
         arkX = std::get<1>(value);
         expectedRect = ListItemGroupIndex {x, y, -1};
         EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getVisibleListContentInfo(peer_, &arkX, &arkY);
+        accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
         // wait for return value type change from Ark_NativePointer to another type
         // which is acceptable to "ListItemGroupIndex" data
         ListItemGroupIndex rc;
@@ -425,7 +426,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
         arkY = std::get<1>(value);
         expectedRect = ListItemGroupIndex {x, y, -1};
         EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getVisibleListContentInfo(peer_, &arkX, &arkY);
+        accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
         // wait for return value type change from Ark_NativePointer to another type
         // which is acceptable to "ListItemGroupIndex" data
         ListItemGroupIndex rc;
@@ -445,7 +446,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
         arkY = std::get<1>(value);
         expectedRect = ListItemGroupIndex {x, y, -1};
         EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getVisibleListContentInfo(peer_, &arkX, &arkY);
+        accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
         // wait for return value type change from Ark_NativePointer to another type
         // which is acceptable to "ListItemGroupIndex" data
         ListItemGroupIndex rc;
@@ -471,7 +472,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestInvalidValues
     auto expectedRect = ListItemGroupIndex();
 
     EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(0);
-    accessor_->getVisibleListContentInfo(peer_, nullptr, &arkY);
+    accessor_->getVisibleListContentInfo(vmContext_, peer_, nullptr, &arkY);
     // wait for return value type change from Ark_NativePointer to another type
     // which is acceptable to "ListItemGroupIndex" data
     ListItemGroupIndex rc;
@@ -480,7 +481,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestInvalidValues
     EXPECT_TRUE(rc.indexInGroup == expectedRect.indexInGroup);
 
     EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(0);
-    accessor_->getVisibleListContentInfo(peer_, &arkX, nullptr);
+    accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, nullptr);
     // wait for return value type change from Ark_NativePointer to another type
     // which is acceptable to "ListItemGroupIndex" data
     EXPECT_TRUE(rc.area == expectedRect.area);
@@ -508,7 +509,7 @@ HWTEST_F(ListScrollerAccessorTest, CloseAllSwipeActionsImplTest, TestSize.Level1
     auto optCallback = Converter::ArkValue<Opt_Callback_Void>(сallbackVoid);
     Ark_CloseSwipeActionOptions arkClose = {.onFinish = optCallback};
     auto arkCloseOpt = Converter::ArkValue<Opt_CloseSwipeActionOptions>(arkClose);
-    accessor_->closeAllSwipeActions(peer_, &arkCloseOpt);
+    accessor_->closeAllSwipeActions(vmContext_, peer_, &arkCloseOpt);
 
     // check the invoking result
     ASSERT_TRUE(checkData.has_value());
