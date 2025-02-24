@@ -1228,11 +1228,11 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 Shadow GetDefaultShadow(ShadowStyle style)
 {
     Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, shadow);
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipeline->GetColorMode();
     shadow = shadowTheme->GetShadow(style, colorMode);
     return shadow;
 }

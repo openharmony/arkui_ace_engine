@@ -75,7 +75,7 @@ public:
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
             auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
-            if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
                 dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
             }
             theme->dragBackgroundColor_ = dragBackgroundColor;

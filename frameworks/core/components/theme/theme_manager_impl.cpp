@@ -242,7 +242,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type)
 
     if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
         ColorMode localMode = pipelineContext->GetLocalColorMode();
-        ColorMode systemMode = SystemProperties::GetColorMode();
+        ColorMode systemMode = pipelineContext->GetColorMode();
         bool needRestore = false;
         if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
             // Ordinary themes should work in system color mode. Only theme wrappers support local color mode.
@@ -273,7 +273,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
 
     if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
         ColorMode localMode = pipelineContext->GetLocalColorMode();
-        ColorMode systemMode = SystemProperties::GetColorMode();
+        ColorMode systemMode = pipelineContext->GetColorMode();
         bool needRestore = false;
         if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
             // Ordinary themes should work in system color mode. Only theme wrappers support local color mode.
@@ -378,7 +378,7 @@ ThemeManagerImpl::ThemeWrappers& ThemeManagerImpl::GetThemeWrappers(ColorMode mo
 ColorMode ThemeManagerImpl::GetCurrentColorMode() const
 {
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    ColorMode systemMode = SystemProperties::GetColorMode();
+    ColorMode systemMode = Container::CurrentColorMode();
     CHECK_NULL_RETURN(pipelineContext, systemMode);
     ColorMode localMode = pipelineContext->GetLocalColorMode();
     return localMode == ColorMode::COLOR_MODE_UNDEFINED ? systemMode : localMode;

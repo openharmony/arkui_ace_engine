@@ -24,6 +24,7 @@ int32_t g_id = 0;
 } // namespace
 
 RefPtr<MockContainer> MockContainer::container_;
+ColorMode MockContainer::mockColorMode_ = ColorMode::LIGHT;
 bool Frontend::MaybeRelease()
 {
     return AceType::MaybeRelease();
@@ -115,6 +116,21 @@ RefPtr<MockContainer> MockContainer::Current()
 RefPtr<Container> Container::GetContainer(int32_t containerId)
 {
     return MockContainer::Current();
+}
+
+ColorMode Container::CurrentColorMode()
+{
+    return MockContainer::mockColorMode_;
+}
+
+void MockContainer::SetMockColorMode(ColorMode mode)
+{
+    mockColorMode_ = mode;
+}
+
+ColorMode MockContainer::GetMockColorMode()
+{
+    return mockColorMode_;
 }
 
 int32_t MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,

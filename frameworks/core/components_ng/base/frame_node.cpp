@@ -1395,8 +1395,19 @@ void FrameNode::FireColorNDKCallback()
     std::shared_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
     if (ndkColorModeUpdateCallback_) {
         auto colorModeChange = ndkColorModeUpdateCallback_;
-        colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        colorModeChange(context->GetColorMode() == ColorMode::DARK);
     }
+}
+
+void FrameNode::SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
+{
+    std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
+    ndkColorModeUpdateCallback_ = callback;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    colorMode_ = context->GetColorMode();
 }
 
 void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChange)

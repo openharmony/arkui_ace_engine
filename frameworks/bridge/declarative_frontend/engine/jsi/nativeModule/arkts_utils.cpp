@@ -204,7 +204,8 @@ RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRe
         }
         resObjParamsList.emplace_back(resObjParams);
     }
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        id, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 

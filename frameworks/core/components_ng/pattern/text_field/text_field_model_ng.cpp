@@ -75,10 +75,10 @@ void TextFieldModelNG::CreateNode(
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->InitTheme();
-    auto colorMode = SystemProperties::GetColorMode();
-    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto colorMode = pipeline->GetColorMode();
+    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }

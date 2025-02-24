@@ -737,7 +737,7 @@ HWTEST_F(SearchTestTwoNg, Pattern025, TestSize.Level1)
     touchInfo1.SetTouchType(TouchType::UP);
     info.AddTouchLocationInfo(std::move(touchInfo1));
     ASSERT_NE(events.size(), 0);
-    SystemProperties::SetColorMode(ColorMode::DARK);
+    MockContainer::SetMockColorMode(ColorMode::DARK);
     for (auto event : events) {
         event->callback_(info);
     }

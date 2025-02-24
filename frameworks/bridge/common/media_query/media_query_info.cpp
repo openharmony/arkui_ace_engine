@@ -94,7 +94,7 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
     json->Put("resolution", PipelineBase::GetCurrentDensity());
     json->Put("orientation", GetOrientation().c_str());
     json->Put("device-type", GetDeviceType().c_str());
-    json->Put("dark-mode", SystemProperties::GetColorMode() == ColorMode::DARK);
+    json->Put("dark-mode", PipelineBase::GetCurrentColorMode() == ColorMode::DARK);
     json->Put("api-version", StringUtils::StringToInt(SystemProperties::GetApiVersion()));
     return json;
 }

@@ -46,6 +46,7 @@
 #include "core/common/window_animation_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -131,6 +132,8 @@ public:
      * Get density of current pipeline if valid, or return density of default display
      */
     static double GetCurrentDensity();
+
+    static ColorMode GetCurrentColorMode();
 
     virtual void SetupRootElement() = 0;
 
@@ -687,6 +690,14 @@ public:
         CHECK_RUN_ON(UI);
         std::unique_lock<std::shared_mutex> lock(themeMtx_);
         themeManager_ = std::move(theme);
+    }
+
+    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter) {
+        std::unique_lock<std::shared_mutex> lock(themeMtx_);
+        CHECK_NULL_VOID(themeManager_);
+        auto themeConstants = themeManager_->GetThemeConstants();
+        CHECK_NULL_VOID(themeConstants);
+        themeConstants->UpdateResourceAdapter(adapter);
     }
 
     template<typename T>

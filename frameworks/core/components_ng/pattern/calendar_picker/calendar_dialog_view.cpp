@@ -180,7 +180,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         renderContext->UpdateBorderRadius(radius);
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
         if (shadowTheme) {
-            auto colorMode = SystemProperties::GetColorMode();
+            auto colorMode = pipelineContext->GetColorMode();
             renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
         }
     }

@@ -577,7 +577,7 @@ public:
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
-        const ParsedConfig& parsedConfig, const std::string& configuration);
+        const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);
     void UpdateConfigurationSyncForAll(
         const ParsedConfig& parsedConfig, const std::string& configuration);
 

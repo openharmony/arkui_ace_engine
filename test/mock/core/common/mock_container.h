@@ -47,6 +47,8 @@ public:
     static void TearDown();
     static RefPtr<MockContainer> Current();
     static RefPtr<MockContainer> GetContainer(int32_t containerId);
+    static void SetMockColorMode(ColorMode mode);
+    static ColorMode GetMockColorMode();
     void SetDisplayInfo(RefPtr<DisplayInfo> displayInfo);
 
     void SetIsFormRender(bool isFormRender) override
@@ -84,6 +86,16 @@ public:
         return isCrossAxisWindow_;
     }
 
+    void SetColorMode(ColorMode mode) override
+    {
+        mockColorMode_ = mode;
+    }
+
+    ColorMode GetColorMode() const override
+    {
+        return mockColorMode_;
+    }
+
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
@@ -116,6 +128,7 @@ public:
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
     static RefPtr<MockContainer> container_;
+    static ColorMode mockColorMode_;
 
 private:
     RefPtr<TaskExecutor> taskExecutor_;

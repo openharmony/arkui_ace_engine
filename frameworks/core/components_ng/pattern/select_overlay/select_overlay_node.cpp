@@ -1373,7 +1373,7 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
                 extensionContext->UpdateOpacity(1.0);
             }
             extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-            auto colorMode = SystemProperties::GetColorMode();
+            auto colorMode = Container::CurrentColorMode();
             extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
             selectMenuInnerContext->UpdateOpacity(0.0);
         });
@@ -1873,7 +1873,7 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty()
     selectMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     selectMenu_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipeline->GetColorMode();
     selectMenu_->GetRenderContext()->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     selectMenu_->GetRenderContext()->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
     selectMenu_->GetRenderContext()->SetClipToFrame(true);
@@ -2908,7 +2908,7 @@ void SelectOverlayNode::UpdateSelectMenuBg()
     CHECK_NULL_VOID(textOverlayTheme);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_VOID(shadowTheme);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     auto renderContext = selectMenu_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));

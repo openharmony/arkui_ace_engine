@@ -574,12 +574,7 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
-    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
-    {
-        std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
-        ndkColorModeUpdateCallback_ = callback;
-        colorMode_ = SystemProperties::GetColorMode();
-    }
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback);
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
     {

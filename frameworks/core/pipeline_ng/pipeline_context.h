@@ -966,11 +966,13 @@ public:
         localColorMode_ = localColorModeValue;
     }
 
-    ColorMode GetLocalColorMode() const
+    ColorMode GetLocalColorMode() const // ColorMode for WithTheme
     {
         ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
         return colorMode;
     }
+
+    ColorMode GetColorMode() const;
 
     void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
     {
@@ -1437,6 +1439,7 @@ private:
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
+    ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;

@@ -1971,7 +1971,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
 
-    SystemProperties::SetColorMode(ColorMode::DARK);
+    MockContainer::SetMockColorMode(ColorMode::DARK);
     context_->SetAppBgColor(Color::BLACK);
     context_->ChangeDarkModeBrightness();
     context_->SetIsJsCard(true);
@@ -1984,7 +1984,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     context_->ChangeDarkModeBrightness();
     context_->SetAppBgColor(Color::BLUE);
     context_->ChangeDarkModeBrightness();
-    SystemProperties::SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
     EXPECT_NE(context_->stageManager_, nullptr);
 }

@@ -19,8 +19,6 @@
 
 #include "gtest/gtest.h"
 #include "base/i18n/time_format.h"
-#include "core/components/theme/theme_attributes.h"
-#include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -28,7 +26,9 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/utils/time_util.h"
+#include "core/components/theme/theme_attributes.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"

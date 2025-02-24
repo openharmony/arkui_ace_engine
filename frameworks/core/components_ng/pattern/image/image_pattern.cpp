@@ -1518,11 +1518,11 @@ void ImagePattern::DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutPr
     DumpLog::GetInstance().AddDesc(
         std::string("SrcType: ").append(std::to_string(static_cast<int32_t>(src.GetSrcType()))));
     DumpLog::GetInstance().AddDesc(
-        std::string("AbilityName: ").append(std::to_string(static_cast<int32_t>(SystemProperties::GetColorMode()))));
+        std::string("AbilityName: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
     DumpLog::GetInstance().AddDesc(std::string("BundleName: ").append(src.GetBundleName()));
     DumpLog::GetInstance().AddDesc(std::string("ModuleName: ").append(src.GetModuleName()));
     DumpLog::GetInstance().AddDesc(
-        std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(SystemProperties::GetColorMode()))));
+        std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
     DumpLog::GetInstance().AddDesc(
         std::string("LocalColorMode: ").append(std::to_string(static_cast<int32_t>(src.GetLocalColorMode()))));
 }

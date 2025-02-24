@@ -1187,7 +1187,7 @@ public:
     ColorMode GetDisplayColorMode()
     {
         auto colorMode = GetColorMode();
-        return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? SystemProperties::GetColorMode() : colorMode;
+        return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? Container::CurrentColorMode() : colorMode;
     }
 
     template<typename T>

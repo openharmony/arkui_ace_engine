@@ -327,7 +327,7 @@ void FfiOHOSShowAlertDialogParamWithConfirmShadowStyle(
     // Parse shadow
     Shadow shadow;
     auto style = static_cast<ShadowStyle>(shadowStyle);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     if (style != ShadowStyle::None) {
         auto container = Container::Current();
         auto pipelineContext = container->GetPipelineContext();
@@ -397,7 +397,7 @@ void FfiOHOSShowAlertDialogParamWithButtonsShadowStyle(NativeAlertDialogParam al
     // Parse shadow
     Shadow shadow;
     auto style = static_cast<ShadowStyle>(shadowStyle);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     if (style != ShadowStyle::None) {
         auto container = Container::Current();
         auto pipelineContext = container->GetPipelineContext();
@@ -502,7 +502,7 @@ void FfiOHOSShowAlertDialogParamWithOptionsShadowStyle(NativeAlertDialogParam al
     // Parse shadow
     Shadow shadow;
     auto style = static_cast<ShadowStyle>(shadowStyle);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     if (style != ShadowStyle::None) {
         auto container = Container::Current();
         auto pipelineContext = container->GetPipelineContext();
