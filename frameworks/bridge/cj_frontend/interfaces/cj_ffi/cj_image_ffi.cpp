@@ -60,6 +60,7 @@ const std::vector<CopyOptions> IMAGE_COPY_OPTIONS = {
     CopyOptions::Local,
     CopyOptions::Distributed
 };
+constexpr uint32_t FIT_MATRIX = 16;
 } // namespace
 
 extern "C" {
@@ -136,11 +137,15 @@ CJ_EXPORT void FfiOHOSAceFrameworkImageSetBorderRadius()
 
 void FfiOHOSAceFrameworkImageSetObjectFit(int32_t objectFit)
 {
-    if (!OHOS::Ace::Framework::Utils::CheckParamsValid(objectFit, IMAGE_FITS.size())) {
-        LOGE("invalid value for image fit");
-        return;
+    int32_t parseRes = objectFit;
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::MATRIX)) {
+        parseRes = static_cast<int32_t>(ImageFit::COVER)
     }
-    ImageModel::GetInstance()->SetImageFit(IMAGE_FITS[objectFit]);
+    auto fit = static_cast<ImageFit>(parseRes);
+    if (parseRes == FIT_MATRIX) {
+        fit = ImageFit::MATRIX;
+    }
+    ImageModel::GetInstance()->SetImageFit(fit);
 }
 
 void FfiOHOSAceFrameworkImageSetObjectRepeat(int32_t objectRepeat)
