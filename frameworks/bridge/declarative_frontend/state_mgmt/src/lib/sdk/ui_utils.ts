@@ -38,6 +38,17 @@ class UIUtilsImpl {
       return RefInfo.get(target)[RefInfo.MAKE_OBSERVED_PROXY] as T;
     }
 
+    public makeV1Observed<T extends object>(target: T): T {
+      // Make non-observed data into observed V1 data
+      return ObservedObject.makeV1Observed(target);
+    }
+
+    public enableV2Compatibility<T extends object>(target: T): T {
+      // Enables V2 compatibility for the given object and all its nested objects
+      ObservedObject.enableV2Compatible(target);
+      return target;
+    }
+
     public static instance(): UIUtilsImpl {
       if (UIUtilsImpl.instance_) {
         return UIUtilsImpl.instance_;

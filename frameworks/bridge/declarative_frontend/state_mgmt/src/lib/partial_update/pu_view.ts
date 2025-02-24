@@ -783,6 +783,7 @@ abstract class ViewPU extends PUV2ViewBase
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
       if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
+        stateMgmtConsole.debug(`${this.debugInfo__()}: V2 dependency recording is enabled (uses ObserveV2.getObserve().startRecordDependencies, enables addRef)`)
         // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startRecordDependencies(this, elmtId);

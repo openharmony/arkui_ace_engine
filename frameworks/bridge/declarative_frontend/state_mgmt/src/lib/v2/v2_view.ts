@@ -468,7 +468,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * @param newValue
      */
     protected initParam<Z>(paramVariableName: string, newValue: Z): void {
-        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV2.initParam<Z>(this, paramVariableName, newValue);
     }
     /**
@@ -481,19 +480,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * @param newValue
      */
     protected updateParam<Z>(paramVariableName: string, newValue: Z): void {
-        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV2.updateParam<Z>(this, paramVariableName, newValue);
     }
 
     protected resetParam<Z>(paramVariableName: string, newValue: Z): void {
-        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV2.resetParam<Z>(this, paramVariableName, newValue);
-    }
-
-    private checkIsV1Proxy<Z>(paramVariableName: string, value: Z): void {
-        if (ObservedObject.IsObservedObject(value)) {
-            throw new Error(`Cannot assign the ComponentV1 value to the ComponentV2 for the property '${paramVariableName}'`);
-        }
     }
 
     /**
