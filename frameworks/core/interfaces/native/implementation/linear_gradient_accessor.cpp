@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -24,7 +25,9 @@ void DestroyPeerImpl(Ark_LinearGradient peer)
 }
 Ark_LinearGradient CtorImpl(const Array_ColorStop* colorStops)
 {
-    return {};
+    CHECK_NULL_RETURN(colorStops, nullptr);
+    auto colors = Converter::Convert<std::vector<std::pair<Color, Dimension>>>(*colorStops);
+    return new LinearGradientPeer{colors};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
