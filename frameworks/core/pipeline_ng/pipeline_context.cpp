@@ -2806,6 +2806,9 @@ void PipelineContext::OnTouchEvent(
         if (formEventMgr) {
             formEventMgr->RemoveEtsCardTouchEventCallback(point.id);
         }
+        if (scalePoint.type == TouchType::CANCEL) {
+            dragEvents_.clear();
+        }
         ResetDraggingStatus(scalePoint, node);
     }
     if (scalePoint.type != TouchType::MOVE) {
