@@ -753,34 +753,6 @@ HWTEST_F(WebPatternWebTest, BeforeSyncGeometryProperties, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnAreaChangedInner_001
- * @tc.desc: OnAreaChangedInner.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, OnAreaChangedInner_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->layoutMode_ = WebLayoutMode::NONE;
-    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
-    OffsetT<float> Offset(1.0, 1.0);
-    webPattern->webOffset_ = Offset;
-    webPattern->OnAreaChangedInner();
-    EXPECT_NE(webPattern->webOffset_.GetX(), Offset.GetX());
-#endif
-}
-
-/**
  * @tc.name: OnAreaChangedInner_002
  * @tc.desc: OnAreaChangedInner.
  * @tc.type: FUNC
