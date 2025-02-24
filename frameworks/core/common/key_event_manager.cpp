@@ -32,6 +32,7 @@ enum CtrlKeysBit : uint8_t {
 RefPtr<NG::PipelineContext> GetPipelineContext(int32_t instanceId)
 {
     auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
     return AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
 }
 
@@ -515,9 +516,6 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         return false;
     }
 
-    auto container = Container::GetContainer(GetInstanceId());
-    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-
     // process drag cancel
     if (event.code == KeyCode::KEY_ESCAPE) {
         auto dragDropMgr = GetDragDropManager(GetInstanceId());
@@ -539,6 +537,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         auto overlayManager = GetOverlayManager(GetInstanceId());
         CHECK_NULL_RETURN(overlayManager, false);
         auto currentContainer = Container::Current();
+        CHECK_NULL_RETURN(currentContainer, false);
         if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
             return overlayManager->RemoveOverlayInSubwindow();
         } else {
