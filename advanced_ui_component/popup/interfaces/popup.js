@@ -100,11 +100,12 @@ export const a1 = {
             start: LengthMetrics.vp(12),
             end: LengthMetrics.vp(12)
         },
-        symbolStyle: new SymbolGlyphModifier({ 'id': -1, 'type': 40000, params: ['sys.symbol.xmark'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+        symbolStyle: new SymbolGlyphModifier({ "id": -1, "type": 40000, params: ['sys.symbol.xmark'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        f1: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        backgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        symbolSize: 18
+        e2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        i2: 18,
+        e1: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
 };
 const b1 = () => {
@@ -124,7 +125,7 @@ export function Popup(options, parent = null) {
                     onClose: options.onClose,
                     buttons: options.buttons,
                     maxWidth: options.maxWidth
-                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 208, j2: 3 });
+                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 210, j2: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -906,7 +907,7 @@ export class d1 extends ViewPU {
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
-                                    Button.accessibilityText({ "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    Button.accessibilityText(this.theme.h2.e1);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1133,7 +1134,7 @@ export class d1 extends ViewPU {
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
-                                    Button.accessibilityText({ "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    Button.accessibilityText(this.theme.h2.e1);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1288,5 +1289,6 @@ export class d1 extends ViewPU {
         this.updateDirtyElements();
     }
 }
+
 
 export default { Popup };
