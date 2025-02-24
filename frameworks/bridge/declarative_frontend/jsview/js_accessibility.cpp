@@ -303,21 +303,28 @@ void JSViewAbstract::JsOnAccessibilityFocus(const JSCallbackInfo& info)
 void JSViewAbstract::JsAccessibilityDefaultFocus(const JSCallbackInfo& info)
 {
     JSRef<JSVal> arg = info[0];
-    if (arg->IsBoolean() && arg->ToBoolean()) {
-        ViewAbstractModel::GetInstance()->SetAccessibilityDefaultFocus();
+    if (arg->IsBoolean()) {
+        auto isFocus = arg->ToBoolean();
+        ViewAbstractModel::GetInstance()->SetAccessibilityDefaultFocus(isFocus);
+        return;
     }
+    ViewAbstractModel::GetInstance()->SetAccessibilityDefaultFocus(false);
 }
 
 void JSViewAbstract::JsAccessibilityUseSamePage(const JSCallbackInfo& info)
 {
     JSRef<JSVal> arg = info[0];
     if (arg->IsNumber()) {
-        auto pageMode = arg->ToNumber<int32_t>();
-        if (pageMode >= 0 && pageMode < static_cast<int32_t>(PAGE_MODE_TYPE.size())) {
-            bool isFullSilent = static_cast<bool>(PAGE_MODE_TYPE[pageMode]);
-            ViewAbstractModel::GetInstance()->SetAccessibilityUseSamePage(isFullSilent);
+        auto pageModeType = arg->ToNumber<int32_t>();
+        if (pageModeType >= 0 && pageModeType < static_cast<int32_t>(PAGE_MODE_TYPE.size())) {
+            auto pageMode = static_cast<bool>(PAGE_MODE_TYPE[pageModeType]) ? "FULL_SILENT" : "SEMI_SILENT";
+            ViewAbstractModel::GetInstance()->SetAccessibilityUseSamePage(pageMode);
+            return;
         }
+        ViewAbstractModel::GetInstance()->SetAccessibilityUseSamePage("");
+        return;
     }
+    ViewAbstractModel::GetInstance()->SetAccessibilityUseSamePage("");
 }
 
 std::string JSAccessibilityAbstract::GetRoleByType(AccessibilityRoleType roleType)

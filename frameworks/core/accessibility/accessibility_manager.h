@@ -32,6 +32,7 @@ class AccessibilityElementOperator;
 namespace OHOS::Ace::NG {
 class WebPattern;
 class FrameNode;
+class UIExtensionManager;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -260,8 +261,10 @@ public:
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
 
-    virtual void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) {};
+    virtual void AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node) {};
+    virtual void AddFrameNodeToDefaultFocusList(const RefPtr<NG::FrameNode>& node, bool isFocus) {};
 
+    virtual void RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager) {};
     virtual void UpdateFrameNodeState(int32_t nodeId) {};
 
     virtual void UpdatePageMode(const std::string& pageMode) {};

@@ -3065,7 +3065,7 @@ bool JsAccessibilityManager::IsSendAccessibilityEvent(const AccessibilityEvent& 
         }
         UpdatePageId(pipelineContext, pageId);
     }
-    return IsSendAccessibilityEventForHost(accessibilityEvent, pageId, componentType);
+    return IsSendAccessibilityEventForHost(accessibilityEvent, componentType, pageId);
 }
 
 bool JsAccessibilityManager::IsSendAccessibilityEventForUEA(
@@ -3089,7 +3089,7 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForUEA(
 }
 
 bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
-    AccessibilityEvent accessibilityEvent, const int32_t pageId, const std::string componentType)
+    const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId)
 {
     UpdateExtensionComponentStatusVec(extensionComponentStatusVec_);
     ClearDefaultFocusList(defaultFocusList_);
@@ -3114,8 +3114,9 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
                 "override the event, componentType:%{public}s event:%{public}d nodeId:%{public}" PRId64,
                 event.componentType.c_str(), eventType, event.nodeId);
         }
-        accessibilityEvent.componentType = componentType;
-        pageIdEventMap_[pageId] = accessibilityEvent;
+        AccessibilityEvent event = accessibilityEvent;
+        event.componentType = componentType;
+        pageIdEventMap_[pageId] = event;
         return false;
     }
     return true;
@@ -3167,13 +3168,69 @@ void JsAccessibilityManager::SendCacheAccessibilityEventForHost(const int32_t pa
     }
 }
 
-void JsAccessibilityManager::SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent)
+void JsAccessibilityManager::AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node)
 {
-    if (isExtensionComponent) {
-        extensionComponentStatusVec_.emplace_back(WeakPtr(node), false);
+    extensionComponentStatusVec_.emplace_back(WeakPtr(node), false);
+}
+
+void JsAccessibilityManager::AddFrameNodeToDefaultFocusList(const RefPtr<NG::FrameNode>& node, bool isFocus)
+{
+    if (isFocus) {
+        AddDefaultFocusNode(node);
         return;
     }
-    defaultFocusList_.push_back(WeakPtr(node));
+    EraseDefaultFocusNode(node);
+}
+
+void JsAccessibilityManager::AddDefaultFocusNode(const RefPtr<NG::FrameNode>& defaultFocusNode)
+{
+    CHECK_NULL_VOID(defaultFocusNode);
+    auto nodeId = defaultFocusNode->GetId();
+    for (const auto& node : defaultFocusList_) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && (frameNode->GetId() == nodeId)) {
+            return;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+        "add frameNode to defaultFocusList, nodeId: %{public}d.", nodeId);
+    defaultFocusList_.push_back(WeakPtr(defaultFocusNode));
+}
+
+void JsAccessibilityManager::EraseDefaultFocusNode(const RefPtr<NG::FrameNode>& defaultFocusNode)
+{
+    CHECK_NULL_VOID(defaultFocusNode);
+    auto nodeId = defaultFocusNode->GetId();
+    for (auto it = defaultFocusList_.begin(); it != defaultFocusList_.end();) {
+        auto node = it->Upgrade();
+        if (node && (node->GetId() == nodeId)) {
+            it = defaultFocusList_.erase(it);
+            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+                "erase frameNode from defaultFocusList, nodeId: %{public}d.", nodeId);
+            return;
+        } else {
+            ++it;
+        }
+    }
+}
+
+void JsAccessibilityManager::RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager)
+{
+    CHECK_NULL_VOID(uiExtManager);
+    auto callback = [weak = WeakClaim(this)](const AAFwk::Want& data) -> int32_t {
+        if (!data.HasParameter("pageMode")) {
+            return -1;
+        }
+        auto accessibilityManager = weak.Upgrade();
+        CHECK_NULL_RETURN(accessibilityManager, -1);
+
+        auto pageMode = data.GetStringParam("pageMode");
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+            "host send pageMode to uea, pageMode: %{public}s.", pageMode.c_str());
+        accessibilityManager->UpdatePageMode(pageMode);
+        return 0;
+    };
+    uiExtManager->RegisterBusinessDataConsumeCallback(NG::UIContentBusinessCode::SEND_PAGE_MODE_TO_UEA, callback);
 }
 
 void JsAccessibilityManager::UpdateFrameNodeState(int32_t nodeId)
