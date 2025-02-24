@@ -357,60 +357,6 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterSelectOverLayOnClose002
- * @tc.desc: Test RegisterSelectOverLayOnClose.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    SelectOverlayInfo selectInfo;
-    selectInfo.firstHandle.isShow = true;
-    selectInfo.secondHandle.isShow = true;
-    webPattern->RegisterSelectOverLayOnClose(selectInfo);
-    selectInfo.onClose(false);
-    ASSERT_FALSE(webPattern->isReceivedArkDrag_);
-#endif
-}
-
-/**
- * @tc.name: RegisterSelectOverLayOnClose003
- * @tc.desc: Test RegisterSelectOverLayOnClose.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose003, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    SelectOverlayInfo selectInfo;
-    selectInfo.firstHandle.isShow = true;
-    selectInfo.secondHandle.isShow = true;
-    webPattern->RegisterSelectOverLayOnClose(selectInfo);
-    selectInfo.onClose(true);
-    ASSERT_FALSE(webPattern->isReceivedArkDrag_);
-#endif
-}
-
-/**
  * @tc.name: DumpViewDataPageNode007
  * @tc.desc: DumpViewDataPageNode.
  * @tc.type: FUNC

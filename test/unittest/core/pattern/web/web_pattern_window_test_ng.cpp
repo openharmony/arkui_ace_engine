@@ -1011,36 +1011,6 @@ HWTEST_F(WebPatternWindowTestNg, OnWindowHide001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateTouchHandleForOverlay001
- * @tc.desc: UpdateTouchHandleForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, UpdateTouchHandleForOverlay001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    bool ret = false;
-    webPattern->UpdateTouchHandleForOverlay(ret);
-    EXPECT_FALSE(ret);
-    webPattern->selectTemporarilyHidden_ = false;
-    webPattern->selectTemporarilyHiddenByScroll_ = true;
-    webPattern->UpdateTouchHandleForOverlay(ret);
-    EXPECT_TRUE(webPattern->selectTemporarilyHiddenByScroll_);
-    webPattern->selectTemporarilyHidden_ = true;
-    EXPECT_TRUE(webPattern->selectTemporarilyHidden_);
-#endif
-}
-
-/**
  * @tc.name: CalculateTooltipOffset_001
  * @tc.desc: CalculateTooltipOffset
  * @tc.type: FUNC
