@@ -65,6 +65,14 @@ ArkUIDialogHandle CreateDialog()
         .levelUniqueId = ARKUI_DEFAULT_LEVEL_UNIQUEID,
         .immersiveMode = ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE,
         .levelOrder = 0.0f,
+        .onWillAppearData = nullptr,
+        .onDidAppearData = nullptr,
+        .onWillDisappearData = nullptr,
+        .onDidDisappearData = nullptr,
+        .onWillAppear = nullptr,
+        .onDidAppear = nullptr,
+        .onWillDisappear = nullptr,
+        .onDidDisappear = nullptr,
     });
 }
 
@@ -150,6 +158,39 @@ void ParseDialogOnWillDismiss(DialogProperties& dialogProperties, ArkUIDialogHan
     };
 }
 
+void ParseDialogLife(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (controllerHandler->onWillAppear) {
+        dialogProperties.onWillAppear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onWillAppear);
+            (*(controllerHandler->onWillAppear))(controllerHandler->onWillAppearData);
+        };
+    }
+    if (controllerHandler->onDidAppear) {
+        dialogProperties.onDidAppear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onDidAppear);
+            (*(controllerHandler->onDidAppear))(controllerHandler->onDidAppearData);
+        };
+    }
+    if (controllerHandler->onWillDisappear) {
+        dialogProperties.onWillDisappear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onWillDisappear);
+            (*(controllerHandler->onWillDisappear))(controllerHandler->onWillDisappearData);
+        };
+    }
+    if (controllerHandler->onDidDisappear) {
+        dialogProperties.onDidDisappear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onDidDisappear);
+            (*(controllerHandler->onDidDisappear))(controllerHandler->onDidDisappearData);
+        };
+    }
+}
+
 void ParseDialogCornerRadiusRect(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
@@ -206,6 +247,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     ParseDialogMask(dialogProperties, controllerHandler);
     ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
     ParseDialogOnWillDismiss(dialogProperties, controllerHandler);
+    ParseDialogLife(dialogProperties, controllerHandler);
 
     if (controllerHandler->onWillDismissCallByNDK) {
         dialogProperties.onWillDismissCallByNDK = [controllerHandler](int32_t reason) {
@@ -414,6 +456,42 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle controllerHandler, ArkUI_Float64 lev
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->levelOrder = levelOrder;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 RegisterOnWillAppearDialog(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onWillAppear = callback;
+    controllerHandler->onWillAppearData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 RegisterOnDidAppearDialog(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onDidAppear = callback;
+    controllerHandler->onDidAppearData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 RegisterOnWillDisappearDialog(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onWillDisappear = callback;
+    controllerHandler->onWillDisappearData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 RegisterOnDidDisappearDialog(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onDidDisappear = callback;
+    controllerHandler->onDidDisappearData = userData;
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NG::ViewModel
