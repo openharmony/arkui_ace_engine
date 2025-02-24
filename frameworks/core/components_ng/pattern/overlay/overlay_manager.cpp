@@ -6303,7 +6303,10 @@ void OverlayManager::RemoveFilterAnimation()
         return;
     }
     auto filterNode = filterColumnNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(filterNode);
+    if (!filterNode) {
+        hasFilter_ = false;
+        return;
+    }
     auto filterContext = filterNode->GetRenderContext();
     CHECK_NULL_VOID(filterContext);
     auto pipelineContext = PipelineContext::GetCurrentContext();
