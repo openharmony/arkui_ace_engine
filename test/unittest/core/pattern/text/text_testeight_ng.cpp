@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
+#include "foundation/arkui/ace_engine/test/mock/core/rosen/testing_canvas.h"
 #include "gmock/gmock.h"
-
 #include "text_base.h"
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "foundation/arkui/ace_engine/test/mock/core/rosen/testing_canvas.h"
 
-#define private protected
+#define private public
 #define protected public
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #undef protected
@@ -806,8 +805,8 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan001, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 20, "example content1", TextDataDetectType::EMAIL};
-    AISpan span2 = {101, 20, "example content2", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 20, "example content1", TextDataDetectType::EMAIL };
+    AISpan span2 = { 101, 20, "example content2", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -832,8 +831,8 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan002, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 50, "example content1", TextDataDetectType::EMAIL};
-    AISpan span2 = {10, 20, "example content2", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 50, "example content1", TextDataDetectType::EMAIL };
+    AISpan span2 = { 10, 20, "example content2", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -856,7 +855,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan003, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 50, "example content1", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 50, "example content1", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
     EXPECT_EQ(subComponentInfos.back().spanText, "example content1");
@@ -878,7 +877,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan004, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {40, 60, "example content1", TextDataDetectType::EMAIL};
+    AISpan span1 = { 40, 60, "example content1", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -901,7 +900,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan005, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {50, 54, "example content", TextDataDetectType::EMAIL};
+    AISpan span1 = { 50, 54, "example content", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
