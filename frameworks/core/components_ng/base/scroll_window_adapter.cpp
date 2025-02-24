@@ -206,4 +206,10 @@ RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
 {
     return Claim(GetChildPtrByIndex(index));
 }
+
+void ScrollWindowAdapter::NotifyChange(int32_t idx)
+{
+    jumpPending_ = true;
+    fillAlgorithm_->MarkJump(); // clear info and re-jump to current mark index
+}
 } // namespace OHOS::Ace::NG

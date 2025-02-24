@@ -78,6 +78,8 @@ public:
 
     void Prepare(uint32_t offset);
 
+    void NotifyChange(int32_t changeIdx);
+
 private:
     FrameNode* GetChildPtrByIndex(uint32_t index);
 
