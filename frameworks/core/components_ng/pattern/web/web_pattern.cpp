@@ -1336,7 +1336,6 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (info.GetSourceDevice() != SourceType::TOUCH) {
             return;
         }
-        pattern->touchEventInfo_ = info;
         pattern->isMouseEvent_ = false;
         pattern->HandleTouchEvent(info);
     };
@@ -1388,6 +1387,7 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    touchEventInfo_ = info;
     const auto& changedPoint = info.GetChangedTouches().front();
     if (changedPoint.GetTouchType() == TouchType::DOWN ||
         changedPoint.GetTouchType() == TouchType::UP) {
