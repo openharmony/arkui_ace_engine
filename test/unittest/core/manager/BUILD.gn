@@ -150,6 +150,7 @@ ace_unittest("drag_drop_behavior_reporter_test_ng") {
 group("core_manager_unittest") {
   testonly = true
   deps = [
+    ":avoid_info_manager_test_ng",
     ":display_sync_manager_test_ng",
     ":drag_animation_helper_test_ng",
     ":drag_drop_behavior_reporter_test_ng",
