@@ -572,6 +572,7 @@ void NGGestureRecognizer::ResetStateVoluntarily()
     }
     group->ResetStateVoluntarily();
     auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(group);
+    CHECK_NULL_VOID(recognizerGroup);
     recognizerGroup->CheckAndSetRecognizerCleanFlag(Claim(this));
 }
 
