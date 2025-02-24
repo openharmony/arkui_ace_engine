@@ -27,7 +27,8 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
     void* nativeEngine, bool isReload = false);
 
 void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj);
-void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine);
+void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runtime,
+    void* nativeEngine, const shared_ptr<JsValue> globalPtr);
 void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode);
 
 RefPtr<FrontendDelegate> JsGetFrontendDelegate();

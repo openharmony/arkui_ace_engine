@@ -142,12 +142,17 @@ TabsModelNG TabsTestNg::CreateTabs(BarPosition barPosition, int32_t index)
 
 TabContentModelNG TabsTestNg::CreateTabContent()
 {
+    return CreateTabContentWithDeepRender(nullptr);
+}
+
+TabContentModelNG TabsTestNg::CreateTabContentWithDeepRender(std::function<void()>&& deepRenderFunc)
+{
     int32_t elmtId = GetElmtId();
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
     auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
     TabContentModelNG tabContentModel;
-    tabContentModel.Create();
+    tabContentModel.Create(std::move(deepRenderFunc));
     ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
     ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
     auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();

@@ -67,6 +67,7 @@ interface CloseButtonTheme {
   backgroundColor: ResourceColor;
   symbolStyle: SymbolGlyphModifier;
   symbolSize: number;
+  accessibilityMessage: Resource;
 }
 
 interface WindowsTheme {
@@ -160,7 +161,8 @@ export const defaultTheme: PopupTheme = {
     fillColor: $r('sys.color.icon_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
-    symbolSize: 18
+    symbolSize: 18,
+    accessibilityMessage: $r('sys.string.off_used_for_accessibility_text')
   },
 };
 
@@ -725,7 +727,7 @@ export struct PopupComponent {
               .padding(this.getCloseButtonPadding())
               .backgroundColor(this.closeButtonBackgroundColor)
               .flexShrink(0)
-              .accessibilityText($r('sys.string.off_used_for_accessibility_text'))
+              .accessibilityText(this.theme.closeButton.accessibilityMessage)
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
@@ -887,7 +889,7 @@ export struct PopupComponent {
               .padding(this.getCloseButtonPadding())
               .backgroundColor(this.closeButtonBackgroundColor)
               .flexShrink(0)
-              .accessibilityText($r('sys.string.off_used_for_accessibility_text'))
+              .accessibilityText(this.theme.closeButton.accessibilityMessage)
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()

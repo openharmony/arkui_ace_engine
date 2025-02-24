@@ -3136,7 +3136,7 @@ void RichEditorPattern::HandleBlurEvent()
         CloseSelectOverlay();
         ResetSelection();
     } else if (IsSelected()) {
-        selectOverlay_->HideMenu();
+        selectOverlay_->HideMenu(true);
     } else {
         CloseSelectOverlay();
     }
@@ -6320,7 +6320,7 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
     if (newPos == caretPosition_) {
         return;
     }
-    UpdateSelector(newPos, fixedPos);
+    UpdateSelector(fixedPos, newPos);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     SetCaretPosition(newPos);
     MoveCaretToContentRect();
@@ -7197,6 +7197,10 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 
 void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
 {
+    if (!textSelector_.IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "prevent mouse selecting because selection has been reset");
+        return;
+    }
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     auto position = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
     UpdateSelector(textSelector_.baseOffset, position);

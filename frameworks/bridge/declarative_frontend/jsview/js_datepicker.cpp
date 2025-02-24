@@ -712,18 +712,20 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         mode = paramObj->GetProperty("mode");
     }
     ParseStartEndDate(startDate, endDate);
+
+    PickerDate parseSelectedDate = PickerDate::Current();
     if (selectedDate->IsObject()) {
         JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selectedDate);
         JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
-        PickerDate parseSelectedDate;
         if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
             ParseSelectedDateTimeObject(info, selectedDateObj, true);
             parseSelectedDate = ParseDate(selectedDateObj->GetProperty("value"));
         } else {
             parseSelectedDate = ParseDate(selectedDate);
         }
-        DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
+    DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
+
     ParseDatePickerMode(mode);
     SetDefaultAttributes();
 }

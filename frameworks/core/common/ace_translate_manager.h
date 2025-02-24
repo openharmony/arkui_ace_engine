@@ -34,11 +34,12 @@ public:
     void GetAllPixelMap(RefPtr<NG::FrameNode> pageNode);
     void TravelFindPixelMap(RefPtr<NG::UINode> currentNode);
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
-    RefPtr<NG::UINode> FindTopNavDestination(RefPtr<NG::UINode> currentNode);
+    void FindTopNavDestination(RefPtr<NG::UINode> currentNode, RefPtr<NG::FrameNode>& result);
 
 private:
     std::map<int32_t, WeakPtr<NG::FrameNode>> listenerMap_;
     std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> pixelMap_;
+    const static std::set<std::string> layoutTags_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H
