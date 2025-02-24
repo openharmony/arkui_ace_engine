@@ -158,7 +158,7 @@ bool KeyEventManager::IsSameKeyboardShortcutNode(const std::string& value, uint8
         }
         auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
         for (auto& keyboardShortcut : keyboardShortcuts) {
-            if (keyboardShortcut.value.find(value) != std::string::npos && keyboardShortcut.keys == keys) {
+            if (keyboardShortcut.value == value && keyboardShortcut.keys == keys) {
                 return true;
             }
         }
@@ -398,13 +398,19 @@ bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<KeyboardSh
 
                 if (keyboardShortcut.onKeyboardShortcutAction) {
                     keyboardShortcut.onKeyboardShortcutAction();
-                    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TriggerKeyboardShortcut action done.");
+                    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+                        "TriggerKeyboardShortcut :%{public}s :%{public}d : %{public}d action done.",
+                        keyboardShortcut.value.c_str(), keyboardShortcut.keys,
+                        static_cast<int32_t>(event.pressedCodes.size()));
                     return true;
                 } else {
                     auto gestureEventHub = eventHub->GetGestureEventHub();
                     if (gestureEventHub && gestureEventHub->IsClickable()) {
                         gestureEventHub->KeyBoardShortCutClick(event, node);
-                        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TriggerKeyboardShortcut click done.");
+                        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+                            "TriggerKeyboardShortcut :%{public}s :%{public}d : %{public}d click done.",
+                            keyboardShortcut.value.c_str(), keyboardShortcut.keys,
+                            static_cast<int32_t>(event.pressedCodes.size()));
                         return true;
                     }
                 }
