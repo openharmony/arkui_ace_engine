@@ -1271,7 +1271,9 @@ private:
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
+    void SetPartitionPoints(std::vector<float>& partition);
     void ratioStrToFloat(const std::string& str);
+    void ratioStrToFloatV2(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
@@ -1380,6 +1382,8 @@ private:
     float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
     float lowerFrameRateVisibleRatio_ = 0.1;
+    float halfFrameRateVisibleRatio_ = 0.3;
+    bool isHalfFrame_ = false;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     std::optional<ScriptItems> onHeadReadyScriptItems_;

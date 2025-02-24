@@ -2783,15 +2783,29 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
         return;
     }
     visibleRatio_ = visibleRatio;
-
     if (fabs(visibleRatio_) > FLT_EPSILON && visibleRatio_ > 0.0) {
         CHECK_NULL_VOID(nweb_);
         nweb_->OnUnoccluded();
-        if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
-            visibleRatio_ < lowerFrameRateVisibleRatio_) {
-            nweb_->SetEnableLowerFrameRate(true);
+        if (isHalfFrame_) {
+            if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < lowerFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(true);
+                nweb_->SetEnableHalfFrameRate(false);
+            } else if (fabs(visibleRatio_ - halfFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < halfFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(false);
+                nweb_->SetEnableHalfFrameRate(true);
+            } else {
+                nweb_->SetEnableLowerFrameRate(false);
+                nweb_->SetEnableHalfFrameRate(false);
+            }
         } else {
-            nweb_->SetEnableLowerFrameRate(false);
+            if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < lowerFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(true);
+            } else {
+                nweb_->SetEnableLowerFrameRate(false);
+            }
         }
     } else {
         auto context = context_.Upgrade();
@@ -2806,8 +2820,7 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
                     CHECK_NULL_VOID(delegate->nweb_);
                     delegate->nweb_->OnOccluded();
                 }
-            },
-            TaskExecutor::TaskType::UI, delayTime_, "ArkUIWebOccluded");
+            }, TaskExecutor::TaskType::UI, delayTime_, "ArkUIWebOccluded");
     }
 }
 
@@ -2841,6 +2854,55 @@ void WebDelegate::ratioStrToFloat(const std::string& str)
     }
 }
 
+void WebDelegate::ratioStrToFloatV2(const std::string& str)
+{
+    // LowerFrameRateConfig format x.xx, len is 4, [0.00, 1.00]
+    if (str.size() != VISIBLERATIO_LENGTH) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio lenth is over 4.");
+        return;
+    }
+    auto dotCount = std::count(str.begin(), str.end(), '.');
+    if (dotCount != 1) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio does not have dot.");
+        return;
+    }
+    auto pos = str.find('.', 0);
+    if (pos != 1) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio dot position is wrong.");
+        return;
+    }
+    auto notDigitCount = std::count_if(str.begin(), str.end(), [](char c) { return !isdigit(c) && c != '.'; });
+    if (notDigitCount > 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio dot count is over 1.");
+        return;
+    }
+    float f = std::stof(str);
+    int i = f * VISIBLERATIO_FLOAT_TO_INT;
+    if (i >= 0 && i <= VISIBLERATIO_FLOAT_TO_INT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "visibleRatio check success.");
+        halfFrameRateVisibleRatio_ = f;
+    }
+}
+
+void WebDelegate::SetPartitionPoints(std::vector<float>& partition)
+{
+    if (isHalfFrame_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to half frame rate:%{public}f", halfFrameRateVisibleRatio_);
+        if ((int)(halfFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0 };
+        } else if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0, halfFrameRateVisibleRatio_ };
+        } else {
+            partition = { 0, lowerFrameRateVisibleRatio_, halfFrameRateVisibleRatio_ };
+        }
+    } else {
+        if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0 };
+        } else {
+            partition = { 0, lowerFrameRateVisibleRatio_ };
+        }
+    }
+}
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
     if (!GetWebOptimizationValue()) {
@@ -2853,14 +2915,14 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
     std::string visibleAreaRatio =
         OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatio");
+    std::string visibleAreaRatioV2 =
+        OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatioV2");
     ratioStrToFloat(visibleAreaRatio);
+    ratioStrToFloatV2(visibleAreaRatioV2);
+    isHalfFrame_ = (lowerFrameRateVisibleRatio_ < halfFrameRateVisibleRatio_ ? true : false);
     std::vector<float> partitionPoints;
     TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
-    if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
-        partitionPoints = { 0 };
-    } else {
-        partitionPoints = { 0, lowerFrameRateVisibleRatio_ };
-    }
+    SetPartitionPoints(partitionPoints);
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
         [weak = WeakClaim(this)](float visibleRatio) {
