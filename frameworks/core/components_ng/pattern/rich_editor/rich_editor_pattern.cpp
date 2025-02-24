@@ -3136,7 +3136,7 @@ void RichEditorPattern::HandleBlurEvent()
         CloseSelectOverlay();
         ResetSelection();
     } else if (IsSelected()) {
-        selectOverlay_->HideMenu();
+        selectOverlay_->HideMenu(true);
     } else {
         CloseSelectOverlay();
     }
