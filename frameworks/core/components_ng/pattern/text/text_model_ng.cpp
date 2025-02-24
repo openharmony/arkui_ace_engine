@@ -1125,22 +1125,6 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
         textPattern->SetExternalParagraphStyle(std::nullopt);
     } else {
         textPattern->SetExternalParagraph(value->paragraph);
-#ifdef USE_GRAPHIC_TEXT_GINE
-        auto position = 0;
-        for (const auto& item : value->items) {
-            auto spanItem = SpanModelNG::CreateSpanItem(item);
-            if (spanItem) {
-                auto intervalStart = position;
-                position += static_cast<int32_t>(spanItem->content.length());
-                auto intervalEnd = position;
-                spanItem->interval = { intervalStart, intervalEnd };
-                spanItem->position = position;
-                spanItems.emplace_back(spanItem);
-            }
-        }
-        textPattern->SetExternalSpanItem(spanItems);
-        textPattern->SetExternalParagraphStyle(SpanModelNG::CreateParagraphStyle(value));
-#endif
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }

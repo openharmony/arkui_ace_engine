@@ -167,11 +167,7 @@ RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration)
             rsTextDecoration = RSTextDecoration::OVERLINE;
             break;
         case TextDecoration::LINE_THROUGH:
-#ifndef USE_GRAPHIC_TEXT_GINE
-            rsTextDecoration = RSTextDecoration::LINETHROUGH;
-#else
             rsTextDecoration = RSTextDecoration::LINE_THROUGH;
-#endif
             break;
         case TextDecoration::UNDERLINE:
             rsTextDecoration = RSTextDecoration::UNDERLINE;
@@ -209,127 +205,56 @@ RSTextDecorationStyle ToRSTextDecorationStyle(TextDecorationStyle textDecoration
 RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle)
 {
     RSTextStyle rsTextStyle;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    rsTextStyle.color_ = ToRSColor(textStyle.GetTextColor());
-    rsTextStyle.decoration_ = ToRSTextDecoration(textStyle.GetTextDecoration());
-    rsTextStyle.decorationStyle_ = ToRSTextDecorationStyle(textStyle.GetTextDecorationStyle());
-    rsTextStyle.decorationColor_ = ToRSColor(textStyle.GetTextDecorationColor());
-#else
     rsTextStyle.color = ToRSColor(textStyle.GetTextColor());
     rsTextStyle.decoration = ToRSTextDecoration(textStyle.GetTextDecoration());
     rsTextStyle.decorationColor = ToRSColor(textStyle.GetTextDecorationColor());
-#endif
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
-    rsTextStyle.fontStyle_ = static_cast<RSFontStyle>(textStyle.GetFontStyle());
-    rsTextStyle.textBaseline_ = static_cast<RSTextBaseline>(textStyle.GetTextBaseline());
-    rsTextStyle.fontFamilies_ = textStyle.GetFontFamilies();
-#else
     rsTextStyle.fontWeight = ToRSFontWeight(textStyle.GetFontWeight());
     rsTextStyle.fontStyle = static_cast<RSFontStyle>(textStyle.GetFontStyle());
     rsTextStyle.baseline = static_cast<RSTextBaseline>(textStyle.GetTextBaseline());
     rsTextStyle.fontFamilies = textStyle.GetFontFamilies();
-#endif
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        rsTextStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
-#else
         rsTextStyle.ellipsis = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
-#endif
     }
     if (context) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        rsTextStyle.fontSize_ = context->NormalizeToPx(textStyle.GetFontSize());
-#else
         rsTextStyle.fontSize = context->NormalizeToPx(textStyle.GetFontSize());
-#endif
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            rsTextStyle.fontSize_ = context->NormalizeToPx(textStyle.GetFontSize() * context->GetFontScale());
-#else
             rsTextStyle.fontSize = context->NormalizeToPx(textStyle.GetFontSize() * context->GetFontScale());
-#endif
         }
     } else {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        rsTextStyle.fontSize_ = textStyle.GetFontSize().Value();
-#else
         rsTextStyle.fontSize = textStyle.GetFontSize().Value();
-#endif
     }
     if (context) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        rsTextStyle.letterSpacing_ = context->NormalizeToPx(textStyle.GetLetterSpacing());
-#else
         rsTextStyle.letterSpacing = context->NormalizeToPx(textStyle.GetLetterSpacing());
-#endif
     }
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        rsTextStyle.wordSpacing_ = textStyle.GetWordSpacing().Value() * rsTextStyle.fontSize_;
-#else
         rsTextStyle.wordSpacing = textStyle.GetWordSpacing().Value() * rsTextStyle.fontSize;
-#endif
     } else {
         if (context) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            rsTextStyle.wordSpacing_ = context->NormalizeToPx(textStyle.GetWordSpacing());
-#else
             rsTextStyle.wordSpacing = context->NormalizeToPx(textStyle.GetWordSpacing());
-#endif
         } else {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            rsTextStyle.wordSpacing_ = textStyle.GetWordSpacing().Value();
-#else
             rsTextStyle.wordSpacing = textStyle.GetWordSpacing().Value();
-#endif
         }
     }
 
     if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        rsTextStyle.hasHeightOverride_ = true;
-        rsTextStyle.height_ = textStyle.GetLineHeight().Value();
-#else
         rsTextStyle.heightOnly = true;
         rsTextStyle.heightScale = textStyle.GetLineHeight().Value();
-#endif
     } else {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        double fontSize = rsTextStyle.fontSize_;
-#else
         double fontSize = rsTextStyle.fontSize;
-#endif
         double lineHeight = textStyle.GetLineHeight().Value();
         if (context) {
             lineHeight = context->NormalizeToPx(textStyle.GetLineHeight());
         }
-#ifndef USE_GRAPHIC_TEXT_GINE
-        rsTextStyle.hasHeightOverride_ = textStyle.HasHeightOverride();
-#else
         rsTextStyle.heightOnly = textStyle.HasHeightOverride();
-#endif
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            rsTextStyle.height_ = lineHeight / fontSize;
-#else
             rsTextStyle.heightScale = lineHeight / fontSize;
-#endif
         } else {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            rsTextStyle.height_ = 1;
-#else
             rsTextStyle.heightScale = 1;
-#endif
             static const int32_t BEGIN_VERSION = 6;
             auto isBeginVersion = context && context->GetMinPlatformVersion() >= BEGIN_VERSION;
             if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-                rsTextStyle.hasHeightOverride_ = false;
-#else
                 rsTextStyle.heightOnly = false;
-#endif
             }
         }
     }

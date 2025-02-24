@@ -46,18 +46,11 @@
 #endif
 
 #include "pipeline/rs_recording_canvas.h"
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "rosen_text/properties/text_style.h"
-#include "rosen_text/ui/font_collection.h"
-#include "rosen_text/ui/typography.h"
-#include "rosen_text/ui/typography_create.h"
-#else
 #include "rosen_text/font_collection.h"
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography_types.h"
 #include "rosen_text/text_style.h"
-#endif
 #include "utils/camera3d.h"
 #include "utils/point3.h"
 #include "utils/scalar.h"
@@ -131,28 +124,6 @@ using RSPixmap = Rosen::Drawing::Pixmap;
 using RSImageInfo = Rosen::Drawing::ImageInfo;
 using RSRectI = Rosen::Drawing::RectI;
 using RSImageBlurType = Rosen::Drawing::ImageBlurType;
-#ifndef USE_GRAPHIC_TEXT_GINE
-using RSPathEffect = rosen::PathEffect;
-using RSPathDirection = rosen::PathDirection;
-using RSPathDashStyle = rosen::PathDashStyle;
-using RSParagraph = rosen::Typography;
-using RSTypographyProperties = rosen::TypographyProperties;
-using RSParagraphBuilder = rosen::TypographyCreate;
-using RSFontCollection = rosen::FontCollection;
-using RSParagraphStyle = rosen::TypographyStyle;
-using RSColorQuad = rosen::ColorQuad;
-using RSShaderEffect = rosen::ShaderEffect;
-using RSTileMode = rosen::TileMode;
-using RSTextDirection = rosen::TextDirection;
-using RSTextAlign = rosen::TextAlign;
-using RSWordBreakType = rosen::WordBreakType;
-using RSTextStyle = rosen::TextStyle;
-using RSTextDecoration = rosen::TextDecoration;
-using RSTextDecorationStyle = rosen::TextDecorationStyle;
-using RSFontWeight = rosen::FontWeight;
-using RSFontStyle = rosen::FontStyle;
-using RSTextBaseline = rosen::TextBaseline;
-#else
 using RSColorQuad = Rosen::Drawing::ColorQuad;
 using RSShaderEffect = Rosen::Drawing::ShaderEffect;
 using RSTileMode = Rosen::Drawing::TileMode;
@@ -178,7 +149,6 @@ using RSTextRect = Rosen::TextRect;
 using RSEllipsisMode = Rosen::EllipsisModal;
 using RSSymbolAnimation = Rosen::RSSymbolAnimation;
 using RSSymbolAnimationConfig = Rosen::TextEngine::SymbolAnimationConfig;
-#endif
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

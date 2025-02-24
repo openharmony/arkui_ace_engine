@@ -23,9 +23,6 @@ template("napi_font_static") {
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [ "js_font.cpp" ]
-    if (enable_graphic_text_gine) {
-      defines += [ "USE_GRAPHIC_TEXT_GINE" ]
-    }
 
     deps = []
     external_deps = []

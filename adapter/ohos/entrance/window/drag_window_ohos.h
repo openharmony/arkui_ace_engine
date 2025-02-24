@@ -40,13 +40,8 @@ public:
     void DrawPixelMap(const RefPtr<PixelMap>& pixelMap) override;
     void DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode) override;
     void DrawImage(void* drawingImage) override;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void DrawText(
-        std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText) override;
-#else
     void DrawText(std::shared_ptr<Rosen::Typography> paragraph, const Offset& offset,
         const RefPtr<RenderText>& renderText) override;
-#endif
     void DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern) override;
 
 private:

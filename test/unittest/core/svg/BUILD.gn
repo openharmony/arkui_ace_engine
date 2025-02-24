@@ -116,7 +116,6 @@ ohos_unittest("parse_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
-    "graphic_2d:rosen_text",
   ]
 
   deps = [
@@ -204,7 +203,6 @@ ohos_unittest("svg_dom_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
-    "graphic_2d:rosen_text",
   ]
 
   deps = [
@@ -238,7 +236,6 @@ ohos_unittest("svg_utils_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
-    "graphic_2d:rosen_text",
   ]
 
   deps = [
@@ -312,7 +309,6 @@ ohos_unittest("svg_context_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
-    "graphic_2d:rosen_text",
   ]
 
   deps = [
@@ -381,7 +377,6 @@ ohos_unittest("svg_node_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
-    "graphic_2d:rosen_text",
   ]
 
   deps = [

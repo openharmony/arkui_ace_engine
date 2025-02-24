@@ -25,13 +25,8 @@ class RichEditorParagraph : public TxtParagraph {
     DECLARE_ACE_TYPE(RichEditorParagraph, TxtParagraph)
 
 public:
-#ifndef USE_GRAPHIC_TEXT_GINE
-    RichEditorParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<txt::FontCollection> fontCollection)
-        : TxtParagraph(paraStyle, fontCollection) {}
-#else
     RichEditorParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
         : TxtParagraph(paraStyle, fontCollection) {}
-#endif
 
     void Layout(float width) override;
     float GetHeight() override;

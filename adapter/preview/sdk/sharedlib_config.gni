@@ -105,16 +105,6 @@ common_bin = [
     part_name = "glfw"
   },
   {
-    label = "//foundation/graphic/graphic_2d/rosen/modules/texgine:libtexgine"
-    subsystem_name = "graphic"
-    part_name = "graphic_2d"
-  },
-  {
-    label = "//foundation/graphic/graphic_2d/rosen/modules/texgine/texgine_drawing:libtexgine_drawing"
-    subsystem_name = "graphic"
-    part_name = "graphic_2d"
-  },
-  {
     label = "//foundation/graphic/graphic_2d/rosen/modules/graphics_effect:libgraphics_effect"
     subsystem_name = "graphic"
     part_name = "graphic_2d"
@@ -191,21 +181,6 @@ common_bin = [
   },
 ]
 
-if (enable_graphic_text_gine) {
-  common_bin += [
-    {
-      label = "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_new"
-      subsystem_name = "graphic"
-      part_name = "graphic_2d"
-    },
-    {
-      label = "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text"
-      subsystem_name = "graphic"
-      part_name = "graphic_2d"
-    },
-  ]
-}
-
 if (defined(use_rosen_drawing) && use_rosen_drawing) {
   common_bin += [
     {
@@ -218,14 +193,6 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
   common_bin += [
     {
       label = "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl"
-      subsystem_name = "graphic"
-      part_name = "graphic_2d"
-    },
-  ]
-
-  common_bin -= [
-    {
-      label = "//foundation/graphic/graphic_2d/rosen/modules/texgine/texgine_drawing:libtexgine_drawing"
       subsystem_name = "graphic"
       part_name = "graphic_2d"
     },

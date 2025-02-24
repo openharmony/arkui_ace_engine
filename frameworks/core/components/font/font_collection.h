@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_FONT_COLLECTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_FONT_COLLECTION_H
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/font_collection.h"
-#else
 #include "rosen_text/font_collection.h"
-#endif
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -31,13 +27,8 @@ class ACE_EXPORT FontCollection : public NonCopyable {
 public:
     static FontCollection* GetInstance();
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    // TODO: Delete txt::FontCollection, using adapter.
-    virtual std::shared_ptr<txt::FontCollection> GetFontCollection() = 0;
-#else
     // TODO: Delete Rosen::FontCollection, using adapter.
     virtual std::shared_ptr<Rosen::FontCollection> GetFontCollection() = 0;
-#endif
 };
 
 } // namespace OHOS::Ace

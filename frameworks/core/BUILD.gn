@@ -520,10 +520,6 @@ template("ace_core_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-        external_deps += [ "graphic_2d:libtexgine" ]
-        if (enable_graphic_text_gine) {
-          external_deps += [ "graphic_2d:rosen_text" ]
-        }
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_arkui_x) {
@@ -1064,10 +1060,6 @@ template("ace_core_ng_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-        external_deps += [ "graphic_2d:libtexgine" ]
-        if (enable_graphic_text_gine) {
-          external_deps += [ "graphic_2d:rosen_text" ]
-        }
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_arkui_x) {

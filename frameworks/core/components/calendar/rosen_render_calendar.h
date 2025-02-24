@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_ROSEN_RENDER_CALENDAR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_ROSEN_RENDER_CALENDAR_H
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "third_party/txt/src/txt/text_style.h"
-#else
 #include "rosen_text/text_style.h"
-#endif
 
 #include "core/components/calendar/render_calendar.h"
 #include "core/components_ng/render/drawing.h"
@@ -50,15 +46,6 @@ private:
     void DrawWeek(RSCanvas* canvas, const Offset& offset) const;
     void DrawBlurArea(RSCanvas* canvas, const Offset& offset, double x, double y) const;
     void DrawTouchedArea(RenderContext& context, Offset offset) const;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void PaintDay(
-        RSCanvas* canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const;
-    void PaintLunarDay(RSCanvas* canvas, const Offset& offset, const CalendarDay& day,
-        const txt::TextStyle& textStyle) const;
-    void HandleAdditionalConditions(RSCanvas* canvas, const Offset& offset, const Offset& dayOffset,
-         const CalendarDay& day, txt::TextStyle& lunarTextStyle);
-    void SetTextStyleColor(txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
-#else
     void PaintDay(
         RSCanvas* canvas, const Offset& offset, const CalendarDay& day, Rosen::TextStyle& textStyle) const;
     void PaintLunarDay(RSCanvas* canvas, const Offset& offset, const CalendarDay& day,
@@ -66,37 +53,18 @@ private:
     void HandleAdditionalConditions(RSCanvas* canvas, const Offset& offset, const Offset& dayOffset,
          const CalendarDay& day, Rosen::TextStyle& lunarTextStyle);
     void SetTextStyleColor(Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle);
-#endif
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void SetNonFocusStyle(const CalendarDay& day, txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
-#else
     void SetNonFocusStyle(const CalendarDay& day, Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle);
-#endif
     void DrawCardCalendar(RSCanvas* canvas, const Offset& offset, const Offset& dayOffset,
         const CalendarDay& day, int32_t dateNumber);
     void DrawTvCalendar(RSCanvas* canvas, const Offset& offset, const Offset& dayOffset,
         const CalendarDay& day, int32_t dateNumber);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void InitTextStyle(txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
-#else
     void InitTextStyle(Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle);
-#endif
     void PaintUnderscore(RSCanvas* canvas, const Offset& offset, const CalendarDay& day);
     void PaintScheduleMarker(RSCanvas* canvas, const Offset& offset, const CalendarDay& day);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void InitWorkStateStyle(
-        const CalendarDay& day, const Offset& offset, txt::TextStyle& workStateStyle, Rect& boxRect) const;
-#else
     void InitWorkStateStyle(
         const CalendarDay& day, const Offset& offset, Rosen::TextStyle& workStateStyle, Rect& boxRect) const;
-#endif
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void SetWorkStateStyle(const CalendarDay& day, RSColorQuad workColor,
-        RSColorQuad offColor, txt::TextStyle& workStateStyle) const;
-#else
     void SetWorkStateStyle(const CalendarDay& day, RSColorQuad workColor,
         RSColorQuad offColor, Rosen::TextStyle& workStateStyle) const;
-#endif
     void SetCalendarTheme();
     bool IsOffDay(const CalendarDay& day) const;
     void AddContentLayer(RenderContext& context);

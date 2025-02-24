@@ -66,11 +66,7 @@ public:
         return 1.0;
     }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    virtual double GetLongestLine()
-#else
     virtual double GetActualWidth()
-#endif
     {
         return 1.0;
     }
@@ -87,47 +83,19 @@ public:
 
     virtual void Paint(TestingCanvas* canvas, double x, double y) {}
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    virtual std::vector<TestingTypographyProperties::TextBox> GetRectsForRange(size_t /* start */, size_t /* end */,
-        TestingTypographyProperties::RectHeightStyle /* height */,
-        TestingTypographyProperties::RectWidthStyle /* width */)
-#else
     virtual std::vector<TestingTypographyProperties::TextRect> GetTextRectsByBoundary(size_t /* start */,
         size_t /* end */, TestingTypographyProperties::TextRectHeightStyle /* height */,
         TestingTypographyProperties::TextRectWidthStyle /* width */)
-#endif
     {
         return {};
     }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    virtual TestingTypographyProperties::PositionAndAffinity GetGlyphPositionAtCoordinateWithCluster(double x, double y)
-    {
-        TestingTypographyProperties::PositionAndAffinity res(1, TestingTypographyProperties::Affinity::UPSTREAM);
-        return res;
-    }
-#else
     virtual TestingTypographyProperties::IndexAndAffinity GetGlyphIndexByCoordinate(double x, double y)
     {
         TestingTypographyProperties::IndexAndAffinity res(1, TestingTypographyProperties::Affinity::PREV);
         return res;
     }
-#endif
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    virtual TestingTypographyProperties::PositionAndAffinity GetGlyphPositionAtCoordinate(double x, double y)
-    {
-        TestingTypographyProperties::PositionAndAffinity res(1, TestingTypographyProperties::Affinity::UPSTREAM);
-        return res;
-    }
-
-    virtual TestingTypographyProperties::Range<size_t> GetWordBoundary(size_t offset)
-    {
-        TestingTypographyProperties::Range<size_t> range =
-            TestingTypographyProperties::Range<size_t>(offset, offset + 1);
-        return range;
-    }
-#else
     virtual TestingTypographyProperties::IndexAndAffinity GetGlyphPositionAtCoordinate(double x, double y)
     {
         TestingTypographyProperties::IndexAndAffinity res(1, TestingTypographyProperties::Affinity::PREV);
@@ -140,7 +108,6 @@ public:
             TestingTypographyProperties::Boundary<size_t>(offset, offset + 1);
         return range;
     }
-#endif
     double GetAlphabeticBaseline()
     {
         return 0.0;

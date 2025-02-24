@@ -71,9 +71,6 @@ template("ace_unittest") {
       "$graphic_2d_path/rosen/modules/render_service_base:librender_service_base",
       "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
     ]
-    if (enable_graphic_text_gine) {
-      ace_external_deps += [ "graphic_2d:rosen_text" ]
-    }
   }
 
   if (flutter_skia) {

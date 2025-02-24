@@ -175,10 +175,6 @@ template("ace_ohos_standard_source_set") {
       external_deps += [ "player_framework:audio_haptic" ]
     }
 
-    if (enable_graphic_text_gine) {
-      external_deps += [ "graphic_2d:rosen_text" ]
-    }
-
     if (os_account_exists) {
       external_deps += [ "os_account:os_account_innerkits" ]
     }

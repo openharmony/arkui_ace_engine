@@ -27,16 +27,6 @@ namespace OHOS::Ace::Testing {
 class TestingTypographyStyle {
 public:
     static const std::u16string ELLIPSIS;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    TextDirection textDirection_;
-    std::string locale_;
-    WordBreakType wordBreakType_ = WordBreakType::WordBreakTypeBreakWord;
-    double fontSize_ = 14;
-    std::u16string ellipsis_;
-    TextAlign textAlign_ = TextAlign::START;
-    size_t maxLines_ = std::numeric_limits<size_t>::max();
-    std::string fontFamily_ = "";
-#else
     TextDirection textDirection;
     std::string locale;
     WordBreakType wordBreakType = WordBreakType::WordBreakTypeBreakWord;
@@ -45,7 +35,6 @@ public:
     TextAlign textAlign = TextAlign::START;
     size_t maxLines = std::numeric_limits<size_t>::max();
     std::string fontFamily;
-#endif
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_STYLE_H
