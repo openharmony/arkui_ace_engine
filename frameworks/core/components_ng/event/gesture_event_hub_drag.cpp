@@ -55,6 +55,7 @@ constexpr int32_t MAX_BUILDER_DEPTH = 5;
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
 constexpr int32_t DEFAULT_DRAG_DROP_STATUS = 0;
 constexpr int32_t NEW_DRAG_DROP_STATUS = 1;
+constexpr int32_t OLD_DRAG_DROP_STATUS = 3;
 const std::unordered_set<std::string> OLD_FRAMEWORK_TAG = {
     V2::WEB_ETS_TAG,
     V2::TEXTAREA_ETS_TAG,
@@ -85,6 +86,8 @@ bool CheckNeedDragDropFrameworkStatus(const std::string& tag)
         (OLD_FRAMEWORK_TAG.find(tag) != OLD_FRAMEWORK_TAG.end())) {
         return false;
     } else if ((dragDropFrameworkStatus == NEW_DRAG_DROP_STATUS) && (VALID_TAG.find(tag) != VALID_TAG.end())) {
+        return false;
+    } else if (dragDropFrameworkStatus == OLD_DRAG_DROP_STATUS) {
         return false;
     }
     return true;

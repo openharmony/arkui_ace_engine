@@ -1964,6 +1964,7 @@ HWTEST_F(GestureEventHubTestNg, GetSelectItemSize001, TestSize.Level1)
      * @tc.steps: step1. Create grid with gridItem frame node tree.
      * @tc.expected: instance is not null.
      */
+    SystemProperties::dragDropFrameworkStatus_ = 3;
     auto gridNode = ProcessDragItemGroupScene();
     ASSERT_NE(gridNode, nullptr);
     auto gridItem = AceType::DynamicCast<FrameNode>(gridNode->GetChildByIndex(0));

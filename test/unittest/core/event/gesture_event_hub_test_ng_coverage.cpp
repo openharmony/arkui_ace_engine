@@ -511,6 +511,7 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage013, TestSize
     EXPECT_TRUE(eventHub);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
+    SystemProperties::dragDropFrameworkStatus_ = 3;
 
     /**
      * @tc.steps: step2. set onDragStart for eventHub
