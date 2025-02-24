@@ -1212,6 +1212,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseLeftButtonMove001, TestSiz
     richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
     richEditorPattern->blockPress_ = false;
     richEditorPattern->leftMousePress_ = true;
+    richEditorPattern->textSelector_.Update(0, 0);
     richEditorPattern->HandleMouseLeftButtonMove(info);
     EXPECT_TRUE(richEditorPattern->isMouseSelect_);
     /**
