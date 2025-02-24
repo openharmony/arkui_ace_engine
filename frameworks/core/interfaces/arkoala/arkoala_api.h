@@ -5398,6 +5398,7 @@ struct ArkUIXComponentModifier {
     void (*startImageAnalyzer)(ArkUINodeHandle node, void* arkuiNode, void* userData,
         XComponentAnalyzerCallback callback);
     void (*stopImageAnalyzer)(ArkUINodeHandle node);
+    bool (*getXComponentIsBindNative)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {

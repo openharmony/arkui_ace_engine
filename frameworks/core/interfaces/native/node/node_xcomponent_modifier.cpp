@@ -326,6 +326,15 @@ void StopImageAnalyzer(ArkUINodeHandle node)
     CHECK_NULL_VOID(xcPattern);
     xcPattern->StopImageAnalyzer();
 }
+
+bool GetXComponentIsBindNative(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_RETURN(xcPattern, false);
+    return xcPattern->IsBindNative();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -365,6 +374,7 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .getXComponentEnableAnalyzer = GetXComponentEnableAnalyzer,
         .startImageAnalyzer = StartImageAnalyzer,
         .stopImageAnalyzer = StopImageAnalyzer,
+        .getXComponentIsBindNative = GetXComponentIsBindNative,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
