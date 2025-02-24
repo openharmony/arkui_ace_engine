@@ -36,6 +36,7 @@ constexpr float DEFAULT_SIZE_18 = 18.0f;
 constexpr float DEFAULT_SIZE_24 = 24.0f;
 constexpr float DEFAULT_SIZE_32 = 32.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
+constexpr int EXPECTED_UPDATE_INTERVAL_VALUE = 1000;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
@@ -1152,6 +1153,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(ArkUI_Visible
 {
     if (!option) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (value < 0) {
+        value = EXPECTED_UPDATE_INTERVAL_VALUE;
     }
     option->expectedUpdateInterval = value;
     return ARKUI_ERROR_CODE_NO_ERROR;
