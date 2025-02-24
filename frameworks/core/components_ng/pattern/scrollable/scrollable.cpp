@@ -131,16 +131,19 @@ void Scrollable::InitAxisAnimator()
     auto axisAnimationCallback = [weak = WeakClaim(this)](float offset) {
         auto scrollable = weak.Upgrade();
         CHECK_NULL_VOID(scrollable);
+        scrollable->ReportToDragFRCScene(scrollable->currentVelocity_, NG::SceneStatus::RUNNING);
         scrollable->ProcessScrollMotion(offset, SCROLL_FROM_AXIS);
     };
     auto axisAnimationStartCallback = [weak = WeakClaim(this)](float position) {
         auto scrollable = weak.Upgrade();
         CHECK_NULL_VOID(scrollable && scrollable->onScrollStartRec_);
+        scrollable->ReportToDragFRCScene(scrollable->currentVelocity_, NG::SceneStatus::START);
         scrollable->onScrollStartRec_(position);
     };
     auto axisAnimationFinishCallback = [weak = WeakClaim(this)]() {
         auto scrollable = weak.Upgrade();
         CHECK_NULL_VOID(scrollable);
+        scrollable->ReportToDragFRCScene(scrollable->currentVelocity_, NG::SceneStatus::END);
         scrollable->ProcessScrollMotionStop();
     };
     axisAnimator_ = AceType::MakeRefPtr<AxisAnimator>(std::move(axisAnimationCallback),
@@ -552,7 +555,10 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 #endif
     currentVelocity_ = info.GetMainVelocity();
-    ReportToDragFRCScene(currentVelocity_, NG::SceneStatus::START);
+    auto isAxisEvent = IsMouseWheelScroll(info);
+    if (!isAxisEvent) {
+        ReportToDragFRCScene(currentVelocity_, NG::SceneStatus::START);
+    }
     if (continuousDragStatus_) {
         IncreaseContinueDragCount();
         task_.Cancel();
@@ -574,7 +580,6 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 #endif
     JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
-    auto isAxisEvent = IsMouseWheelScroll(info);
     ACE_SCOPED_TRACE("HandleDragStart, inputEventType:%d, sourceTool:%d, IsMouseWheelScroll:%u, "
                      "IsAxisAnimationRunning:%u, IsSnapAnimationRunning:%u, id:%d, tag:%s",
         info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, IsAxisAnimationRunning(), IsSnapAnimationRunning(),
@@ -730,7 +735,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s, "
         "dragCnt:%{public}d", info.GetMainVelocity(), nodeId_, nodeTag_.c_str(), dragCount_);
-    ReportToDragFRCScene(info.GetMainVelocity(), NG::SceneStatus::END);
     auto isAxisEvent = IsMouseWheelScroll(info);
     if (isAxisEvent) {
         ProcessAxisEndEvent();
@@ -744,6 +748,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     } else {
         HandleDragUpdate(info);
     }
+    ReportToDragFRCScene(info.GetMainVelocity(), NG::SceneStatus::END);
     bool isScrollFromTouchPad = info.GetSourceTool() == SourceTool::TOUCHPAD;
     isDragUpdateStop_ = false;
     scrollPause_ = false;
