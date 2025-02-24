@@ -435,4 +435,14 @@ void ArcListTestNg::ScrollTo(float position)
     pattern_->ScrollTo(position);
     FlushLayoutTask(frameNode_);
 }
+
+void ArcListTestNg::SetChildrenMainSize(
+    const RefPtr<FrameNode>& frameNode, int32_t startIndex, const std::vector<float>& newChildrenSize)
+{
+    int32_t size = static_cast<int32_t>(newChildrenSize.size());
+    for (int32_t index = 0; index < size; index++) {
+        auto child = GetChildFrameNode(frameNode, index + startIndex);
+        ViewAbstract::SetHeight(AceType::RawPtr(child), CalcLength(newChildrenSize[index]));
+    }
+}
 } // namespace OHOS::Ace::NG
