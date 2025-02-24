@@ -661,7 +661,6 @@ void EventReport::ReportReusedNodeSkipMeasureApp()
     auto progressName = AceApplicationInfo::GetInstance().GetProcessName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_REUSED_NODE_SKIP_MEASURE,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_PACKAGE_NAME, progressName);
-        
 }
 
 void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
