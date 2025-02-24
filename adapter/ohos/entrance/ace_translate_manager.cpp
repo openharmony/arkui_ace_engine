@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 namespace OHOS::Ace {
+const std::set<std::string> UiTranslateManagerImpl::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene",
+    "root", "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> node)
 {
     auto frameNode = node.Upgrade();
@@ -139,9 +141,10 @@ void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelM
 
 void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 {
-    auto topNavNode = FindTopNavDestination(pageNode);
-    if (topNavNode) {
-        TravelFindPixelMap(topNavNode);
+    RefPtr<NG::FrameNode> result;
+    FindTopNavDestination(pageNode, result);
+    if (result != nullptr) {
+        TravelFindPixelMap(result);
     } else {
         TravelFindPixelMap(pageNode);
     }
@@ -153,28 +156,33 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
     for (const auto& item : currentNode->GetChildren()) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
         if (node) {
-            if (node->GetTag() == V2::IMAGE_ETS_TAG) {
+            if (layoutTags_.find(node->GetTag()) != layoutTags_.end() && !node->IsActive()) {
+                continue;
+            }
+            auto property = node->GetLayoutProperty();
+            if (node->GetTag() == V2::IMAGE_ETS_TAG && property &&
+                (static_cast<int32_t>(property->GetVisibility().value_or(VisibleType::VISIBLE)) == 0) &&
+                node->IsActive()) {
                 auto imagePattern = node->GetPattern<NG::ImagePattern>();
                 CHECK_NULL_VOID(imagePattern);
                 imagePattern->AddPixelMapToUiManager();
             }
         }
-
         TravelFindPixelMap(item);
     }
 }
-RefPtr<NG::UINode> UiTranslateManagerImpl::FindTopNavDestination(RefPtr<NG::UINode> currentNode)
+
+void UiTranslateManagerImpl::FindTopNavDestination(RefPtr<NG::UINode> currentNode, RefPtr<NG::FrameNode>& result)
 {
     for (const auto& item : currentNode->GetChildren()) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
         if (node && node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
             auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(node);
-            auto topChild = navigationGroupNode->GetTopDestination();
-            return topChild;
+            CHECK_NULL_VOID(navigationGroupNode);
+            result = navigationGroupNode->GetTopDestination();
+            return;
         }
-        FindTopNavDestination(item);
+        FindTopNavDestination(item, result);
     }
-    return nullptr;
 }
-
 } // namespace OHOS::Ace

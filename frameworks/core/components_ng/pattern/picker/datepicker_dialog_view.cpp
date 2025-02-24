@@ -1021,7 +1021,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
 
     PickerDate parseStartDate;
     PickerDate parseEndDate;
-    PickerDate parseSelectedDate;
+    PickerDate parseSelectedDate = PickerDate::Current();
     SetShowLunar(dateNode, isLunar);
     SetDateTextProperties(dateNode, properties);
     auto iterStart = datePickerProperty.find("start");
@@ -1037,8 +1037,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     auto iterSelected = datePickerProperty.find("selected");
     if (iterSelected != datePickerProperty.end()) {
         parseSelectedDate = iterSelected->second;
-        SetSelectedDate(dateNode, parseSelectedDate);
     }
+    SetSelectedDate(dateNode, parseSelectedDate);
     return dateNode;
 }
 

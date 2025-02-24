@@ -184,11 +184,6 @@ void AtomicServicePattern::OnAttachToFrameNode()
     AppBgColorCallBack();
 }
 
-void AtomicServicePattern::OnLanguageConfigurationUpdate()
-{
-    UpdateLayout();
-}
-
 void AtomicServicePattern::OnColorConfigurationUpdate()
 {
     AppBgColorCallBack();

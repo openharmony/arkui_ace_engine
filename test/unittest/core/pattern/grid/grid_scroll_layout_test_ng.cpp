@@ -2006,4 +2006,42 @@ HWTEST_F(GridScrollLayoutTestNg, CachedCount003, TestSize.Level1)
     EXPECT_EQ(cacheStart, 0);
     EXPECT_EQ(cacheEnd, 2);
 }
+
+HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest001, TestSize.Level1) {
+    // Arrange
+    auto pattern = AceType::MakeRefPtr<GridPattern>();
+    pattern->info_.lastMainSize_ = 100.0f;
+    pattern->info_.contentEndPadding_ = 10.0f;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 10;
+    pattern->info_.childrenCount_ = 11;
+    pattern->info_.totalHeightOfItemsInView_ = 90.0f;
+    pattern->info_.currentOffset_ = 50.0f;
+    pattern->info_.offsetEnd_ = false;
+
+    // Act
+    bool result = pattern->IsFadingBottom();
+
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest002, TestSize.Level1) {
+    // Arrange
+    auto pattern = AceType::MakeRefPtr<GridPattern>();
+    pattern->info_.lastMainSize_ = 100.0f;
+    pattern->info_.contentEndPadding_ = 10.0f;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 10;
+    pattern->info_.childrenCount_ = 11;
+    pattern->info_.totalHeightOfItemsInView_ = 110.0f;
+    pattern->info_.currentOffset_ = 50.0f;
+    pattern->info_.offsetEnd_ = true;
+
+    // Act
+    bool result = pattern->IsFadingBottom();
+
+    // Assert
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG

@@ -367,6 +367,7 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
             event(gestureInfo);
         });
     isDragging_ = false;
+    isCrownDragging_ = false;
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);

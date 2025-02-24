@@ -139,9 +139,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     bool needRemain = false;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
-    ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d][fontSize:%s][fontColor:%s]",
-        host->GetId(), needReCreateParagraph_, textStyle.GetFontSize().ToString().c_str(),
-        textStyle.GetTextColor().ColorToString().c_str());
+    ACE_SCOPED_TRACE(
+        "TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d]", host->GetId(), needReCreateParagraph_);
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
         auto result = BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
