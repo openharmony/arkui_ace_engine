@@ -1551,6 +1551,7 @@ private:
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
     const bool isAPI14Plus;
+    const bool isAPI16Plus;
     bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
