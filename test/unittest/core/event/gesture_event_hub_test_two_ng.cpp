@@ -542,6 +542,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
      */
     overlayManager->pixmapColumnNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(columnNode));
     auto gestureHub = buttonFrameNode->GetOrCreateGestureEventHub();
+    SystemProperties::dragDropFrameworkStatus_ = 3;
     gestureHub->InitDragDropEvent();
     overlayManager->MountPixelMapToRootNode(columnNode);
     overlayManager->isMenuShow_ = true;
