@@ -51,6 +51,9 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         for (auto index = 0; index < childSize; index++) {
             auto child = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!child) {
+                continue;
+            }
             auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(child->GetHostNode());
             if (!navDestinationNode) {
                 continue;

@@ -260,6 +260,20 @@ class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class BindMenuModifier extends ModifierWithKey<ArkBindMenu> {
+  constructor(value: ArkBindMenu) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('bindMenu');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBindMenu(node);
+    } else {
+      getUINativeModule().common.setBindMenu(node, this.value.content, this.value.options);
+    }
+  }
+}
+
 class WidthModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
@@ -446,7 +460,7 @@ class PositionModifier extends ModifierWithKey<Position | Edges | LocalizedEdges
       }
     }
   }
-  
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
       !isBaseOrResourceEqual(this.stageValue.y, this.value.y) ||
@@ -2004,6 +2018,21 @@ class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
   }
 }
 
+declare type HoverMoveEventCallback = (event: HoverEvent) => void;
+class OnHoverMoveModifier extends ModifierWithKey<HoverMoveEventCallback> {
+  constructor(value: HoverMoveEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onHoverMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnHoverMove(node);
+    } else {
+      getUINativeModule().common.setOnHoverMove(node, this.value);
+    }
+  }
+}
+
 declare type MouseEventCallback = (event: MouseEvent) => void;
 class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   constructor(value: MouseEventCallback) {
@@ -2015,6 +2044,21 @@ class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
       getUINativeModule().common.resetOnMouse(node);
     } else {
       getUINativeModule().common.setOnMouse(node, this.value);
+    }
+  }
+}
+
+declare type AxisEventCallback = (event: AxisEvent) => void;
+class OnAxisEventModifier extends ModifierWithKey<AxisEventCallback> {
+  constructor(value: AxisEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAxisEvent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAxisEvent(node);
+    } else {
+      getUINativeModule().common.setOnAxisEvent(node, this.value);
     }
   }
 }
@@ -2398,6 +2442,34 @@ class AccessibilityTextModifier extends ModifierWithKey<string> {
   }
 }
 
+class AccessibilityRoleModifier extends ModifierWithKey<AccessibilityRoleType> {
+  constructor(value: AccessibilityRoleType) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityRole');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityRoleType(node);
+    } else {
+      getUINativeModule().common.setAccessibilityRoleType(node, this.value);
+    }
+  }
+}
+
+class AccessibilityFocusCallbackModifier extends ModifierWithKey<AccessibilityFocusCallback> {
+  constructor(value: AccessibilityFocusCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAccessibilityFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityFocusCallback(node);
+    } else {
+      getUINativeModule().common.setAccessibilityFocusCallback(node, this.value);
+    }
+  }
+}
+
 class AllowDropModifier extends ModifierWithKey<Array<UniformDataType>> {
   constructor(value: Array<UniformDataType>) {
     super(value);
@@ -2730,15 +2802,15 @@ class BackgroundBrightnessInternalModifier extends ModifierWithKey<BrightnessOpt
     if (reset) {
       getUINativeModule().common.resetBackgroundBrightnessInternal(node);
     } else {
-      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
         this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
-  }                       
+  }
 
   checkObjectDiff(): boolean {
     return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
       && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
       && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -2752,7 +2824,7 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
     if (reset) {
       getUINativeModule().common.resetForegroundBrightness(node);
     } else {
-      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
         this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
   }
@@ -2760,7 +2832,7 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
   checkObjectDiff(): boolean {
     return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
       && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
       && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -2774,16 +2846,12 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
     if (reset) {
       getUINativeModule().common.resetDragPreviewOptions(node);
     } else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
-        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !(this.value.mode === this.stageValue.mode
-      && this.value.numberBadge === this.stageValue.numberBadge
-      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
-      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
+    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -2796,12 +2864,12 @@ class DragPreviewModifier extends ModifierWithKey<ArkDragPreview> {
     if (reset) {
       getUINativeModule().common.resetDragPreview(node);
     } else {
-      getUINativeModule().common.setDragPreview(node, this.value.inspetorId);
+      getUINativeModule().common.setDragPreview(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return this.value.inspetorId !== this.stageValue.inspetorId;
+    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -3091,6 +3159,76 @@ class AccessibilityGroupModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class AccessibilityNextFocusIdModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityNextFocusId');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityNextFocusId(node);
+    } else {
+      getUINativeModule().common.setAccessibilityNextFocusId(node, this.value);
+    }
+  }
+}
+
+class AccessibilityDefaultFocusModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityDefaultFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityDefaultFocus(node);
+    } else {
+      getUINativeModule().common.setAccessibilityDefaultFocus(node, this.value);
+    }
+  }
+}
+
+class AccessibilityUseSamePageModifier extends ModifierWithKey<AccessibilitySamePageMode> {
+  constructor(value: AccessibilitySamePageMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityUseSamePage');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityUseSamePage(node);
+    } else {
+      getUINativeModule().common.setAccessibilityUseSamePage(node, this.value);
+    }
+  }
+}
+
+class AccessibilityScrollTriggerableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityScrollTriggerable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityScrollTriggerable(node);
+    } else {
+      getUINativeModule().common.setAccessibilityScrollTriggerable(node, this.value);
+    }
+  }
+}
+
+class AccessibilityFocusDrawLevelModifier extends ModifierWithKey<FocusDrawLevel> {
+  constructor(value: FocusDrawLevel) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityFocusDrawLevel');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityFocusDrawLevel(node);
+    } else {
+      getUINativeModule().common.setAccessibilityFocusDrawLevel(node, this.value);
+    }
+  }
+}
+
 class HoverEffectModifier extends ModifierWithKey<HoverEffect> {
   constructor(value: HoverEffect) {
     super(value);
@@ -3264,6 +3402,21 @@ class FocusBoxModifier extends ModifierWithKey<FocusBoxStyle> {
   }
 }
 
+class NextFocusModifier extends ModifierWithKey<FocusMovement> {
+  constructor(value: FocusMovement) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('nextFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetNextFocus(node);
+    } else {
+      getUINativeModule().common.setNextFocus(node, this.value.forward, this.value.backward,
+        this.value.up, this.value.down, this.value.left, this.value.right);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -3371,6 +3524,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
       this._gestureEvent.setWeakNodePtr(this._weakPtr);
+      this._gestureEvent.registerFrameNodeDeletedCallback(this.nativePtr);
     }
     return this._gestureEvent;
   }
@@ -3533,6 +3687,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (typeof options === 'object') {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
       arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+      arkDragPreviewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
+      arkDragPreviewOptions.enableHapticFeedback = options.enableHapticFeedback;
+      arkDragPreviewOptions.isLiftingDisabled = options.isLiftingDisabled;
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
@@ -3693,7 +3850,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  backgroundImage(src: ResourceStr | PixelMap, repeat?: ImageRepeat): this {
+  backgroundImage(src: ResourceStr | PixelMap, repeat?: ImageRepeat | BackgroundImageOptions): this {
     let arkBackgroundImage = new ArkBackgroundImage();
     arkBackgroundImage.src = src;
     arkBackgroundImage.repeat = repeat;
@@ -3924,6 +4081,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onHoverMove(event: (event?: HoverMoveEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
+    return this;
+  }
+
   hoverEffect(value: HoverEffect): this {
     modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
@@ -3934,6 +4096,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onAxisEvent(event: (event?: AxisEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnAxisEventModifier.identity, OnAxisEventModifier, event);
+    return this;
+  }
+  
   onTouch(event: (event?: TouchEvent) => void): this {
     modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
     return this;
@@ -4460,14 +4627,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  dragPreview(value: CustomBuilder | DragItemInfo | string): this {
-    if (typeof value === 'string') {
-      let arkDragPreview = new ArkDragPreview();
-      arkDragPreview.inspetorId = value;
-      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
-      return this;
+  dragPreview(preview: CustomBuilder | DragItemInfo | string, config: PreviewConfiguration): this {
+    let arkDragPreview = new ArkDragPreview();
+    if (typeof config === 'object') {
+      arkDragPreview.onlyForLifting = config.onlyForLifting;
     }
-    throw new Error('Method not implemented.');
+    if (typeof preview === 'string') {
+      arkDragPreview.inspetorId = preview;
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+    } else if (typeof preview === 'object') {
+      arkDragPreview.pixelMap = preview.pixelMap;
+      arkDragPreview.extraInfo = preview.extraInfo;
+      if (preview.builder) {
+        throw new Error('Builder is not supported.');
+      }
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+    } else if (typeof preview === 'function') {
+      throw new Error('Method not implemented.');
+    }
+    return this;
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
@@ -4538,7 +4716,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
     return this;
   }
-  
+
   key(value: string): this {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
@@ -4570,7 +4748,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this {
-    throw new Error('Method not implemented.');
+    let arkBindMenu = new ArkBindMenu();
+    arkBindMenu.content = content;
+    arkBindMenu.options = options;
+    modifierWithKey(this._modifiersWithKeys, BindMenuModifier.identity, BindMenuModifier, arkBindMenu);
+    return this;
   }
 
   bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this {
@@ -4684,6 +4866,48 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  accessibilityRole(value: AccessibilityRoleType): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityRoleModifier.identity, AccessibilityRoleModifier, value);
+    return this;
+  }
+
+  onAccessibilityFocus(value: AccessibilityFocusCallback): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
+    return this;
+  }
+
+  accessibilityNextFocusId(value: string): this {
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityNextFocusIdModifier.identity, AccessibilityNextFocusIdModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityNextFocusIdModifier.identity, AccessibilityNextFocusIdModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityDefaultFocus(value: boolean): this {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityDefaultFocusModifier.identity, AccessibilityDefaultFocusModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityDefaultFocusModifier.identity, AccessibilityDefaultFocusModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityUseSamePage(value: AccessibilitySamePageMode): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityUseSamePageModifier.identity, AccessibilityUseSamePageModifier, value);
+    return this;
+  }
+
+  accessibilityScrollTriggerable(value: boolean): this {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
+    }
+    return this;
+  }
+
   obscured(reasons: Array<ObscuredReasons>): this {
     modifierWithKey(this._modifiersWithKeys, ObscuredModifier.identity, ObscuredModifier, reasons);
     return this;
@@ -4752,6 +4976,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   focusBox(value:FocusBoxStyle):this {
     modifierWithKey(this._modifiersWithKeys, FocusBoxModifier.identity, FocusBoxModifier, value);
   }
+  nextFocus(value:FocusMovement):this {
+    modifierWithKey(this._modifiersWithKeys, NextFocusModifier.identity, NextFocusModifier, value);
+  }
 }
 
 const isNull = (val: any) => typeof val === 'object' && val === null;
@@ -4777,6 +5004,7 @@ class UICommonEvent {
   private _onFocusEvent?: () => void;
   private _onBlur?: () => void;
   private _onHoverEvent?: (isHover: boolean, event: HoverEvent) => void;
+  private _onHoverMoveEvent?: (event: HoverEvent) => void;
   private _onMouseEvent?: (event: MouseEvent) => void;
   private _onSizeChangeEvent?: SizeChangeCallback;
   private _onVisibleAreaApproximateChange?: VisibleAreaChangeCallback;
@@ -4788,7 +5016,7 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   // the first param is used to indicate frameNode
-  // the second param is used to indicate the callback 
+  // the second param is used to indicate the callback
   // the third param is used to indicate the instanceid
   // other options will be indicated after them
   setOnClick(callback: (event: ClickEvent) => void): void {
@@ -4830,6 +5058,10 @@ class UICommonEvent {
   setOnHover(callback: (isHover: boolean, event: HoverEvent) => void): void {
     this._onHoverEvent = callback;
     getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
+  }
+  setOnHoverMove(callback: (event: HoverMoveEvent) => void): void {
+    this._onHoverMoveEvent = callback;
+    getUINativeModule().frameNode.setOnHoverMove(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback: (event: MouseEvent) => void): void {
     this._onMouseEvent = callback;
@@ -4923,11 +5155,18 @@ class UIGestureEvent {
   private _nodePtr: Object | null;
   private _weakNodePtr: JsPointerClass;
   private _gestures: GestureHandler[] | undefined;
+  private _destructorCallback: Callback<number>;
   setNodePtr(nodePtr: Object | null): void {
     this._nodePtr = nodePtr;
   }
   setWeakNodePtr(weakNodePtr: JsPointerClass): void {
     this._weakNodePtr = weakNodePtr;
+  }
+  registerFrameNodeDeletedCallback(nodePtr): void {
+    this._destructorCallback = (elementId: number): void => {
+      globalThis.__mapOfModifier__.delete(elementId);
+    };
+    getUINativeModule().common.registerFrameNodeDestructorCallback(nodePtr, this._destructorCallback);
   }
   addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
     if (this._weakNodePtr.invalid()) {
@@ -4942,40 +5181,45 @@ class UIGestureEvent {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
         getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
-          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback);
+          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback);
         break;
       }
       case CommonGestureType.LONG_PRESS_GESTURE: {
         let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
         getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
-          longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+          longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat,
+          longPressGesture.duration, longPressGesture.limitFingerCount,
           longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.PAN_GESTURE: {
         let panGesture: PanGestureHandler = gesture as PanGestureHandler;
         getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
-          panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
-          panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
+          panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance,
+          panGesture.limitFingerCount, panGesture.onActionStartCallback, panGesture.onActionUpdateCallback,
+          panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.SWIPE_GESTURE: {
         let swipeGesture: SwipeGestureHandler = gesture as SwipeGestureHandler;
         getUINativeModule().common.addSwipeGesture(this._nodePtr, priority, mask, swipeGesture.gestureTag,
-          swipeGesture.allowedTypes, swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback);
+          swipeGesture.allowedTypes, swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed,
+          swipeGesture.limitFingerCount, swipeGesture.onActionCallback);
         break;
       }
       case CommonGestureType.PINCH_GESTURE: {
         let pinchGesture: PinchGestureHandler = gesture as PinchGestureHandler;
         getUINativeModule().common.addPinchGesture(this._nodePtr, priority, mask, pinchGesture.gestureTag,
-          pinchGesture.allowedTypes, pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+          pinchGesture.allowedTypes, pinchGesture.fingers, pinchGesture.distance,
+          pinchGesture.limitFingerCount, pinchGesture.onActionStartCallback,
           pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.ROTATION_GESTURE: {
         let rotationGesture: RotationGestureHandler = gesture as RotationGestureHandler;
         getUINativeModule().common.addRotationGesture(this._nodePtr, priority, mask, rotationGesture.gestureTag,
-          rotationGesture.allowedTypes, rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
+          rotationGesture.allowedTypes, rotationGesture.fingers, rotationGesture.angle,
+          rotationGesture.limitFingerCount, rotationGesture.onActionStartCallback,
           rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
           rotationGesture.onActionCancelCallback);
         break;
@@ -5039,42 +5283,44 @@ function addGestureToGroup(nodePtr: Object | null, gesture: any, gestureGroupPtr
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
       getUINativeModule().common.addTapGestureToGroup(nodePtr, tapGesture.gestureTag, tapGesture.allowedTypes,
-        tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback, gestureGroupPtr);
+        tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback,
+        gestureGroupPtr);
       break;
     }
     case CommonGestureType.LONG_PRESS_GESTURE: {
       let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
       getUINativeModule().common.addLongPressGestureToGroup(nodePtr, longPressGesture.gestureTag, longPressGesture.allowedTypes,
-        longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+        longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration, longPressGesture.limitFingerCount,
         longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PAN_GESTURE: {
       let panGesture: PanGestureHandler = gesture as PanGestureHandler;
       getUINativeModule().common.addPanGestureToGroup(nodePtr, panGesture.gestureTag, panGesture.allowedTypes,
-        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
+        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.limitFingerCount, panGesture.onActionStartCallback,
         panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.SWIPE_GESTURE: {
       let swipeGesture: SwipeGestureHandler = gesture as SwipeGestureHandler;
       getUINativeModule().common.addSwipeGestureToGroup(nodePtr, swipeGesture.gestureTag, swipeGesture.allowedTypes,
-        swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback, gestureGroupPtr);
+        swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.limitFingerCount,
+        swipeGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PINCH_GESTURE: {
       let pinchGesture: PinchGestureHandler = gesture as PinchGestureHandler;
       getUINativeModule().common.addPinchGestureToGroup(nodePtr, pinchGesture.gestureTag, pinchGesture.allowedTypes,
-        pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+        pinchGesture.fingers, pinchGesture.distance, pinchGesture.limitFingerCount, pinchGesture.onActionStartCallback,
         pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.ROTATION_GESTURE: {
       let rotationGesture: RotationGestureHandler = gesture as RotationGestureHandler;
       getUINativeModule().common.addRotationGestureToGroup(nodePtr, rotationGesture.gestureTag, rotationGesture.allowedTypes,
-        rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
-        rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
-        rotationGesture.onActionCancelCallback, gestureGroupPtr);
+        rotationGesture.fingers, rotationGesture.angle, rotationGesture.limitFingerCount,
+        rotationGesture.onActionStartCallback, rotationGesture.onActionUpdateCallback,
+        rotationGesture.onActionEndCallback, rotationGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.GESTURE_GROUP: {
@@ -5102,9 +5348,6 @@ function applyGesture(modifier: GestureModifier, component: ArkComponent): void 
 
 globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
-  if (globalThis.__mapOfModifier__.size === 0) {
-    __modifierElmtDeleteCallback__();
-  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   if (globalThis.__mapOfModifier__.get(elmtId)) {
@@ -5115,16 +5358,6 @@ function __gestureModifier__(modifier) {
     globalThis.__mapOfModifier__.set(elmtId, component);
     applyGesture(modifier, component);
   }
-}
-
-declare class UINodeRegisterProxy {
-  public static registerModifierElmtDeleteCallback(): void;
-}
-
-function __modifierElmtDeleteCallback__() {
-  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
-    globalThis.__mapOfModifier__.delete(elmtId);
-  });
 }
 
 const __elementIdToCustomProperties__ = new Map();

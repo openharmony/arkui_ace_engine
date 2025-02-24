@@ -139,6 +139,7 @@ struct ParagraphStyle {
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
     Dimension lineHeight;
+    bool halfLeading = false;
     Dimension indent;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
 
@@ -147,7 +148,8 @@ struct ParagraphStyle {
         return direction == others.direction && align == others.align && maxLines == others.maxLines &&
                fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
-               leadingMargin == others.leadingMargin && fontSize == others.fontSize && indent == others.indent;
+               leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
+               halfLeading == others.halfLeading && indent == others.indent;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -217,6 +219,8 @@ class Paragraph : public virtual AceType {
 
 public:
     static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
+    static RefPtr<Paragraph> CreateRichEditorParagraph(
+        const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
 
     static RefPtr<Paragraph> Create(void* paragraph);
     // whether the paragraph has been build

@@ -117,19 +117,16 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level
     style.strokeWidth = Converter::ArkValue<Opt_Length>("222.00px");
     modifier_->setMark0(node_, &style);
 
-    auto* frameNode = reinterpret_cast<FrameNode*>(node_);
-    const InspectorFilter inspector;
-    auto jsonVal = JsonUtil::Create(true);
-    frameNode->ToJsonValue(jsonVal, inspector);
-    auto mark = jsonVal->GetValue("mark");
+    auto jsonValue = GetJsonValue(node_);
+    auto mark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, "mark");
 
-    auto checkVal1 = mark->GetString("strokeColor");
+    auto checkVal1 = GetAttrValue<std::string>(mark, "strokeColor");
     EXPECT_EQ(checkVal1, "#FF123456");
 
-    auto checkVal2 = mark->GetString("size");
+    auto checkVal2 = GetAttrValue<std::string>(mark, "size");
     EXPECT_EQ(checkVal2, "111.00px");
 
-    auto checkVal3 = mark->GetString("strokeWidth");
+    auto checkVal3 = GetAttrValue<std::string>(mark, "strokeWidth");
     EXPECT_EQ(checkVal3, "222.00px");
 }
 

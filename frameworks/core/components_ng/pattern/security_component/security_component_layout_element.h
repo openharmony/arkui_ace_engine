@@ -57,7 +57,7 @@ public:
 class IconLayoutElement : public SecurityComponentLayoutElement {
 public:
     IconLayoutElement() {};
-    void Init(RefPtr<SecurityComponentLayoutProperty>& property, RefPtr<LayoutWrapper>& textWrap);
+    void Init(const RefPtr<SecurityComponentLayoutProperty>& property, RefPtr<LayoutWrapper>& textWrap);
     ~IconLayoutElement() = default;
 
     double ShrinkWidth(double reduceSize) override;
@@ -144,7 +144,7 @@ private:
 class TextLayoutElement : public SecurityComponentLayoutElement {
 public:
     TextLayoutElement() {};
-    void Init(RefPtr<SecurityComponentLayoutProperty>& property,
+    void Init(const RefPtr<SecurityComponentLayoutProperty>& property,
         RefPtr<LayoutWrapper>& textWrap);
     ~TextLayoutElement() = default;
 
@@ -173,7 +173,7 @@ private:
     std::optional<SizeF> GetMeasureTextSize(const std::string& data,
         const Dimension& fontSize, FontWeight fontWeight, float constraintWidth);
     void MeasureForWidth(float width);
-    float GetHeightConstraint(RefPtr<SecurityComponentLayoutProperty>& property, float height);
+    float GetHeightConstraint(const RefPtr<SecurityComponentLayoutProperty>& property, float height);
     void UpdateFontSize();
 
     bool isExist_ = false;

@@ -104,8 +104,6 @@ private:
     float FixScrollOffset(float offset, int32_t source);
     void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged) override {}
     float GetScrollUpdateFriction(float overScroll) override;
-    float GetStartOverScrollOffset(float offset, float startMainPos) const override;
-    float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const override;
     ScrollAlign GetScrollToNodeAlign() override
     {
         return ScrollAlign::CENTER;

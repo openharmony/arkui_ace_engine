@@ -19,8 +19,8 @@
 #include "test/mock/core/rosen/testing_brush.h"
 #include "test/mock/core/rosen/testing_filter.h"
 #include "test/mock/core/rosen/testing_matrix.h"
-#include "test/mock/core/rosen/testing_pen.h"
 #include "test/mock/core/rosen/testing_path.h"
+#include "test/mock/core/rosen/testing_pen.h"
 #include "test/mock/core/rosen/testing_typography.h"
 
 namespace OHOS::Ace::Testing {

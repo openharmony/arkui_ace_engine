@@ -86,9 +86,9 @@ RefPtr<FrameNode> ProgressModelNG::CreateFrameNode(int32_t nodeId, double value,
     auto frameNode = FrameNode::CreateFrameNode(V2::PROGRESS_ETS_TAG, nodeId, AceType::MakeRefPtr<ProgressPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
-    ProgressModelNG::SetTotal(frameNode.GetRawPtr(), max);
-    ProgressModelNG::SetValue(frameNode.GetRawPtr(), value);
-    ProgressModelNG::SetType(frameNode.GetRawPtr(), type);
+    ProgressModelNG::SetTotal(Referenced::RawPtr(frameNode), max);
+    ProgressModelNG::SetValue(Referenced::RawPtr(frameNode), value);
+    ProgressModelNG::SetType(Referenced::RawPtr(frameNode), type);
     return frameNode;
 }
 

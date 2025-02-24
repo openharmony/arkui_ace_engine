@@ -99,7 +99,7 @@ private:
     void AdjustMenuOffsetAtSingleHandleBottom(const RectF handleRect, const RectF& menuRect, OffsetF& menuOffset,
         double spaceBetweenText);
     bool IsMenuAreaSmallerHandleArea(RectF handleRect, float menuHeight, float menuDistance);
-    void AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect);
+    void AdjustMenuTooFarAway(LayoutWrapper* layoutWrapper, OffsetF& menuOffset, const RectF& menuRect);
     void AdjustMenuInRootRect(OffsetF& menuOffset, const SizeF& menuSize, const SizeF& rootSize);
     OffsetF CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper);
     OffsetF NewMenuAvoidStrategy(LayoutWrapper* layoutWrapper, float menuWidth, float menuHeight);
@@ -110,6 +110,8 @@ private:
     bool IsReverseLayout(LayoutWrapper* layoutWrapper) const;
     void CheckHandleIsInClipViewPort();
     float GetCustomMenuMaxHeight(float topSafeArea, float bottomSafeArea);
+    void UpdateMainWindowOffset(LayoutWrapper* layoutWrapper);
+    bool GetIsMenuShowInSubWindow(LayoutWrapper* layoutWrapper);
 
     std::shared_ptr<SelectOverlayInfo> info_;
 
@@ -119,6 +121,8 @@ private:
     std::optional<float> menuHeight_;
     bool hasExtensionMenu_ = false;
     bool hideMoreOrBack_ = false;
+    OffsetF mainWindowOffset_;
+    OffsetF containerModalOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayLayoutAlgorithm);
 };

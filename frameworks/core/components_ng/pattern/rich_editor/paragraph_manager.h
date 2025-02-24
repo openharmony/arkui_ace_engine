@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARAGRAPH_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARAGRAPH_MANAGER_H
 #include <list>
 #include <optional>
 
@@ -32,6 +32,8 @@ public:
         ParagraphStyle paragraphStyle;
         int32_t start = 0;
         int32_t end = 0;
+        float topPos = 0.0f;
+        float bottomPos = 0.0f;
 
         std::string ToString() const;
     };
@@ -49,7 +51,7 @@ public:
     PositionWithAffinity GetGlyphPositionAtCoordinate(Offset offset);
     float GetHeight() const;
 
-    const std::list<ParagraphInfo>& GetParagraphs() const
+    const std::vector<ParagraphInfo>& GetParagraphs() const
     {
         return paragraphs_;
     }
@@ -74,7 +76,7 @@ public:
         paragraphs_.emplace_back(std::move(info));
     }
 
-    void SetParagraphs(const std::list<ParagraphInfo>& paragraphs)
+    void SetParagraphs(const std::vector<ParagraphInfo>& paragraphs)
     {
         paragraphs_ = paragraphs;
     }
@@ -99,6 +101,9 @@ public:
     TextLineMetrics GetLineMetrics(size_t lineNumber);
     bool IsIndexAtParagraphEnd(int32_t index);
 
+protected:
+    std::vector<ParagraphInfo> paragraphs_;
+
 private:
     struct SelectData {
         float y = 0.0f;
@@ -113,7 +118,6 @@ private:
         const SelectData& selectData);
     static void RemoveBlankLineRectByHandler(std::vector<RectF>& rects, const SelectData& selectData);
     static bool IsRectOutByHandler(const RectF& rect, const SelectData& selectData);
-    std::list<ParagraphInfo> paragraphs_;
 };
 } // namespace OHOS::Ace::NG
 #endif

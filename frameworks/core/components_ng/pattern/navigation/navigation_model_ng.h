@@ -52,6 +52,8 @@ public:
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
+    void SetHideItemText(bool isHideItemText) override;
+    void SetEnableToolBarAdaptation(bool enable) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
@@ -100,6 +102,7 @@ public:
         std::function<void(NG::NavigationMode)>&& onModeChange);
     static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
+    static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
 
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
@@ -114,6 +117,13 @@ public:
     static void SetOnTitleModeChange(FrameNode* frameNode,
         std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo);
+    static void SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode);
+    static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
+    static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);
+    static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
+    static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
+    static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
+    static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
     static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
 
 private:

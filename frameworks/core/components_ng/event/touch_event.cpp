@@ -132,11 +132,13 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
     }
     eventInfo.SetSourceTool(lastPoint.sourceTool);
     eventInfo.SetPressedKeyCodes(lastPoint.pressedKeyCodes_);
+    eventInfo.SetOperatingHand(lastPoint.operatingHand);
     if (isFlushTouchEventsEnd_) {
         // trigger callback of the last touch event during one vsync period
         eventInfo.SetTouchEventsEnd(true);
         isFlushTouchEventsEnd_ = false;
     }
+    eventInfo.SetTargetDisplayId(lastPoint.targetDisplayId);
     return eventInfo;
 }
 
@@ -152,6 +154,9 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
     changedInfo.SetTouchType(lastPoint.type);
     changedInfo.SetForce(lastPoint.force);
+    changedInfo.SetPressedTime(lastPoint.pressedTime);
+    changedInfo.SetWidth(lastPoint.width);
+    changedInfo.SetHeight(lastPoint.height);
     if (lastPoint.tiltX.has_value()) {
         changedInfo.SetTiltX(lastPoint.tiltX.value());
     }
@@ -159,6 +164,7 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
         changedInfo.SetTiltY(lastPoint.tiltY.value());
     }
     changedInfo.SetSourceTool(lastPoint.sourceTool);
+    changedInfo.SetOperatingHand(lastPoint.operatingHand);
     return changedInfo;
 }
 
@@ -179,6 +185,9 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     info.SetScreenLocation(Offset(screenX, screenY));
     info.SetTouchType(type);
     info.SetForce(pointItem.force);
+    info.SetPressedTime(pointItem.downTime);
+    info.SetWidth(pointItem.width);
+    info.SetHeight(pointItem.height);
     if (pointItem.tiltX.has_value()) {
         info.SetTiltX(pointItem.tiltX.value());
     }
@@ -186,6 +195,7 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
         info.SetTiltY(pointItem.tiltY.value());
     }
     info.SetSourceTool(pointItem.sourceTool);
+    info.SetOperatingHand(pointItem.operatingHand);
     return info;
 }
 
@@ -206,6 +216,9 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     historyInfo.SetScreenLocation(Offset(screenX, screenY));
     historyInfo.SetTouchType(eventItem.type);
     historyInfo.SetForce(eventItem.force);
+    historyInfo.SetPressedTime(eventItem.pressedTime);
+    historyInfo.SetWidth(eventItem.width);
+    historyInfo.SetHeight(eventItem.height);
     if (eventItem.tiltX.has_value()) {
         historyInfo.SetTiltX(eventItem.tiltX.value());
     }
@@ -213,6 +226,7 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
         historyInfo.SetTiltY(eventItem.tiltY.value());
     }
     historyInfo.SetSourceTool(eventItem.sourceTool);
+    historyInfo.SetOperatingHand(eventItem.operatingHand);
     return historyInfo;
 }
 

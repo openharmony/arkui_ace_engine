@@ -344,6 +344,11 @@ public:
 
 protected:
     SliderTheme() = default;
+    Color blockColor_;
+    Color trackBgColor_;
+    Color trackSelectedColor_;
+    Color outsetModeSelectedTrackColor_;
+    Color markerColor_;
 
 private:
     // outset slider mode
@@ -368,15 +373,11 @@ private:
     Dimension tipTextPadding_;
     Dimension bubbleToCircleCenterDistance_;
     Dimension measureContentDefaultWidth_;
-    Color blockColor_;
     Color blockHoverColor_;
     Color blockPressedColor_;
     Color blockOuterEdgeColor_;
     Color tipColor_;
     Color tipTextColor_;
-    Color markerColor_;
-    Color trackBgColor_;
-    Color trackSelectedColor_;
     Color blockShadowColor_;
 
     // others
@@ -400,7 +401,6 @@ private:
     bool showFocusFrame_ = 0.0;
     double focusedScaleValue_ = 1.0;
     Dimension measureContentOutsetWidth_;
-    Color outsetModeSelectedTrackColor_;
     Color noneModeSelectedTrackColor_;
 };
 

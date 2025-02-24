@@ -20,7 +20,6 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_picker_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -49,48 +48,45 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
 }
 
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
 std::unique_ptr<TextPickerDialogModel> TextPickerDialogModel::textPickerDialogInstance_ = nullptr;
-std::mutex TextPickerModel::mutex_;
-std::mutex TextPickerDialogModel::mutex_;
+std::once_flag TextPickerModel::onceFlag_;
+std::once_flag TextPickerDialogModel::onceFlag_;
 
 TextPickerModel* TextPickerModel::GetInstance()
 {
-    if (!textPickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!textPickerInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            textPickerInstance_.reset(new NG::TextPickerModelNG());
+        textPickerInstance_.reset(new NG::TextPickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                textPickerInstance_.reset(new NG::TextPickerModelNG());
-            } else {
-                textPickerInstance_.reset(new Framework::TextPickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            textPickerInstance_.reset(new NG::TextPickerModelNG());
+        } else {
+            textPickerInstance_.reset(new Framework::TextPickerModelImpl());
         }
-    }
+#endif
+    });
+
     return textPickerInstance_.get();
 }
 
 TextPickerDialogModel* TextPickerDialogModel::GetInstance()
 {
-    if (!textPickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!textPickerDialogInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+        textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
-            } else {
-                textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+        } else {
+            textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
         }
-    }
+#endif
+    });
+
     return textPickerDialogInstance_.get();
 }
 } // namespace OHOS::Ace
@@ -203,6 +199,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create, opt);
     JSClass<JSTextPicker>::StaticMethod("defaultPickerItemHeight", &JSTextPicker::SetDefaultPickerItemHeight);
     JSClass<JSTextPicker>::StaticMethod("canLoop", &JSTextPicker::SetCanLoop);
+    JSClass<JSTextPicker>::StaticMethod("digitalCrownSensitivity", &JSTextPicker::SetDigitalCrownSensitivity);
     JSClass<JSTextPicker>::StaticMethod("disappearTextStyle", &JSTextPicker::SetDisappearTextStyle);
     JSClass<JSTextPicker>::StaticMethod("textStyle", &JSTextPicker::SetTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
@@ -227,6 +224,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextPicker>::StaticMethod("enableHapticFeedback", &JSTextPicker::SetEnableHapticFeedback);
     JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -287,16 +285,25 @@ size_t JSTextPicker::ProcessCascadeOptionDepth(const NG::TextCascadePickerOption
     return depth;
 }
 
-void JSTextPicker::CreateMulti(const RefPtr<PickerTheme>& theme, const std::vector<std::string>& values,
-    const std::vector<uint32_t>& selectedValues, const NG::TextCascadePickerOptionsAttr& attr,
-    const std::vector<NG::TextCascadePickerOptions>& options)
+void JSTextPicker::CreateSingle(const RefPtr<PickerTheme>& theme, ParseTextArrayParam& param)
+{
+    TextPickerModel::GetInstance()->Create(theme, param.kind);
+    TextPickerModel::GetInstance()->SetRange(param.result);
+    TextPickerModel::GetInstance()->SetSelected(param.selected);
+    TextPickerModel::GetInstance()->SetValue(param.value);
+    TextPickerModel::GetInstance()->SetColumnWidths(param.columnWidths);
+}
+
+void JSTextPicker::CreateMulti(const RefPtr<PickerTheme>& theme,
+    const NG::TextCascadePickerOptionsAttr& attr, ParseTextArrayParam& param)
 {
     TextPickerModel::GetInstance()->MultiInit(theme);
-    TextPickerModel::GetInstance()->SetValues(values);
-    TextPickerModel::GetInstance()->SetSelecteds(selectedValues);
+    TextPickerModel::GetInstance()->SetValues(param.values);
+    TextPickerModel::GetInstance()->SetSelecteds(param.selecteds);
     TextPickerModel::GetInstance()->SetIsCascade(attr.isCascade);
     TextPickerModel::GetInstance()->SetHasSelectAttr(attr.isHasSelectAttr);
-    TextPickerModel::GetInstance()->SetColumns(options);
+    TextPickerModel::GetInstance()->SetColumns(param.options);
+    TextPickerModel::GetInstance()->SetColumnWidths(param.columnWidths);
 }
 
 void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -370,13 +377,12 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             }
             if (optionsMultiContentCheckErr) {
                 optionsCascadeContentCheckErr =
-                    !ProcessCascadeOptions(paramObject, param.options, param.selecteds, param.values, optionsAttr);
+                    !ProcessCascadeOptions(paramObject, param, optionsAttr);
             }
         }
         if (!isSingleRange && optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
             param.result.clear();
             param.options.clear();
-
             auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             bool firstBuild = targetNode && targetNode->IsFirstBuilding();
             if (!firstBuild) {
@@ -386,12 +392,9 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         auto theme = GetTheme<PickerTheme>();
         CHECK_NULL_VOID(theme);
         if (!param.result.empty()) {
-            TextPickerModel::GetInstance()->Create(theme, param.kind);
-            TextPickerModel::GetInstance()->SetRange(param.result);
-            TextPickerModel::GetInstance()->SetSelected(param.selected);
-            TextPickerModel::GetInstance()->SetValue(param.value);
+            CreateSingle(theme, param);
         } else {
-            CreateMulti(theme, param.values, param.selecteds, optionsAttr, param.options);
+            CreateMulti(theme, optionsAttr, param);
         }
         TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
         JSInteractableView::SetFocusable(true);
@@ -402,7 +405,6 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         if (param.selectedChangeEventVal->IsFunction()) {
             ParseTextPickerSelectedObject(info, param.selectedChangeEventVal);
         }
-        JSTextPickerTheme::ApplyTheme();
     }
 }
 
@@ -417,7 +419,7 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
         return false;
     }
     if (!JSTextPickerParser::ParseTextArray(paramObjec, param)) {
-        if (!JSTextPickerParser::ParseIconTextArray(paramObjec, param.result, param.kind, param.selected)) {
+        if (!JSTextPickerParser::ParseIconTextArray(paramObjec, param)) {
             param.result.clear();
             ret = false;
         }
@@ -425,41 +427,43 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
     return ret;
 }
 
-bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
-    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues,
-    std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr)
+bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param,
+    NG::TextCascadePickerOptionsAttr& attr)
 {
     auto getRange = paramObject->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
-        options.clear();
+        param.options.clear();
         return false;
     }
-    if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, selectedValues, values, attr)) {
-        options.clear();
+    if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, param.selecteds, param.values, attr)) {
+        param.options.clear();
         return false;
     } else {
-        JSTextPickerParser::GenerateCascadeOptions(getRange, options);
-        uint32_t maxCount = options.empty() ? 0 : 1;
-        for (size_t i = 0; i < options.size(); i++) {
-            size_t tmp = ProcessCascadeOptionDepth(options[i]);
+        JSTextPickerParser::GenerateCascadeOptions(getRange, param.options);
+        uint32_t maxCount = param.options.empty() ? 0 : 1;
+        for (size_t i = 0; i < param.options.size(); i++) {
+            size_t tmp = ProcessCascadeOptionDepth(param.options[i]);
             if (tmp > maxCount) {
                 maxCount = tmp;
             }
         }
-        if (selectedValues.size() < maxCount) {
-            auto differ = maxCount - selectedValues.size();
+        if (param.selecteds.size() < maxCount) {
+            auto differ = maxCount - param.selecteds.size();
             for (uint32_t i = 0; i < differ; i++) {
-                selectedValues.emplace_back(0);
+                param.selecteds.emplace_back(0);
             }
         }
-        if (values.size() < maxCount) {
-            auto differ = maxCount - values.size();
+        if (param.values.size() < maxCount) {
+            auto differ = maxCount - param.values.size();
             for (uint32_t i = 0; i < differ; i++) {
-                values.emplace_back("");
+                param.values.emplace_back("");
             }
         }
         attr.isCascade = true;
         TextPickerModel::GetInstance()->SetMaxCount(maxCount);
+        if (!JSTextPickerParser::ParseColumnWidths(paramObject, param)) {
+            return false;
+        }
     }
     return true;
 }
@@ -598,6 +602,15 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
     return true;
 }
 
+bool JSTextPickerParser::ParseMultiColumnWidths(const JsiRef<JsiValue>& jsColumnWidthsValue,
+    ParseTextArrayParam& param)
+{
+    if (jsColumnWidthsValue->IsArray() && ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths)) {
+        return true;
+    }
+    return false;
+}
+
 void JSTextPickerParser::ParseMultiTextArrayValueInternal(
     const std::vector<NG::TextCascadePickerOptions>& options, std::vector<std::string>& values)
 {
@@ -669,6 +682,7 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
     auto getSelected = paramObject->GetProperty("selected");
     auto getValue = paramObject->GetProperty("value");
     auto getRange = paramObject->GetProperty("range");
+    auto getColumnWidths = paramObject->GetProperty("columnWidths");
     if (getRange->IsNull() || getRange->IsUndefined()) {
         return false;
     }
@@ -698,6 +712,11 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
     }
     if (!ParseMultiTextArraySelect(getSelected, param)) {
         return false;
+    }
+    if (!getColumnWidths->IsNull() && !getColumnWidths->IsUndefined()) {
+        if (!ParseMultiColumnWidths(getColumnWidths, param)) {
+            return false;
+        }
     }
     return true;
 }
@@ -805,6 +824,17 @@ bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObjec
     return ParseInternalArray(getRange, selectedValues, values, 0, attr.isHasSelectAttr);
 }
 
+bool JSTextPickerParser::ParseColumnWidths(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param)
+{
+    auto getColumnWidths = paramObject->GetProperty("columnWidths");
+    if (!getColumnWidths->IsNull() && !getColumnWidths->IsUndefined()) {
+        if (!ParseMultiColumnWidths(getColumnWidths, param)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param)
 {
     auto getSelected = paramObject->GetProperty("selected");
@@ -815,7 +845,6 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (!ParseJsStrArray(getRange, getRangeVector)) {
             return false;
         }
-
         param.result.clear();
         for (const auto& text : getRangeVector) {
             NG::RangeContent content;
@@ -850,13 +879,14 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (param.selected >= getRangeVector.size()) {
             param.selected = 0;
         }
+        if (!ParseColumnWidths(paramObject, param)) {
+            return false;
+        }
     }
-
     return true;
 }
 
-bool JSTextPickerParser::ParseIconTextArray(
-    const JSRef<JSObject>& paramObject, std::vector<NG::RangeContent>& result, uint32_t& kind, uint32_t& selectedValue)
+bool JSTextPickerParser::ParseIconTextArray(const JSRef<JSObject>& paramObject,  ParseTextArrayParam& param)
 {
     auto getSelected = paramObject->GetProperty("selected");
     auto getRange = paramObject->GetProperty("range");
@@ -864,8 +894,8 @@ bool JSTextPickerParser::ParseIconTextArray(
         return false;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(getRange);
-    result.clear();
-    kind = 0;
+    param.result.clear();
+    param.kind = 0;
     for (size_t i = 0; i < array->Length(); i++) {
         if (!array->GetValueAt(i)->IsObject()) {
             continue;
@@ -878,22 +908,26 @@ bool JSTextPickerParser::ParseIconTextArray(
         std::string text;
         if (ParseJsMedia(rangeIcon, icon)) {
             content.icon_ = icon;
-            kind |= NG::ICON;
+            param.kind |= NG::ICON;
         }
 
         if (ParseJsString(rangeText, text)) {
             content.text_ = text;
-            kind |= NG::TEXT;
+            param.kind |= NG::TEXT;
         }
-        result.emplace_back(content);
+        param.result.emplace_back(content);
     }
 
-    if (kind != NG::ICON && kind != (NG::ICON | NG::TEXT)) {
+    if (param.kind != NG::ICON && param.kind != (NG::ICON | NG::TEXT)) {
         return false;
     }
 
-    if (!ParseJsInteger(getSelected, selectedValue)) {
-        selectedValue = 0;
+    if (!ParseJsInteger(getSelected, param.selected)) {
+        param.selected = 0;
+    }
+
+    if (!ParseColumnWidths(paramObject, param)) {
+        return false;
     }
     return true;
 }
@@ -1048,12 +1082,20 @@ void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
     TextPickerModel::GetInstance()->SetCanLoop(value);
 }
 
+void JSTextPicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+    int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
+    TextPickerModel::GetInstance()->SetDigitalCrownSensitivity(value);
+}
+
 void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
@@ -1065,7 +1107,6 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
@@ -1077,7 +1118,6 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
@@ -1391,6 +1431,14 @@ void JSTextPicker::OnEnterSelectedArea(const JSCallbackInfo& info)
     TextPickerModel::GetInstance()->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
     info.ReturnSelf();
 }
+void JSTextPicker::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
+    TextPickerModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
 
 void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 {
@@ -1588,7 +1636,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             textPickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1653,6 +1701,22 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
+    auto blurStyleValue = paramObject->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleValue->IsObject()) {
+        if (!textPickerDialog.blurStyleOption.has_value()) {
+            textPickerDialog.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, textPickerDialog.blurStyleOption.value());
+    }
+
+    auto effectOptionValue = paramObject->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!textPickerDialog.effectOption.has_value()) {
+            textPickerDialog.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOptionValue, textPickerDialog.effectOption.value());
+    }
+
     auto buttonInfos = ParseButtonStyles(paramObject);
 
     TextPickerDialogEvent textPickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
@@ -1696,6 +1760,12 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
 
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    auto enableHapticFeedbackValue = paramObj->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -1708,7 +1778,8 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 bool JSTextPickerDialog::ParseShowDataOptions(
@@ -1809,7 +1880,7 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
         return false;
     }
     if (!JSTextPickerParser::ParseTextArray(paramObject, param)) {
-        if (!JSTextPickerParser::ParseIconTextArray(paramObject, param.result, param.kind, param.selected)) {
+        if (!JSTextPickerParser::ParseIconTextArray(paramObject, param)) {
             rangeContentCheckErr = true;
             param.result.clear();
         }
@@ -1837,6 +1908,12 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
     } else {
         ParseShowDataMultiContent(param.options, param.selecteds, param.values, attr, settingData);
     }
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    auto enableHapticFeedbackValue = paramObject->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
     return true;
 }
 

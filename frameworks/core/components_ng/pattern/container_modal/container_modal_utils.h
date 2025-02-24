@@ -18,5 +18,6 @@
 
 namespace OHOS::Ace::NG {
 bool ExecuteCustomTitleAbc();
+bool ExecuteCustomWindowMaskAbc();
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_UTILS_H

@@ -65,6 +65,7 @@ void SwipeRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Swipe accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
+    auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onAction_);
     int64_t overTime = GetSysTimestamp();
@@ -73,6 +74,9 @@ void SwipeRecognizer::OnAccepted()
             static_cast<long long>(inputTime), static_cast<long long>(overTime));
     }
     firstInputTime_.reset();
+    if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
+        ResetStateVoluntarily();
+    }
 }
 
 void SwipeRecognizer::OnRejected()
@@ -102,11 +106,6 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe recognizer direction is none, node tag = %{public}s, id = %{public}s",
             node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
         extraInfo_ += "swipe direction is NONE.";
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
-
-    if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -186,6 +185,10 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             }
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
+            if (CheckLimitFinger()) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
@@ -382,6 +385,9 @@ void SwipeRecognizer::OnResetStatus()
 
 void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);

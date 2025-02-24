@@ -29,7 +29,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_theme.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -278,11 +278,8 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     JSRef<JSVal> args = info[0];
     if (!ParseJsColor(args, textColor)) {
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        textColor = theme->GetTextStyle().GetTextColor();
+        TextModel::GetInstance()->ResetTextColor();
+        return;
     }
     TextModel::GetInstance()->SetTextColor(textColor);
 }
@@ -459,7 +456,7 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+        if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
             return;
         }
         value = 0;
@@ -470,7 +467,7 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+        if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
             return;
         }
         value = 0;
@@ -583,7 +580,7 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+        if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
             return;
         }
         value = 0;
@@ -655,7 +652,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+        if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
             return;
         }
         value = 0;
@@ -685,8 +682,9 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             func->Execute(*clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::u16string label = u"";
-            if (!node.Invalid()) {
-                auto pattern = node.GetRawPtr()->GetPattern();
+            auto frameNode = node.Upgrade();
+            if (frameNode) {
+                auto pattern = frameNode->GetPattern();
                 CHECK_NULL_VOID(pattern);
                 auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
                 CHECK_NULL_VOID(layoutProperty);
@@ -774,7 +772,6 @@ void JSText::Create(const JSCallbackInfo& info)
         TextModel::GetInstance()->Create(data);
     }
 
-    JSTextTheme::ApplyTheme();
     if (info.Length() <= 1 || !info[1]->IsObject()) {
         return;
     }
@@ -789,6 +786,13 @@ void JSText::Create(const JSCallbackInfo& info)
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
     if (jsController) {
         jsController->SetController(controller);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            auto styledString = jsController->GetStyledString();
+            if (styledString) {
+                controller->SetStyledString(styledString, false);
+                jsController->ClearStyledString();
+            }
+        }
     }
 }
 
@@ -850,68 +854,6 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
 }
 
-void JSText::JsOnDragEnter(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragEnter");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(info, extraParams);
-    };
-    TextModel::GetInstance()->SetOnDragEnter(std::move(onDragEnterId));
-}
-
-void JSText::JsOnDragMove(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
-                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragMove");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(info, extraParams);
-    };
-    TextModel::GetInstance()->SetOnDragMove(std::move(onDragMoveId));
-}
-
-void JSText::JsOnDragLeave(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragLeave");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(info, extraParams);
-    };
-    TextModel::GetInstance()->SetOnDragLeave(std::move(onDragLeaveId));
-}
-
-void JSText::JsOnDrop(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDrop");
-        func->Execute(info, extraParams);
-    };
-    TextModel::GetInstance()->SetOnDrop(std::move(onDropId));
-}
-
 void JSText::JsFocusable(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
@@ -965,11 +907,12 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
 void JSText::BindSelectionMenu(const JSCallbackInfo& info)
 {
     // TextSpanType
-    NG::TextSpanType testSpanType = NG::TextSpanType::TEXT;
+    NG::TextSpanType textSpanType = NG::TextSpanType::TEXT;
+    bool isValidTextSpanType = true;
     JSRef<JSVal> argsSpanType = info[0];
     if (argsSpanType->IsNumber()) {
-        auto spanType = argsSpanType->ToNumber<int32_t>();
-        testSpanType = static_cast<NG::TextSpanType>(spanType);
+        auto spanTypeId = argsSpanType->ToNumber<int32_t>();
+        isValidTextSpanType = NG::TextSpanTypeMapper::GetTextSpanTypeFromJsType(spanTypeId, textSpanType);
     }
 
     // Builder
@@ -986,7 +929,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     // TextResponseType
-    int32_t resquiredParameterCount = 3;
+    uint32_t resquiredParameterCount = 3;
     JSRef<JSVal> argsResponse = info[resquiredParameterCount - 1];
     NG::TextResponseType responseType = NG::TextResponseType::LONG_PRESS;
     if (argsResponse->IsNumber()) {
@@ -1005,14 +948,15 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
 
     // SelectionMenuOptions
     NG::SelectMenuParam menuParam;
-    if (info.Length() > resquiredParameterCount) {
+    menuParam.isValid = isValidTextSpanType;
+    if (info.Length() > static_cast<uint32_t>(resquiredParameterCount)) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
         if (argsMenuOptions->IsObject()) {
             ParseMenuParam(info, argsMenuOptions, menuParam);
         }
     }
 
-    TextModel::GetInstance()->BindSelectionMenu(testSpanType, responseType, buildFunc, menuParam);
+    TextModel::GetInstance()->BindSelectionMenu(textSpanType, responseType, buildFunc, menuParam);
 }
 
 void JSText::SetOnTextSelectionChange(const JSCallbackInfo& info)
@@ -1123,11 +1067,11 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
-    JSClass<JSText>::StaticMethod("onDragEnter", &JSText::JsOnDragEnter);
-    JSClass<JSText>::StaticMethod("onDragMove", &JSText::JsOnDragMove);
-    JSClass<JSText>::StaticMethod("onDragLeave", &JSText::JsOnDragLeave);
-    JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
+    } else {
+        JSClass<JSText>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
+    }
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
@@ -1177,11 +1121,14 @@ void JSTextController::SetStyledString(const JSCallbackInfo& info)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
-    auto controller = controllerWeak_.Upgrade();
-    CHECK_NULL_VOID(controller);
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
-    controller->SetStyledString(spanStringController);
+    auto controller = controllerWeak_.Upgrade();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) && !controller) {
+        styledString_ = spanStringController;
+    }
+    CHECK_NULL_VOID(controller);
+    controller->SetStyledString(spanStringController, true);
     auto thisObj = info.This();
     thisObj->SetPropertyObject("STYLED_STRING_IN_CONTROLLER", info[0]);
 }
@@ -1230,6 +1177,31 @@ void JSText::ParseMenuParam(
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
+    menuParam.onMenuShow = ParseMenuCallback(frameNode, menuOptions, info, "onMenuShow");
+    menuParam.onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
+}
+
+std::function<void(int32_t, int32_t)> JSText::ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
+    const JSRef<JSObject>& menuOptions, const JSCallbackInfo& info, const std::string& name)
+{
+    auto onMenuCallbackValue = menuOptions->GetProperty(name.c_str());
+    if (onMenuCallbackValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnMenuCallbackFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onMenuCallbackValue));
+        auto onMenuCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMenuCallbackFunc),
+                                  node = frameNode, eventName = name](int32_t start, int32_t end) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT(eventName);
+
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(start));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(end));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(2, params);
+        };
+        return onMenuCallback;
+    }
+    return nullptr;
 }
 
 void JSText::SetMarqueeOptions(const JSCallbackInfo& info)

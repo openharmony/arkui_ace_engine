@@ -28,7 +28,7 @@ SvgFeFlood::SvgFeFlood() : SvgFe() {}
 
 void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
-    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash, bool /*cropRect*/) const
 {
     imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
 

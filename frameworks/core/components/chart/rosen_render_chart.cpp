@@ -51,6 +51,7 @@ constexpr double DEFAULT_AXIS_STROKE_WIDTH = 3.0;
 constexpr double BEZIER_CONSTANT = 6.0;
 constexpr double DOUBLE_TEXT_PADDING = TEXT_PADDING * 2;
 constexpr int32_t MIN_SDK_VERSION = 6;
+constexpr float HALF = 0.5f;
 
 } // namespace
 
@@ -93,8 +94,10 @@ void RosenRenderChart::Paint(RenderContext& context, const Offset& offset)
     } else {
         PaintVerticalAxis(context, offset, verticalPaintRegion);
         PaintHorizontalAxis(context, horizontalPaintRegion);
-        dataRegion = Rect(offset.GetX() + tickHorizontalOffset_ + EDGE_PADDING, offset.GetY() + EDGE_PADDING,
-            horizontal_.tickNumber * tickHorizontalOffset_, vertical_.tickNumber * tickOffset_);
+        dataRegion = Rect(verticalPaintRegion.Width() - HALF * TICK_LENGTH,
+                          GetLayoutSize().Height() - vertical_.tickNumber * tickOffset_ -
+                              horizontalPaintRegion.Height() + HALF * TICK_LENGTH,
+                          horizontal_.tickNumber * tickHorizontalOffset_, vertical_.tickNumber * tickOffset_);
     }
     if (!dataRegion.IsValid()) {
         LOGW("chart paint data region is not valid height:%{public}lf, width:%{public}lf. do not paint data",

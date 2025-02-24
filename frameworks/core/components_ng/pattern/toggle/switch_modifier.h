@@ -35,8 +35,8 @@ class SwitchModifier : public ContentModifier {
     DECLARE_ACE_TYPE(SwitchModifier, ContentModifier);
 
 public:
-    SwitchModifier(const SizeF& size, const OffsetF& offset, float pointOffset, bool isSelect, const Color& boardColor,
-        float dragOffsetX);
+    SwitchModifier(const SizeF& size, const OffsetF& offset, float pointOffset, bool isSelect,
+        const Color& boardColor, const Color& pointColor, float dragOffsetX);
     ~SwitchModifier() override = default;
 
     void onDraw(DrawingContext& context) override
@@ -133,7 +133,7 @@ public:
         }
     }
 
-    void InitializeParam();
+    void InitializeParam(int32_t themeScopeId);
     void PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
     float GetSwitchWidth(const SizeF& contentSize) const;
     float CalcActualWidth(float width, float height, double actualGap, double defaultWidthGap);

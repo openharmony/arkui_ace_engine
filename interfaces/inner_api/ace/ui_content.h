@@ -53,12 +53,14 @@ struct Rect;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
+class RSNode;
 class RSSurfaceNode;
 class RSTransaction;
 class Transform;
 enum class AvoidAreaType : uint32_t;
 class AvoidArea;
 struct DecorButtonStyle;
+struct SingleHandTransform;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -79,6 +81,12 @@ namespace AbilityBase {
 struct ViewData;
 enum class AutoFillType;
 } // namespace AbilityBase
+
+namespace Global {
+namespace Resource {
+class ResourceManager;
+}
+} // namespace Global
 
 class RefBase;
 class Parcelable;
@@ -147,10 +155,13 @@ public:
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void SetIsFocusActive(bool isFocusActive) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
+    virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
+    virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) {};
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
@@ -207,6 +218,7 @@ public:
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};
+    virtual void SetFormEnableBlurBackground(bool enableBlurBackground) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
@@ -309,6 +321,8 @@ public:
     virtual void RecoverForm(const std::string &statusData) {}
 
     virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
+
+    virtual bool GetContainerModalTitleVisible(bool isImmersive) { return false; }
 
     virtual void SetContainerModalTitleHeight(int height) {}
 
@@ -481,6 +495,31 @@ public:
     {
         return false;
     }
+
+    virtual bool ConfigCustomWindowMask(bool enable)
+    {
+        return false;
+    }
+
+    virtual void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) {};
+
+    virtual std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId)
+    {
+        return nullptr;
+    }
+
+    virtual void ActiveWindow() {};
+
+    virtual void UnActiveWindow() {};
+
+    virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
+
+    virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+    {
+        return false;
+    }
+
+    virtual void EnableContainerModalCustomGesture(bool enable) {};
 };
 
 } // namespace OHOS::Ace

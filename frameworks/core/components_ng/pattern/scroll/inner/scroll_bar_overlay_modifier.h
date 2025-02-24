@@ -182,7 +182,7 @@ private:
     PositionMode positionMode_ = PositionMode::RIGHT;
 
     bool isScrollable_ = true;
-    bool isNavDestinationShow_;
+    bool isNavDestinationShow_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -21,18 +21,20 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/models/action_sheet_model_impl.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<ActionSheetModel> ActionSheetModel::instance_ = nullptr;
 std::mutex ActionSheetModel::mutex_;
 
+#ifndef ARKUI_WEARABLE
 ActionSheetModel* ActionSheetModel::GetInstance()
 {
-#ifndef ARKUI_WAERABLE
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
@@ -48,10 +50,8 @@ ActionSheetModel* ActionSheetModel::GetInstance()
         }
     }
     return instance_.get();
-#else
-    return nullptr;
-#endif
 }
+#endif
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -62,21 +62,23 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
 } // namespace
 
+#ifndef ARKUI_WEARABLE
 static void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
 {
-#ifndef ARKUI_WAERABLE
     if (styleValue >= static_cast<int32_t>(DialogButtonStyle::DEFAULT) &&
         styleValue <= static_cast<int32_t>(DialogButtonStyle::HIGHTLIGHT)) {
         buttonInfo.dlgButtonStyle = static_cast<DialogButtonStyle>(styleValue);
     }
-#endif
 }
+#endif
 
+#ifndef ARKUI_WEARABLE
 ActionSheetInfo ParseSheetInfo(const JsiExecutionContext& execContext, JSRef<JSVal> val)
 {
-#ifndef ARKUI_WAERABLE
     ActionSheetInfo sheetInfo;
     if (!val->IsObject()) {
         LOGW("param is not an object.");
@@ -111,12 +113,12 @@ ActionSheetInfo ParseSheetInfo(const JsiExecutionContext& execContext, JSRef<JSV
         ActionSheetModel::GetInstance()->SetAction(eventFunc, sheetInfo);
     }
     return sheetInfo;
-#endif
 }
+#endif
 
 void ParseTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse title.
     auto titleValue = obj->GetProperty("title");
     std::string title;
@@ -142,7 +144,7 @@ void ParseTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto confirmVal = obj->GetProperty("confirm");
     if (!confirmVal->IsObject()) {
         return;
@@ -199,7 +201,7 @@ void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties
 
 void ParseShadow(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse shadow.
     auto shadowValue = obj->GetProperty("shadow");
     Shadow shadow;
@@ -211,7 +213,7 @@ void ParseShadow(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto borderWidthValue = obj->GetProperty("borderWidth");
     NG::BorderWidthProperty borderWidth;
     if (JSActionSheet::ParseBorderWidthProps(borderWidthValue, borderWidth)) {
@@ -230,7 +232,7 @@ void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseRadius(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto cornerRadiusValue = obj->GetProperty("cornerRadius");
     NG::BorderRadiusProperty radius;
     if (JSActionSheet::ParseBorderRadius(cornerRadiusValue, radius)) {
@@ -241,7 +243,7 @@ void ParseRadius(DialogProperties& properties, JSRef<JSObject> obj)
 
 void UpdateDialogAlignment(DialogAlignment& alignment)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (alignment == DialogAlignment::TOP_START) {
         if (isRtl) {
@@ -273,12 +275,12 @@ void UpdateDialogAlignment(DialogAlignment& alignment)
 
 void ParseDialogAlignment(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse alignment
     auto alignmentValue = obj->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             properties.alignment = DIALOG_ALIGNMENT[alignment];
             UpdateDialogAlignment(properties.alignment);
         }
@@ -293,7 +295,7 @@ void ParseDialogAlignment(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseOffset(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse offset
     auto offsetValue = obj->GetProperty("offset");
     if (offsetValue->IsObject()) {
@@ -314,7 +316,7 @@ void ParseOffset(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse maskRect.
     auto maskRectValue = obj->GetProperty("maskRect");
     DimensionRect maskRect;
@@ -329,9 +331,69 @@ void ParseMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
 #endif
 }
 
+void ParseDialogLevelMode(DialogProperties& properties, JSRef<JSObject> obj)
+{
+#ifndef ARKUI_WEARABLE
+    auto levelMode = obj->GetProperty("levelMode");
+    auto levelUniqueId = obj->GetProperty("levelUniqueId");
+    auto immersiveMode = obj->GetProperty("immersiveMode");
+    bool showInMainWindow = true;
+    if (obj->GetProperty("showInSubWindow")->IsBoolean() && obj->GetProperty("showInSubWindow")->ToBoolean()) {
+        showInMainWindow = false;
+    }
+    if (levelMode->IsNumber() && showInMainWindow) {
+        auto mode = levelMode->ToNumber<int32_t>();
+        if (mode >= 0 && mode < static_cast<int32_t>(DIALOG_LEVEL_MODE.size())) {
+            properties.dialogLevelMode = DIALOG_LEVEL_MODE[mode];
+        }
+    }
+    if (levelUniqueId->IsNumber()) {
+        properties.dialogLevelUniqueId = levelUniqueId->ToNumber<int32_t>();
+    }
+    if (immersiveMode->IsNumber()) {
+        auto immersiveVal = immersiveMode->ToNumber<int32_t>();
+        if (immersiveVal >= 0 && immersiveVal < static_cast<int32_t>(DIALOG_IMMERSIVE_MODE.size())) {
+            properties.dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[immersiveVal];
+        }
+    }
+#endif
+}
+
+void ParseLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
+{
+#ifndef ARKUI_WEARABLE
+    if (properties.isShowInSubWindow) {
+        return;
+    }
+
+    properties.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
+    auto levelOrderValue = obj->GetProperty("levelOrder");
+    if (!levelOrderValue->IsObject()) {
+        return;
+    }
+    napi_value levelOrderApi = JsConverter::ConvertJsValToNapiValue(levelOrderValue);
+    CHECK_NULL_VOID(levelOrderApi);
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    NG::LevelOrder* levelOrder = nullptr;
+    napi_status status = napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
+    if (status != napi_ok || !levelOrder) {
+        LOGE("Failed to unwrap LevelOrder.");
+        return;
+    }
+
+    double order = levelOrder->GetOrder();
+    properties.levelOrder = std::make_optional(order);
+#endif
+}
+
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -358,11 +420,13 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     ParseDialogAlignment(properties, obj);
     ParseOffset(properties, obj);
     ParseMaskRect(properties, obj);
+    ParseDialogLevelMode(properties, obj);
 
     auto onLanguageChange = [execContext, obj, parseContent = ParseTitleAndMessage, parseButton = ParseConfirmButton,
                                 parseShadow = ParseShadow, parseBorderProps = ParseBorderWidthAndColor,
                                 parseRadius = ParseRadius, parseAlignment = ParseDialogAlignment,
                                 parseOffset = ParseOffset,  parseMaskRect = ParseMaskRect,
+                                parseDialogLevelMode = ParseDialogLevelMode,
                                 node = dialogNode](DialogProperties& dialogProps) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
         ACE_SCORING_EVENT("ActionSheet.property.onLanguageChange");
@@ -377,6 +441,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         ParseDialogAlignment(dialogProps, obj);
         parseOffset(dialogProps, obj);
         parseMaskRect(dialogProps, obj);
+        parseDialogLevelMode(dialogProps, obj);
         // Parse sheets
         auto sheetsVal = obj->GetProperty("sheets");
         if (sheetsVal->IsArray()) {
@@ -414,6 +479,8 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismissFunc = nullptr;
     ParseDialogCallback(obj, onWillDismissFunc);
     ActionSheetModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
+
+    JSViewAbstract::ParseAppearDialogCallback(args, properties);
 
     // Parse sheets
     auto sheetsVal = obj->GetProperty("sheets");
@@ -466,8 +533,11 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     }
     // Parse transition.
     properties.transitionEffect = ParseJsTransitionEffect(args);
+    ParseLevelOrder(properties, obj);
     JSViewAbstract::SetDialogProperties(obj, properties);
     JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
+    JSViewAbstract::SetDialogBlurStyleOption(obj, properties);
+    JSViewAbstract::SetDialogEffectOption(obj, properties);
     ActionSheetModel::GetInstance()->ShowActionSheet(properties);
     args.SetReturnValue(args.This());
 #endif
@@ -475,7 +545,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
 
 void JSActionSheet::JSBind(BindingTarget globalObj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     JSClass<JSActionSheet>::Declare("ActionSheet");
     JSClass<JSActionSheet>::StaticMethod("show", &JSActionSheet::Show);
     JSClass<JSActionSheet>::InheritAndBind<JSViewAbstract>(globalObj);

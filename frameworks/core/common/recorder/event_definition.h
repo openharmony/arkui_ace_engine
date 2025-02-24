@@ -29,6 +29,8 @@ enum class EventCategory: int32_t {
     CATEGORY_RECT,
     CATEGORY_WEB,
     CATEGORY_TEXT_INPUT,
+    CATEGORY_POINT,
+    CATEGORY_PARENT_TEXT,
     CATEGORY_END,
 };
 
@@ -72,12 +74,14 @@ enum EventType : int32_t {
 
 constexpr char KEY_COUNT[] = "count";
 constexpr char KEY_NODE_RECT[] = "rect";
-constexpr char KEY_MOUDLE_NAME[] = "moudle";
+constexpr char KEY_MOUDLE_NAME[] = "module";
 constexpr char KEY_ABILITY_NAME[] = "ability";
 constexpr char KEY_ACE_ID[] = "aceId";
 constexpr char KEY_POINT[] = "point";
 constexpr char KEY_CURRENT_OFFSET[] = "currentOffset";
 constexpr char KEY_DISTANCE[] = "distance";
+constexpr char KEY_NAME[] = "name";
+constexpr char KEY_EXTRA_TEXT[] = "extraText";
 constexpr char KEY_WEB_CATEGORY[] = "webCategory";
 constexpr char WEB_OBJ_NAME[] = "arkMessager";
 constexpr char WEB_METHOD_NAME[] = "postMessage";

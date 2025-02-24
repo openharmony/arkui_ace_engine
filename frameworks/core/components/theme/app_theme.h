@@ -138,7 +138,17 @@ public:
     {
         return focusBoxGlow_;
     }
-    
+
+    bool NeedFocusActiveByTab() const
+    {
+        return focusActiveByTab_;
+    }
+
+    bool NeedFocusHandleClick() const
+    {
+        return focusHandleClick_;
+    }
+
     float GetPageTransitionAmplitudeRatio() const
     {
         return pageTransitionAmplitudeRatio_;
@@ -163,6 +173,8 @@ private:
     Dimension focusWidthVp_ = 2.0_vp;      // General focus border width
     Dimension focusOutPaddingVp_ = 2.0_vp; // General distance between focus border and component border
     bool focusBoxGlow_ = false;
+    bool focusActiveByTab_ = true;
+    bool focusHandleClick_ = true;
     float pageTransitionAmplitudeRatio_ = DEFAULT_AMPLITUDE_RATIO;
 };
 

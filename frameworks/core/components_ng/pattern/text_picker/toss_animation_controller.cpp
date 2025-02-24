@@ -89,14 +89,15 @@ void TextPickerTossAnimationController::StartSpringMotion()
     auto columnNode = column->GetHost();
     CHECK_NULL_VOID(columnNode);
     auto offset = column->GetOffset();
+    auto speed = column->GetMainVelocity() / VELOCTY_TRANS;
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto springCurve = UpdatePlayAnimationValue();
     CHECK_NULL_VOID(springCurve);
     double midIndex = column->GetShowOptionCount() / 2;
     auto optionProperties = column->GetMidShiftDistance();
-    auto midShiftDistance =
-        column->IsDownScroll() ? optionProperties[midIndex].nextDistance : optionProperties[midIndex].prevDistance;
+    auto midShiftDistance = LessNotEqual(speed, 0.0) ? optionProperties[midIndex].prevDistance
+                                                     : optionProperties[midIndex].nextDistance;
     column->SetYLast(0);
     end_ = midShiftDistance * showCount_ - offset;
     AnimationOption option = AnimationOption();

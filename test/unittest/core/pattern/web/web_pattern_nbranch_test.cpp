@@ -299,7 +299,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->selectOverlayProxy_ = nullptr;
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
 #endif
 }
@@ -325,7 +325,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext001, TestSize.Level1)
     webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
     pipelineContext->SetupRootElement();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
 #endif
 }
@@ -351,7 +351,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext002, TestSize.Level1)
     webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
     pipelineContext->selectOverlayManager_ = nullptr;
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
 #endif
 }
@@ -1014,7 +1014,7 @@ HWTEST_F(WebPatternBranchTestUT, OnAttachContextDrag, TestSize.Level1)
     auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     auto pipelineContext = MockPipelineContext::GetCurrent();
     pipelineContext->SetupRootElement();
-    webPattern->OnAttachContext(pipelineContext.GetRawPtr());
+    webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
 #endif
 }
@@ -1041,7 +1041,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContextDrag, TestSize.Level1)
     auto pipelineContext = MockPipelineContext::GetCurrent();
     pipelineContext->SetupRootElement();
     webPattern->tooltipId_ = 1;
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
 #endif
 }

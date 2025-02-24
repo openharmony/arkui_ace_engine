@@ -1587,7 +1587,9 @@ void EnableSmoothDragResizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
+#ifdef REMOVED
     WebModelNG::SetSmoothDragResizeEnabled(frameNode, convValue);
+#endif
 #endif // WEB_SUPPORTED
 }
 void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,

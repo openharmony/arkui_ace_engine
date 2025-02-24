@@ -47,6 +47,20 @@ void ResetNavDestinationHideToolBar(ArkUINodeHandle node)
     NavDestinationModelNG::SetHideToolBar(frameNode, false, false);
 }
 
+void SetNavDestinationHideBackButton(ArkUINodeHandle node, ArkUI_Bool hideBackButton)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideBackButton(frameNode, hideBackButton);
+}
+
+void ResetNavDestinationHideBackButton(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideBackButton(frameNode, false);
+}
+
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -233,15 +247,113 @@ void ResetNavDestinationRecoverable(ArkUINodeHandle node)
     NavDestinationModelNG::SetRecoverable(frameNode, true);
 }
 
+void SetNavDestinationCustomTitle(ArkUINodeHandle node, ArkUINodeHandle titleNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* customTitleFrameNode = reinterpret_cast<FrameNode*>(titleNode);
+    CHECK_NULL_VOID(customTitleFrameNode);
+    NavDestinationModelNG::SetCustomTitle(frameNode, AceType::Claim(customTitleFrameNode));
+}
+
+ArkUINodeHandle GetNavDestinationCustomTitle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto titleNode = NavDestinationModelNG::GetCustomTitle(frameNode);
+    CHECK_NULL_RETURN(titleNode, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(titleNode));
+}
+
+void SetNavDestinationTitleHeight(ArkUINodeHandle node, const struct ArkUIDimensionType height)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension titleHeight = Dimension(height.value, static_cast<OHOS::Ace::DimensionUnit>(height.units));
+    NavDestinationModelNG::SetTitleHeight(frameNode, titleHeight, true);
+}
+
+void SetNavDestinationTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opts)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationTitlebarOptions finalOptions;
+    if (opts.colorValue.isSet) {
+        finalOptions.bgOptions.color = Color(opts.colorValue.value);
+    }
+    if (opts.barStyle.isSet) {
+        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(opts.barStyle.value);
+    }
+    NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
+}
+
+void SetNavDestinationOnCoordScrollStartAction(
+    ArkUINodeHandle node, void (*onCoordScrollStartAction)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onCoordScrollStartAction(nodeHandle);
+    };
+    NavDestinationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
+}
+
+void SetNavDestinationOnCoordScrollUpdateAction(ArkUINodeHandle node,
+    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollUpdateActionCallBack =
+        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
+            auto frameNode = node.Upgrade();
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+                onCoordScrollUpdateAction(nodeHandle, currentOffset);
+        };
+    NavDestinationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
+}
+
+void SetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onCoordScrollEndAction(nodeHandle);
+    };
+    NavDestinationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));
+}
+
+void SetNavDestinationSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentColor = Color(value);
+    NavDestinationModelNG::SetSystemBarStyle(frameNode, contentColor);
+}
+
+void SetCustomBackButtonNode(ArkUINodeHandle node, ArkUINodeHandle backButtonNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* backButton = reinterpret_cast<FrameNode*>(backButtonNode);
+    CHECK_NULL_VOID(backButton);
+    NavDestinationModelNG::SetCustomBackButtonNode(frameNode, backButton);
+}
+
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUINavDestinationModifier modifier = {
         .setHideTitleBar = SetHideTitleBar,
         .resetHideTitleBar = ResetHideTitleBar,
         .setNavDestinationHideToolBar = SetNavDestinationHideToolBar,
         .resetNavDestinationHideToolBar = ResetNavDestinationHideToolBar,
+        .setNavDestinationHideBackButton = SetNavDestinationHideBackButton,
+        .resetNavDestinationHideBackButton = ResetNavDestinationHideBackButton,
         .setNavDestinationMode = SetNavDestinationMode,
         .resetNavDestinationMode = ResetNavDestinationMode,
         .setIgnoreLayoutSafeArea = SetIgnoreLayoutSafeArea,
@@ -256,27 +368,31 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetRecoverable = ResetNavDestinationRecoverable,
         .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
         .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
+        .setNavDestinationCustomTitle = SetNavDestinationCustomTitle,
+        .getNavDestinationCustomTitle = GetNavDestinationCustomTitle,
+        .setNavDestinationTitleHeight = SetNavDestinationTitleHeight,
+        .setNavDestinationTitlebarOptions = SetNavDestinationTitlebarOptions,
+        .setNavDestinationOnCoordScrollStartAction = SetNavDestinationOnCoordScrollStartAction,
+        .setNavDestinationOnCoordScrollUpdateAction = SetNavDestinationOnCoordScrollUpdateAction,
+        .setNavDestinationOnCoordScrollEndAction = SetNavDestinationOnCoordScrollEndAction,
+        .setNavDestinationSystemBarStyle = SetNavDestinationSystemBarStyle,
+        .setCustomBackButtonNode = SetCustomBackButtonNode,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUINavDestinationModifier modifier = {
         .setHideTitleBar = SetHideTitleBar,
         .resetHideTitleBar = ResetHideTitleBar,
         .setNavDestinationHideToolBar = SetNavDestinationHideToolBar,
         .resetNavDestinationHideToolBar = ResetNavDestinationHideToolBar,
+        .setNavDestinationHideBackButton = SetNavDestinationHideBackButton,
+        .resetNavDestinationHideBackButton = ResetNavDestinationHideBackButton,
         .setNavDestinationMode = SetNavDestinationMode,
         .resetNavDestinationMode = ResetNavDestinationMode,
         .setIgnoreLayoutSafeArea = SetIgnoreLayoutSafeArea,
@@ -284,14 +400,7 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
         .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
         .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

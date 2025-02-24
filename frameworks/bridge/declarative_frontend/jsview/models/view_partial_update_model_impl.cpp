@@ -37,7 +37,8 @@ RefPtr<AceType> ViewPartialUpdateModelImpl::CreateNode(NodeInfoPU&& info)
 
     auto renderFunction = [renderFunc = std::move(info.renderFunc), updateFunc = std::move(info.updateFunc)](
                               const RefPtr<Component>& component) -> RefPtr<Component> {
-        auto node = renderFunc ? renderFunc() : nullptr;
+        bool isTimeout = false;
+        auto node = renderFunc ? renderFunc(0, isTimeout) : nullptr;
         if (updateFunc) {
             updateFunc();
         }

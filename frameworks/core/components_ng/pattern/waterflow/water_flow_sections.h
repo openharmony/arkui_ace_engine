@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 using GetItemMainSizeByIndex = std::function<float(int32_t)>;
 
-class WaterFlowSections : public virtual AceType {
+class ACE_FORCE_EXPORT WaterFlowSections : public virtual AceType {
     DECLARE_ACE_TYPE(WaterFlowSections, AceType)
 public:
     struct Section {
@@ -64,9 +64,9 @@ public:
     void NotifySectionChange(
         int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections);
 
-    void SetNotifyDataChange(std::function<void(int32_t start, int32_t count)>&& func)
+    void SetNotifySectionChange(std::function<void(int32_t start)>&& func)
     {
-        notifyDataChange_ = func;
+        notifySectionChange_ = func;
     }
 
     /**
@@ -96,7 +96,7 @@ private:
     // for comparing and handling special case
     std::vector<Section> prevSections_;
     std::function<void(int32_t start)> onSectionDataChange_;
-    std::function<void(int32_t start, int32_t count)> notifyDataChange_;
+    std::function<void(int32_t start)> notifySectionChange_;
 };
 
 } // namespace OHOS::Ace::NG

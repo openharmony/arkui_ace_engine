@@ -95,14 +95,6 @@ void RatingModelNG::SetOnChange(RatingChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-void RatingModelNG::SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(onChange));
-}
-
 void RatingModelNG::SetOnChangeEvent(RatingChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -216,5 +208,13 @@ void RatingModelNG::SetRatingOptions(FrameNode* frameNode, const std::optional<d
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, frameNode);
     }
+}
+
+void RatingModelNG::SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 } // namespace OHOS::Ace::NG

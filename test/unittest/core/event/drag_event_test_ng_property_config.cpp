@@ -88,7 +88,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorDragingStatusTest001, TestSize.Level1
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->ResetDragging(DragDropMgrState::DRAGGING);
-    auto globalStatus = dragEventActuator->IsGlobalStatusSuitableForDragging();
+    auto globalStatus = DragDropFuncWrapper::IsGlobalStatusSuitableForDragging();
     ASSERT_EQ(globalStatus, false);
 
     /**
@@ -287,11 +287,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetPixelMapTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragEventActuatorBrulStyleToEffectionTest001
- * @tc.desc: Test BrulStyleToEffection function.
+ * @tc.name: DragEventActuatorBlurStyleToEffectionTest001
+ * @tc.desc: Test BlurStyleToEffection function.
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventTestNg, DragEventActuatorBrulStyleToEffectionTest001, TestSize.Level1)
+HWTEST_F(DragEventTestNg, DragEventActuatorBlurStyleToEffectionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create DragEventActuator.
@@ -308,7 +308,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorBrulStyleToEffectionTest001, TestSize
     ASSERT_NE(dragEventActuator, nullptr);
 
     /**
-     * @tc.steps: step2. Invoke BrulStyleToEffection.
+     * @tc.steps: step2. Invoke BlurStyleToEffection.
      */
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -317,7 +317,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorBrulStyleToEffectionTest001, TestSize
     ASSERT_NE(imageContext, nullptr);
     auto blurstyletmp = imageContext->GetBackBlurStyle();
     blurstyletmp->colorMode = ThemeColorMode::DARK;
-    dragEventActuator->BrulStyleToEffection(blurstyletmp);
+    DragDropFuncWrapper::BlurStyleToEffection(blurstyletmp);
     ASSERT_NE(blurstyletmp->colorMode, ThemeColorMode::SYSTEM);
 }
 
@@ -416,7 +416,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeInitAttrTest001, TestSize
     auto layoutProperty = frameNode->GetLayoutProperty();
     auto shadow = Shadow::CreateShadow(ShadowStyle::None);
 
-    dragEventActuator->SetImageNodeInitAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     EXPECT_TRUE(dragPreviewOption.defaultAnimationBeforeLifting);
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_FALSE(dragPreviewOption.options.shadow.has_value());
@@ -426,7 +426,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeInitAttrTest001, TestSize
      * @tc.desc: defaultAnimationBeforeLifting = true, layoutProperty = nullptr.
      */
     frameNode->layoutProperty_ = nullptr;
-    dragEventActuator->SetImageNodeInitAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     EXPECT_EQ(frameNode->GetLayoutProperty(), nullptr);
 
     /**
@@ -434,7 +434,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeInitAttrTest001, TestSize
      * @tc.desc: defaultAnimationBeforeLifting = false, layoutProperty = nullptr.
      */
     dragPreviewOption.defaultAnimationBeforeLifting = false;
-    dragEventActuator->SetImageNodeInitAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     EXPECT_FALSE(dragPreviewOption.defaultAnimationBeforeLifting);
 
     /**
@@ -442,7 +442,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeInitAttrTest001, TestSize
      * @tc.desc: dragPreviewOption.options.shadow.has_value() = true.
      */
     dragPreviewOption.options.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultXS);
-    dragEventActuator->SetImageNodeInitAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     EXPECT_TRUE(dragPreviewOption.options.shadow.has_value());
 }
 
@@ -477,7 +477,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeFinishAttrTest001, TestSi
     EXPECT_NE(imageContext, nullptr);
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
 
-    dragEventActuator->SetImageNodeFinishAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
     EXPECT_FALSE(dragPreviewOption.options.shadow->GetIsFilled());
     EXPECT_FALSE(dragPreviewOption.options.shadow.has_value());
 
@@ -485,7 +485,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeFinishAttrTest001, TestSi
      * @tc.steps: step3. Invoke SetImageNodeFinishAttr.
      */
     dragPreviewOption.options.shadow->isFilled_ = true;
-    dragEventActuator->SetImageNodeFinishAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
     EXPECT_TRUE(dragPreviewOption.options.shadow->GetIsFilled());
     EXPECT_FALSE(dragPreviewOption.options.shadow.has_value());
 
@@ -494,7 +494,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeFinishAttrTest001, TestSi
      */
     dragPreviewOption.options.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultXS);
     dragPreviewOption.options.shadow->isFilled_ = false;
-    dragEventActuator->SetImageNodeFinishAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
     EXPECT_FALSE(dragPreviewOption.options.shadow->GetIsFilled());
     EXPECT_TRUE(dragPreviewOption.options.shadow.has_value());
 
@@ -503,7 +503,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeFinishAttrTest001, TestSi
      */
     dragPreviewOption.options.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultXS);
     dragPreviewOption.options.shadow->isFilled_ = true;
-    dragEventActuator->SetImageNodeFinishAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
     EXPECT_TRUE(dragPreviewOption.options.shadow->GetIsFilled());
     EXPECT_TRUE(dragPreviewOption.options.shadow.has_value());
 }
@@ -566,7 +566,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorResetNodeTest001, TestSize.Level1)
      */
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
     dragPreviewOption.defaultAnimationBeforeLifting = false;
-    dragEventActuator->ResetNode(frameNode);
+    DragDropFuncWrapper::ResetNode(frameNode);
     dragPreviewOption = frameNode->GetDragPreviewOption();
     EXPECT_FALSE(dragPreviewOption.defaultAnimationBeforeLifting);
 
@@ -575,7 +575,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorResetNodeTest001, TestSize.Level1)
      */
     dragPreviewOption.defaultAnimationBeforeLifting = true;
     frameNode->layoutProperty_ = nullptr;
-    dragEventActuator->ResetNode(frameNode);
+    DragDropFuncWrapper::ResetNode(frameNode);
     EXPECT_EQ(frameNode->GetLayoutProperty(), nullptr);
 }
 
@@ -635,7 +635,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorCreateBadgeTextNodeTest001, TestSize.
     /**
      * @tc.steps: step2. Invoke CreateBadgeTextNode.
      */
-    auto textNode = dragEventActuator->CreateBadgeTextNode(1);
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(1);
     EXPECT_EQ(textNode, nullptr);
 }
 
@@ -933,9 +933,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest008, TestSize.Leve
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
     framenode->previewOption_.defaultAnimationBeforeLifting = true;
     ASSERT_NE(dragEventActuator, nullptr);
-    dragEventActuator->SetImageNodeInitAttr(framenode, framenode1);
+    DragAnimationHelper::SetImageNodeInitAttr(framenode, framenode1);
     framenode->layoutProperty_ = nullptr;
-    dragEventActuator->SetImageNodeInitAttr(framenode, framenode1);
+    DragAnimationHelper::SetImageNodeInitAttr(framenode, framenode1);
     EXPECT_EQ(framenode->previewOption_.defaultAnimationBeforeLifting, true);
 }
 
@@ -1333,7 +1333,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest016, TestSize.Leve
 
 /**
  * @tc.name: DragEventActuatorMountGatherNodeTest017
- * @tc.desc: Test BrulStyleToEffection.
+ * @tc.desc: Test BlurStyleToEffection.
  * @tc.type: FUNC
  */
 HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest017, TestSize.Level1)
@@ -1355,7 +1355,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest017, TestSize.Leve
     BlurStyleOption blurStyleInfo = { BlurStyle::NO_MATERIAL, ThemeColorMode::SYSTEM, AdaptiveColor::DEFAULT, 1.0,
         { vecGrayScale } };
     std::optional<BlurStyleOption> optBlurStyleInfo(blurStyleInfo);
-    auto optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    auto optEffectOption = DragDropFuncWrapper::BlurStyleToEffection(optBlurStyleInfo);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     EXPECT_EQ(optEffectOption.has_value(), false);
@@ -1378,7 +1378,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest017, TestSize.Leve
     EXPECT_CALL(*themeManager, GetTheme(BlurStyleTheme::TypeId())).WillRepeatedly(Return(blThemeInstance));
 
     optBlurStyleInfo->colorMode = ThemeColorMode::LIGHT;
-    optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    optEffectOption = DragDropFuncWrapper::BlurStyleToEffection(optBlurStyleInfo);
     ASSERT_NE(optEffectOption.has_value(), true);
     EXPECT_EQ(resValueWrapper.type, ThemeConstantsType::THEME);
 }
@@ -1479,13 +1479,13 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest020, TestSize.Leve
     ASSERT_NE(pipeline, nullptr);
     auto overlayManager = pipeline->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
-    frameNode->eventHub_->SetEnabled(true);
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    ASSERT_NE(frameNode->GetPixelMap(), nullptr);
+    ASSERT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     ASSERT_NE(imageNode, nullptr);
@@ -1660,7 +1660,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest024, TestSize.Leve
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
     ASSERT_NE(dragEventActuator, nullptr);
-    dragEventActuator->ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
+    DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
     Dimension dimen(2.0);
     BlurBackGroundInfo bgBackEffect = { { dimen, 1.0f, 1.0f, Color::TRANSPARENT, AdaptiveColor::DEFAULT,
         { { 2.0f, 2.0f } } } };
@@ -1671,11 +1671,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest024, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     parentNode->SetDragPreviewOptions(previewOptions);
-    dragEventActuator->ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
+    DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
     EXPECT_EQ(previewOptions.isMultiSelectionEnabled, false);
 }
 
@@ -1768,15 +1768,15 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest026, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     framenode->SetDragPreviewOptions(previewOptions);
-    dragEventActuator->SetImageNodeInitAttr(framenode, framenodeOne);
-    dragEventActuator->SetImageNodeFinishAttr(framenode, framenodeOne);
+    DragAnimationHelper::SetImageNodeInitAttr(framenode, framenodeOne);
+    DragAnimationHelper::SetImageNodeFinishAttr(framenode, framenodeOne);
     previewOptions.options.shadow->isFilled_ = true;
     framenode->SetDragPreviewOptions(previewOptions);
-    dragEventActuator->SetImageNodeFinishAttr(framenode, framenodeOne);
+    DragAnimationHelper::SetImageNodeFinishAttr(framenode, framenodeOne);
 
     DragDropInfo dragDropInfo;
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
@@ -1896,7 +1896,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest029, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     previewOptions.options.shadow->isFilled_ = true;
@@ -1944,7 +1944,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest030, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     previewOptions.options.shadow->isFilled_ = true;
@@ -1955,7 +1955,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest030, TestSize.Leve
     Shadow shadows;
     shadows.SetIsFilled(false);
     shadows.SetOffset(Offset(5, 5));
-    optionTmp = { 0, shadows, "test", borderRadius, { bgBackEffect } };
+    optionTmp = { 0, shadows, "test", true, borderRadius, { bgBackEffect } };
     previewOptions.options = optionTmp;
     framenode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->PrepareShadowParametersForDragData(framenode, arkExtraInfoJson, scale);

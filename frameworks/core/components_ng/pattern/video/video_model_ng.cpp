@@ -66,9 +66,9 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
 void VideoModelNG::SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
     VideoSourceInfo videoSrcInfo;
-    videoSrcInfo.src = src;
-    videoSrcInfo.bundleName = bundleName;
-    videoSrcInfo.moduleName = moduleName;
+    videoSrcInfo.src_ = src;
+    videoSrcInfo.bundleName_ = bundleName;
+    videoSrcInfo.moduleName_ = moduleName;
     ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo);
 }
 
@@ -291,7 +291,7 @@ RefPtr<FrameNode> VideoModelNG::CreateFrameNode(int32_t nodeId)
         CHECK_NULL_RETURN(controllerRowNode, videoNode);
         videoNode->AddChild(controllerRowNode);
     }
-    VideoModelNG::AddDragFrameNodeToManager(videoNode.GetRawPtr());
+    VideoModelNG::AddDragFrameNodeToManager(Referenced::RawPtr(videoNode));
     return videoNode;
 }
 
@@ -470,9 +470,9 @@ void VideoModelNG::SetSrc(FrameNode* frameNode,
     const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
     VideoSourceInfo videoSrcInfo;
-    videoSrcInfo.src = src;
-    videoSrcInfo.bundleName = bundleName;
-    videoSrcInfo.moduleName = moduleName;
+    videoSrcInfo.src_ = src;
+    videoSrcInfo.bundleName_ = bundleName;
+    videoSrcInfo.moduleName_ = moduleName;
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo, frameNode);
 }
 

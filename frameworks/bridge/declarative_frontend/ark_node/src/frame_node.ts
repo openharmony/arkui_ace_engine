@@ -19,10 +19,21 @@ interface LayoutConstraint {
   percentReference: Size;
 }
 
+interface CrossLanguageOptions {
+  attributeSetting?: boolean;
+}
+
+enum ExpandMode {
+  NOT_EXPAND = 0,
+  EXPAND = 1,
+  LAZY_EXPAND = 2,
+}
+
 class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
+  public _componentAttribute: ArkComponent;
   protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
@@ -277,8 +288,8 @@ class FrameNode {
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();
   }
-  getChild(index: number, isExpanded?: boolean): FrameNode | null {
-    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
+  getChild(index: number, expandMode?: ExpandMode): FrameNode | null {
+    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -288,6 +299,14 @@ class FrameNode {
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getFirstChildIndexWithoutExpand(): number {
+    return getUINativeModule().frameNode.getFirstChildIndexWithoutExpand(this.getNodePtr());
+  }
+
+  getLastChildIndexWithoutExpand(): number {
+    return getUINativeModule().frameNode.getLastChildIndexWithoutExpand(this.getNodePtr());
   }
 
   getFirstChild(isExpanded?: boolean): FrameNode | null {
@@ -372,8 +391,29 @@ class FrameNode {
 
   getChildrenCount(isExpanded?: boolean): number {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
     __JSScopeUtil__.restoreInstanceId();
+    return childrenCount;
+  }
+
+  moveTo(targetParent: FrameNode, index?: number): void {
+    if (targetParent === undefined || targetParent === null) {
+      return;
+    }
+    if (index === undefined || index === null) {
+      index = -1;
+    }
+    const oldParent = this.getParent();
+    if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
+    __JSScopeUtil__.restoreInstanceId();
+    if (oldParent) {
+      oldParent._childList.delete(this._nodeId);
+    }
+    targetParent._childList.set(this._nodeId, this);
   }
 
   getPositionToParent(): Position {
@@ -531,6 +571,29 @@ class FrameNode {
     getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
   }
 
+  setCrossLanguageOptions(options: CrossLanguageOptions): void {
+    if (!this.isModifiable()) {
+      throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false);
+    __JSScopeUtil__.restoreInstanceId();
+    if (result !== 0) {
+      throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
+    }
+  }
+
+  getCrossLanguageOptions(): CrossLanguageOptions {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const attributeSetting = getUINativeModule().frameNode.getCrossLanguageOptions(this.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    return { attributeSetting: attributeSetting ?? false };
+  }
+
+  checkIfCanCrossLanguageAttributeSetting(): boolean {
+    return this.isModifiable() || getUINativeModule().frameNode.checkIfCanCrossLanguageAttributeSetting(this.getNodePtr());
+  }
+
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
@@ -556,6 +619,9 @@ class FrameNode {
         this._gestureEvent.setNodePtr(this.nodePtr_);
         let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
         this._gestureEvent.setWeakNodePtr(weakPtr);
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this._gestureEvent.registerFrameNodeDeletedCallback(this.nodePtr_);
+        __JSScopeUtil__.restoreInstanceId();
     }
     return this._gestureEvent;
   }
@@ -568,6 +634,12 @@ class FrameNode {
   }
   triggerOnRecycle(): void {
     getUINativeModule().frameNode.triggerOnRecycle(this.getNodePtr());
+  }
+  reuse(): void {
+    this.triggerOnReuse();
+  }
+  recycle(): void {
+    this.triggerOnRecycle();
   }
 }
 
@@ -637,6 +709,9 @@ class ProxyFrameNode extends ImmutableFrameNode {
     this._nodeId = -1;
     this._nativeRef = undefined;
     this.nodePtr_ = undefined;
+  }
+  moveTo(targetParent: FrameNode, index?: number): void {
+    throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
 }
 
@@ -926,6 +1001,21 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
   ]
 )
 
+const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
+  [
+    ['Scroll', (node: FrameNode): ArkScrollComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+  ]
+)
+
 class typeNode {
   static createNode(context: UIContext, type: string, options?: object): FrameNode {
     let creator = __creatorMap__.get(type)
@@ -933,5 +1023,30 @@ class typeNode {
       return undefined
     }
     return creator(context, options);
+  }
+  
+  static getAttribute(node: FrameNode, nodeType: string): ArkComponent {
+    if (node === undefined || node === null || node.getNodeType() !== nodeType) {
+      return undefined;
+    }
+    if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+      return undefined;
+    }
+    let attribute = __attributeMap__.get(nodeType);
+    if (attribute === undefined || attribute === null) {
+      return undefined;
+    }
+    return attribute(node);
+  }
+
+  static bindController(node: FrameNode, controller: Scroller, nodeType: string): void {
+    if (node === undefined || node === null || controller === undefined || controller === null ||
+      node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+      throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+    }
+    if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+    getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
   }
 }

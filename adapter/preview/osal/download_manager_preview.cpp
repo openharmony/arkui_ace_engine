@@ -143,6 +143,11 @@ public:
         return false;
     }
 
+    bool IsContains(const std::string& url) override
+    {
+        return false;
+    }
+
 private:
     struct ProxyInfo {
         std::string host;

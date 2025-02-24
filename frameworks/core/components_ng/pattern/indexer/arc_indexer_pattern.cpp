@@ -19,13 +19,15 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float STR_DOT_ROTATE_ANGLE = 90;
+constexpr float STR_DOT_ROTATE_ANGLE = 90.0;
 constexpr int32_t ANIMATION_DURATION_20 = 20;
 constexpr char BUTTON_ROLE[] = "Button";
 }
+
 void ArcIndexerPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -34,8 +36,25 @@ void ArcIndexerPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     bool autoCollapseModeChanged = true;
+    InitArrayValue(autoCollapseModeChanged);
+    auto itemSize =
+        layoutProperty->GetItemSize().value_or(Dimension(ARC_INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
+    lastItemSize_ = itemSize;
+    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
+    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false);
+    InitTouchEvent ();
+    SetAccessibilityAction();
+    InitializeAccessibility();
+}
+
+void ArcIndexerPattern::InitArrayValue(bool& autoCollapseModeChanged)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (!isNewHeightCalculated_) {
-        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
+        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
         autoCollapseModeChanged = autoCollapse != autoCollapse_;
         autoCollapse_ = autoCollapse;
         auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
@@ -49,33 +68,32 @@ void ArcIndexerPattern::OnModifyDone()
             }
         }
         fullArrayValue_ = newArray;
+        fullCount_ = static_cast<int32_t>(fullArrayValue_.size());
     }
     auto propSelect = layoutProperty->GetSelected().value();
     if (propSelect < 0) {
         propSelect = 0;
         layoutProperty->UpdateSelected(propSelect);
     }
-    if (propSelect >= fullCount_) {
-        propSelect = fullCount_;
+    if (fullCount_ > 0 && propSelect >= fullCount_) {
+        propSelect = fullCount_ - 1;
         layoutProperty->UpdateSelected(propSelect);
     }
     if (propSelect != selected_) {
-        selected_ = propSelect;
         selectChanged_ = true;
+        if (selected_ + startIndex_ == propSelect) {
+            selectChanged_ = false;
+        }
+        selected_ = propSelect;
         ResetStatus();
-    } else if (!isNewHeightCalculated_) {
+    } else if (propSelect == selected_ && propSelect == 0) {
+        selectChanged_ = true;
+    }
+    if (isNewHeightCalculated_) {
         selectChanged_ = false;
     }
-    ResetArrayValue(autoCollapseModeChanged);
     isNewHeightCalculated_ = false;
-    auto itemSize =
-        layoutProperty->GetItemSize().value_or(Dimension(ARC_INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
-    lastItemSize_ = itemSize;
-    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false);
-    InitTouchEvent ();
-    SetAccessibilityAction();
-    InitializeAccessibility();
+    ResetArrayValue(autoCollapseModeChanged);
 }
 
 void ArcIndexerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -263,7 +281,7 @@ void ArcIndexerPattern::ResetArrayValue(bool isModeChanged)
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto itemCountChanged = false;
-    fullCount_ = fullArrayValue_.size();
+    fullCount_ = static_cast<int32_t>(fullArrayValue_.size());
     if (fullCount_ > 0) {
         if (autoCollapse_) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(ARC_INDEXER_STR_SHARP) ? 1 : 0;
@@ -350,9 +368,35 @@ bool ArcIndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
         StartCollapseDelayTask(hostNode, ARC_INDEXER_COLLAPSE_WAIT_DURATION);
+    } else {
+        initialized_ = true;
     }
 
     return true;
+}
+
+RefPtr<FrameNode> ArcIndexerPattern::BuildIcon()
+{
+    CHECK_EQUAL_RETURN(arcArrayValue_.size(), 0, nullptr);
+    int32_t indexerSize = static_cast<int32_t>(arcArrayValue_.size() - 1);
+    auto icon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(icon, nullptr);
+    ImageSourceInfo imageSourceInfo;
+    if (arcArrayValue_[indexerSize].second == ArcIndexerBarState::COLLAPSED) {
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
+    } else if (arcArrayValue_[indexerSize].second == ArcIndexerBarState::EXPANDED) {
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
+    }
+    imageSourceInfo.SetFillColor(Color(ARC_INDEXER_STR_DOT_COLOR));
+    auto iconLayoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(iconLayoutProperty, nullptr);
+    iconLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    // size
+    iconLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(lastItemSize_), CalcLength(lastItemSize_)));
+    icon->MarkModifyDone();
+    return icon;
 }
 
 void ArcIndexerPattern::BuildArrayValueItems()
@@ -367,32 +411,51 @@ void ArcIndexerPattern::BuildArrayValueItems()
     if (layoutProperty->GetIsPopupValue(false)) {
         lastChildCount -= 1;
     }
+    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
     if (indexerSize != lastChildCount) {
         host->Clean();
         layoutProperty->UpdateIsPopup(false);
+        if (autoCollapse) {
+            indexerSize -= 1;
+        }
         for (int32_t index = 0; index < indexerSize; index++) {
             auto indexerChildNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(indexerChildNode);
             host->AddChild(indexerChildNode);
         }
+        if (autoCollapse) {
+            auto icon = BuildIcon();
+            CHECK_NULL_VOID(icon);
+            host->AddChild(icon);
+        }
     }
     std::vector<std::string> arrayValueStrs;
-    for (auto indexerItem : arcArrayValue_) {
-        arrayValueStrs.push_back(indexerItem.first);
+    auto it = arcArrayValue_.begin();
+    while (it != arcArrayValue_.end()) {
+        if (autoCollapse && (it == arcArrayValue_.end() - 1)) {
+            break;
+        }
+        arrayValueStrs.push_back(it->first);
+        ++it;
     }
-    layoutProperty->UpdateArrayValue(arrayValueStrs);
+    layoutProperty->UpdateActualArrayValue(arrayValueStrs);
 }
 
 void ArcIndexerPattern::BuildFullArrayValue()
 {
     arcArrayValue_.clear();
-    size_t startIndex = (fullCount_ > 29) ? (fullCount_ - 29) : 0;
-    for (size_t i = startIndex; i < fullCount_; ++i) {
-        arcArrayValue_.push_back(std::pair(fullArrayValue_.at(i), ArcIndexerBarState::INVALID));
+    int32_t startIndex = 0;
+    auto arraySize = (fullCount_ > ARC_INDEXER_ITEM_MAX_COUNT) ? ARC_INDEXER_ITEM_MAX_COUNT : fullCount_;
+    if (!autoCollapse_ && arraySize == ARC_INDEXER_ITEM_MAX_COUNT) {
+        arraySize = arraySize + 1;
     }
-
-    if (autoCollapse_ && fullCount_ > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
+    for (int32_t i = startIndex; i < startIndex + arraySize; ++i) {
+        if (i >= 0 && i < static_cast<int32_t>(fullArrayValue_.size())) {
+            arcArrayValue_.push_back(std::pair(fullArrayValue_.at(i), ArcIndexerBarState::INVALID));
+        }
+    }
+    if (autoCollapse_ && arraySize > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
         arcArrayValue_.push_back(
             std::pair(StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED), ArcIndexerBarState::COLLAPSED));
     }
@@ -425,6 +488,9 @@ void ArcIndexerPattern::UpdateStartAndEndIndexByTouch()
         if (selected_ > fullCount_ - ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
             startIndex_ = fullCount_ - ARC_INDEXER_COLLAPSE_ITEM_COUNT;
         }
+        if (startIndex_ > ARC_INDEXER_ITEM_MAX_COUNT - ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
+            startIndex_ = ARC_INDEXER_ITEM_MAX_COUNT - ARC_INDEXER_COLLAPSE_ITEM_COUNT;
+        }
         endIndex_ = startIndex_ + ARC_INDEXER_COLLAPSE_ITEM_COUNT;
     }
     focusIndex_ = selected_ - startIndex_;
@@ -436,12 +502,19 @@ void ArcIndexerPattern::UpdateStartAndEndIndexbySelected()
     if (!autoCollapse_) {
         return;
     }
+    auto arraySize = (fullCount_ > ARC_INDEXER_ITEM_MAX_COUNT) ? ARC_INDEXER_ITEM_MAX_COUNT : fullCount_;
     if (currectCollapsingMode_ == ArcIndexerCollapsingMode::FOUR) {
         focusIndex_ = selected_ - startIndex_;
-        if (selected_ >= endIndex_ - 1) {
+        if (endIndex_ > arraySize) {
+            endIndex_ = arraySize;
+        }
+        if (selected_ >= startIndex_ && selected_ < endIndex_) {
+            selected_ -= startIndex_;
+            focusIndex_ = selected_;
+        } else if (selected_ >= endIndex_ - 1) {
             endIndex_ = selected_ + 1;
-            if (endIndex_ > fullCount_) {
-                endIndex_ = fullCount_;
+            if (endIndex_ > arraySize) {
+                endIndex_ = arraySize;
             }
             startIndex_ = endIndex_ - ARC_INDEXER_COLLAPSE_ITEM_COUNT;
             selected_ = ARC_INDEXER_COLLAPSE_ITEM_COUNT - 1;
@@ -465,7 +538,9 @@ void ArcIndexerPattern::ApplyFourPlusOneMode()
     UpdateStartAndEndIndexbySelected();
     arcArrayValue_.clear();
     for (int32_t index = startIndex_; index < endIndex_; index++) {
-        arcArrayValue_.push_back(std::pair(fullArrayValue_.at(index), ArcIndexerBarState::INVALID));
+        if (index >= 0 && index < static_cast<int32_t>(fullArrayValue_.size())) {
+            arcArrayValue_.push_back(std::pair(fullArrayValue_.at(index), ArcIndexerBarState::INVALID));
+        }
     }
     arcArrayValue_.push_back(
         std::pair(StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED), ArcIndexerBarState::EXPANDED));
@@ -492,14 +567,9 @@ void ArcIndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             return;
         }
         if (info.GetInputEventType() == InputEventType::AXIS) {
-            if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
-                pattern->MoveIndexByStep(-1);
-            } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
-                pattern->MoveIndexByStep(1);
-            }
-        } else {
-            pattern->MoveIndexByOffset(info.GetLocalLocation());
+            return;
         }
+        pattern->MoveIndexByOffset(info.GetLocalLocation());
     };
 
     auto onActionEnd = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -558,6 +628,7 @@ void ArcIndexerPattern::MoveIndexByOffset(const Offset& offset)
         return;
     }
     if (arcArrayValue_[nextSelectIndex].second != ArcIndexerBarState::INVALID) {
+        selectChanged_ = false;
         isNewHeightCalculated_ = true;
         lastCollapsingMode_ = currectCollapsingMode_;
         if (arcArrayValue_[nextSelectIndex].second == ArcIndexerBarState::COLLAPSED && autoCollapse_) {
@@ -566,7 +637,8 @@ void ArcIndexerPattern::MoveIndexByOffset(const Offset& offset)
             IndexNodeCollapsedAnimation();
         } else {
             currectCollapsingMode_ = ArcIndexerCollapsingMode::NONE;
-            ArcExpandedAnimation(fullArrayValue_.size() - 1);
+            auto arraySize = (fullCount_ > ARC_INDEXER_ITEM_MAX_COUNT) ? ARC_INDEXER_ITEM_MAX_COUNT : fullCount_;
+            ArcExpandedAnimation(arraySize - 1);
             auto host = GetHost();
             host->MarkModifyDone();
             host->MarkDirtyNode();
@@ -601,7 +673,7 @@ void ArcIndexerPattern::IndexNodeCollapsedAnimation()
     option.SetIteration(1);
     auto total = fullArrayValue_.size();
     float from = stepAngle_ * total;
-    collapsedAnimateIndex_ = total;
+    collapsedAnimateIndex_ = static_cast<int32_t>(total);
     collapsedProperty_->Set(from);
     float to = stepAngle_ * (ARC_INDEXER_COLLAPSE_ITEM_COUNT + 1);
     AnimationUtils::Animate(
@@ -653,7 +725,6 @@ void ArcIndexerPattern::IndexNodeExpandedAnimation()
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             pattern->atomicAnimateOp_ = true;
-            pattern->atomicAnimateOp_ = true;
             auto collapsedNode = pattern->collapsedNode_.Upgrade();
             CHECK_NULL_VOID(collapsedNode);
             collapsedNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
@@ -665,7 +736,7 @@ void ArcIndexerPattern::StartIndexerNodeDisappearAnimation(int32_t nodeIndex)
 {
     auto host = GetHost();
     auto total = fullArrayValue_.size();
-    if (nodeIndex > total) {
+    if (nodeIndex > static_cast<int32_t>(total)) {
         return;
     }
     auto child = host->GetChildByIndex(nodeIndex);
@@ -746,8 +817,6 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
     CHECK_NULL_VOID(paintProperty);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-    CHECK_NULL_VOID(indexerTheme);
     int32_t index = 0;
     auto total = host->GetTotalChildCount();
     if (layoutProperty->GetIsPopupValue(false)) {
@@ -756,26 +825,26 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
     UpdateIndexerRender();
     int32_t focusIndex = GetFocusIndex(selected_);
     auto radiusSize =  Dimension(lastItemSize_ * HALF);
+    bool isSetIndexStyle = false;
     for (int32_t i = 0; i < total; i++) {
         auto child = host->GetChildByIndex(i);
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
-        UpdateChildBoundary(childNode);
+        CHECK_NULL_VOID(childNode);
         UpdateChildNodeStyle(index);
         auto childRenderContext = childNode->GetRenderContext();
+        CHECK_NULL_VOID(childRenderContext);
         childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
         auto nodeStr = GetChildNodeContent(index);
-        if (index == childPressIndex_) {
-            childRenderContext->UpdateBackgroundColor(
-                paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
-        } else if (index == childFocusIndex_ || index == focusIndex) {
+        SetChildNodeStyle(index, nodeStr, fromTouchUp);
+        if (!isSetIndexStyle && (index == childPressIndex_ || index == childFocusIndex_ || index == focusIndex)) {
+            isSetIndexStyle = true;
             SetFocusIndexStyle(index, nodeStr, isTextNodeInTree);
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
                 childRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
             }
         }
-        SetChildNodeStyle(index, nodeStr, fromTouchUp);
         index++;
         childNode->MarkModifyDone();
         if (isTextNodeInTree) childNode->MarkDirtyNode();
@@ -800,6 +869,7 @@ void ArcIndexerPattern::UpdateIndexerRender()
 
 std::string ArcIndexerPattern::GetChildNodeContent(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(arcArrayValue_.size()) - 1);
     auto nodeStr = autoCollapse_ && (arcArrayValue_[index].second != ArcIndexerBarState::INVALID) ?
         (arcArrayValue_[index].second == ArcIndexerBarState::COLLAPSED ?
         StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED) :
@@ -820,50 +890,25 @@ void ArcIndexerPattern::UpdateChildNodeStyle(int32_t index)
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
     UpdateChildBoundary(childNode);
-    auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
     auto childRenderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
     childRenderContext->SetClipToBounds(true);
     if (arcArrayValue_[index].second != ArcIndexerBarState::INVALID) {
         float itemAngle = CalcArcItemAngle(index) + STR_DOT_ROTATE_ANGLE;
         childRenderContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, itemAngle, 0.0f));
-        nodeLayoutProperty->UpdateTextColor(Color(ARC_INDEXER_STR_DOT_COLOR));
     } else {
+        auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(nodeLayoutProperty);
         nodeLayoutProperty->UpdateTextColor(
             layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
     }
 }
 
-void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &nodeStr, bool fromTouchUp)
+void ArcIndexerPattern::SetChildNodeAccessibility(const RefPtr<FrameNode>& childNode, const std::string &nodeStr)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-    CHECK_NULL_VOID(indexerTheme);
-    auto child = host->GetChildByIndex(index);
-    CHECK_NULL_VOID(child);
-    auto childNode = child->GetHostNode();
-    auto childRenderContext = childNode->GetRenderContext();
-    UpdateChildBoundary(childNode);
-    auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
-    Dimension borderWidth;
-    nodeLayoutProperty->UpdateContent(nodeStr);
-    nodeLayoutProperty->UpdateMaxLines(1);
-    nodeLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    nodeLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
-    nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
-    childRenderContext->ResetBlendBorderColor();
-    auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
-    nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
-    nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
-    nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
-    nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
+    CHECK_NULL_VOID(childNode);
     auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     if (textAccessibilityProperty) {
         textAccessibilityProperty->SetSelected(false);
@@ -880,6 +925,46 @@ void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &node
             }
         }
     }
+}
+
+void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &nodeStr, bool fromTouchUp)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto child = host->GetChildByIndex(index);
+    CHECK_NULL_VOID(child);
+    auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    auto childRenderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
+    UpdateChildBoundary(childNode);
+    if (StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED) != nodeStr &&
+        StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED) != nodeStr) {
+        auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(nodeLayoutProperty);
+        Dimension borderWidth;
+        nodeLayoutProperty->UpdateContent(nodeStr);
+        nodeLayoutProperty->UpdateMaxLines(1);
+        nodeLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        nodeLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        nodeLayoutProperty->UpdateBorderWidth(
+            { borderWidth, borderWidth, borderWidth, borderWidth, borderWidth, borderWidth });
+        childRenderContext->ResetBlendBorderColor();
+        auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
+        nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
+        nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
+        nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
+        nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
+    }
+    SetChildNodeAccessibility(childNode, nodeStr);
     if (!fromTouchUp && currectCollapsingMode_ == ArcIndexerCollapsingMode::NONE &&
         currectCollapsingMode_ != lastCollapsingMode_) {
         UpdateIndexerNodeOpacityByIdx(childRenderContext, index);
@@ -891,10 +976,11 @@ void ArcIndexerPattern::SetFocusIndexStyle(int32_t index, const std::string &nod
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto child = host->GetChildByIndex(index);
+    CHECK_NULL_VOID(child);
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    CHECK_NULL_VOID(child);
     auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
     auto paintProperty = host->GetPaintProperty<ArcIndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     UpdateChildBoundary(childNode);
@@ -903,12 +989,14 @@ void ArcIndexerPattern::SetFocusIndexStyle(int32_t index, const std::string &nod
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto childRenderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
     auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(nodeLayoutProperty);
     nodeLayoutProperty->UpdateContent(nodeStr);
     nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
     childRenderContext->UpdateBackgroundColor(
-        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
+        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColorArc()));
     if (index != childFocusIndex_) {
         childRenderContext->ResetBlendBorderColor();
     }
@@ -996,8 +1084,9 @@ void ArcIndexerPattern::UpdateIndexerNodeOpacityByIdx(RefPtr<RenderContext>& con
 void ArcIndexerPattern::StartIndexerNodeAppearAnimation(int32_t nodeIndex)
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto total = fullArrayValue_.size();
-    if (nodeIndex > total) {
+    if (nodeIndex > static_cast<int32_t>(total)) {
         return;
     }
     auto child = host->GetChildByIndex(nodeIndex);
@@ -1053,37 +1142,25 @@ void ArcIndexerPattern::ShowBubble(bool isShow)
 
 RefPtr<FrameNode> ArcIndexerPattern::CreatePopupNode()
 {
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    CHECK_NULL_RETURN(columnNode, nullptr);
-
-    auto letterNode = FrameNode::CreateFrameNode(
+    auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(letterNode, nullptr);
-    auto letterStackNode = FrameNode::CreateFrameNode(
-        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
-    CHECK_NULL_RETURN(letterStackNode, nullptr);
-    letterStackNode->AddChild(letterNode);
-    columnNode->AddChild(letterStackNode);
-    return columnNode;
+    CHECK_NULL_RETURN(textNode, nullptr);
+    return textNode;
 }
 
 void ArcIndexerPattern::UpdateBubbleView()
 {
     CHECK_NULL_VOID(popupNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
     auto currentListData = std::vector<std::string>();
     UpdateBubbleLetterView(false, currentListData);
-    auto columnRenderContext = popupNode_->GetRenderContext();
-    CHECK_NULL_VOID(columnRenderContext);
-    auto radius = Dimension(ARC_BUBBLE_RADIUS, DimensionUnit::VP);
-    columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-    columnRenderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
+    auto textRenderContext = popupNode_->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto radius = Dimension(ARC_BUBBLE_BOX_RADIUS, DimensionUnit::VP);
+    textRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    textRenderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
 
     UpdateBubbleBackgroundView();
-    columnRenderContext->SetClipToBounds(true);
+    textRenderContext->SetClipToBounds(true);
     popupNode_->MarkModifyDone();
     popupNode_->MarkDirtyNode();
 }
@@ -1098,15 +1175,13 @@ void ArcIndexerPattern::UpdateBubbleBackgroundView()
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-    BlurStyleOption styleOption;
-    if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
-        styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
-    } else {
-        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-    }
+    CHECK_NULL_VOID(indexerTheme);
     auto bubbleRenderContext = popupNode_->GetRenderContext();
     CHECK_NULL_VOID(bubbleRenderContext);
-    bubbleRenderContext->UpdateBackBlurStyle(styleOption);
+    if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
+        BlurStyleOption styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
+        bubbleRenderContext->UpdateBackBlurStyle(styleOption);
+    }
     bubbleRenderContext->UpdateBackgroundColor(
         paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
 }
@@ -1129,29 +1204,13 @@ void ArcIndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std
     UpdateBubbleLetterStackAndLetterTextView();
     auto letterNodeRenderContext = letterNode->GetRenderContext();
     CHECK_NULL_VOID(letterNodeRenderContext);
-    auto radius = Dimension(ARC_BUBBLE_RADIUS, DimensionUnit::VP);
+    auto radius = Dimension(ARC_BUBBLE_BOX_RADIUS, DimensionUnit::VP);
     letterNodeRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
     letterNodeRenderContext->UpdateBackgroundColor(
         paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
-    auto letterStackNode = DynamicCast<FrameNode>(popupNode_->GetFirstChild());
-    CHECK_NULL_VOID(letterStackNode);
-    auto letterStackLayoutProperty = letterStackNode->GetLayoutProperty<StackLayoutProperty>();
-    CHECK_NULL_VOID(letterStackLayoutProperty);
-    auto letterStackRenderContext = letterStackNode->GetRenderContext();
-    CHECK_NULL_VOID(letterStackRenderContext);
-    letterStackRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-    letterStackRenderContext->UpdateBackgroundColor(
-        paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
-    auto letterStackSize = Dimension(ARC_BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    letterStackLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(letterStackSize), CalcLength(letterStackSize)));
-
     letterNodeRenderContext->SetClipToBounds(true);
-    letterStackRenderContext->SetClipToBounds(true);
     letterNode->MarkModifyDone();
     letterNode->MarkDirtyNode();
-    letterStackNode->MarkModifyDone();
-    letterStackNode->MarkDirtyNode();
 }
 
 void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
@@ -1191,8 +1250,8 @@ void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     letterLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
     auto textPadding = Dimension(ARC_INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
-    letterLayoutProperty->UpdatePadding(
-        { CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding) });
+    letterLayoutProperty->UpdatePadding({ CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding),
+        CalcLength(textPadding), CalcLength(textPadding), CalcLength(textPadding) });
 
     auto BubbleSize = Dimension(ARC_BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdateUserDefinedIdealSize(
@@ -1202,7 +1261,7 @@ void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
 RefPtr<FrameNode> ArcIndexerPattern::GetLetterNode()
 {
     CHECK_NULL_RETURN(popupNode_, nullptr);
-    return DynamicCast<FrameNode>(popupNode_->GetFirstChild()->GetFirstChild());
+    return DynamicCast<FrameNode>(popupNode_);
 }
 
 bool ArcIndexerPattern::NeedShowBubble()
@@ -1217,7 +1276,8 @@ bool ArcIndexerPattern::NeedShowBubble()
 
 bool ArcIndexerPattern::IfSelectIndexValid()
 {
-    return (selected_ >= 0 && selected_ < fullCount_);
+    auto arraySize = (fullCount_ > ARC_INDEXER_ITEM_MAX_COUNT) ? ARC_INDEXER_ITEM_MAX_COUNT : fullCount_;
+    return (selected_ >= 0 && selected_ < arraySize);
 }
 
 void ArcIndexerPattern::ArcExpandedAnimation(int32_t nextIndex)
@@ -1406,10 +1466,12 @@ void ArcIndexerPattern::UpdateChildBoundary(RefPtr<FrameNode>& frameNode)
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(frameNode);
-    auto pattern = DynamicCast<TextPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(pattern);
     auto isMeasureBoundary = layoutProperty->GetPropertyChangeFlag() ==  PROPERTY_UPDATE_NORMAL;
-    pattern->SetIsMeasureBoundary(isMeasureBoundary);
+    if (frameNode->GetHostTag() == V2::TEXT_ETS_TAG) {
+        auto pattern = DynamicCast<TextPattern>(frameNode->GetPattern());
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsMeasureBoundary(isMeasureBoundary);
+    }
 }
 
 void ArcIndexerPattern::DumpInfo()

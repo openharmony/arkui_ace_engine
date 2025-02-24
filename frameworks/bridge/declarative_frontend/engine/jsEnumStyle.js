@@ -89,7 +89,7 @@ let WordBreak;
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
   WordBreak[WordBreak.BREAK_ALL = 1] = 'break-all';
   WordBreak[WordBreak.BREAK_WORD = 2] = 'break-word';
-  WordBreak[WordBreak.HYPHENATION = 3] = "hyphenation";
+  WordBreak[WordBreak.HYPHENATION = 3] = 'hyphenation';
 })(WordBreak || (WordBreak = {}));
 
 let DpiFollowStrategy;
@@ -103,6 +103,12 @@ let SecurityDpiFollowStrategy;
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
 })(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
+
+let WindowModeFollowStrategy;
+(function (WindowModeFollowStrategy) {
+  WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE = 0] = 'follow-host-window-mode';
+  WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1] = 'follow-ui-extension-ability-window-mode';
+})(WindowModeFollowStrategy || (WindowModeFollowStrategy = {}));
 
 let EllipsisMode;
 (function (EllipsisMode) {
@@ -633,6 +639,18 @@ let FlexWrap;
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
 
+class LayoutPolicy {
+  id_ = '';
+
+  constructor(id) {
+    this.id_ = id;
+  }
+
+  static get matchParent() {
+    return new LayoutPolicy('matchParent');
+  }
+}
+
 var BlurStyle;
 (function (BlurStyle) {
   BlurStyle[BlurStyle.SmallLight = 100] = 'SmallLight';
@@ -816,7 +834,16 @@ let AnimationMode;
   AnimationMode[AnimationMode.CONTENT_FIRST = 0] = 'CONTENT_FIRST';
   AnimationMode[AnimationMode.ACTION_FIRST = 1] = 'ACTION_FIRST';
   AnimationMode[AnimationMode.NO_ANIMATION = 2] = 'NO_ANIMATION';
+  AnimationMode[AnimationMode.CONTENT_FIRST_WITH_JUMP = 3] = 'CONTENT_FIRST_WITH_JUMP';
+  AnimationMode[AnimationMode.ACTION_FIRST_WITH_JUMP = 4] = 'ACTION_FIRST_WITH_JUMP';
 })(AnimationMode || (AnimationMode = {}));
+
+let SwiperAnimationMode;
+(function (SwiperAnimationMode) {
+  SwiperAnimationMode[SwiperAnimationMode.NO_ANIMATION = 0] = 'NO_ANIMATION';
+  SwiperAnimationMode[SwiperAnimationMode.DEFAULT_ANIMATION = 1] = 'DEFAULT_ANIMATION';
+  SwiperAnimationMode[SwiperAnimationMode.FAST_ANIMATION = 2] = 'FAST_ANIMATION';
+})(SwiperAnimationMode || (SwiperAnimationMode = {}));
 
 let SelectedMode;
 (function (SelectedMode) {
@@ -1078,6 +1105,10 @@ let NavigationSystemTransitionType;
   NavigationSystemTransitionType[NavigationSystemTransitionType.NONE = 1] = 'NONE';
   NavigationSystemTransitionType[NavigationSystemTransitionType.TITLE = 2] = 'TITLE';
   NavigationSystemTransitionType[NavigationSystemTransitionType.CONTENT = 3] = 'CONTENT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.FADE = 4] = 'FADE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.EXPLODE = 5] = 'EXPLODE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_RIGHT = 6] = 'SLIDE_RIGHT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_BOTTOM = 7] = 'SLIDE_BOTTOM';
 }(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
@@ -1098,6 +1129,7 @@ let RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType.RIGHT_CLICK = 0] = 'RIGHT_CLICK';
   RichEditorResponseType[RichEditorResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
   RichEditorResponseType[RichEditorResponseType.SELECT = 2] = 'SELECT';
+  RichEditorResponseType[RichEditorResponseType.DEFAULT = 3] = 'DEFAULT';
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
 let MenuType;
@@ -1372,6 +1404,14 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
+let KeyboardAppearance;
+(function (KeyboardAppearance) {
+  KeyboardAppearance[KeyboardAppearance.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.IMMERSIVE = 1] = 'IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.LIGHT_IMMERSIVE = 2] = 'LIGHT_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
+})(KeyboardAppearance || (KeyboardAppearance = {}));
+
 class SymbolEffect {
 }
 
@@ -1465,6 +1505,7 @@ let RichEditorSpanType;
   RichEditorSpanType[RichEditorSpanType.IMAGE = 1] = 'IMAGE';
   RichEditorSpanType[RichEditorSpanType.MIXED = 2] = 'MIXED';
   RichEditorSpanType[RichEditorSpanType.BUILDER = 3] = 'BUILDER';
+  RichEditorSpanType[RichEditorSpanType.DEFAULT = 4] = 'DEFAULT';
 })(RichEditorSpanType || (RichEditorSpanType = {}));
 
 let ListItemAlign;
@@ -1738,6 +1779,18 @@ let ContentType;
   ContentType[ContentType.NICKNAME = 23] = 'NICKNAME';
   ContentType[ContentType.DETAIL_INFO_WITHOUT_STREET = 24] = 'DETAIL_INFO_WITHOUT_STREET';
   ContentType[ContentType.FORMAT_ADDRESS = 25] = 'FORMAT_ADDRESS';
+  ContentType[ContentType.PASSPORT_NUMBER = 26] = 'PASSPORT_NUMBER';
+  ContentType[ContentType.VALIDITY = 27] = 'VALIDITY';
+  ContentType[ContentType.ISSUE_AT = 28] = 'ISSUE_AT';
+  ContentType[ContentType.ORGANIZATION = 29] = 'ORGANIZATION';
+  ContentType[ContentType.TAX_ID = 30] = 'TAX_ID';
+  ContentType[ContentType.ADDRESS_CITY_AND_STATE = 31] = 'ADDRESS_CITY_AND_STATE';
+  ContentType[ContentType.FLIGHT_NUMBER = 32] = 'FLIGHT_NUMBER';
+  ContentType[ContentType.LICENSE_NUMBER = 33] = 'LICENSE_NUMBER';
+  ContentType[ContentType.LICENSE_FILE_NUMBER = 34] = 'LICENSE_FILE_NUMBER';
+  ContentType[ContentType.LICENSE_PLATE = 35] = 'LICENSE_PLATE';
+  ContentType[ContentType.ENGINE_NUMBER = 36] = 'ENGINE_NUMBER';
+  ContentType[ContentType.LICENSE_CHASSIS_NUMBER = 37] = 'LICENSE_CHASSIS_NUMBER';
 })(ContentType || (ContentType = {}));
 
 let GestureJudgeResult;
@@ -1887,8 +1940,16 @@ class Indicator {
     this.rightValue = value;
     return this;
   }
-  bottom(value) {
-    this.bottomValue = value;
+  bottom(...args) {
+    if (args.length === 1) {
+      this.bottomValue = args[0];
+      this.setIgnoreSizeValue = false;
+    }
+    if (args.length == 2) {
+      this.bottomValue = args[0];
+      this.ignoreSizeValue = args[1];
+      this.setIgnoreSizeValue = true;
+    }
     return this;
   }
   start(value) {
@@ -1942,6 +2003,10 @@ class DotIndicator extends Indicator {
   }
   maxDisplayCount(value) {
     this.maxDisplayCountValue = value;
+    return this;
+  }
+  space(value) {
+    this.spaceValue = value;
     return this;
   }
 }
@@ -2048,6 +2113,18 @@ class TransitionEffect {
   }
 }
 
+class ColorContent {
+  colorContent_ = '';
+
+  constructor(colorContent) {
+    this.colorContent_ = colorContent;
+  }
+
+  static get ORIGIN() {
+    return new ColorContent('ORIGIN');
+  }
+}
+
 class TextMenuItemId {
   id_ = '';
 
@@ -2079,8 +2156,16 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get TRANSLATE() {
+    return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
+  }
+
   static get SEARCH() {
     return new TextMenuItemId('OH_DEFAULT_SEARCH');
+  }
+
+  static get SHARE() {
+    return new TextMenuItemId('OH_DEFAULT_SHARE');
   }
 
   static get COLLABORATION_SERVICE() {
@@ -2179,6 +2264,7 @@ class NavPathInfo {
     this.isEntry = isEntry;
     this.fromRecovery = false;
     this.mode = undefined;
+    this.singletonMoved = false;
   }
 }
 
@@ -2200,6 +2286,7 @@ class NavPathStack {
     this.parentStack = undefined;
     this.popArray = [];
     this.interception = undefined;
+    this.hasSingletonMoved = false;
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {
@@ -2322,10 +2409,12 @@ class NavPathStack {
         this.pathArray[index].onPop = info.onPop;
         this.pathArray[index].needUpdate = true;
         this.pathArray[index].isEntry = info.isEntry;
+        this.pathArray[index].singletonMoved = true;
+        this.hasSingletonMoved = true;
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {
-          this.popToIndex(index, undefined, animated);
+          this.innerPopToIndex(index, undefined, animated, false);
         }
         let promise = null;
         if (createPromise) {
@@ -2506,6 +2595,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return pathInfo;
   }
@@ -2534,10 +2624,11 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return index;
   }
-  popToIndex(index, result, animated) {
+  innerPopToIndex(index, result, animated, needFireOnResult) {
     if (index >= this.pathArray.length) {
       return;
     }
@@ -2558,7 +2649,13 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    if (needFireOnResult) {
+      this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
+    }
     this.nativeStack?.onStateChanged();
+  }
+  popToIndex(index, result, animated) {
+    this.innerPopToIndex(index, result, animated, true);
   }
   moveToTop(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -3292,6 +3389,7 @@ let DragPreviewMode;
   DragPreviewMode.ENABLE_DEFAULT_SHADOW = 3;
   DragPreviewMode.ENABLE_DEFAULT_RADIUS = 4;
   DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT = 5;
+  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT  = 6;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 let FoldStatus;
@@ -3355,6 +3453,7 @@ let TextSpanType;
   TextSpanType[TextSpanType.TEXT = 0] = 'TEXT';
   TextSpanType[TextSpanType.IMAGE = 1] = 'IMAGE';
   TextSpanType[TextSpanType.MIXED = 2] = 'MIXED';
+  TextSpanType[TextSpanType.DEFAULT = 3] = 'DEFAULT';
 })(TextSpanType || (TextSpanType = {}));
 
 let TextResponseType;
@@ -3362,6 +3461,7 @@ let TextResponseType;
   TextResponseType[TextResponseType.RIGHT_CLICK = 0] = 'RIGHT_CLICK';
   TextResponseType[TextResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType.SELECT = 2] = 'SELECT';
+  TextResponseType[TextResponseType.DEFAULT = 3] = 'DEFAULT';
 })(TextResponseType || (TextResponseType = {}));
 
 let MarqueeState;
@@ -3416,7 +3516,14 @@ let PreDragStatus;
   PreDragStatus.PREVIEW_LANDING_STARTED = 4;
   PreDragStatus.PREVIEW_LANDING_FINISHED = 5;
   PreDragStatus.ACTION_CANCELED_BEFORE_DRAG = 6;
+  PreDragStatus.PREPARING_FOR_DRAG_DETECTION = 7;
 })(PreDragStatus || (PreDragStatus = {}));
+
+let DragStartRequestStatus;
+(function (DragStartRequestStatus) {
+  DragStartRequestStatus.WAITING = 0;
+  DragStartRequestStatus.READY = 1;
+})(DragStartRequestStatus || (DragStartRequestStatus = {}));
 
 let DataOperationType;
 (function (DataOperationType) {
@@ -3707,16 +3814,40 @@ let AxisModel;
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
 })(AxisModel || (AxisModel = {}));
 
-var CrownSensitivity;
+let CrownSensitivity;
 (function (CrownSensitivity) {
-  CrownSensitivity[CrownSensitivity["LOW"] = 0] = "LOW";
-  CrownSensitivity[CrownSensitivity["MEDIUM"] = 1] = "MEDIUM";
-  CrownSensitivity[CrownSensitivity["HIGH"] = 2] = "HIGH";
+  CrownSensitivity[CrownSensitivity.LOW = 0] = 'LOW';
+  CrownSensitivity[CrownSensitivity.MEDIUM = 1] = 'MEDIUM';
+  CrownSensitivity[CrownSensitivity.HIGH = 2] = 'HIGH';
 })(CrownSensitivity || (CrownSensitivity = {}));
 
-var CrownAction;
+let CrownAction;
 (function (CrownAction) {
-  CrownAction[CrownAction["BEGIN"] = 0] = "BEGIN";
-  CrownAction[CrownAction["UPDATE"] = 1] = "UPDATE";
-  CrownAction[CrownAction["END"] = 2] = "END";
+  CrownAction[CrownAction.BEGIN = 0] = 'BEGIN';
+  CrownAction[CrownAction.UPDATE = 1] = 'UPDATE';
+  CrownAction[CrownAction.END = 2] = 'END';
 })(CrownAction || (CrownAction = {}));
+
+let AccessibilitySamePageMode;
+(function (AccessibilitySamePageMode) {
+  AccessibilitySamePageMode[AccessibilitySamePageMode.SEMI_SILENT = 0] = 'SEMI_SILENT';
+  AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
+})(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));
+
+let FocusDrawLevel;
+(function (FocusDrawLevel) {
+  FocusDrawLevel[FocusDrawLevel.SELF = 0] = 'SELF';
+  FocusDrawLevel[FocusDrawLevel.TOP = 1] = 'TOP';
+})(FocusDrawLevel || (FocusDrawLevel = {}));
+
+let TextMenuShowMode;
+(function (TextMenuShowMode) {
+  TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
+  TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
+})(TextMenuShowMode || (TextMenuShowMode = {}));
+
+let KeyProcessingMode;
+(function (KeyProcessingMode) {
+  KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
+  KeyProcessingMode[KeyProcessingMode.ANCESTOR_EVENT = 1] = 'ANCESTOR_EVENT';
+})(KeyProcessingMode || (KeyProcessingMode = {}));

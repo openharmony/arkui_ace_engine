@@ -45,12 +45,15 @@ bool SystemProperties::measureDebugTraceEnable_ = false;
 bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
+bool SystemProperties::vsyncModeTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::debugEnabled_ = false;
+DebugFlags SystemProperties::debugFlags_ = 0;
+bool SystemProperties::containerDeleteFlag_ = false;
 bool SystemProperties::layoutDetectEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
@@ -67,6 +70,7 @@ bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(true);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
@@ -80,6 +84,8 @@ float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
+bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
+int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
@@ -111,6 +117,11 @@ float SystemProperties::GetAnimationScale()
 }
 
 bool SystemProperties::GetIsUseMemoryMonitor()
+{
+    return false;
+}
+
+bool SystemProperties::IsSyscapExist(const char* cap)
 {
     return false;
 }
@@ -211,6 +222,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsBigFoldProduct()
+{
+    return false;
+}
+
 std::string SystemProperties::GetDebugInspectorId()
 {
     return "N/A";
@@ -244,5 +260,20 @@ bool SystemProperties::IsNeedSymbol()
 bool SystemProperties::GetResourceDecoupling()
 {
     return true;
+}
+
+int32_t SystemProperties::GetDragDropFrameworkStatus()
+{
+    return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return false;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    return false;
 }
 } // namespace OHOS::Ace

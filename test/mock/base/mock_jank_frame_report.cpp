@@ -46,6 +46,10 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 
 void PerfMonitor::End(const std::string& sceneId, bool isJsApi) {}
 
+void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note) {}
+
+void PerfMonitor::EndCommercial(const std::string& sceneId, bool isJsApi) {}
+
 void PerfMonitor::SetPageUrl(const std::string& pageUrl) {}
 
 void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank, const std::string& windowName) {}
@@ -71,4 +75,6 @@ void PerfMonitor::SetPageName(const std::string& pageName) {}
 void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName) {}
 void JankFrameReport::RecordAnimateEnd() {}
+void PerfMonitor::NotifyAppJankStatsBegin() {}
+void PerfMonitor::NotifyAppJankStatsEnd() {}
 } // namespace OHOS::Ace

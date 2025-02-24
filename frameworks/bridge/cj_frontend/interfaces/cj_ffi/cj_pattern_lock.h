@@ -35,6 +35,7 @@ public:
     {
         controller_ = controller;
     }
+    void SetChallengeResult(int64_t challengeResult);
 
 private:
     RefPtr<V2::PatternLockController> controller_;
@@ -42,6 +43,13 @@ private:
 } // namespace OHOS::Ace::Framework
 
 extern "C" {
+struct CJCircleStyleOptions {
+    uint32_t color;
+    double radius;
+    int32_t radiusUnit;
+    bool enableWaveEffect;
+};
+
 CJ_EXPORT void FfiOHOSAceFrameworkPatternLockCreate(int64_t controller);
 CJ_EXPORT void FfiOHOSAceFrameworkPatternLockOnPatternComplete(void (*callback)(VectorInt32Handle array));
 CJ_EXPORT void FfiOHOSAceFrameworkPatternLockSelectedColor(uint32_t color);
@@ -54,6 +62,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkPatternLockSideLength(double value, int32_t un
 CJ_EXPORT void FfiOHOSAceFrameworkPatternLockStrokeWidth(double value, int32_t unit);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkPatternLockControllerCreate();
 CJ_EXPORT void FfiOHOSAceFrameworkPatternLockControllerReset(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkPatternLockonDotConnect(void (*callback)(int32_t idx));
+CJ_EXPORT void FfiOHOSAceFrameworkPatternLockActivateCircleStyle(CJCircleStyleOptions options);
+CJ_EXPORT void FfiOHOSAceFrameworkPatternLockControllerSetChallengeResult(int64_t selfID, int64_t challengeResult);
 };
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_PATTERN_LOCK_H

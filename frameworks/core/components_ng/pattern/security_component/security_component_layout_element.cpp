@@ -32,14 +32,22 @@
 #endif
 
 namespace OHOS::Ace::NG {
-void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
+
+constexpr double DEFAULT_SIZE_24 = 24;
+
+void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& iconWrap)
 {
     CHECK_NULL_VOID(property);
     CHECK_NULL_VOID(iconWrap);
     secCompProperty_ = property;
     iconWrap_ = iconWrap;
-    if (property->GetIconStyle().value_or(-1) ==
+    bool isSymbolIcon = iconWrap->GetHostTag() == V2::SYMBOL_ETS_TAG;
+    if (isSymbolIcon &&
+        static_cast<int32_t>(property->GetSymbolIconStyle().value_or(-1)) ==
+        static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+        return;
+    } else if (!isSymbolIcon && property->GetIconStyle().value_or(-1) ==
         static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
         return;
     }
@@ -55,7 +63,9 @@ void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
         isSetSize_ = true;
         width_ = height_ = property->GetIconSize().value().ConvertToPx();
     } else {
-        width_ = height_ = theme->GetIconSize().ConvertToPx();
+        height_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
+                           theme->GetIconSize().ConvertToPx();
+        width_ = height_;
     }
 }
 
@@ -116,7 +126,7 @@ void TextLayoutElement::UpdateFontSize()
     }
 }
 
-float TextLayoutElement::GetHeightConstraint(RefPtr<SecurityComponentLayoutProperty>& property, float height)
+float TextLayoutElement::GetHeightConstraint(const RefPtr<SecurityComponentLayoutProperty>& property, float height)
 {
     CHECK_NULL_RETURN(property, 0.0f);
     auto isVertical = (property->GetTextIconLayoutDirection().value_or(
@@ -139,7 +149,7 @@ float TextLayoutElement::GetHeightConstraint(RefPtr<SecurityComponentLayoutPrope
     return height - topPadding.Value() - bottomPadding.Value();
 }
 
-void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
+void TextLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& textWrap)
 {
     secCompProperty_ = property;
@@ -332,36 +342,36 @@ bool TextLayoutElement::GetCurrentTextSize(std::optional<SizeF>& currentTextSize
 bool TextLayoutElement::TryShrinkTextWidth(SizeF& point, SizeF& circlePoint, bool maxSpaceToShrink, float maxDistance,
     float threshold)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_RETURN(textProp, false);
 
     auto stepPx = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
-    auto tempHeight = height_;
+    auto currentHeight = height_;
     auto tempWidth = width_;
     auto currentRectWidth = point.Width();
-    while (NearEqual(tempHeight, height_)) {
+    while (NearEqual(currentHeight, height_)) {
         if (LessOrEqual(tempWidth, threshold)) {
+            MeasureForWidth(tempWidth + stepPx);
             return false;
         }
-        tempWidth -= stepPx;
+        auto newWidth = tempWidth - stepPx;
         currentRectWidth -= stepPx;
-        auto tempSize = GetMeasureTextSize(UtfUtils::Str16ToStr8(textProp->GetContent().value()),
-            textProp->GetFontSize().value(), textProp->GetFontWeight().value_or(FontWeight::NORMAL), tempWidth);
-        if (!tempSize.has_value()) {
-            return false;
-        }
-        tempHeight = tempSize.value().Height();
-        if (!NearEqual(tempHeight, height_)) {
+        MeasureForWidth(newWidth);
+        if (!NearEqual(currentHeight, height_)) {
+            MeasureForWidth(tempWidth);
             return false;
         }
         auto distance = pow(currentRectWidth - circlePoint.Width()) + pow(point.Height() - circlePoint.Height());
+        tempWidth = newWidth;
         if (!GreatNotEqual(distance, maxDistance)) {
             break;
         }
     }
-
-    MeasureForWidth(tempWidth);
     return true;
+#else
+    return false;
+#endif
 }
 
 std::optional<SizeF> TextLayoutElement::GetMeasureTextSize(const std::string& data,

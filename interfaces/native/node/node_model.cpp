@@ -139,10 +139,9 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_XCOMPONENT_TEXTURE,
-        ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER,
-        ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX,
-        ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM,
-        ARKUI_CUSTOM_SPAN };
+        ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
+        ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM,
+        ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN };
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     const auto* impl = GetFullImpl();
@@ -386,6 +385,30 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
         }
         impl->getNodeModifiers()->getCommonModifier()->setOnVisibleAreaChange(
             nodePtr->uiNodeHandle, reinterpret_cast<int64_t>(nodePtr), radioList, radioLength);
+    } else if (eventType == NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT) {
+        auto options = nodePtr->visibleAreaEventOptions;
+        if (!options) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        auto visibleAreaEventOptions = reinterpret_cast<ArkUI_VisibleAreaEventOptions*>(options);
+        if (!visibleAreaEventOptions) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        ArkUI_Int32 radioLength = static_cast<ArkUI_Int32>(visibleAreaEventOptions->ratios.size());
+        if (radioLength <= 0) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        ArkUI_Float32 radioList[radioLength];
+        for (int i = 0; i < radioLength; ++i) {
+            if (LessNotEqual(visibleAreaEventOptions->ratios[i], 0.0f) ||
+                GreatNotEqual(visibleAreaEventOptions->ratios[i], 1.0f)) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            radioList[i] = visibleAreaEventOptions->ratios[i];
+        }
+        impl->getNodeModifiers()->getCommonModifier()->setOnVisibleAreaApproximateChange(nodePtr->uiNodeHandle,
+            reinterpret_cast<int64_t>(nodePtr), radioList, radioLength,
+            visibleAreaEventOptions->expectedUpdateInterval);
     } else {
         impl->getBasicAPI()->registerNodeAsyncEvent(
             nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));
@@ -457,6 +480,7 @@ void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 
 void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
     uiEvent.eventTypeId = C_KEY_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->keyEvent);
 }
@@ -465,6 +489,25 @@ void HandleFocusAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEven
 {
     uiEvent.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->focusAxisEvent);
+}
+
+void HandleAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
+    uiEvent.eventTypeId = C_AXIS_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->axisEvent);
+}
+
+void HandleHoverEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_HOVER_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->hoverEvent);
+}
+
+void HandleClickEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_CLICK_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->clickEvent);
 }
 
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
@@ -505,7 +548,11 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_KEY_EVENT, HandleKeyEvent},
             {NODE_ON_KEY_PRE_IME, HandleKeyEvent},
             {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent},
-            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent}
+            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_AXIS, HandleAxisEvent},
+            {NODE_ON_CLICK_EVENT, HandleClickEvent},
+            {NODE_ON_HOVER_EVENT, HandleHoverEvent},
+            {NODE_ON_HOVER_MOVE, HandleTouchEvent},
         };
 
         auto it = eventHandlers.find(eventType);
@@ -567,6 +614,15 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case TEXT_INPUT_CHANGE:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->textChangeEvent.subKind);
+            break;
+        case AXIS_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->axisEvent.subKind);
+            break;
+        case CLICK_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->clickEvent.subKind);
+            break;
+        case HOVER_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->hoverEvent.subKind);
             break;
         default:
             break; /* Empty */
@@ -742,6 +798,83 @@ bool CheckIsCNode(ArkUI_NodeHandle node)
         return true;
     }
     return false;
+}
+
+bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node)
+{
+    if (node->cNode || node->buildNode) {
+        return true;
+    }
+    const auto* impl = GetFullImpl();
+    CHECK_NULL_RETURN(impl, false);
+    return impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(node->uiNodeHandle);
+}
+
+ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(node);
+    if (attachNode) {
+        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
+    }
+    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
+    arkUINode->type = GetNodeTypeByTag(arkUINode);
+    impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
+    return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
+}
+
+int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return -1;
+    }
+
+    static const std::unordered_map<std::string, ArkUI_NodeType> nodeTypeMap = {
+        { OHOS::Ace::V2::TEXT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT },
+        { OHOS::Ace::V2::SPAN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SPAN },
+        { OHOS::Ace::V2::IMAGE_SPAN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE_SPAN },
+        { OHOS::Ace::V2::IMAGE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE },
+        { OHOS::Ace::V2::TOGGLE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TOGGLE },
+        { OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LOADING_PROGRESS },
+        { OHOS::Ace::V2::TEXTINPUT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_INPUT },
+        { OHOS::Ace::V2::TEXTAREA_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_AREA },
+        { OHOS::Ace::V2::BUTTON_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_BUTTON },
+        { OHOS::Ace::V2::PROGRESS_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_PROGRESS },
+        { OHOS::Ace::V2::CHECK_BOX_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CHECKBOX },
+        { OHOS::Ace::V2::XCOMPONENT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_XCOMPONENT },
+        { OHOS::Ace::V2::DATE_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_DATE_PICKER },
+        { OHOS::Ace::V2::TIME_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TIME_PICKER },
+        { OHOS::Ace::V2::TEXT_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_PICKER },
+        { OHOS::Ace::V2::CALENDAR_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CALENDAR_PICKER },
+        { OHOS::Ace::V2::SLIDER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SLIDER },
+        { OHOS::Ace::V2::RADIO_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RADIO },
+        { OHOS::Ace::V2::IMAGE_ANIMATOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE_ANIMATOR },
+        { OHOS::Ace::V2::STACK_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_STACK },
+        { OHOS::Ace::V2::SWIPER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SWIPER },
+        { OHOS::Ace::V2::SCROLL_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SCROLL },
+        { OHOS::Ace::V2::LIST_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST },
+        { OHOS::Ace::V2::LIST_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST_ITEM },
+        { OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST_ITEM_GROUP },
+        { OHOS::Ace::V2::COLUMN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_COLUMN },
+        { OHOS::Ace::V2::ROW_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ROW },
+        { OHOS::Ace::V2::FLEX_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_FLEX },
+        { OHOS::Ace::V2::REFRESH_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_REFRESH },
+        { OHOS::Ace::V2::WATERFLOW_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_WATER_FLOW },
+        { OHOS::Ace::V2::FLOW_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_FLOW_ITEM },
+        { OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RELATIVE_CONTAINER },
+        { OHOS::Ace::V2::GRID_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_GRID },
+        { OHOS::Ace::V2::GRID_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_GRID_ITEM },
+        { OHOS::Ace::V2::CUSTOM_SPAN_NODE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM_SPAN },
+    };
+
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto value = impl->getNodeModifiers()->getFrameNodeModifier()->getNodeType(node->uiNodeHandle);
+    auto iter = nodeTypeMap.find(value);
+    if (iter != nodeTypeMap.end()) {
+        return iter->second;
+    }
+    return -1;
 }
 } // namespace OHOS::Ace::NodeModel
 

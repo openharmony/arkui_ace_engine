@@ -249,11 +249,11 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected(const GestureEvent& info)
+bool GridPattern::IsItemSelected(float offsetX, float offsetY)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    auto node = host->FindChildByPosition(offsetX, offsetY);
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);
@@ -266,7 +266,7 @@ void GridPattern::FireOnScrollStart()
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     SuggestOpIncGroup(true);
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -382,7 +382,8 @@ float GridPattern::GetMainGap() const
 bool GridPattern::IsFadingBottom() const
 {
     float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
-    if (LessNotEqual(info_.totalHeightOfItemsInView_, mainSize) && info_.startIndex_ == 0) {
+    if (info_.startIndex_ == 0 && (info_.endIndex_ == info_.childrenCount_ - 1) &&
+        LessNotEqual(info_.totalHeightOfItemsInView_, mainSize)) {
         return Positive(info_.currentOffset_);
     } else {
         return !info_.offsetEnd_;
@@ -417,9 +418,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     float mainGap = GetMainGap();
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     if (info_.offsetEnd_) {
-        if (GetEffectEdge() == EffectEdge::START && NonPositive(offset) && source == SCROLL_FROM_UPDATE) {
-            return true;
-        }
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
             if (irregular) {
@@ -443,9 +441,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     if (info_.reachStart_) {
-        if (GetEffectEdge() == EffectEdge::END && NonNegative(offset) && source == SCROLL_FROM_UPDATE) {
-            return true;
-        }
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
             offset *= friction;
@@ -1638,14 +1633,15 @@ ScopeFocusAlgorithm GridPattern::GetScopeFocusAlgorithm()
     }
     return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS,
         [wp = WeakClaim(this)](
-            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
             auto grid = wp.Upgrade();
-            CHECK_NULL_VOID(grid);
+            CHECK_NULL_RETURN(grid, false);
             if (grid->UseIrregularLayout() && (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB)) {
                 nextFocusNode = grid->focusHandler_.GetNextFocusSimplified(step, currFocusNode.Upgrade());
             } else {
                 nextFocusNode = grid->focusHandler_.GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
 

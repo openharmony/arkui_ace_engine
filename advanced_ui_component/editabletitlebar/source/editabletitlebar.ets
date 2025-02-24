@@ -866,9 +866,6 @@ class Util {
   private static RESOURCE_TYPE_SYMBOL = 40000;
 
   public static isSymbolResource(resourceStr: ResourceStr | undefined): boolean {
-    if (resourceStr === undefined) {
-      return true;
-    }
     if (!Util.isResourceType(resourceStr)) {
       return false;
     }
@@ -876,10 +873,13 @@ class Util {
     return resource.type === Util.RESOURCE_TYPE_SYMBOL;
   }
 
-  public static isResourceType(resource: ResourceStr): boolean {
+  public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
     if (!resource) {
       return false;
     }
-    return typeof resource !== 'string';
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
   }
 }

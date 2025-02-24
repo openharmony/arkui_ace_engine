@@ -51,9 +51,11 @@ public:
     void SetAnimationDuration(float duration) override;
     void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
     void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) override;
+    void SetOnUnselected(std::function<void(const BaseEventInfo*)>&& onUnselected) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
     void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
+    void SetOnSelected(std::function<void(const BaseEventInfo*)>&& onSelected) override;
     void SetDivider(const TabsItemDivider& divider) override;
     void SetFadingEdge(bool fadingEdge) override;
     void SetBarOverlap(bool barOverlap) override;
@@ -79,6 +81,7 @@ public:
     static void SetHeightAuto(FrameNode* frameNode, bool isAuto);
     static void SetTabBarMode(FrameNode* frameNode, const std::optional<TabBarMode>& tabBarModeOpt);
     static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
+    static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetDivider(FrameNode* frameNode, const std::optional<TabsItemDivider>& dividerOpt);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode,  const std::optional<Color>& backgroundColorOpt);
@@ -111,6 +114,7 @@ public:
     static RefPtr<TabsControllerNG> GetSwiperController(FrameNode* frameNode);
     static void InitIndex(FrameNode* tabsNode, const std::optional<int32_t>& indexOpt);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);
+    static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

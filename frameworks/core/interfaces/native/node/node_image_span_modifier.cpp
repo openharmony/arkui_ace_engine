@@ -247,7 +247,7 @@ void ResetImageSpanBorderRadius(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIImageSpanModifier* GetImageSpanModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIImageSpanModifier modifier = {
         .setImageSpanVerticalAlign = SetImageSpanVerticalAlign,
         .resetImageSpanVerticalAlign = ResetImageSpanVerticalAlign,
@@ -270,20 +270,13 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         .resetImageSpanBorderRadius = ResetImageSpanBorderRadius,
         .getImageSpanBaselineOffset = GetImageSpanBaselineOffset,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIImageSpanModifier modifier = {
         .setImageSpanVerticalAlign = SetImageSpanVerticalAlign,
         .resetImageSpanVerticalAlign = ResetImageSpanVerticalAlign,
@@ -301,14 +294,7 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
         .setImageSpanOnError = SetImageSpanOnError,
         .resetImageSpanOnError = ResetImageSpanOnError,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

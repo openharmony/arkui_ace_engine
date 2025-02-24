@@ -54,6 +54,7 @@
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
+#include "core/interfaces/native/node/node_indicator_modifier.h"
 #include "core/interfaces/native/node/node_list_item_group_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
@@ -123,12 +124,19 @@
 #include "core/interfaces/native/node/form_component_modifier.h"
 #endif
 
+#ifdef WEB_SUPPORTED
+#include "core/interfaces/native/node/web_modifier.h"
+#endif
+
 using namespace OHOS::Ace::NG;
+
+#define MODIFIER_COUNTS 14
+#define BLANK_LINES 6
 
 extern "C" {
 const ArkUINodeModifiers* GetArkUINodeModifiers()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static ArkUINodeModifiers impl = {
         .version = ARKUI_NODE_MODIFIERS_API_VERSION,
         .getCommonModifier = NodeModifier::GetCommonModifier,
@@ -202,11 +210,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCalendarPickerModifier = nullptr,
     #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
-    #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetTabsModifier,
-    #else
-        .getTabsModifier = nullptr,
-    #endif
     #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
     #else
@@ -265,16 +269,16 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getFlexModifier = NodeModifier::GetFlexModifier, // FlexModifier
         .getScrollBarModifier = NodeModifier::GetScrollBarModifier, // ScrollBarModifier
         .getScrollerModifier = NodeModifier::GetScrollerModifier,
-    #ifndef ARKUI_WEARABLE
         .getTabContentModifier = NodeModifier::GetTabContentModifier,
-    #else
-        .getTabContentModifier = nullptr,
-    #endif
         .getTabsControllerModifier = nullptr, // TabsControllerModifier
         .getSwiperControllerModifier = NodeModifier::GetSwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetGestureModifier, // GestureModifier
         .getBadgeModifier = NodeModifier::GetBadgeModifier, // BadgeModifier
+    #ifdef WEB_SUPPORTED
+        .getWebModifier = NodeModifier::GetWebModifier, // WebModifier
+    #else
         .getWebModifier = nullptr, // WebModifier
+    #endif
         .getRefreshModifier = NodeModifier::GetRefreshModifier, // RefreshModifier
         .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
         .getSearchControllerModifier = nullptr, // SearchControllerModifier
@@ -286,11 +290,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
         .getParticleModifier = NodeModifier::GetParticleModifier,
-    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetNodeContentModifier,
-    #else
-        .getNodeContentModifier = nullptr,
-    #endif
         .getSymbolGlyphModifier = NodeModifier::GetSymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetSymbolSpanModifier,
     #ifdef MODEL_COMPONENT_SUPPORTED
@@ -302,21 +302,15 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCustomNodeExtModifier = nullptr,
         .getThemeModifier = NodeModifier::GetThemeModifier,
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
+        .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 16; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(impl) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;
 }
 
 const CJUINodeModifiers* GetCJUINodeModifiers()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static CJUINodeModifiers modifiers {
         .version = ARKUI_NODE_MODIFIERS_API_VERSION,
         .getCommonModifier = NodeModifier::GetCJUICommonModifier,
@@ -390,11 +384,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getCalendarPickerModifier = nullptr,
     #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
-    #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
-    #else
-        .getTabsModifier = nullptr,
-    #endif
     #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
     #else
@@ -456,16 +446,16 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getFlexModifier = NodeModifier::GetCJUIFlexModifier, // FlexModifier
         .getScrollBarModifier = NodeModifier::GetCJUIScrollBarModifier, // ScrollBarModifier
         .getScrollerModifier = NodeModifier::GetCJUIScrollerModifier,
-    #ifndef ARKUI_WEARABLE
         .getTabContentModifier = NodeModifier::GetCJUITabContentModifier,
-    #else
-        .getTabContentModifier = nullptr,
-    #endif
         .getTabsControllerModifier = nullptr, // TabsControllerModifier
         .getSwiperControllerModifier = NodeModifier::GetCJUISwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetCJUIGestureModifier, // GestureModifier
         .getBadgeModifier = nullptr, // BadgeModifier
+    #ifdef WEB_SUPPORTED
+        .getWebModifier = NodeModifier::GetCJUIWebModifier, // WebModifier
+    #else
         .getWebModifier = nullptr, // WebModifier
+    #endif
         .getRefreshModifier = NodeModifier::GetCJUIRefreshModifier, // RefreshModifier
         .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
         .getSearchControllerModifier = nullptr, // SearchControllerModifier
@@ -476,11 +466,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getRichEditorControllerModifier = nullptr, // RichEditorControllerModifier
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetCJUIRelativeContainerModifier, // RelativeContainerModifier
-    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetCJUINodeContentModifier,
-    #else
-        .getNodeContentModifier = nullptr,
-    #endif
         .getParticleModifier = NodeModifier::GetCJUIParticleModifier,
         .getSymbolGlyphModifier = NodeModifier::GetCJUISymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetCJUISymbolSpanModifier,
@@ -493,14 +479,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
 
         .getContainerSpanModifier = NodeModifier::GetCJUIContainerSpanModifier,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 6; // modify this line accordingly
-    constexpr auto ifdefs = 16; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifiers) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifiers, MODIFIER_COUNTS, BLANK_LINES, 0); // don't move this line
     return &modifiers;
 }
 }

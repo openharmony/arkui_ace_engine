@@ -86,9 +86,7 @@ class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     }
 
     public updateIndex(newIndex: number): void {
-        if (this.index !== undefined) {
-            this.index = newIndex;
-        }
+        this.index = newIndex;
     }
 }
 
@@ -140,19 +138,24 @@ interface __RepeatConfig<T> {
     arr?: Array<T>;
     itemGenFuncs?: { [type: string]: RepeatItemGenFunc<T> };
     keyGenFunc?: RepeatKeyGenFunc<T>;
-    typeGenFunc?: RepeatTypeGenFunc<T>;
+    keyGenFuncSpecified?: boolean;
+    ttypeGenFunc?: RepeatTTypeGenFunc<T>;
     totalCountSpecified?: boolean;
     totalCount?: number;
     templateOptions?: { [type: string]: RepeatTemplateImplOptions };
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     onMoveHandler?: OnMoveHandler;
+    reusable?: boolean;
 };
+
+// should be empty string, don't change it
+const RepeatEachFuncTtype : string = '';
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
 class __Repeat<T> implements RepeatAPI<T> {
     private config: __RepeatConfig<T> = {};
-    private impl: __RepeatImpl<T> | __RepeatVirtualScrollImpl<T>;
+    private impl: __RepeatImpl<T> | __RepeatVirtualScrollImpl<T> | __RepeatVirtualScroll2Impl<T>;
     private isVirtualScroll = false;
 
     constructor(owningView: ViewV2 | ViewPU, arr: Array<T>) {
@@ -160,10 +163,13 @@ class __Repeat<T> implements RepeatAPI<T> {
         this.config.arr = arr ?? [];
         this.config.itemGenFuncs = {};
         this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
-        this.config.typeGenFunc = ((): string => '');
+        this.config.keyGenFuncSpecified = false;
+        this.config.ttypeGenFunc = undefined;
+
         this.config.totalCountSpecified = false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
+        this.config.reusable = true;
 
         // to be used with ViewV2
         const mkRepeatItemV2 = (item: T, index?: number): __RepeatItemFactoryReturn<T> =>
@@ -178,58 +184,53 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     public each(itemGenFunc: RepeatItemGenFunc<T>): RepeatAPI<T> {
-        this.config.itemGenFuncs[''] = itemGenFunc;
-        this.config.templateOptions[''] = this.normTemplateOptions({});
+        this.config.itemGenFuncs[RepeatEachFuncTtype] = itemGenFunc;
+        this.config.templateOptions[RepeatEachFuncTtype] = this.normTemplateOptions({});
         return this;
     }
 
     public key(keyGenFunc: RepeatKeyGenFunc<T>): RepeatAPI<T> {
         this.config.keyGenFunc = keyGenFunc;
+        this.config.keyGenFuncSpecified = true;
         return this;
     }
 
-    public virtualScroll(options? : { totalCount?: number }): RepeatAPI<T> {
-        if (Number.isInteger(options?.totalCount)) {
+    public virtualScroll(options? : { totalCount?: number, reusable?: boolean }): RepeatAPI<T> {
+        // totalCount must be integer and must be 0 or larger
+        if (Number.isInteger(options?.totalCount) && options.totalCount >= 0) {
             this.config.totalCount = options.totalCount;
             this.config.totalCountSpecified = true;
         } else {
+            // use default totalCount value if given a non-integer or negative value
+            this.config.totalCount = this.config.arr.length;
             this.config.totalCountSpecified = false;
         }
         this.isVirtualScroll = true;
+
+        if (typeof options?.reusable === 'boolean') {
+            this.config.reusable = options.reusable;
+        } else if (options?.reusable === null) {
+            this.config.reusable = true;
+            stateMgmtConsole.warn(
+                `Repeat.reusable type should be boolean. Use default setting: reusable = true`);
+        } else {
+            this.config.reusable = true;
+        }
         return this;
     }
 
     // function to decide which template to use, each template has an ttype
-    public templateId(typeGenFunc: RepeatTypeGenFunc<T>): RepeatAPI<T> {
-        const typeGenFuncImpl = (item: T, index: number): string => {
-            try {
-                return typeGenFunc(item, index);
-            } catch (e) {
-                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Exception in templateId():`, e?.message);
-                return '';
-            }
-        };
-        // typeGenFunc wrapper with ttype validation
-        const typeGenFuncSafe = (item: T, index: number): string => {
-            const itemType = typeGenFuncImpl(item, index);
-            const itemFunc = this.config.itemGenFuncs[itemType];
-            if (typeof itemFunc !== 'function') {
-                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for ttype '${itemType}'`);
-                return '';
-            }
-            return itemType;
-        };
-
-        this.config.typeGenFunc = typeGenFuncSafe;
+    public templateId(ttypeGenFunc: RepeatTTypeGenFunc<T>): RepeatAPI<T> {
+        this.config.ttypeGenFunc = ttypeGenFunc;
         return this;
     }
 
     // template: ttype + builder function to render specific type of data item 
-    public template(type: string, itemGenFunc: RepeatItemGenFunc<T>,
+    public template(ttype: string, itemGenFunc: RepeatItemGenFunc<T>,
         options?: RepeatTemplateOptions): RepeatAPI<T>
     {
-        this.config.itemGenFuncs[type] = itemGenFunc;
-        this.config.templateOptions[type] = this.normTemplateOptions(options);
+        this.config.itemGenFuncs[ttype] = itemGenFunc;
+        this.config.templateOptions[ttype] = this.normTemplateOptions(options);
         return this;
     }
 
@@ -239,17 +240,23 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     public render(isInitialRender: boolean): void {
-        if (!this.config.itemGenFuncs?.['']) {
+        if (!this.config.itemGenFuncs?.[RepeatEachFuncTtype]) {
             throw new Error(`__Repeat item builder function unspecified. Usage error`);
         }
         if (!this.isVirtualScroll) {
-          // Repeat
-          this.impl ??= new __RepeatImpl<T>();
-          this.impl.render(this.config, isInitialRender);
+            // Repeat
+            this.impl ??= new __RepeatImpl<T>();
+            this.impl.render(this.config, isInitialRender);
+            return;
+        }
+        if (Utils.getApiVersion() < 16) {
+            // RepeatVirtualScroll
+            this.impl ??= new __RepeatVirtualScrollImpl<T>();
+            this.impl.render(this.config, isInitialRender);
         } else {
-          // RepeatVirtualScroll
-          this.impl ??= new __RepeatVirtualScrollImpl<T>();
-          this.impl.render(this.config, isInitialRender);
+            // RepeatVirtualScroll v2
+            this.impl ??= new __RepeatVirtualScroll2Impl<T>();
+            this.impl.render(this.config, isInitialRender);
         }
     }
 

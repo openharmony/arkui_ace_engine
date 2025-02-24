@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("select_overlay_test_ng") {
   type = "new"
   sources = [
+    "select_overlay_content_modifier_test_ng.cpp",
     "select_overlay_paint_method_test_ng.cpp",
     "select_overlay_test_ng.cpp",
     "select_overlay_testthree_ng.cpp",

@@ -275,6 +275,7 @@ HWTEST_F(WebPatternWindowTestNg, OnDateTimeChooserCloseTest001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
     webPattern->OnDateTimeChooserClose();
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>(), nullptr);
 }
 
 /**
@@ -395,43 +396,6 @@ HWTEST_F(WebPatternWindowTestNg, SetFullScreenExitHandlerTest001, TestSize.Level
     EXPECT_NE(fullScreenExitHandler, nullptr);
     webPattern->SetFullScreenExitHandler(fullScreenExitHandler);
     EXPECT_NE(webPattern->fullScreenExitHandler_, nullptr);
-}
-
-/**
- * @tc.name: OnSmoothDragResizeEnabledUpdateTest001
- * @tc.desc: Test OnSmoothDragResizeEnabledUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, OnSmoothDragResizeEnabledUpdateTest001, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->delegate_ = nullptr;
-    webPattern->OnSmoothDragResizeEnabledUpdate(true);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
-}
-
-/**
- * @tc.name: OnSmoothDragResizeEnabledUpdateTest002
- * @tc.desc: Test OnSmoothDragResizeEnabledUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, OnSmoothDragResizeEnabledUpdateTest002, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->delegate_ =
-        AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-    webPattern->OnSmoothDragResizeEnabledUpdate(true);
-    EXPECT_NE(webPattern->delegate_, nullptr);
 }
 
 /**

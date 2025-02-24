@@ -22,10 +22,32 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING = 8.0_vp;
+constexpr int32_t DOUBLE = 2;
 } // namespace
+
+float DigitIndicatorLayoutAlgorithm::CalcFrameHeight(const RefPtr<FrameNode>& frameNode, float indicatorHeight)
+{
+    CHECK_NULL_RETURN(frameNode, indicatorHeight);
+    auto indicatorlayoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_RETURN(indicatorlayoutProperty, indicatorHeight);
+    auto ignoreSize = indicatorlayoutProperty->GetIgnoreSize();
+    auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_RETURN(indicatorPattern, indicatorHeight);
+    bool isHorizontal = false;
+    auto direction = indicatorPattern->GetDirection();
+    if (direction == Axis::HORIZONTAL) {
+        isHorizontal = true;
+    }
+    auto frameHeight = indicatorHeight;
+    if (ignoreSize.has_value() && ignoreSize.value() == true && isHorizontal) {
+        frameHeight = indicatorHeight + INDICATOR_PADDING.ConvertToPx();
+    }
+    return frameHeight;
+}
 
 void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -57,10 +79,52 @@ void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
     }
 
-    SizeF frameSize = { indicatorWidth, indicatorHeight };
+    const auto& calcLayoutConstraint = layoutPropertyConstraint->GetCalcLayoutConstraint();
+    if (isSingle_ && calcLayoutConstraint && calcLayoutConstraint->selfIdealSize) {
+        const auto& constraint = layoutPropertyConstraint->GetLayoutConstraint();
+        CHECK_NULL_VOID(constraint);
+        auto idealSize =
+            CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutPropertyConstraint->GetMeasureType(), true);
+        auto width = calcLayoutConstraint->selfIdealSize->Width();
+        auto height = calcLayoutConstraint->selfIdealSize->Height();
+        if (width) {
+            indicatorWidth = std::max(static_cast<float>(indicatorWidth), idealSize.Width());
+        }
+
+        if (height) {
+            indicatorHeight = std::max(static_cast<float>(indicatorHeight), idealSize.Height());
+        }
+    }
+    
+    auto frameHeight = CalcFrameHeight(frameNode, indicatorHeight);
+    SizeF frameSize = { indicatorWidth, frameHeight };
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(frameSize);
+}
+
+void DigitIndicatorLayoutAlgorithm::SetBackTextOffset(const ChildrenListWithGuard& textWrapperList,
+    const SizeF& frameSize, bool isHorizontal, const std::optional<bool>& ignoreSize)
+{
+    auto backTextWrapper = textWrapperList.back();
+    CHECK_NULL_VOID(backTextWrapper);
+    auto backTextGeometryNode = backTextWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(backTextGeometryNode);
+    auto width = frameSize.Width();
+    auto height = frameSize.Height();
+    auto backOffsetHeight = backTextGeometryNode->GetMarginFrameSize().Height();
+    if (ignoreSize.has_value() && ignoreSize.value() == true) {
+        if (isHorizontal) {
+            backOffsetHeight = 0.0f;
+        } else {
+            backOffsetHeight = backOffsetHeight / DOUBLE;
+        }
+    }
+    auto backTextCurrentOffset =
+        OffsetF { width - backTextGeometryNode->GetMarginFrameSize().Width() - INDICATOR_PADDING.ConvertToPx(),
+            (height - backOffsetHeight) * 0.5  };
+    backTextGeometryNode->SetMarginFrameOffset(backTextCurrentOffset);
+    backTextWrapper->Layout();
 }
 
 void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -80,21 +144,37 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frontTextGeometryNode);
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(layoutGeometryNode);
+
+    auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    SizeF frameSize = { 0.0f, 0.0f };
+    auto success = indicatorPattern->GetDigitFrameSize(layoutGeometryNode, frameSize);
+    CHECK_NULL_VOID(success);
+    auto height = frameSize.Height();
+
+    auto indicatorlayoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(indicatorlayoutProperty);
+
+    bool isHorizontal = false;
+    auto direction = indicatorPattern->GetDirection();
+    if (direction == Axis::HORIZONTAL) {
+        isHorizontal = true;
+    }
+
+    float frontOffsetHeight = frontTextGeometryNode->GetMarginFrameSize().Height();
+    auto ignoreSize = indicatorlayoutProperty->GetIgnoreSize();
+    if (ignoreSize.has_value() && ignoreSize.value() == true) {
+        if (isHorizontal) {
+            frontOffsetHeight = 0.0f;
+        } else {
+            frontOffsetHeight = frontOffsetHeight / DOUBLE;
+        }
+    }
     auto frontCurrentOffset = OffsetF { INDICATOR_PADDING.ConvertToPx(),
-        (layoutGeometryNode->GetMarginFrameSize().Height() - frontTextGeometryNode->GetMarginFrameSize().Height()) *
-            0.5 };
+        (height - frontOffsetHeight) * 0.5 };
     frontTextGeometryNode->SetMarginFrameOffset(frontCurrentOffset);
     frontTextWrapper->Layout();
-    auto backTextWrapper = textWrapperList.back();
-    CHECK_NULL_VOID(backTextWrapper);
-    auto backTextGeometryNode = backTextWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(backTextGeometryNode);
-    auto backTextCurrentOffset = OffsetF {
-        layoutGeometryNode->GetMarginFrameSize().Width() - backTextGeometryNode->GetMarginFrameSize().Width() -
-            INDICATOR_PADDING.ConvertToPx(),
-        (layoutGeometryNode->GetMarginFrameSize().Height() - backTextGeometryNode->GetMarginFrameSize().Height()) * 0.5
-    };
-    backTextGeometryNode->SetMarginFrameOffset(backTextCurrentOffset);
-    backTextWrapper->Layout();
+
+    SetBackTextOffset(textWrapperList, frameSize, isHorizontal, ignoreSize);
 }
 } // namespace OHOS::Ace::NG

@@ -17,10 +17,8 @@
 
 namespace OHOS::Ace::Framework {
 
-static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Checkbox", "CheckboxGroup",
-    "Rating", "Radio", "Toggle", "Hyperlink" };
-static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Checkbox", "CheckboxGroup", "Rating",
-    "Radio", "Toggle", "Hyperlink" };
+static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
+static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
 
 #ifdef USE_ARK_ENGINE
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
@@ -30,6 +28,17 @@ Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
         info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetStopPropagation(true);
+    }
+    return JSValueRef::Undefined(info->GetVM());
+}
+
+Local<JSValueRef> JsPropagation(panda::JsiRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (eventInfo) {
+        eventInfo->SetStopPropagation(false);
     }
     return JSValueRef::Undefined(info->GetVM());
 }
@@ -87,8 +96,7 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
     if (!eventInfo) {
         return JSValueRef::Undefined(info->GetVM());
     }
-    std::list<TouchLocationInfo> history;
-    history = eventInfo->GetHistory();
+    std::list<TouchLocationInfo> history = eventInfo->GetHistory();
     Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
     auto index = 0;
     for (auto const &point : history) {
@@ -96,24 +104,30 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
         const OHOS::Ace::Offset& globalLocation = point.GetGlobalLocation();
         const OHOS::Ace::Offset& localLocation = point.GetLocalLocation();
         const OHOS::Ace::Offset& screenLocation = point.GetScreenLocation();
+        auto x = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+        auto y = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+        auto globalX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+        auto globalY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+        auto displayX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+        auto displayY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
         touchObject->Set(info->GetVM(), ToJSValue("id"), ToJSValue(point.GetFingerId()));
         touchObject->Set(info->GetVM(), ToJSValue("type"), ToJSValue(static_cast<int32_t>(point.GetTouchType())));
+        touchObject->Set(info->GetVM(), ToJSValue("x"), ToJSValue(x));
+        touchObject->Set(info->GetVM(), ToJSValue("y"), ToJSValue(y));
+        touchObject->Set(info->GetVM(), ToJSValue("screenX"), ToJSValue(globalX));
+        touchObject->Set(info->GetVM(), ToJSValue("screenY"), ToJSValue(globalY));
+        touchObject->Set(info->GetVM(), ToJSValue("windowX"), ToJSValue(globalX));
+        touchObject->Set(info->GetVM(), ToJSValue("windowY"), ToJSValue(globalY));
+        touchObject->Set(info->GetVM(), ToJSValue("displayX"), ToJSValue(displayX));
+        touchObject->Set(info->GetVM(), ToJSValue("displayY"), ToJSValue(displayY));
+        touchObject->Set(info->GetVM(), ToJSValue("hand"), ToJSValue(point.GetOperatingHand()));
+        touchObject->Set(info->GetVM(), ToJSValue("pressedTime"),
+            ToJSValue(static_cast<double>(point.GetPressedTime().time_since_epoch().count())));
+        touchObject->Set(info->GetVM(), ToJSValue("pressure"), ToJSValue(point.GetForce()));
         touchObject->Set(info->GetVM(),
-            ToJSValue("x"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX())));
+            ToJSValue("width"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.GetWidth())));
         touchObject->Set(info->GetVM(),
-            ToJSValue("y"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY())));
-        touchObject->Set(info->GetVM(),
-            ToJSValue("screenX"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX())));
-        touchObject->Set(info->GetVM(),
-            ToJSValue("screenY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY())));
-        touchObject->Set(info->GetVM(),
-            ToJSValue("windowX"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX())));
-        touchObject->Set(info->GetVM(),
-            ToJSValue("windowY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY())));
-        touchObject->Set(info->GetVM(),
-            ToJSValue("displayX"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX())));
-        touchObject->Set(info->GetVM(),
-            ToJSValue("displayY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())));
+            ToJSValue("height"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.GetHeight())));
 
         Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
         objRef->Set(info->GetVM(), ToJSValue("touchObject"), (touchObject));

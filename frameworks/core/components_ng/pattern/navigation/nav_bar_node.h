@@ -41,14 +41,11 @@ public:
     static RefPtr<NavBarNode> GetOrCreateNavBarNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    void InitSystemTransitionPush(bool transitionIn = false) override;
-    void EndSystemTransitionPush(bool transitionIn = false) override;
-    void InitSystemTransitionPop(bool transitionIn = true) override;
-    void EndSystemTransitionPop(bool transitionIn = true) override;
-    void FinishSystemTransitionPush();
+    void InitSystemTransitionPop();
+    void SystemTransitionPushAction(bool isFinish);
+    void StartSystemTransitionPush();
+    void StartSystemTransitionPop();
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
-    void FinishSystemTransitionAnimationPush(RefPtr<FrameNode>& preNode, RefPtr<FrameNode>& naviagtionNode,
-        bool transitionIn, const int32_t animationId) override;
 };
 
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,9 @@
 
 namespace OHOS::Ace::Framework {
 
+#define HAND_NONE 0
+#define HAND_LEFT 1
+#define HAND_RIGHT 2
 class JsClickFunction : public JsFunction {
     DECLARE_ACE_TYPE(JsClickFunction, JsFunction)
 

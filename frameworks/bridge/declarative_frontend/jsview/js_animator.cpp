@@ -14,9 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_animator.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 
 #include "base/log/ace_scoring_log.h"
@@ -141,9 +139,7 @@ std::function<void()> GetEventCallback(const JSCallbackInfo& info, const std::st
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT(name);
         func->Execute();
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", name);
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", name);
     };
 }
 

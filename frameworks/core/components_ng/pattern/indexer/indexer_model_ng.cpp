@@ -22,16 +22,17 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::INDEXER_ETS_TAG, nodeId);
+    const char* tag = isArc ? V2::ARC_INDEXER_ETS_TAG : V2::INDEXER_ETS_TAG;
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag, nodeId);
     RefPtr<FrameNode> frameNode = nullptr;
     if (isArc) {
         frameNode = FrameNode::GetOrCreateFrameNode(
-            V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcIndexerPattern>(); });
+            tag, nodeId, []() { return AceType::MakeRefPtr<ArcIndexerPattern>(); });
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(
-            V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+            tag, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
     }
-    
+
     stack->Push(frameNode);
     if (selected < 0 || selected >= static_cast<int32_t>(arrayValue.size())) {
         selected = 0;
@@ -332,11 +333,17 @@ void IndexerModelNG::SetAdaptiveWidth(bool state)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AdaptiveWidth, state);
 }
 
-RefPtr<FrameNode> IndexerModelNG::CreateFrameNode(int32_t nodeId)
+RefPtr<FrameNode> IndexerModelNG::CreateFrameNode(int32_t nodeId, bool isArc)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
-
+    const char* tag = isArc ? V2::ARC_INDEXER_ETS_TAG : V2::INDEXER_ETS_TAG;
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (isArc) {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            tag, nodeId, []() { return AceType::MakeRefPtr<ArcIndexerPattern>(); });
+    } else {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            tag, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+    }
     return frameNode;
 }
 

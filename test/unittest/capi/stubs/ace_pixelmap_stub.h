@@ -150,6 +150,11 @@ public:
         return true;  // Return true to indicate success
     }
 
+    uint32_t WritePixels(const WritePixelsOptions& opts) override
+    {
+        return 0;
+    }
+    
 private:
     int32_t stubWidth = 2;
     int32_t stubHeight = 2;

@@ -26,4 +26,62 @@ void SearchController::CaretPosition(int32_t caretPosition)
     }
 }
 
+void SearchController::StopEditing()
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
+    } else {
+        LOGW("StopEditing failed, controller is null.");
+    }
+}
+
+void SearchController::SetTextSelection(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->SetTextSelection(selectionStart, selectionEnd, options);
+    } else {
+        LOGW("SetTextSelection failed, controller is null.");
+    }
+}
+
+int32_t SearchController::GetTextContentLinesNum()
+{
+    int32_t linesNum = -1;
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        linesNum = controller->GetTextContentLinesNum();
+    }
+    return linesNum;
+}
+
+CJRectResult SearchController::GetTextContentRect()
+{
+    CJRectResult result;
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        Rect rect = controller->GetTextContentRect();
+        result.x = rect.Left();
+        result.y = rect.Top();
+        result.width = rect.Width();
+        result.height = rect.Height();
+    }
+    return result;
+}
+
+CJCaretOffset SearchController::GetCaretOffset()
+{
+    CJCaretOffset result;
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        NG::OffsetF caretOffset = controller->GetCaretPosition();
+        result.index = controller->GetCaretIndex();
+        result.x = caretOffset.GetX();
+        result.y = caretOffset.GetY();
+    }
+    return result;
+}
+
 } // namespace OHOS::Ace::Framework

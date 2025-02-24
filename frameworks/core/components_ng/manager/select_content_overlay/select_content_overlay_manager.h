@@ -100,6 +100,8 @@ public:
     void RevertRectRelativeToRoot(RectF& rect);
     OffsetF GetContainerModalOffset();
     bool IsStopBackPress() const;
+    bool IsRightClickSubWindowMenu();
+    bool IsSelectOverlaySubWindowMenu();
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
@@ -133,6 +135,10 @@ private:
         const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children);
     RefPtr<FrameNode> GetContainerModalRoot();
     void UpdateSelectOverlayInfoInternal(SelectOverlayInfo& overlayInfo);
+    std::string GetOwnerDebugInfo();
+    void MountMenuNodeToSubWindow(const RefPtr<FrameNode>& overlayNode, bool animation, NodeType nodeType);
+    bool IsEnableSubWindowMenu();
+    void UpdateRightClickSubWindowMenuProps(const RefPtr<FrameNode>& overlayNode);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;
@@ -144,6 +150,7 @@ private:
     std::optional<HoldSelectionInfo> holdSelectionInfo_;
     LegacyManagerCallbacks legacyManagerCallbacks_;
     bool isIntercept_ = false;
+    int32_t containerId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectContentOverlayManager);
 };

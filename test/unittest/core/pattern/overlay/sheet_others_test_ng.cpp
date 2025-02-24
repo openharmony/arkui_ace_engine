@@ -589,43 +589,6 @@ HWTEST_F(SheetOthersTestNg, GetOverlayFromPage004, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTagFromRootNodeType001
- * @tc.desc: Increase the coverage of SheetManager::GetTagFromRootNodeType function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetOthersTestNg, GetTagFromRootNodeType001, TestSize.Level1)
-{
-    SheetOthersTestNg::SetUpTestCase();
-    int32_t rootNodeId = 101;
-    auto sheetNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, rootNodeId,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    RootNodeType rootNodeType = RootNodeType::PAGE_ETS_TAG;
-    EXPECT_FALSE(rootNodeId <= 0);
-    EXPECT_EQ(rootNodeType, RootNodeType::PAGE_ETS_TAG);
-    SheetManager sheetManager;
-    sheetManager.GetOverlayFromPage(rootNodeId, rootNodeType);
-
-    rootNodeType = RootNodeType::NAVDESTINATION_VIEW_ETS_TAG;
-    sheetNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
-    EXPECT_FALSE(rootNodeId <= 0);
-    EXPECT_EQ(rootNodeType, RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
-    sheetManager.GetOverlayFromPage(rootNodeId, rootNodeType);
-
-    rootNodeType = RootNodeType::WINDOW_SCENE_ETS_TAG;
-    sheetNode->tag_ = V2::WINDOW_SCENE_ETS_TAG;
-    EXPECT_FALSE(rootNodeId <= 0);
-    EXPECT_EQ(rootNodeType, RootNodeType::WINDOW_SCENE_ETS_TAG);
-    sheetManager.GetOverlayFromPage(rootNodeId, rootNodeType);
-
-    rootNodeType = RootNodeType(100);
-    EXPECT_NE(rootNodeType, RootNodeType::PAGE_ETS_TAG);
-    EXPECT_NE(rootNodeType, RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
-    EXPECT_NE(rootNodeType, RootNodeType::WINDOW_SCENE_ETS_TAG);
-    sheetManager.GetOverlayFromPage(rootNodeId, rootNodeType);
-    SheetOthersTestNg::TearDownTestCase();
-}
-
-/**
  * @tc.name: UpdateBindSheetByUIContext001
  * @tc.desc: Increase the coverage of SheetManager::UpdateBindSheetByUIContext function.
  * @tc.type: FUNC

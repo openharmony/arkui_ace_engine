@@ -26,11 +26,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-using namespace testing;
-using namespace testing::ext;
-constexpr float GRID_WIDTH = 240.f;
-constexpr float GRID_HEIGHT = 400.f;
-constexpr float ITEM_MAIN_SIZE = 100.f;
 constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 3.0_vp;
 constexpr Dimension BORDER_RADIUS = 8.0_vp;
 constexpr float COL_GAP = 10.f;
@@ -38,7 +33,6 @@ constexpr float ROW_GAP = 5.f;
 constexpr float BIG_ROW_GAP = 700.f;
 constexpr float MEDIUM_ROW_GAP = 35.f;
 constexpr int32_t FILL_VALUE = -2;
-constexpr int32_t TICK = 2;
 } // namespace
 
 class GridTestNg : public ScrollableUtilsTestNG {

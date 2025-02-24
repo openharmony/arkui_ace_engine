@@ -105,7 +105,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
 
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isMouseSelect_ = false;
@@ -126,7 +126,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
 
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isMouseSelect_ = false;
@@ -159,7 +159,8 @@ HWTEST_F(RichEditorClickTestNg, HandleMouseLeftButton001, TestSize.Level1)
 
     auto paragraph = AceType::MakeRefPtr<MockParagraph>();
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
-    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
+    auto& paragraphs = richEditorPattern->paragraphs_.paragraphs_;
+    paragraphs.insert(paragraphs.begin(), { paragraph });
     richEditorPattern->mouseStatus_ = MouseStatus::NONE;
     richEditorPattern->blockPress_ = false;
     richEditorPattern->leftMousePress_ = true;
@@ -412,6 +413,28 @@ HWTEST_F(RichEditorClickTestNg, HandleMouseEvent002, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->isMouseSelect_);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
     EXPECT_TRUE(richEditorPattern->isFirstMouseSelect_);
+}
+
+/**
+ * @tc.name: OnHover001
+ * @tc.desc: test on hover
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, OnHover001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto host = richEditorPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto id = host->GetId();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    richEditorPattern->OnHover(true);
+    auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
+    EXPECT_EQ(mouseStyleManager->mouseStyleNodeId_.value(), id);
+    richEditorPattern->OnHover(false);
+    EXPECT_FALSE(mouseStyleManager->mouseStyleNodeId_.has_value());
 }
 
 /**

@@ -155,7 +155,7 @@ void SetMainSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 namespace NodeModifier {
 const ArkUIFlexModifier* GetFlexModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIFlexModifier modifier = {
         .setFlexOptions = SetFlexOptions,
         .resetFlexOptions = ResetFlexOptions,
@@ -163,21 +163,14 @@ const ArkUIFlexModifier* GetFlexModifier()
         .setFlexCrossSpace = setFlexCrossSpace,
         .setFlexMainSpace = SetMainSpace,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIFlexModifier* GetCJUIFlexModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIFlexModifier modifier = {
         .setFlexOptions = SetFlexOptions,
         .resetFlexOptions = ResetFlexOptions,
@@ -185,14 +178,7 @@ const CJUIFlexModifier* GetCJUIFlexModifier()
         .setFlexCrossSpace = setFlexCrossSpace,
         .setFlexMainSpace = SetMainSpace,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

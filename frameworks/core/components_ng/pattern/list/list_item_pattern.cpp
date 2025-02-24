@@ -636,7 +636,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
         }
         if (NearEqual(position, listItem->curOffset_, 1.0) && !listItem->springMotionTraceFlag_) {
             listItem->springMotionTraceFlag_ = true;
-            AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+            AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
         }
         float delta = listItem->IsRTLAndVertical() ? listItem->curOffset_ - position : position - listItem->curOffset_;
         listItem->UpdatePostion(delta);
@@ -653,7 +653,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
         }
         if (listItem->springMotionTraceFlag_) {
             listItem->springMotionTraceFlag_ = false;
-            AceAsyncTraceEnd(0, TRAILING_ANIMATION);
+            AceAsyncTraceEndCommercial(0, TRAILING_ANIMATION);
         }
         listItem->MarkDirtyNode();
         if (trigOnFinishEvent) {

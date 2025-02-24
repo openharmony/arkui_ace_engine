@@ -47,6 +47,14 @@ private:
     void SetBorderPenStyle(RSPen& pen, const Dimension& borderWidth, const Color& borderColor);
     void GetBorderDrawPath(RSPath& path, const RefPtr<FrameNode> sheetNode, const RefPtr<SheetTheme>& sheetTheme,
         float borderWidth, const BorderRadiusProperty& sheetRadius);
+    void GetBorderDrawPathNew(RSPath& path, const RefPtr<FrameNode> sheetNode,
+        float borderWidth, const BorderRadiusProperty& sheetRadius);
+    void DrawClipPathBottom(
+        RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);
+    void DrawClipPathTop(RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);
+    void DrawClipPathLeft(RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);
+    void DrawClipPathRight(RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);
+    void DrawClipPathWithoutArrow(RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float);
     bool IsDrawBorder(PaintWrapper* paintWrapper);
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetWrapperPaintMethod);

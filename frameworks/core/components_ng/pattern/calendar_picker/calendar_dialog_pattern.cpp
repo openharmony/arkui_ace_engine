@@ -17,11 +17,10 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/date_util.h"
-#include "core/components/calendar/calendar_data_adapter.h"
-#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -51,6 +50,23 @@ constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
 constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 } // namespace
+
+FocusPattern CalendarDialogPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+    CHECK_NULL_RETURN(calendarTheme, FocusPattern());
+    auto focusColor = pickerTheme->GetFocusColor();
+    FocusPaintParam focusPaintParams;
+    focusPaintParams.SetPaintColor(focusColor);
+    auto focusPaintWidth = calendarTheme->GetCalendarDayKeyFocusedPenWidth();
+    focusPaintParams.SetPaintWidth(focusPaintWidth);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+}
+
 void CalendarDialogPattern::OnModifyDone()
 {
     LinearLayoutPattern::OnModifyDone();
@@ -1419,5 +1435,42 @@ void CalendarDialogPattern::UpdateCaretInfoToController()
     CHECK_NULL_VOID(dialogNode);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     CalendarDialogView::SetPreviousOrientation();
+}
+
+bool CalendarDialogPattern::CanReportChangeEvent(const PickerDate& pickerDate)
+{
+    return CalendarDialogView::CanReportChangeEvent(reportedPickerDate_, pickerDate);
+}
+
+void CalendarDialogPattern::OnColorConfigurationUpdate()
+{
+    auto titleNode = titleNode_.Upgrade();
+    CHECK_NULL_VOID(titleNode);
+    auto pipelineContext = titleNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    
+    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+}
+
+void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("markToday", currentSettingData_.markToday ? "true" : "false", filter);
+    std::string disabledDateRangeStr = "";
+    for (const auto& range : currentSettingData_.disabledDateRange) {
+        disabledDateRangeStr += range.first.ToString(false) + "," + range.second.ToString(false) + ",";
+    }
+    if (!disabledDateRangeStr.empty() && disabledDateRangeStr.back() == ',') {
+        disabledDateRangeStr.pop_back();
+    }
+    json->PutExtAttr("disabledDateRange", disabledDateRangeStr.c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

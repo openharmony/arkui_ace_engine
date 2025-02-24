@@ -64,5 +64,7 @@ void RichEditorDragPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper
     CHECK_NULL_VOID(textTheme);
     auto selectorColor = info_.selectedBackgroundColor.value_or(textTheme->GetSelectedColor());
     modifier->SetSelectedColor(selectorColor.GetValue());
+    modifier->SetDragBackgroundColor(info_.dragBackgroundColor);
+    modifier->SetIsDragShadowNeeded(info_.isDragShadowNeeded);
 }
 } // namespace OHOS::Ace::NG

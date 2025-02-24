@@ -18,10 +18,14 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
 namespace OHOS::Ace::NG {
+constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 constexpr int32_t INFO_COUNT = 3;
 const bool DEFAULT_SELECTED = false;
 const char* CHECKBOX_NODEPTR_OF_UINODE = "nodePtr_";
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
 panda::Local<panda::JSValueRef> JsCheckboxChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     auto vm = runtimeCallInfo->GetVM();
@@ -433,6 +437,44 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxOptions(ArkUIRuntimeCallInfo* 
     }
     GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxName(nativeNode, nameStr.c_str());
     GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxGroup(nativeNode, groupStr.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue CheckboxBridge::ResetCheckboxOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+
+    GetArkUINodeModifiers()->getCheckboxModifier()->resetCheckboxOnChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue CheckboxBridge::SetCheckboxOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getCheckboxModifier()->resetCheckboxOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(bool)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](bool isOnchange) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { panda::BooleanRef::New(vm, isOnchange) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxOnChange(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

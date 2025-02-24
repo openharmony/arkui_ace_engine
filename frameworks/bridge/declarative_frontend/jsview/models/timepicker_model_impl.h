@@ -25,6 +25,8 @@ public:
     ~TimePickerModelImpl() override = default;
 
     void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) override;
+    void SetStartTime(const PickerTime& value) override {};
+    void SetEndTime(const PickerTime& value) override {};
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(ChangeEvent&& onChange) override;
     void SetOnEnterSelectedArea(ChangeEvent&& onEnterSelectedArea) override;
@@ -40,6 +42,7 @@ public:
     void SetChangeEvent(ChangeEvent&& onChange) override {};
     void HasUserDefinedOpacity() override {};
     void SetEnableCascade(bool isEnableCascade) override;
+    void SetDigitalCrownSensitivity(int32_t value) override {};
 };
 
 class TimePickerDialogModelImpl : public TimePickerDialogModel {

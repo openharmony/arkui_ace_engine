@@ -17,7 +17,7 @@
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include <mutex>
-#include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #endif //WINDOW_SCENE_SUPPORTED
 
 struct UIExtensionProxyPeer {

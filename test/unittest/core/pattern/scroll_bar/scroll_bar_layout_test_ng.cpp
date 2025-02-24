@@ -106,7 +106,7 @@ HWTEST_F(ScrollBarLayoutTestNg, DisplayMode001, TestSize.Level1)
     pattern_->controlDistanceChanged_ = true;
     pattern_->UpdateScrollBarDisplay();
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 1);
 
     /**
@@ -117,14 +117,14 @@ HWTEST_F(ScrollBarLayoutTestNg, DisplayMode001, TestSize.Level1)
     pattern_->controlDistanceChanged_ = true;
     pattern_->UpdateScrollBarDisplay();
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 0);
 
     layoutProperty_->UpdateDisplayMode(DisplayMode::AUTO);
     pattern_->controlDistanceChanged_ = true;
     pattern_->UpdateScrollBarDisplay();
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 0);
 
     /**
@@ -135,7 +135,7 @@ HWTEST_F(ScrollBarLayoutTestNg, DisplayMode001, TestSize.Level1)
     pattern_->controlDistanceChanged_ = true;
     pattern_->UpdateScrollBarDisplay();
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 0);
 
     /**
@@ -146,7 +146,7 @@ HWTEST_F(ScrollBarLayoutTestNg, DisplayMode001, TestSize.Level1)
     pattern_->controlDistanceChanged_ = true;
     pattern_->UpdateScrollBarDisplay();
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 1);
 }
 
@@ -183,7 +183,7 @@ HWTEST_F(ScrollBarLayoutTestNg, UpdateScrollBarOffset001, TestSize.Level1)
     CreateScroll();
     CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
 
     /**
@@ -215,7 +215,7 @@ HWTEST_F(ScrollBarLayoutTestNg, SetScrollBar001, TestSize.Level1)
     CreateScroll();
     CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_NE(pattern_->scrollBar_, nullptr);
     EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
 
@@ -234,9 +234,9 @@ HWTEST_F(ScrollBarLayoutTestNg, SetScrollBar001, TestSize.Level1)
      */
     layoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     pattern_->SetScrollBar(DisplayMode::ON);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollBarOverlayModifier_->positionMode_, PositionMode::BOTTOM);
 
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
@@ -259,12 +259,12 @@ HWTEST_F(ScrollBarLayoutTestNg, SetScrollBar002, TestSize.Level1)
     CreateScroll();
     CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_NE(pattern_->scrollBar_, nullptr);
     EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
 
     pattern_->SetScrollBar(DisplayMode::ON);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
 
     /**
@@ -272,13 +272,13 @@ HWTEST_F(ScrollBarLayoutTestNg, SetScrollBar002, TestSize.Level1)
      * @tc.expected: Still Hide scrollBar when unScrollable
      */
     pattern_->SetScrollBar(DisplayMode::AUTO);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), 0);
 
     SetScrollContentMainSize(SCROLL_HEIGHT);
     EXPECT_FALSE(pattern_->scrollBar_->IsScrollable());
     pattern_->SetScrollBar(DisplayMode::ON);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), 0);
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }

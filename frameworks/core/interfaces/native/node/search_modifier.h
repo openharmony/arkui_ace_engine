@@ -26,6 +26,8 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam);
 void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam);
 void SetOnSearchCut(ArkUINodeHandle node, void* extraParam);
 void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam);
+void SetSearchKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance);
+void ResetSearchKeyboardAppearance(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SEARCH_MODIFIER_H

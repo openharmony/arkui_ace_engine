@@ -488,8 +488,7 @@ auto g_bindSheetParams = [](SheetStyle sheetStyle, const Ark_SheetOptions& sheet
     Validator::ValidateNonNegative(sheetStyle.width);
     auto height = OptConvert<SheetHeight>(sheetOptions.height);
     if (height) {
-        sheetStyle.sheetMode = height->sheetMode;
-        sheetStyle.height = height->height;
+        sheetStyle.sheetHeight = height.value();
     }
 };
 
@@ -1936,9 +1935,9 @@ void ChainWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LayoutWeightPair layoutWeightPair(Converter::OptConvert<float>(value->horizontal),
-                                      Converter::OptConvert<float>(value->vertical));
-    ViewAbstractModelNG::SetLayoutWeight(frameNode, layoutWeightPair);
+    ChainWeightPair chainWeight(Converter::OptConvert<float>(value->horizontal),
+        Converter::OptConvert<float>(value->vertical));
+    ViewAbstractModelNG::SetChainWeight(frameNode, chainWeight);
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Ark_Union_Padding_Length_LocalizedPadding* value)
@@ -3572,7 +3571,7 @@ void OnDragStartImpl(Ark_NativePointer node,
 
         auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
             if (auto fnode = weakNode.Upgrade(); fnode) {
-                result.customNode = CallbackHelper(val).BuildSync(fnode.GetRawPtr());
+                result.customNode = CallbackHelper(val).BuildSync(Referenced::RawPtr(fnode));
             }
         };
         auto parseDragI = [&result](const Ark_DragItemInfo& value) {
@@ -4449,9 +4448,9 @@ void BackgroundImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto customNode = CallbackHelper(*builder).BuildSync(node);
     CHECK_NULL_VOID(customNode);
-    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
+    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
     auto optAlign = options ? Converter::OptConvert<Alignment>(*options) : std::nullopt;
-    ViewAbstract::SetBackgroundAlign(customFrameNode, optAlign);
+    ViewAbstract::SetBackgroundAlign(Referenced::RawPtr(customFrameNode), optAlign);
 }
 void BackgroundImageImpl(Ark_NativePointer node,
                          const Ark_Union_ResourceStr_PixelMap* src,
@@ -5003,7 +5002,7 @@ void BindSheetImpl(Ark_NativePointer node,
         ViewStackProcessor::GetInstance()->Push(uiNode);
     };
     SheetStyle sheetStyle;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;

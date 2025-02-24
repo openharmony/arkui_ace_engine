@@ -61,6 +61,18 @@
         continue;                \
     }
 
+#define CHECK_INITIALIZED_FIELDS_BEGIN() \
+    constexpr auto _lineBegin = __LINE__;
+
+#define CHECK_INITIALIZED_FIELDS_END(obj, ifdefs, blankLines, commentLines) \
+    constexpr auto _lineEnd = __LINE__; \
+    constexpr auto _ifdefOverhead = 4; \
+    constexpr auto _overHeadLines = 3; \
+    constexpr auto initializedFieldLines = _lineEnd - _lineBegin - _overHeadLines \
+        - ifdefs * _ifdefOverhead - blankLines - commentLines; \
+    static_assert(initializedFieldLines == sizeof(obj) / sizeof(void*), \
+        "ensure all fields are explicitly initialized");
+
 #define PRIMITIVE_CAT(x, y) x##y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
 

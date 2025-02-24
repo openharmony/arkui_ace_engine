@@ -505,17 +505,17 @@ HWTEST_F(SearchModifierTest, setSearchOptionsValidValues, TestSize.Level1)
  *
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, setCancelButtonTestDefault, TestSize.Level1)
+HWTEST_F(SearchModifierTest, DISABLED_setCancelButtonTestDefault, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCancelButton, nullptr);
     // default
     auto fullJsonDefault = GetJsonValue(node_);
     auto defaultCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJsonDefault, CANCEL_BUTTON_ATTR);
-    auto defaultButtonIconStyleAttr = defaultCancelButtonAttrs->GetString(CANCEL_BUTTON_STYLE_ATTR);
-    auto defaultCancelButtonIconAttrs = defaultCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-    auto defaultCancelButtonIconSrc = defaultCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SRC_ATTR);
-    auto defaultCancelButtonIconColor = defaultCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
-    auto defaultCancelButtonIconSize = defaultCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SIZE_ATTR);
+    auto defaultButtonIconStyleAttr = GetAttrValue<std::string>(defaultCancelButtonAttrs, CANCEL_BUTTON_STYLE_ATTR);
+    auto defaultCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(defaultCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+    auto defaultCancelButtonIconSrc = GetAttrValue<std::string>(defaultCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SRC_ATTR);
+    auto defaultCancelButtonIconColor = GetAttrValue<std::string>(defaultCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
+    auto defaultCancelButtonIconSize = GetAttrValue<std::string>(defaultCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SIZE_ATTR);
     EXPECT_EQ(defaultButtonIconStyleAttr, BUTTON_STYLE_INPUT);
     EXPECT_EQ(defaultCancelButtonIconSrc, EMPTY_TEXT);
     EXPECT_EQ(defaultCancelButtonIconColor, CHECK_DEFAULT_BLACK_COLOR_ARRAY);
@@ -555,8 +555,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidColorValues, TestSize.Level
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
 }
@@ -593,8 +593,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidNumberValues, TestSize.Leve
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
 }
@@ -631,8 +631,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidStringValues, TestSize.Leve
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
 }
@@ -660,8 +660,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestInvalidNumberValues, TestSize.Le
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
 }
@@ -690,8 +690,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestTestInvalidStringValues, TestSiz
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
 }
@@ -711,8 +711,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSize, TestSize.Level1)
         modifier_->setCancelButton(node_, &attrs);
         auto fullJson = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto customCancelButtonIconSize = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SIZE_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto customCancelButtonIconSize = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SIZE_ATTR);
         EXPECT_EQ(customCancelButtonIconSize, testSize.second);
     }
 }
@@ -733,8 +733,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSrc, TestSize.Level1)
         modifier_->setCancelButton(node_, &attrs);
         auto jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SRC_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SRC_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
 }
@@ -754,7 +754,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestStyle, TestSize.Level1)
         modifier_->setCancelButton(node_, &attrs);
         auto fullJson = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CANCEL_BUTTON_ATTR);
-        auto customButtonIconStyleAttr = customCancelButtonAttrs->GetString(CANCEL_BUTTON_STYLE_ATTR);
+        auto customButtonIconStyleAttr = GetAttrValue<std::string>(customCancelButtonAttrs, CANCEL_BUTTON_STYLE_ATTR);
         EXPECT_EQ(customButtonIconStyleAttr, testStyleButton.second);
     }
 }
@@ -790,9 +790,9 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTest, TestSize.Level1)
     // default
     auto fullJson = GetJsonValue(node_);
     auto defaultSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, SEARCH_ICON_ATTR);
-    auto defaultSearchIconSrc = defaultSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
-    auto defaultSearchIconColor = defaultSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
-    auto defaultSearchIconSize = defaultSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
+    auto defaultSearchIconSrc = GetAttrValue<std::string>(defaultSearchIconAttrs, SEARCH_ICON_SRC_ATTR);
+    auto defaultSearchIconColor = GetAttrValue<std::string>(defaultSearchIconAttrs, SEARCH_ICON_COLOR_ATTR);
+    auto defaultSearchIconSize = GetAttrValue<std::string>(defaultSearchIconAttrs, SEARCH_ICON_SIZE_ATTR);
     EXPECT_EQ(defaultSearchIconSrc, ICON_DEFAULT_SRC);
     EXPECT_EQ(defaultSearchIconColor, CHECK_DEFAULT_BLACK_COLOR);
     EXPECT_EQ(defaultSearchIconSize, CHECK_DEFAULT_PX);
@@ -812,9 +812,9 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTest, TestSize.Level1)
                 modifier_->setSearchIcon(node_, &attrs);
                 auto jsonValue = GetJsonValue(node_);
                 auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, SEARCH_ICON_ATTR);
-                auto customSearchIconSrc = customSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
-                auto customSearchIconColor = customSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
-                auto customSearchIconSize = customSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
+                auto customSearchIconSrc = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_SRC_ATTR);
+                auto customSearchIconColor = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_COLOR_ATTR);
+                auto customSearchIconSize = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_SIZE_ATTR);
                 EXPECT_EQ(customSearchIconSrc, expectSrc);
                 EXPECT_EQ(customSearchIconColor, expectColor);
                 EXPECT_EQ(customSearchIconSize, expectLength);
@@ -863,8 +863,8 @@ HWTEST_F(SearchModifierTest, setSearchButtonTest, TestSize.Level1)
     // default
     auto fullJson = GetJsonValue(node_);
     auto defaultCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUTTON_OPTIONS_ATTR);
-    auto defaultCaretColor = defaultCaretStyle->GetString(BUTTON_OPTIONS_COLOR_ATTR);
-    auto defaultCaretWidth = defaultCaretStyle->GetString(BUTTON_OPTIONS_SIZE_ATTR);
+    auto defaultCaretColor = GetAttrValue<std::string>(defaultCaretStyle, BUTTON_OPTIONS_COLOR_ATTR);
+    auto defaultCaretWidth = GetAttrValue<std::string>(defaultCaretStyle, BUTTON_OPTIONS_SIZE_ATTR);
     EXPECT_EQ(defaultCaretColor, CHECK_DEFAULT_BLACK_COLOR);
     EXPECT_EQ(defaultCaretWidth, CHECK_DEFAULT_VP);
     // custom
@@ -883,8 +883,8 @@ HWTEST_F(SearchModifierTest, setSearchButtonTest, TestSize.Level1)
         modifier_->setSearchButton(node_, &checkText, &buttonOptions.first);
         auto fullJson = GetJsonValue(node_);
         auto customButtonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUTTON_OPTIONS_ATTR);
-        auto searchButtonColor = customButtonOptions->GetString(BUTTON_OPTIONS_COLOR_ATTR);
-        auto searchButtonSize = customButtonOptions->GetString(BUTTON_OPTIONS_SIZE_ATTR);
+        auto searchButtonColor = GetAttrValue<std::string>(customButtonOptions, BUTTON_OPTIONS_COLOR_ATTR);
+        auto searchButtonSize = GetAttrValue<std::string>(customButtonOptions, BUTTON_OPTIONS_SIZE_ATTR);
         EXPECT_EQ(searchButtonColor, buttonOptions.second.first);
         EXPECT_EQ(searchButtonSize, buttonOptions.second.second);
     }
@@ -969,8 +969,8 @@ HWTEST_F(SearchModifierTest, setCaretStyleTest, TestSize.Level1)
     ASSERT_NE(modifier_->setCaretStyle, nullptr);
     auto fullJsonDefault = GetJsonValue(node_);
     auto defaultCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJsonDefault, CARET_STYLE_ATTR);
-    auto defaultCaretColor = defaultCaretStyle->GetString(CARET_STYLE_COLOR_ATTR);
-    auto defaultCaretWidth = defaultCaretStyle->GetString(CARET_STYLE_WIDTH_ATTR);
+    auto defaultCaretColor = GetAttrValue<std::string>(defaultCaretStyle, CARET_STYLE_COLOR_ATTR);
+    auto defaultCaretWidth = GetAttrValue<std::string>(defaultCaretStyle, CARET_STYLE_WIDTH_ATTR);
     EXPECT_EQ(defaultCaretColor, CHECK_DEFAULT_BLACK_COLOR);
     EXPECT_EQ(defaultCaretWidth, CHECK_DEFAULT_PX);
 
@@ -989,8 +989,8 @@ HWTEST_F(SearchModifierTest, setCaretStyleTest, TestSize.Level1)
         auto value = GetStringAttribute(node_, CARET_STYLE_ATTR);
         auto fullJson = GetJsonValue(node_);
         auto customCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CARET_STYLE_ATTR);
-        auto caretColor = customCaretStyle->GetString(CARET_STYLE_COLOR_ATTR);
-        auto caretWidth = customCaretStyle->GetString(CARET_STYLE_WIDTH_ATTR);
+        auto caretColor = GetAttrValue<std::string>(customCaretStyle, CARET_STYLE_COLOR_ATTR);
+        auto caretWidth = GetAttrValue<std::string>(customCaretStyle, CARET_STYLE_WIDTH_ATTR);
         EXPECT_EQ(caretColor, caretStyle.second.first);
         EXPECT_EQ(caretWidth, caretStyle.second.second);
     }
@@ -1160,13 +1160,13 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestStyle, TestSize.Level1)
         modifier_->setPlaceholderFont(node_, &fontOpt);
         auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
-        auto checkSize = placeholderFont->GetString(PLACEHOLDER_FONT_SIZE);
-        auto checkFamily = placeholderFont->GetString(PLACEHOLDER_FONT_FAMILY);
-        auto checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT);
+        auto checkSize = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
+        auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
+        auto checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT);
         if (checkWeight.empty()) {
-            checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT_ENUM);
+            checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT_ENUM);
         }
-        auto checkStyle = placeholderFont->GetString(PLACEHOLDER_FONT_STYLE);
+        auto checkStyle = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_STYLE);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
         EXPECT_EQ(checkStyle, style.second);
@@ -1200,13 +1200,13 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestWeight, TestSize.Level1)
         modifier_->setPlaceholderFont(node_, &fontOpt);
         auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
-        auto checkSize = placeholderFont->GetString(PLACEHOLDER_FONT_SIZE);
-        auto checkFamily = placeholderFont->GetString(PLACEHOLDER_FONT_FAMILY);
-        auto checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT);
+        auto checkSize = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
+        auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
+        auto checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT);
         if (checkWeight.empty()) {
-            checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT_ENUM);
+            checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT_ENUM);
         }
-        auto checkStyle = placeholderFont->GetString(PLACEHOLDER_FONT_STYLE);
+        auto checkStyle = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_STYLE);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
         EXPECT_EQ(checkStyle, styleStr);
@@ -1240,13 +1240,13 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestFamily, TestSize.Level1)
         modifier_->setPlaceholderFont(node_, &fontOpt);
         auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
-        auto checkSize = placeholderFont->GetString(PLACEHOLDER_FONT_SIZE);
-        auto checkFamily = placeholderFont->GetString(PLACEHOLDER_FONT_FAMILY);
-        auto checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT);
+        auto checkSize = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
+        auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
+        auto checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT);
         if (checkWeight.empty()) {
-            checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT_ENUM);
+            checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT_ENUM);
         }
-        auto checkStyle = placeholderFont->GetString(PLACEHOLDER_FONT_STYLE);
+        auto checkStyle = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_STYLE);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, family.second);
         EXPECT_EQ(checkStyle, styleStr);
@@ -1280,13 +1280,13 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestSize, TestSize.Level1)
         modifier_->setPlaceholderFont(node_, &fontOpt);
         auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
-        auto checkSize = placeholderFont->GetString(PLACEHOLDER_FONT_SIZE);
-        auto checkFamily = placeholderFont->GetString(PLACEHOLDER_FONT_FAMILY);
-        auto checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT);
+        auto checkSize = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
+        auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
+        auto checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT);
         if (checkWeight.empty()) {
-            checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT_ENUM);
+            checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT_ENUM);
         }
-        auto checkStyle = placeholderFont->GetString(PLACEHOLDER_FONT_STYLE);
+        auto checkStyle = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_STYLE);
         EXPECT_EQ(checkSize, size.second);
         EXPECT_EQ(checkFamily, familyStr);
         EXPECT_EQ(checkStyle, styleStr);
@@ -1320,10 +1320,10 @@ HWTEST_F(SearchModifierTest, setTextFontTestStyle, TestSize.Level1)
         modifier_->setTextFont(node_, &fontOpt);
         auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
         auto textFont = JsonUtil::ParseJsonString(textFontJSON);
-        auto checkSize = textFont->GetString(TEXT_FONT_SIZE_ATTR);
-        auto checkFamily = textFont->GetString(TEXT_FONT_FAMILY_ATTR);
-        auto checkWeight = textFont->GetString(TEXT_FONT_WEIGHT_ATTR);
-        auto checkStyle = textFont->GetString(TEXT_FONT_STYLE_ATTR);
+        auto checkSize = GetAttrValue<std::string>(textFont, TEXT_FONT_SIZE_ATTR);
+        auto checkFamily = GetAttrValue<std::string>(textFont, TEXT_FONT_FAMILY_ATTR);
+        auto checkWeight = GetAttrValue<std::string>(textFont, TEXT_FONT_WEIGHT_ATTR);
+        auto checkStyle = GetAttrValue<std::string>(textFont, TEXT_FONT_STYLE_ATTR);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
         EXPECT_EQ(checkStyle, style.second);
@@ -1357,10 +1357,10 @@ HWTEST_F(SearchModifierTest, setTextFontTestFontWeight, TestSize.Level1)
         modifier_->setTextFont(node_, &fontOpt);
         auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
         auto textFont = JsonUtil::ParseJsonString(textFontJSON);
-        auto checkSize = textFont->GetString(TEXT_FONT_SIZE_ATTR);
-        auto checkFamily = textFont->GetString(TEXT_FONT_FAMILY_ATTR);
-        auto checkWeight = textFont->GetString(TEXT_FONT_WEIGHT_ATTR);
-        auto checkStyle = textFont->GetString(TEXT_FONT_STYLE_ATTR);
+        auto checkSize = GetAttrValue<std::string>(textFont, TEXT_FONT_SIZE_ATTR);
+        auto checkFamily = GetAttrValue<std::string>(textFont, TEXT_FONT_FAMILY_ATTR);
+        auto checkWeight = GetAttrValue<std::string>(textFont, TEXT_FONT_WEIGHT_ATTR);
+        auto checkStyle = GetAttrValue<std::string>(textFont, TEXT_FONT_STYLE_ATTR);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
         EXPECT_EQ(checkStyle, styleStr);
@@ -1394,10 +1394,10 @@ HWTEST_F(SearchModifierTest, setTextFontTestFontFamily, TestSize.Level1)
         modifier_->setTextFont(node_, &fontOpt);
         auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
         auto textFont = JsonUtil::ParseJsonString(textFontJSON);
-        auto checkSize = textFont->GetString(TEXT_FONT_SIZE_ATTR);
-        auto checkFamily = textFont->GetString(TEXT_FONT_FAMILY_ATTR);
-        auto checkWeight = textFont->GetString(TEXT_FONT_WEIGHT_ATTR);
-        auto checkStyle = textFont->GetString(TEXT_FONT_STYLE_ATTR);
+        auto checkSize = GetAttrValue<std::string>(textFont, TEXT_FONT_SIZE_ATTR);
+        auto checkFamily = GetAttrValue<std::string>(textFont, TEXT_FONT_FAMILY_ATTR);
+        auto checkWeight = GetAttrValue<std::string>(textFont, TEXT_FONT_WEIGHT_ATTR);
+        auto checkStyle = GetAttrValue<std::string>(textFont, TEXT_FONT_STYLE_ATTR);
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, family.second);
         EXPECT_EQ(checkStyle, styleStr);
@@ -1431,10 +1431,10 @@ HWTEST_F(SearchModifierTest, setTextFontTestFontSize, TestSize.Level1)
         modifier_->setTextFont(node_, &fontOpt);
         auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
         auto textFont = JsonUtil::ParseJsonString(textFontJSON);
-        auto checkSize = textFont->GetString(TEXT_FONT_SIZE_ATTR);
-        auto checkFamily = textFont->GetString(TEXT_FONT_FAMILY_ATTR);
-        auto checkWeight = textFont->GetString(TEXT_FONT_WEIGHT_ATTR);
-        auto checkStyle = textFont->GetString(TEXT_FONT_STYLE_ATTR);
+        auto checkSize = GetAttrValue<std::string>(textFont, TEXT_FONT_SIZE_ATTR);
+        auto checkFamily = GetAttrValue<std::string>(textFont, TEXT_FONT_FAMILY_ATTR);
+        auto checkWeight = GetAttrValue<std::string>(textFont, TEXT_FONT_WEIGHT_ATTR);
+        auto checkStyle = GetAttrValue<std::string>(textFont, TEXT_FONT_STYLE_ATTR);
         EXPECT_EQ(checkSize, size.second);
         EXPECT_EQ(checkFamily, familyStr);
         EXPECT_EQ(checkStyle, styleStr);
@@ -1523,9 +1523,9 @@ HWTEST_F(SearchModifierTest, setDecorationTest, TestSize.Level1)
     ASSERT_NE(modifier_->setDecoration, nullptr);
     auto defaultDecorationJSON = GetStringAttribute(node_, DECORATION_ATTRS);
     auto defaultDecoration = JsonUtil::ParseJsonString(defaultDecorationJSON);
-    auto defaultType = defaultDecoration->GetString(DECORATION_TYPE_ATTR);
-    auto defaultStyle = defaultDecoration->GetString(DECORATION_STYLE_ATTR);
-    auto defaultColor = defaultDecoration->GetString(DECORATION_COLOR_ATTR);
+    auto defaultType = GetAttrValue<std::string>(defaultDecoration, DECORATION_TYPE_ATTR);
+    auto defaultStyle = GetAttrValue<std::string>(defaultDecoration, DECORATION_STYLE_ATTR);
+    auto defaultColor = GetAttrValue<std::string>(defaultDecoration, DECORATION_COLOR_ATTR);
     EXPECT_EQ(defaultType, "TextDecorationType.None");
     EXPECT_EQ(defaultStyle, "TextDecorationStyle.SOLID");
     EXPECT_EQ(defaultColor, CHECK_DEFAULT_BLACK_COLOR);
@@ -1541,9 +1541,9 @@ HWTEST_F(SearchModifierTest, setDecorationTest, TestSize.Level1)
                 modifier_->setDecoration(node_, &options);
                 auto decorationJSON = GetStringAttribute(node_, DECORATION_ATTRS);
                 auto decoration = JsonUtil::ParseJsonString(decorationJSON);
-                auto type = decoration->GetString(DECORATION_TYPE_ATTR);
-                auto style = decoration->GetString(DECORATION_STYLE_ATTR);
-                auto color = decoration->GetString(DECORATION_COLOR_ATTR);
+                auto type = GetAttrValue<std::string>(decoration, DECORATION_TYPE_ATTR);
+                auto style = GetAttrValue<std::string>(decoration, DECORATION_STYLE_ATTR);
+                auto color = GetAttrValue<std::string>(decoration, DECORATION_COLOR_ATTR);
                 EXPECT_EQ(type, expectDecorationType);
                 EXPECT_EQ(style, expectDecorationStyle);
                 EXPECT_EQ(color, expectColor);
@@ -1623,11 +1623,11 @@ HWTEST_F(SearchModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
 
     PreviewText previewText {.offset = -1, .value = u""};
     ASSERT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnChange(u"test", previewText);
+    eventHub->FireOnChange({u"test", previewText});
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, "test");
-    eventHub->FireOnChange(u"test_2", previewText);
+    eventHub->FireOnChange({u"test_2", previewText});
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, "test_2");

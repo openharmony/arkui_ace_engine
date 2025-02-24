@@ -22,6 +22,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
+#include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -234,7 +235,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg007, TestSize
                                NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
     auto updateNodeFuncation = [&testUpdateNodeFunc](
                                    const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [&testRenderfunc](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> { return nullptr; };
 
     NodeInfoPU info = {
         .renderFunc = renderFunction,
@@ -323,7 +324,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg010, TestSize
                                NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
     auto updateNodeFuncation = [&testUpdateNodeFunc](
                                    const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [&testRenderfunc](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> { return nullptr; };
 
     NodeInfoPU info = {
         .renderFunc = renderFunction,
@@ -364,7 +365,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg011, TestSize
                                NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
     auto updateNodeFuncation = [&testUpdateNodeFunc](
                                    const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [&testRenderfunc](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> { return nullptr; };
     auto measureSizeFunction = [&testMeasure](NG::LayoutWrapper* testMeasureWrapper = nullptr) {
         testMeasure = testMeasureWrapper;
     };
@@ -407,7 +408,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg012, TestSize
                                NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
     auto updateNodeFuncation = [&testUpdateNodeFunc](
                                    const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [&testRenderfunc](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> { return nullptr; };
     auto placeChildrenFunction = [&testPlaceChildrenFunc](NG::LayoutWrapper* testPlaceChildrenFuncWrapper = nullptr) {
         testPlaceChildrenFunc = testPlaceChildrenFuncWrapper;
     };

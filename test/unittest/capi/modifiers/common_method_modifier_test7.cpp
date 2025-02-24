@@ -205,7 +205,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragEnterTest, TestSize.Level1)
 
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->dragEvent, dragEventPtr);
     EXPECT_EQ(checkEvent->extraParams, extraParamsString);
 }
 
@@ -250,7 +250,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragMoveTest, TestSize.Level1)
 
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->dragEvent, dragEventPtr);
     EXPECT_EQ(checkEvent->extraParams, extraParamsString);
 }
 
@@ -295,7 +295,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragLeaveTest, TestSize.Level1)
 
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->dragEvent, dragEventPtr);
     EXPECT_EQ(checkEvent->extraParams, extraParamsString);
 }
 
@@ -340,7 +340,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDropTest, TestSize.Level1)
 
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->dragEvent, dragEventPtr);
     EXPECT_EQ(checkEvent->extraParams, extraParamsString);
 }
 
@@ -384,7 +384,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragEndTest, TestSize.Level1)
 
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEventPtr.GetRawPtr());
+    EXPECT_EQ(checkEvent->dragEvent, dragEventPtr);
     EXPECT_EQ(checkEvent->extraParams, "");
 }
 
@@ -443,7 +443,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTestCOPY, TestSize.Level1)
     dragEvent->SetDragBehavior(DragBehavior::COPY);
     DragDropInfo ddInfo = fireOnDragStart(dragEvent, expectedInfo);
     EXPECT_EQ(ddInfo.customNode, nullptr);
-    EXPECT_EQ(checkEvent->dragEvent.GetRawPtr(), dragEvent.GetRawPtr());
+    EXPECT_EQ(checkEvent->dragEvent, dragEvent);
     EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
     arkBuilder = nullptr;
 }

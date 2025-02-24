@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ constexpr size_t MAX_SIZE = 10;
 
 ScrollableItemPool& ScrollableItemPool::GetInstance()
 {
-    static ScrollableItemPool pool(MAX_SIZE);
+    static thread_local ScrollableItemPool pool(MAX_SIZE);
     return pool;
 }
 

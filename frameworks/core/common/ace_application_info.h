@@ -228,6 +228,28 @@ public:
         useNewPipeline_.emplace(useNewPipeline);
     }
 
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        std::unique_lock<std::shared_mutex> lock(eventsPassThroughMutex_);
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+    }
+
+    bool IsTouchEventsPassThrough() const
+    {
+        std::shared_lock<std::shared_mutex> lock(eventsPassThroughMutex_);
+        return isTouchEventsPassThrough_;
+    }
+
+    void SetReusedNodeSkipMeasure(bool reusedNodeSkipMeasure)
+    {
+        reusedNodeSkipMeasure_= reusedNodeSkipMeasure;
+    }
+
+    bool IsReusedNodeSkipMeasure() const
+    {
+        return reusedNodeSkipMeasure_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -258,6 +280,9 @@ protected:
     std::string versionName_;
     uint32_t versionCode_ = 0;
     int32_t missionId_ = -1;
+    mutable std::shared_mutex eventsPassThroughMutex_;
+    bool isTouchEventsPassThrough_ = false;
+    bool reusedNodeSkipMeasure_ = false;
 };
 
 } // namespace OHOS::Ace

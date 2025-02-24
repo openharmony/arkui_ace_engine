@@ -533,7 +533,6 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize
 
     auto renderMock = GetMockRenderContext();
     ASSERT_NE(renderMock, nullptr);
-    EXPECT_CALL(*renderMock, UpdateBackgroundEffect(std::optional<EffectOption>(expectedBgEffect))).Times(1);
 
     Ark_BackgroundEffectOptions inputValValid = {
         .radius = ArkValue<Ark_Number>(123.45f),
@@ -548,6 +547,7 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize
         .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
     };
     modifier_->setBackgroundEffect0(node_, &inputValValid);
+    EXPECT_EQ(renderMock->GetOrCreateBackground()->propEffectOption, expectedBgEffect);
 }
 
 /*

@@ -443,6 +443,7 @@ HWTEST_F(RichEditorEditTestOneNg, RefreshSelectOverlay001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     pipeline->themeManager_ = theme;
 
     richEditorPattern->customKeyboardBuilder_ = []() {};
@@ -497,6 +498,9 @@ HWTEST_F(RichEditorEditTestOneNg, ShowHandles001, TestSize.Level1)
     richEditorPattern->ShowHandles(false);
     EXPECT_EQ(richEditorPattern->showSelect_, true);
 
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
     richEditorPattern->isSpanStringMode_ = true;
     auto pasteStr = richEditorPattern->GetPasteStr();
     richEditorPattern->InsertValueByPaste(pasteStr);
@@ -1259,11 +1263,35 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnCut004, TestSize.Level1)
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     richEditorPattern->previewLongPress_ = true;
     richEditorPattern->HandleOnCut();
-    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
+    EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
     EXPECT_EQ(isEventCalled, true);
+}
+
+/**
+ * @tc.name: RichEditorHalfLeading001
+ * @tc.desc: test RichEditor HalfLeading
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, RichEditorHalfLeading001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    TextStyle textStyle;
+    textStyle.SetHalfLeading(true);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateHalfLeading = true;
+
+    richEditorPattern->UpdateTextStyle(newSpan1, updateSpanStyle, textStyle);
+    ASSERT_NE(newSpan1, nullptr);
+    EXPECT_EQ(newSpan1->GetHalfLeading(), true);
+    ClearSpan();
 }
 
 /**
@@ -1278,5 +1306,23 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnDelete001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->HandleOnDelete(true);
     richEditorPattern->HandleOnDelete(false);
+}
+
+/**
+ * @tc.name: KeyboardAppearance001
+ * @tc.desc: test KeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, KeyboardAppearance001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetKeyboardAppearance(KeyboardAppearance::IMMERSIVE);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_EQ(richEditorPattern->GetKeyboardAppearance(), KeyboardAppearance::IMMERSIVE);
 }
 } // namespace OHOS::Ace::NG

@@ -15,11 +15,15 @@
 
 #include "cj_menu_ffi.h"
 
-#include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
+
+namespace {
+enum class SubMenuExpandingMode { SIDE = 0, EMBEDDED, STACK };
+} // namespace
 
 extern "C" {
 void FfiOHOSAceFrameworkMenuCreate()
@@ -27,8 +31,7 @@ void FfiOHOSAceFrameworkMenuCreate()
     MenuModel::GetInstance()->Create();
 }
 
-void FfiOHOSAceFrameworkMenuFont(double size, int32_t unit, const char* weight,
-    const char* family, int32_t style)
+void FfiOHOSAceFrameworkMenuFont(double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
     MenuModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(style));
 
@@ -63,14 +66,74 @@ void FfiOHOSAceFrameworkMenuSetRadiusByLength(double size, int32_t unit)
 
 void FfiOHOSAceFrameworkMenuSetRadiusByBorderRadiuses(CBorderRadiuses radius)
 {
-    std::optional<CalcDimension> radiusTopLeft = CalcDimension(radius.topLeftRadiuses,
-        DimensionUnit(radius.topLeftUnit));
-    std::optional<CalcDimension> radiusTopRight = CalcDimension(radius.topRightRadiuses,
-        DimensionUnit(radius.topRightUnit));
-    std::optional<CalcDimension> radiusBottomLeft = CalcDimension(radius.bottomLeftRadiuses,
-        DimensionUnit(radius.bottomLeftUnit));
-    std::optional<CalcDimension> radiusBottomRight = CalcDimension(radius.bottomRightRadiuses,
-        DimensionUnit(radius.bottomRightUnit));
+    std::optional<CalcDimension> radiusTopLeft =
+        CalcDimension(radius.topLeftRadiuses, DimensionUnit(radius.topLeftUnit));
+    std::optional<CalcDimension> radiusTopRight =
+        CalcDimension(radius.topRightRadiuses, DimensionUnit(radius.topRightUnit));
+    std::optional<CalcDimension> radiusBottomLeft =
+        CalcDimension(radius.bottomLeftRadiuses, DimensionUnit(radius.bottomLeftUnit));
+    std::optional<CalcDimension> radiusBottomRight =
+        CalcDimension(radius.bottomRightRadiuses, DimensionUnit(radius.bottomRightUnit));
     MenuModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+}
+
+void FfiOHOSAceFrameworkMenuSetItemDivider(DividerParams dividerParams, bool hasValue)
+{
+    V2::ItemDivider divider;
+    if (hasValue) {
+        divider.strokeWidth = CalcDimension(dividerParams.width, DimensionUnit(dividerParams.widthUnit));
+        divider.color = Color(dividerParams.color);
+        divider.startMargin = CalcDimension(dividerParams.startMargin, DimensionUnit(dividerParams.startMarginUnit));
+        divider.endMargin = CalcDimension(dividerParams.endMargin, DimensionUnit(dividerParams.endMarginUnit));
+        if (divider.strokeWidth.IsNegative()) {
+            divider.strokeWidth.Reset();
+        }
+        if (divider.startMargin.IsNegative()) {
+            divider.startMargin.Reset();
+        }
+        if (divider.endMargin.IsNegative()) {
+            divider.endMargin.Reset();
+        }
+    }
+    MenuModel::GetInstance()->SetItemDivider(divider);
+}
+
+void FfiOHOSAceFrameworkMenuSetItemGroupDivider(DividerParams dividerParams, bool hasValue)
+{
+    auto divider = V2::ItemDivider {
+        .strokeWidth = Dimension(0.0f, DimensionUnit::INVALID),
+        .color = Color::FOREGROUND,
+    };
+    if (hasValue) {
+        divider.strokeWidth = CalcDimension(dividerParams.width, DimensionUnit(dividerParams.widthUnit));
+        divider.color = Color(dividerParams.color);
+        divider.startMargin = CalcDimension(dividerParams.startMargin, DimensionUnit(dividerParams.startMarginUnit));
+        divider.endMargin = CalcDimension(dividerParams.endMargin, DimensionUnit(dividerParams.endMarginUnit));
+        if (divider.strokeWidth.IsNegative() || divider.strokeWidth.Unit() < DimensionUnit::PX ||
+            divider.strokeWidth.Unit() > DimensionUnit::LPX) {
+            divider.strokeWidth.Reset();
+            divider.strokeWidth.SetUnit(DimensionUnit::INVALID);
+        }
+        if (divider.startMargin.IsNegative() || divider.startMargin.Unit() < DimensionUnit::PX ||
+            divider.startMargin.Unit() > DimensionUnit::LPX) {
+            divider.startMargin.Reset();
+            divider.startMargin.SetUnit(DimensionUnit::INVALID);
+        }
+        if (divider.endMargin.IsNegative() || divider.endMargin.Unit() < DimensionUnit::PX ||
+            divider.endMargin.Unit() > DimensionUnit::LPX) {
+            divider.endMargin.Reset();
+            divider.endMargin.SetUnit(DimensionUnit::INVALID);
+        }
+    }
+    MenuModel::GetInstance()->SetItemGroupDivider(divider);
+}
+
+void FfiOHOSAceFrameworkMenuSetExpandingMode(int32_t mode)
+{
+    auto modeVal = static_cast<SubMenuExpandingMode>(mode);
+    auto expandingMode = modeVal == SubMenuExpandingMode::EMBEDDED ? NG::SubMenuExpandingMode::EMBEDDED
+                         : modeVal == SubMenuExpandingMode::STACK  ? NG::SubMenuExpandingMode::STACK
+                                                                   : NG::SubMenuExpandingMode::SIDE;
+    MenuModel::GetInstance()->SetExpandingMode(expandingMode);
 }
 }

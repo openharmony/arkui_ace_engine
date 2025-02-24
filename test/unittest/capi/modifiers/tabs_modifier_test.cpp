@@ -578,8 +578,8 @@ HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto func = Converter::ArkValue<Callback_Number_Void>(recv.onChange, CONTEXT_ID);
     ASSERT_NE(frameNode, nullptr);
-    auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
-    frameNode->AttachToMainTree(true, context);
+    auto context = MockPipelineContext::GetCurrent();
+    frameNode->AttachToMainTree(true, Referenced::RawPtr(context));
     modifier_->setOnChange(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);

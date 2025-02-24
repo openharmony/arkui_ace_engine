@@ -49,6 +49,8 @@ public:
     void SetJustifyContent(int32_t value) override;
 
     void SetAlignContent(int32_t value) override;
+    void SetWidthLayoutPolicy(uint8_t widthLayoutPolicy) override;
+    void SetHeightLayoutPolicy(uint8_t heightLayoutPolicy) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFlexRow(FrameNode* frameNode);
@@ -64,6 +66,8 @@ public:
     static void SetFlexAlignItems(FrameNode* frameNode, int32_t value);
     static void SetFlexAlignContent(FrameNode* frameNode, int32_t value);
     static void SetFlexAlignContent(FrameNode* frameNode, std::optional<WrapAlignment>& alignContent);
+    static void SetWidthLayoutPolicy(FrameNode* frameNode, uint8_t widthLayoutPolicy);
+    static void SetHeightLayoutPolicy(FrameNode* frameNode, uint8_t heightLayoutPolicy);
 
     static int GetFlexWrap(FrameNode* frameNode);
     static int GetFlexDirection(FrameNode* frameNode);

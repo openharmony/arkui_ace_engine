@@ -53,6 +53,8 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         ACE_SCOPED_TRACE("BufferAvailableCallback[id:%d]", session->GetPersistentId());
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "BufferAvailableCallback id:%{public}d", session->GetPersistentId());
         if (!session->GetBufferAvailable()) {
             session->SetBufferAvailable(true);
             Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
@@ -140,7 +142,7 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     auto windowName = IsMainWindow() ? session_->GetSessionInfo().bundleName_ : session_->GetWindowName();
     ACE_SCOPED_TRACE("OnDetachFromFrameNode[id:%d][self:%d][type:%d][name:%s]",
         session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), windowName.c_str());
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+    TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE,
         "OnDetachFromFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
         session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), windowName.c_str());
 }
@@ -246,6 +248,13 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto transaction = transactionController && session_->GetSessionRect() != windowRect ?
         transactionController->GetRSTransaction() : nullptr;
     auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged", transaction);
+    auto sizeChangeReason = session_->GetSizeChangeReason();
+    if ((sizeChangeReason >= Rosen::SizeChangeReason::MAXIMIZE &&
+        sizeChangeReason <= Rosen::SizeChangeReason::RESIZE) ||
+        sizeChangeReason == Rosen::SizeChangeReason::DRAG_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect id:%{public}d, reason:%{public}u, rect:%{public}s",
+            session_->GetPersistentId(), sizeChangeReason, windowRect.ToString().c_str());
+    }
     if (ret != Rosen::WSError::WS_OK) {
         TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
             session_->GetPersistentId(), static_cast<int32_t>(ret));
@@ -270,6 +279,12 @@ void WindowScene::BufferAvailableCallback()
                 self->session_->GetPersistentId(), isWindowSizeEqual);
             return;
         }
+        if (self->session_->GetSystemConfig().IsPcWindow()) {
+            auto leashSurfaceNode = self->session_->GetLeashWinSurfaceNode();
+            if (leashSurfaceNode) {
+                leashSurfaceNode->MarkUifirstNode(false);
+            }
+        }
         CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
@@ -286,9 +301,15 @@ void WindowScene::BufferAvailableCallback()
             auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(config.opacityEnd_);
             effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, config.duration_));
             context->UpdateChainedTransition(effect);
-            AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
-            context->SetTransitionUserCallback([](bool) {
-                AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
+            AceAsyncTraceBeginCommercial(0, "StartingWindowExitAnimation");
+            context->SetTransitionUserCallback([weakSession = wptr(self->session_)](bool) {
+                AceAsyncTraceEndCommercial(0, "StartingWindowExitAnimation");
+                auto session = weakSession.promote();
+                CHECK_NULL_VOID(session);
+                CHECK_EQUAL_VOID(session->GetSystemConfig().IsPcWindow(), false);
+                auto leashSurfaceNode = session->GetLeashWinSurfaceNode();
+                CHECK_NULL_VOID(leashSurfaceNode);
+                leashSurfaceNode->MarkUifirstNode(true);
             });
         }
 
@@ -350,6 +371,8 @@ void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
 
 void WindowScene::BufferAvailableCallbackForSnapshot()
 {
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "BufferAvailableCallbackForSnapshot id:%{public}d", session_->GetPersistentId());
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForSnapshot");
         auto self = weakThis.Upgrade();
@@ -417,6 +440,8 @@ void WindowScene::OnActivation()
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         } else if (self->snapshotWindow_) {
             self->DisposeSnapshotAndBlankWindow();
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                     "OnActivation removeSnapshot, id: %{public}d", self->session_->GetPersistentId());
         }
     };
 
@@ -596,6 +621,64 @@ void WindowScene::OnRemoveBlank()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneRemoveBlank", TaskExecutor::TaskType::UI);
 }
 
+void WindowScene::OnAddSnapshot()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self->session_);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        if (self->snapshotWindow_ || self->startingWindow_ || self->blankWindow_) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In snap/start/blank window id %{public}d host id %{public}d",
+                self->session_->GetPersistentId(), host->GetId());
+            return;
+        }
+        self->RemoveChild(host, self->appWindow_, self->appWindowName_);
+        self->CreateSnapshotWindow(self->session_->GetSnapshot());
+        self->AddChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "OnAddSnapshot id %{public}d host id %{public}d", self->session_->GetPersistentId(), host->GetId());
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneAddSnapshot", TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnRemoveSnapshot()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self->session_);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        if (self->snapshotWindow_) {
+            self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+            auto surfaceNode = self->session_->GetSurfaceNode();
+            CHECK_NULL_VOID(surfaceNode);
+            if (!surfaceNode->IsBufferAvailable()) {
+                TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnRemoveSnapshot not IsBufferAvailable");
+                surfaceNode->SetBufferAvailableCallback(self->callback_);
+                return;
+            }
+            self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+            self->snapshotWindow_.Reset();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                "OnRemoveSnapshot id %{public}d host id %{public}d", self->session_->GetPersistentId(), host->GetId());
+        }
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneRemoveSnapshot", TaskExecutor::TaskType::UI);
+}
+
 void WindowScene::OnAppRemoveStartingWindow()
 {
     CHECK_EQUAL_VOID(session_->GetEnableRemoveStartingWindow(), false);
@@ -703,17 +786,23 @@ uint32_t WindowScene::GetWindowPatternType() const
 void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     CHECK_NULL_VOID(surfaceNode);
-    auto subWindowCallback = [weakSession = wptr(session_), weakThis = WeakClaim(this)]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        auto session = weakSession.promote();
-        CHECK_NULL_VOID(session);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "subWindowBufferAvailable id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
-            session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
-        session->SetBufferAvailable(true);
+    auto subWindowCallback = [weakSession = wptr(session_), weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis, weakSession]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto session = weakSession.promote();
+            CHECK_NULL_VOID(session);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                "subWindowBufferAvailable id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+                session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
+            session->SetBufferAvailable(true);
+        },
+            "ArkUIWindowSceneSubWindowBufferAvailable", TaskExecutor::TaskType::UI);
     };
     surfaceNode->SetBufferAvailableCallback(subWindowCallback);
 }

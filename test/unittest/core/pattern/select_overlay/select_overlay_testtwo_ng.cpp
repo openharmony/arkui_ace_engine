@@ -97,9 +97,11 @@ std::vector<MenuOptionsParam> SelectOverlayTestTwoNg::GetMenuOptionItems()
     MenuOptionsParam menuOptionItem1;
     menuOptionItem1.content = "test1";
     menuOptionItem1.action = [](const std::string&) {};
+    menuOptionItem1.id = "OH_DEFAULT_CUT";
     MenuOptionsParam menuOptionItem2;
     menuOptionItem2.content = "test2";
     menuOptionItem2.action = [](const std::string&) {};
+    menuOptionItem2.id = "OH_DEFAULT_COPY";
     menuOptionItems.emplace_back(menuOptionItem1);
     menuOptionItems.emplace_back(menuOptionItem2);
     return menuOptionItems;
@@ -527,5 +529,362 @@ HWTEST_F(SelectOverlayTestTwoNg, CheckHandleIsInClipViewPort007, TestSize.Level1
     EXPECT_FALSE(node->info_->firstHandle.isShow);
     node->CheckHandleIsInClipViewPort();
     EXPECT_TRUE(node->info_->firstHandle.isShow);
+}
+
+/**
+ * @tc.name: UpdateMoreOrBackSymbolOptions001
+ * @tc.desc: moreOrBackSymbol_ == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions001, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->UpdateMoreOrBackSymbolOptions(false, true);
+    EXPECT_EQ(selectOverlayNode->moreOrBackSymbol_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateMoreOrBackSymbolOptions002
+ * @tc.desc: moreOrBackSymbol_ != nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions002, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    EXPECT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->moreButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->UpdateMoreOrBackSymbolOptions(true, true);
+    EXPECT_NE(selectOverlayNode->moreOrBackSymbol_, nullptr);
+    auto parent = selectOverlayNode->moreOrBackSymbol_->GetParent();
+    EXPECT_NE(parent, nullptr);
+}
+
+/**
+ * @tc.name: UpdateMoreOrBackSymbolOptions003
+ * @tc.desc: moreOrBackSymbol_ != nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions003, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    EXPECT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->moreButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->UpdateMoreOrBackSymbolOptions(true, false);
+    EXPECT_NE(selectOverlayNode->moreOrBackSymbol_, nullptr);
+    auto parent = selectOverlayNode->moreOrBackSymbol_->GetParent();
+    EXPECT_NE(parent, nullptr);
+}
+
+/**
+ * @tc.name: UpdateMoreOrBackSymbolOptionsWithDelay001
+ * @tc.desc: UpdateMoreOrBackSymbolOptionsWithDelay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptionsWithDelay001, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    selectOverlayNode->UpdateMoreOrBackSymbolOptionsWithDelay();
+    EXPECT_NE(selectOverlayNode, nullptr);
+}
+
+/**
+ * @tc.name: AddCreateMenuExtensionMenuParams001
+ * @tc.desc: AddCreateMenuExtensionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuExtensionMenuParams001, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    SelectMenuCallback menuCallback;
+    menuCallback.onCut = []() {};
+    infoPtr->menuCallback = menuCallback;
+    auto menuOptionItems = GetMenuOptionItems();
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    EXPECT_NE(selectOverlayNode, nullptr);
+    std::vector<OptionParam> params;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params);
+    EXPECT_EQ(params.size(), 1);
+}
+
+/**
+ * @tc.name: UpdateMainWindowOffset001
+ * @tc.desc: UpdateMainWindowOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMainWindowOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    pattern->SetIsMenuShowInSubWindow(false);
+
+    /**
+     * @tc.steps: step3. Call SelectOverlayLayoutAlgorithm UpdateMainWindowOffset
+     */
+    auto selectOverlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    selectOverlayLayoutAlgorithm->UpdateMainWindowOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->mainWindowOffset_, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->containerModalOffset_, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateMainWindowOffset002
+ * @tc.desc: UpdateMainWindowOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMainWindowOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    pattern->SetIsMenuShowInSubWindow(true);
+    auto containerId = -1;
+    pattern->SetContainerId(containerId);
+
+    /**
+     * @tc.steps: step3. Call SelectOverlayLayoutAlgorithm UpdateMainWindowOffset
+     */
+    auto selectOverlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    selectOverlayLayoutAlgorithm->UpdateMainWindowOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->mainWindowOffset_, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->containerModalOffset_, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateMainWindowOffset003
+ * @tc.desc: UpdateMainWindowOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMainWindowOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    pattern->SetIsMenuShowInSubWindow(true);
+    auto containerId = 100000;
+    pattern->SetContainerId(containerId);
+
+    /**
+     * @tc.steps: step3. Call SelectOverlayLayoutAlgorithm UpdateMainWindowOffset
+     */
+    auto selectOverlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    selectOverlayLayoutAlgorithm->UpdateMainWindowOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->mainWindowOffset_, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->containerModalOffset_, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateMainWindowOffset004
+ * @tc.desc: UpdateMainWindowOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMainWindowOffset004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    pattern->SetIsMenuShowInSubWindow(true);
+    auto containerId = 100000;
+    pattern->SetContainerId(containerId);
+
+    /**
+     * @tc.steps: step3. Mock theme
+     */
+    auto selectOverlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->expandDisplay_ = false;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+
+    /**
+     * @tc.steps: step4. Call SelectOverlayLayoutAlgorithm UpdateMainWindowOffset
+     */
+    selectOverlayLayoutAlgorithm->UpdateMainWindowOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->mainWindowOffset_, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->containerModalOffset_, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: GetIsMenuShowInSubWindow001
+ * @tc.desc: GetIsMenuShowInSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, GetIsMenuShowInSubWindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    pattern->SetIsMenuShowInSubWindow(true);
+
+    /**
+     * @tc.steps: step3. Call SelectOverlayLayoutAlgorithm GetIsMenuShowInSubWindow
+     */
+    auto selectOverlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->GetIsMenuShowInSubWindow(AceType::RawPtr(layoutWrapper)), true);
+}
+
+/**
+ * @tc.name: GetIsMenuShowInSubWindow002
+ * @tc.desc: GetIsMenuShowInSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, GetIsMenuShowInSubWindow002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    pattern->SetIsMenuShowInSubWindow(false);
+
+    /**
+     * @tc.steps: step3. Call SelectOverlayLayoutAlgorithm GetIsMenuShowInSubWindow
+     */
+    auto selectOverlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    EXPECT_EQ(selectOverlayLayoutAlgorithm->GetIsMenuShowInSubWindow(AceType::RawPtr(layoutWrapper)), false);
 }
 } // namespace OHOS::Ace::NG

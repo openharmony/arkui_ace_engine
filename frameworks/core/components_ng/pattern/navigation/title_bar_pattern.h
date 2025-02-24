@@ -121,6 +121,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     float GetCurrentOffset()
     {
         return GetTempTitleBarHeight() - defaultTitleBarHeight_;

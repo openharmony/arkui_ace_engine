@@ -18,6 +18,8 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+constexpr float GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
+constexpr float GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 class RotationRecognizerTestNg : public GesturesCommonTestNg {
 public:
     static void SetUpTestSuite();
@@ -1049,4 +1051,223 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerHandleAxisEventTest004, Tes
     recognizer->HandleTouchCancelEvent(event);
     EXPECT_EQ(recognizer->refereeState_, RefereeState::SUCCEED);
 }
+
+/**
+ * @tc.name: SetOnActionCancelTest001
+ * @tc.desc: Test SendCallbackMsg function in the HandleTouchCancelEvent with touch event input. The onActionCancel
+ * function will return GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, SetOnActionCancelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RotationRecognizerTestNg.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: RotationRecognizer's callback onActionCancel is not nullptr.
+     */
+    rotationRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    rotationRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(rotationRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke HandleTouchCancelEvent when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value. rotationRecognizer.refereeState_ = RefereeState::READY
+     */
+    TouchEvent touchEvent;
+    rotationRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.activeFingers_.emplace_back(touchEvent.id);
+    rotationRecognizer.activeFingers_.push_back(1);
+    rotationRecognizer.HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest002
+ * @tc.desc: Test SendCallbackMsg function in the HandleTouchCancelEvent with axis event input. The onActionCancel
+ * function will return GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, SetOnActionCancelTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: rotationRecognizer's callback onActionCancel is not nullptr.
+     */
+    rotationRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    rotationRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(rotationRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke HandleTouchCancelEvent when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    AxisEvent axisEvent;
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.HandleTouchCancelEvent(axisEvent);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest003
+ * @tc.desc: Test SendCallbackMsg function in the ReconcileFrom. The onActionCancel function will return
+ * GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, SetOnActionCancelTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: rotationRecognizer's callback onActionCancel is not nullptr.
+     */
+    rotationRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    rotationRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(rotationRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke ReconcileFrom when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    rotationRecognizer.fingers_ = 0;
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.activeFingers_.push_back(1);
+    rotationRecognizer.activeFingers_.push_back(2);
+    auto result = rotationRecognizer.ReconcileFrom(rotationRecognizerPtr);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: RotationGestureLimitFingerTest001
+ * @tc.desc: Test RotationGesture CreateRecognizer function
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationGestureLimitFingerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationGestureGesture.
+     */
+    RotationGestureModelNG rotationGestureModelNG;
+    rotationGestureModelNG.Create(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto rotationGestureNG = AceType::DynamicCast<NG::RotationGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(rotationGestureNG->angle_, ROTATION_GESTURE_ANGLE);
+    EXPECT_EQ(rotationGestureNG->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    RotationGesture rotationGesture = RotationGesture(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(rotationGesture.angle_, ROTATION_GESTURE_ANGLE);
+    EXPECT_EQ(rotationGesture.isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: functions are not existed
+     */
+    rotationGesture.priority_ = GesturePriority::Low;
+    rotationGesture.gestureMask_ = GestureMask::Normal;
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_NE(rotationRecognizer, nullptr);
+    EXPECT_EQ(rotationRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(rotationRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    // /**
+    //  * @tc.steps: step2. call CreateRecognizer function and compare result
+    //  * @tc.steps: case2: functions are existed
+    //  */
+    std::unique_ptr<GestureEventFunc> onActionStartId;
+    std::unique_ptr<GestureEventFunc> onActionUpdateId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
+    rotationGesture.onActionStartId_ = std::move(onActionStartId);
+    rotationGesture.onActionUpdateId_ = std::move(onActionUpdateId);
+    rotationGesture.onActionEndId_ = std::move(onActionEndId);
+    rotationGesture.onActionCancelId_ = std::move(onActionCancelId);
+    rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_EQ(rotationRecognizer->priority_, rotationGesture.priority_);
+    EXPECT_EQ(rotationRecognizer->priorityMask_, rotationGesture.gestureMask_);
+    EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+}
+
+/**
+ * @tc.name: RotationGestureLimitFingerTest002
+ * @tc.desc: Test RotationGesture CreateRecognizer function
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationGestureLimitFingerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationGestureGesture.
+     */
+    RotationGestureModelNG rotationGestureModelNG;
+    rotationGestureModelNG.Create(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_NOT_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto rotationGestureNG = AceType::DynamicCast<NG::RotationGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(rotationGestureNG->angle_, ROTATION_GESTURE_ANGLE);
+    EXPECT_EQ(rotationGestureNG->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    RotationGesture rotationGesture = RotationGesture(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_NOT_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(rotationGesture.angle_, ROTATION_GESTURE_ANGLE);
+    EXPECT_EQ(rotationGesture.isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: functions are not existed
+     */
+    rotationGesture.priority_ = GesturePriority::Low;
+    rotationGesture.gestureMask_ = GestureMask::Normal;
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_NE(rotationRecognizer, nullptr);
+    EXPECT_EQ(rotationRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(rotationRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    // /**
+    //  * @tc.steps: step2. call CreateRecognizer function and compare result
+    //  * @tc.steps: case2: functions are existed
+    //  */
+    std::unique_ptr<GestureEventFunc> onActionStartId;
+    std::unique_ptr<GestureEventFunc> onActionUpdateId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
+    rotationGesture.onActionStartId_ = std::move(onActionStartId);
+    rotationGesture.onActionUpdateId_ = std::move(onActionUpdateId);
+    rotationGesture.onActionEndId_ = std::move(onActionEndId);
+    rotationGesture.onActionCancelId_ = std::move(onActionCancelId);
+    rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_EQ(rotationRecognizer->priority_, rotationGesture.priority_);
+    EXPECT_EQ(rotationRecognizer->priorityMask_, rotationGesture.gestureMask_);
+    EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+}
+
 } // namespace OHOS::Ace::NG

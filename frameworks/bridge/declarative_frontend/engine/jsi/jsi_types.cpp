@@ -385,7 +385,11 @@ JsiFunction::JsiFunction(const EcmaVM *vm, panda::Local<panda::FunctionRef> val)
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
-    JS_CALLBACK_DURATION();
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    JS_CALLBACK_DURATION(id);
     auto vm = GetEcmaVM();
     panda::JsiFastNativeScope fastNativeScope(vm);
     LocalScope scope(vm);
@@ -449,7 +453,7 @@ JsiCallbackInfo::JsiCallbackInfo(panda::JsiRuntimeCallInfo* info) : info_(info) 
 
 JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 {
-    if (static_cast<int32_t>(index) < Length()) {
+    if (index < Length()) {
         return JsiRef<JsiValue>::FastMake(info_->GetVM(), info_->GetCallArgRef(index));
     }
     return JsiRef<JsiValue>::FastMake(info_->GetVM(), panda::JSValueRef::Undefined(info_->GetVM()));
@@ -462,7 +466,7 @@ JsiRef<JsiObject> JsiCallbackInfo::This() const
     return ref;
 }
 
-int JsiCallbackInfo::Length() const
+uint32_t JsiCallbackInfo::Length() const
 {
     return info_->GetArgsNumber();
 }

@@ -332,13 +332,10 @@ void TabsModelNG::SetIndex(int32_t index)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
     if (index < 0) {
         index = 0;
     }
-    tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->SetClickRepeat(false);
+    tabBarPattern->UpdateIndicator(index);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
     auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
@@ -433,6 +430,15 @@ void TabsModelNG::SetOnTabBarClick(FrameNode* frameNode, std::function<void(cons
     tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
 }
 
+void TabsModelNG::SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnUnselectedEvent(std::move(onUnselected));
+}
+
 void TabsModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -492,6 +498,23 @@ void TabsModelNG::SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& on
     auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(std::move(onGestureSwipe));
+}
+
+void TabsModelNG::SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnSelectedEvent(std::move(onSelected));
+}
+
+void TabsModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnSelectedEvent(std::move(onSelected));
 }
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
@@ -582,18 +605,6 @@ void TabsModelNG::Pop()
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
-    auto tabsFocusNode = tabsNode->GetFocusHub();
-    CHECK_NULL_VOID(tabsFocusNode);
-    auto tabBarFocusNode = tabBarNode->GetFocusHub();
-    CHECK_NULL_VOID(tabBarFocusNode);
-    if (tabBarPosition == BarPosition::START && !tabsFocusNode->IsCurrentFocus()) {
-        auto lastWeakFocusNode = tabsFocusNode->GetLastWeakFocusNode().Upgrade();
-        if (!lastWeakFocusNode) {
-            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
-        }
-    }
-
     tabBarNode->MarkModifyDone();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
@@ -671,17 +682,19 @@ void TabsModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(cons
 
 void TabsModelNG::SetClipEdge(bool clipEdge)
 {
-    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
     ViewAbstract::SetClipEdge(clipEdge);
-    auto tabsChildren = tabsNode->GetChildren();
-    for (const auto& child : tabsChildren) {
-        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(childFrameNode);
-        auto renderContext = childFrameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateClipEdge(clipEdge);
-    }
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperRenderContext = swiperNode->GetRenderContext();
+    CHECK_NULL_VOID(swiperRenderContext);
+    swiperRenderContext->UpdateClipEdge(clipEdge);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    dividerRenderContext->UpdateClipEdge(clipEdge);
 }
 
 void TabsModelNG::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option)
@@ -771,6 +784,14 @@ void TabsModelNG::SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptio
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateBarGridAlign(BarGridColumnOptions);
+}
+
+void TabsModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnUnselectedEvent(std::move(onUnselected));
 }
 
 void TabsModelNG::SetDivider(FrameNode* frameNode, const std::optional<TabsItemDivider>& dividerOpt)
@@ -1046,16 +1067,19 @@ void TabsModelNG::SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimation
 
 void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
 {
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetClipEdge(frameNode, clipEdge);
-    auto tabsChildren = frameNode->GetChildren();
-    for (const auto& child : tabsChildren) {
-        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(childFrameNode);
-        auto renderContext = childFrameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateClipEdge(clipEdge);
-    }
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    ViewAbstract::SetClipEdge(tabsNode, clipEdge);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperRenderContext = swiperNode->GetRenderContext();
+    CHECK_NULL_VOID(swiperRenderContext);
+    swiperRenderContext->UpdateClipEdge(clipEdge);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    dividerRenderContext->UpdateClipEdge(clipEdge);
 }
 
 void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback)

@@ -36,6 +36,8 @@ struct TextPickerDialog {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<Shadow> shadow;
     std::optional<HoverModeAreaType> hoverModeArea;
 };
@@ -61,6 +63,7 @@ public:
     virtual void SetDefaultPickerItemHeight(const Dimension& value) = 0;
     virtual void SetGradientHeight(const Dimension& value) {};
     virtual void SetCanLoop(const bool value) = 0;
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
     virtual void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
@@ -90,12 +93,14 @@ public:
     virtual bool GetSingleRange() = 0;
     virtual void SetDivider(const NG::ItemDivider& divider) {};
     virtual void HasUserDefinedOpacity() = 0;
+    virtual void SetColumnWidths(const std::vector<Dimension>& widths) = 0;
     virtual void SetDisableTextStyleAnimation(const bool value) = 0;
     virtual void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) = 0;
+    virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) = 0;
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 
 class TextPickerDialogModel {
@@ -112,7 +117,7 @@ public:
 
 private:
     static std::unique_ptr<TextPickerDialogModel> textPickerDialogInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_MODEL_H

@@ -18,8 +18,9 @@
 #include <cinttypes>
 #include <optional>
 #include <string>
-#include "core/components/common/properties/animation_option.h"
+
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
+#include "core/components/common/properties/animation_option.h"
 
 extern "C" {
 struct NativeAnimateParam {

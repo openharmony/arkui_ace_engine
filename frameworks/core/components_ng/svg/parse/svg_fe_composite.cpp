@@ -88,23 +88,35 @@ RSBlendMode SvgFeComposite::BlendModeForOperator(SvgFeOperatorType op) const
 
 void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
-    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash, bool cropRect) const
 {
     auto mode = feCompositeAttr_.operatorType;
     auto foreImageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
     auto backImageFilter = MakeImageFilter(feCompositeAttr_.in2, imageFilter, resultHash);
+    RSRect filterRect(effectFilterArea_.Left(), effectFilterArea_.Top(),
+                      effectFilterArea_.Right(), effectFilterArea_.Bottom());
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
     if (mode != SvgFeOperatorType::FE_ARITHMETIC) {
-        imageFilter = RSRecordingImageFilter::CreateBlendImageFilter(
-            BlendModeForOperator(mode), backImageFilter, foreImageFilter);
+        if (cropRect) {
+            imageFilter = RSRecordingImageFilter::CreateBlendImageFilter(BlendModeForOperator(mode),
+                backImageFilter, foreImageFilter, filterRect);
+        } else {
+            imageFilter = RSRecordingImageFilter::CreateBlendImageFilter(BlendModeForOperator(mode),
+                backImageFilter, foreImageFilter);
+        }
         ConverImageFilterColor(imageFilter, srcColor, currentColor);
         return;
     }
     std::vector<RSScalar> coefficients = { feCompositeAttr_.k1, feCompositeAttr_.k2, feCompositeAttr_.k3,
         feCompositeAttr_.k4 };
-    imageFilter =
-        RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter, foreImageFilter);
+    if (cropRect) {
+        imageFilter = RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter,
+            foreImageFilter, filterRect);
+    } else {
+        imageFilter = RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter,
+            foreImageFilter);
+    }
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
     RegisterResult(feAttr_.result, imageFilter, resultHash);
 }

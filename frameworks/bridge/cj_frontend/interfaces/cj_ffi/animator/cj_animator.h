@@ -21,6 +21,7 @@
 #include <string>
 
 #include "ffi_remote_data.h"
+
 #include "base/memory/referenced.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "core/animation/animator.h"
@@ -50,6 +51,7 @@ struct AnimatorOption {
 extern RefPtr<Motion> ParseOptionToMotion(const std::shared_ptr<AnimatorOption>& option);
 class AnimatorResultImpl : public OHOS::FFI::FFIData {
     DECL_TYPE(AnimatorResultImpl, OHOS::FFI::FFIData);
+
 public:
     AnimatorResultImpl() = default;
     AnimatorResultImpl(RefPtr<Animator> animator, std::shared_ptr<AnimatorOption> option)
@@ -89,11 +91,19 @@ public:
 
     void SetOnframe(int64_t funcId);
 
+    void SetOnFrame(int64_t funcId);
+
     void SetOnfinish(int64_t funcId);
+
+    void SetOnFinish(int64_t funcId);
 
     void SetOncancel(int64_t funcId);
 
+    void SetOnCancel(int64_t funcId);
+
     void SetOnrepeat(int64_t funcId);
+
+    void SetOnRepeat(int64_t funcId);
 
     void ApplyOption();
 

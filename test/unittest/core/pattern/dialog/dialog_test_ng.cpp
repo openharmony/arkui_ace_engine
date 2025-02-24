@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,6 +50,7 @@ const std::string INTERNAL_SOURCE = "$r('app.media.icon')";
 const std::string FILE_SOURCE = "/common/icon.png";
 
 const std::string TITLE = "This is title";
+const std::string SUBTITLE = "This is subtitle";
 const std::string MESSAGE = "Message";
 const int32_t buttonIdx = 1;
 const double_t WIDTH_A = 16.0;
@@ -61,6 +63,8 @@ const Dimension DIMENSION_RADIUS(10.0, DimensionUnit::PX);
 constexpr int BUTTONINDEX_TEST_1 = 1;
 constexpr int BUTTONINDEX_TEST_2 = -1;
 constexpr int BUTTONINDEX_TEST_3 = -2;
+constexpr int DIALOG_TITLE_AVE_BY_2 = 2;
+const Dimension DIALOG_TITLE_PADDING { 10.0, DimensionUnit::VP };
 const Dimension BORDER_WIDTH_PX_A { 10.0, DimensionUnit::PX };
 const Dimension BORDER_WIDTH_PX_B { 20.0, DimensionUnit::PX };
 const Dimension BORDER_WIDTH_PX_C { 30.0, DimensionUnit::PX };
@@ -94,6 +98,8 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetDialogTheme();
+    void UpdateDialogProperties(DialogProperties& props);
+    void CheckTextMarquee(RefPtr<FrameNode> buttonNode);
 
 protected:
     RefPtr<FrameNode> CreateDialog();
@@ -196,6 +202,48 @@ void DialogPatternTestNg::SetDialogTheme()
 {
     auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockDialogTheme>()));
+}
+
+void DialogPatternTestNg::UpdateDialogProperties(DialogProperties& props)
+{
+    /**
+     * @tc.steps: step0. Update DialogProperties.
+     */
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.subtitle = SUBTITLE;
+    props.content = MESSAGE;
+    props.buttonDirection = DialogButtonDirection::HORIZONTAL;
+    vector<ButtonInfo> btnItems = {
+        ButtonInfo {
+            .text = "main button",
+            .bgColor = Color::BLACK,
+        },
+        ButtonInfo {
+            .text = "second button",
+            .bgColor = Color::BLUE,
+        },
+        ButtonInfo {
+            .text = "three button",
+            .bgColor = Color::BLUE,
+        },
+    };
+    props.buttons = btnItems;
+}
+
+void DialogPatternTestNg::CheckTextMarquee(RefPtr<FrameNode> buttonNode)
+{
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
+    ASSERT_NE(buttonProp, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildAtIndex(0));
+    ASSERT_NE(textNode, nullptr);
+    auto textProps = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    ASSERT_NE(textProps, nullptr);
+    EXPECT_EQ(buttonProp->GetButtonStyle(), ButtonStyleMode::NORMAL);
+    EXPECT_EQ(textProps->GetTextOverflow(), TextOverflow::MARQUEE);
+    EXPECT_EQ(textProps->GetTextMarqueeStartPolicy(), MarqueeStartPolicy::ON_FOCUS);
+    EXPECT_TRUE(textProps->GetTextMarqueeFadeout());
 }
 
 /**
@@ -1774,5 +1822,151 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest029, TestSize.Level1)
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion = gestureHub->GetMouseResponseRegion();
     EXPECT_EQ(mouseResponseRegion[0].GetOffset().GetX().Value(), 30.0);
+}
+
+/**
+ * @tc.name: DialogPatternTest030
+ * @tc.desc: Test dialogPattern.BuildTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. create and update DialogProperties.
+     * @tc.expected: the DialogProperties created and update successfully.
+     */
+    DialogProperties props;
+    UpdateDialogProperties(props);
+    props.subtitle = "";
+    /**
+     * @tc.steps: step1. Create mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    textTheme->isTextFadeout_ = true;
+    dialogTheme->paddingSingleTitle_ = DIALOG_TITLE_PADDING;
+    dialogTheme->button_type_ = 1;
+    dialogTheme->buttonTextSize_ = 0.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return textTheme;
+        } else if (type == DialogTheme::TypeId()) {
+            return dialogTheme;
+        } else {
+            return buttonTheme;
+        }
+    });
+    /**
+     * @tc.steps: step2. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->isSuitableForElderly_ = true;
+    dialogPattern->AddButtonAndDivider(btnItems, dialogPattern->buttonContainer_, false);
+    SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+    dialogPattern->BuildChild(props);
+    EXPECT_EQ(dialogPattern->titleContainer_->GetTag(), V2::ROW_ETS_TAG);
+    /**
+     * @tc.steps: step2. get titleTextNode && subTitleTextNode.
+     * @tc.expected: The text padding is equal to dialogTheme_->GetPaddingSingleTitle().ConvertToPx() /
+     * DIALOG_TITLE_AVE_BY_2 when only have title.
+     */
+    auto titleTextNode = AceType::DynamicCast<FrameNode>(dialogPattern->titleContainer_->GetChildAtIndex(0));
+    ASSERT_NE(titleTextNode, nullptr);
+    auto titleProp = AceType::DynamicCast<TextLayoutProperty>(titleTextNode->GetLayoutProperty());
+    ASSERT_NE(titleProp, nullptr);
+    const auto& titlePadding = titleProp->GetPaddingProperty();
+    auto topPadding = titlePadding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto bottomPadding = titlePadding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto padding = DIALOG_TITLE_PADDING.ConvertToPx() / DIALOG_TITLE_AVE_BY_2;
+    EXPECT_EQ(topPadding, padding);
+    EXPECT_EQ(bottomPadding, padding);
+    /**
+     * @tc.steps: step2. get ButtonNode.
+     * @tc.expected: Check the param value
+     */
+    EXPECT_EQ(dialogPattern->buttonContainer_->GetTag(), V2::COLUMN_ETS_TAG);
+    for (auto child : dialogPattern->buttonContainer_->GetChildren()) {
+        if (child->GetTag() != V2::BUTTON_ETS_TAG) {
+            continue;
+        }
+        auto buttonNode = AceType::DynamicCast<FrameNode>(child);
+        CheckTextMarquee(buttonNode);
+    }
+}
+
+/**
+ * @tc.name: DialogPatternTest031
+ * @tc.desc: Test dialogPattern.BuildTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. create and update DialogProperties.
+     * @tc.expected: the DialogProperties created and update successfully.
+     */
+    DialogProperties props;
+    UpdateDialogProperties(props);
+    /**
+     * @tc.steps: step1. Create mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return textTheme;
+        } else if (type == DialogTheme::TypeId()) {
+            return dialogTheme;
+        } else {
+            return buttonTheme;
+        }
+    });
+    /**
+     * @tc.steps: step2. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->BuildChild(props);
+    ASSERT_NE(dialogPattern->titleContainer_, nullptr);
+    EXPECT_EQ(dialogPattern->titleContainer_->GetTag(), V2::COLUMN_ETS_TAG);
+    auto titleNode = AceType::DynamicCast<FrameNode>(dialogPattern->titleContainer_->GetChildAtIndex(0));
+    auto subTitleNode = AceType::DynamicCast<FrameNode>(dialogPattern->titleContainer_->GetChildAtIndex(1));
+    ASSERT_NE(titleNode, nullptr);
+    ASSERT_NE(subTitleNode, nullptr);
+    EXPECT_EQ(titleNode->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(subTitleNode->GetTag(), V2::ROW_ETS_TAG);
+    /**
+     * @tc.steps: step2. get titleTextNode && subTitleTextNode.
+     * @tc.expected: The text padding is equal to dialogTheme->GetPaddingTopTitle() when have title && subTitle.
+     */
+    auto titleTextNode = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(0));
+    auto subTitleTextNode = AceType::DynamicCast<FrameNode>(subTitleNode->GetChildAtIndex(0));
+    ASSERT_NE(titleTextNode, nullptr);
+    ASSERT_NE(subTitleTextNode, nullptr);
+    EXPECT_EQ(titleTextNode->GetTag(), V2::TEXT_ETS_TAG);
+    EXPECT_EQ(subTitleTextNode->GetTag(), V2::TEXT_ETS_TAG);
+    auto titleProp = AceType::DynamicCast<TextLayoutProperty>(titleTextNode->GetLayoutProperty());
+    auto subTitleProp = AceType::DynamicCast<TextLayoutProperty>(subTitleTextNode->GetLayoutProperty());
+    ASSERT_NE(titleProp, nullptr);
+    ASSERT_NE(subTitleProp, nullptr);
+    const auto& titlePadding = titleProp->GetPaddingProperty();
+    const auto& subTitlePadding = subTitleProp->GetPaddingProperty();
+    auto topPadding = titlePadding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto bottomPadding = subTitlePadding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    EXPECT_EQ(topPadding, dialogTheme->GetPaddingTopTitle().ConvertToPx());
+    EXPECT_EQ(bottomPadding, dialogTheme->GetPaddingTopTitle().ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -47,6 +48,38 @@ void ResetTimepickerSelected(ArkUINodeHandle node)
     PickerTime pickerTime(currentTm->tm_hour, currentTm->tm_min, 0);
 
     TimePickerModelNG::SetSelectedTime(frameNode, pickerTime);
+}
+
+void SetTimepickerStart(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetStartTime(frameNode, PickerTime(hour, minute, 0));
+}
+
+void ResetTimepickerStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerTime pickerTime(0, 0, 0);
+
+    TimePickerModelNG::SetStartTime(frameNode, pickerTime);
+}
+
+void SetTimepickerEnd(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEndTime(frameNode, PickerTime(hour, minute, 0));
+}
+
+void ResetTimepickerEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerTime defaultEndTime = PickerTime(23, 59, 59);
+
+    TimePickerModelNG::SetEndTime(frameNode, defaultEndTime);
 }
 
 void SetTimepickerBackgroundColor(ArkUINodeHandle node, uint32_t color)
@@ -353,6 +386,28 @@ ArkUI_CharPtr GetTimepickerSelected(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+ArkUI_CharPtr GetTimepickerStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTime pickerTime = TimePickerModelNG::getTimepickerStart(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(pickerTime.GetHour())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetMinute())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetSecond()));
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetTimepickerEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTime pickerTime = TimePickerModelNG::getTimepickerEnd(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(pickerTime.GetHour())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetMinute())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetSecond()));
+    return g_strValue.c_str();
+}
+
 ArkUI_Uint32 GetTimepickerBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -388,16 +443,50 @@ ArkUI_Int32 GetTimepickerEnableCascade(ArkUINodeHandle node)
     return TimePickerModelNG::getTimepickerEnableCascade(frameNode);
 }
 
+void SetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
+}
+
+void SetTimepickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    TimePickerModelNG::SetOnChange(frameNode, std::move(*onChange));
+}
+
+void ResetTimepickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetOnChange(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUITimepickerModifier* GetTimepickerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITimepickerModifier modifier = {
         .getTimepickerSelected = GetTimepickerSelected,
         .setTimepickerSelected = SetTimepickerSelected,
         .resetTimepickerSelected = ResetTimepickerSelected,
+        .getTimepickerStart = GetTimepickerStart,
+        .setTimepickerStart = SetTimepickerStart,
+        .resetTimepickerStart = ResetTimepickerStart,
+        .getTimepickerEnd = GetTimepickerEnd,
+        .setTimepickerEnd = SetTimepickerEnd,
+        .resetTimepickerEnd = ResetTimepickerEnd,
         .getTimepickerBackgroundColor = GetTimepickerBackgroundColor,
         .setTimepickerBackgroundColor = SetTimepickerBackgroundColor,
         .getTimepickerDisappearTextStyle = GetTimepickerDisappearTextStyle,
@@ -422,26 +511,29 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .getTimepickerEnableCascade = GetTimepickerEnableCascade,
         .setTimepickerEnableCascade = SetTimepickerEnableCascade,
         .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
+        .setTimePickerDigitalCrownSensitivity = SetTimePickerDigitalCrownSensitivity,
+        .resetTimePickerDigitalCrownSensitivity = ResetTimePickerDigitalCrownSensitivity,
+        .setTimepickerOnChange = SetTimepickerOnChangeExt,
+        .resetTimepickerOnChange = ResetTimepickerOnChange,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITimepickerModifier* GetCJUITimepickerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITimepickerModifier modifier = {
         .getTimepickerSelected = GetTimepickerSelected,
         .setTimepickerSelected = SetTimepickerSelected,
         .resetTimepickerSelected = ResetTimepickerSelected,
+        .getTimepickerStart = GetTimepickerStart,
+        .setTimepickerStart = SetTimepickerStart,
+        .resetTimepickerStart = ResetTimepickerStart,
+        .getTimepickerEnd = GetTimepickerEnd,
+        .setTimepickerEnd = SetTimepickerEnd,
+        .resetTimepickerEnd = ResetTimepickerEnd,
         .getTimepickerBackgroundColor = GetTimepickerBackgroundColor,
         .setTimepickerBackgroundColor = SetTimepickerBackgroundColor,
         .getTimepickerDisappearTextStyle = GetTimepickerDisappearTextStyle,
@@ -461,18 +553,8 @@ const CJUITimepickerModifier* GetCJUITimepickerModifier()
         .resetTimepickerLoop = ResetTimepickerLoop,
         .setTimepickerDateTimeOptions = SetTimepickerDateTimeOptions,
         .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
-        .getTimepickerEnableCascade = GetTimepickerEnableCascade,
-        .setTimepickerEnableCascade = SetTimepickerEnableCascade,
-        .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

@@ -115,6 +115,16 @@ public:
         shadowOpacity_->Set(opacity);
     }
 
+    void SetDragBackgroundColor(const std::optional<Color>& color)
+    {
+        dragBackgroundColor_ = color;
+    }
+
+    void SetIsDragShadowNeeded(bool isDragShadowNeeded)
+    {
+        isDragShadowNeeded_ = isDragShadowNeeded;
+    }
+
 private:
     void PaintImage(DrawingContext& context);
     void PaintImageNode(DrawingContext& context, const RefPtr<FrameNode>& imageNode,
@@ -143,6 +153,8 @@ private:
     RefPtr<AnimatablePropertyFloat> handleOpacity_;
     RefPtr<AnimatablePropertyFloat> shadowOpacity_;
     RefPtr<PropertyInt> selectedColor_;
+    std::optional<Color> dragBackgroundColor_;
+    bool isDragShadowNeeded_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

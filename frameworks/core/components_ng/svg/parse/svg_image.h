@@ -28,7 +28,7 @@ public:
     SvgImage();
     ~SvgImage() override = default;
     static RefPtr<SvgNode> Create();
-
+    void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override;
     void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override;
     std::shared_ptr<RSData> LoadLocalImage(const std::string& uri);
     std::shared_ptr<RSData> LoadBase64Image(const std::string& uri);

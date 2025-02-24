@@ -122,27 +122,33 @@ void GestureModelNG::SetAllowedTypes(const std::set<SourceTool>& allowedTypes)
     gesture->SetAllowedTypes(allowedTypes);
 }
 
-void TapGestureModelNG::Create(int32_t countNum, int32_t fingersNum, double distanceThreshold)
+void TapGestureModelNG::Create(
+    int32_t countNum, int32_t fingersNum, double distanceThreshold, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::TapGesture>(countNum, fingersNum, distanceThreshold);
+    auto gesture = AceType::MakeRefPtr<NG::TapGesture>(
+        countNum, fingersNum, distanceThreshold, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void LongPressGestureModelNG::Create(int32_t fingersNum, bool repeatResult, int32_t durationNum)
+void LongPressGestureModelNG::Create(
+    int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(fingersNum, repeatResult, durationNum);
+    auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(
+        fingersNum, repeatResult, durationNum, false, false, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void PanGestureModelNG::Create(int32_t fingersNum, const PanDirection& panDirection, double distanceNum)
+void PanGestureModelNG::Create(
+    int32_t fingersNum, const PanDirection& panDirection, double distanceNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::PanGesture>(fingersNum, panDirection, distanceNum);
+    auto gesture = AceType::MakeRefPtr<NG::PanGesture>(
+        fingersNum, panDirection, distanceNum, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
@@ -154,27 +160,29 @@ void PanGestureModelNG::SetPanGestureOption(const RefPtr<PanGestureOption>& panG
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void SwipeGestureModelNG::Create(int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum)
+void SwipeGestureModelNG::Create(
+    int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::SwipeGesture>(fingersNum, slideDirection, speedNum);
+    auto gesture = AceType::MakeRefPtr<NG::SwipeGesture>(
+        fingersNum, slideDirection, speedNum, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void PinchGestureModelNG::Create(int32_t fingersNum, double distanceNum)
+void PinchGestureModelNG::Create(int32_t fingersNum, double distanceNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::PinchGesture>(fingersNum, distanceNum);
+    auto gesture = AceType::MakeRefPtr<NG::PinchGesture>(fingersNum, distanceNum, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void RotationGestureModelNG::Create(int32_t fingersNum, double angleNum)
+void RotationGestureModelNG::Create(int32_t fingersNum, double angleNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::RotationGesture>(fingersNum, angleNum);
+    auto gesture = AceType::MakeRefPtr<NG::RotationGesture>(fingersNum, angleNum, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 

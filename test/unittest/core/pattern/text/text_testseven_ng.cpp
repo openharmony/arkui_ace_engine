@@ -295,7 +295,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     span0->textLineStyle->UpdateWordBreak(WordBreak::BREAK_ALL);
     span0->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
     span0->textLineStyle->UpdateEllipsisMode(EllipsisMode::MIDDLE);
-    auto span1 = span0->GetSameStyleSpanItem();
+    auto span1 = span0->GetSameStyleSpanItem(true);
     span1->content = u"123456789";
     span1->interval.first = 0;
     span1->interval.second = 9;
@@ -364,7 +364,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
     options.moduleName = "moduleName";
     span0->options = options;
 
-    auto span1 = span0->GetSameStyleSpanItem();
+    auto span1 = span0->GetSameStyleSpanItem(true);
     span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;
@@ -430,7 +430,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     span0->interval.first = 0;
     span0->interval.second = 1;
     span0->imageNodeId = 1;
-    auto span1 = span0->GetSameStyleSpanItem();
+    auto span1 = span0->GetSameStyleSpanItem(true);
     span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;
@@ -480,7 +480,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
     span0->interval.first = 0;
     span0->interval.second = 1;
     span0->imageNodeId = 1;
-    auto span1 = span0->GetSameStyleSpanItem();
+    auto span1 = span0->GetSameStyleSpanItem(true);
     span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;

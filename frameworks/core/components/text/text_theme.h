@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_TEXT_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_TEXT_THEME_H
 
+#include "ui/base/utils/utils.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -45,14 +46,29 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            InitThemeDefaults(theme);
+            ParsePattern(themeConstants, theme);
+            return theme;
+        }
+    protected:
+        void InitThemeDefaults(const RefPtr<TextTheme>& theme) const
+        {
             // Styles below do not need to get from ThemeConstants, directly set at here.
             theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
             theme->textStyle_.SetFontWeight(FontWeight::NORMAL);
             theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
-            ParsePattern(themeConstants, theme);
-            return theme;
+            InitThemeDefaultsClock(theme);
         }
-    private:
+
+        void InitThemeDefaultsClock(const RefPtr<TextTheme>& theme) const
+        {
+            CHECK_NULL_VOID(theme);
+            // Styles below do not need to get from ThemeConstants, directly set at here.
+            theme->textStyleClock_.SetFontStyle(FontStyle::NORMAL);
+            theme->textStyleClock_.SetFontWeight(FontWeight::NORMAL);
+            theme->textStyleClock_.SetTextDecoration(TextDecoration::NONE);
+        }
+
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_TEXT);
@@ -63,6 +79,10 @@ public:
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
+            theme->textStyleClock_.SetTextColor(
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::GRAY)
+                    .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
+            theme->textStyleClock_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
             theme->caretColor_ = pattern->GetAttr<Color>("text_caret_color", Color(0xff006cde));
             theme->textStyle_.SetLineSpacing(pattern->GetAttr<Dimension>("text_line_spacing", 0.0_vp));
             theme->textStyle_.SetFontWeight(static_cast<FontWeight>(pattern->GetAttr<double>("text_font_weight", 0.0)));
@@ -79,6 +99,8 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            auto textShowTranslate = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->isShowTranslate_ = StringUtils::StringToInt(textShowTranslate);
             auto textShowSearch = pattern->GetAttr<std::string>("text_menu_search_is_support", "0");
             theme->isShowSearch_ = StringUtils::StringToInt(textShowSearch);
             auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
@@ -103,6 +125,11 @@ public:
     const Color& GetCaretColor() const
     {
         return caretColor_;
+    }
+
+    const TextStyle& GetTextStyleClock() const
+    {
+        return textStyleClock_;
     }
 
     const Color& GetSelectedColor() const
@@ -133,6 +160,11 @@ public:
     bool IsShowHandle() const
     {
         return isShowHandle_;
+    }
+
+    bool IsShowTranslate() const
+    {
+        return isShowTranslate_;
     }
 
     bool IsShowSearch() const
@@ -171,15 +203,17 @@ public:
 
 protected:
     TextTheme() = default;
+    TextStyle textStyle_;
+    TextStyle textStyleClock_;
 
 private:
-    TextStyle textStyle_;
     Color caretColor_;
     Color selectedColor_;
     Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
+    bool isShowTranslate_ = false;
     bool isShowSearch_ = false;
     bool isTextFadeout_ = false;
     Dimension fadeoutWidth_;

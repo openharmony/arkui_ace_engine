@@ -67,6 +67,8 @@ public:
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual bool NeedSetItems() = 0;
     virtual void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetHideItemText(bool isHideItemText) {};
+    virtual void SetEnableToolBarAdaptation(bool disable) {};
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetToolbarOptions(NG::NavigationToolbarOptions&& opt) {}

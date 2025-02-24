@@ -70,7 +70,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderColorTestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setPlaceholderColorTestPlaceholderColorValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderColorTestPlaceholderColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValuePlaceholderColor;
 

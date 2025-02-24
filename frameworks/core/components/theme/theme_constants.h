@@ -266,6 +266,14 @@ public:
     bool CloseRawFileDescription(const std::string& rawfileName) const;
 
     /*
+     * Get rawfile file description which will not be cached.
+     * NOTE: false value will be returned if not found.
+     * @param[in] rawfileName Target rawfile.
+     * @return success or not to close file info.
+     */
+    bool GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const;
+
+    /*
      * Get resource media file path.
      * NOTE: false value will be returned if not found.
      * @param[in] resId Target resource id, mediaPath Target media path.
@@ -362,13 +370,10 @@ private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];
     static uint32_t DefaultMapCount;
-#ifdef WEARABLE_PRODUCT
     static const ResValueWrapper* styleMapWatch[];
     static uint32_t WatchMapCount;
-#else
     static const ResValueWrapper* styleMapTv[];
     static uint32_t TvMapCount;
-#endif
 
     ResValueWrapper GetValue(uint32_t key) const;
     double GetBlendAlpha(const BlendAlpha& blendAlpha) const;

@@ -336,7 +336,7 @@ struct custombutton {
 
   }
 
-  onAreaChangeEvent(oldValue: Area, newValue: Area) {
+  onAreaChangeEvent(oldValue: SizeOptions, newValue: SizeOptions) {
 
   }
 
@@ -433,7 +433,6 @@ struct custombutton {
     if (!this.hideSplit && this.isFocused) {
       this.showMenuTimeoutId = setTimeout(() => {
         this.isShowMenu = true
-        this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
       }, HOVER_TIME)
     }
   }
@@ -551,7 +550,7 @@ struct custombutton {
 
   build() {
     Row() {
-      Row() {
+      Row({space: this.buttonSpacing}) {
         Button() {
           Image(this.maximizeResource)
             .width(IMAGE_SIZE)
@@ -569,8 +568,6 @@ struct custombutton {
         .type(ButtonType.Normal)
         .borderRadius('4vp')
         .hoverEffect(HoverEffect.None)
-        // 间距可修改
-        .margin({ right: this.buttonSpacing + 'vp' })
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -587,6 +584,7 @@ struct custombutton {
         .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
           this.onMenuWidthChange()
           this.isShowMenu = !this.hideSplit
+          this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
         }), TapGesture().onAction(() => {
           this.onMaximizeButtonClick()
         })))
@@ -595,8 +593,10 @@ struct custombutton {
           if (isHover) {
             this.onMenuWidthChange()
             this.onShowMenuWithTimer()
+            this.cancelMenuDisappearTimer()
           } else {
             this.onCancelMenuTimer()
+            this.menuDisappearTimer(MENU_MOUSEOUT_DISAPPEAR_TIME)
           }
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
@@ -622,7 +622,6 @@ struct custombutton {
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        .margin({ right: this.buttonSpacing + 'vp' })
         .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
@@ -687,7 +686,7 @@ struct custombutton {
       }.id('containerModalButtonRowId')
       .height('100%')
       .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset +'vp'})
-      .onAreaChange((oldValue: Area, newValue: Area) => {
+      .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.onAreaChangeEvent(oldValue, newValue)
       })
       .gesture(PanGesture())

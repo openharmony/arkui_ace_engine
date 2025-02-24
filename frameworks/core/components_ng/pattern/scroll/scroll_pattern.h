@@ -214,6 +214,7 @@ public:
     {
         if (intervalSize_ != intervalSize) {
             intervalSize_ = intervalSize;
+            TAG_LOGI(AceLogTag::ACE_SCROLL, "scroll setIntervalSize:%{public}f", intervalSize.Value());
             scrollSnapUpdate_ = true;
         }
     }

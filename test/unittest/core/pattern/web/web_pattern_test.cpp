@@ -363,6 +363,7 @@ HWTEST_F(WebPatternTest, RegisterSelectOverlayCallbackTest005, TestSize.Level1)
     std::shared_ptr<NWebQuickMenuCallback> callback = std::make_shared<NWebQuickMenuCallbackMock>();
     SelectOverlayInfo selectInfo;
     g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
+    EXPECT_FALSE(selectInfo.menuInfo.showCut);
     g_editStateFlags = EF_CAN_CUT;
     g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
     g_editStateFlags = EF_CAN_COPY;
@@ -385,7 +386,7 @@ HWTEST_F(WebPatternTest, OnTouchSelectionChangedTest006, TestSize.Level1)
     g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
     g_endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
     g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-
+    EXPECT_EQ(g_webPattern->insertHandle_, nullptr);
     g_insertHandle = std::make_shared<NWebTouchHandleStateMock>();
     g_startSelectionHandle.reset();
     g_startSelectionHandle = nullptr;
@@ -413,7 +414,7 @@ HWTEST_F(WebPatternTest, UpdateTouchHandleForOverlayTest007, TestSize.Level1)
     g_webPattern->startSelectionHandle_.reset();
     g_webPattern->endSelectionHandle_.reset();
     g_webPattern->UpdateTouchHandleForOverlay();
-
+    EXPECT_EQ(g_webPattern->selectOverlayProxy_, nullptr);
     int32_t selectOverlayId = 1;
     g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     g_webPattern->UpdateTouchHandleForOverlay();
@@ -492,7 +493,7 @@ HWTEST_F(WebPatternTest, HandleDoubleClickEventTest009, TestSize.Level1)
     std::queue<MouseClickInfo> empty;
     swap(empty, g_webPattern->mouseClickQueue_);
     g_webPattern->HandleDoubleClickEvent(info);
-    g_webPattern->HandleDoubleClickEvent(info);
+    EXPECT_FALSE(g_webPattern->HandleDoubleClickEvent(info));
 #endif
 }
 
@@ -545,6 +546,7 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->isWindowShow_ = false;
     g_webPattern->OnWindowHide();
     g_webPattern->OnWindowShow();
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 
     g_webPattern->isActive_ = true;
     g_webPattern->OnActive();
@@ -552,6 +554,7 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->isActive_ = false;
     g_webPattern->OnInActive();
     g_webPattern->OnActive();
+    EXPECT_TRUE(g_webPattern->isActive_);
 
     g_webPattern->OnVisibleChange(false);
     g_webPattern->OnVisibleChange(true);

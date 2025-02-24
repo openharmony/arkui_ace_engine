@@ -42,7 +42,7 @@ public:
         PLAY_ONCE,
     };
 
-    PickerHapticController() noexcept;
+    PickerHapticController(const std::string& uri, const std::string& effectId) noexcept;
     ~PickerHapticController() noexcept;
     void Play(size_t speed) override;
     void PlayOnce() override;

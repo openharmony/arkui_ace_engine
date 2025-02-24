@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -89,6 +90,17 @@ struct ParsedConfig {
     }
 };
 
+struct SingleHandTransform {
+    SingleHandTransform() = default;
+    SingleHandTransform(float x, float y, float scaleX, float scaleY)
+        : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
+ 
+    float x_ = 0.0f;
+    float y_ = 0.0f;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
+};
+
 using ConfigurationChangedCallback = std::function<void(const ParsedConfig& config, const std::string& configuration)>;
 
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
@@ -106,6 +118,8 @@ public:
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         std::shared_ptr<TaskWrapper> taskWrapper, bool useCurrentEventRunner = false, bool isSubContainer = false,
         bool useNewPipeline = false);
+
+    AceContainer(int32_t instanceId, FrontendType type);
 
     ~AceContainer() override;
 
@@ -324,6 +338,8 @@ public:
 
     bool DumpInfo(const std::vector<std::string>& params);
 
+    bool DumpRSNodeByStringID(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
@@ -394,7 +410,7 @@ public:
         return sharedRuntime_;
     }
 
-    void SetParentId(int32_t parentId)
+    void SetParentId(int32_t parentId) override
     {
         parentId_ = parentId;
     }
@@ -417,7 +433,7 @@ public:
         return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
-    int32_t GetParentId() const
+    int32_t GetParentId() const override
     {
         return parentId_;
     }
@@ -470,6 +486,8 @@ public:
     static void OnHide(int32_t instanceId);
     static void OnActive(int32_t instanceId);
     static void OnInactive(int32_t instanceId);
+    static void ActiveWindow(int32_t instanceId);
+    static void UnActiveWindow(int32_t instanceId);
     static void OnNewWant(int32_t instanceId, const std::string& data);
     static bool OnStartContinuation(int32_t instanceId);
     static std::string OnSaveData(int32_t instanceId);
@@ -497,6 +515,9 @@ public:
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
     static bool RemoveOverlayBySubwindowManager(int32_t instanceId);
+
+    static bool CloseWindow(int32_t instanceId);
+    static bool HideWindow(int32_t instanceId);
 
     // ArkTsCard
     static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
@@ -540,6 +561,10 @@ public:
     {
         isFormRender_ = isFormRender;
     }
+
+    void SetAppRunningUniqueId(const std::string& uniqueId) override;
+
+    const std::string& GetAppRunningUniqueId() const override;
 
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
@@ -593,13 +618,20 @@ public:
         return webHapPath_;
     }
 
-    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type,
+        std::optional<NG::RectF> windowRect = std::nullopt);
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
-    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
+    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion = Rosen::API_VERSION_INVALID);
 
     uint32_t GetStatusBarHeight();
+
+    Rosen::WindowMode GetWindowMode() const
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
+        return uiWindow_->GetWindowMode();
+    }
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -614,6 +646,7 @@ public:
 
     bool IsLauncherContainer() override;
     bool IsScenceBoardWindow() override;
+    bool IsCrossAxisWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;
@@ -668,7 +701,7 @@ public:
         int32_t eventType, int64_t timeMs);
 
     void TerminateUIExtension() override;
-
+    bool UIExtensionIsHalfScreen() override;
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {
         isUIExtensionSubWindow_ = isUIExtensionSubWindow;
@@ -735,7 +768,7 @@ public:
     }
 
     void UpdateResourceOrientation(int32_t orientation);
-    void UpdateResourceDensity(double density);
+    void UpdateResourceDensity(double density, bool isUpdateResConfig);
     void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
@@ -755,8 +788,35 @@ public:
     bool IsFloatingWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
-        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
+
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+    }
+
+    void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
+    {
+        singleHandTransform_ = singleHandTransform;
+    }
+
+    const SingleHandTransform& GetSingleHandTransform() const
+    {
+        return singleHandTransform_;
+    }
+
+    bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
+
+    Rect GetDisplayAvailableRect() const override;
+
+    void GetExtensionConfig(AAFwk::WantParams& want);
+
+    void SetIsFocusActive(bool isFocusActive);
+
+    void SetFontScaleAndWeightScale(int32_t instanceId);
+
+    sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
 
 private:
     virtual bool MaybeRelease() override;
@@ -768,7 +828,6 @@ private:
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
         float height, uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
-    sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> GetRuntimeContextInner() const;
 
@@ -786,10 +845,15 @@ private:
     void RegisterUIExtDataConsumer();
     void UnRegisterUIExtDataConsumer();
     void DispatchUIExtDataConsume(
-        NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void RegisterUIExtDataSendToHost();
-    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
-    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool FireUIExtDataSendToHost(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply);
+
+    void RegisterAvoidInfoCallback();
+    void RegisterAvoidInfoDataProcessCallback();
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -855,6 +919,8 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    std::string uniqueId_;
+
     // For custom drag event
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
@@ -865,6 +931,9 @@ private:
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
+
+    SingleHandTransform singleHandTransform_;
 };
 
 } // namespace OHOS::Ace::Platform

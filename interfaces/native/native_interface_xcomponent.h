@@ -69,6 +69,25 @@ enum {
     OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER = -2,
 };
 
+/**
+ * @brief Status code for AI analyzer.
+ *
+ * @since 16
+ * @version 1.0
+ */
+typedef enum {
+    /** AI analyzer execution is finished. */
+    ARKUI_XCOMPONENT_AI_ANALYSIS_FINISHED = 0,
+    /** AI analyzer is disabled. */
+    ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED = 110000,
+    /** AI analyzer is unsupported. */
+    ARKUI_XCOMPONENT_AI_ANALYSIS_UNSUPPORTED = 110001,
+    /** AI analyzer is ongoing. */
+    ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING = 110002,
+    /** AI analyzer is stopped. */
+    ARKUI_XCOMPONENT_AI_ANALYSIS_STOPPED = 110003,
+} ArkUI_XComponent_ImageAnalyzerState;
+
 typedef enum {
     /** Trigger a touch event when a finger is pressed. */
     OH_NATIVEXCOMPONENT_DOWN = 0,
@@ -832,6 +851,34 @@ int32_t OH_NativeXComponent_GetNativeAccessibilityProvider(
  */
 int32_t OH_NativeXComponent_RegisterKeyEventCallbackWithResult(
     OH_NativeXComponent* component, bool (*callback)(OH_NativeXComponent* component, void* window));
+
+/**
+ * @brief Start image analyzer for the specified XComponent
+ * instance created by the native API.
+ *
+ * @param node Indicates the pointer to the XComponent instance created by the native API.
+ * @param userData Indicates the pointer to a user defined data.
+ * @param callback Indicates the pointer to a image analyzer status callback function.
+ * @return Returns the status code of the execution.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.\n
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} component is nullptr or callback is nullptr,
+ *         or the type of node is not XComponent.\n
+ * @since 16
+ */
+int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* userData,
+    void (*callback)(ArkUI_NodeHandle node, ArkUI_XComponent_ImageAnalyzerState statusCode, void* userData));
+
+/**
+ * @brief Stop image analyzer for the specified XComponent
+ * instance created by the native API.
+ *
+ * @param node Indicates the pointer to the XComponent instance created by the native API.
+ * @return Returns the status code of the execution.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.\n
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} component is nullptr or the type of node is not XComponent.\n
+ * @since 16
+ */
+int32_t OH_ArkUI_XComponent_StopImageAnalyzer(ArkUI_NodeHandle node);
 
 #ifdef __cplusplus
 };

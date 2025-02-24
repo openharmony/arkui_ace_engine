@@ -20,15 +20,15 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/rect.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS {
 
-namespace Ace {
-class Rect;
-}
 namespace Media {
 class PixelMap;
 }
@@ -147,11 +147,38 @@ enum class AceAntiAliasingOption : int32_t {
     HIGH = 3,
 };
 
+enum class ScaleMode : int32_t {
+    FIT_TARGET_SIZE = 0,
+    CENTER_CROP = 1,
+};
+
+struct InitializationOptions {
+    NG::SizeT<int32_t> size;
+    PixelFormat srcPixelFormat = PixelFormat::BGRA_8888;
+    PixelFormat pixelFormat = PixelFormat::UNKNOWN;
+    AlphaType alphaType = AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+    ScaleMode scaleMode = ScaleMode::FIT_TARGET_SIZE;
+    int32_t srcRowStride = 0;
+    bool editable = false;
+    bool useSourceIfMatch = false;
+    bool useDMA = false;
+};
+
+struct WritePixelsOptions {
+    const uint8_t* source = nullptr;
+    uint64_t bufferSize = 0;
+    uint32_t offset = 0;
+    uint32_t stride = 0;
+    Rect region;
+    PixelFormat srcPixelFormat = PixelFormat::BGRA_8888;
+};
+
 class ACE_FORCE_EXPORT PixelMap : public AceType {
     DECLARE_ACE_TYPE(PixelMap, AceType)
 
 public:
     static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
+    static RefPtr<PixelMap> Create(const InitializationOptions& opts);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
     static RefPtr<PixelMap> CopyPixelMap(const RefPtr<PixelMap>& pixelMap);
     static RefPtr<PixelMap> DecodeTlv(std::vector<uint8_t>& buff);
@@ -191,6 +218,7 @@ public:
     virtual void SavePixelMapToFile(const std::string& dst) const = 0;
     virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) = 0;
     virtual bool EncodeTlv(std::vector<uint8_t>& buff) = 0;
+    virtual uint32_t WritePixels(const WritePixelsOptions& opts) = 0;
 };
 
 } // namespace Ace

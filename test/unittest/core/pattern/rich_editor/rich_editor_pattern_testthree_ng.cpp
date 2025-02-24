@@ -117,33 +117,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, BeforeStatusCursorMove001, TestSize.Level
 }
 
 /**
- * @tc.name: CursorMoveRight001
- * @tc.desc: test CursorMoveRight
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveRight001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->CursorMoveRight();
-    EXPECT_TRUE(richEditorPattern->caretVisible_);
-}
-
-/**
- * @tc.name: CursorMoveLeftAndRightWord001
- * @tc.desc: test CursorMoveLeftWord and CursorMoveRightWord
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveLeftWord001, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    EXPECT_FALSE(richEditorPattern->CursorMoveLeftWord());
-    EXPECT_FALSE(richEditorPattern->CursorMoveRightWord());
-}
-
-/**
  * @tc.name: CursorMoveToParagraphBegin001
  * @tc.desc: test CursorMoveToParagraphBegin
  * @tc.type: FUNC
@@ -603,6 +576,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, InitScrollablePattern001, TestSize.Level1
     ASSERT_NE(context, nullptr);
     context->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PaddingProperty padding;
     padding.top = CalcLength(10);
     padding.left = CalcLength(10);
@@ -813,9 +787,8 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent005, TestSize.Level1)
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     richEditorPattern->hasUrlSpan_ = true;
-    richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->HandleTouchEvent(touchEventInfo);
-    EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
+    EXPECT_EQ(richEditorPattern->moveCaretState_.touchDownOffset, touchLocationInfo.localLocation_);
 }
 
 /**
@@ -834,9 +807,9 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent006, TestSize.Level1)
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     richEditorPattern->hasUrlSpan_ = true;
-    richEditorPattern->isMoveCaretAnywhere_ = true;
+    richEditorPattern->previewLongPress_ = true;
     richEditorPattern->HandleTouchEvent(touchEventInfo);
-    EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
+    EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }
 
 /**
@@ -1437,7 +1410,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleBlurEvent, TestSize.Level1)
     richEditorPattern->magnifierController_ = nullptr;
     richEditorPattern->textSelector_.Update(3, 4);
     richEditorPattern->HandleBlurEvent();
-    EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
+    EXPECT_FALSE(richEditorPattern->isEditing_);
 }
 
 /**

@@ -22,10 +22,14 @@ template("napi_prompt_static") {
     cflags_cc += invoker.cflags_cc
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
-    sources = [
-      "../promptaction/prompt_action.cpp",
-      "js_prompt.cpp",
-    ]
+    if (platform == "ohos" && !is_asan) {
+      sources = [ "js_prompt.cpp" ]
+    } else {
+      sources = [
+        "../promptaction/prompt_action.cpp",
+        "js_prompt.cpp",
+      ]
+    }
     deps = []
     external_deps = []
     if (platform != "" && is_arkui_x) {

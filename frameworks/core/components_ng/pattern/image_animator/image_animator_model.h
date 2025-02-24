@@ -41,6 +41,7 @@ public:
     virtual void SetOnRepeat(std::function<void()>&& OnRepeat) = 0;
     virtual void SetOnCancel(std::function<void()>&& OnCancel) = 0;
     virtual void SetOnFinish(std::function<void()>&& OnFinish) = 0;
+    virtual void SetAutoMonitorInvisibleArea(bool autoMonitorInvisibleArea = false) = 0;
 
 private:
     static std::unique_ptr<ImageAnimatorModel> instance_;

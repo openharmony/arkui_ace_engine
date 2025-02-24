@@ -33,6 +33,11 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         nodeInfo_->codeRow = pos.first;
         nodeInfo_->codeCol = pos.second;
     }
+    apiVersion_ = Container::GetCurrentApiTargetVersion();
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        depth_ = 1;
+        hostPageId_ = INT32_MAX;
+    }
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -216,20 +221,32 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
 
 void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
 {
-    if (isTraversing_) {
+    if (!isTraversing_) {
+        return;
+    }
+
+    if (withAbort) {
         if (node) {
-            LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
-                "is traversing", node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+            LOGF_ABORT("Try to remove the child([%{public}s][%{public}d]) of "
+                "node [%{public}s][%{public}d] when its children is traversing",
+                node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
         } else {
-            LOGF("Try to remove all the children of node [%{public}s][%{public}d] when its children is traversing",
+            LOGF_ABORT("Try to remove all the children of "
+                "node [%{public}s][%{public}d] when its children is traversing",
                 GetTag().c_str(), GetId());
         }
-        OHOS::Ace::LogBacktrace();
-
-        if (withAbort) {
-            abort();
-        }
     }
+
+    if (node) {
+        LOGE("Try to remove the child([%{public}s][%{public}d]) of "
+            "node [%{public}s][%{public}d] when its children is traversing",
+            node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+    } else {
+        LOGE("Try to remove all the children of "
+            "node [%{public}s][%{public}d] when its children is traversing",
+            GetTag().c_str(), GetId());
+    }
+    OHOS::Ace::LogBacktrace();
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
@@ -238,6 +255,12 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
 
     auto iter = std::find(children_.begin(), children_.end(), child);
     if (iter == children_.end()) {
+        return children_.end();
+    }
+
+    // the node set isInDestroying state when destroying in pop animation
+    // when in isInDestroying state node should not DetachFromMainTree preventing pop page from being white
+    if (IsDestroyingState()) {
         return children_.end();
     }
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
@@ -320,6 +343,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 
 void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
 {
+    bool needSyncRenderTree = false;
     int32_t index = 0;
 
     auto children = GetChildren();
@@ -335,6 +359,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
         if (child->OnRemoveFromParent(allowTransition)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
+            needSyncRenderTree = true;
         } else {
             // else move child into disappearing children, skip syncing render tree
             AddDisappearingChild(child, index, branchId);
@@ -353,6 +378,32 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
 {
     CHECK_NULL_VOID(parent);
     parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition, addModalUiextension);
+    if (parent->IsInDestroying()) {
+        parent->SetChildrenInDestroying();
+    }
+    if (parent->GetPageId() != 0 && parent->GetPageId() != INT32_MAX) {
+        SetHostPageId(parent->GetPageId());
+    }
+    AfterMountToParent();
+}
+
+void UINode::MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChildAfter(AceType::Claim(this), siblingNode);
+    if (parent->IsInDestroying()) {
+        parent->SetChildrenInDestroying();
+    }
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
+    AfterMountToParent();
+}
+
+void UINode::MountToParentBefore(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChildBefore(AceType::Claim(this), siblingNode);
     if (parent->IsInDestroying()) {
         parent->SetChildrenInDestroying();
     }
@@ -378,6 +429,9 @@ void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationC
 
 bool UINode::OnRemoveFromParent(bool allowTransition)
 {
+    if (IsDestroyingState()) {
+        return false;
+    }
     // The recursive flag will used by RenderContext, if recursive flag is false,
     // it may trigger transition
     DetachFromMainTree(!allowTransition);
@@ -391,7 +445,11 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    SetDepth(1);
+    depth_ = -1;
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        SetDepth(1);
+        SetHostPageIdByParent(INT32_MAX);
+    }
     UpdateThemeScopeId(0);
 }
 
@@ -422,7 +480,7 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     static_assert(totalLengthLimit > childLengthLimit, "totalLengthLimit too small");
     constexpr size_t currentLengthLimit = totalLengthLimit - childLengthLimit;
 
-    LOGF("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
+    LOGE("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
         (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
 
     // log full childNode info in case of hilog length limit reached
@@ -442,7 +500,8 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     }
 
     if (SystemProperties::GetLayoutDetectEnabled()) {
-        abort();
+        LOGF_ABORT("LoopDetected: child[%{public}.*s] vs current[%{public}.*s]",
+            (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
     } else {
         LogBacktrace();
     }
@@ -478,12 +537,15 @@ void UINode::DoAddChild(
         }
     }
 
-    child->SetParent(Claim(this));
+    child->SetParent(Claim(this), false);
     auto themeScopeId = GetThemeScopeId();
     if (child->IsAllowUseParentTheme() && child->GetThemeScopeId() != themeScopeId) {
         child->UpdateThemeScopeId(themeScopeId);
     }
     child->SetDepth(GetDepth() + 1);
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        child->SetHostPageIdByParent(hostPageId_);
+    }
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
     }
@@ -492,6 +554,7 @@ void UINode::DoAddChild(
         child->AttachToMainTree(!addDefaultTransition, context_);
     }
     MarkNeedSyncRenderTree(true);
+    ProcessIsInDestroyingForReuseableNode(child);
 }
 
 void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
@@ -650,7 +713,7 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
 void UINode::GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     for (const auto& uiChild : children_) {
-        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
+        auto frameChild = AceType::DynamicCast<FrameNode>(Referenced::RawPtr(uiChild));
         if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
             const auto focusHub = frameChild->GetFocusHub();
             if (focusHub) {
@@ -710,6 +773,9 @@ void UINode::DetachFromMainTree(bool recursive)
     if (!onMainTree_) {
         return;
     }
+    if (IsDestroyingState()) {
+        return;
+    }
     onMainTree_ = false;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
@@ -728,10 +794,26 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
-void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule)
+void UINode::SetUserFreeze(bool isUserFreeze)
+{
+    userFreeze_ = isUserFreeze;
+}
+
+bool UINode::IsUserFreeze()
+{
+    return userFreeze_.has_value() && userFreeze_.value();
+}
+
+void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule, bool isUserFreeze)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
+    if (isUserFreeze) {
+        SetUserFreeze(isUserFreeze);
+    } else if (IsUserFreeze()) {
+        return;
+    }
+
     auto isNeedUpdateFreezeVaule = context->IsOpenInvisibleFreeze() || isForceUpdateFreezeVaule;
     if (isNeedUpdateFreezeVaule && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
@@ -867,7 +949,7 @@ void UINode::UpdateGeometryTransition()
 bool UINode::IsAutoFillContainerNode()
 {
     return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG
-        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
+        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG || tag_ == V2::POPUP_ETS_TAG;
 }
 
 void UINode::DumpViewDataPageNodes(
@@ -1313,7 +1395,7 @@ void UINode::SetActive(bool active, bool needRebuildRenderContext)
     }
 }
 
-void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
 {
     for (const auto& child : GetChildren()) {
         auto customNode = AceType::DynamicCast<CustomNode>(child);
@@ -1322,10 +1404,10 @@ void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
             return;
         }
         if (customNode) {
-            customNode->SetJSViewActive(active);
+            customNode->SetJSViewActive(active, isLazyForEachNode, isReuse);
             continue;
         }
-        child->SetJSViewActive(active);
+        child->SetJSViewActive(active, isLazyForEachNode, isReuse);
     }
 }
 
@@ -1660,6 +1742,47 @@ bool UINode::GetIsRootBuilderNode() const
 }
 
 // Collects  all the child elements of "children" in a recursive manner
+// Fills the "removedElmtId" list and the "reservedElmtId" list with the collected child elements
+void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
+    std::list<int32_t>& reservedElmtId, bool isEntry)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Container::Current();
+    auto greatOrEqualApi13 =
+        container && container->GetApiTargetVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    for (auto const& child : children) {
+        bool needByTransition = child->IsDisappearing();
+        if (greatOrEqualApi13) {
+            needByTransition = isEntry && child->IsDisappearing() && child->GetInspectorIdValue("") != "";
+        }
+
+        if (!needByTransition && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
+            removedElmtId.emplace_back(child->GetId());
+            if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
+                CollectCleanedChildren(child->GetChildren(), removedElmtId, reservedElmtId, false);
+            }
+        } else if (needByTransition && greatOrEqualApi13) {
+            child->CollectReservedChildren(reservedElmtId);
+        }
+    }
+    if (isEntry) {
+        children_.clear();
+    }
+}
+
+void UINode::CollectReservedChildren(std::list<int32_t>& reservedElmtId)
+{
+    reservedElmtId.emplace_back(GetId());
+    if (GetTag() == V2::JS_VIEW_ETS_TAG) {
+        SetJSViewActive(false);
+    } else {
+        for (auto const& child : GetChildren()) {
+            child->CollectReservedChildren(reservedElmtId);
+        }
+    }
+}
+
+// Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
@@ -1682,6 +1805,7 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
 void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
 {
     removedElmtId.emplace_back(child->GetId());
+    child->OnCollectRemoved();
     // Fetch all the child elementIDs recursively
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
         // add CustomNode but do not recurse into its children
@@ -1795,6 +1919,16 @@ void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, Notifica
     }
 }
 
+void UINode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
+{
+    auto current = parent.Upgrade();
+    CHECK_NULL_VOID(current);
+    if (needDetect && DetectLoop(Claim(this), current)) {
+        return;
+    }
+    parent_ = parent;
+}
+
 int32_t UINode::GetThemeScopeId() const
 {
     return themeScopeId_;
@@ -1802,6 +1936,7 @@ int32_t UINode::GetThemeScopeId() const
 
 void UINode::SetThemeScopeId(int32_t themeScopeId)
 {
+    LOGD("WithTheme SetThemeScopeId %{public}d", themeScopeId);
     themeScopeId_ = themeScopeId;
     auto children = GetChildren();
     for (const auto& child : children) {
@@ -1817,6 +1952,7 @@ void UINode::UpdateThemeScopeId(int32_t themeScopeId)
     if (GetThemeScopeId() == themeScopeId) {
         return;
     }
+    LOGD("WithTheme UpdateThemeScopeId old:%{public}d new:%{public}d", GetThemeScopeId(), themeScopeId);
     themeScopeId_ = themeScopeId;
     OnThemeScopeUpdate(themeScopeId);
     auto children = GetChildren();
@@ -1869,5 +2005,47 @@ void UINode::SetAllowReusableV2Descendant(bool allow)
 bool UINode::IsAllowReusableV2Descendant() const
 {
     return allowReusableV2Descendant_;
+}
+
+void UINode::SetDestroying(bool isDestroying, bool cleanStatus)
+{
+    if (isInDestroying_ == isDestroying) {
+        return;
+    }
+
+    isInDestroying_ = isDestroying;
+    for (const auto& child : GetChildren()) {
+        if (child->IsReusableNode()) {
+            child->SetDestroying(isDestroying, false);
+        } else {
+            child->SetDestroying(isDestroying, cleanStatus);
+        }
+    }
+    // add customnode to pipiline when state change, destroy them next vsync
+    OnDestroyingStateChange(isDestroying, cleanStatus);
+}
+
+bool UINode::HasSkipNode()
+{
+    for (const auto& child : children_) {
+        if (child->GetTag() == V2::WEB_ETS_TAG) {
+            return true;
+        }
+
+        if (child->HasSkipNode()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) || !child || !child->IsReusableNode()) {
+        return;
+    }
+    if (!IsInDestroying() && child->IsInDestroying()) {
+        child->SetDestroying(false, false);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -41,6 +41,7 @@ enum class DragPreviewMode : int32_t {
     ENABLE_DEFAULT_SHADOW = 3,
     ENABLE_DEFAULT_RADIUS = 4,
     ENABLE_DRAG_ITEM_GRAY_EFFECT = 5,
+    ENABLE_MULTI_TILE_EFFECT  = 6,
 };
 
 struct BlurBackGroundInfo {
@@ -68,6 +69,7 @@ struct OptionsAfterApplied {
     double opacity { 1.0f };
     std::optional<Shadow> shadow;
     std::string shadowPath;
+    bool isFilled = true;
     std::optional<BorderRadiusProperty> borderRadius;
     BlurBackGroundInfo blurbgEffect;
 };
@@ -81,9 +83,13 @@ struct DragPreviewOption {
     bool isDefaultRadiusEnabled = false;
     bool isDragPreviewEnabled = true;
     bool isDefaultDragItemGrayEffectEnabled = false;
+    bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
+    bool isMultiTiled = false;
+    bool isLiftingDisabled = false;
     union {
         int32_t badgeNumber;
-        bool isShowBadge;
+        bool isShowBadge = true;
     };
     std::optional<int32_t> GetCustomerBadgeNumber()
     {
@@ -102,6 +108,7 @@ struct DragPreviewOption {
         isDefaultShadowEnabled = false;
         isDefaultRadiusEnabled = false;
         isDefaultDragItemGrayEffectEnabled = false;
+        isMultiTiled = false;
     }
 };
 
@@ -111,6 +118,8 @@ class ACE_EXPORT Gesture : public virtual AceType {
 public:
     Gesture() = default;
     explicit Gesture(int32_t fingers) : fingers_(fingers) {}
+    explicit Gesture(
+        int32_t fingers, bool isLimitFingerCount) : fingers_(fingers), isLimitFingerCount_(isLimitFingerCount) {}
     ~Gesture() override = default;
 
     void SetOnActionId(const GestureEventFunc& onActionId)
@@ -159,6 +168,16 @@ public:
     int32_t GetFingers() const
     {
         return fingers_;
+    }
+
+    void SetLimitFingerCount(bool limitFingerCount)
+    {
+        isLimitFingerCount_ = limitFingerCount;
+    }
+
+    bool GetLimitFingerCount() const
+    {
+        return isLimitFingerCount_;
     }
 
     void SetTag(std::string tag)
@@ -238,6 +257,7 @@ public:
 
 protected:
     int32_t fingers_ = 1;
+    bool isLimitFingerCount_ = false;
     GesturePriority priority_ = GesturePriority::Low;
     GestureMask gestureMask_ = GestureMask::Normal;
     std::shared_ptr<GestureEventFunc> onActionId_;

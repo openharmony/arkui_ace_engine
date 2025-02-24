@@ -123,7 +123,11 @@ NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
         return nullptr;
     }
     auto iter = itemMap_.find(elementId);
-    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::FrameNode>(iter->second.GetRawPtr());
+    if (iter == itemMap_.end()) {
+        return nullptr;
+    }
+    auto node = AceType::DynamicCast<NG::FrameNode>(iter->second.Upgrade());
+    return AceType::RawPtr(node); // warning: returning an unsafe rawptr !!!
 }
 
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
@@ -224,7 +228,7 @@ void ElementRegister::ClearPendingRemoveNodes()
     pendingRemoveNodes_.clear();
 }
 
-RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key)
+RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
 {
     auto it = inspectorIdMap_.find(key);
     CHECK_NULL_RETURN(it != inspectorIdMap_.end(), nullptr);
@@ -237,7 +241,8 @@ RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::strin
             continue;
         }
         auto depOfNode = uiNode->GetDepth();
-        if (uiNode->IsOnMainTree() && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode) {
+        bool withInScope = willGetAll || (!willGetAll && uiNode->IsOnMainTree());
+        if (withInScope && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode) {
             depth = depOfNode;
             frameNode = uiNode;
         }

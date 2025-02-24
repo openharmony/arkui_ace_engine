@@ -45,6 +45,7 @@ void SetOnListReachStartCallBack(ArkUINodeHandle node, void* extraParam);
 void SetOnListReachEndCallBack(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollStartCallBack(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollStopCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnListScrollVisibleContentChange(ArkUINodeHandle node, void* extraParam);
 
 void ResetOnListScroll(ArkUINodeHandle node);
 void ResetOnListScrollIndex(ArkUINodeHandle node);

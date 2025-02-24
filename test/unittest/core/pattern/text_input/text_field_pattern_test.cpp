@@ -2379,6 +2379,43 @@ HWTEST_F(TextFieldPatternTest, TextPattern103, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TextPattern104
+ * @tc.desc: test textInput/textArea text Delete under isLongPress_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern104, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+    GestureEvent info;
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleLongPress to set isLongPress_
+     *                   call Delete to delete selected characters.
+     */
+    ASSERT_NE(pattern->selectController_, nullptr);
+    pattern->contentController_->SetTextValue(UtfUtils::Str8ToStr16(DEFAULT_TEXT));
+    pattern->selectController_->firstHandleInfo_.index = 1;
+    pattern->selectController_->secondHandleInfo_.index = 2;
+    pattern->HandleLongPress(info);
+    pattern->Delete(pattern->selectController_->GetStartIndex(), pattern->selectController_->GetEndIndex());
+
+    /**
+     * @tc.expected: step3. check if the CaretIndex and HandleIndex is correct.
+     */
+    EXPECT_EQ(pattern->selectController_->GetCaretIndex(), 1);
+    EXPECT_EQ(pattern->selectController_->GetStartIndex(), 1);
+    EXPECT_EQ(pattern->selectController_->GetEndIndex(), 1);
+}
+
+/**
  * @tc.name: IsShowSearch001
  * @tc.desc: test testInput text IsShowSearch
  * @tc.type: FUNC
@@ -2410,6 +2447,26 @@ HWTEST_F(TextFieldPatternTest, HandleOnSearch001, TestSize.Level1)
     ASSERT_NE(selectOverlay, nullptr);
 
     selectOverlay->HandleOnSearch();
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
+}
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test testInput text HandleOnShare
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnShare001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto selectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    selectOverlay->HandleOnShare();
     EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
     EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
 }
@@ -2502,6 +2559,42 @@ HWTEST_F(TextFieldPatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
     layoutWrapper->skipMeasureContent_ = true;
     layoutWrapper->layoutAlgorithm_->skipMeasure_ = true;
     EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), false);
+}
+
+/**
+ * @tc.name: IsShowTranslate001
+ * @tc.desc: test testInput text IsShowTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, IsShowTranslate001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->IsShowTranslate();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: HandleOnTranslate001
+ * @tc.desc: test testInput text HandleOnTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnTranslate001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto selectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    selectOverlay->HandleOnTranslate();
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
 }
 
 /**

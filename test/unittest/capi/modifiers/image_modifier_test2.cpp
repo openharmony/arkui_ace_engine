@@ -147,7 +147,7 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
     EXPECT_TRUE(alt->IsPixmap());
 
     auto resultPixelMap = alt->GetPixmap();
-    EXPECT_EQ(resultPixelMap.GetRawPtr(), expectedPixelMapRefPtr.GetRawPtr());
+    EXPECT_EQ(resultPixelMap, expectedPixelMapRefPtr);
 }
 
 } // namespace OHOS::Ace::NG

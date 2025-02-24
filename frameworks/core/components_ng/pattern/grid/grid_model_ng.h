@@ -95,13 +95,14 @@ public:
     static void SetEditable(FrameNode* frameNode, bool editMode);
     static void SetMultiSelectable(FrameNode* frameNode, bool multiSelectable);
     static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
-
+    static EdgeEffect GetEdgeEffect(FrameNode* frameNode);
+    static bool GetAlwaysEnabled(FrameNode* frameNode);
     static void SetEdgeEffect(
         FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
         EffectEdge edge = EffectEdge::ALL);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
-    static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
@@ -126,12 +127,12 @@ public:
     static void SetGridItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc);
     static RefPtr<FrameNode> CreateGrid(int32_t nodeId);
 
-    static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
-    static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
-    static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
+    static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
+    static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
 
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);

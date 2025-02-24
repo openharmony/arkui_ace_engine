@@ -361,7 +361,7 @@ HWTEST_F(RichEditorDragTestNg, OnDragEnd004, TestSize.Level1)
 
     auto event = AceType::MakeRefPtr<Ace::DragEvent>();
     richEditorPattern->showSelect_ = false;
-    richEditorNode_->eventHub_->focusHub_->focusType_ = FocusType::DISABLE;
+    richEditorNode_->focusHub_->focusType_ = FocusType::DISABLE;
     richEditorPattern->OnDragEnd(event);
     EXPECT_FALSE(richEditorPattern->showSelect_);
 }
@@ -424,11 +424,11 @@ HWTEST_F(RichEditorDragTestNg, HandleDraggableFlag001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHubRefPtr = AceType::MakeRefPtr<EventHub>();
     auto eventHubWeakPtr = AceType::WeakClaim(AceType::RawPtr(eventHubRefPtr));
-    richEditorNode_->eventHub_->gestureEventHub_ = AceType::MakeRefPtr<GestureEventHub>(eventHubWeakPtr);
+    richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_ = AceType::MakeRefPtr<GestureEventHub>(eventHubWeakPtr);
     richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorNode_->eventHub_->gestureEventHub_->isTextDraggable_ = true;
+    richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_->isTextDraggable_ = true;
     richEditorPattern->HandleDraggableFlag(true);
-    EXPECT_FALSE(richEditorNode_->eventHub_->gestureEventHub_->isTextDraggable_);
+    EXPECT_FALSE(richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_->isTextDraggable_);
 }
 
 /**

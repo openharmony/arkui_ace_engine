@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -437,9 +435,11 @@ void SearchPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(renderContext);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
-    if (!renderContext->HasBackgroundColor()) {
+    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutProperty);
+    if (!searchLayoutProperty->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     }
 }
@@ -480,7 +480,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
         auto childFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childIndex));
         CHECK_NULL_VOID(childFrameNode);
         auto childEventHub = childFrameNode->GetEventHub<EventHub>();
-        auto childGestureHub = childEventHub->GetGestureEventHub();
+        auto childGestureHub = childEventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(childGestureHub);
         childGestureHub->SetTouchable(searchTouchable);
         childGestureHub->SetHitTestMode(searchHitTestMode);
@@ -506,9 +506,9 @@ void SearchPattern::InitTextFieldValueChangeEvent()
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->GetOnChange()) {
         auto searchChangeFunc = [weak = AceType::WeakClaim(this)]
-        (const std::u16string& value, PreviewText& previewText) {
+        (const ChangeValueInfo& info) {
             auto searchPattern = weak.Upgrade();
-            searchPattern->UpdateChangeEvent(value);
+            searchPattern->UpdateChangeEvent(info.value);
         };
         eventHub->SetOnChange(std::move(searchChangeFunc));
     }
@@ -526,6 +526,15 @@ void SearchPattern::InitTextFieldDragEvent()
     CHECK_NULL_VOID(textFieldEventHub);
 
     textFieldFrameNode->SetDragPreview(host->GetDragPreview());
+    if (host->GetDisallowDropForcedly()) {
+        textFieldFrameNode->SetDisallowDropForcedly(true);
+        textFieldFrameNode->SetAllowDrop(host->GetAllowDrop());
+    } else if (!host->GetAllowDrop().empty()) {
+        textFieldFrameNode->SetDisallowDropForcedly(false);
+        textFieldFrameNode->SetAllowDrop(host->GetAllowDrop());
+    } else {
+        textFieldFrameNode->SetDisallowDropForcedly(false);
+    }
 
     auto dragStart = searchEventHub->GetOnDragStart();
     if (dragStart != nullptr) {
@@ -803,9 +812,7 @@ void SearchPattern::OnClickButtonAndImage()
     if (!event.IsKeepEditable()) {
         textFieldPattern->StopEditing();
     }
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Search.onSubmit");
-#endif
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -819,17 +826,13 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(!textFieldPattern->IsDragging());
     CHECK_NULL_VOID(!textFieldPattern->IsHandleDragging());
     focusChoice_ = FocusChoice::SEARCH;
-    textFieldPattern->InitEditingValueText(u"");
+    textFieldPattern->ClearTextContent();
     textFieldPattern->SetTextChangedAtCreation(true);
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateValue(u"");
-    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-    PreviewText previewText {};
-    eventHub->FireOnChange(u"", previewText);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
@@ -907,6 +910,12 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             textFieldPattern->OnKeyEvent(event);
         }
         return false;
+    }
+
+    if (focusChoice_ == FocusChoice::SEARCH &&
+        (event.IsShiftWith(KeyCode::KEY_DPAD_LEFT) ||
+        event.IsShiftWith(KeyCode::KEY_DPAD_RIGHT))) {
+        return textFieldPattern->OnKeyEvent(event);
     }
 
     // If the focus is on the search, press Enter to request keyboard.
@@ -1103,8 +1112,13 @@ void SearchPattern::HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& text
     const RefPtr<SearchTextFieldPattern>& searchTextFieldPattern)
 {
     PaintSearchFocusState();
+    if (directionKeysMoveFocusOut_ && !recoverFlag && !textFieldPattern->GetTextUtf16Value().empty()) {
+        textFieldPattern->HandleFocusEvent();
+        searchTextFieldPattern->SearchRequestStartTwinkling();
+        return;
+    }
     if (!recoverFlag) {
-        if (!textFieldPattern->GetTextUtf16Value().empty() && !directionKeysMoveFocusOut_) {
+        if (!textFieldPattern->GetTextUtf16Value().empty()) {
             textFieldPattern->NeedRequestKeyboard();
             textFieldPattern->SearchRequestKeyboard();
             textFieldPattern->HandleOnSelectAll(false); // Select all text
@@ -1395,11 +1409,11 @@ void SearchPattern::InitSearchTheme()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     searchNormalColor_ = textFieldTheme->GetBgColor();
     directionKeysMoveFocusOut_ = textFieldTheme->GetDirectionKeysMoveFocusOut();
-    searchTheme_ = pipeline->GetTheme<SearchTheme>();
+    searchTheme_ = pipeline->GetTheme<SearchTheme>(host->GetThemeScopeId());
 
     // 使用分层参数控制是否需要注册相关事件以适配悬浮态、按压态的变化
     auto hoverAndPressBgColorEnabled = textFieldTheme->GetHoverAndPressBgColorEnabled();
@@ -1418,7 +1432,7 @@ RefPtr<SearchTheme> SearchPattern::GetTheme() const
     CHECK_NULL_RETURN(tmpHost, nullptr);
     auto context = tmpHost->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
-    auto theme = context->GetTheme<SearchTheme>();
+    auto theme = context->GetTheme<SearchTheme>(tmpHost->GetThemeScopeId());
     return theme;
 }
 
@@ -1479,7 +1493,11 @@ void SearchPattern::InitTouchEvent()
         CHECK_NULL_VOID(pattern);
         auto infoTouches = info.GetTouches();
         CHECK_EQUAL_VOID(infoTouches.empty(), true);
-        pattern->OnTouchDownOrUp(infoTouches.front().GetTouchType() == TouchType::DOWN);
+        auto touchType = infoTouches.front().GetTouchType();
+        if (touchType == TouchType::MOVE) {
+            return;
+        }
+        pattern->OnTouchDownOrUp(touchType == TouchType::DOWN);
     };
     searchTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(searchTouchListener_);
@@ -1495,10 +1513,9 @@ void SearchPattern::OnTouchDownOrUp(bool isDown)
     auto renderContext = host->GetRenderContext();
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
-    auto searchHoverColor = searchTheme->GetHoverColor();
     auto searchTouchColor = searchTheme->GetTouchColor();
-    AnimateSearchTouchAndHover(renderContext, isDown ? searchHoverColor : searchTouchColor,
-        isDown ? searchTouchColor : searchHoverColor, TOUCH_DURATION, Curves::FRICTION);
+    AnimateSearchTouchAndHover(renderContext, isDown ? transparentColor_ : searchTouchColor,
+        isDown ? searchTouchColor : transparentColor_, TOUCH_DURATION, Curves::FRICTION);
 }
 
 void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
@@ -1649,13 +1666,15 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     CHECK_NULL_VOID(textFieldPattern);
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
 
     json->PutExtAttr("value", textFieldPattern->GetTextValue().c_str(), filter);
-    json->PutExtAttr("placeholder", UtfUtils::Str16ToStr8(textFieldPattern->GetPlaceHolder()).c_str(), filter);
+    json->PutExtAttr("placeholder", UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder()).c_str(), filter);
     json->PutExtAttr("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str(), filter);
     json->PutExtAttr("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str(), filter);
     json->PutExtAttr("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str(), filter);
-    auto textColor = textFieldLayoutProperty->GetTextColor().value_or(Color());
+    auto textColor = textFieldLayoutProperty->GetTextColor().value_or(searchTheme->GetTextColor());
     json->PutExtAttr("fontColor", textColor.ColorToString().c_str(), filter);
     auto textFontJson = JsonUtil::Create(true);
     textFontJson->Put("fontSize", textFieldPattern->GetFontSize().c_str());
@@ -1676,6 +1695,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         "letterSpacing", textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr(
         "lineHeight", textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("halfLeading", textFieldLayoutProperty->GetHalfLeading().value_or(false), filter);
     auto jsonDecoration = JsonUtil::Create(true);
     json->PutExtAttr(
         "enterKeyType", TextInputActionToString(
@@ -1713,6 +1733,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("fontFeature", fontFeatureStr.c_str(), filter);
     json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback(), filter);
     json->PutExtAttr("halfLeading", textFieldLayoutProperty->GetHalfLeading().value_or(false), filter);
+    json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
 }
 
 std::string SearchPattern::TextInputActionToString(TextInputAction action) const
@@ -1879,6 +1900,8 @@ void SearchPattern::ToJsonValueForSearchButtonOption(
     CHECK_NULL_VOID(searchButtonFrameNode);
     auto searchButtonLayoutProperty = searchButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(searchButtonLayoutProperty);
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
     auto searchButtonJson = JsonUtil::Create(true);
 
     // font size
@@ -1886,7 +1909,8 @@ void SearchPattern::ToJsonValueForSearchButtonOption(
     searchButtonJson->Put("fontSize", searchButtonFontSize.ToString().c_str());
 
     // font color
-    auto searchButtonFontColor = searchButtonLayoutProperty->GetFontColor().value_or(Color());
+    auto searchButtonFontColor = searchButtonLayoutProperty->GetFontColor().value_or(
+        searchTheme->GetSearchButtonTextColor());
     searchButtonJson->Put("fontColor", searchButtonFontColor.ColorToString().c_str());
     auto searchButtonAutoDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
     searchButtonJson->Put("autoDisable", searchButtonAutoDisable);
@@ -1905,10 +1929,14 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPaintProperty = textFieldFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(textFieldTheme);
     auto cursorJson = JsonUtil::Create(true);
 
     // color
-    auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(Color());
+    auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(textFieldTheme->GetCursorColor());
     cursorJson->Put("color", caretColor.ColorToString().c_str());
     auto caretWidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
     cursorJson->Put("width", caretWidth.ToString().c_str());
@@ -1934,9 +1962,7 @@ void SearchPattern::UpdateDividerColorMode()
     CHECK_NULL_VOID(host);
     auto dividerFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
     CHECK_NULL_VOID(dividerFrameNode);
-    auto pipeline = dividerFrameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     auto searchDividerColor = searchTheme->GetSearchDividerColor();
     auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
@@ -1950,9 +1976,7 @@ void SearchPattern::UpdateCancelButtonColorMode()
 {
     auto cancelButtonNode = cancelButtonNode_.Upgrade();
     CHECK_NULL_VOID(cancelButtonNode);
-    auto pipeline = cancelButtonNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     auto cancelButtonRenderContext = cancelButtonNode->GetRenderContext();
     CHECK_NULL_VOID(cancelButtonRenderContext);
@@ -1961,7 +1985,11 @@ void SearchPattern::UpdateCancelButtonColorMode()
     CHECK_NULL_VOID(textFrameNode);
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+    auto buttonLayoutProperty = cancelButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    if (!buttonLayoutProperty->HasFontColor()) {
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+    }
     cancelButtonNode->MarkModifyDone();
     cancelButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -1973,13 +2001,11 @@ void SearchPattern::OnColorConfigurationUpdate()
     host->SetNeedCallChildrenUpdate(false);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     UpdateCancelButtonColorMode();
     auto buttonNode = buttonNode_.Upgrade();
@@ -1991,7 +2017,11 @@ void SearchPattern::OnColorConfigurationUpdate()
         CHECK_NULL_VOID(textFrameNode);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(buttonLayoutProperty);
+        if (!buttonLayoutProperty->HasFontColor()) {
+            textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -2005,6 +2035,119 @@ void SearchPattern::OnColorConfigurationUpdate()
         textField->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     UpdateDividerColorMode();
+}
+
+bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    // need to get theme according to theme scope id to update searchTheme_ and searchNormalColor_
+    auto searchTheme = pipeline->GetTheme<SearchTheme>(themeScopeId);
+    CHECK_NULL_RETURN(searchTheme, result);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(themeScopeId);
+    CHECK_NULL_RETURN(textFieldTheme, result);
+    searchTheme_ = searchTheme; // update searchTheme_
+    searchNormalColor_ = textFieldTheme->GetBgColor(); // update searchNormalColor_
+
+    if (!ButtonNodeOnThemeScopeUpdate(searchTheme)) {
+        return result;
+    }
+
+    if (!IconNodeOnThemeScopeUpdate(searchTheme)) {
+        return result;
+    }
+
+    HandleBackgroundColor();
+    UpdateDividerColorMode();
+
+    TextNodeOnThemeScopeUpdate(searchTheme, textFieldTheme);
+
+    return result;
+}
+
+bool SearchPattern::ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme)
+{
+    CHECK_NULL_RETURN(searchTheme, false);
+    auto buttonNode = buttonNode_.Upgrade();
+    if (buttonNode) {
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+        CHECK_NULL_RETURN(textFrameNode, false);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProperty, false);
+        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_RETURN(buttonLayoutProperty, false);
+
+        if (!buttonLayoutProperty->HasFontColor()) {
+            textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+            buttonNode->MarkModifyDone();
+            buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+    return true;
+}
+
+bool SearchPattern::IconNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme)
+{
+    CHECK_NULL_RETURN(searchTheme, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
+    CHECK_NULL_RETURN(iconFrameNode, false);
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_RETURN(cancelIconFrameNode, false);
+    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_RETURN(searchLayoutProperty, false);
+
+    auto iconColor = Color(iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG ?
+        searchTheme->GetSymbolIconColor() : searchTheme->GetSearchIconColor());
+    if (!searchLayoutProperty->HasSearchIconColor()) {
+        SetSearchIconColor(iconColor);
+    }
+    auto cancelIconColor = Color(cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG ?
+        searchTheme->GetSymbolIconColor() : searchTheme->GetSearchIconColor());
+    if (!searchLayoutProperty->HasCancelIconColor()) {
+        SetCancelIconColor(cancelIconColor);
+    }
+    return true;
+}
+
+bool SearchPattern::TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
+    const RefPtr<TextFieldTheme>& textFieldTheme)
+{
+    CHECK_NULL_RETURN(searchTheme, false);
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    auto textField = textField_.Upgrade();
+    if (textField) {
+        auto needUpdateNode = false;
+        auto textFieldLayoutProperty = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+        auto textPaintProperty = textField->GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_RETURN(textPaintProperty, false);
+ 
+        if (!textPaintProperty->HasTextColorFlagByUser()) {
+            textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
+            needUpdateNode = true;
+        }
+
+        if (!textPaintProperty->HasPlaceholderColorFlagByUser()) {
+            textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+            needUpdateNode = true;
+        }
+ 
+        if (!textPaintProperty->HasCaretColorFlagByUser()) {
+            textPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+            textField->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+ 
+        if (needUpdateNode) {
+            textField->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+    return true;
 }
 
 uint32_t SearchPattern::GetMaxLength() const
@@ -2053,27 +2196,17 @@ void SearchPattern::InitIconColorSize()
 
 void SearchPattern::InitSearchIconColorSize()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     GetSearchNode()->SetSearchSymbolIconColor(Color(searchTheme->GetSymbolIconColor()));
-    auto searchSymbolIconSize = searchTheme->GetIconSize().ConvertToFp();
-    GetSearchNode()->SetSearchSymbolIconSize(searchSymbolIconSize <= 0 ? SYMBOL_ICON_HEIGHT :
-        Dimension(searchSymbolIconSize, DimensionUnit::FP));
+    GetSearchNode()->SetSearchSymbolIconSize(searchTheme->GetSymbolIconHeight());
     GetSearchNode()->SetSearchImageIconColor(Color(searchTheme->GetSearchIconColor()));
     GetSearchNode()->SetSearchImageIconSize(searchTheme->GetIconHeight());
 }
 
 void SearchPattern::InitCancelIconColorSize()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     GetSearchNode()->SetCancelSymbolIconColor(Color(searchTheme->GetSymbolIconColor()));
     GetSearchNode()->SetCancelSymbolIconSize(SYMBOL_ICON_HEIGHT);
@@ -2106,8 +2239,9 @@ void SearchPattern::UpdateSearchSymbolIconColor()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(GetSearchNode());
-    auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
-    auto layoutProperty = cancelButtonFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto searchButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
+    CHECK_NULL_VOID(searchButtonFrameNode);
+    auto layoutProperty = searchButtonFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateSymbolColorList({ GetSearchNode()->GetSearchSymbolIconColor() });
     auto searchTheme = GetTheme();
@@ -2157,7 +2291,7 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     auto iconFrameNode = FrameNode::GetOrCreateFrameNode(
         V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -2208,8 +2342,6 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
     auto iconFrameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -2367,7 +2499,9 @@ void SearchPattern::SetRightIconSrcPath(const std::string& src)
 void SearchPattern::SetCancelButtonStyle(const CancelButtonStyle& style)
 {
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
     UpdateChangeEvent(textFieldPattern->GetTextUtf16Value(), static_cast<int16_t>(style));
 }
 
@@ -2433,6 +2567,7 @@ void SearchPattern::UpdateImageIconNode(int32_t index)
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
+        CHECK_NULL_VOID(iconFrameNode);
         UpdateImageIconProperties(iconFrameNode, index);
         iconFrameNode->MarkModifyDone();
         iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2471,9 +2606,9 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto searchTheme = pipeline->GetTheme<SearchTheme>();
+        auto searchTheme = GetTheme();
         CHECK_NULL_VOID(searchTheme);
-        auto iconTheme = pipeline->GetTheme<IconTheme>();
+        auto iconTheme = pipeline->GetTheme<IconTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(iconTheme);
         if (iconOptions.GetSrc().value_or("").empty()) {
             imageSourceInfo.SetResourceId(index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG
@@ -2507,13 +2642,12 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(iconFrameNode);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolLayoutProperty);
     symbolLayoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX
                                                      ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
                                                      : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
@@ -2540,7 +2674,8 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     symbolEffectOptions.SetIsTxtActive(false);
     symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     auto fontSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
-    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
+    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale()),
+        ICON_MAX_SIZE.ConvertToPx())) {
         symbolLayoutProperty->UpdateFontSize(ICON_MAX_SIZE);
     }
 }
@@ -2566,23 +2701,8 @@ const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSi
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, iconSizeValue);
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_RETURN(textFieldFrameNode, iconSizeValue);
-    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, iconSizeValue);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, iconSizeValue);
-    auto maxFontScale = MAX_FONT_SCALE;
-    auto minFontScale = 0.0f;
-    if (textFieldLayoutProperty->HasMaxFontScale()) {
-        maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
-    }
-    if (pipeline->GetMaxAppFontScale()) {
-        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
-    }
-    if (textFieldLayoutProperty->HasMinFontScale()) {
-        minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
-    }
+    auto maxFontScale = GetMaxFontScale();
+    auto minFontScale = GetMinFontScale();
     if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale),
         ICON_MAX_SIZE.ConvertToPx())) {
         return ICON_MAX_SIZE;
@@ -2592,6 +2712,41 @@ const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSi
     } else {
         return iconSizeValue;
     }
+}
+
+float SearchPattern::GetMaxFontScale()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, MAX_FONT_SCALE);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, MAX_FONT_SCALE);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, MAX_FONT_SCALE);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, MAX_FONT_SCALE);
+
+    auto maxFontScale = MAX_FONT_SCALE;
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
+    } else if (pipeline->GetMaxAppFontScale()) {
+        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
+    }
+    return maxFontScale;
+}
+
+float SearchPattern::GetMinFontScale()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, 0.0f);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, 0.0f);
+    auto minFontScale = 0.0f;
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+    }
+    return minFontScale;
 }
 
 } // namespace OHOS::Ace::NG

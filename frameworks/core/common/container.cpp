@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,8 @@
 #endif
 
 #include <dirent.h>
+
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
 namespace OHOS::Ace {
 
@@ -133,6 +135,17 @@ RefPtr<Container> Container::GetFoucsed()
     return foucsContainer;
 }
 
+RefPtr<Container> Container::GetByWindowId(uint32_t windowId)
+{
+    RefPtr<Container> windowContainer;
+    AceEngine::Get().NotifyContainers([&windowContainer, windowId](const RefPtr<Container>& container) {
+        if (windowId == container->GetWindowId()) {
+            windowContainer = container;
+        }
+    });
+    return windowContainer;
+}
+
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();
@@ -204,22 +217,27 @@ void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
 
 RefPtr<DisplayInfo> Container::GetDisplayInfo()
 {
-    return DisplayInfoUtils::GetInstance().GetDisplayInfo(currentDisplayId_);
+    return displayManager_->GetDisplayInfo(currentDisplayId_);
 }
 
 void Container::InitIsFoldable()
 {
-    DisplayInfoUtils::GetInstance().InitIsFoldable();
+    displayManager_->InitIsFoldable();
 }
 
 bool Container::IsFoldable()
 {
-    return DisplayInfoUtils::GetInstance().IsFoldable();
+    return displayManager_->GetIsFoldable();
 }
 
 FoldStatus Container::GetCurrentFoldStatus()
 {
-    return DisplayInfoUtils::GetInstance().GetCurrentFoldStatus();
+    return displayManager_->GetCurrentFoldStatus();
+}
+
+std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
+{
+    return displayManager_->GetCurrentFoldCreaseRegion();
 }
 
 void Container::DestroyToastSubwindow(int32_t instanceId)
@@ -231,6 +249,15 @@ void Container::DestroyToastSubwindow(int32_t instanceId)
     auto systemToastWindow = SubwindowManager::GetInstance()->GetSystemToastWindow(instanceId);
     if (systemToastWindow && systemToastWindow->IsToastSubWindow()) {
         systemToastWindow->DestroyWindow();
+    }
+}
+
+void Container::DestroySelectOverlaySubwindow(int32_t instanceId)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetSelectOverlaySubwindow(instanceId);
+    if (subwindow && subwindow->GetIsSelectOverlaySubWindow()) {
+        subwindow->DestroyWindow();
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Destroy selectOverlay subwindow, instanceId is %{public}d", instanceId);
     }
 }
 
@@ -307,4 +334,20 @@ int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
 #endif
 }
 
+bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    return NG::WindowSceneHelper::IsNodeInKeyGuardWindow(node);
+#else
+    return false;
+#endif
+}
+bool Container::CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
+{
+    auto container = GetContainer(currentId);
+    CHECK_NULL_RETURN(container, defaultRes);
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, defaultRes);
+    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace

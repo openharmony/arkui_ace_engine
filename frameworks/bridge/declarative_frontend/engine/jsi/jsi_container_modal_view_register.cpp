@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 
 namespace OHOS::Ace::Framework {
@@ -102,7 +103,7 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     const auto object = JSRef<JSObject>::Make(obj);
     const EcmaVM* vm = object->GetEcmaVM();
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -113,14 +114,29 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
 
     BindingCustomBaseFromJS(object, vm, customNode);
     BindingCustomTitleFromJS(object, vm, customNode);
+    BindingCustomButtonFromJS(object, vm, customNode);
     NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
+}
+
+void AddCustomWindowMaskComponent(const panda::Local<panda::ObjectRef>& obj)
+{
+    const auto object = JSRef<JSObject>::Make(obj);
+    const EcmaVM* vm = object->GetEcmaVM();
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
+        return;
+    }
+
+    auto uiNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode(true));
+    CHECK_NULL_VOID(uiNode);
+    NG::ViewStackProcessor::GetInstance()->SetCustomWindowMaskNode(uiNode);
 }
 
 void AddCustomButtonComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     const auto object = JSRef<JSObject>::Make(obj);
     const EcmaVM* vm = object->GetEcmaVM();
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -147,6 +163,24 @@ panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* 
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
     AddCustomTitleBarComponent(obj);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsLoadCustomWindowMask(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    AddCustomWindowMaskComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
 }

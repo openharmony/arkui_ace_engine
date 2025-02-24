@@ -54,7 +54,11 @@ public:
             theme->friction_ = pattern->GetAttr<double>("scroll_able_friction", 0.75f);
             theme->flingVelocityScale_ = pattern->GetAttr<double>("scroll_able_fling_velocity_scale", 1.5f);
             theme->springVelocityScale_ = pattern->GetAttr<double>("scroll_able_spring_velocity_scale", 1.5f);
-            theme->ratio_ = pattern->GetAttr<double>("scroll_able_over_edge_following_ratio", 1.848f);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                theme->ratio_ = pattern->GetAttr<double>("scroll_able_over_edge_following_ratio_api_sixteen", 5.0f);
+            } else {
+                theme->ratio_ = pattern->GetAttr<double>("scroll_able_over_edge_following_ratio", 1.848f);
+            }
             theme->springResponse_ = pattern->GetAttr<double>("scroll_able_spring_response", 0.417f);
             theme->touchPadVelocityScaleRate_ =
                 pattern->GetAttr<double>("scroll_able_touch_pad_velocity_scale_rate", 1.0f);

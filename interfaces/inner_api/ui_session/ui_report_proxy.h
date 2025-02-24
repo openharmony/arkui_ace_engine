@@ -62,6 +62,10 @@ public:
      */
     void SendBaseInfo(const std::string& data) override;
     void OnComponentChange(const std::string& key, const std::string& value);
+    void SendCurrentLanguage(const std::string& data) override;
+    void SendWebText(int32_t nodeId, std::string res) override;
+    void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
+    void ClearAshmem(sptr<Ashmem>& optMem);
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;

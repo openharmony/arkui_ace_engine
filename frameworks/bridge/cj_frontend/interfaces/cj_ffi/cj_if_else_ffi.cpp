@@ -34,7 +34,8 @@ void FfiOHOSAceFrameworkIfElsePop()
 void FfiOHOSAceFrameworkIfElseSetBranchId(int32_t value)
 {
     std::list<int32_t> removes;
-    IfElseModel::GetInstance()->SetBranchId(value, removes);
+    std::list<int32_t> reserves;
+    IfElseModel::GetInstance()->SetBranchId(value, removes, reserves);
 }
 
 int32_t FfiOHOSAceFrameworkIfElseGetBranchId()

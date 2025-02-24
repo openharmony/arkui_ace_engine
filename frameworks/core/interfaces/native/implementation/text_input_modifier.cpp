@@ -221,10 +221,10 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [arkCallback = CallbackHelper(*value)](const std::u16string& value, PreviewText& previewText) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& info) {
         Converter::ConvContext ctx;
-        arkCallback.Invoke(Converter::ArkValue<Ark_String>(value, &ctx),
-            Converter::ArkValue<Opt_PreviewText>(previewText, &ctx));
+        arkCallback.Invoke(Converter::ArkValue<Ark_String>(info.value, &ctx),
+            Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx));
     };
     TextFieldModelNG::SetOnChange(frameNode, onChange);
 }
@@ -833,9 +833,9 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     KeyboardOptions keyboardOptions = {.supportAvoidance = false};
     auto convOptions = options ? Converter::OptConvert<KeyboardOptions>(*options) : keyboardOptions;
     auto customNode = CallbackHelper(*value).BuildSync(node);
-    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
+    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
     bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
-    TextFieldModelNG::SetCustomKeyboard(frameNode, customFrameNode, supportAvoidance);
+    TextFieldModelNG::SetCustomKeyboard(frameNode, Referenced::RawPtr(customFrameNode), supportAvoidance);
 }
 void ShowCounterImpl(Ark_NativePointer node,
                      Ark_Boolean value,

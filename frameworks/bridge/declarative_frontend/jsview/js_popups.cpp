@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
+#include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 #include "base/log/ace_scoring_log.h"
@@ -24,11 +26,19 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 
+#include "bridge/declarative_frontend/jsview/js_popups.h"
+
 namespace OHOS::Ace::Framework {
 namespace {
+constexpr int32_t PARAMETER_LENGTH_ZERO = 0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr int NUM_ZERO = 0;
+constexpr int NUM_FIRST = 1;
+constexpr int NUM_SECOND = 2;
+constexpr int32_t TRANSITION_NUM_ZERO = 0;
+constexpr int32_t TRANSITION_NUM_TWO = 2;
 constexpr uint32_t ON_WILL_DISMISS_FIELD_COUNT = 2;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
@@ -45,7 +55,7 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
 using DoubleBindCallback = std::function<void(const std::string&)>;
 
 #ifndef WEARABLE_PRODUCT
-DoubleBindCallback ParseDoubleBindCallback(const JSCallbackInfo& info, const JSRef<JSObject>& callbackObj,
+DoubleBindCallback JSViewPopups::ParseDoubleBindCallback(const JSCallbackInfo& info, const JSRef<JSObject>& callbackObj,
     const char* arrowFuncName)
 {
     JSRef<JSVal> arrowFunc = callbackObj->GetProperty(arrowFuncName);
@@ -362,7 +372,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
         auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
         if (!ret) {
-            if (!popupParam->IsPartialUpdate()) {
+            if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
                 popupParam->SetShadow(shadow);
             }
@@ -370,7 +380,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             popupParam->SetShadow(shadow);
         }
     } else {
-        if (!popupParam->IsPartialUpdate()) {
+        if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
             JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
             popupParam->SetShadow(shadow);
         }
@@ -383,12 +393,12 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
         } else {
-            if (!popupParam->IsPartialUpdate()) {
+            if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 GetBlurStyleFromTheme(popupParam);
             }
         }
     } else {
-        if (!popupParam->IsPartialUpdate()) {
+        if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
             GetBlurStyleFromTheme(popupParam);
         }
     }
@@ -403,6 +413,14 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         } else {
             auto effects = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
             popupParam->SetTransitionEffects(effects);
+        }
+    }
+    auto keyboardAvoidMode = popupObj->GetProperty("keyboardAvoidMode");
+    if (keyboardAvoidMode->IsNumber()) {
+        auto popupKeyboardAvoidMode = keyboardAvoidMode->ToNumber<int32_t>();
+        if (popupKeyboardAvoidMode >= static_cast<int>(PopupKeyboardAvoidMode::DEFAULT) &&
+            popupKeyboardAvoidMode <= static_cast<int>(PopupKeyboardAvoidMode::NONE)) {
+            popupParam->SetKeyBoardAvoidMode(static_cast<PopupKeyboardAvoidMode>(popupKeyboardAvoidMode));
         }
     }
 }
@@ -526,7 +544,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         builderIndex = 1;
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj, "$value");
+        menuParam.onStateChange = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "$value");
         auto isShowObj = callbackObj->GetProperty("value");
         if (isShowObj->IsBoolean()) {
             menuParam.isShow = isShowObj->ToBoolean();
@@ -586,13 +604,13 @@ void JSViewAbstract::ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::
             dismissObj->SetPropertyObject(
                 "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissContentCover));
             dismissObj->SetProperty<int32_t>("reason", info);
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
 }
 
-std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex)
+std::vector<NG::OptionParam> JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex)
 {
     JSRef<JSVal> arg = info[optionIndex];
     if (!arg->IsArray()) {
@@ -642,7 +660,7 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
     return params;
 }
 
-void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto borderRadiusValue = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BORDER_RADIUS));
     NG::BorderRadiusProperty menuBorderRadius;
@@ -683,7 +701,7 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
     }
 }
 
-void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto enableArrowValue = menuOptions->GetProperty("enableArrow");
     if (enableArrowValue->IsBoolean()) {
@@ -702,7 +720,7 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
-void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension)
+void JSViewPopups::ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension)
 {
     CalcDimension dimension;
     if (!JSViewAbstract::ParseJsDimensionVpNG(jsValue, dimension, true)) {
@@ -714,7 +732,7 @@ void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDime
     }
 }
 
-void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto marginVal = menuOptions->GetProperty("layoutRegionMargin");
     if (!marginVal->IsObject()) {
@@ -723,10 +741,10 @@ void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::Me
 
     CommonCalcDimension commonCalcDimension;
     auto object = JSRef<JSObject>::Cast(marginVal);
-    ParseLayoutRegionMargin(object->GetProperty("top"), commonCalcDimension.top);
-    ParseLayoutRegionMargin(object->GetProperty("bottom"), commonCalcDimension.bottom);
-    ParseLayoutRegionMargin(object->GetProperty("left"), commonCalcDimension.left);
-    ParseLayoutRegionMargin(object->GetProperty("right"), commonCalcDimension.right);
+    JSViewPopups::ParseLayoutRegionMargin(object->GetProperty("top"), commonCalcDimension.top);
+    JSViewPopups::ParseLayoutRegionMargin(object->GetProperty("bottom"), commonCalcDimension.bottom);
+    JSViewPopups::ParseLayoutRegionMargin(object->GetProperty("left"), commonCalcDimension.left);
+    JSViewPopups::ParseLayoutRegionMargin(object->GetProperty("right"), commonCalcDimension.right);
 
     if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
         commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
@@ -735,7 +753,29 @@ void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::Me
     }
 }
 
-void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto blurStyle = menuOptions->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyle->IsObject()) {
+        if (!menuParam.blurStyleOption.has_value()) {
+            menuParam.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyle, menuParam.blurStyleOption.value());
+    }
+}
+
+void JSViewPopups::ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto effectOption = menuOptions->GetProperty("backgroundEffect");
+    if (effectOption->IsObject()) {
+        if (!menuParam.effectOption.has_value()) {
+            menuParam.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOption, menuParam.effectOption.value());
+    }
+}
+
+void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -745,7 +785,8 @@ void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
 }
 
-void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseMenuParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto offsetVal = menuOptions->GetProperty("offset");
     if (offsetVal->IsObject()) {
@@ -853,25 +894,27 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
 
     JSRef<JSVal> showInSubWindowValue = menuOptions->GetProperty("showInSubWindow");
-    GetMenuShowInSubwindow(menuParam);
+    JSViewPopups::GetMenuShowInSubwindow(menuParam);
     if (menuParam.isShowInSubWindow) {
         if (showInSubWindowValue->IsBoolean()) {
             menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
         }
     }
-    ParseMenuArrowParam(menuOptions, menuParam);
-    ParseMenuBorderRadius(menuOptions, menuParam);
-    ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuArrowParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuBorderRadius(menuOptions, menuParam);
+    JSViewPopups::ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuBlurStyleOption(menuOptions, menuParam);
+    JSViewPopups::ParseMenuEffectOption(menuOptions, menuParam);
 }
 
-void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
+void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
 {
     if (!info[optionIndex]->IsObject()) {
         return;
     }
     auto menuOptions = JSRef<JSObject>::Cast(info[optionIndex]);
     JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
-    ParseMenuParam(info, menuOptions, menuParam);
+    JSViewPopups::ParseMenuParam(info, menuOptions, menuParam);
 }
 
 void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, MenuPreviewAnimationOptions& options)
@@ -929,6 +972,17 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
     }
 }
 
+void ParsePreviewBorderRadiusParam(const JSRef<JSObject>& menuContentOptions, NG::MenuParam& menuParam)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    auto previewBorderRadiusValue = menuContentOptions->GetProperty("previewBorderRadius");
+    NG::BorderRadiusProperty previewBorderRadius;
+    JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius);
+    menuParam.previewBorderRadius = previewBorderRadius;
+}
+
 void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
     std::function<void()>& previewBuildFunc)
 {
@@ -936,7 +990,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         return;
     }
     auto menuContentOptions = JSRef<JSObject>::Cast(args);
-    ParseMenuParam(info, menuContentOptions, menuParam);
+    JSViewPopups::ParseMenuParam(info, menuContentOptions, menuParam);
     RefPtr<JsFunction> previewBuilderFunc;
     auto preview = menuContentOptions->GetProperty("preview");
     if (!preview->IsFunction() && !preview->IsNumber()) {
@@ -947,6 +1001,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         if (preview->ToNumber<int32_t>() == 1) {
             menuParam.previewMode = MenuPreviewMode::IMAGE;
             ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
+            ParsePreviewBorderRadiusParam(menuContentOptions, menuParam);
         }
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
@@ -961,30 +1016,31 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         };
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
+        ParsePreviewBorderRadiusParam(menuContentOptions, menuParam);
     }
 }
 
 #ifndef WEARABLE_PRODUCT
 void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 {
-    if (info.Length() < 2) {
+    if (info.Length() < PARAMETER_LENGTH_SECOND) {
         return;
     }
-    if ((!info[0]->IsBoolean() && !info[0]->IsObject()) || !info[1]->IsObject()) {
+    if ((!info[NUM_ZERO]->IsBoolean() && !info[NUM_ZERO]->IsObject()) || !info[NUM_FIRST]->IsObject()) {
         return;
     }
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     // Set IsShow to popupParam
-    if (info[0]->IsBoolean()) {
-        popupParam->SetIsShow(info[0]->ToBoolean());
+    if (info[NUM_ZERO]->IsBoolean()) {
+        popupParam->SetIsShow(info[NUM_ZERO]->ToBoolean());
     } else {
-        JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
-        auto callback = ParseDoubleBindCallback(info, showObj, "$value");
+        JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[NUM_ZERO]);
+        auto callback = JSViewPopups::ParseDoubleBindCallback(info, showObj, "$value");
         popupParam->SetDoubleBindCallback(std::move(callback));
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
     // Set popup to popupParam
-    auto popupObj = JSRef<JSObject>::Cast(info[1]);
+    auto popupObj = JSRef<JSObject>::Cast(info[NUM_FIRST]);
     SetPopupDismiss(info, popupObj, popupParam);
     if (popupObj->GetProperty("message")->IsString()) {
         ParsePopupParam(info, popupObj, popupParam); // Parse PopupOptions param
@@ -1060,8 +1116,7 @@ PopupOnWillDismiss JSViewAbstract::ParsePopupCallback(const JSCallbackInfo& info
         JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
         dismissObj->SetPropertyObject("dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissPopup));
         dismissObj->SetProperty<int32_t>("reason", reason);
-        JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
-
+        JSRef<JSVal> newJSVal = dismissObj;
         func->ExecuteJS(1, &newJSVal);
     };
     return onWillDismiss;
@@ -1078,11 +1133,11 @@ void JSViewAbstract::ParseContentPopupCommonParam(
 {
     CHECK_EQUAL_VOID(popupObj->IsEmpty(), true);
     CHECK_NULL_VOID(popupParam);
-    if (popupParam->GetTargetId().empty() || std::stoi(popupParam->GetTargetId()) < 0) {
+    int32_t targetId = StringUtils::StringToInt(popupParam->GetTargetId(), -1);
+    if (targetId < 0) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
         return;
     }
-    int32_t targetId = std::stoi(popupParam->GetTargetId());
     auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
     if (!targetNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist.");
@@ -1120,7 +1175,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
     // Check the parameters
-    if (info.Length() <= 0) {
+    if (info.Length() <= PARAMETER_LENGTH_ZERO) {
         return;
     }
     size_t builderIndex = ParseBindContextMenuShow(info, menuParam);
@@ -1137,8 +1192,8 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     ResponseType responseType = ResponseType::LONG_PRESS;
-    if (!info[0]->IsBoolean() && info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
-        auto response = info[1]->ToNumber<int32_t>();
+    if (!info[NUM_ZERO]->IsBoolean() && info.Length() >= PARAMETER_LENGTH_SECOND && info[NUM_FIRST]->IsNumber()) {
+        auto response = info[NUM_FIRST]->ToNumber<int32_t>();
         responseType = static_cast<ResponseType>(response);
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -1152,8 +1207,8 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 
     menuParam.previewMode = MenuPreviewMode::NONE;
     std::function<void()> previewBuildFunc = nullptr;
-    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
-        ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[NUM_SECOND]->IsObject()) {
+        ParseBindContentOptionParam(info, info[NUM_SECOND], menuParam, previewBuildFunc);
     }
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
@@ -1177,10 +1232,10 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     bool isShow = ParseSheetIsShow(info, "ContentCover", callback);
 
     // parse builder
-    if (!info[1]->IsObject()) {
+    if (!info[NUM_FIRST]->IsObject()) {
         return;
     }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[NUM_FIRST]);
     auto builder = obj->GetProperty("builder");
     if (!builder->IsFunction()) {
         return;
@@ -1204,16 +1259,17 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     std::function<void()> onWillDismissCallback;
     NG::ContentCoverParam contentCoverParam;
     std::function<void(const int32_t&)> onWillDismissFunc;
-    if (info.Length() == 3) {
-        if (info[2]->IsObject()) {
-            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback, onWillShowCallback, /* 2:args index */
-                onWillDismissCallback, onWillDismissFunc);
-            ParseModalStyle(info[2], modalStyle);
+    if (info.Length() == PARAMETER_LENGTH_THIRD) {
+        if (info[NUM_SECOND]->IsObject()) {
+            ParseOverlayCallback(info[NUM_SECOND], onShowCallback, onDismissCallback, /* 2:args index */
+                onWillShowCallback, onWillDismissCallback, onWillDismissFunc);
+            ParseModalStyle(info[NUM_SECOND], modalStyle);
             contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
-            ParseModalTransitonEffect(info[2], contentCoverParam, info.GetExecutionContext()); /* 2:args index */
-        } else if (info[2]->IsNumber()) {
-            auto transitionNumber = info[2]->ToNumber<int32_t>();
-            if (transitionNumber >= 0 && transitionNumber <= 2) {
+            ParseModalTransitonEffect(info[NUM_SECOND], contentCoverParam, /* 2:args index */
+                info.GetExecutionContext());
+        } else if (info[NUM_SECOND]->IsNumber()) {
+            auto transitionNumber = info[NUM_SECOND]->ToNumber<int32_t>();
+            if (transitionNumber >= TRANSITION_NUM_ZERO && transitionNumber <= TRANSITION_NUM_TWO) {
                 modalStyle.modalTransition = static_cast<NG::ModalTransition>(transitionNumber);
             }
         }
@@ -1239,7 +1295,7 @@ void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalS
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
     if (modalTransition->IsNumber()) {
         auto transitionNumber = modalTransition->ToNumber<int32_t>();
-        if (transitionNumber >= 0 && transitionNumber <= 2) {
+        if (transitionNumber >= TRANSITION_NUM_ZERO && transitionNumber <= TRANSITION_NUM_TWO) {
             modalStyle.modalTransition = static_cast<NG::ModalTransition>(transitionNumber);
         }
     }
@@ -1259,10 +1315,10 @@ bool JSViewAbstract::ParseSheetIsShow(const JSCallbackInfo& info, const std::str
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
-        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
+        callback = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "changeEvent");
         if (!callback && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
             TAG_LOGD(AceLogTag::ACE_SHEET, "Try %{public}s another parsing", name.c_str());
-            callback = ParseDoubleBindCallback(info, callbackObj, "$value");
+            callback = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "$value");
         }
     }
     TAG_LOGD(AceLogTag::ACE_SHEET, "%{public}s get isShow is: %{public}d", name.c_str(), isShow);
@@ -1274,9 +1330,9 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     // parse isShow and builder
     DoubleBindCallback callback = nullptr;
     bool isShow = ParseSheetIsShow(info, "Sheet", callback);
-    if (!info[1]->IsObject())
+    if (!info[NUM_FIRST]->IsObject())
         return;
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[NUM_FIRST]);
     auto builder = obj->GetProperty("builder");
     if (!builder->IsFunction())
         return;
@@ -1291,7 +1347,7 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     };
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;
@@ -1307,18 +1363,31 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     std::function<void(const float)> onTypeDidChangeCallback;
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
-    if (info.Length() == PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
-        ParseSheetCallback(info[2], onAppearCallback, onDisappearCallback, shouldDismissFunc,
+    if (info.Length() == PARAMETER_LENGTH_THIRD && info[NUM_SECOND]->IsObject()) {
+        ParseSheetCallback(info[NUM_SECOND], onAppearCallback, onDisappearCallback, shouldDismissFunc,
             onWillDismissCallback, onWillAppearCallback, onWillDisappearCallback, onHeightDidChangeCallback,
             onDetentsDidChangeCallback, onWidthDidChangeCallback, onTypeDidChangeCallback, sheetSpringBackFunc);
-        ParseSheetStyle(info[2], sheetStyle);
-        ParseSheetTitle(info[2], sheetStyle, titleBuilderFunction);
+        ParseSheetStyle(info[NUM_SECOND], sheetStyle);
+        ParseSheetTitle(info[NUM_SECOND], sheetStyle, titleBuilderFunction);
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
         std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
         std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
         std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
+}
+
+NG::SheetEffectEdge JSViewAbstract::ParseSheetEffectEdge(const JSRef<JSObject>& paramObj)
+{
+    auto sheetEffectEdge = static_cast<int32_t>(NG::SheetEffectEdge::ALL);
+    JSRef<JSVal> effectEdgedParam = paramObj->GetProperty("effectEdge");
+    if (effectEdgedParam->IsNull() || effectEdgedParam->IsUndefined() ||
+        !JSViewAbstract::ParseJsInt32(effectEdgedParam, sheetEffectEdge) ||
+        sheetEffectEdge < static_cast<int32_t>(NG::SheetEffectEdge::NONE) ||
+        sheetEffectEdge > static_cast<int32_t>(NG::SheetEffectEdge::END)) {
+        sheetEffectEdge = static_cast<int32_t>(NG::SheetEffectEdge::ALL);
+    }
+    return static_cast<NG::SheetEffectEdge>(sheetEffectEdge);
 }
 
 void JSViewAbstract::ParseSheetStyle(
@@ -1426,6 +1495,22 @@ void JSViewAbstract::ParseSheetStyle(
         }
     }
 
+    auto placement = paramObj->GetProperty("placement");
+    sheetStyle.placement.reset();
+    if (placement->IsNumber()) {
+        auto placementValue = placement->ToNumber<int32_t>();
+        if (placementValue >= static_cast<int>(Placement::LEFT) &&
+            placementValue <= static_cast<int>(Placement::RIGHT_BOTTOM)) {
+            sheetStyle.placement = static_cast<Placement>(placementValue);
+        }
+    }
+
+    auto placementOnTarget = paramObj->GetProperty("placementOnTarget");
+    sheetStyle.placementOnTarget.reset();
+    if (placementOnTarget->IsBoolean()) {
+        sheetStyle.placementOnTarget = placementOnTarget->ToBoolean();
+    }
+
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;
@@ -1484,6 +1569,9 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.shadow = shadow;
     }
 
+    //parse effectEdge
+    sheetStyle.sheetEffectEdge = ParseSheetEffectEdge(paramObj);
+
     // Parse hoverMode
     auto enableHoverModeValue = paramObj->GetProperty("enableHoverMode");
     if (enableHoverModeValue->IsBoolean()) {
@@ -1506,51 +1594,49 @@ void JSViewAbstract::ParseSheetStyle(
     auto radiusValue = paramObj->GetProperty("radius");
     JSViewAbstract::ParseBindSheetBorderRadius(radiusValue, sheetStyle);
 
-    CalcDimension sheetHeight;
-    if (height->IsString()) {
-        std::string heightStr = height->ToString();
-        // Remove all " ".
-        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
-        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-        if (heightStr == SHEET_HEIGHT_MEDIUM) {
-            sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_LARGE) {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
-            sheetStyle.sheetMode = NG::SheetMode::AUTO;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr.find("calc") != std::string::npos) {
-            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
-        } else {
-            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
-        }
-        if (sheetHeight.Value() < 0) {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-            sheetStyle.height.reset();
-            return;
-        }
+    ParseDetentSelection(paramObj, sheetStyle);
+
+    NG::SheetHeight sheetStruct;
+    bool parseResult = ParseSheetHeight(height, sheetStruct, isPartialUpdate);
+    if (!parseResult) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet height in unnormal condition");
     }
-    if (!ParseJsDimensionVpNG(height, sheetHeight)) {
-        if (isPartialUpdate) {
-            sheetStyle.sheetMode.reset();
-        } else {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-        }
-        sheetStyle.height.reset();
-    } else {
-        sheetStyle.height = sheetHeight;
-        sheetStyle.sheetMode.reset();
+    sheetStyle.sheetHeight = sheetStruct;
+
+    ParseSheetSubWindowValue(paramObj, sheetStyle);
+}
+
+void JSViewAbstract::ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    // parse sheet showInSubWindow
+    sheetStyle.showInSubWindow = false;
+    if (sheetStyle.showInPage == NG::SheetLevel::EMBEDDED) {
+        return;
+    }
+    auto showInSubWindowValue = paramObj->GetProperty("showInSubWindow");
+    if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+                "emulator or a real device instead.");
+#else
+        sheetStyle.showInSubWindow = showInSubWindowValue->ToBoolean();
+#endif
     }
 }
 
+void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    auto detentSelection = paramObj->GetProperty("detentSelection");
+    NG::SheetHeight sheetStruct;
+    bool parseResult = ParseSheetHeight(detentSelection, sheetStruct, true);
+    if (!parseResult) {
+        sheetStruct.height.reset();
+        sheetStruct.sheetMode.reset();
+        TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet detent selection in unnormal condition");
+    }
+    sheetStyle.detentSelection = sheetStruct;
+}
+ 
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
 {
     if (!args->IsArray()) {
@@ -1559,7 +1645,10 @@ bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG:
     JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
     NG::SheetHeight sheetDetent;
     for (size_t i = 0; i < array->Length(); i++) {
-        ParseSheetDetentHeight(array->GetValueAt(i), sheetDetent);
+        bool parseResult = ParseSheetHeight(array->GetValueAt(i), sheetDetent, false);
+        if (!parseResult) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet detent in unnormal condition");
+        }
         if ((!sheetDetent.height.has_value()) && (!sheetDetent.sheetMode.has_value())) {
             continue;
         }
@@ -1568,49 +1657,6 @@ bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG:
         sheetDetent.sheetMode.reset();
     }
     return true;
-}
-
-void JSViewAbstract::ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent)
-{
-    CalcDimension sheetHeight;
-    if (args->IsString()) {
-        std::string heightStr = args->ToString();
-        // Remove all " ".
-        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
-        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-        if (heightStr == SHEET_HEIGHT_MEDIUM) {
-            detent.sheetMode = NG::SheetMode::MEDIUM;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_LARGE) {
-            detent.sheetMode = NG::SheetMode::LARGE;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
-            detent.sheetMode = NG::SheetMode::AUTO;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr.find("calc") != std::string::npos) {
-            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
-        } else {
-            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
-        }
-        if (sheetHeight.Value() < 0) {
-            detent.sheetMode = NG::SheetMode::LARGE;
-            detent.height.reset();
-            return;
-        }
-    }
-    if (!ParseJsDimensionVpNG(args, sheetHeight)) {
-        detent.sheetMode = NG::SheetMode::LARGE;
-        detent.height.reset();
-    } else {
-        detent.height = sheetHeight;
-        detent.sheetMode.reset();
-    }
 }
 
 bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions)
@@ -1681,7 +1727,7 @@ void JSViewAbstract::ParseSpringBackCallback(const JSRef<JSObject>& paramObj,
             JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
             dismissObj->SetPropertyObject(
                 "springBack", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsSheetSpringBack));
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
@@ -1710,7 +1756,7 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
             JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
             dismissObj->SetPropertyObject(
                 "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissSheet));
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
@@ -1724,7 +1770,7 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
             dismissObj->SetPropertyObject(
                 "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissSheet));
             dismissObj->SetProperty<int32_t>("reason", info);
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
@@ -1781,14 +1827,65 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsSheetSpringBack(panda::JsiRunt
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
 }
 
+bool JSViewAbstract::ParseSheetMode(const std::string heightStr, NG::SheetHeight& detent)
+{
+    if (heightStr == SHEET_HEIGHT_MEDIUM) {
+        detent.sheetMode = NG::SheetMode::MEDIUM;
+        return true;
+    }
+
+    if (heightStr == SHEET_HEIGHT_LARGE) {
+        detent.sheetMode = NG::SheetMode::LARGE;
+        return true;
+    }
+    if (heightStr == SHEET_HEIGHT_FITCONTENT) {
+        detent.sheetMode = NG::SheetMode::AUTO;
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent,
+    bool isReset)
+{
+    detent.height.reset();
+    detent.sheetMode.reset();
+    CalcDimension sheetHeight;
+    if (args->IsString()) {
+        std::string heightStr = args->ToString();
+
+        // Remove all " ".
+        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
+        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
+        if (ParseSheetMode(heightStr, detent)) {
+            return true;
+        }
+        if (heightStr.find("calc") != std::string::npos) {
+            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+        } else {
+            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
+        }
+        if (sheetHeight.Value() < 0) {
+            detent.sheetMode = NG::SheetMode::LARGE;
+            return false;
+        }
+    }
+    if (!ParseJsDimensionVpNG(args, sheetHeight)) {
+        if (!isReset) {
+            detent.sheetMode = NG::SheetMode::LARGE;
+        }
+        return false;
+    }
+    detent.height = sheetHeight;
+    return true;
+}
+
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        menuParam.placement = Placement::BOTTOM_LEFT;
-    }
+    MenuDefaultParam(menuParam);
     size_t builderIndex = 0;
-    GetMenuShowInSubwindow(menuParam);
+    JSViewPopups::GetMenuShowInSubwindow(menuParam);
     if (info.Length() > PARAMETER_LENGTH_FIRST) {
         auto jsVal = info[0];
         if (jsVal->IsBoolean()) {
@@ -1796,35 +1893,35 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             menuParam.setShow = true;
             builderIndex = 1;
             if (info.Length() > PARAMETER_LENGTH_SECOND) {
-                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
         } else if (jsVal->IsUndefined()) {
             menuParam.setShow = true;
             menuParam.isShow = false;
             builderIndex = 1;
             if (info.Length() > PARAMETER_LENGTH_SECOND) {
-                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
         } else if (jsVal->IsObject()) {
             JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(jsVal);
-            menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj, "$value");
+            menuParam.onStateChange = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "$value");
             auto isShowObj = callbackObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
             if (isShowObj->IsBoolean()) {
                 menuParam.isShow = isShowObj->ToBoolean();
                 menuParam.setShow = true;
                 builderIndex = 1;
                 if (info.Length() > PARAMETER_LENGTH_SECOND) {
-                    ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                    JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
                 }
             } else {
                 builderIndex = 0;
-                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
         }
     }
 
     if (info[builderIndex]->IsArray()) {
-        std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info, builderIndex);
+        std::vector<NG::OptionParam> optionsParam = JSViewPopups::ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
     } else if (info[builderIndex]->IsObject()) {
         // CustomBuilder
@@ -1847,6 +1944,47 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::MenuDefaultParam(NG::MenuParam& menuParam)
+{
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
+    }
+}
+
+void JSViewAbstract::ParseContentMenuCommonParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuObj, NG::MenuParam& menuParam)
+{
+    if (!menuParam.placement.has_value()) {
+        MenuDefaultParam(menuParam);
+    }
+    CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
+    JSViewPopups::ParseMenuParam(info, menuObj, menuParam);
+    auto preview = menuObj->GetProperty("preview");
+    if (preview->IsNumber()) {
+        auto previewMode = preview->ToNumber<int32_t>();
+        if (previewMode == static_cast<int32_t>(MenuPreviewMode::IMAGE)) {
+            menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
+            ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
+        }
+    }
+}
+
+int32_t JSViewAbstract::OpenMenu(
+    NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+{
+    return ViewAbstractModel::GetInstance()->OpenMenu(menuParam, customNode, targetId);
+}
+
+int32_t JSViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->UpdateMenu(menuParam, customNode);
+}
+
+int32_t JSViewAbstract::CloseMenu(const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->CloseMenu(customNode);
+}
+
 void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
     std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
 {
@@ -1861,7 +1999,7 @@ void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
             dismissObj->SetPropertyObject(
                 "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissDialog));
             dismissObj->SetProperty<int32_t>("reason", info);
-            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            JSRef<JSVal> newJSVal = dismissObj;
             func->ExecuteJS(1, &newJSVal);
         };
     }
@@ -1871,6 +2009,77 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissDialog(panda::JsiRuntim
 {
     ViewAbstractModel::GetInstance()->DismissDialog();
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
+
+void AppearDialogEvent(const JSCallbackInfo& info, DialogProperties& dialogProperties)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onDidAppear = paramObject->GetProperty("onDidAppear");
+    if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
+        auto didAppearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popups.onDidAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        dialogProperties.onDidAppear = std::move(didAppearId);
+    }
+    auto onWillAppear = paramObject->GetProperty("onWillAppear");
+    if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
+        auto willAppearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popups.onWillAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        dialogProperties.onWillAppear = std::move(willAppearId);
+    }
+}
+
+void DisappearDialogEvent(const JSCallbackInfo& info, DialogProperties& dialogProperties)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
+    if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
+        auto didDisappearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popups.onDidDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        dialogProperties.onDidDisappear = std::move(didDisappearId);
+    }
+    auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
+    if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
+        auto willDisappearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popups.onWillDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        dialogProperties.onWillDisappear = std::move(willDisappearId);
+    }
+}
+
+void JSViewAbstract::ParseAppearDialogCallback(const JSCallbackInfo& info, DialogProperties& dialogProperties)
+{
+    if (!info[0]->IsObject()) {
+        return ;
+    }
+    AppearDialogEvent(info, dialogProperties);
+    DisappearDialogEvent(info, dialogProperties);
 }
 
 void JSViewAbstract::SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties)
@@ -1887,6 +2096,28 @@ void JSViewAbstract::SetDialogHoverModeProperties(const JSRef<JSObject>& obj, Di
         if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
             properties.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
         }
+    }
+}
+
+void JSViewAbstract::SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto blurStyleValue = obj->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleValue->IsObject()) {
+        if (!properties.blurStyleOption.has_value()) {
+            properties.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, properties.blurStyleOption.value());
+    }
+}
+
+void JSViewAbstract::SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto effectOptionValue = obj->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!properties.effectOption.has_value()) {
+            properties.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOptionValue, properties.effectOption.value());
     }
 }
 }

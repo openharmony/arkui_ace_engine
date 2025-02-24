@@ -80,9 +80,10 @@ std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
     jsonValue->Put("step",
         StringUtils::DoubleToString(GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx())).c_str());
     jsonValue->Put("loop", std::to_string(GetTextMarqueeLoop().value_or(-1)).c_str());
-    jsonValue->Put("direction", GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT) == MarqueeDirection::LEFT
-                                    ? "MarqueeDirection.LEFT"
-                                    : "MarqueeDirection.RIGHT");
+    jsonValue->Put(
+        "direction", GetTextMarqueeDirection().value_or(MarqueeDirection::DEFAULT) == MarqueeDirection::DEFAULT
+                         ? "MarqueeDirection.DEFAULT"
+                         : "MarqueeDirection.DEFAULT_REVERSE");
     jsonValue->Put("delay", std::to_string(GetTextMarqueeDelay().value_or(0)).c_str());
     jsonValue->Put("fadeout", GetTextMarqueeFadeout().value_or(false));
     jsonValue->Put(
@@ -107,7 +108,7 @@ void TextLayoutProperty::UpdateMarqueeOptionsFromJson(const std::unique_ptr<Json
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
-    json->PutFixedAttr("content", UtfUtils::Str16ToStr8(GetContent().value_or(u"")).c_str(), filter,
+    json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(GetContent().value_or(u"")).c_str(), filter,
         FIXED_ATTR_CONTENT);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
@@ -177,8 +178,7 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
         GetTextSelectableMode().value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE)).c_str(), filter);
     json->PutExtAttr("marqueeOptions", GetTextMarqueeOptionsString().c_str(), filter);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
+    json->PutExtAttr("privacySensitive", host ? host->IsPrivacySensitive() : false, filter);
     json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
     json->PutExtAttr("halfLeading", GetHalfLeading().value_or(false), filter);
@@ -206,18 +206,6 @@ void TextLayoutProperty::ToJsonValueForSymbol(std::unique_ptr<JsonValue>& json, 
         jsonArrayColors->Put(index.c_str(), GetSymbolColorList()->at(i).ToString().c_str());
     }
     json->PutExtAttr("symbolColorList", jsonArrayColors, filter);
-}
-
-void TextLayoutProperty::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
-{
-    LayoutProperty::ToTreeJson(json, config);
-    if (json->Contains(TreeKey::CONTENT)) {
-        return;
-    }
-    auto content = UtfUtils::Str16ToStr8(GetContent().value_or(u""));
-    if (!content.empty()) {
-        json->Put(TreeKey::CONTENT, content.c_str());
-    }
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

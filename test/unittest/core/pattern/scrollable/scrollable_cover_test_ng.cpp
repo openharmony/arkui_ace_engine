@@ -353,29 +353,6 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetVelocityScaleTest001
- * @tc.desc: Test SetVelocityScale method with valid and invalid values
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, SetVelocityScaleTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set VelocityScale to a valid value
-     * @tc.expected: VelocityScale is updated to the new value
-     */
-    double sVelocityScale = 2.0;
-    auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    scrollable->SetVelocityScale(sVelocityScale);
-    EXPECT_EQ(scrollable->sVelocityScale_.value_or(0.0), sVelocityScale);
-    /**
-     * @tc.steps: step2. Set VelocityScale to an invalid value (less than or equal to 0)
-     * @tc.expected: VelocityScale remains unchanged
-     */
-    scrollable->SetVelocityScale(-1.0);
-    EXPECT_EQ(scrollable->sVelocityScale_.value_or(0.0), sVelocityScale);
-}
-
-/**
  * @tc.name: HandleTouchCancel001
  * @tc.desc: Test the behavior of the HandleTouchCancel method
  * @tc.type: FUNC
@@ -434,12 +411,12 @@ HWTEST_F(ScrollableCoverTestNg, GetGainTest001, TestSize.Level1)
      * @tc.steps: step1. Create a Scrollable object and initalizes the parameters
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    auto continuousSlidingCallback = []() { return 100.0; };
+    auto continuousSlidingCallback = []() { return 300.0; };
     scrollable->continuousSlidingCallback_ = continuousSlidingCallback;
     scrollable->dragCount_ = 5;
     scrollable->preGain_ = 1.0;
     scrollable->lastPos_ = 100.0f;
-    double delta = 50.0;
+    double delta = 150.0;
     /**
      * @tc.steps: step2. Test GetGain with dragCount between FIRST_THRESHOLD and SECOND_THRESHOLD
      * @tc.expected: The result should be the expected gain value
@@ -460,12 +437,12 @@ HWTEST_F(ScrollableCoverTestNg, GetGainTest002, TestSize.Level1)
      * @tc.steps: step1. Create a Scrollable object and initalizes the parameters
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    auto continuousSlidingCallback = []() { return 100.0; };
+    auto continuousSlidingCallback = []() { return 300.0; };
     scrollable->continuousSlidingCallback_ = continuousSlidingCallback;
     scrollable->dragCount_ = 5;
     scrollable->preGain_ = 1.0;
     scrollable->lastPos_ = 100.0f;
-    double delta = -50.0;
+    double delta = -150.0;
 
     /**
      * @tc.steps: step2. Test GetGain with delta negative value
@@ -1198,22 +1175,6 @@ HWTEST_F(ScrollableCoverTestNg, GetOrCreateScrollableItemWithParent002, TestSize
 }
 
 /**
- * @tc.name: SetFriction001
- * @tc.desc: Test SetFriction method
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, SetFriction001, TestSize.Level1)
-{
-    double sFriction = -1.0;
-    /**
-     * @tc.steps: step1. Call SetFriction with sFriction LessOrEqual 0.0
-     * @tc.expected: sFriction_ dont change
-     */
-    Scrollable::SetFriction(sFriction);
-    EXPECT_FALSE(Scrollable::sFriction_.has_value());
-}
-
-/**
  * @tc.name: InitializeTest002
  * @tc.desc: Test Initialize method and covering actionUpdate, actionEnd, actionCancel
  * @tc.type: FUNC
@@ -1496,13 +1457,13 @@ HWTEST_F(ScrollableTestNg, GetGainTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. Call GetGain with continuousSlidingCallback nullptr.
      */
-    scrollable->GetGain(100.0);
+    scrollable->GetGain(150.0);
     EXPECT_EQ(scrollable->preGain_, 1.0);
     /**
      * @tc.steps: step2. Call GetGain with continuousSlidingCallback has callback.
      */
     scrollable->continuousSlidingCallback_ = []() { return 0.0; };
-    scrollable->GetGain(100.0);
+    scrollable->GetGain(150.0);
     EXPECT_EQ(scrollable->preGain_, 1.0);
     /**
      * @tc.steps: step3. Call GetGain with Negative lastPos_ / delta.
@@ -1510,14 +1471,14 @@ HWTEST_F(ScrollableTestNg, GetGainTest003, TestSize.Level1)
     scrollable->continuousSlidingCallback_ = []() { return 1.0; };
     scrollable->dragCount_ = 6;
     scrollable->lastPos_ = -10;
-    scrollable->GetGain(100.0);
+    scrollable->GetGain(150.0);
     EXPECT_EQ(scrollable->preGain_, 1.0);
     /**
      * @tc.steps: step4. Call GetGain with dragCount_ >= SECOND_THRESHOLD and Negative lastPos_ / delta.
      */
     scrollable->dragCount_ = 10;
     scrollable->lastPos_ = -10;
-    scrollable->GetGain(100.0);
+    scrollable->GetGain(150.0);
     EXPECT_EQ(scrollable->preGain_, 1.0);
     /**
      * @tc.steps: step5 Call GetGain with dragCount_ >= SECOND_THRESHOLD and positive lastPos_ / delta.
@@ -1525,7 +1486,7 @@ HWTEST_F(ScrollableTestNg, GetGainTest003, TestSize.Level1)
     scrollable->continuousSlidingCallback_ = []() { return 1; };
     scrollable->dragCount_ = 10;
     scrollable->lastPos_ = 10;
-    scrollable->GetGain(100.0);
+    scrollable->GetGain(150.0);
     EXPECT_EQ(scrollable->preGain_, 16);
 }
 
@@ -1746,7 +1707,7 @@ HWTEST_F(ScrollableCoverTestNg, CoordinateWithSheetTest001, TestSize.Level1)
         return frameNode;
     };
     SheetStyle sheetStyle;
-    sheetStyle.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OpenBindSheetByUIContext(sheetContentNode, std::move(buildTitleNodeFunc), sheetStyle, nullptr,

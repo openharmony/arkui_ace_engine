@@ -27,6 +27,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -213,21 +214,15 @@ HWTEST_F(MenuItemPatternOptionTestNg, PerformActionTest002, TestSize.Level1)
     event.code = KeyCode::KEY_ENTER;
     EXPECT_TRUE(optionPattern_->OnKeyEvent(event));
 
-    TouchEventInfo touchInfo("touchUP");
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetTouchType(TouchType::UP);
-    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    UIState normalState = UI_STATE_NORMAL;
     for (int turn = 0; turn < 2; turn++) {
         optionPattern_->SetIsHover(isHover[turn]);
-        optionPattern_->OnPress(touchInfo);
+        optionPattern_->OnPress(normalState);
         EXPECT_EQ(optionPattern_->GetBgBlendColor(), hoverColor[turn]);
     }
 
-    TouchEventInfo touchInfo2("touchDown");
-    TouchLocationInfo touchLocationInfo2(1);
-    touchLocationInfo2.SetTouchType(TouchType::DOWN);
-    touchInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
-    optionPattern_->OnPress(touchInfo2);
+    UIState pressedState = UI_STATE_PRESSED;
+    optionPattern_->OnPress(pressedState);
     EXPECT_EQ(optionPattern_->GetBgBlendColor(), optionPattern_->selectTheme_->GetClickedColor());
 }
 
@@ -496,7 +491,17 @@ HWTEST_F(MenuItemPatternOptionTestNg, CreatePasteButton001, TestSize.Level1)
 
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextOverlayTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return nullptr;
+        }
+    });
     MenuView::CreatePasteButton(false, option, row, []() {});
     auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
     EXPECT_FALSE(PasteButtonNode.empty());

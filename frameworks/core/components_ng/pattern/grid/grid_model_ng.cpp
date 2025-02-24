@@ -282,7 +282,7 @@ void GridModelNG::SetOnItemDragMove(ItemDragMoveFunc&& value)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragMove(std::move(value));
 
-    AddDragFrameNodeToManager(frameNode);
+    GridModelNG::AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
@@ -293,7 +293,7 @@ void GridModelNG::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragLeave(std::move(value));
 
-    AddDragFrameNodeToManager(frameNode);
+    GridModelNG::AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDrop(ItemDropFunc&& value)
@@ -304,7 +304,7 @@ void GridModelNG::SetOnItemDrop(ItemDropFunc&& value)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDrop(std::move(value));
 
-    AddDragFrameNodeToManager(frameNode);
+    GridModelNG::AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnScroll(OnScrollEvent&& onScroll)
@@ -432,7 +432,7 @@ void GridModelNG::SetScrollBarMode(FrameNode* frameNode, const std::optional<Dis
 void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth)
 {
     if (scrollBarWidth &&
-        GreatOrEqual(scrollBarWidth.value().Value(), 0.0) &&
+        GreatOrEqual(scrollBarWidth.value().Value(), 0.0f) &&
         scrollBarWidth.value().Unit() != DimensionUnit::PERCENT) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth.value(), frameNode);
     } else {
@@ -514,8 +514,21 @@ void GridModelNG::SetSupportAnimation(FrameNode* frameNode, bool supportAnimatio
     pattern->SetSupportAnimation(supportAnimation);
 }
 
-void GridModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
-    const std::optional<bool>& alwaysEnabled, EffectEdge edge)
+EdgeEffect GridModelNG::GetEdgeEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, EdgeEffect::NONE);
+    return static_cast<EdgeEffect>(ScrollableModelNG::GetEdgeEffect(frameNode));
+}
+
+bool GridModelNG::GetAlwaysEnabled(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<bool>(ScrollableModelNG::GetAlwaysEnabled(frameNode));
+}
+
+void GridModelNG::SetEdgeEffect(
+    FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
+    EffectEdge edge)
 {
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
@@ -537,10 +550,10 @@ void GridModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>&
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     std::optional<double> friction = value;
-    if (friction.has_value() && LessOrEqual(friction.value(), 0.0)) {
+    if (friction.has_value() && LessOrEqual(friction.value(), 0.0f)) {
         friction.reset();
     }
-    pattern->SetFriction(friction.value_or(FRICTION));
+    pattern->SetFriction(friction.value_or(-1.0f));
 }
 
 void GridModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign)
@@ -695,38 +708,6 @@ void GridModelNG::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc
     eventHub->SetOnScrollBarUpdate(std::move(value));
 }
 
-void GridModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollStart(std::move(onScrollStart));
-}
-
-void GridModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollStop(std::move(onScrollStop));
-}
-
-void GridModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachStart(std::move(onReachStart));
-}
-
-void GridModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachEnd(std::move(onReachEnd));
-}
-
 void GridModelNG::SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -745,7 +726,7 @@ void GridModelNG::SetOnItemDragStart(FrameNode* frameNode, std::function<void(co
     CHECK_NULL_VOID(gestureEventHub);
     eventHub->InitItemDragEvent(gestureEventHub);
 
-    AddDragFrameNodeToManager(frameNode);
+    GridModelNG::AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value)
@@ -755,7 +736,7 @@ void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& v
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragEnter(std::move(value));
 
-    AddDragFrameNodeToManager(frameNode);
+    GridModelNG::AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value)
@@ -788,23 +769,6 @@ void GridModelNG::SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value)
     AddDragFrameNodeToManager(frameNode);
 }
 
-void GridModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScroll(std::move(onScroll));
-}
-
-void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
-    AddDragFrameNodeToManager(frameNode);
-}
-
 void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -814,5 +778,53 @@ void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
     CHECK_NULL_VOID(dragDropManager);
 
     dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
+}
+
+void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+}
+
+void GridModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachStart(std::move(onReachStart));
+}
+
+void GridModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachEnd(std::move(onReachEnd));
+}
+
+void GridModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStart(std::move(onScrollStart));
+}
+
+void GridModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
+}
+
+void GridModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScroll(std::move(onScroll));
 }
 } // namespace OHOS::Ace::NG

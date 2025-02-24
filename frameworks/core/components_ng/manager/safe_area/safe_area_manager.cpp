@@ -20,9 +20,6 @@
 namespace OHOS::Ace::NG {
 SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, {});
-    CHECK_NULL_RETURN(pipeline->GetUseCutout(), {});
     // cutout regions adjacent to edges.
     auto cutoutArea = safeArea;
 
@@ -94,8 +91,7 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
 {
     uint32_t bottom;
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    if (systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+    if (container && systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
         bottom = systemSafeArea_.bottom_.start;
         ACE_SCOPED_TRACE("calc keyboardRect use systemSafeArea_.bottom_");
     } else {
@@ -116,7 +112,7 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     if (!IsSafeAreaValid()) {
         return {};
     }
-    if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
+    if ((opts.type & SAFE_AREA_TYPE_CUTOUT) && useCutout_) {
         res = res.Combine(cutoutSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
@@ -130,6 +126,37 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         res.bottom_ = res.bottom_.Combine(keyboardInset_);
     }
     return res;
+}
+
+bool SafeAreaManager::UpdateScbSystemSafeArea(const SafeAreaInsets& safeArea)
+{
+    if (scbSystemSafeArea_.has_value() && scbSystemSafeArea_.value() == safeArea) {
+        return false;
+    }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateScbSystemSafeArea %s", safeArea.ToString().c_str());
+    scbSystemSafeArea_ = safeArea;
+    return true;
+}
+
+bool SafeAreaManager::UpdateScbCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+{
+    auto safeAreaWithRoot = GenerateCutOutAreaWithRoot(safeArea, rootSize);
+    if (scbCutoutSafeArea_.has_value() && scbCutoutSafeArea_.value() == safeAreaWithRoot) {
+        return false;
+    }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateScbCutoutSafeArea %s", safeAreaWithRoot.ToString().c_str());
+    scbCutoutSafeArea_ = safeAreaWithRoot;
+    return true;
+}
+
+bool SafeAreaManager::UpdateScbNavSafeArea(const SafeAreaInsets& safeArea)
+{
+    if (scbNavSafeArea_.has_value() && scbNavSafeArea_.value() == safeArea) {
+        return false;
+    }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateScbNavSafeArea %s", safeArea.ToString().c_str());
+    scbNavSafeArea_ = safeArea;
+    return true;
 }
 
 bool SafeAreaManager::IsSafeAreaValid() const
@@ -208,13 +235,27 @@ bool SafeAreaManager::IsAtomicService() const
 
 SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 {
+    if (windowTypeConfig_.isSceneBoardWindow && scbSystemSafeArea_.has_value()) {
+        return scbSystemSafeArea_.value();
+    }
     return systemSafeArea_;
 }
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 {
-    if (!IsSafeAreaValid()) {
-        return {};
+    if (IsSafeAreaValid() && useCutout_) {
+        if (windowTypeConfig_.isSceneBoardWindow && scbCutoutSafeArea_.has_value()) {
+            return scbCutoutSafeArea_.value();
+        }
+        return cutoutSafeArea_;
+    }
+    return {};
+}
+
+SafeAreaInsets SafeAreaManager::GetCutoutSafeAreaWithoutProcess() const
+{
+    if (windowTypeConfig_.isSceneBoardWindow && scbCutoutSafeArea_.has_value()) {
+        return scbCutoutSafeArea_.value();
     }
     return cutoutSafeArea_;
 }
@@ -224,7 +265,8 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
     if (!IsSafeAreaValid()) {
         return {};
     }
-    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
 }
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
@@ -237,7 +279,21 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
-    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    if (!windowTypeConfig_.isSceneBoardWindow) {
+        return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
+    }
+    SafeAreaInsets scbSafeArea;
+    if (scbSystemSafeArea_.has_value()) {
+        scbSafeArea = scbSafeArea.Combine(scbSystemSafeArea_.value());
+    }
+    if (scbCutoutSafeArea_.has_value() && useCutout_) {
+        scbSafeArea = scbSafeArea.Combine(scbCutoutSafeArea_.value());
+    }
+    if (scbNavSafeArea_.has_value()) {
+        scbSafeArea = scbSafeArea.Combine(scbNavSafeArea_.value());
+    }
+    return scbSafeArea;
 }
 
 PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
@@ -253,7 +309,8 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
         }
 #endif
     }
-    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
     PaddingPropertyF result;
     if (combinedSafeArea.left_.IsValid()) {
         result.left = combinedSafeArea.left_.Length();
@@ -333,6 +390,17 @@ std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
     std::vector<WeakPtr<FrameNode>> result;
     std::copy(needExpandNodes_.begin(), needExpandNodes_.end(), std::back_inserter(result));
     return result;
+}
+
+void SafeAreaManager::SetKeyboardInfo(float height)
+{
+    SetRawKeyboardHeight(height);
+    keyboardOrientation_ = -1;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    keyboardOrientation_ = static_cast<int32_t>(displayInfo->GetRotation());
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)

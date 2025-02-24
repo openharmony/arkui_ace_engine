@@ -19,6 +19,8 @@
 #include "core/common/window_animation_config.h"
 
 namespace OHOS::Ace::NG {
+enum class RSSubsystemId : uint8_t { WM_UIEXT = 0, ARKUI_UIEXT, ABILITY_UIEXT, INVALID };
+
 enum class PlaceholderType : int32_t {
     NONE = 0,
     UNDEFINED = 1,
@@ -50,8 +52,14 @@ enum class BusinessDataSendType : uint32_t {
 
 enum class UIContentBusinessCode : uint32_t {
     UNDEFINED = 0,
-    SEND_STATAUSBAR_TYPE = 1,
+    // uiextension session business begin
     EVENT_PROXY = 1001,
+    SEND_PAGE_MODE = 1002,
+    // accessibility business begin
+    TRANSFORM_PARAM = 2001,
+    // avoid info business begin
+    NOTIFY_AVOID_INFO_CHANGE = 3001,
+    GET_AVOID_INFO = 3002,
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UIEXTENSION_CONFIG_H

@@ -81,6 +81,20 @@ class OnReachStartModifier extends ModifierWithKey<() => void> {
     }
 }
 
+class BackToTopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backToTop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetBackToTop(node);
+    } else {
+      getUINativeModule().scrollable.setBackToTop(node, this.value);
+    }
+  }
+}
+
 class OnReachEndModifier extends ModifierWithKey<() => void> {
     constructor(value: () => void) {
         super(value);
@@ -128,5 +142,9 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
     onReachEnd(event: () => void): this {
         modifierWithKey(this._modifiersWithKeys, OnReachEndModifier.identity, OnReachEndModifier, event);
         return this;
+    }
+    backToTop(value: boolean): this {
+      modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
+      return this;
     }
 }

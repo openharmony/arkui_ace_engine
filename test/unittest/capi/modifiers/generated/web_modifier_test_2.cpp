@@ -950,7 +950,7 @@ HWTEST_F(
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setEnableSmoothDragResizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, DISABLED_setEnableSmoothDragResizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -965,7 +965,7 @@ HWTEST_F(WebModifierTest, setEnableSmoothDragResizeTestDefaultValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setEnableSmoothDragResizeTestEnableSmoothDragResizeValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, DISABLED_setEnableSmoothDragResizeTestEnableSmoothDragResizeValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueEnableSmoothDragResize;
 

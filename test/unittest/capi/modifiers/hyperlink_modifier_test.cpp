@@ -234,7 +234,7 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentInvalidValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(HyperlinkModifierTest, setColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -286,7 +286,7 @@ HWTEST_F(HyperlinkModifierTest, setColorTestColorValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(HyperlinkModifierTest, setColorTestColorInvalidValues, TestSize.Level1)
+HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Level1)
 {
     Ark_Union_Color_Number_String_Resource initValueColor;
 

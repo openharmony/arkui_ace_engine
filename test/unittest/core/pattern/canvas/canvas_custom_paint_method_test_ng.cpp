@@ -23,6 +23,9 @@
 
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/pattern/canvas/canvas_event_hub.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
@@ -35,8 +38,6 @@
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #undef private
 #undef protected
 
@@ -53,7 +54,7 @@ const double END_ANGLE = 8.0;
 const double MAX_END_ANGLE = 1160.0;
 const double HALF = 0.5;
 const double HANGING_PERCENT = 0.8;
-}
+} // namespace
 
 class CanvasCustomPaintMethodTestNg : public testing::Test {
 public:
@@ -210,8 +211,8 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest002, TestSize
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5vp"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10rem"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5rem"));
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10"));
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5"));
+    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10"));
+    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5"));
 
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10%px"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10%rem"));
@@ -536,7 +537,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest012, TestSize
     result = paintMethod->CalcTextScale(1.0, std::nullopt);
     EXPECT_FALSE(result.has_value());
 
-    result =paintMethod->CalcTextScale(0.0, std::nullopt);
+    result = paintMethod->CalcTextScale(0.0, std::nullopt);
     EXPECT_FALSE(result.has_value());
 
     result = paintMethod->CalcTextScale(1.0, -1.0);
@@ -994,7 +995,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest024, TestSize
     param.startAngle = 0.0;
     param.endAngle = 1.0;
     param.rotation = 1.0;
-    
+
     EXPECT_CALL(matrix, Rotate(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(path, Transform(_)).WillRepeatedly(Return());
     paintMethod->Ellipse(param);

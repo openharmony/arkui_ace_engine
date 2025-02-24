@@ -29,6 +29,7 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
@@ -36,6 +37,8 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #ifndef __OHOS_NG__
 #include "core/components/box/box_component.h"
 #include "core/components/display/display_component.h"
@@ -48,6 +51,8 @@
 #include "core/gestures/tap_gesture.h"
 #include "core/pipeline/base/component.h"
 
+using VectorTextMenuItemHandle = void*;
+
 extern "C" {
 struct NativeResourceObject {
     const char* bundleName;
@@ -56,7 +61,16 @@ struct NativeResourceObject {
     int32_t type;
     const char* paramsJsonStr;
 };
+
+struct FfiTextMenuItem {
+    ExternalString content;
+    ExternalString icon;
+    ExternalString id;
+};
 }
+
+typedef VectorTextMenuItemHandle (*CjOnCreateMenu)(VectorTextMenuItemHandle);
+typedef bool (*CjOnMenuItemClick)(FfiTextMenuItem, int32_t, int32_t);
 
 namespace OHOS::Ace {
 enum class ResourceType : uint32_t {
@@ -70,7 +84,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    SYMBOL = 40000
 };
 }
 
@@ -127,7 +142,7 @@ public:
         const std::string& bundleName = "", const std::string& moduleName = "");
     static void CjEnabled(bool enabled);
 
-    static void CompleteResourceObject(NativeResourceObject& obj);
+    static void CompleteResourceObject(NativeResourceObject& obj, std::string& bundleName, std::string& moduleName);
     static void CompleteResourceObjectWithBundleName(
         NativeResourceObject& obj, std::string& bundleName, std::string& moduleName, int32_t& resId);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
@@ -136,6 +151,7 @@ public:
 
     static bool ParseCjString(NativeResourceObject& obj, std::string& result);
     static bool ParseCjMedia(NativeResourceObject& obj, std::string& result);
+    static bool ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result);
     static bool ParseCjColor(NativeResourceObject& obj, Color& result);
     static bool ParseCjDimension(
         NativeResourceObject& obj, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
@@ -151,7 +167,9 @@ public:
     template<typename T>
     static bool ParseCjInteger(NativeResourceObject& obj, T& result)
     {
-        CompleteResourceObject(obj);
+        std::string bundleName;
+        std::string moduleName;
+        CompleteResourceObject(obj, bundleName, moduleName);
         if (obj.type == -1) {
             return false;
         }
@@ -182,10 +200,16 @@ public:
         return false;
     }
 
+    static bool ParseEditMenuOptions(CjOnCreateMenu& cjOnCreateMenu, CjOnMenuItemClick& cjOnMenuItemClick,
+        NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClick);
+
 private:
     static void CompleteResourceObjectInner(
         NativeResourceObject& obj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
     static bool ParseCjMediaInternal(NativeResourceObject& obj, std::string& result);
+    static void ParseOnCreateMenu(CjOnCreateMenu& cjOnCreateMenu, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static void ParseOnMenuItemClick(
+        CjOnMenuItemClick& cjOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClick);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_CJ_FRONTEND_CPP_VIEW_VIEW_ABSTRACT_H

@@ -183,7 +183,8 @@ int32_t ParagraphManager::GetGlyphIndexByCoordinate(Offset offset, bool isSelect
         // get offset relative to each paragraph
         offset.SetY(offset.GetY() - info.paragraph->GetHeight());
     }
-    return paragraphs_.back().end;
+    offset.SetY(offset.GetY() + paragraphs_.back().paragraph->GetHeight());
+    return paragraphs_.back().paragraph->GetGlyphIndexByCoordinate(offset, isSelectionPos) + paragraphs_.back().start;
 }
 
 bool ParagraphManager::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) const
@@ -326,6 +327,11 @@ std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
         std::vector<TextDirection> tempTextDirections;
         info.paragraph->TxtGetRectsForRange(
             relativeStart, relativeEnd, heightStyle, widthStyle, tempRects, tempTextDirections);
+        if (tempTextDirections.size() < tempRects.size()) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "TxtGetRectsForRange failed, tempTextDirections size=%{public}zu is less "\
+                "than tempRects size=%{public}zu", tempTextDirections.size(), tempRects.size());
+            continue;
+        }
         for (size_t i = 0; i < tempRects.size(); ++i) {
             tempRects[i].SetTop(tempRects[i].Top() + y);
             resultTextBoxes.emplace_back(TextBox(tempRects[i], tempTextDirections[i]));

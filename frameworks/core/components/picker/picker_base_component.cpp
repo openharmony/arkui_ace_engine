@@ -189,7 +189,7 @@ void PickerBaseComponent::OpenDialog(const DialogProperties& properties)
                 picker->dialogComponent_ = context->ShowDialog(dialogProperties, false, picker->GetDialogName());
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowPicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowPicker", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void PickerBaseComponent::CloseDialog()
@@ -222,7 +222,8 @@ void PickerBaseComponent::CloseDialog()
             auto dialogId = dialogComponent->GetDialogId();
             lastStack->PopDialog(dialogId);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogClosePicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogClosePicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void PickerBaseComponent::OnTitleBuilding()

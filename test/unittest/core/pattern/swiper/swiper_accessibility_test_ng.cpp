@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class SwiperAccessibilityTestNg : public SwiperTestNg {
-public:
-};
+class SwiperAccessibilityTestNg : public SwiperTestNg {};
 
 /**
  * @tc.name: GetInfo001
@@ -29,7 +27,9 @@ public:
  */
 HWTEST_F(SwiperAccessibilityTestNg, GetInfo001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), 4);
     EXPECT_EQ(accessibilityProperty_->GetCurrentIndex(), 0);
@@ -135,7 +135,9 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Scrollable swiper
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
 
     /**
@@ -144,7 +146,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      */
     accessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step3. Call ActActionScrollBackward
@@ -152,7 +154,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      */
     accessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -177,7 +179,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      */
     accessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step3. Call ActActionScrollBackward
@@ -185,7 +187,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      */
     accessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**

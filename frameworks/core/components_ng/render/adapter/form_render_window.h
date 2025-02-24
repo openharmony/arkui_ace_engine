@@ -20,7 +20,7 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include <mutex>
-#include "render_service_client/core/ui/rs_frame_rate_linker.h"
+#include "render_service_client/core/feature/hyper_graphic_manager/rs_frame_rate_linker.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "vsync_receiver.h"
 #endif

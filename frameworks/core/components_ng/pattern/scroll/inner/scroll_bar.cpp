@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +26,9 @@ constexpr double BAR_ADAPT_EPSLION = 1.0;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
+#ifdef ARKUI_WEARABLE
+constexpr char SCROLL_BAR_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
+#endif
 } // namespace
 
 ScrollBar::ScrollBar()
@@ -233,7 +237,7 @@ void ScrollBar::SetRectTrickRegion(
     double activeMainOffset =
         std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) + NormalizeToPx(startReservedHeight_);
     activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
-    bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
+    bool canUseAnimation = NearZero(outBoundary_) && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
     scrollableOffset_ = activeMainOffset;
@@ -573,7 +577,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag start");
     ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
-        scrollPositionCallback_(0, SCROLL_FROM_START);
+        scrollPositionCallback_(0, SCROLL_FROM_START, false);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(0, NG::SceneStatus::START);
         }
@@ -602,7 +606,9 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
             offset = -offset;
         }
         ACE_SCOPED_TRACE("inner scrollBar HandleDragUpdate offset:%f", offset);
-        scrollPositionCallback_(offset, SCROLL_FROM_BAR);
+        auto isMouseWheelScroll =
+            info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
+        scrollPositionCallback_(offset, SCROLL_FROM_BAR, isMouseWheelScroll);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
                                                                 : info.GetMainVelocity() / info.GetMainDelta() * offset,
@@ -666,7 +672,7 @@ void ScrollBar::ProcessFrictionMotion(double value)
 {
     if (scrollPositionCallback_) {
         auto offset = CalcPatternOffset(value - frictionPosition_);
-        if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING)) {
+        if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING, false)) {
             if (frictionController_ && frictionController_->IsRunning()) {
                 frictionController_->Stop();
             }
@@ -685,7 +691,7 @@ void ScrollBar::ProcessFrictionMotionStop()
 
 void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    ResponseLinkResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult, bool inBarRect)
 {
     if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -695,6 +701,16 @@ void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetE
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
         panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+        GestureJudgeFunc sysJudge = nullptr;
+        if (inBarRect) {
+            sysJudge = [](const RefPtr<GestureInfo>& gestureInfo,
+                          const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+                auto inputEventType = gestureInfo->GetInputEventType();
+                return inputEventType == InputEventType::AXIS ? GestureJudgeResult::CONTINUE
+                                                              : GestureJudgeResult::REJECT;
+            };
+        }
+        panRecognizer_->SetSysGestureJudge(sysJudge);
         result.emplace_front(panRecognizer_);
         responseLinkResult.emplace_back(panRecognizer_);
     }
@@ -1002,6 +1018,9 @@ void ScrollBar::PlayScrollBarAppearAnimation()
 
 void ScrollBar::PlayScrollBarGrowAnimation()
 {
+#ifdef ARKUI_WEARABLE
+    VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+#endif
     PlayScrollBarAppearAnimation();
     normalWidth_ = activeWidth_;
     FlushBarWidth();
@@ -1011,6 +1030,9 @@ void ScrollBar::PlayScrollBarGrowAnimation()
 
 void ScrollBar::PlayScrollBarShrinkAnimation()
 {
+#ifdef ARKUI_WEARABLE
+    VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+#endif
     normalWidth_ = inactiveWidth_;
     FlushBarWidth();
     hoverAnimationType_ = HoverAnimationType::SHRINK;

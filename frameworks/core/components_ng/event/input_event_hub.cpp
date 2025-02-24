@@ -54,9 +54,14 @@ bool InputEventHub::ProcessPenHoverTestHit(const OffsetF& coordinateOffset, Touc
 {
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
-
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
     if (hoverEventActuator_) {
-        hoverEventActuator_->OnCollectPenHoverEvent(coordinateOffset, getEventTargetImpl, result);
+        hoverEventActuator_->OnCollectPenHoverEvent(coordinateOffset, getEventTargetImpl, result, host);
+    }
+
+    if (hoverMoveEventActuator_) {
+        hoverMoveEventActuator_->OnCollectPenHoverMoveEvent(coordinateOffset, getEventTargetImpl, result, host);
     }
 
     return false;

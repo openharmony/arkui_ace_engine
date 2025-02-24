@@ -201,6 +201,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     bubblePattern->SetMessageColor(textColor.has_value());
     bubblePattern->SetHasTransition(param->GetHasTransition());
     bubblePattern->SetEnableHoverMode(param->EnableHoverMode());
+    bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);
     // Create child
@@ -344,6 +345,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
     }
     popupPattern->SetHasTransition(param->GetHasTransition());
+    popupPattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
 
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -578,7 +580,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
     auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
-    if (bubbleHub) {
+    if (bubbleHub && (!(param->GetIsPartialUpdate().has_value()))) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
     auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
@@ -664,9 +666,13 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         }
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
-    bubblePattern->SetHasTransition(param->GetHasTransition());
-    if (param->GetHasTransition()) {
-        popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
+    bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
+
+    if (!(param->GetIsPartialUpdate().has_value())) {
+        bubblePattern->SetHasTransition(param->GetHasTransition());
+        if (param->GetHasTransition()) {
+            popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
+        }
     }
 }
 
@@ -676,10 +682,33 @@ void BubbleView::ResetBubbleProperty(int32_t popupId)
     CHECK_NULL_VOID(popupNode);
     auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(popupLayoutProp);
-    popupLayoutProp->Reset();
+    popupLayoutProp->ResetEnableArrow();
+    popupLayoutProp->ResetPlacement();
+    popupLayoutProp->ResetTargetSpace();
+    popupLayoutProp->ResetPositionOffset();
+    popupLayoutProp->ResetArrowHeight();
+    popupLayoutProp->ResetArrowWidth();
+    popupLayoutProp->ResetRadius();
+    popupLayoutProp->ResetFollowTransformOfTarget();
+
     auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(popupPaintProp);
-    popupPaintProp->Reset();
+    popupPaintProp->ResetAutoCancel();
+    popupPaintProp->ResetBackgroundColor();
+    popupPaintProp->ResetEnableArrow();
+    popupPaintProp->ResetMaskColor();
+    popupPaintProp->ResetPlacement();
+    popupPaintProp->ResetArrowOffset();
+
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->ResetBackShadow();
+    }
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    childLayoutProperty->ClearUserDefinedIdealSize(true, false);
 }
 
 RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsUseCustom)
@@ -951,5 +980,70 @@ bool BubbleView::IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool i
         return renderContext->IsUniRenderEnabled();
     }
     return true;
+}
+
+PopupInfo GetPopupInfoHelper(
+    const RefPtr<UINode>& customNode, const std::function<PopupInfo(const RefPtr<OverlayManager>&)>& getPopupInfoFunc)
+{
+    PopupInfo popupInfoError;
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, popupInfoError);
+    auto instanceId = context->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+    if (subwindow) {
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = getPopupInfoFunc(overlayManager);
+            if (popupInfo.popupNode) {
+                return popupInfo;
+            }
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = getPopupInfoFunc(overlayManager);
+        if (popupInfo.popupNode) {
+            return popupInfo;
+        }
+    }
+    return popupInfoError;
+}
+
+PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode)
+{
+    return GetPopupInfoHelper(customNode, [customNode](const RefPtr<OverlayManager>& overlayManager) {
+        return overlayManager->GetPopupInfoWithExistContent(customNode);
+    });
+}
+
+PopupInfo BubbleView::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId)
+{
+    return GetPopupInfoHelper(customNode,
+        [targetId](const RefPtr<OverlayManager>& overlayManager) { return overlayManager->GetPopupInfo(targetId); });
+}
+
+RefPtr<OverlayManager> BubbleView::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
+{
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+    if (subwindow) {
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = overlayManager->GetPopupInfo(targetId);
+            if (popupInfo.popupNode) {
+                return overlayManager;
+            }
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = overlayManager->GetPopupInfo(targetId);
+        if (popupInfo.popupNode) {
+            return overlayManager;
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

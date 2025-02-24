@@ -562,63 +562,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove004, TestSize.Lev
 }
 
 /**
- * @tc.name: GetSelectedMaxWidth001
- * @tc.desc: test GetSelectedMaxWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_EQ(ret, 0.0f);
-}
-
-/**
- * @tc.name: GetSelectedMaxWidth002
- * @tc.desc: test GetSelectedMaxWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    std::vector<RectF> rectList;
-    rectList.push_back(RectF(1.0f, 1.0f, 5.0f, 10.f));
-    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    overlayMod->SetSelectedRects(rectList);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
-}
-
-/**
- * @tc.name: GetSelectedMaxWidth003
- * @tc.desc: test GetSelectedMaxWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetSelectedMaxWidth003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    std::vector<RectF> rectList;
-    rectList.push_back(RectF(1.0f, 1.0f, 5.0f, 10.f));
-    rectList.push_back(RectF(10.0f, 10.0f, 50.0f, 100.f));
-    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    overlayMod->SetSelectedRects(rectList);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
-}
-
-/**
  * @tc.name: HandleSelectParagraghPos001
  * @tc.desc: test HandleSelectParagraghPos
  * @tc.type: FUNC
@@ -1039,6 +982,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection004, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     pipeline->themeManager_ = theme;
 
     richEditorPattern->customKeyboardBuilder_ = []() {};
@@ -1079,6 +1023,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection005, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     pipeline->themeManager_ = theme;
 
     richEditorPattern->customKeyboardBuilder_ = []() {};
@@ -1118,6 +1063,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection006, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     pipeline->themeManager_ = theme;
 
     richEditorPattern->customKeyboardBuilder_ = []() {};

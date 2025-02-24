@@ -83,7 +83,6 @@ void WebPattern::BoolWebPropertiesToJsonValue(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("allowWindowOpenMethod", GetAllowWindowOpenMethodValue(false) ? "true" : "false", filter);
     json->PutExtAttr("enableNativeEmbedMode", GetNativeEmbedModeEnabledValue(false) ? "true" : "false", filter);
     json->PutExtAttr("textAutosizing", GetTextAutosizingValue(true) ? "true" : "false", filter);
-    json->PutExtAttr("enableSmoothDragResize", GetSmoothDragResizeEnabledValue(false) ? "true" : "false", filter);
 }
 
 void WebPattern::NestedScrollExtToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

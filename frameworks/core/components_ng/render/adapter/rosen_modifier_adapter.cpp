@@ -14,13 +14,23 @@
  */
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
-#include "core/components_ng/animation/animatable_arithmetic_proxy.h"
+#include "interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.h"
+#include "ui/view/draw/content_modifier.h"
+
 #include "core/animation/native_curve_helper.h"
+#include "core/components_ng/animation/animatable_arithmetic_proxy.h"
 
 namespace OHOS::Ace::NG {
 
 std::unordered_map<int32_t, std::shared_ptr<RSModifier>> g_ModifiersMap;
 std::mutex g_ModifiersMapLock;
+
+std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<Kit::Modifier>& modifier)
+{
+    auto kitModifier = AceType::DynamicCast<Kit::ContentModifier>(modifier);
+    CHECK_NULL_RETURN(kitModifier, nullptr);
+    return kitModifier->GetRSModifier();
+}
 
 std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier)
 {
@@ -117,6 +127,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyColor, LinearColor);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorColor, GradientArithmetic);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorFloat, LinearVector<float>);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorLinearVector, LinearVector<LinearColor>);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertySizeF, SizeF);
 
     if (AceType::InstanceOf<AnimatableArithmeticProperty>(property)) {
@@ -133,10 +144,8 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
         };
         castProp->SetUpCallbacks(getter, setter);
         if (castProp->GetUpdateCallback()) {
-            rsProp->SetUpdateCallback(
-                [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) {
-                    cb(value.GetObject());
-                });
+            rsProp->SetUpdateCallback([cb = castProp->GetUpdateCallback()](
+                                          const AnimatableArithmeticProxy& value) { cb(value.GetObject()); });
         }
         return rsProp;
     }
@@ -239,8 +248,8 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
 } // namespace
 
 template<>
-void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(const AnimationOption& option,
-    float value, float velocity, const FinishCallback& finishCallback)
+void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(
+    const AnimationOption& option, float value, float velocity, const FinishCallback& finishCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
     auto targetValue = std::make_shared<RSAnimatableProperty<float>>(value);

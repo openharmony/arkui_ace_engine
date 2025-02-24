@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_text_ffi.h"
 
@@ -66,6 +67,91 @@ CJ_EXPORT void FfiOHOSAceFrameworkSwiperControllerShowNext(int64_t selfId);
 CJ_EXPORT void FfiOHOSAceFrameworkSwiperControllerShowPrevious(int64_t selfId);
 CJ_EXPORT void FfiOHOSAceFrameworkSwiperControllerFinishAnimation(int64_t selfId);
 CJ_EXPORT void FfiOHOSAceFrameworkSwiperControllerFinishAnimationWithCallback(int64_t selfId, void (*callback)());
+
+struct CJDotIndicator {
+    double itemWidth;
+    int32_t itemWidthUnit;
+    double itemHeight;
+    int32_t itemHeightUnit;
+    double selectedItemWidth;
+    int32_t selectedItemWidthUnit;
+    double selectedItemHeight;
+    int32_t selectedItemHeightUnit;
+    bool mask;
+    uint32_t color;
+    uint32_t selectedColor;
+    uint32_t maxDisplayCount;
+    CJIndicator indicator;
+};
+
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetIndicatorWithDot(CJDotIndicator value);
+
+struct CJDigitIndicator {
+    uint32_t fontColor;
+    uint32_t selectedColor;
+    double digitFontSize;
+    int32_t digitFontSizeUnit;
+    const char* digitFontWeight;
+    double selectedDigitFontSize;
+    int32_t selectedDigitFontSizeUnit;
+    const char* selectedDigitFontWeight;
+    CJIndicator indicator;
+};
+
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetIndicatorWithDit(CJDigitIndicator value);
+
+struct CJSwiperAutoFill {
+    double minSize;
+    int32_t minSizeUnit;
+};
+
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetDisplayCountWithObj(CJSwiperAutoFill value, bool swipeByGroup);
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetDisplayCountByGroup(int32_t count, bool swipeByGroup);
+
+struct CJArrowStyle {
+    bool showBackground;
+    bool isSidebarMiddle;
+    double backgroundSize;
+    int32_t backgroundSizeUnit;
+    uint32_t backgroundColor;
+    double arrowSize;
+    int32_t arrowSizeUnit;
+    uint32_t arrowColor;
+};
+
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetDisplayArrowWithBool(bool value, bool isHoverShow);
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetDisplayArrowWithObj(CJArrowStyle value, bool isHoverShow);
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperNextMargin(double value, int32_t unit, bool ignoreBlank);
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperPrevMargin(double value, int32_t unit, bool ignoreBlank);
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperNestedScroll(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperIndicatorInteractive(bool value);
+
+struct CJSwiperAnimationEvent {
+    double currentOffset;
+    double targetOffset;
+    double velocity;
+};
+
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperOnAnimationStart(
+    void (*callback)(int32_t index, int32_t targetIndex, CJSwiperAnimationEvent event));
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperOnAnimationEnd(void (*callback)(int32_t index, CJSwiperAnimationEvent event));
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperOnGestureSwipe(void (*callback)(int32_t index, CJSwiperAnimationEvent event));
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperOnContentDidScroll(
+    void (*callback)(int32_t selectedIndex, int32_t index, float position, float mainAxisLength));
+
+struct CJSwiperContentTransitionProxy {
+    int32_t selectedIndex;
+    int32_t index;
+    float position;
+    float mainAxisLength;
+    void* proxy;
+    void (*finishTransition)(void* proxy);
+};
+
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperCustomContentTransition(
+    int32_t timeout, void (*callback)(CJSwiperContentTransitionProxy proxy));
+
+CJ_EXPORT void FfiOHOSAceFrameworkSwiperControllerChangeIndex(int32_t index, bool useAnimation, int64_t id);
 }
 
 #endif

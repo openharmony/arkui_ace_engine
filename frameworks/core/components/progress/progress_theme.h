@@ -116,8 +116,8 @@ public:
                 pattern->GetAttr<Color>("ring_progress_bg_color", Color::GRAY);
             theme->loadingFocusedColor_ =
                 pattern->GetAttr<Color>("loading_progress_focused_color", theme->loadingColor_);
-            theme->capsuleBgFocusedColor_ =
-                pattern->GetAttr<Color>("capsule_progress_bg_focused_color", theme->capsuleBgColor_);
+            theme->capsuleBgFocusedColor_ = pattern->GetAttr<Color>("capsule_progress_bg_focused_color",
+                theme->capsuleBgColor_).BlendOpacity(pattern->GetAttr<double>("capsule_progress_bg_alpha", 1.0));
             theme->capsuleTextFocusedColor_ =
                 pattern->GetAttr<Color>("capsule_progress_text_focused_color", theme->textColor_);
             theme->capsuleSelectFocusedColor_ =

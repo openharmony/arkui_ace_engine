@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,13 +21,8 @@
 namespace OHOS::Ace {
 class MockImageLoader : public ImageLoader {
 public:
-#ifndef USE_ROSEN_DRAWING
-    MOCK_METHOD(sk_sp<SkData>, LoadImageData,
-        (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
-#else
     MOCK_METHOD(std::shared_ptr<RSData>, LoadImageData,
         (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
-#endif
     MOCK_METHOD(RefPtr<NG::ImageData>, LoadDecodedImageData,
         (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
 };

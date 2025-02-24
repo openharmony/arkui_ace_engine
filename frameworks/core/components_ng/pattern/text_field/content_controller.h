@@ -49,7 +49,7 @@ public:
 
     std::string GetTextValue()
     {
-        return UtfUtils::Str16ToStr8(content_);
+        return UtfUtils::Str16DebugToStr8(content_);
     }
 
     const std::u16string& GetTextUtf16Value()
@@ -75,6 +75,11 @@ public:
     }
 
     void SetTextValueOnly(std::u16string&& value)
+    {
+        content_ = value;
+    }
+
+    void SetTextValueOnly(const std::u16string& value)
     {
         content_ = value;
     }

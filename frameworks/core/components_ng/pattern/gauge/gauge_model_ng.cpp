@@ -193,7 +193,7 @@ void GaugeModelNG::SetGaugeStrokeWidth(FrameNode* frameNode, const std::optional
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, StrokeWidth, *strokeWidth, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
-        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GaugePaintProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GaugeLayoutProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -208,7 +208,7 @@ void GaugeModelNG::SetDescription(FrameNode* frameNode, const RefPtr<AceType>& c
 
 void GaugeModelNG::SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue, frameNode);
 }
 
 void GaugeModelNG::SetShadowOptions(FrameNode* frameNode, const GaugeShadowOptions& shadowOptions)

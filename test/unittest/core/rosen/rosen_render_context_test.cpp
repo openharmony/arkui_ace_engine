@@ -287,21 +287,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: RosenRenderContextTest016
- * @tc.desc: OnForegroundColorStrategyUpdate().
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTest016, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    ForegroundColorStrategy value = ForegroundColorStrategy::NONE;
-    rosenRenderContext->OnForegroundColorStrategyUpdate(value);
-    value = ForegroundColorStrategy::INVERT;
-    rosenRenderContext->OnForegroundColorStrategyUpdate(value);
-}
-
-/**
  * @tc.name: RosenRenderContextTest017
  * @tc.desc: OnBackgroundImageUpdate().
  * @tc.type: FUNC
@@ -327,35 +312,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest017, TestSize.Level1)
     rosenRenderContext->OnBackgroundImageUpdate(src);
     EXPECT_TRUE(rosenRenderContext->bgImage_ == nullptr);
     EXPECT_TRUE(rosenRenderContext->bgLoadingCtx_ != nullptr);
-}
-
-/**
- * @tc.name: RosenRenderContextTest018
- * @tc.desc: OnBackgroundImageUpdate()/OnPixelStretchEffectUpdate()
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTest018, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    BlurStyleOption bgBlurStyleObj;
-    std::optional<BlurStyleOption> bgBlurStyle = std::make_optional(bgBlurStyleObj);
-    rosenRenderContext->UpdateBackBlurStyle(bgBlurStyle);
-
-    // option.IsPercentOption() false
-    PixStretchEffectOption pixStretchEffectOption;
-    pixStretchEffectOption.left = Dimension(1.0);
-    pixStretchEffectOption.right = Dimension(1.0);
-    pixStretchEffectOption.top = Dimension(1.0);
-    pixStretchEffectOption.bottom = Dimension(1.0);
-    rosenRenderContext->OnPixelStretchEffectUpdate(pixStretchEffectOption);
-
-    // option.IsPercentOption() true
-    pixStretchEffectOption.left = Dimension(1.0, DimensionUnit::PERCENT);
-    pixStretchEffectOption.right = Dimension(1.0, DimensionUnit::PERCENT);
-    pixStretchEffectOption.top = Dimension(1.0, DimensionUnit::PERCENT);
-    pixStretchEffectOption.bottom = Dimension(1.0, DimensionUnit::PERCENT);
-    rosenRenderContext->OnPixelStretchEffectUpdate(pixStretchEffectOption);
 }
 
 /**
@@ -571,9 +527,9 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest024, TestSize.Level1)
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     // constrcuct params
     RefPtr<PixelMap> ret = rosenRenderContext->GetThumbnailPixelMap(false);
-    EXPECT_EQ(ret.GetRawPtr() == nullptr, true);
+    EXPECT_EQ(Referenced::RawPtr(ret) == nullptr, true);
     RefPtr<PixelMap> ret2 = rosenRenderContext->GetThumbnailPixelMap(true);
-    EXPECT_EQ(ret.GetRawPtr() == nullptr, true);
+    EXPECT_EQ(Referenced::RawPtr(ret) == nullptr, true);
 }
 
 /**
@@ -843,14 +799,14 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest034, TestSize.Level1)
     bgBlurStyle2->isValidColor = true;
     EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(bgBlurStyle2));
     bgBlurStyle2->isWindowFocused = false;
-    EXPECT_FALSE(rosenRenderContext->UpdateBlurBackgroundColor(bgBlurStyle2));
+    EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(bgBlurStyle2));
 
     std::optional<EffectOption> efffectOption = std::make_optional(EffectOption());
     EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
     efffectOption->isValidColor = true;
     EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
     efffectOption->isWindowFocused = false;
-    EXPECT_FALSE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
+    EXPECT_TRUE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
 }
 
 /**
@@ -898,21 +854,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest035, TestSize.Level1)
     EXPECT_EQ(rectAfterUpdate.GetTop(), 2.0f);
     EXPECT_EQ(rectAfterUpdate.GetRight(), 18.0f);
     EXPECT_EQ(rectAfterUpdate.GetBottom(), 18.0f);
-}
-
-/**
- * @tc.name: RosenRenderContextTest036
- * @tc.desc: UpdateWindowBlur.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTest036, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    if (!rosenRenderContext) {
-        return;
-    }
-    rosenRenderContext->UpdateWindowBlur();
 }
 
 /**
@@ -981,7 +922,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest039, TestSize.Level1)
     auto useEffectTypeVal = rosenRenderContext->GetUseEffectType();
     EXPECT_EQ(useEffectTypeVal, windowEffect);
     EXPECT_TRUE(pipeline->IsWindowFocused());
-    EXPECT_FALSE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
+    EXPECT_TRUE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
 
     rosenRenderContext->UpdateUseEffectType(EffectType::DEFAULT);
     EXPECT_FALSE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
@@ -1167,4 +1108,22 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest045, TestSize.Level1)
     EXPECT_EQ(isOffScreen, isOffScreenVal);
 }
 
+/**
+ * @tc.name: RosenRenderContextTest046
+ * @tc.desc: Test SetRenderFit Func and GetRenderFit Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest046, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->SetRenderFit(RenderFit::CENTER);
+    auto renderFit = rosenRenderContext->GetRenderFit();
+    ASSERT_NE(renderFit, std::nullopt);
+    EXPECT_EQ(renderFit.value(), RenderFit::CENTER);
+}
 } // namespace OHOS::Ace::NG

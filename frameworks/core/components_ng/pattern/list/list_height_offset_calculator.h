@@ -19,6 +19,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -29,8 +30,9 @@ constexpr float DEFAULT_ITEM_HEIGHT = 64.f;
 }
 class ListHeightOffsetCalculator {
 public:
-    ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition, float space,
-        int32_t lanes, Axis axis) : axis_(axis), spaceWidth_(space), lanes_(lanes), itemPosition_(itemPosition)
+    ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition, float space, int32_t lanes,
+        Axis axis, int32_t itemStartIndex)
+        : axis_(axis), spaceWidth_(space), lanes_(lanes), itemPosition_(itemPosition), itemStartIndex_(itemStartIndex)
     {
         if (!itemPosition.empty()) {
             targetPos_ = { itemPosition.begin()->second.startPos, itemPosition.begin()->second.endPos };
@@ -99,19 +101,26 @@ public:
         }
     }
 
-    void CalculateUINode(RefPtr<UINode> node)
+    void CalculateUINode(RefPtr<UINode> node, bool checkStart)
     {
         CHECK_NULL_VOID(node);
         auto children = node->GetChildren();
+        int32_t index = 0;
         for (const auto& child : children) {
+            if (checkStart && index++ < itemStartIndex_) {  // ignore start header if exist
+                continue;
+            }
             if (AceType::InstanceOf<FrameNode>(child)) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
                 CalculateFrameNode(frameNode);
-            } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
-                AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
+            } else if (AceType::InstanceOf<LazyForEachNode>(child)) {
+                CalculateLazyForEachNode(child);
+            } else if (AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
+                CalculateLazyForEachNode(child);
+            } else if (AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
                 CalculateLazyForEachNode(child);
             } else {
-                CalculateUINode(child);
+                CalculateUINode(child, false);
             }
         }
     }
@@ -210,7 +219,7 @@ public:
 
     bool GetEstimateHeightAndOffset(RefPtr<UINode> node)
     {
-        CalculateUINode(node);
+        CalculateUINode(node, true);
         if (currLane_ > 0) {
             estimateHeight_ += currRowHeight_;
             currLane_ = 0;
@@ -274,6 +283,7 @@ private:
     float currRowHeight_ = 0.0f;
 
     const ListLayoutAlgorithm::PositionMap& itemPosition_;
+    int32_t itemStartIndex_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif

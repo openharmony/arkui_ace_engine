@@ -63,6 +63,7 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+        CHECK_NULL_RETURN(paintProperty, nullptr);
         paintProperty->SetHost(host);
         if (!paintMethod_) {
             paintMethod_ = MakeRefPtr<CheckBoxPaintMethod>();
@@ -244,6 +245,8 @@ public:
         checkboxSettingData_ = checkboxSettingData;
     }
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -326,7 +329,6 @@ private:
 
     RefPtr<CheckBoxPaintMethod> paintMethod_;
     WeakPtr<GroupManager> groupManager_;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };
 } // namespace OHOS::Ace::NG

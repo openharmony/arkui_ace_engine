@@ -71,6 +71,30 @@ public:
                blue_ == color.GetBlue();
     }
 
+    LinearColor& operator+=(const LinearColor& color) {
+        alpha_ = alpha_ + color.GetAlpha();
+        red_ = red_ + color.GetRed();
+        green_ = green_ + color.GetGreen();
+        blue_ = blue_ + color.GetBlue();
+        return *this;
+    }
+
+    LinearColor& operator*=(float scale) {
+        alpha_ = alpha_ * scale;
+        red_ = red_ * scale;
+        green_ = green_ * scale;
+        blue_ = blue_ * scale;
+        return *this;
+    }
+
+    LinearColor& operator-=(const LinearColor& color) {
+        alpha_ = alpha_ - color.GetAlpha();
+        red_ = red_ - color.GetRed();
+        green_ = green_ - color.GetGreen();
+        blue_ = blue_ - color.GetBlue();
+        return *this;
+    }
+
     int16_t GetRed() const
     {
         return red_;
@@ -93,10 +117,10 @@ public:
 
     uint32_t GetValue() const
     {
-        return (static_cast<uint32_t>(std::clamp<int16_t>(blue_, 0, UINT8_MAX))) |
-               (static_cast<uint32_t>((std::clamp<int16_t>(green_, 0, UINT8_MAX)) << 8)) |
-               (static_cast<uint32_t>((std::clamp<int16_t>(red_, 0, UINT8_MAX)) << 16)) |
-               (static_cast<uint32_t>((std::clamp<int16_t>(alpha_, 0, UINT8_MAX)) << 24));
+        return (static_cast<uint32_t>(std::clamp<uint16_t>(blue_, 0, UINT8_MAX))) |
+               (static_cast<uint32_t>((std::clamp<uint16_t>(green_, 0, UINT8_MAX)) << 8)) |
+               (static_cast<uint32_t>((std::clamp<uint16_t>(red_, 0, UINT8_MAX)) << 16)) |
+               (static_cast<uint32_t>((std::clamp<uint16_t>(alpha_, 0, UINT8_MAX)) << 24));
     }
 
     Color BlendOpacity(double opacityRatio) const

@@ -51,6 +51,9 @@ public:
         const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight, int32_t popupId);
     static void UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const RefPtr<PopupParam>& param);
+    static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
+    static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
+    static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
 private:
     static bool IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow);

@@ -93,6 +93,9 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
     
+    if (layoutProperty->GetBadgeCount().has_value()) {
+        textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+    }
     textLayoutProperty->UpdateFontSize(Dimension(fontSizeInit, DimensionUnit::VP));
     auto circleSize = std::make_optional(Dimension(badgeSizeInit, DimensionUnit::VP));
     auto badgeCircleDiameter = Dimension(badgeSizeInit, DimensionUnit::VP).ConvertToPx();
@@ -311,10 +314,6 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     textGeometryNode->SetFrameSize(textFrameSize);
     textWrapper->Layout();
-
-    if (layoutProperty->GetBadgeCount().has_value()) {
-        textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
-    }
 
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);

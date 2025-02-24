@@ -51,7 +51,8 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
+constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
+constexpr int32_t RESERVED_DEVICEID2 = 0xAAAAAAFE;
 constexpr int32_t BUFFER_SIZE = 100;
 constexpr int32_t WIDTH_VALUE = 10.0;
 constexpr int32_t HEIGHT_VALUE = 20.0;
@@ -588,9 +589,12 @@ HWTEST_F(WebPatternMethodTestNg, OnCursorChange_001, TestSize.Level1)
     OHOS::NWeb::CursorType type = OHOS::NWeb::CursorType::CT_NONE;
     auto info = std::make_shared<NWebCursorInfoTestImpl>();
     ASSERT_NE(info, nullptr);
-    webPattern->mouseEventDeviceId_ = RESERVED_DEVICEID;
+    webPattern->mouseEventDeviceId_ = RESERVED_DEVICEID1;
     webPattern->isHoverExit_ = true;
     bool result = webPattern->OnCursorChange(type, info);
+    EXPECT_FALSE(result);
+    webPattern->mouseEventDeviceId_ = RESERVED_DEVICEID2;
+    result = webPattern->OnCursorChange(type, info);
     EXPECT_FALSE(result);
 #endif
 }

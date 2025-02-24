@@ -18,6 +18,7 @@
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
+#include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -415,9 +416,11 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
     taskExecutor_->PostTask(
         [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_)), weak = WeakClaim(this)]() {
             auto clip = weak.Upgrade();
+            CHECK_NULL_VOID(clip);
             auto taskExecutor = weakExecutor.Upgrade();
             CHECK_NULL_VOID(taskExecutor);
             if (!OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData()) {
+                EventReport::ReportClipboardFailEvent("SystemKeyboardData is not exist from MiscServices");
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "SystemKeyboardData is not exist from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed",
@@ -540,6 +543,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
     taskExecutor_->PostTask(
         [textCallback, pixelMapCallback, urlCallback, weakExecutor = WeakClaim(RawPtr(taskExecutor_))]() {
             auto taskExecutor = weakExecutor.Upgrade();
+            CHECK_NULL_VOID(taskExecutor);
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
             CHECK_NULL_VOID(has);
             OHOS::MiscServices::PasteData pasteData;

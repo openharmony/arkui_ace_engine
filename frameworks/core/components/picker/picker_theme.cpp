@@ -92,7 +92,9 @@ void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<P
     theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, theme->focusColor_);
     theme->selectedOptionStyle_.SetTextColor(
         pattern->GetAttr<Color>("selected_text_color", theme->selectedOptionStyle_.GetTextColor()));
-    theme->focusOptionStyle_.SetTextColor(theme->selectedOptionStyle_.GetTextColor());
+    if (!theme->IsCircleDial()) {
+        theme->focusOptionStyle_.SetTextColor(theme->selectedOptionStyle_.GetTextColor());
+    }
     theme->normalOptionStyle_.SetTextColor(
         pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->normalOptionStyle_.GetTextColor()));
     theme->disappearOptionStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());

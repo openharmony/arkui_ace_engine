@@ -18,7 +18,8 @@
 
 
 namespace OHOS::Ace::NG {
-std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::GetInstance()
+std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::GetInstance(
+    const std::string& uri, const std::string& effectId)
 {
     return nullptr;
 }

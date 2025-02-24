@@ -125,6 +125,9 @@ public:
     {
         return "";
     }
+
+    virtual void TransformWithPerspectiveClip(const TestingMatrix& matrix, TestingPath* dst,
+        bool applyPerspectiveClip) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PATH_H

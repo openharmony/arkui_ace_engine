@@ -53,6 +53,7 @@ const char ROOT_ETS_TAG[] = "root";
 const char STAGE_ETS_TAG[] = "stage";
 // overlay view
 const char OVERLAY_ETS_TAG[] = "overlay";
+const char ORDER_OVERLAY_ETS_TAG[] = "OrderOverlay";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)
@@ -113,6 +114,10 @@ const char SWIPER_LEFT_ARROW_ETS_TAG[] = "LeftArrow";
 const char SWIPER_RIGHT_ARROW_ETS_TAG[] = "RightArrow";
 const char SWIPER_LEFT_CAPTURE_ETS_TAG[] = "SwiperLeftCapture";
 const char SWIPER_RIGHT_CAPTURE_ETS_TAG[] = "SwiperRightCapture";
+
+// indicator
+const char INDICATOR_COMPONENT_TAG[] = "IndicatorComponentComponent";
+const char INDICATOR_ETS_TAG[] = "IndicatorComponent";
 
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
@@ -342,6 +347,12 @@ const char FORM_ETS_TAG[] = "FormComponent";
 // formLink
 const char FORM_LINK_TAG[] = "FormLink";
 const char FORM_LINK_ETS_TAG[] = "FormLink";
+
+// formButton
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+const char FORM_BUTTON_TAG[] = "FormButton";
+const char FORM_BUTTON_ETS_TAG[] = "FormButton";
+#endif
 
 // PluginComponent
 const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";
@@ -631,4 +642,11 @@ const char ARC_LIST_ITEM_ETS_TAG[] = "ArcListItem";
 // ArcScrollBar
 const char ARC_SCROLL_BAR_COMPONENT_TAG[] = "ArcScrollBarComponent";
 const char ARC_SCROLL_BAR_ETS_TAG[] = "ArcScrollBar";
+
+// ArcAlphabetIndexer
+const char ARC_INDEXER_COMPONENT_TAG[] = "ArcIndexerComponent";
+const char ARC_INDEXER_ETS_TAG[] = "ArcAlphabetIndexer";
+
+// Magnifier
+const char MAGNIFIER_TAG[] = "Magnifier";
 } // namespace OHOS::Ace::V2

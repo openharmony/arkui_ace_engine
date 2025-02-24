@@ -144,7 +144,7 @@ float CounterDecorator::MeasureTextNodeHeight()
     auto counterGeometryNode = textNode->GetGeometryNode();
     CHECK_NULL_RETURN(counterGeometryNode, 0.0);
 
-    //For efficiency: keep content same, make full use of rs cache.
+    // For efficiency: keep content same, make full use of rs cache.
     auto textContent = contentController->GetTextValue();
     auto textLength = static_cast<uint32_t>(textContent.length());
     auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLength().value());
@@ -251,8 +251,6 @@ void CounterDecorator::UpdateTextNodeAndMeasure(
     CHECK_NULL_VOID(textNode);
     auto pipeline = decoratedNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
     auto textFieldPattern = decoratedNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -264,6 +262,14 @@ void CounterDecorator::UpdateTextNodeAndMeasure(
         UpdateCounterContentAndStyle(textLength, maxLength, true);
     } else {
         UpdateCounterContentAndStyle(textLength, maxLength, false);
+    }
+    // TextInput's counter is outside of it,
+    // hence need to check whether counter's width is longer than TextInput's constraint
+    if (!textFieldPattern->IsTextArea() && contentConstraint.selfIdealSize.Width().has_value()) {
+        textNode->Measure(LayoutConstraintF());
+        if (GetContentWidth() > contentConstraint.selfIdealSize.Width().value()) {
+            return;
+        }
     }
     textNode->Measure(contentConstraint);
 }
@@ -362,6 +368,15 @@ float CounterDecorator::GetBoundHeight() const
     CHECK_NULL_RETURN(theme, 0.0);
     return theme->GetCounterTextTopMargin().ConvertToPx() + theme->GetCounterTextBottomMargin().ConvertToPx() +
         GetDecoratorHeight();
+}
+
+bool CounterDecorator::HasContent() const
+{
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_RETURN(textNode, false);
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    return textLayoutProperty->GetContent().has_value() && !textLayoutProperty->GetContent().value().empty();
 }
 
 void ErrorDecorator::UpdateTextFieldMargin()

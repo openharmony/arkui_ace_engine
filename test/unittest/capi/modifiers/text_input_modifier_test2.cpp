@@ -83,7 +83,7 @@ HWTEST_F(TextInputModifierTest2, setOnChangeTest, TestSize.Level1)
     auto onChange = Converter::ArkValue<EditableTextOnChangeCallback>(arkCallback, frameNode->GetId());
 
     modifier_->setOnChange(node_, &onChange);
-    textFieldEventHub->FireOnChange(expectedText, expectedPreviewText);
+    textFieldEventHub->FireOnChange({expectedText, expectedPreviewText});
     EXPECT_EQ(resultText, expectedText);
     EXPECT_EQ(resultPreviewText, expectedPreviewText.value);
     EXPECT_EQ(resultOffset, expectedPreviewText.offset);

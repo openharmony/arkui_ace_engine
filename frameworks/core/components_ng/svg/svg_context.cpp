@@ -16,6 +16,7 @@
 #include "core/components_ng/svg/svg_context.h"
 
 #include <sys/time.h>
+#include "core/components_ng/svg/base/svg_length_scale_rule.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
@@ -134,6 +135,13 @@ void SvgContext::AnimateFlush()
     }
 }
 
+Rect GetBoundingRect(RefPtr<SvgNode>& boxNode, const SvgLengthScaleRule& boxMeasureRule)
+{
+    CHECK_NULL_RETURN(boxNode, Rect());
+    auto boxRect = boxNode->AsPath(boxMeasureRule).GetBounds();
+    return Rect(boxRect.GetLeft(), boxRect.GetTop(), boxRect.GetWidth(), boxRect.GetHeight());
+}
+
 void SvgContext::SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx)
 {
     funcNormalizeToPx_ = funcNormalizeToPx;
@@ -162,7 +170,7 @@ std::string SvgContext::GetCurrentTimeString()
 #ifdef __OHOS__
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    struct tm ptm = { 0 };
+    struct tm ptm;
     localtime_noenv_r(&tv.tv_sec, &ptm);
     char timeStr[TIME_LENGTH] = { 0 };
     size_t charsWritten = strftime(timeStr, TIME_LENGTH, "%Y-%m-%d %H:%M:%S:", &ptm);

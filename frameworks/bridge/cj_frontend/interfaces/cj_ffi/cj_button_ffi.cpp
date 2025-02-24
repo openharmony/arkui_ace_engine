@@ -16,7 +16,12 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_button_ffi.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/edge.h"
 #include "core/components_ng/pattern/button/button_model.h"
+#include "core/components_ng/pattern/button/button_request_data.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -24,7 +29,12 @@ using namespace OHOS::Ace::Framework;
 namespace {
 const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle::DASHED, BorderStyle::DOTTED };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<ButtonType> BUTTON_TYPES = { ButtonType::NORMAL, ButtonType::CAPSULE, ButtonType::CIRCLE };
+const std::vector<ButtonType> BUTTON_TYPES = { ButtonType::NORMAL, ButtonType::CAPSULE, ButtonType::CIRCLE,
+    ButtonType::ROUNDED_RECTANGLE };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE,
+    TextOverflow::MARQUEE };
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 } // namespace
 
 extern "C" {
@@ -34,6 +44,39 @@ void FfiOHOSAceFrameworkButtonCreateWithChild()
     params.parseSuccess = false;
     params.optionSetFirst = false;
     ButtonModel::GetInstance()->CreateWithChild(params);
+    ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
+}
+
+void FfiOHOSAceFrameworkButtonCreateWithChildAndOptions(ButtonOptions buttonOptions)
+{
+    CreateWithPara params;
+    params.parseSuccess = true;
+    params.optionSetFirst = true;
+    params.type = static_cast<ButtonType>(buttonOptions.shape);
+    params.stateEffect = buttonOptions.stateEffect;
+    params.buttonStyleMode = static_cast<ButtonStyleMode>(buttonOptions.buttonStyle);
+    params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
+    params.buttonRole = static_cast<ButtonRole>(buttonOptions.role);
+    ButtonModel::GetInstance()->CreateWithChild(params);
+    ButtonModel::GetInstance()->SetCreateWithLabel(false);
+    ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
+}
+
+void FfiOHOSAceFrameworkButtonCreateWithButtonOptions(ButtonOptions buttonOptions)
+{
+    CreateWithPara params;
+    params.parseSuccess = true;
+    params.optionSetFirst = true;
+    params.label = "";
+    params.type = static_cast<ButtonType>(buttonOptions.shape);
+    params.stateEffect = buttonOptions.stateEffect;
+    params.buttonStyleMode = static_cast<ButtonStyleMode>(buttonOptions.buttonStyle);
+    params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
+    params.buttonRole = static_cast<ButtonRole>(buttonOptions.role);
+    std::list<RefPtr<Component>> children;
+    ButtonModel::GetInstance()->CreateWithLabel(params, children);
+    ButtonModel::GetInstance()->Create(params, children);
+    ButtonModel::GetInstance()->SetCreateWithLabel(true);
     ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
 }
 
@@ -57,6 +100,29 @@ void FfiOHOSAceFrameworkButtonCreateWithLabel(const char* label)
     LOGI("done create with child");
     ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
     LOGI("done set hover effect");
+}
+
+void FfiOHOSAceFrameworkButtonCreateWithLabelAndOptions(const char* label, ButtonOptions buttonOptions)
+{
+    CreateWithPara params;
+    params.label = label;
+    params.parseSuccess = true;
+    params.optionSetFirst = true;
+    params.type = static_cast<ButtonType>(buttonOptions.shape);
+    params.stateEffect = buttonOptions.stateEffect;
+    params.buttonStyleMode = static_cast<ButtonStyleMode>(buttonOptions.buttonStyle);
+    params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
+    params.buttonRole = static_cast<ButtonRole>(buttonOptions.role);
+    auto model = ButtonModel::GetInstance();
+    if (!model) {
+        LOGE("ButtonModel::GetInstance returns null");
+        return;
+    }
+    std::list<RefPtr<Component>> children;
+    model->CreateWithLabel(params, children);
+    model->Create(params, children);
+    model->SetCreateWithLabel(true);
+    ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
 }
 
 void FfiOHOSAceFrameworkButtonSetFontSize(double fontSize, int32_t unit)
@@ -154,7 +220,12 @@ void FfiOHOSAceFrameworkButtonSetPadding(double top, int32_t topUnit, double rig
     Dimension rightValue(right, static_cast<DimensionUnit>(rightUnit));
     Dimension bottomValue(bottom, static_cast<DimensionUnit>(bottomUnit));
     Dimension leftValue(left, static_cast<DimensionUnit>(leftUnit));
-    ViewAbstractModel::GetInstance()->SetPaddings(topValue, rightValue, bottomValue, leftValue);
+    NG::PaddingProperty paddings;
+    paddings.top = NG::CalcLength(topValue);
+    paddings.right = NG::CalcLength(rightValue);
+    paddings.bottom = NG::CalcLength(bottomValue);
+    paddings.left = NG::CalcLength(leftValue);
+    ButtonModel::GetInstance()->Padding(paddings, Edge());
 }
 
 void FfiOHOSAceFrameworkButtonSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
@@ -165,5 +236,44 @@ void FfiOHOSAceFrameworkButtonSetSize(double width, int32_t widthUnit, double he
 void FfiOHOSAceFrameworkButtonSetStateEffect(bool stateEffect)
 {
     ButtonModel::GetInstance()->SetStateEffect(stateEffect);
+}
+
+void FfiOHOSAceFrameworkButtonSetRole(int32_t value)
+{
+    ButtonModel::GetInstance()->SetRole(static_cast<ButtonRole>(value));
+}
+
+void FfiOHOSAceFrameworkButtonSetControlSize(int32_t value)
+{
+    ButtonModel::GetInstance()->SetControlSize(static_cast<ControlSize>(value));
+}
+
+void FfiOHOSAceFrameworkButtonSetButtonStyle(int32_t value)
+{
+    ButtonModel::GetInstance()->SetButtonStyle(static_cast<ButtonStyleMode>(value));
+}
+
+void FfiOHOSAceFrameworkButtonSetLabelStyle(CJLabelStyle labelStyle)
+{
+    ButtonParameters buttonParameters;
+    buttonParameters.textOverflow = TEXT_OVERFLOWS[labelStyle.overflow];
+    buttonParameters.maxLines = labelStyle.maxLines;
+    if (labelStyle.minFontFlag) {
+        Dimension value(labelStyle.minFontSize, static_cast<DimensionUnit>(labelStyle.minFontSize_unit));
+        buttonParameters.minFontSize = value;
+    }
+    if (labelStyle.maxFontFlag) {
+        Dimension value(labelStyle.maxFontSize, static_cast<DimensionUnit>(labelStyle.maxFontSize_unit));
+        buttonParameters.maxFontSize = value;
+    }
+    buttonParameters.heightAdaptivePolicy = HEIGHT_ADAPTIVE_POLICY[labelStyle.heightAdaptivePolicy];
+    Dimension thisFontSize(labelStyle.fontSize, static_cast<DimensionUnit>(labelStyle.fontSize_unit));
+    buttonParameters.fontSize = thisFontSize;
+    buttonParameters.fontWeight = ConvertStrToFontWeight(labelStyle.fontWeight);
+    std::vector<std::string> fontFamilies;
+    fontFamilies = ConvertStrToFontFamilies(labelStyle.fontFamiliy);
+    buttonParameters.fontFamily = fontFamilies;
+    buttonParameters.fontStyle = FONT_STYLES[labelStyle.fontStyle];
+    ButtonModel::GetInstance()->SetLabelStyle(buttonParameters);
 }
 }

@@ -403,6 +403,7 @@ export struct ToolBarV2 {
     })
     .opacity(this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE ? 1 : 0.4)
     .enabled(this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE)
+    .accessibilityGroup(true)
     .accessibilityText(this.toStringFormat(this.toolBarList[index]?.accessibilityText) ??
     this.toStringFormat(this.toolBarList[index]?.content?.text))
     .accessibilityDescription(this.toStringFormat(this.toolBarList[index]?.accessibilityDescription) ?? '')
@@ -437,7 +438,7 @@ export struct ToolBarV2 {
 
   @Builder
   itemCardDialogBuilder(item: ToolBarV2Item, index: number): void {
-    if (item.content) {
+    if (item.content && item.content.text) {
       Column() {
         if (item.symbol) {
           SymbolGlyph()

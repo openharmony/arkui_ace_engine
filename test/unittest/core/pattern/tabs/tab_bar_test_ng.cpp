@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,23 @@
  */
 
 #include "tabs_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 class TabBarTestNg : public TabsTestNg {
 public:
+    RefPtr<RenderContext> GetBarItemRenderContext(int32_t index)
+    {
+        auto columnNode = GetChildFrameNode(tabBarNode_, index);
+        auto columnNodeRenderContext = columnNode->GetRenderContext();
+        return columnNodeRenderContext;
+    }
 };
 
 /**
@@ -41,7 +47,6 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     tabBarPattern_->UpdateSubTabBoard(0);
-    EXPECT_EQ(swiperNode_->GetTag(), V2::SWIPER_ETS_TAG);
     pipeline->fontScale_ = BIG_FONT_SIZE_SCALE;
     tabBarPattern_->UpdateSubTabBoard(0);
 
@@ -77,6 +82,41 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     tabBarPattern_->UpdateSubTabBoard(tabBarPattern_->indicator_);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
     pipeline->fontScale_ = 1.f;
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateSubTabBoard002
+ * @tc.desc: test UpdateSubTabBoard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        TabContentModelNG tabContentModel = CreateTabContent();
+        tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+        tabContentModel.SetTabBar("text", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+        tabContentModel.SetSelectedMode(SelectedMode::BOARD);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps1: Test Default selected item
+     * @tc.expected: The selected item would show bgColor
+     */
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::GRAY));
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::BLACK.BlendOpacity(0.0f)));
+
+    /**
+     * @tc.steps2: Change selected item
+     * @tc.expected: Would change bgColor
+     */
+    ChangeIndex(1);
+    EXPECT_TRUE(CurrentIndex(1));
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::BLACK.BlendOpacity(0.0f)));
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::GRAY));
 }
 
 /**
@@ -579,15 +619,6 @@ HWTEST_F(TabBarTestNg, TabBarPatternChangeMask001, TestSize.Level1)
      */
     auto tabBarGeometryNode = tabBarNode_->GetGeometryNode();
     auto tabBarOffset = tabBarGeometryNode->GetMarginFrameOffset();
-
-    auto maskNode1 = AceType::DynamicCast<FrameNode>(
-        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
-    auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
-
-    auto maskNode2 = AceType::DynamicCast<FrameNode>(
-        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
-    auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
-
     tabBarPattern_->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 1.0f, TEST_MASK_MIDDLE_RADIUS_RATIO, true);
     tabBarPattern_->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 0.99f, TEST_MASK_MIDDLE_RADIUS_RATIO, false);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
@@ -654,6 +685,7 @@ HWTEST_F(TabBarTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
     }
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -669,6 +701,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitClick001, TestSize.Level1)
 
     auto info = GestureEvent();
     tabBarPattern_->clickEvents_.begin()->second->callback_(info);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -692,6 +725,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange001, TestSize.Level1)
         tabBarPattern_->FocusIndexChange(index);
         tabBarPattern_->animationDuration_ = animation_test;
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -732,7 +766,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange003, TestSize.Level1)
         ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
     }
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->CanScroll());
 
     /**
@@ -764,6 +798,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternMaskAnimationFinish003, TestSize.Level1)
     int32_t selectedIndex = -1;
     bool isSelected = true;
     tabBarPattern_->MaskAnimationFinish(tabBarNode_, selectedIndex, isSelected);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -835,6 +870,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayPressAnimation002, TestSize.Level1)
         tabBarPattern_->PlayPressAnimation(index, pressColor, animationType);
         animationType = AnimationType::HOVER;
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -858,6 +894,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -950,10 +987,11 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable002, TestSize.Level1)
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->InitScrollable(gestureHub);
-        tabBarPattern_->swiperController_->tabBarFinishCallback_();
+        swiperController_->GetTabBarFinishCallback()();
         scrollableEvent->SetScrollable(nullptr);
         tabBarPattern_->scrollableEvent_ = scrollableEvent;
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1029,17 +1067,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
     float unselectedImageSize = 0.2f;
     OffsetF originalUnselectedMaskOffset(0.1f, 0.2f);
     int32_t unselectedIndex = 1;
-
-    auto maskNode1 = AceType::DynamicCast<FrameNode>(
-        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
-    auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
-
-    auto maskNode2 = AceType::DynamicCast<FrameNode>(
-        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
-    auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
-
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1110,6 +1140,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect002, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1345,7 +1376,7 @@ HWTEST_F(TabBarTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     tabContentFrameNode->OnDetachFromMainTree(true, AceType::RawPtr(pipeline));
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -1602,7 +1633,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternOnRestoreInfo001, TestSize.Level1)
     tabBarPattern_->SetAnimationDuration(1);
     pattern_->OnRestoreInfo(restoreInfo_);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicator().value_or(0), 0);
-    tabBarPattern_->swiperController_ = nullptr;
+    swiperController_ = nullptr;
     pattern_->OnRestoreInfo(restoreInfo_);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicator().value_or(0), 0);
     auto columnNode1 =
@@ -1638,6 +1669,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect003, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1814,6 +1846,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitLongPressEvent001, TestSize.Level1)
         tabBarPattern_->InitLongPressEvent(gestureHub);
         tabBarPattern_->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>([](GestureEvent&) {});
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1838,6 +1871,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitDragEvent001, TestSize.Level1)
         tabBarPattern_->InitDragEvent(gestureHub);
         tabBarPattern_->dragEvent_ = AceType::MakeRefPtr<DragEvent>(nullptr, [](GestureEvent&) {}, nullptr, nullptr);
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
@@ -52,6 +53,11 @@ void ScrollableModelNG::SetScrollBarColor(const std::string& value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, Color::FromString(value));
 }
 
+void ScrollableModelNG::ResetScrollBarColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+}
+
 void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     if (value) {
@@ -61,14 +67,14 @@ void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optio
     }
 }
 
-void ScrollableModelNG::ResetScrollBarColor(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
-}
-
 void ScrollableModelNG::SetScrollBarWidth(const std::string& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
+}
+
+void ScrollableModelNG::ResetScrollBarWidth(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -78,11 +84,6 @@ void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
     }
-}
-
-void ScrollableModelNG::ResetScrollBarWidth(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
 }
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
@@ -361,6 +362,17 @@ float ScrollableModelNG::GetFadingEdgeLength(FrameNode* frameNode)
     return paintProperty->GetFadingEdgeLength().value_or(DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE).Value();
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void ScrollableModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(sensitivity);
+}
+#endif
+
 void ScrollableModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
     CHECK_NULL_VOID(frameNode);
@@ -377,14 +389,26 @@ void ScrollableModelNG::SetFriction(FrameNode* frameNode, const std::optional<do
     pattern->SetFriction(value.value_or(invalidValue));
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN
-void ScrollableModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+void ScrollableModelNG::SetBackToTop(bool backToTop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    SetBackToTop(frameNode, backToTop);
+}
+
+void ScrollableModelNG::SetBackToTop(FrameNode* frameNode, bool backToTop)
+{
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetDigitalCrownSensitivity(sensitivity);
+    pattern->SetBackToTop(backToTop);
 }
-#endif
+
+bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetBackToTop();
+}
 } // namespace OHOS::Ace::NG

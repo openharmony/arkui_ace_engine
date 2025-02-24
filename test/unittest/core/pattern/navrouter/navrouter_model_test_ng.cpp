@@ -42,6 +42,17 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
+namespace {
+void CreateAndBindNavigationBarTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+}
+} // namespace
+
 class NavrouterModelTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -92,8 +103,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0017, TestSize.Level1)
     auto buttonNode = FrameNode::CreateFrameNode("buttonNode", 44, AceType::MakeRefPtr<ButtonPattern>());
     titleBarNode->backButton_ = buttonNode;
     ASSERT_NE(buttonNode->GetEventHub<EventHub>(), nullptr);
-    auto eventHub = AceType::MakeRefPtr<NavDestinationEventHub>();
-    navDestinationNode->eventHub_ = eventHub;
+    auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     auto onBack = []() { return true; };
     eventHub->onBackPressedEvent_ = onBack;
     auto layoutProperty = AceType::MakeRefPtr<NavigationLayoutProperty>();
@@ -348,7 +358,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
     auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto eventHub = backButton->GetEventHub<EventHub>();
     auto pattern = navigation->GetPattern<NavigationPattern>();
     /**
      * @tc.steps: step2. call navigation->SetBackButtonEvent.
@@ -357,7 +367,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
     navDestination->titleBarNode_ = destinationTitleBarNode;
     destinationTitleBarNode->backButton_ = backButton;
     backButton->eventHub_ = eventHub;
-    navDestination->eventHub_ = AceType::MakeRefPtr<NavDestinationEventHub>();
+    navDestination->GetEventHub<NavDestinationEventHub>();
     navDestination->contentNode_ = nullptr;
     navigation->SetBackButtonEvent(navDestination);
     pattern->navigationMode_ = NavigationMode::STACK;
@@ -1193,10 +1203,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0038, TestSize.Level1)
      * @tc.steps: step1. create BarItemNode.
      * @tc.expected: check whether the properties is correct.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    CreateAndBindNavigationBarTheme();
     auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
         V2::BAR_ITEM_ETS_TAG, 1, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     ASSERT_NE(barItemNode, nullptr);
@@ -1278,10 +1285,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0039, TestSize.Level1)
     /**
      * @tc.steps: step2. create mock theme manager.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    CreateAndBindNavigationBarTheme();
     /**
      * @tc.steps: step3. call algorithm->Measure then change isInToolbar_.
      */
@@ -1364,10 +1368,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0040, TestSize.Level1)
     /**
      * @tc.steps: step2. create mock theme manager.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    CreateAndBindNavigationBarTheme();
     /**
      * @tc.steps: step3. call algorithm->Layout then change isInToolbar_.
      */

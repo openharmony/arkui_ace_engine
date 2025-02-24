@@ -55,6 +55,10 @@ public:
     static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
         FrameNode* frameNode, const std::optional<float>& defaultSize);
     static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
+    static void RemoveHeader(FrameNode* frameNode);
+    static void RemoveFooter(FrameNode* frameNode);
+    static bool HasFooter(FrameNode* frameNode);
+    static bool HasHeader(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

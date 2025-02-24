@@ -70,7 +70,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     auto layoutProp = host->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);

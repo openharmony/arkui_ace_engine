@@ -308,88 +308,96 @@ void SetRadioOptions(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr gr
     }
     RadioModelNG::SetRadioOptions(frameNode, std::string(value), std::string(group), indicatorType);
 }
+
+void SetRadioOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        RadioModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        RadioModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetRadioOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetOnChange(frameNode, nullptr);
+}
+
 } // namespace
 
 namespace NodeModifier {
 const ArkUIRadioModifier* GetRadioModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIRadioModifier modifier = {
-        SetRadioChecked,
-        ResetRadioChecked,
-        SetRadioStyle,
-        ResetRadioStyle,
-        SetRadioWidth,
-        ResetRadioWidth,
-        SetRadioHeight,
-        ResetRadioHeight,
-        SetRadioSize,
-        ResetRadioSize,
-        SetRadioHoverEffect,
-        ResetRadioHoverEffect,
-        SetRadioPadding,
-        ResetRadioPadding,
-        SetRadioResponseRegion,
-        ResetRadioResponseRegion,
-        GetRadioChecked,
-        GetRadioStyle,
-        SetRadioValue,
-        ResetRadioValue,
-        GetSetRadioValue,
-        SetRadioGroup,
-        ResetRadioGroup,
-        GetRadioGroup,
-        SetRadioOptions,
+        .setRadioChecked = SetRadioChecked,
+        .resetRadioChecked = ResetRadioChecked,
+        .setRadioStyle = SetRadioStyle,
+        .resetRadioStyle = ResetRadioStyle,
+        .setRadioWidth = SetRadioWidth,
+        .resetRadioWidth = ResetRadioWidth,
+        .setRadioHeight = SetRadioHeight,
+        .resetRadioHeight = ResetRadioHeight,
+        .setRadioSize = SetRadioSize,
+        .resetRadioSize = ResetRadioSize,
+        .setRadioHoverEffect = SetRadioHoverEffect,
+        .resetRadioHoverEffect = ResetRadioHoverEffect,
+        .setRadioPadding = SetRadioPadding,
+        .resetRadioPadding = ResetRadioPadding,
+        .setRadioResponseRegion = SetRadioResponseRegion,
+        .resetRadioResponseRegion = ResetRadioResponseRegion,
+        .getRadioChecked = GetRadioChecked,
+        .getRadioStyle = GetRadioStyle,
+        .setRadioValue = SetRadioValue,
+        .resetRadioValue = ResetRadioValue,
+        .getRadioValue = GetSetRadioValue,
+        .setRadioGroup = SetRadioGroup,
+        .resetRadioGroup = ResetRadioGroup,
+        .getRadioGroup = GetRadioGroup,
+        .setRadioOptions = SetRadioOptions,
+        .setRadioOnChange = SetRadioOnChange,
+        .resetRadioOnChange = ResetRadioOnChange,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIRadioModifier* GetCJUIRadioModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIRadioModifier modifier = {
-        SetRadioChecked,
-        ResetRadioChecked,
-        SetRadioStyle,
-        ResetRadioStyle,
-        SetRadioWidth,
-        ResetRadioWidth,
-        SetRadioHeight,
-        ResetRadioHeight,
-        SetRadioSize,
-        ResetRadioSize,
-        SetRadioHoverEffect,
-        ResetRadioHoverEffect,
-        SetRadioPadding,
-        ResetRadioPadding,
-        SetRadioResponseRegion,
-        ResetRadioResponseRegion,
-        GetRadioChecked,
-        GetRadioStyle,
-        SetRadioValue,
-        ResetRadioValue,
-        GetSetRadioValue,
-        SetRadioGroup,
-        ResetRadioGroup,
-        GetRadioGroup,
+        .setRadioChecked = SetRadioChecked,
+        .resetRadioChecked = ResetRadioChecked,
+        .setRadioStyle = SetRadioStyle,
+        .resetRadioStyle = ResetRadioStyle,
+        .setRadioWidth = SetRadioWidth,
+        .resetRadioWidth = ResetRadioWidth,
+        .setRadioHeight = SetRadioHeight,
+        .resetRadioHeight = ResetRadioHeight,
+        .setRadioSize = SetRadioSize,
+        .resetRadioSize = ResetRadioSize,
+        .setRadioHoverEffect = SetRadioHoverEffect,
+        .resetRadioHoverEffect = ResetRadioHoverEffect,
+        .setRadioPadding = SetRadioPadding,
+        .resetRadioPadding = ResetRadioPadding,
+        .setRadioResponseRegion = SetRadioResponseRegion,
+        .resetRadioResponseRegion = ResetRadioResponseRegion,
+        .getRadioChecked = GetRadioChecked,
+        .getRadioStyle = GetRadioStyle,
+        .setRadioValue = SetRadioValue,
+        .resetRadioValue = ResetRadioValue,
+        .getRadioValue = GetSetRadioValue,
+        .setRadioGroup = SetRadioGroup,
+        .resetRadioGroup = ResetRadioGroup,
+        .getRadioGroup = GetRadioGroup,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

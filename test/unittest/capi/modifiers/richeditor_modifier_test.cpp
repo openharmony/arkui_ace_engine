@@ -140,7 +140,7 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions0Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto internalController = RichEditorModelNG::GetRichEditorController(frameNode);
     ASSERT_NE(internalController, nullptr);
-    void* ptr = internalController.GetRawPtr();
+    void* ptr = Referenced::RawPtr(internalController);
     RichEditorController *rawPtr = reinterpret_cast<RichEditorController *>(ptr);
     ImageSpanOptions imageOptions;
     rawPtr->AddImageSpan(imageOptions);
@@ -183,18 +183,18 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions1Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto internalController = RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
     ASSERT_NE(internalController, nullptr);
-    void* ptr = internalController.GetRawPtr();
+    void* ptr = Referenced::RawPtr(internalController);
     RichEditorStyledStringController *rawPtr = reinterpret_cast<RichEditorStyledStringController *>(ptr);
-    ASSERT_NE(rawPtr->GetStyledString().GetRawPtr(), nullptr);
+    ASSERT_NE(rawPtr->GetStyledString(), nullptr);
 
     RichEditorStyledStringControllerPeer peer;
     auto controller = Converter::ArkValue<Ark_RichEditorStyledStringOptions>(&peer);
     modifier_->setRichEditorOptions1(node_, &controller);
 
     auto string = peer.GetStyledString();
-    ASSERT_NE(string.GetRawPtr(), nullptr);
+    ASSERT_NE(string, nullptr);
     peer.SetStyledString(string);
-    ASSERT_NE(string.GetRawPtr(), peer.GetStyledString().GetRawPtr());
+    ASSERT_NE(string, peer.GetStyledString());
 }
 
 /**

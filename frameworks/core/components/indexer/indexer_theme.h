@@ -84,6 +84,10 @@ public:
     {
         return selectedBackgroundColor_;
     }
+    const Color& GetSelectedBackgroundColorArc() const
+    {
+        return selectedBackgroundColorArc_;
+    }
     const Dimension& GetPopupAreaSize() const
     {
         return popupAreaSize_;
@@ -190,6 +194,7 @@ protected:
     Color popupTextColor_;
     Dimension popupTextSize_;
     Color selectedBackgroundColor_;
+    Color selectedBackgroundColorArc_;
     Color popupBackgroundColor_;
     Color popupSeparateColor_;
     Color popupSelectedTextColor_;
@@ -223,6 +228,10 @@ private:
         theme->defaultTextColor_ = indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR));
         theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
         theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
+        theme->selectedBackgroundColorArc_ =
+            indexerPattern->GetAttr<Color>("selected_background_color_arc", Color(SELECT_BACKGROUD_COLOR_ARC))
+            .ChangeOpacity(
+                indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
         theme->selectedBackgroundColor_ =
             indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR)).ChangeOpacity(
                 indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
@@ -328,6 +337,7 @@ private:
     static constexpr uint32_t POPUP_TEXT_COLOR = 0xff007dff;
     static constexpr float POPUP_TEXT_SIZE = 24.0;
     static constexpr uint32_t SELECT_BACKGROUD_COLOR = 0x33007dff;
+    static constexpr uint32_t SELECT_BACKGROUD_COLOR_ARC = 0xFF1F71FF;
     static constexpr uint32_t POPUP_BACKGROUND_COLOR = 0xffffffff;
     static constexpr uint32_t POPUP_SEPARATOR_COLOR = 0x33182431;
     static constexpr float POPUP_AREA_SIZE = 56.0f;

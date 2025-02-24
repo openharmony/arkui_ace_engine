@@ -34,6 +34,7 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(
     }
     gestureInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(gestureInfo->GetType()));
     gestureInfoObj->SetProperty<bool>("isSystemGesture", gestureInfo->IsSystemGesture());
+    gestureInfoObj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
     auto obj = CreateGestureEventObject(info, gestureInfo->GetType());
     int32_t paramCount = 2;
     JSRef<JSVal> params[paramCount];
@@ -108,6 +109,11 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateEventTargetObject(const std::share
     area->SetProperty<double>("width", info->GetTarget().area.GetWidth().ConvertToVp());
     area->SetProperty<double>("height", info->GetTarget().area.GetHeight().ConvertToVp());
     target->SetPropertyObject("area", area);
+    if (!info->GetTarget().id.empty()) {
+        target->SetProperty<const char*>("id", info->GetTarget().id.c_str());
+    } else {
+        target->SetPropertyObject("id", JsiValue::Undefined());
+    }
     return target;
 }
 
@@ -186,6 +192,7 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
     obj->SetProperty<double>("tiltY", info->GetTiltY().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info->GetSourceTool()));
     obj->SetProperty<double>("deviceId", static_cast<int32_t>(info->GetDeviceId()));
+    obj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();

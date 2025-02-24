@@ -122,13 +122,13 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
         if (parentItemPattern != nullptr) {
             auto parentMenu = parentItemPattern->GetMenu();
             position = parentMenu == nullptr
-                ? parentMenuItem->GetPaintRectOffset() + OffsetF(parentItemFrameSize.Width(), 0.0)
-                : OffsetF(parentMenu->GetPaintRectOffset().GetX(),
-                    parentMenuItem->GetPaintRectOffset().GetY() +
+                ? parentMenuItem->GetPaintRectOffset(false, true) + OffsetF(parentItemFrameSize.Width(), 0.0)
+                : OffsetF(parentMenu->GetPaintRectOffset(false, true).GetX(),
+                    parentMenuItem->GetPaintRectOffset(false, true).GetY() +
                     parentItemFrameSize.Height()); // * 0.95
         }
     } else {
-        position = parentMenuItem->GetPaintRectOffset() + OffsetF(parentItemFrameSize.Width(), 0.0);
+        position = parentMenuItem->GetPaintRectOffset(false, true) + OffsetF(parentItemFrameSize.Width(), 0.0);
     }
 
     auto pipelineContext = parentMenuItem->GetContextWithCheck();
@@ -156,11 +156,11 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
     CHECK_NULL_RETURN(scroll, position);
     auto scrollGeometryNode = scroll->GetGeometryNode();
     CHECK_NULL_RETURN(scrollGeometryNode, position);
-    auto scrollTop = scroll->GetPaintRectOffset().GetY();
+    auto scrollTop = scroll->GetPaintRectOffset(false, true).GetY();
     auto scrollHeight = scrollGeometryNode->GetFrameSize().Height();
     auto bottomOffset = scrollTop + scrollHeight;
-    if (parentMenuItem->GetPaintRectOffset().GetY() > bottomOffset) {
-        return scroll->GetPaintRectOffset() + OffsetF(parentItemFrameSize.Width(), 0.0);
+    if (parentMenuItem->GetPaintRectOffset(false, true).GetY() > bottomOffset) {
+        return scroll->GetPaintRectOffset(false, true) + OffsetF(parentItemFrameSize.Width(), 0.0);
     }
     return position;
 }
@@ -261,7 +261,7 @@ void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
-        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
         paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
         paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
         if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -282,7 +282,7 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
-        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
         if (!canExpandCurrentWindow_) {
             paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
             paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());

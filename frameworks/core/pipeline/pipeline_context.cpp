@@ -65,6 +65,7 @@ constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
 constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;
 constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0;
 constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
+constexpr int32_t ROTATION_DIVISOR = 64; // from adapter/ohos/entrance/ace_view_ohos.cpp
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -858,7 +859,7 @@ void PipelineContext::SetupRootElement()
     requestedRenderNode_.Reset();
 }
 
-void PipelineContext::SetupSubRootElement()
+RefPtr<Element> PipelineContext::SetupSubRootElement()
 {
     LOGI("Set up SubRootElement!");
 
@@ -885,7 +886,7 @@ void PipelineContext::SetupSubRootElement()
     if (!rootElement_) {
         LOGE("Set up SubRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return;
+        return RefPtr<Element>();
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -902,7 +903,7 @@ void PipelineContext::SetupSubRootElement()
     cardTransitionController_->RegisterTransitionListener();
     requestedRenderNode_.Reset();
     LOGI("Set up SubRootElement success!");
-    return;
+    return rootElement_;
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
@@ -1518,7 +1519,7 @@ RefPtr<RenderNode> PipelineContext::DragTest(
     return nullptr;
 }
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
@@ -1627,7 +1628,7 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
-bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
+bool PipelineContext::OnKeyEvent(const NonPointerEvent& nonPointerEvent)
 {
     CHECK_RUN_ON(UI);
     if (nonPointerEvent.eventType != UIInputEventType::KEY) {
@@ -1640,9 +1641,7 @@ bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
         return false;
     }
     rootElement_->HandleSpecifiedKey(event);
-
     SetShortcutKey(event);
-
     pressedKeyCodes = event.pressedCodes;
     isKeyCtrlPressed_ = !pressedKeyCodes.empty() && (pressedKeyCodes.back() == KeyCode::KEY_CTRL_LEFT ||
                                                         pressedKeyCodes.back() == KeyCode::KEY_CTRL_RIGHT);
@@ -1679,6 +1678,20 @@ bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
     if (rootElement_->HandleKeyEvent(event)) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Default focus system handled this event");
         return true;
+    }
+    return false;
+}
+
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
+{
+    CHECK_RUN_ON(UI);
+    if (nonPointerEvent.eventType == UIInputEventType::KEY) {
+        return OnKeyEvent(nonPointerEvent);
+    } else if (nonPointerEvent.eventType == UIInputEventType::CROWN) {
+        const auto& crownEvent = static_cast<const CrownEvent&>(nonPointerEvent);
+        RotationEvent rotationEvent;
+        rotationEvent.value = crownEvent.degree * ROTATION_DIVISOR;
+        return OnRotationEvent(rotationEvent);
     }
     return false;
 }
@@ -3098,7 +3111,7 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
         pageOffset_ = GetPageRect().GetOffset();
     }
 
-    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
 
     if (action != DragEventAction::DRAG_EVENT_END) {
         ProcessDragEvent(renderNode, event, globalPoint);

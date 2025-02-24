@@ -22,13 +22,17 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkListItemCreate();
+CJ_EXPORT void FfiOHOSAceFrameworkListItemCreateWithOptions(int32_t style);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetBorderRaduis(double raduis, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetSticky(int32_t sticky);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetEditable(bool flag);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetSelectable(bool flag);
+CJ_EXPORT void FfiOHOSAceFrameworkListItemSetSelected(bool flag);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetOnSelect(void (*callback)(bool flag));
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetSwipeAction(
     void (*startBuilder)(), void (*endBuilder)(), int32_t edgeEffect);
+CJ_EXPORT void FfiOHOSAceFrameworkListItemSetSwipeAction2(
+    void (*startBuilder)(), void (*endBuilder)(), int32_t edgeEffect, void (*onOffsetChange)(int32_t offset));
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_FLEX_FFI_H

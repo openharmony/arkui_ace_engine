@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 class XComponentPattern;
 
-class XComponentControllerNG : public OHOS::Ace::InnerXComponentController {
+class ACE_FORCE_EXPORT XComponentControllerNG : public OHOS::Ace::InnerXComponentController {
 public:
     XComponentControllerNG() = default;
     ~XComponentControllerNG() override = default;

@@ -85,6 +85,15 @@ inline std::string ConvertBoolToString(bool flag)
     return flag ? "true" : "false";
 }
 
+inline bool ConvertStringToBool(const std::string& str)
+{
+    if (str == "true") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 inline std::string ConvertTabBarModeToString(TabBarMode barMode)
 {
     std::string result = "";
@@ -651,6 +660,20 @@ inline std::string ConvertWrapMarqueeUpdateStrategyToStirng(MarqueeUpdateStrateg
     auto index = BinarySearchFindIndex(
         marqueeUpdateStrategyTable, ArraySize(marqueeUpdateStrategyTable), marqueeUpdateStrategy);
     return index < 0 ? "MarqueeUpdateStrategy.DEFAULT" : marqueeUpdateStrategyTable[index].value;
+}
+
+inline std::string ConvertSymbolColorToString(const std::vector<Color>& colors)
+{
+    if (colors.size() <= 0) {
+        return "";
+    }
+    auto colorStr = std::string("[");
+    for (auto color : colors) {
+        colorStr.append(color.ColorToString());
+        colorStr.append(",");
+    }
+    colorStr.append("]");
+    return colorStr;
 }
 
 } // namespace OHOS::Ace::V2

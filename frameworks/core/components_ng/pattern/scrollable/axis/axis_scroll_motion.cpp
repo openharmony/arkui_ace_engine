@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/axis/axis_scroll_motion.h"
 
+#include "base/log/ace_trace.h"
 #include "base/utils/time_util.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +28,8 @@ void AxisScrollMotion::Reset(float startPos, float distance)
     currentPos_ = startPos;
     finalPos_ = startPos + distance;
     endTime_ = startTime_ + AXIS_ANIMATION_DURATION;
+    ACE_SCOPED_TRACE("axis motion reset, startPos:%f, distance:%f, startTime:%f, currentPos_:%f", startPos_, distance_,
+        startTime_, currentPos_);
     if (LessOrEqual(std::abs(distance), AXIS_DISTANCE_THRESHOLD)) {
         moveCallback_ = [endTime = endTime_, startTime = startTime_, startPos = startPos_, finalPos = finalPos_,
                             distance](float offsetTime) -> float {
@@ -34,6 +37,10 @@ void AxisScrollMotion::Reset(float startPos, float distance)
             if ((LessOrEqual(startPos, finalPos) && GreatNotEqual(currentPos, finalPos)) ||
                 (GreatOrEqual(startPos, finalPos) && LessNotEqual(currentPos, finalPos))) {
                 currentPos = finalPos;
+            }
+            if (SystemProperties::GetDebugOffsetLogEnabled()) {
+                ACE_SCOPED_TRACE("axis motion moving, distance less than threshold, offsetTime:%f, currentPos:%f",
+                    offsetTime, currentPos);
             }
             return currentPos;
         };
@@ -54,6 +61,10 @@ void AxisScrollMotion::Reset(float startPos, float distance)
             if ((LessOrEqual(startPos, finalPos) && GreatNotEqual(currentPos, finalPos)) ||
                 (GreatOrEqual(startPos, finalPos) && LessNotEqual(currentPos, finalPos))) {
                 currentPos = finalPos;
+            }
+            if (SystemProperties::GetDebugOffsetLogEnabled()) {
+                ACE_SCOPED_TRACE("axis motion moving, distance greater than threshold, offsetTime:%f, currentPos:%f",
+                    offsetTime, currentPos);
             }
             return currentPos;
         };

@@ -70,7 +70,7 @@ class RecycleManager {
   public setActive(active): void {
     this.cachedRecycleNodes_.forEach((nodes, _) => {
       nodes.forEach((node) => {
-        node.setActiveInternal(active);
+        node.setActiveInternal(active, true);
       })
     })
   }

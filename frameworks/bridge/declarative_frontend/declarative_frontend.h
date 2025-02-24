@@ -248,6 +248,8 @@ public:
         return AceType::DynamicCast<Framework::FrontendDelegate>(delegate_);
     }
 
+    std::string GetPagePathByUrl(const std::string& url) const override;
+
 protected:
     bool isFormRender_ = false;
     RefPtr<Framework::FrontendDelegateDeclarative> delegate_;

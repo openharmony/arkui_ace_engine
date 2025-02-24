@@ -22,6 +22,8 @@
 #include "singleton.h"
 #include "system_ability_definition.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 const char BUNDLE_TAG[] = "@bundle:";
 constexpr size_t BUNDLE_START_POS = 8;

@@ -34,7 +34,9 @@ static void DragActionConvert(
     }
     internalDragAction->previewOption.defaultAnimationBeforeLifting =
         dragAction->dragPreviewOption.defaultAnimationBeforeLifting;
+    internalDragAction->previewOption.enableHapticFeedback = dragAction->dragPreviewOption.enableHapticFeedback;
     internalDragAction->previewOption.isMultiSelectionEnabled = dragAction->dragPreviewOption.isMultiSelectionEnabled;
+    internalDragAction->previewOption.enableEdgeAutoScroll = dragAction->dragPreviewOption.enableEdgeAutoScroll;
     internalDragAction->previewOption.isNumber = dragAction->dragPreviewOption.isNumberBadgeEnabled;
     if (dragAction->dragPreviewOption.badgeNumber > 1) {
         internalDragAction->previewOption.badgeNumber = dragAction->dragPreviewOption.badgeNumber;
@@ -141,12 +143,39 @@ void SetDragEventStrictReportingEnabledWithContext(ArkUI_Int32 instanceId, bool 
     NG::ViewAbstract::SetDragEventStrictReportingEnabled(instanceId, enabled);
 }
 
+ArkUI_Int32 RequestDragEndPending()
+{
+    return NG::DragDropFuncWrapper::RequestDragEndPending();
+}
+
+ArkUI_Int32 NotifyDragResult(ArkUI_Int32 requestId, ArkUI_Int32 result)
+{
+    return NG::DragDropFuncWrapper::NotifyDragResult(requestId, result);
+}
+
+ArkUI_Int32 NotifyDragEndPendingDone(ArkUI_Int32 requestId)
+{
+    return NG::DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
+}
+
 } // namespace
 const ArkUIDragAdapterAPI* GetDragAdapterAPI()
 {
-    static const ArkUIDragAdapterAPI impl { StartDrag, RegisterStatusListener, UnRegisterStatusListener,
-        CreateDragActionWithNode, CreateDragActionWithContext, SetDragPreview,
-        SetDragEventStrictReportingEnabledWithNode, SetDragEventStrictReportingEnabledWithContext };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIDragAdapterAPI impl {
+        .startDrag = StartDrag,
+        .registerStatusListener = RegisterStatusListener,
+        .unregisterStatusListener = UnRegisterStatusListener,
+        .createDragActionWithNode = CreateDragActionWithNode,
+        .createDragActionWithContext = CreateDragActionWithContext,
+        .setDragPreview = SetDragPreview,
+        .setDragEventStrictReportingEnabledWithNode = SetDragEventStrictReportingEnabledWithNode,
+        .setDragEventStrictReportingEnabledWithContext = SetDragEventStrictReportingEnabledWithContext,
+        .requestDragEndPending = RequestDragEndPending,
+        .notifyDragResult = NotifyDragResult,
+        .notifyDragEndPendingDone = NotifyDragEndPendingDone
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 } // namespace OHOS::Ace::DragAdapter

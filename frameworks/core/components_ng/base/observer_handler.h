@@ -39,6 +39,8 @@ enum class NavDestinationState {
     ON_WILL_HIDE = 5,
     ON_WILL_APPEAR = 6,
     ON_WILL_DISAPPEAR = 7,
+    ON_ACTIVE = 8,
+    ON_INACTIVE = 9,
     ON_BACKPRESS = 100,
 };
 
@@ -49,6 +51,8 @@ struct NavDestinationInfo {
     int32_t index;
     napi_value param;
     std::string navDestinationId;
+    NavDestinationMode mode;
+    int32_t uniqueId;
 
     NavDestinationInfo() = default;
 
@@ -60,6 +64,12 @@ struct NavDestinationInfo {
         int32_t index, napi_value param, std::string navDesId)
         : navigationId(std::move(id)), name(std::move(name)), state(state),
           index(index), param(param), navDestinationId(std::move(navDesId))
+    {}
+
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
+        int32_t index, napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId)
+        : navigationId(std::move(id)), name(std::move(name)), state(state),
+        index(index), param(param), navDestinationId(std::move(navDesId)), mode(mode), uniqueId(std::move(uniqueId))
     {}
 };
 
@@ -154,6 +164,9 @@ public:
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
+    std::shared_ptr<NavDestinationInfo> GetNavDestinationInfo(const RefPtr<UINode>& current);
+    std::shared_ptr<NavDestinationInfo> GetNavigationInnerState(const RefPtr<AceType>& node);
+    std::shared_ptr<NavDestinationInfo> GetNavigationOuterState(const RefPtr<AceType>& node);
     std::shared_ptr<ScrollEventInfo> GetScrollEventState(const RefPtr<AceType>& node);
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,

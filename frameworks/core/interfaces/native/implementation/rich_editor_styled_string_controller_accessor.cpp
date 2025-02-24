@@ -22,23 +22,14 @@
 #include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 
-namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_Materialized& dst, const std::string& src)
+namespace OHOS::Ace::NG {
+void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
 {
-    auto str2 = const_cast<std::string&>(src);
-    dst.ptr = &str2;
-}
-void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src, ConvContext *ctx)
-{
-    auto str = src.GetReplacementString();
-    auto replacementString = reinterpret_cast<MutableSpanString*>(str.GetRawPtr());
-    if (replacementString) {
-        dst.replacementString = Converter::ArkValue<Ark_StyledString>(replacementString->GetString(), ctx);
-    }
+    dst.replacementString = { StyledStringPeer::Create(src.GetReplacementString()) };
     dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().start);
     dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().end);
 }
-} // namespace OHOS::Ace::NG::Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
@@ -87,8 +78,7 @@ void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
     auto onWillChangeCapture = std::make_shared<Callback_StyledStringChangeValue_Boolean>(*onWillChangeArk);
     auto onWillChange = [onWillChangeCapture, arkCallback = CallbackHelper(*onWillChangeCapture)](
         const StyledStringChangeValue& value) {
-        Converter::ConvContext ctx;
-        auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value, &ctx);
+        auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
         Callback_Boolean_Void continuation;
         arkCallback.Invoke(changeValue, continuation);
         return true;

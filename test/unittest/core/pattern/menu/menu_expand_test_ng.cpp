@@ -316,7 +316,7 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg005, TestSize.Level1)
      * @tc.steps: step4. call SetSubMenuShow
      * @tc.expected: isSubMenuShow_ is true
      */
-    subMenuPattern->SetSubMenuShow();
+    subMenuPattern->SetSubMenuShow(true);
     EXPECT_TRUE(subMenuPattern->isSubMenuShow_);
 }
 

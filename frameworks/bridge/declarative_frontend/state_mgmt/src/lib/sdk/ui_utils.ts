@@ -35,7 +35,7 @@ class UIUtilsImpl {
     public makeObserved<T extends object>(target: T): T {
       // mark makeObserved using V2 feature
       ConfigureStateMgmt.instance.usingV2ObservedTrack('makeObserved', 'use');
-      return RefInfo.get(target).proxy as T;
+      return RefInfo.get(target)[RefInfo.MAKE_OBSERVED_PROXY] as T;
     }
 
     public static instance(): UIUtilsImpl {

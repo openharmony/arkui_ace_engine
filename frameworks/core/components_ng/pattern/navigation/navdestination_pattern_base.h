@@ -255,6 +255,25 @@ public:
     }
 
     void MarkSafeAreaPaddingChangedWithCheckTitleBar(float titleBarHeight);
+    
+    virtual void OnCoordScrollStart() {};
+    virtual float OnCoordScrollUpdate(float offset, float currentOffset)
+    {
+        return 0.0f;
+    }
+    virtual void OnCoordScrollEnd() {};
+    virtual bool NeedCoordWithScroll()
+    {
+        return false;
+    }
+    virtual float GetTitleBarHeightLessThanMaxBarHeight() const
+    {
+        return 0.0f;
+    }
+    virtual bool CanCoordScrollUp(float offset) const
+    {
+        return false;
+    }
 protected:
     void AbortBarAnimation();
     void UpdateHideBarProperty();

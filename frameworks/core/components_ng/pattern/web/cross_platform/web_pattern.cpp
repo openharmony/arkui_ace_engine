@@ -1179,11 +1179,6 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 
-void WebPattern::OnSmoothDragResizeEnabledUpdate(bool value)
-{
-    // cross platform is not support now;
-}
-
 void WebPattern::OnRootLayerChanged(int width, int height)
 {
     // cross platform is not support now;
@@ -1195,6 +1190,11 @@ void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 }
 
 void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnScrollStart(const float x, const float y)
 {
     // cross platform is not support now;
 }
@@ -1221,6 +1221,12 @@ void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems
 }
 
 void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
     const ScriptItemsByOrder& scriptItemsByOrder)
 {
     // cross platform is not support now;
@@ -1384,6 +1390,21 @@ void WebPattern::RemovePreviewMenuNode()
 }
 
 void WebPattern::UpdateImagePreviewParam()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
 {
     // cross platform is not support now;
 }

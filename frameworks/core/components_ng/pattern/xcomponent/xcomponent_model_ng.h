@@ -89,6 +89,12 @@ public:
     static void HdrBrightness(FrameNode* frameNode, float hdrBrightness);
     static void EnableTransparentLayer(FrameNode* frameNode, bool enable);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
+    static RenderFit GetSurfaceRenderFit(FrameNode* frameNode);
+    static void SetXComponentSurfaceRect(FrameNode* frameNode, float offsetX, float offsetY,
+        float surfaceWidth, float surfaceHeight);
+    static void GetXComponentSurfaceRect(FrameNode* frameNode, float& offsetX, float& offsetY,
+        float& surfaceWidth, float& surfaceHeight);
+    static bool GetXComponentEnableAnalyzer(FrameNode* frameNode);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

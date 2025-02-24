@@ -140,7 +140,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
 
     auto families = style.GetFontFamilies();
     if (!families.empty()) {
-        dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(families[0]);
+        dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(families[0], ctx);
     }
 
     Converter::TextDecorationStruct decoration;
@@ -332,7 +332,7 @@ HWTEST_F(RichEditorControllerAccessorTest, AddBuilderSpanTest, TestSize.Level1)
     // Creating custom node
     auto customSpanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     auto customUI_Node = static_cast<RefPtr<UINode>>(customSpanNode);
-    auto customNodeHandle = reinterpret_cast<Ark_NodeHandle>(customSpanNode.GetRawPtr());
+    auto customNodeHandle = reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(customSpanNode));
     // Creating custom node builder with helper and customNodeHandle
     int callsCount = 0;
     CustomNodeBuilderTestHelper<RichEditorControllerAccessorTest> builderHelper(this, nullptr, customNodeHandle);

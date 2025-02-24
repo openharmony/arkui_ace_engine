@@ -587,10 +587,44 @@ void ResetRichEditorMaxLines(ArkUINodeHandle node)
     RichEditorModelNG::SetMaxLines(frameNode, INT_MAX);
 }
 
+void SetRichEditorStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+void ResetRichEditorStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetStopBackPress(frameNode, true);
+}
+
+void SetRichEditorKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    if (value < KeyboardAppearance::NONE_IMMERSIVE || value > KeyboardAppearance::DARK_IMMERSIVE) {
+        RichEditorModelNG::SetKeyboardAppearance(frameNode, KeyboardAppearance::NONE_IMMERSIVE);
+        return;
+    }
+    RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIRichEditorModifier modifier = {
         .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
         .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
@@ -646,21 +680,18 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorMaxLength = ResetRichEditorMaxLength,
         .setRichEditorMaxLines = SetRichEditorMaxLines,
         .resetRichEditorMaxLines = ResetRichEditorMaxLines,
+        .setRichEditorStopBackPress = SetRichEditorStopBackPress,
+        .resetRichEditorStopBackPress = ResetRichEditorStopBackPress,
+        .setRichEditorKeyboardAppearance = SetRichEditorKeyboardAppearance,
+        .resetRichEditorKeyboardAppearance = ResetRichEditorKeyboardAppearance,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIRichEditorModifier modifier = {
         .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
         .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
@@ -681,14 +712,7 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
         .setRichEditorBarState = SetRichEditorBarState,
         .resetRichEditorBarState = ResetRichEditorBarState,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

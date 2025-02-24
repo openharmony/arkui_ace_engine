@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 constexpr Dimension DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE = Dimension(32.0f, DimensionUnit::VP); // default value
-class ACE_EXPORT ScrollableModelNG {
+class ACE_FORCE_EXPORT ScrollableModelNG {
 public:
     static void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL);
 
@@ -83,14 +83,18 @@ public:
     static void ResetContentClip(FrameNode* frameNode);
     static bool GetFadingEdge(FrameNode* frameNode);
     static float GetFadingEdgeLength(FrameNode* frameNode);
-    static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
-    static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
 #endif
     static void ResetScrollBarWidth(FrameNode* frameNode);
     static void ResetScrollBarColor(FrameNode* frameNode);
+    static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
+
+    static void SetBackToTop(bool backToTop);
+    static void SetBackToTop(FrameNode* frameNode, bool backToTop);
+    static bool GetBackToTop(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

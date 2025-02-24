@@ -182,7 +182,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<TextTheme>();
+    auto theme = themeManager->GetTheme<TextTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

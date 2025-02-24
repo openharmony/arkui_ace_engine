@@ -46,11 +46,15 @@ void EventReport::SendInternalException(InternalExcepType type) {}
 
 void EventReport::SendAccessibilityException(AccessibilityExcepType type) {}
 
+void EventReport::ReportAccessibilityFailEvent(const std::string& actionName) {}
+
 void EventReport::SendFormException(FormExcepType type) {}
 
 void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr) {}
 
-void EventReport::JsErrReport(const std::string& packageName, const std::string& reason, const std::string& summary) {}
+void EventReport::JsErrReport(
+    const std::string& packageName, const std::string& reason, const std::string& summary, const std::string& uniqueId)
+{}
 
 void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
     const std::string& processName, const std::string& msg)
@@ -85,4 +89,16 @@ void EventReport::ReportDragInfo(const DragInfo& dragInfo)
     MockEventReport::dragInfo_ = dragInfo;
     return;
 }
+
+void EventReport::ReportScrollableErrorEvent(
+    const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType)
+{}
+
+void EventReport::ReportRichEditorInfo(const RichEditorInfo& richEditorInfo) {}
+
+void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
+{}
+
+void EventReport::ReportClipboardFailEvent(const std::string& errorType)
+{}
 } // namespace OHOS::Ace

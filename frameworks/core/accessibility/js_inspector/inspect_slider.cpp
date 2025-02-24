@@ -41,7 +41,7 @@ void InspectSlider::PackAttrAndStyle()
     } else if (deviceType == DeviceType::TV) {
         styles_.insert(std::make_pair("color", "#33ffffff"));
         styles_.insert(std::make_pair("selected-color", "#ff0d9ffb"));
-    } else if (deviceType == DeviceType::WATCH) {
+    } else if (deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) {
         styles_.insert(std::make_pair("color", "#26ffffff"));
         styles_.insert(std::make_pair("selected-color", "#ff007dff"));
     }

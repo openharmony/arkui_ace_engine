@@ -52,13 +52,13 @@ std::string DatePickerAccessibilityProperty::GetColumnsText(
     for (const auto& child : frameNode->GetChildren()) {
         auto stackColumn = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_RETURN(stackColumn, "");
-        auto colLayoutProperty = stackColumn->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(colLayoutProperty, "");
-        if (colLayoutProperty->GetVisibility() == VisibleType::GONE) {
-            continue;
-        }
         auto blendColumn = AceType::DynamicCast<FrameNode>(stackColumn->GetLastChild());
         CHECK_NULL_RETURN(blendColumn, "");
+        auto blendColumnLayoutProperty = blendColumn->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(blendColumnLayoutProperty, "");
+        if (blendColumnLayoutProperty->GetVisibility() == VisibleType::GONE) {
+            continue;
+        }
         auto dataColumnNode = AceType::DynamicCast<FrameNode>(blendColumn->GetLastChild());
         CHECK_NULL_RETURN(dataColumnNode, "");
         auto columnPattern = dataColumnNode->GetPattern<DatePickerColumnPattern>();

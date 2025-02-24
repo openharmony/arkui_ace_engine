@@ -128,10 +128,15 @@ std::string TextFieldAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, "");
-    std::string text = UtfUtils::Str16ToStr8(textFieldLayoutProperty->GetValueValue(u""));
+    std::string text = UtfUtils::Str16DebugToStr8(textFieldLayoutProperty->GetValueValue(u""));
     if (IsPassword() && !text.empty()) {
         return std::string(text.size(), '*');
     }
+
+    if ((IsShowCount() || IsShowError()) && IsHint()) {
+        return GetHintText();
+    }
+
     return text;
 }
 
@@ -151,7 +156,7 @@ std::string TextFieldAccessibilityProperty::GetHintText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, "");
-    return UtfUtils::Str16ToStr8(textFieldPattern->GetPlaceHolder());
+    return UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder());
 }
 
 bool TextFieldAccessibilityProperty::GetContentInvalid() const
@@ -185,5 +190,28 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
     AddSupportAction(AceAction::ACTION_SET_TEXT);
     AddSupportAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
     AddSupportAction(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+}
+
+bool TextFieldAccessibilityProperty::IsShowCount() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    CHECK_NULL_RETURN(textFieldPattern->IsShowCount(), false);
+    auto textCmpDecorator = textFieldPattern->GetCounterDecorator();
+    CHECK_NULL_RETURN(textCmpDecorator, false);
+    auto counterDecorator = DynamicCast<CounterDecorator>(textCmpDecorator);
+    CHECK_NULL_RETURN(counterDecorator, false);
+    return counterDecorator->HasContent();
+}
+
+bool TextFieldAccessibilityProperty::IsShowError() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->IsShowError();
 }
 } // namespace OHOS::Ace::NG

@@ -177,7 +177,7 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
         auto onAcquired = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Form.onAcquired");
-            std::vector<std::string> keys = { "id", "idString" };
+            std::vector<std::string> keys = { "id", "idString", "isLocked" };
             func->Execute(keys, param);
         };
         FormModel::GetInstance()->SetOnAcquired(std::move(onAcquired));
@@ -205,7 +205,7 @@ void JSForm::JsOnUninstall(const JSCallbackInfo& info)
         auto onUninstall = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Form.onUninstall");
-            std::vector<std::string> keys = { "id", "idString" };
+            std::vector<std::string> keys = { "id", "idString", "isLocked" };
             func->Execute(keys, param);
         };
         FormModel::GetInstance()->SetOnUninstall(std::move(onUninstall));

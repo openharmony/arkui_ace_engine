@@ -166,6 +166,10 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
     return this;
   }
+  direction(value: Direction): this {
+    modifierWithKey(this._modifiersWithKeys, SelectDirectionModifier.identity, SelectDirectionModifier, value);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey<SelectOption[]> {
@@ -628,6 +632,23 @@ class SelectSizeModifier extends ModifierWithKey<SizeOptions> {
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
       !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+
+class SelectDirectionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectDirection');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetSelectDirection(node);
+    } else {
+      getUINativeModule().select.setSelectDirection(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

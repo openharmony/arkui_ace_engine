@@ -492,7 +492,6 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                     return FrameNode::GetOrCreateFrameNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(); });
                 } },
-#ifndef ARKUI_WEARABLE
             { V2::TABS_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return TabsModelNG::GetOrCreateTabsNode(
@@ -503,19 +502,16 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                     return FrameNode::GetOrCreateFrameNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<TabBarPattern>(); });
                 } },
-#endif
             { V2::SWIPER_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return FrameNode::GetOrCreateFrameNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
                 } },
-#ifndef ARKUI_WEARABLE
             { V2::TAB_CONTENT_ITEM_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return TabContentNode::GetOrCreateTabContentNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
                 } },
-#endif
             { V2::COMMON_VIEW_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return FrameNode::GetOrCreateFrameNode(

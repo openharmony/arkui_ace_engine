@@ -33,6 +33,7 @@ public:
         auto value = MakeRefPtr<SecurityComponentPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propIconColor_ = CloneIconColor();
+        value->propSymbolIconColor_ = CloneSymbolIconColor();
         value->propFontColor_ = CloneFontColor();
         value->propBackgroundColor_ = CloneBackgroundColor();
         value->propBackgroundBorderColor_ = CloneBackgroundBorderColor();
@@ -51,6 +52,7 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolIconColor, std::vector<Color>, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundBorderColor, Color, PROPERTY_UPDATE_RENDER);

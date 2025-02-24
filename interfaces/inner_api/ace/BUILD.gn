@@ -19,6 +19,7 @@ config("uicontent_public_config") {
   include_dirs = [
     "${ace_root}/interfaces/inner_api/ace",
     "${ace_root}/interfaces/inner_api/ace/ai/",
+    "${ace_root}/interfaces/inner_api/ace/share/",
   ]
   if (use_hilog) {
     defines = [ "USE_HILOG" ]

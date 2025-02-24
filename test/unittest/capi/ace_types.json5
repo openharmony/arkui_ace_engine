@@ -1827,6 +1827,7 @@
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
                 "setTextOverflowTestTextOverflowValidValues", // due to issue #IB57XU can not be fixed
+                "setPlaceholderColorTestPlaceholderColorValidValues", // After upmerge 20250224
             ]
         },
         {
@@ -2209,6 +2210,8 @@
                 "setLetterSpacingTestLetterSpacingInvalidValues",
                 "setLineHeightTestDefaultValues",
                 "setLineHeightTestLineHeightInvalidValues",
+
+                "setPlaceholderColorTestPlaceholderColorValidValues", // Disabled after upmerge 20250224
             ]
         },
         {
@@ -5098,6 +5101,10 @@
                 "setEnableFollowSystemFontWeightTestEnableFollowSystemFontWeightValidValues",
                 "setEnableWebAVSessionTestDefaultValues",
                 "setEnableWebAVSessionTestEnableWebAVSessionValidValues",
+
+                // Disabled after upmerge 20250224
+                "setEnableSmoothDragResizeTestDefaultValues",
+                "setEnableSmoothDragResizeTestEnableSmoothDragResizeValidValues",
             ],
             "attributes": [
                 {

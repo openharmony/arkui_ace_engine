@@ -27,14 +27,30 @@ SvgFeGaussianBlur::SvgFeGaussianBlur() : SvgFe() {}
 
 void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
-    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash, bool cropRect) const
 {
     imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
     RSRect filterRect(effectFilterArea_.Left(), effectFilterArea_.Top(),
         effectFilterArea_.Right(), effectFilterArea_.Bottom());
-    imageFilter = RSRecordingImageFilter::CreateBlurImageFilter(
-        gaussianBlurAttr_.stdDeviationX, gaussianBlurAttr_.stdDeviationY,
-        RSTileMode::DECAL, imageFilter, RSImageBlurType::GAUSS, filterRect);
+    if (cropRect) {
+        float stdDeviationX = 0.0;
+        float stdDeviationY = 0.0;
+        auto filterContext = GetFilterContext();
+        auto primitiveRule = filterContext.GetPrimitiveRule();
+        if (primitiveRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
+            stdDeviationX = gaussianBlurAttr_.stdDeviationX * primitiveRule.GetBaseRect().Width();
+            stdDeviationY = gaussianBlurAttr_.stdDeviationY * primitiveRule.GetBaseRect().Height();
+        } else {
+            stdDeviationX = gaussianBlurAttr_.stdDeviationX;
+            stdDeviationY = gaussianBlurAttr_.stdDeviationY;
+        }
+        imageFilter = RSRecordingImageFilter::CreateBlurImageFilter(
+            stdDeviationX, stdDeviationY, RSTileMode::DECAL, imageFilter, RSImageBlurType::GAUSS, filterRect);
+    } else {
+        imageFilter = RSRecordingImageFilter::CreateBlurImageFilter(
+            gaussianBlurAttr_.stdDeviationX, gaussianBlurAttr_.stdDeviationY,
+            RSTileMode::DECAL, imageFilter, RSImageBlurType::GAUSS, filterRect);
+    }
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
     RegisterResult(feAttr_.result, imageFilter, resultHash);
 }
@@ -42,7 +58,7 @@ void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFil
 bool SvgFeGaussianBlur::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFeGaussianBlurAttribute&)> attrs[] = {
-        { SVG_FE_EDGE_MODE, [](const std::string& val, SvgFeGaussianBlurAttribute& attr) { 
+        { SVG_FE_EDGE_MODE, [](const std::string& val, SvgFeGaussianBlurAttribute& attr) {
             static const LinearMapNode<SvgFeEdgeMode> EDGE_MODE_TABLE[] = {
                 { "duplicate", SvgFeEdgeMode::EDGE_DUPLICATE },
                 { "none", SvgFeEdgeMode::EDGE_NONE },

@@ -39,7 +39,15 @@ void ReportTheme(ThemeType type);
 void ResetThemes();
 #endif
 
-inline RefPtr<Theme> CatchEmptyTheme(ThemeType type)
+inline RefPtr<Theme> CatchEmptyTheme1(ThemeType type)
+{
+#ifdef CAPI_BACKTRACE
+    ReportTheme(type);
+#endif
+    return nullptr;
+}
+
+inline RefPtr<Theme> CatchEmptyTheme2(ThemeType type, uint32_t id)
 {
 #ifdef CAPI_BACKTRACE
     ReportTheme(type);
@@ -78,14 +86,15 @@ public:
     static void SetUpTestCase()
     {
         MockPipelineContext::SetUp();
-        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
+        themeManager_ = AceType::MakeRefPtr<::testing::NiceMock<MockThemeManager>>();
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
 
         // assume using of test/mock/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
             .WillRepeatedly(testing::Return(themeConstants_));
-        EXPECT_CALL(*themeManager_, GetTheme(testing::_)).WillRepeatedly(CatchEmptyTheme);
+        ON_CALL(*themeManager_, GetTheme(testing::_)).WillByDefault(CatchEmptyTheme1);
+        ON_CALL(*themeManager_, GetTheme(testing::_, testing::_)).WillByDefault(CatchEmptyTheme2);
 
         themeConstants_->LoadTheme(0);
         MockThemeStyle::GetInstance()->SetAttributes({});
@@ -117,7 +126,8 @@ public:
     static void SetupTheme()
     {
         auto theme = typename Theme::Builder().Build(themeConstants_);
-        EXPECT_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillRepeatedly(testing::Return(theme));
+        ON_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillByDefault(testing::Return(theme));
+        ON_CALL(*themeManager_, GetTheme(Theme::TypeId(), testing::_)).WillByDefault(testing::Return(theme));
     }
 
     static RefPtr<ThemeStyle> SetupThemeStyle(const std::string& pattern)
@@ -172,7 +182,7 @@ public:
     }
 
 protected:
-    inline static RefPtr<MockThemeManager> themeManager_;
+    inline static RefPtr<::testing::NiceMock<MockThemeManager>> themeManager_;
     inline static RefPtr<ThemeConstants> themeConstants_;
 
     inline static const GENERATED_ArkUIBasicNodeAPI *basicAPI_

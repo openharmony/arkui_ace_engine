@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,7 +200,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern005, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     auto firstTextNode = FrameNode::CreateFrameNode(
@@ -258,7 +260,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern007, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern008, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -304,7 +308,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern008, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern009, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->dragStartPoint_.SetX(0.0f);
     indicatorPattern->dragStartPoint_.SetY(0.0f);
@@ -340,7 +346,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern009, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern010, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -379,7 +387,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern010, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern011, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -505,7 +515,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = false;
     indicatorPattern->isClicked_ = true;
     indicatorPattern->isRepeatClicked_ = false;
-    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DOT;
     /**
      * @tc.steps: step2. call the function DumpAdvanceInfo.
      * @tc.expected: verify the size dumped correctly.
@@ -522,7 +531,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = true;
     indicatorPattern->isClicked_ = false;
     indicatorPattern->isRepeatClicked_ = true;
-    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DIGIT;
     indicatorPattern->DumpAdvanceInfo();
     EXPECT_EQ(DumpLog::GetInstance().description_.size(), 5);
 }

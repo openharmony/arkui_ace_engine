@@ -35,6 +35,9 @@ public:
     void SetChangeEvent(GroupChangeEvent&& changeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyle) override;
+    void ResetSelectedColor() override;
+    void ResetUnSelectedColor() override;
+    void ResetCheckMarkColor() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelectAll(FrameNode* frameNode, bool isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
@@ -56,7 +59,7 @@ public:
     static Dimension GetCheckMarkWidth(FrameNode* frameNode);
     static CheckBoxStyle GetCheckboxGroupStyle(FrameNode* frameNode);
 
-    static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
+    static void SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange);
     static void SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent);
 };
 } // namespace OHOS::Ace::NG

@@ -122,9 +122,10 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMessageTest, TestSize.
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto checkValue = GetAttrValue<std::string>(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()),
+    auto checkValue = GetAttrValue<std::string>(
+        reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)),
         ACCESSABLE_PROP_TEXT);
     EXPECT_EQ(checkValue, ACCESSABLE_PROP_TEXT_VALUE);
 }
@@ -152,9 +153,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementDefaultValueT
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
     EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_BOTTOM);
@@ -184,9 +185,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementValidValueTes
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
     EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_TOP);
@@ -216,9 +217,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementInvalidValueT
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
     EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_BOTTOM);
@@ -249,9 +250,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementOnTopDefaultV
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
     EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_BOTTOM);
@@ -282,9 +283,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementOnTopTest, Te
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
     EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_TOP);
@@ -298,9 +299,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPlacementOnTopTest, Te
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_PLACEMENT);
     EXPECT_EQ(checkValue, BUBBLE_LAYOUT_PROP_PLACEMENT_BOTTOM);
@@ -330,9 +331,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetTest, TestS
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_ARROW_OFFSET);
     EXPECT_EQ(checkValue, "0.00px");
@@ -347,9 +348,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetTest, TestS
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_ARROW_OFFSET);
     EXPECT_EQ(checkValue, "1.00px");
@@ -382,9 +383,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetPointPositi
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_ARROW_OFFSET);
     EXPECT_EQ(checkValue, "0.00px");
@@ -400,9 +401,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsArrowOffsetPointPositi
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_ARROW_OFFSET);
     EXPECT_EQ(checkValue, "50.00%");
@@ -434,9 +435,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsTargetSpaceTest, TestS
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_TARGET_SPACE);
     EXPECT_EQ(checkValue, "8.00vp"); // default from PopupTheme
@@ -450,9 +451,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsTargetSpaceTest, TestS
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_TARGET_SPACE);
     EXPECT_EQ(checkValue, "1.00px");
@@ -466,9 +467,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsTargetSpaceTest, TestS
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_TARGET_SPACE);
     EXPECT_EQ(checkValue, "-1.00px");
@@ -498,9 +499,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableArrowTest, TestS
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_ENABLE_ARROW);
     EXPECT_TRUE(checkValue); // default from PopupParam
@@ -514,9 +515,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableArrowTest, TestS
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_ENABLE_ARROW);
     EXPECT_FALSE(checkValue);
@@ -545,9 +546,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableHoverModeDefault
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_ENABLE_HOVER_MODE);
     EXPECT_FALSE(checkValue);
@@ -576,9 +577,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsEnableHoverModeTest, T
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_ENABLE_HOVER_MODE);
     EXPECT_TRUE(checkValue);
@@ -608,9 +609,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsFollowTransformOfTarge
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_FOLLOW_TRANSFORM);
     EXPECT_FALSE(checkValue); // default from PopupParam
@@ -624,9 +625,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsFollowTransformOfTarge
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_FOLLOW_TRANSFORM);
     EXPECT_TRUE(checkValue);
@@ -655,9 +656,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsAutoCancelDefaultValue
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_AUTO_CANCEL);
     EXPECT_TRUE(checkValue); // default from PopupParam, autoCancel = !hasAction
@@ -686,9 +687,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsAutoCancelTest, TestSi
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_AUTO_CANCEL);
     EXPECT_FALSE(checkValue);
@@ -717,9 +718,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskBlockEventTest, Te
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_BLOCK_EVENT);
     EXPECT_TRUE(checkValue);
@@ -734,9 +735,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskBlockEventTest, Te
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_BLOCK_EVENT);
     EXPECT_FALSE(checkValue);
@@ -765,9 +766,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorDefaultTest, 
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_MASK_COLOR);
     EXPECT_EQ(checkValue, THEME_COLOR_RED.ToString()); // set & get from PopupTheme
@@ -801,9 +802,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorColorNumberTe
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_MASK_COLOR);
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -820,9 +821,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorColorNumberTe
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_MASK_COLOR);
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -856,9 +857,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorStringResourc
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_MASK_COLOR);
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -875,9 +876,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsMaskColorStringResourc
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_MASK_COLOR);
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -906,9 +907,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsOffsetTest, TestSize.L
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_POSITION_OFFSET);
     EXPECT_EQ(checkValue, "Offset (0.00, 0.00)");
@@ -927,9 +928,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsOffsetTest, TestSize.L
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_POSITION_OFFSET);
     EXPECT_EQ(checkValue, OffsetF(xLength, yLength).ToString());
@@ -958,9 +959,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorDefaultTest,
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_POPUP_COLOR);
     EXPECT_EQ(checkValue, THEME_COLOR_RED.ToString()); // set & get from PopupTheme
@@ -994,9 +995,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorColorStringT
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_POPUP_COLOR);
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -1012,9 +1013,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorColorStringT
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_POPUP_COLOR);
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -1048,9 +1049,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorNumberResour
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_POPUP_COLOR);
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -1065,9 +1066,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsPopupColorNumberResour
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_RENDER_PROP_POPUP_COLOR);
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -1096,9 +1097,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsShowInSubWindowTest, T
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_SHOW_IN_SUBWINDOW);
     EXPECT_FALSE(checkValue);
@@ -1111,9 +1112,9 @@ HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsShowInSubWindowTest, T
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_LAYOUT_PROP_SHOW_IN_SUBWINDOW);
     EXPECT_TRUE(checkValue);

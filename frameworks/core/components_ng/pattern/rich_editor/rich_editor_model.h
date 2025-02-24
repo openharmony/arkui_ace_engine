@@ -23,12 +23,14 @@
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/device_config.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/text_model.h"
@@ -303,6 +305,8 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
+    virtual ColorMode GetColorMode() = 0;
+    virtual RefPtr<NG::RichEditorTheme> GetTheme() = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {
@@ -368,6 +372,7 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
@@ -378,6 +383,9 @@ public:
     virtual void SetMaxLength(std::optional<int32_t> value) {}
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
+    virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
+
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

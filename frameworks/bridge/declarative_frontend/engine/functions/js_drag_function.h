@@ -59,6 +59,7 @@ public:
     void GetVelocityX(const JSCallbackInfo& args);
     void GetVelocityY(const JSCallbackInfo& args);
     void GetModifierKeyState(const JSCallbackInfo& args);
+    void ExecuteDropAnimation(const JSCallbackInfo& args);
     void GetVelocity(const JSCallbackInfo& args);
     void SetData(const JSCallbackInfo& args);
     void GetData(const JSCallbackInfo& args);
@@ -81,6 +82,7 @@ public:
     {
         return dragEvent_;
     }
+    void StartDataLoading(const JSCallbackInfo& args);
 
 private:
     static void Constructor(const JSCallbackInfo& args);

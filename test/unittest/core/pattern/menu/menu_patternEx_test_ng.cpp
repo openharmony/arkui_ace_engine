@@ -2001,7 +2001,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
-    FrameNode *frameNode = menuNode.GetRawPtr();
+    FrameNode *frameNode = Referenced::RawPtr(menuNode);
     CHECK_NULL_VOID(frameNode);
     MneuModelInstance.SetFontSize(frameNode, Dimension(25.0));
     MneuModelInstance.SetFontWeight(frameNode, FontWeight::BOLD);

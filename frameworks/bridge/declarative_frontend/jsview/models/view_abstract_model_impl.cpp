@@ -1092,10 +1092,18 @@ void ViewAbstractModelImpl::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     box->SetOnMouseId(onMouseId);
 }
 
+void ViewAbstractModelImpl::SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) {}
+
 void ViewAbstractModelImpl::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOnHoverId(onHoverEventFunc);
+}
+
+void ViewAbstractModelImpl::SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnHoverMoveId(onHoverMoveEventFunc);
 }
 
 void ViewAbstractModelImpl::SetOnDelete(std::function<void()>&& onDeleteCallback)
@@ -1650,6 +1658,18 @@ void ViewAbstractModelImpl::SetOnAccessibilityFocus(
 {}
 
 void ViewAbstractModelImpl::ResetOnAccessibilityFocus()
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityDefaultFocus()
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityUseSamePage(bool isFullSilent)
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue)
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
 {}
 
 } // namespace OHOS::Ace::Framework

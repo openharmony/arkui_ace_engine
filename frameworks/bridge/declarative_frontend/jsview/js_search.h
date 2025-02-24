@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ public:
     static void SetSearchIcon(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
+    static void SetBackgroundColor(const JSCallbackInfo& info);
     static void SetCaret(const JSCallbackInfo& info);
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
@@ -100,6 +101,9 @@ public:
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static void CreateJsSearchCommonEvent(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
+    static void SetKeyboardAppearance(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
+    static void SetOnWillChange(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

@@ -19,6 +19,8 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+constexpr float GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
+constexpr float GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 class PanRecognizerTestNg : public GesturesCommonTestNg {
 public:
     static void SetUpTestSuite();
@@ -2080,5 +2082,255 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchUpEvent005, TestSize.Level
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     panRecognizerPtr->HandleTouchUpEvent(axisEvent);
     EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest001
+ * @tc.desc: Test SendCallbackMsg function in the HandleTouchCancelEvent with touch event input. The onActionCancel
+ * function will return GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, SetOnActionCancelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanRecognizerTestNg.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: panRecognizer's callback onActionCancel is not nullptr.
+     */
+    panRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    panRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(panRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke HandleTouchCancelEvent when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value. panRecognizer.refereeState_ = RefereeState::READY
+     */
+    TouchEvent touchEvent;
+    panRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    panRecognizer.refereeState_ = RefereeState::SUCCEED;
+    panRecognizer.currentFingers_ = panRecognizer.fingers_;
+    panRecognizer.HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest002
+ * @tc.desc: Test SendCallbackMsg function in the HandleTouchCancelEvent with axis event input. The onActionCancel
+ * function will return GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, SetOnActionCancelTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanRecognizerTestNg.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: panRecognizerPtr's callback onActionCancel is not nullptr.
+     */
+    panRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    panRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(panRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke HandleTouchCancelEvent when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    AxisEvent axisEvent;
+    panRecognizer.refereeState_ = RefereeState::SUCCEED;
+    panRecognizer.HandleTouchCancelEvent(axisEvent);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest003
+ * @tc.desc: Test SendCallbackMsg function in the ReconcileFrom. The onActionCancel function will return
+ * GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, SetOnActionCancelTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: panRecognizer's callback onActionCancel is not nullptr.
+     */
+    panRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    panRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(panRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke ReconcileFrom when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    TouchEvent touchEvent;
+    panRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    panRecognizer.fingers_ = 0;
+    panRecognizer.refereeState_ = RefereeState::SUCCEED;
+    auto result = panRecognizer.ReconcileFrom(panRecognizerPtr);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest004
+ * @tc.desc: Test SendCallbackMsg function in the OnSucceedCancel. The onActionCancel function will return
+ * GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, SetOnActionCancelTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: panRecognizer's callback onActionCancel is not nullptr.
+     */
+    panRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    panRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(panRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step4. Invoke OnSucceedCancel when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    panRecognizer.OnSucceedCancel();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+}
+
+/**
+ * @tc.name: PanGestureLimitFingerTest001
+ * @tc.desc: Test PanGesture CreateRecognizer function
+ */
+HWTEST_F(PanRecognizerTestNg, PanGestureLimitFingerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanGesture.
+     */
+    PanDirection panDirection;
+    panDirection.type = PanDirection::RIGHT;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(
+        SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE, IS_LIMIT_FINGER_COUNT);
+    ASSERT_NE(panGesture, nullptr);
+    EXPECT_EQ(panGesture->fingers_, SINGLE_FINGER_NUMBER);
+    EXPECT_EQ(panGesture->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. create onActionStart, onActionUpdate, onActionEnd, onActionCancel for PanRecognizer.
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
+     * @tc.expect: panRecognizer create successfully with the OnActionCall.
+     */
+    panGesture->priority_ = GesturePriority::Low;
+    panGesture->gestureMask_ = GestureMask::Normal;
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(panGesture->CreateRecognizer());
+    ASSERT_NE(panRecognizer, nullptr);
+    EXPECT_EQ(panRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(panRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(panRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. create onActionStart, onActionUpdate, onActionEnd, onActionCancel for PanRecognizer.
+     * @tc.steps: case2: onActionId, onActionEndId, onActionCancelId not existed
+     * @tc.expect: panRecognizer create successfully without the OnActionCall.
+     */
+    panGesture->priority_ = GesturePriority::Low;
+    panGesture->gestureMask_ = GestureMask::Normal;
+    auto panRecognizerWithoutFunc = AceType::DynamicCast<PanRecognizer>(panGesture->CreateRecognizer());
+    ASSERT_NE(panRecognizerWithoutFunc, nullptr);
+    EXPECT_EQ(panRecognizerWithoutFunc->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(panRecognizerWithoutFunc->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(panRecognizerWithoutFunc->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+}
+
+/**
+ * @tc.name: PanGestureLimitFingerTest002
+ * @tc.desc: Test PanGesture CreateRecognizer function
+ */
+HWTEST_F(PanRecognizerTestNg, PanGestureLimitFingerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanGesture.
+     */
+    PanDirection panDirection;
+    panDirection.type = PanDirection::RIGHT;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(
+        SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE, IS_NOT_LIMIT_FINGER_COUNT);
+    ASSERT_NE(panGesture, nullptr);
+    EXPECT_EQ(panGesture->fingers_, SINGLE_FINGER_NUMBER);
+    EXPECT_EQ(panGesture->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. create onActionStart, onActionUpdate, onActionEnd, onActionCancel for PanRecognizer.
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
+     * @tc.expect: panRecognizer create successfully with the OnActionCall.
+     */
+    panGesture->priority_ = GesturePriority::Low;
+    panGesture->gestureMask_ = GestureMask::Normal;
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(panGesture->CreateRecognizer());
+    ASSERT_NE(panRecognizer, nullptr);
+    EXPECT_EQ(panRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(panRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(panRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. create onActionStart, onActionUpdate, onActionEnd, onActionCancel for PanRecognizer.
+     * @tc.steps: case2: onActionId, onActionEndId, onActionCancelId existed
+     * @tc.expect: panRecognizer create successfully with the OnActionCall.
+     */
+    panGesture->priority_ = GesturePriority::Low;
+    panGesture->gestureMask_ = GestureMask::Normal;
+    auto onActionStart = [](GestureEvent& info) { return true; };
+    auto onActionUpdate = [](GestureEvent& info) { return true; };
+    auto onActionEnd = [](GestureEvent& info) { return true; };
+    auto onActionCancel = [](GestureEvent& info) { return true; };
+    panGesture->SetOnActionStartId(onActionStart);
+    panGesture->SetOnActionUpdateId(onActionUpdate);
+    panGesture->SetOnActionEndId(onActionEnd);
+    panGesture->SetOnActionCancelId(onActionCancel);
+    EXPECT_TRUE(panGesture->onActionStartId_);
+    EXPECT_TRUE(panGesture->onActionUpdateId_);
+    EXPECT_TRUE(panGesture->onActionEndId_);
+    EXPECT_TRUE(panGesture->onActionCancelId_);
+
+    auto panRecognizerWithFunc = AceType::DynamicCast<PanRecognizer>(panGesture->CreateRecognizer());
+    ASSERT_NE(panRecognizerWithFunc, nullptr);
+    EXPECT_EQ(panRecognizerWithFunc->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(panRecognizerWithFunc->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(panRecognizerWithFunc->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
 }
 } // namespace OHOS::Ace::NG

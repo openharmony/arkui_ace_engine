@@ -293,12 +293,12 @@ HWTEST_F(ListEventTestNg, HandleDragOverScroll007, TestSize.Level1)
      * @tc.expected: List Adaptive Content, List height is 300.
      */
     StackModelNG stackModel;
-    stackModel.Create();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    stackModel.Create(Alignment::TOP_LEFT);
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     ListModelNG model;
     model.Create();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     GetList();
     CreateListItems(3);
@@ -366,7 +366,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign001, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
     model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
@@ -443,7 +443,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign002, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
     model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
@@ -517,7 +517,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign003, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
     model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
@@ -525,7 +525,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign003, TestSize.Level1)
     /**
      * @tc.steps: step1. The middle item in the view will be align to center
      */
-    const float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_MAIN_SIZE) / 2;
+    const float defaultOffset = -(HEIGHT - DEVIATION_HEIGHT - ITEM_MAIN_SIZE) / 2;
     EXPECT_TRUE(Position(-defaultOffset));
 
     /**
@@ -636,7 +636,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign005, TestSize.Level1)
      */
     DragAction(frameNode_, Offset(), 100, 800);
     EXPECT_TRUE(TickPosition(-250.0f));
-    EXPECT_TRUE(TickPosition(-175.0f));
+    EXPECT_TRUE(TickPosition(0.0f));
 }
 
 /**
@@ -678,7 +678,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign007, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
     model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(TOTAL_ITEM_NUMBER);
     SetChildrenMainSize(frameNode_, 1, { 150 });
@@ -736,7 +736,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign008, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
     model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateListItems(TOTAL_ITEM_NUMBER);
     SetChildrenMainSize(frameNode_, 4, { 150 });
@@ -794,7 +794,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign009, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
     model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     CreateListItems(TOTAL_ITEM_NUMBER);
     SetChildrenMainSize(frameNode_, 1, { 150 });
@@ -803,7 +803,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign009, TestSize.Level1)
     /**
      * @tc.steps: step1. The middle item in the view will be align to center
      */
-    const float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_MAIN_SIZE) / 2;
+    const float defaultOffset = -(HEIGHT - DEVIATION_HEIGHT - ITEM_MAIN_SIZE) / 2;
     EXPECT_TRUE(Position(-defaultOffset));
 
     /**
@@ -965,7 +965,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign013, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
     model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
@@ -1030,7 +1030,7 @@ HWTEST_F(ListEventTestNg, StartSnapAnimation001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollSnapAlign(ScrollSnapAlign::START);
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
 
@@ -1052,61 +1052,61 @@ HWTEST_F(ListEventTestNg, StartSnapAnimation001, TestSize.Level1)
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 2);
 
     snapAnimationOptions.snapDirection = SnapDirection::NONE;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 0);
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 0);
 
     snapAnimationOptions.snapDirection = SnapDirection::NONE;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 2);
 }
@@ -1124,7 +1124,7 @@ HWTEST_F(ListEventTestNg, EndSnapAnimation001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollSnapAlign(ScrollSnapAlign::END);
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     CreateListItems(5);
     CreateDone();
 
@@ -1147,34 +1147,34 @@ HWTEST_F(ListEventTestNg, EndSnapAnimation001, TestSize.Level1)
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 4);
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 4);
 
     snapAnimationOptions.snapDirection = SnapDirection::NONE;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 3);
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 2);
 }
@@ -1192,7 +1192,7 @@ HWTEST_F(ListEventTestNg, CenterSnapAnimation001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     // Make ListHeight not an integer multiple of ListItems
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     CreateListItems(5);
     CreateDone();
 
@@ -1214,35 +1214,64 @@ HWTEST_F(ListEventTestNg, CenterSnapAnimation001, TestSize.Level1)
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 2);
 
     snapAnimationOptions.snapDirection = SnapDirection::NONE;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 1);
 
     snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 0);
+}
+
+/**
+ * @tc.name: HandleBoxSelectDragStart
+ * @tc.desc: Handle drag start for box select
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleBoxSelectDragStart, TestSize.Level1)
+{
+    const int32_t itemNumber = 20;
+    const float contentStartOffset = 0;
+    const float contentEndOffset = 100;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    CreateListItems(itemNumber);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetRawGlobalLocation(Offset(20, 50));
+    info.SetOffsetX(5);
+    info.SetOffsetY(10);
+    pattern_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->canMultiSelect_);
+    EXPECT_FALSE(pattern_->IsItemSelected(20, 50));
+    pattern_->HandleDragEnd();
+
+    GetChildPattern<ListItemPattern>(frameNode_, 0)->SetSelected(true);
+    EXPECT_TRUE(pattern_->IsItemSelected(20, 50));
 }
 } // namespace OHOS::Ace::NG

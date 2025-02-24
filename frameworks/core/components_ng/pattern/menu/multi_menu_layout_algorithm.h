@@ -43,6 +43,7 @@ private:
     void UpdateMenuDefaultConstraintByDevice(const RefPtr<MenuPattern>& pattern,
         LayoutConstraintF& childConstraint, float paddingWidth, std::optional<LayoutConstraintF>& layoutConstraint,
         bool idealSizeHasVal);
+    bool UpdateSelectOverlayMenuMinWidth(const RefPtr<MenuPattern>& pattern, const RefPtr<GridColumnInfo>& columnInfo);
 
     float userHeight_ = 0.0f;
     

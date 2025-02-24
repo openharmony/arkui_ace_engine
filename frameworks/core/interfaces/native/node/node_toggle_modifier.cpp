@@ -340,11 +340,31 @@ void SetToggleState(ArkUINodeHandle node, ArkUI_Bool isOn)
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::SetToggleState(frameNode, static_cast<bool>(isOn));
 }
+
+void SetToggleOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        ToggleModelNG::OnChange(frameNode, std::move(*onChange));
+    } else {
+        ToggleModelNG::OnChange(frameNode, nullptr);
+    }
+}
+
+void ResetToggleOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::OnChange(frameNode, nullptr);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIToggleModifier modifier = {
         .setToggleSelectedColor = SetToggleSelectedColor,
         .resetToggleSelectedColor = ResetToggleSelectedColor,
@@ -373,22 +393,17 @@ const ArkUIToggleModifier* GetToggleModifier()
         .resetToggleTrackBorderRadius = ResetToggleTrackBorderRadius,
         .getToggleUnselectedColor = GetToggleUnselectedColor,
         .setToggleState = SetToggleState,
+        .setToggleOnChange = SetToggleOnChange,
+        .resetToggleOnChange = ResetToggleOnChange,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIToggleModifier* GetCJUIToggleModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIToggleModifier modifier = {
         .setToggleSelectedColor = SetToggleSelectedColor,
         .resetToggleSelectedColor = ResetToggleSelectedColor,
@@ -417,14 +432,7 @@ const CJUIToggleModifier* GetCJUIToggleModifier()
         .resetToggleTrackBorderRadius = ResetToggleTrackBorderRadius,
         .getToggleUnselectedColor = GetToggleUnselectedColor,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

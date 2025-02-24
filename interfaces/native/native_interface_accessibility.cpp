@@ -41,6 +41,15 @@ int32_t OH_ArkUI_AccessibilityProviderRegisterCallback(
     return provider->AccessibilityProviderRegisterCallback(callbacks);
 }
 
+int32_t OH_ArkUI_AccessibilityProviderRegisterCallbackWithInstance(const char* instanceId,
+    ArkUI_AccessibilityProvider* provider, ArkUI_AccessibilityProviderCallbacksWithInstance* callbacks)
+{
+    if ((provider == nullptr) || (callbacks == nullptr)) {
+        return ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER;
+    }
+    return provider->AccessibilityProviderRegisterCallbackWithInstance(instanceId, callbacks);
+}
+
 void OH_ArkUI_SendAccessibilityAsyncEvent(
     ArkUI_AccessibilityProvider* provider, ArkUI_AccessibilityEventInfo* eventInfo,
     void (*callback)(int32_t errorCode))

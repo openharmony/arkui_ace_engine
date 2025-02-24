@@ -1233,7 +1233,7 @@ HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->SetFriction(friction);
+    scrollable->SetUnstaticFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
@@ -1252,16 +1252,16 @@ HWTEST_F(ScrollableTestNg, FadingEdge001, TestSize.Level1)
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     auto paintProperty = scrollPn->GetPaintProperty<ScrollablePaintProperty>();
-    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), false);
+    NG::ScrollableModelNG::SetFadingEdge(Referenced::RawPtr(scroll_), false);
     EXPECT_FALSE(paintProperty->GetFadingEdge().value_or(false));
     /**
      * @tc.cases: SetFadingEdge true and SetFadingEdgeLength
      * @tc.expected: FadingEdge true and FadingEdgeLength is the same as SetFadingEdgeLength
      */
-    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), true);
+    NG::ScrollableModelNG::SetFadingEdge(Referenced::RawPtr(scroll_), true);
     EXPECT_TRUE(paintProperty->GetFadingEdge().value_or(false));
     EXPECT_EQ(paintProperty->GetFadingEdgeLength().value(), Dimension(32.0f, DimensionUnit::VP)); // default value;
-    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), true, Dimension(50.0f, DimensionUnit::PERCENT));
+    NG::ScrollableModelNG::SetFadingEdge(Referenced::RawPtr(scroll_), true, Dimension(50.0f, DimensionUnit::PERCENT));
     EXPECT_TRUE(paintProperty->GetFadingEdge().value_or(false));
     EXPECT_EQ(paintProperty->GetFadingEdgeLength().value(), Dimension(50.0f, DimensionUnit::PERCENT));
 }
@@ -1375,7 +1375,8 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     MouseInfo info;
     info.SetAction(MouseAction::PRESS);
     info.SetButton(MouseButton::LEFT_BUTTON);
-    auto& inputEvents = scrollPn->GetEventHub<EventHub>()->GetInputEventHub()->mouseEventActuator_->inputEvents_;
+    auto& inputEvents = scrollPn->GetEventHub<EventHub>()
+        ->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
     EXPECT_EQ(inputEvents.size(), 1);
     for (const auto& callback : inputEvents) {
         if (callback) {
@@ -1392,6 +1393,37 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
         }
     };
     EXPECT_FALSE(scrollPn->isMousePressed_);
+}
+
+/**
+ * @tc.name: InitMouseEvent002
+ * @tc.desc: Test multiSelectable event and mouse scroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, InitMouseEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable.
+     * @tc.expected: create PartiallyMockedScrollable successfully.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    ASSERT_NE(scroll_, nullptr);
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    auto gestureHub = scroll_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->panEventActuator_, nullptr);
+    
+    /**
+     * @tc.steps: step2. execute the InitMouseEbent.
+     * @tc.expected: the isExcludedAxis_ of panEventActuator_ is true.
+     */
+    scrollPn->InitMouseEvent();
+    gestureHub = scroll_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    ASSERT_NE(gestureHub->panEventActuator_, nullptr);
+    EXPECT_TRUE(gestureHub->panEventActuator_->isExcludedAxis_);
 }
 
 /**

@@ -46,15 +46,17 @@ public:
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
     void HasUserDefinedOpacity() override;
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
     static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
     static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
-    static void SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
     static void SetMode(FrameNode* frameNode, const DatePickerMode& value);
     static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static void SetChangeEvent(FrameNode* frameNode, DateChangeEvent&& onChange);
+    static void SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetChangeEvent(DateChangeEvent&& onChange) override;
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     static void SetSelectedTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(
@@ -74,9 +76,9 @@ public:
     static uint32_t getBackgroundColor(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
-#ifdef SUPPORT_DIGITAL_CROWN
-    static void SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity);
-#endif
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
@@ -88,7 +90,7 @@ private:
     std::string dateTimeOrder = "";
 };
 
-class ACE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {
+class ACE_FORCE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {
 public:
     void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,

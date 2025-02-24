@@ -27,6 +27,7 @@ class ACE_FORCE_EXPORT ViewStackProcessor {
 public:
     static int32_t ClaimNodeId();
     static void Push(const RefPtr<FrameNode>& node);
+    static RefPtr<FrameNode> GetTopNode();
 };
 } // namespace OHOS::Ace::Kit
 

@@ -20,8 +20,9 @@
 #include "bridge/cj_frontend/frontend/cj_frontend_loader.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "bridge/common/accessibility/accessibility_node_manager.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/font_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "securec.h"
 
 using namespace OHOS::Ace::NG;
 using namespace OHOS::Ace;
@@ -52,8 +53,8 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
 } // namespace
 
 #if defined(PREVIEW)
-void CJFrontendAbstract::TransferJsResponseDataPreview(int32_t callbackId, int32_t code,
-    ResponseData responseData) const
+void CJFrontendAbstract::TransferJsResponseDataPreview(
+    int32_t callbackId, int32_t code, ResponseData responseData) const
 {}
 #endif
 
@@ -242,9 +243,8 @@ void CJFrontendAbstract::ShowDialogInner(DialogProperties& dialogProperties,
     auto pipelineContext = pipelineContextHolder_.Get();
     LOGI("Dialog IsCurrentUseNewPipeline.");
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
-        taskExecutor->PostTask(
-            [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); }, TaskExecutor::TaskType::JS,
-            "CJFroentendShowDialogInner");
+        taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+            TaskExecutor::TaskType::JS, "CJFroentendShowDialogInner");
     };
     dialogProperties.onSuccess = std::move(callback);
     auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
@@ -271,8 +271,8 @@ void CJFrontendAbstract::ShowDialogInner(DialogProperties& dialogProperties,
     MainWindowOverlay(std::move(task), "ArkUIShowDialogInner");
 }
 
-void CJFrontendAbstract::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
-    std::function<void(int32_t, int32_t)>&& callback)
+void CJFrontendAbstract::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     DialogProperties dialogProperties = {
         .title = title,
@@ -320,17 +320,14 @@ void CJFrontendAbstract::ShowActionMenuInner(DialogProperties& dialogProperties,
         TaskExecutor::TaskType::UI, "CJFroentendShowActionMenuInner");
 }
 
-void CJFrontendAbstract::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
-    std::function<void(int32_t)> &&callback)
+void CJFrontendAbstract::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
 {
-    DialogProperties dialogProperties = {
-        .onWillDismiss = dialogAttr.customOnWillDismiss,
+    DialogProperties dialogProperties = { .onWillDismiss = dialogAttr.customOnWillDismiss,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
         .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
-        .maskRect = dialogAttr.maskRect
-    };
+        .maskRect = dialogAttr.maskRect };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -394,15 +391,10 @@ NativeOptionFontInfo CJFrontendAbstract::GetSystemFont(const std::string& fontNa
 {
     FontInfo fontInfo;
     if (!pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo)) {
-        return NativeOptionFontInfo {
-            .hasValue = false,
-            .info = nullptr
-        };
+        return NativeOptionFontInfo { .hasValue = false, .info = nullptr };
     }
-    return NativeOptionFontInfo {
-        .hasValue = true,
-        .info = new NativeFontInfo {
-            .path = fontInfo.path.c_str(),
+    return NativeOptionFontInfo { .hasValue = true,
+        .info = new NativeFontInfo { .path = fontInfo.path.c_str(),
             .postScriptName = fontInfo.postScriptName.c_str(),
             .fullName = fontInfo.fullName.c_str(),
             .family = fontInfo.family.c_str(),
@@ -411,8 +403,102 @@ NativeOptionFontInfo CJFrontendAbstract::GetSystemFont(const std::string& fontNa
             .width = fontInfo.width,
             .italic = fontInfo.italic,
             .monoSpace = fontInfo.monoSpace,
-            .symbolic =  fontInfo.symbolic
-        }
-    };
+            .symbolic = fontInfo.symbolic } };
 }
+void CJFrontendAbstract::BackIndex(int32_t index, const std::string& params)
+{
+    pageRouterManager_->BackWithIndex(index, params);
+}
+
+void CJFrontendAbstract::Clear()
+{
+    pageRouterManager_->Clear();
+}
+
+int32_t CJFrontendAbstract::GetLength()
+{
+    return pageRouterManager_->GetStackSize();
+}
+
+void CJFrontendAbstract::SetShowAlertBeforeBackPage(const char* msg, std::function<void(int32_t)>&& callback)
+{
+    pageRouterManager_->EnableAlertBeforeBackPage(msg, callback);
+}
+
+void CJFrontendAbstract::SetHideAlertBeforeBackPage()
+{
+    pageRouterManager_->DisableAlertBeforeBackPage();
+}
+
+static char* CopyStr(const std::string& str)
+{
+    char* newStr = new (std::nothrow) char[str.length() + 1];
+    if (newStr == nullptr) {
+        return nullptr;
+    }
+
+    int err = strcpy_s(newStr, str.length() + 1, str.c_str());
+    if (err != 0) {
+        delete[] newStr;
+        return nullptr;
+    }
+
+    return newStr;
+}
+
+void CJFrontendAbstract::GetState(CJPageRouterAbstract::RouterState* info)
+{
+    std::string name_str = "";
+    std::string path_str = "";
+    std::string params_str = "";
+    pageRouterManager_->GetState(info->index, name_str, path_str, params_str);
+    info->name = CopyStr(name_str);
+    info->path = CopyStr(path_str);
+    info->params = CopyStr(params_str);
+}
+
+void CJFrontendAbstract::GetStateByIndex(CJPageRouterAbstract::RouterState* info)
+{
+    std::string name_str = "";
+    std::string path_str = "";
+    std::string params_str = "";
+    pageRouterManager_->GetStateByIndex(info->index, name_str, path_str, params_str);
+    info->name = CopyStr(name_str);
+    info->path = CopyStr(path_str);
+    info->params = CopyStr(params_str);
+}
+
+CJPageRouterAbstract::RouterStateList CJFrontendAbstract::GetStateByUrl(const char* url)
+{
+    CJPageRouterAbstract::RouterStateList result;
+    std::vector<CJPageRouterAbstract::RouterState> states = pageRouterManager_->GetStateByUrl(url);
+    if (states.empty()) {
+        return result;
+    }
+    auto stateslist = new CJPageRouterAbstract::RouterState[states.size()];
+    size_t idx = 0;
+    for (auto state : states) {
+        stateslist[idx].index = state.index;
+        stateslist[idx].name = state.name;
+        stateslist[idx].path = state.path;
+        stateslist[idx].params = state.params;
+        idx++;
+    }
+    result.array = stateslist;
+    result.size = static_cast<int64_t>(states.size());
+    result.free = CJPageRouterAbstract::RouterStateListFree;
+    return result;
+}
+void CJFrontendAbstract::PushPageWithCallback(const std::string& url, const std::string& params,
+    CJPageRouterAbstract::RouterMode& mode, std::function<void(int32_t)>&& callback)
+{
+    pageRouterManager_->PushPageWithCallback({ url, mode, "", callback }, params);
+}
+
+void CJFrontendAbstract::ReplacePageWithCallback(const std::string& url, const std::string& params,
+    CJPageRouterAbstract::RouterMode& mode, std::function<void(int32_t)>&& callback)
+{
+    pageRouterManager_->ReplacePageWithCallback({ url, mode, "", callback }, params);
+}
+
 } // namespace OHOS::Ace

@@ -38,7 +38,8 @@ public:
             auto offset = paintWrapper->GetContentOffset();
             auto pipeline = PipelineBase::GetCurrentContextSafely();
             CHECK_NULL_RETURN(pipeline, nullptr);
-            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+            auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
+            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
             CHECK_NULL_RETURN(checkBoxTheme, nullptr);
             auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
             CHECK_NULL_RETURN(paintProperty, nullptr);
@@ -91,8 +92,9 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(checkboxModifier_);
-        checkboxModifier_->InitializeParam();
         CHECK_NULL_VOID(paintWrapper);
+        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
+        checkboxModifier_->InitializeParam(host ? host->GetThemeScopeId() : 0);
         auto size = paintWrapper->GetContentSize();
         float strokePaintSize = size.Width();
         auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
@@ -128,7 +130,7 @@ public:
         if (paintProperty->HasCheckBoxUnSelectedColor()) {
             auto pipeline = PipelineBase::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipeline);
-            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
             CHECK_NULL_VOID(checkBoxTheme);
             checkboxModifier_->SetHasUnselectedColor(
                 paintProperty->GetCheckBoxUnSelectedColorValue() != checkBoxTheme->GetInactiveColor());

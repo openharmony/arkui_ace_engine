@@ -134,7 +134,12 @@ int AnimatedImage::GenerateIteration(const std::unique_ptr<SkCodec>& codec)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, 1);
     if (pipeline->IsFormRender()) {
-        iteration = FORM_REPEAT_COUNT;
+        auto container = Container::Current();
+        bool isDynamicComponent = container && container->IsDynamicRender() &&
+                                  container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+        if (!isDynamicComponent) {
+            iteration = FORM_REPEAT_COUNT;
+        }
     }
     return iteration;
 }

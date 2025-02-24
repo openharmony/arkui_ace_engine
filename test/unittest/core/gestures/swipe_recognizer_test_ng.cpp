@@ -1182,4 +1182,114 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerPtrHandleTouchUpEventTest001, Tes
     swipeRecognizerPtr->HandleTouchUpEvent(axisEvent);
     EXPECT_EQ(swipeRecognizerPtr->disposal_, GestureDisposal::REJECT);
 }
+
+/**
+ * @tc.name: SwipeGestureLimitFingerTest001
+ * @tc.desc: Test SwipeGesture CreateRecognizer function
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeGestureGesture.
+     */
+    int32_t fingersNum = DEFAULT_PAN_FINGER;
+    double speedNum = DEFAULT_SLIDE_SPEED;
+    SwipeDirection slideDirection;
+    SwipeGestureModelNG swipeGestureModelNG;
+    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum, IS_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto swipeGestureNG = AceType::DynamicCast<NG::SwipeGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(swipeGestureNG->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+    
+
+    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, speedNum, IS_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    EXPECT_EQ(swipeGesture.isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: functions are not existed
+     */
+    swipeGesture.priority_ = GesturePriority::Low;
+    swipeGesture.gestureMask_ = GestureMask::Normal;
+    auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
+    EXPECT_NE(swipeRecognizer, nullptr);
+    EXPECT_EQ(swipeRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(swipeRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(swipeRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    // /**
+    //  * @tc.steps: step2. call CreateRecognizer function and compare result
+    //  * @tc.steps: case2: functions are existed
+    //  */
+    std::unique_ptr<GestureEventFunc> onActionStartId;
+    std::unique_ptr<GestureEventFunc> onActionUpdateId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
+    swipeGesture.onActionStartId_ = std::move(onActionStartId);
+    swipeGesture.onActionUpdateId_ = std::move(onActionUpdateId);
+    swipeGesture.onActionEndId_ = std::move(onActionEndId);
+    swipeGesture.onActionCancelId_ = std::move(onActionCancelId);
+    swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
+    EXPECT_EQ(swipeRecognizer->priority_, swipeGesture.priority_);
+    EXPECT_EQ(swipeRecognizer->priorityMask_, swipeGesture.gestureMask_);
+    EXPECT_EQ(swipeRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+}
+
+/**
+ * @tc.name: SwipeGestureLimitFingerTest002
+ * @tc.desc: Test SwipeGesture CreateRecognizer function
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeGestureGesture.
+     */
+    int32_t fingersNum = DEFAULT_PAN_FINGER;
+    double speedNum = DEFAULT_SLIDE_SPEED;
+    SwipeDirection slideDirection;
+    SwipeGestureModelNG swipeGestureModelNG;
+    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum, IS_NOT_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto swipeGestureNG = AceType::DynamicCast<NG::SwipeGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(swipeGestureNG->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+    
+
+    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, speedNum, IS_NOT_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    EXPECT_EQ(swipeGesture.isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: functions are not existed
+     */
+    swipeGesture.priority_ = GesturePriority::Low;
+    swipeGesture.gestureMask_ = GestureMask::Normal;
+    auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
+    EXPECT_NE(swipeRecognizer, nullptr);
+    EXPECT_EQ(swipeRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(swipeRecognizer->GetPriorityMask(), GestureMask::Normal);
+    EXPECT_EQ(swipeRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    // /**
+    //  * @tc.steps: step2. call CreateRecognizer function and compare result
+    //  * @tc.steps: case2: functions are existed
+    //  */
+    std::unique_ptr<GestureEventFunc> onActionStartId;
+    std::unique_ptr<GestureEventFunc> onActionUpdateId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
+    swipeGesture.onActionStartId_ = std::move(onActionStartId);
+    swipeGesture.onActionUpdateId_ = std::move(onActionUpdateId);
+    swipeGesture.onActionEndId_ = std::move(onActionEndId);
+    swipeGesture.onActionCancelId_ = std::move(onActionCancelId);
+    swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
+    EXPECT_EQ(swipeRecognizer->priority_, swipeGesture.priority_);
+    EXPECT_EQ(swipeRecognizer->priorityMask_, swipeGesture.gestureMask_);
+    EXPECT_EQ(swipeRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+}
 } // namespace OHOS::Ace::NG

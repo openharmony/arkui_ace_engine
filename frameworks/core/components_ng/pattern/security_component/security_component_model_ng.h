@@ -28,6 +28,7 @@ struct SecurityComponentElementStyle {
     int32_t text;
     int32_t icon;
     int32_t backgroundType;
+    uint32_t symbolIcon;
 };
 
 class ACE_EXPORT SecurityComponentModelNG {
@@ -45,8 +46,10 @@ public:
         const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent);
     static void SetIconSize(const Dimension& value);
     static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetIconColor(const Color& value);
     static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetSymbolIconSize(const Dimension& value);
+    static void SetIconColor(const Color& value);
+    static void SetSymbolIconColor(const std::vector<Color>& value);
     static void SetFontSize(const Dimension& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontStyle(const Ace::FontStyle& value);
@@ -123,6 +126,8 @@ protected:
 private:
     static void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
         bool isButtonVisible);
+    static void SetDefaultSymbolIconStyle(const RefPtr<FrameNode>& symbolNode, uint32_t symbolId,
+        bool isButtonVisible);
     static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
     static bool IsBackgroundVisible();
     static bool IsBackgroundVisible(FrameNode* frameNode);
@@ -134,8 +139,10 @@ private:
     static void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
         int32_t type);
     static void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text, bool isButtonVisible);
-    static void InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon,
+    static void InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon, uint32_t symbolIcon,
         int32_t backgroundType);
+    RefPtr<FrameNode> InitChild(const std::string& tag, int32_t nodeId,
+        SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_SECURITY_COMPONENT_MODEL_NG_H

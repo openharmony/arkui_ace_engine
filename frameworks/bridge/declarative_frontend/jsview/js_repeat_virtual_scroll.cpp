@@ -44,10 +44,11 @@ enum {
     PARAM_TOTAL_COUNT = 0,
     PARAM_TEMPLATE_OPTS = 1,
     PARAM_HANDLERS = 2,
-    MIN_PARAM_SIZE = 3,
+    PARAM_REUSABLE = 3,
+    MIN_PARAM_SIZE = 4,
 };
 
-bool ParseAndVerifyParams(const JSCallbackInfo& info)
+static bool ParseAndVerifyParams(const JSCallbackInfo& info)
 {
     if (info.Length() < MIN_PARAM_SIZE) {
         return false;
@@ -60,6 +61,9 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info)
         return false;
     }
     if (!info[PARAM_HANDLERS]->IsObject()) {
+        return false;
+    }
+    if (!info[PARAM_REUSABLE]->IsBoolean()) {
         return false;
     }
 
@@ -174,9 +178,12 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
 
+    // arg 3
+    auto reusable = info[PARAM_REUSABLE]->ToBoolean();
+
     RepeatVirtualScrollModel::GetInstance()->Create(
         totalCount, templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range,
-        onSetActiveRange);
+        onSetActiveRange, reusable);
 }
 
 void JSRepeatVirtualScroll::UpdateRenderState(const JSCallbackInfo& info)

@@ -117,6 +117,8 @@ struct SpanOptionBase {
     std::optional<int32_t> offset;
     UserGestureOptions userGestureOption;
     UserMouseOptions userMouseOption;
+    std::optional<Color> dragBackgroundColor;
+    bool isDragShadowNeeded = true;
 
     std::string ToString() const
     {
@@ -189,6 +191,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
 
     void UpdateColorByResourceId();
 };

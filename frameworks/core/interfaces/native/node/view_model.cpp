@@ -296,6 +296,13 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createXComponentTextureNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::TEXTURE, "");
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
@@ -450,6 +457,14 @@ void* createDividerNode(ArkUI_Int32 nodeId)
 void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = IndexerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createArcAlphabetIndexerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = IndexerModelNG::CreateFrameNode(nodeId, true);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -613,11 +628,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createRowNode,
     createFlexNode,
     createListItemNode,
-#ifndef ARKUI_WEARABLE
     createTabsNode,
-#else
-    nullptr, // createTabsNode
-#endif
     nullptr, // Navigator
     nullptr, // Web
     createSliderNode,
@@ -665,16 +676,14 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #endif
     createImageAnimatorNode,
     createCircleNode,
-#ifndef ARKUI_WEARABLE
     createTabContentNode,
-#else
-    nullptr, // createTabContentNode
-#endif
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
 #ifdef QRCODEGEN_SUPPORT
     createQRcodeNode,
+#else
+    nullptr,
 #endif
     createBadgeNode,
     createTextClockNode,
@@ -682,11 +691,17 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createMarqueeNode,
     createCheckBoxGroupNode,
     createRatingNode,
+#ifdef XCOMPONENT_SUPPORTED
+    createXComponentTextureNode,
+#else
+    nullptr,
+#endif
+    createArcAlphabetIndexerNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
-    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+    if (tag >= static_cast<ArkUINodeType>(sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*))) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;
     }
@@ -699,7 +714,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 
 void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
-    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+    if (tag >= static_cast<ArkUINodeType>(sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*))) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;
     }

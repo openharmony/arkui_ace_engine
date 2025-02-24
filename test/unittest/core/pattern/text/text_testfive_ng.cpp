@@ -29,7 +29,10 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::string SYMBOL_FONT_FAMILY = "Symbol_Test_CustomSymbol";
+constexpr int32_t DEFAULT_SYMBOL_ID = 983242;
+} // namespace
 
 class TextTestFiveNg : public TextBases {
 public:
@@ -505,6 +508,22 @@ HWTEST_F(TextTestFiveNg, GetTextHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsShowTranslate001
+ * @tc.desc: test text_pattern.cpp IsShowTranslate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsShowTranslate001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    bool showTranslate = textPattern->IsShowTranslate();
+    EXPECT_EQ(showTranslate, false);
+}
+
+/**
  * @tc.name: IsShowSearch001
  * @tc.desc: test text_pattern.cpp IsShowSearch function
  * @tc.type: FUNC
@@ -518,6 +537,24 @@ HWTEST_F(TextTestFiveNg, IsShowSearch001, TestSize.Level1)
 
     textPattern->IsShowSearch();
     EXPECT_NE(textPattern, nullptr);
+}
+
+/**
+ * @tc.name: IsSupportMenuShare001
+ * @tc.desc: test base_text_select_overlay.cpp IsSupportMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsSupportMenuShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsSupportMenuShare(), false);
 }
 
 /**
@@ -767,20 +804,20 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::RTL);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::RTL);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
@@ -843,7 +880,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     LayoutConstraintF contentConstraint;
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     textStyle.SetAdaptTextSize(Dimension(100, DimensionUnit::PERCENT),
         Dimension(10, DimensionUnit::PERCENT), Dimension(10, DimensionUnit::PERCENT));
@@ -852,13 +889,13 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     contentConstraint.maxSize.SetHeight(-1.0);
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     contentConstraint.maxSize.SetWidth(1.0);
     contentConstraint.maxSize.SetHeight(1.0);
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     TextStyle textStyleFP;
     textStyleFP.SetAdaptTextSize(Dimension(100, DimensionUnit::FP),
@@ -866,7 +903,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     textStyleFP.SetFontSize(Dimension(10, DimensionUnit::FP));
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyleFP, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyleFP, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 }
 
 /**
@@ -1087,6 +1124,44 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolTextStyle001, TestSize.Level1)
     textStyle.SetRenderStrategy(-1);
     textStyle.SetEffectStrategy(-1);
     textStyle.SetSymbolEffectOptions(symbolEffectOptions);
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
+}
+
+/**
+ * @tc.name: UpdateSymbolTextStyle002
+ * @tc.desc: test text_layout_algorithm.cpp UpdateSymbolTextStyle function for custom symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateSymbolTextStyle002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(DEFAULT_SYMBOL_ID));
+
+    TextStyle textStyle;
+    ParagraphStyle paragraphStyle;
+    textStyle.SetSymbolType(SymbolType::SYSTEM);
+
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
+
+    textStyle.SetSymbolType(SymbolType::CUSTOM);
+
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), false);
+
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    textStyle.SetFontFamilies(fontFamilies);
     EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
         textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
 }
@@ -1482,16 +1557,74 @@ HWTEST_F(TextTestFiveNg, OnHandleMarkInfoChange001, TestSize.Level1)
     EXPECT_EQ(shareOverlayInfo->handlerColor, std::nullopt);
 
     flag = DIRTY_FIRST_HANDLE;
+    shareOverlayInfo->menuInfo.showTranslate = false;
+    textSelectOverlay->SetMenuTranslateIsSupport(false);
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showTranslate, false);
+
+    flag = DIRTY_SECOND_HANDLE;
+    shareOverlayInfo->menuInfo.showTranslate = true;
+    textSelectOverlay->SetMenuTranslateIsSupport(true);
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showTranslate, false);
+
+    flag = DIRTY_FIRST_HANDLE;
     shareOverlayInfo->menuInfo.showSearch = false;
     textSelectOverlay->SetIsSupportMenuSearch(false);
     textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
     EXPECT_EQ(shareOverlayInfo->menuInfo.showSearch, false);
+
+    shareOverlayInfo->menuInfo.showShare = false;
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showShare, false);
 
     flag = DIRTY_SECOND_HANDLE;
     shareOverlayInfo->menuInfo.showSearch = true;
     textSelectOverlay->SetIsSupportMenuSearch(true);
     textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
     EXPECT_EQ(shareOverlayInfo->menuInfo.showSearch, false);
+
+    shareOverlayInfo->menuInfo.showShare = true;
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showShare, false);
+}
+
+/**
+ * @tc.name: IsNeedMenuTranslate001
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuTranslate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuTranslate001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuTranslate(), false);
+}
+
+/**
+ * @tc.name: HandleOnTranslate001
+ * @tc.desc: test base_text_select_overlay.cpp HandleOnTranslate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, HandleOnTranslate001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->HandleOnTranslate();
+    EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
+    EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
 }
 
 /**
@@ -1528,6 +1661,44 @@ HWTEST_F(TextTestFiveNg, HandleOnSearch001, TestSize.Level1)
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->HandleOnSearch();
+    EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
+    EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
+}
+
+/**
+ * @tc.name: IsNeedMenuShare001
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuShare(), false);
+}
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test base_text_select_overlay.cpp HandleOnShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, HandleOnShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->HandleOnShare();
     EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
     EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
 }
@@ -1819,6 +1990,44 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSymbolSpanParagraph002
+ * @tc.desc: test span_node.cpp UpdateSymbolSpanParagraph function for customSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    int32_t callPushStyleCount = 0;
+    EXPECT_CALL(*paragraph, PushStyle(_)).WillRepeatedly([&callPushStyleCount](){ callPushStyleCount++; });
+
+    EXPECT_EQ(callPushStyleCount, 0);
+
+    spanItem->fontStyle->UpdateFontSize(Dimension(1));
+    spanItem->fontStyle->UpdateSymbolType(SymbolType::SYSTEM);
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 1);
+
+    spanItem->fontStyle->UpdateSymbolType(SymbolType::CUSTOM);
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 1);
+
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    spanItem->fontStyle->UpdateFontFamily(fontFamilies);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 2);
+}
+
+/**
  * @tc.name: UpdateSymbolSpanColor001
  * @tc.desc: test span_node.cpp UpdateSymbolSpanColor function
  * @tc.type: FUNC
@@ -1915,9 +2124,6 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
     spanNode->spanItem_->position = StringUtils::ToWstring(CREATE_VALUE).length();
     TextStyle textStyle;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
     /**
      * @tc.steps: step2. call StartDrag
      * @tc.expected: IsDragging() return ture
@@ -1952,6 +2158,96 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 20, 20);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
     MockParagraph::TearDown();
+}
+
+/**
+ * @tc.name: UpdateTextStyle002
+ * @tc.desc: test span_node.cpp UpdateTextStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize spanNode and paragraph.
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetTextDetectEnable(true);
+    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
+    spanNode->SetParent(node);
+    spanNode->MountToParagraph();
+    ASSERT_NE(spanNode->GetParent(), nullptr);
+    spanNode->spanItem_->fontStyle = nullptr;
+    spanNode->spanItem_->position = StringUtils::ToWstring(CREATE_VALUE).length();
+    TextStyle textStyle;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    /**
+     * @tc.steps: step2. call UpdateTextStyle
+     * @tc.expected: update text style for three parts.
+     */
+    std::u16string spanContent = u"0123456789";
+    spanNode->spanItem_->selectedStart = 3;
+    spanNode->spanItem_->selectedEnd = 6;
+    std::u16string part1 = u"012";
+    std::u16string part2 = u"345";
+    std::u16string part3 = u"6789";
+    EXPECT_CALL(*paragraph, AddText(part1)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part2)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part3)).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(3);
+    EXPECT_CALL(*paragraph, PopStyle).Times(3);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 3, 6);
+    /**
+     * @tc.steps: step3. call UpdateTextStyle
+     * @tc.expected: update text style when selStart equals 0.
+     */
+    spanNode->spanItem_->selectedStart = 0;
+    spanNode->spanItem_->selectedEnd = 6;
+    part1 = u"012345";
+    part2 = u"6789";
+    EXPECT_CALL(*paragraph, AddText(part1)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part2)).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(2);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 0, 6);
+    /**
+     * @tc.steps: step4. call UpdateTextStyle
+     * @tc.expected: update text style when selEnd reaches before the end of string.
+     */
+    spanNode->spanItem_->selectedStart = 3;
+    spanNode->spanItem_->selectedEnd = 9;
+    part1 = u"012";
+    part2 = u"345678";
+    part3 = u"9";
+    EXPECT_CALL(*paragraph, AddText(part1)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part2)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part3)).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(3);
+    EXPECT_CALL(*paragraph, PopStyle).Times(3);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 3, 9);
+    /**
+     * @tc.steps: step5. call UpdateTextStyle
+     * @tc.expected: update text style when selEnd reaches end of string.
+     */
+    spanNode->spanItem_->selectedStart = 3;
+    spanNode->spanItem_->selectedEnd = 10;
+    part2 = u"012";
+    part3 = u"3456789";
+    EXPECT_CALL(*paragraph, AddText(part2)).Times(1);
+    EXPECT_CALL(*paragraph, AddText(part3)).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(2);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 3, 10);
+    /**
+     * @tc.steps: step6. call UpdateTextStyle
+     * @tc.expected: update text style when selStart and selEnd is invalid.
+     */
+    EXPECT_CALL(*paragraph, AddText).Times(0);
+    EXPECT_CALL(*paragraph, PushStyle).Times(0);
+    EXPECT_CALL(*paragraph, PopStyle).Times(0);
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
 }
 
 /**
@@ -2302,7 +2598,7 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
 
     textFrameNode->draggable_ = true;
-    textFrameNode->eventHub_->SetOnDragStart(
+    textFrameNode->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     textPattern->copyOption_ = CopyOptions::InApp;
@@ -2405,14 +2701,14 @@ HWTEST_F(TextTestFiveNg, HandleSurfaceChanged001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateMaxLines(0);
 
-    pattern->HandleSurfaceChanged(100, 100, 100, 100);
-    pattern->HandleSurfaceChanged(100, 100, 10, 100);
-    pattern->HandleSurfaceChanged(100, 100, 100, 10);
-    pattern->HandleSurfaceChanged(100, 100, 10, 10);
+    pattern->HandleSurfaceChanged(100, 100, 100, 100, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 10, 100, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 100, 10, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 10, 10, WindowSizeChangeReason::DRAG);
 
     manager->shareOverlayInfo_->menuInfo.menuType = OptionMenuType::MOUSE_MENU;
 
-    pattern->HandleSurfaceChanged(100, 100, 10, 10);
+    pattern->HandleSurfaceChanged(100, 100, 10, 10, WindowSizeChangeReason::DRAG);
     EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
 }
 

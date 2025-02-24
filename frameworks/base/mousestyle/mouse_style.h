@@ -114,24 +114,31 @@ public:
     void VsyncMouseFormat();
     void DumpMouseStyleChangeLog();
 
-    void SetMouseStyleHoldNode(int32_t id)
+    bool SetMouseStyleHoldNode(int32_t id)
     {
         if (!mouseStyleNodeId_.has_value()) {
             mouseStyleNodeId_ = id;
+            return true;
+        } else {
+            return false;
         }
     }
 
-    void FreeMouseStyleHoldNode(int32_t id)
+    bool FreeMouseStyleHoldNode(int32_t id)
     {
         if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
             mouseStyleNodeId_.reset();
+            return true;
+        } else {
+            return false;
         }
     }
 
-    void FreeMouseStyleHoldNode()
+    bool FreeMouseStyleHoldNode()
     {
-        CHECK_NULL_VOID(mouseStyleNodeId_.has_value());
+        CHECK_NULL_RETURN(mouseStyleNodeId_.has_value(), false);
         mouseStyleNodeId_.reset();
+        return true;
     }
 
     void SetUserSetCursor(bool userSetCursor)

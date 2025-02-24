@@ -28,11 +28,11 @@ std::string TextAccessibilityProperty::GetText() const
     if (children.empty()) {
         auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, value);
-        value = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(std::u16string(u"")));
+        value = UtfUtils::Str16DebugToStr8(textLayoutProperty->GetContentValue(std::u16string(u"")));
     } else {
         auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_RETURN(textPattern, value);
-        value = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
+        value = UtfUtils::Str16DebugToStr8(textPattern->GetTextForDisplay());
     }
     return value;
 }

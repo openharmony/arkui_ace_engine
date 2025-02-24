@@ -128,7 +128,7 @@ public:
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto rootNode = pipeline->GetRootElement();
         CHECK_NULL_RETURN(rootNode, nullptr);
-        auto rootPtr = reinterpret_cast<Ark_NodeHandle>(rootNode.GetRawPtr());
+        auto rootPtr = reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(rootNode));
         CHECK_NULL_RETURN(rootPtr, nullptr);
         auto companionNode = GeneratedApiImpl::GetCompanion(rootPtr);
         CHECK_NULL_RETURN(companionNode, nullptr);

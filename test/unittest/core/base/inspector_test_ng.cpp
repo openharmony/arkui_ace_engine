@@ -703,6 +703,38 @@ HWTEST_F(InspectorTestNg, InspectorTestNg020, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InspectorTestNg021
+ * @tc.desc: Test the operation of ParseWindowIdFromMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg021, TestSize.Level1)
+{
+    std::string inspectorMsg = "";
+    auto windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(windowId, 0);
+    
+    inspectorMsg = "invalid message";
+    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(windowId, 0);
+    
+    inspectorMsg = "{\"method\":\"ArkUI.xxx\", \"params\":{\"windowId\":\"10\"}}";
+    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(windowId, 0);
+    
+    inspectorMsg = "{\"method\":\"ArkUI.tree\", \"params\":{\"windowIds\":\"10\"}}";
+    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(windowId, 0);
+    
+    inspectorMsg = "{\"method\":\"ArkUI.tree\", \"paramss\":{\"windowId\":\"10\"}}";
+    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(windowId, 0);
+    
+    inspectorMsg = "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"10\"}}";
+    windowId = Inspector::ParseWindowIdFromMsg(inspectorMsg);
+    EXPECT_EQ(windowId, 10);
+}
+
+/**
  * @tc.name: AddOffscreenNode_001
  * @tc.desc: Test the operation of AddOffscreenNode
  * @tc.type: FUNC

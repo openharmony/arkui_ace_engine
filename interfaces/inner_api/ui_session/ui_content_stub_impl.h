@@ -44,6 +44,19 @@ public:
     int32_t UnregisterComponentChangeEventCallback() override;
     int32_t UnregisterWebUnfocusEventCallback() override;
     bool IsConnect() override;
+    int32_t ResetTranslateTextAll() override;
+    int32_t ResetTranslateText(int32_t nodeId) override;
+    int32_t GetWebViewTranslateText(
+        const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback) override;
+    int32_t GetWebViewCurrentLanguage(const EventCallback& eventCallback) override;
+    int32_t StartWebViewTranslate(
+        const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback) override;
+    int32_t SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) override;
+    int32_t EndWebViewTranslate() override;
+    int32_t SendTranslateResult(int32_t nodeId, std::string result) override;
+    int32_t GetCurrentImagesShowing(
+        const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
+        override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

@@ -234,25 +234,11 @@ struct GridLayoutInfo {
     void ClearMapsToEnd(int32_t idx);
 
     /**
-     * @brief clears lineHeightMap_ and gridMatrix_ starting from line [idx]
-     *
-     * @param idx starting line index
-     */
-    void ClearMapsToEndContainsMultiLineItem(int32_t idx);
-
-    /**
      * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
      *
      * @param idx ending line index, exclusive.
      */
     void ClearMapsFromStart(int32_t idx);
-
-    /**
-     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
-     *
-     * @param idx ending line index, exclusive.
-     */
-    void ClearMapsFromStartContainsMultiLineItem(int32_t idx);
 
     /**
      * @brief clears lineHeightMap_ starting from line [idx]

@@ -222,6 +222,16 @@ public:
         isPostEventResult_ = isPostEventResult;
     }
 
+    int32_t GetOperatingHand() const
+    {
+        return operatingHand_;
+    }
+
+    void SetOperatingHand(int32_t operatingHand)
+    {
+        operatingHand_ = operatingHand;
+    }
+
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -243,6 +253,7 @@ protected:
     std::vector<KeyCode> pressedKeyCodes_;
     bool isPostEventResult_ = false;
     int32_t postEventNodeId_ = -1;
+    int32_t operatingHand_ = 0;
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {

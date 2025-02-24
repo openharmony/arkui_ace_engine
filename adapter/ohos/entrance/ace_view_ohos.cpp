@@ -95,6 +95,11 @@ void AceViewOhos::TransformHintChanged(const RefPtr<AceViewOhos>& view, uint32_t
     view->NotifyTransformHintChanged(transform);
 }
 
+bool IsAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return pointerEvent->GetAxes() != 0;
+}
+
 void AceViewOhos::HandleMouseEvent(const RefPtr<AceViewOhos>& view,
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
     int32_t pointerAction, bool isInjected, int32_t toolType)
@@ -104,7 +109,8 @@ void AceViewOhos::HandleMouseEvent(const RefPtr<AceViewOhos>& view,
         (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
         (toolType == MMI::PointerEvent::TOOL_TYPE_TOUCHPAD &&
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL && IsAxisEvent(pointerEvent))) {
         view->ProcessAxisEvent(pointerEvent, node, isInjected);
     } else {
         view->ProcessDragEvent(pointerEvent, node);
@@ -151,10 +157,8 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
         }
         // mouse event
         HandleMouseEvent(view, pointerEvent, node, pointerAction, isInjected, toolType);
-#ifdef SUPPORT_DIGITAL_CROWN
     } else if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_CROWN) {
         view->ProcessDigitalCrownEvent(pointerEvent, isInjected);
-#endif
     } else {
         // touch event
         view->ProcessDragEvent(pointerEvent, node);
@@ -275,13 +279,11 @@ void AceViewOhos::RegisterNonPointerEventCallback(NonPointerEventCallback&& call
     nonPointerEventCallback_ = std::move(callback);
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN
 void AceViewOhos::RegisterCrownEventCallback(CrownEventCallback&& callback)
 {
     ACE_DCHECK(callback);
     crownEventCallback_ = std::move(callback);
 }
-#endif
 
 void AceViewOhos::RegisterMouseEventCallback(MouseEventCallback&& callback)
 {
@@ -360,6 +362,11 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW: {
             action = DragEventAction::DRAG_EVENT_OUT;
+            dragEventCallback_(event, action, node);
+            break;
+        }
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL: {
+            action = DragEventAction::DRAG_EVENT_PULL_CANCEL;
             dragEventCallback_(event, action, node);
             break;
         }
@@ -459,7 +466,6 @@ bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>
     return nonPointerEventCallback_(event, std::move(markProcess));
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN
 bool AceViewOhos::ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool isInjected)
 {
@@ -477,7 +483,6 @@ bool AceViewOhos::ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEve
     CHECK_NULL_RETURN(crownEventCallback_, false);
     return crownEventCallback_(event, markProcess);
 }
-#endif
 
 const void* AceViewOhos::GetNativeWindowById(uint64_t textureId)
 {

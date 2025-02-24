@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,17 +17,17 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
-#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
-#include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -289,6 +289,9 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     RefPtr<WantWrap> want2 = AceType::MakeRefPtr<WantWrapOhos>("1234", "1234");
     UIExtensionModelNG uecNG;
     std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
+    /**
+     * @tc.steps: step1. test Create without return
+     */
     uecNG.Create(want, placeholderMap);
     uecNG.Create(want2, placeholderMap);
     uecNG.SetOnError(onError);
@@ -304,6 +307,14 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     uecNG.Create(config);
     config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
     uecNG.Create(config);
+    /**
+     * @tc.steps: step2. test Create with return FrameNode
+     */
+    OHOS::AAFwk::Want want3;
+    want3.SetElementName("com.example", "testuea");
+    want3.SetParam("ability.want.params.uiExtensionType", std::string("sys/CommonUI"));
+    InnerModalUIExtensionConfig innerConfig;
+    EXPECT_NE(uecNG.Create(want3, callbacks, innerConfig), nullptr);
 #endif
 }
 
@@ -828,10 +839,10 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventValidSession, Te
     pattern->HandleTouchEvent(touchEventInfo);
     focusHub->currentFocus_ = false;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+
     pattern->needReSendFocusToUIExtension_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN);
     pattern->HandleTouchEvent(touchEventInfo);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
@@ -1476,7 +1487,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest009, TestSize.Level
      */
     OHOS::AAFwk::Want want;
     want.SetElementName("123", "456", "");
-    
+
     /**
      * @tc.steps: step3. test UpdateWant
      */
@@ -1616,6 +1627,9 @@ HWTEST_F(UIExtensionComponentTestNg, SecurityUIExtensionComponentNgTest002, Test
 HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->instanceId_ = IGNORE_POSITION_TRANSITION_SWITCH;
     /**
      * @tc.steps: step1. construct a UIExtensionComponent Node
      */
@@ -1626,7 +1640,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. test OnExtensionEvent
      */
@@ -1767,5 +1781,41 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest013, TestSize.Level
      * @tc.steps: step4. test RegisterVisibleAreaChange
      */
     pattern->RegisterVisibleAreaChange();
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestNotifyWindowMode
+ * @tc.desc: Test pattern SetIsWindowModeFollowHost/GetIsWindowModeFollowHost function
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTestNotifyWindowMode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. default false
+     */
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_FALSE(pattern->GetIsWindowModeFollowHost());
+
+    /**
+     * @tc.steps: step3. SetIsWindowModeFollowHost false
+     */
+    pattern->SetIsWindowModeFollowHost(false);
+    EXPECT_FALSE(pattern->GetIsWindowModeFollowHost());
+
+    /**
+     * @tc.steps: step4. SetIsWindowModeFollowHost true
+     */
+    pattern->SetIsWindowModeFollowHost(true);
+    EXPECT_TRUE(pattern->GetIsWindowModeFollowHost());
 }
 } // namespace OHOS::Ace::NG

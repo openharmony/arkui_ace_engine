@@ -121,6 +121,20 @@ public:
         windowPattern->OnRemoveBlank();
     }
 
+    void OnAddSnapshot() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnAddSnapshot();
+    }
+
+    void OnRemoveSnapshot() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnRemoveSnapshot();
+    }
+
     void OnAppRemoveStartingWindow() override
     {
         auto windowPattern = windowPattern_.Upgrade();
@@ -157,7 +171,7 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
+    TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
         session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
@@ -492,10 +506,10 @@ bool WindowPattern::IsSnapshotSizeChanged()
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
     Rosen::WSRect lastRect = session_->GetLastLayoutRect();
     Rosen::WSRect curRect = session_->GetLayoutRect();
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id:%{public}d, last:%{public}s, cur:%{public}s",
+             session_->GetPersistentId(), lastRect.ToString().c_str(), curRect.ToString().c_str());
     if (!session_->GetShowRecent() && !lastRect.IsInvalid() &&
         NearEqual(lastRect.width_, curRect.width_, 1.0f) && NearEqual(lastRect.height_, curRect.height_, 1.0f)) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id: %{public}d, name: %{public}s",
-            session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
         return true;
     }
     return false;
@@ -505,7 +519,8 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ACE_SCOPED_TRACE("CreateSnapshotWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
+    auto persistentId = session_->GetPersistentId();
+    ACE_SCOPED_TRACE("CreateSnapshotWindow[id:%d][self:%d]", persistentId, host->GetId());
     session_->SetNeedSnapshot(false);
     isBlankForSnapshot_ = false;
 
@@ -531,11 +546,16 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
-        if (scenePersistence->IsSavingSnapshot()) {
+        auto isSaveingSnapshot = scenePersistence->IsSavingSnapshot();
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "id: %{public}d isSaveingSnapshot: %{public}d", persistentId, isSaveingSnapshot);
+        if (isSaveingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
+            snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
+            Rosen::SceneSessionManager::GetInstance().VisitSnapshotFromCache(persistentId);
         } else {
             sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath());
         }

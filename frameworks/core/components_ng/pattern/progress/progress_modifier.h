@@ -18,6 +18,7 @@
 
 #include "base/geometry/arc.h"
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
@@ -65,6 +66,7 @@ public:
     void SetStrokeRadius(float strokeRaidus);
     void SetUseContentModifier(bool useContentModifier);
     void SetIsRightToLeft(bool value);
+    void UpdateProgress();
     void SetCapsuleBorderRadius(float borderRadius);
     void SetIsHovered(bool value);
     void SetIsPressed(bool value);
@@ -135,6 +137,12 @@ private:
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
     bool IsSweepEffectOn();
+    inline bool IsDynamicComponent()
+    {
+        auto container = Container::Current();
+        return container && container->IsDynamicRender() &&
+               container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    }
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
@@ -165,6 +173,7 @@ private:
     RefPtr<PropertyBool> smoothEffect_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> isRightToLeft_;
+    RefPtr<PropertyBool> progressUpdate_;
     RefPtr<PropertyFloat> capsuleBorderRadius_;
 
     Color hoverBlendColor_;

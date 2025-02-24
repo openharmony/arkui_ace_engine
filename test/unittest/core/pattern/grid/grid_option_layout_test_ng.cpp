@@ -392,10 +392,9 @@ HWTEST_F(GridOptionLayoutTestNg, GridPattern_GetItemRect001, TestSize.Level1)
      * @tc.steps: step3. Get valid GridItem Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(4), Rect(0, ITEM_MAIN_SIZE, GRID_WIDTH / 2, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(
-        IsEqual(pattern_->GetItemRect(7), Rect(GRID_WIDTH / 2, ITEM_MAIN_SIZE * 2, GRID_WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, 0, WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(4), Rect(0, ITEM_MAIN_SIZE, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(7), Rect(WIDTH / 2, ITEM_MAIN_SIZE * 2, WIDTH / 2, ITEM_MAIN_SIZE)));
 
     /**
      * @tc.steps: step4. Slide Grid by Scroller.
@@ -414,12 +413,11 @@ HWTEST_F(GridOptionLayoutTestNg, GridPattern_GetItemRect001, TestSize.Level1)
      * @tc.steps: step6. Get valid GridItem Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(0, -ITEM_MAIN_SIZE / 2, GRID_WIDTH, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0, ITEM_MAIN_SIZE / 2, GRID_WIDTH / 2, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(
-        IsEqual(pattern_->GetItemRect(3), Rect(0, ITEM_MAIN_SIZE + ITEM_MAIN_SIZE / 2, GRID_WIDTH, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5),
-        Rect(GRID_WIDTH / 2, ITEM_MAIN_SIZE * 2 + ITEM_MAIN_SIZE / 2, GRID_WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(0, -ITEM_MAIN_SIZE / 2, WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0, ITEM_MAIN_SIZE / 2, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, ITEM_MAIN_SIZE + ITEM_MAIN_SIZE / 2, WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(
+        pattern_->GetItemRect(5), Rect(WIDTH / 2, ITEM_MAIN_SIZE * 2 + ITEM_MAIN_SIZE / 2, WIDTH / 2, ITEM_MAIN_SIZE)));
 }
 
 /**
@@ -459,7 +457,7 @@ HWTEST_F(GridOptionLayoutTestNg, GridPattern_GetItemIndex001, TestSize.Level1)
      * @tc.steps: step3. Get valid GridItem index.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(GRID_WIDTH / 2, ITEM_MAIN_SIZE / 2), 3));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(WIDTH / 2, ITEM_MAIN_SIZE / 2), 3));
 }
 
 /**
@@ -649,7 +647,7 @@ HWTEST_F(GridOptionLayoutTestNg, TestChildrenUpdate001, TestSize.Level1)
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         FlushUITasks();
         EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0));
-        EXPECT_EQ(GetChildOffset(frameNode_, 1), OffsetF(GRID_WIDTH / 4.0f, 0));
+        EXPECT_EQ(GetChildOffset(frameNode_, 1), OffsetF(WIDTH / 4.0f, 0));
         const decltype(info.gridMatrix_) cmp = { { 0, { { 0, 0 }, { 1, 1 } } } };
         EXPECT_EQ(info.gridMatrix_, cmp);
         EXPECT_EQ(info.lineHeightMap_.size(), 1);
@@ -866,7 +864,7 @@ HWTEST_F(GridOptionLayoutTestNg, OutOfBounds001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone();
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_EQ(GetChildRect(frameNode_, 29).Bottom(), GRID_HEIGHT);
+    EXPECT_EQ(GetChildRect(frameNode_, 29).Bottom(), HEIGHT);
     EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
 
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
@@ -874,7 +872,7 @@ HWTEST_F(GridOptionLayoutTestNg, OutOfBounds001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsOutOfBoundary(true));
 
     UpdateCurrentOffset(75);
-    EXPECT_GT(GetChildRect(frameNode_, 29).Bottom(), GRID_HEIGHT);
+    EXPECT_GT(GetChildRect(frameNode_, 29).Bottom(), HEIGHT);
     EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
 }
 
@@ -1349,6 +1347,45 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll004, TestSize.Level1)
     (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 62.5183945);
+    scrollable->HandleTouchUp();
+    (*scrollable->panRecognizerNG_->onActionEnd_)(info);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+}
+
+/**
+ * @tc.name: OverScroll005
+ * @tc.desc: Test notifying data change during bottom overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OverScroll005, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetRowsGap(Dimension(5.0));
+    CreateFixedItems(6); // less than viewport
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(-1000.f);
+    info.SetMainDelta(-250.f);
+    ASSERT_TRUE(pattern_->GetScrollableEvent());
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    (*scrollable->panRecognizerNG_->onActionStart_)(info);
+    (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -164.95305);
+    frameNode_->ChildrenUpdatedFrom(0);
+    frameNode_->MarkDirtyNode();
+    FlushUITasks();
     scrollable->HandleTouchUp();
     (*scrollable->panRecognizerNG_->onActionEnd_)(info);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);

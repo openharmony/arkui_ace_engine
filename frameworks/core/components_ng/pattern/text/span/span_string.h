@@ -53,7 +53,8 @@ public:
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
     bool IsEqualToSpanString(const RefPtr<SpanString>& other) const;
-    RefPtr<SpanString> GetSubSpanString(int32_t start, int32_t length) const;
+    RefPtr<SpanString> GetSubSpanString(int32_t start, int32_t length, bool includeStartHalf = false,
+        bool includeEndHalf = true, bool rangeNeedNotChange = true) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;
@@ -64,7 +65,13 @@ public:
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
     bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff);
-    static void DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString);
+    static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff,
+        const std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)>&& unmarshallCallback,
+        int32_t instanceId = -1);
+    static void DecodeTlvOldExt(std::vector<uint8_t>& buff, SpanString* spanString, int32_t& cursor);
+    static void DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString,
+        const std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)>&& unmarshallCallback,
+        int32_t instanceId = -1);
     static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
     static void DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& cursor, SpanString* spanStr);
     void ClearSpans();

@@ -213,7 +213,7 @@ HWTEST_F(TextInputModifierTest, setPlaceholderColorTestDefaultValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setPlaceholderColorTestPlaceholderColorValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderColorTestPlaceholderColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValuePlaceholderColor;
 

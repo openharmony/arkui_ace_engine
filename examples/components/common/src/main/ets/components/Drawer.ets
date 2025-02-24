@@ -38,12 +38,13 @@ export struct Drawer {
   @Prop @Require title: ResourceStr;
   @Link showParameters: boolean
   @BuilderParam content: () => void;
+  @BuilderParam generic: () => void;
   @BuilderParam parameters: () => void;
   @Consume('router') router: NavPathStack;
   @State tabSelectedIndexes: number[] = [0];
   @State tabOptions: SegmentButtonOptions = SegmentButtonOptions.tab({
-    buttons: [{ text: '参数列表' }, { text: '日志' }],
-    textPadding: { top: 8, bottom: 8 },
+    buttons: [{ text: '参数列表' }, { text: '基础属性' }, { text: '日志' }],
+    textPadding: { top: 8, bottom: 8 }
   });
   @StorageProp('Block') listBlockTags: Array<BlockTag> = [];
   @State dividerHeight: number = 1;
@@ -77,10 +78,9 @@ export struct Drawer {
 
       if (this.showParameters) {
         Column() {
-          Stack() {
+          Row() {
             SegmentButton({ options: this.tabOptions, selectedIndexes: $tabSelectedIndexes })
-              .width(250)
-
+              .width(380)
             Row() {
               IconButton($r('sys.media.ohos_ic_public_close'), () => {
                 animateTo({ curve: curves.interpolatingSpring(0, 1, 328, 36) }, () => {
@@ -91,13 +91,15 @@ export struct Drawer {
             .height('100%')
             .position({ right: 8 })
             .alignItems(VerticalAlign.Center)
-          }
-          .width('100%')
+          }.width('100%')
           .height(56)
+          .justifyContent(FlexAlign.SpaceBetween)
           .margin({ bottom: 12, top: 8 })
 
           if (this.tabSelectedIndexes[0] === 0) {
             this.parameters()
+          } else if (this.tabSelectedIndexes[0] === 1) {
+            this.generic()
           } else {
             Stack() {
               List() {

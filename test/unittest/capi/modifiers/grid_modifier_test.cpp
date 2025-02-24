@@ -107,6 +107,8 @@ namespace {
 
     const Ark_Int32 FAKE_RES_ID(1234);
     const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
+
+    const auto DEFAULT_FRICTION = 0.75; // Value valid for API12+
 } // namespace
 
 class GridModifierTest : public ModifierTestBase<GENERATED_ArkUIGridModifier,
@@ -1609,7 +1611,7 @@ HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
     OnModifyDone();
 
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_NEAR(doubleResult, ATTRIBUTE_FRICTION_DEFAULT_VALUE, FLT_EPSILON);
+    EXPECT_DOUBLE_EQ(doubleResult, ATTRIBUTE_FRICTION_DEFAULT_VALUE);
 }
 
 /*
@@ -1625,22 +1627,22 @@ HWTEST_F(GridModifierTest, setFrictionTestValidValues, TestSize.Level1)
     inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0.1f);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_NEAR(doubleResult, 0.1f, FLT_EPSILON);
+    EXPECT_DOUBLE_EQ(doubleResult, 0.1f);
 
     inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0.9f);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_NEAR(doubleResult, 0.9f, FLT_EPSILON);
+    EXPECT_DOUBLE_EQ(doubleResult, 0.9f);
 
     inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1.1f);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_NEAR(doubleResult, 1.1f, FLT_EPSILON);
+    EXPECT_DOUBLE_EQ(doubleResult, 1.1f);
 
     inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(123456);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_NEAR(doubleResult, 123456.f, FLT_EPSILON);
+    EXPECT_DOUBLE_EQ(doubleResult, 123456.f);
 }
 
 /*
@@ -1654,7 +1656,7 @@ HWTEST_F(GridModifierTest, setFrictionTestValidResourceValues, TestSize.Level1)
     for (const auto &[value, expectVal]: UNION_NUMBER_RES_TEST_PLAN) {
         modifier_->setFriction(node_, &value);
         doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-        EXPECT_NEAR(doubleResult, expectVal, FLT_EPSILON);
+        EXPECT_DOUBLE_EQ(doubleResult, expectVal);
     }
 }
 
@@ -1671,17 +1673,17 @@ HWTEST_F(GridModifierTest, setFrictionTestInvalidValues, TestSize.Level1)
     inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_NEAR(doubleResult, 0.6f, FLT_EPSILON);
+    EXPECT_DOUBLE_EQ(doubleResult, DEFAULT_FRICTION);
 
     inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-1);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_NEAR(doubleResult, 0.6f, FLT_EPSILON);
+    EXPECT_DOUBLE_EQ(doubleResult, DEFAULT_FRICTION);
 
     inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-0.1f);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_NEAR(doubleResult, 0.6f, FLT_EPSILON);
+    EXPECT_DOUBLE_EQ(doubleResult, DEFAULT_FRICTION);
 }
 
 /*

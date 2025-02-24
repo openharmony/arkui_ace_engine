@@ -17,11 +17,21 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_FRAME_REPORT_H
 
 #include <string>
+#include <unordered_map>
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
+enum class FrameSchedEvent {
+    SCHED_EVENT_BASE = 0,
+    INIT,
+    UI_FLUSH_BEGIN = 20001,
+    UI_FLUSH_END,
+    UI_SCB_WORKER_BEGIN,
+    UI_SCB_WORKER_END,
+    SCHED_EVENT_MAX,
+};
 using FrameInitFunc = void (*)();
 using FrameGetEnableFunc = int (*)();
 using BeginFlushAnimationFunc = void (*)();
@@ -42,6 +52,8 @@ using FlushEndFunc = void (*)();
 using SetFrameParamFunc = void (*)(int, int, int, int);
 using EnableSelfRenderFunc = void (*)();
 using DisableSelfRenderFunc = void (*)();
+using ReportSchedEventFunc =
+    void (*)(FrameSchedEvent, const std::unordered_map<std::string, std::string>&);
 
 class ACE_EXPORT FrameReport final {
 public:
@@ -67,6 +79,8 @@ public:
     void SetFrameParam(int requestId, int load, int schedFrameNum, int value);
     void EnableSelfRender();
     void DisableSelfRender();
+    void ReportSchedEvent(
+        FrameSchedEvent event, const std::unordered_map<std::string, std::string>& payLoad);
 
 private:
     FrameReport();
@@ -99,6 +113,7 @@ private:
     ACE_EXPORT SetFrameParamFunc setFrameParamFunc_ = nullptr;
     ACE_EXPORT EnableSelfRenderFunc enableSelfRenderFunc_ = nullptr;
     ACE_EXPORT DisableSelfRenderFunc disableSelfRenderFunc_ = nullptr;
+    ACE_EXPORT ReportSchedEventFunc reportSchedEventFunc_ = nullptr;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_FRAME_REPORT_H

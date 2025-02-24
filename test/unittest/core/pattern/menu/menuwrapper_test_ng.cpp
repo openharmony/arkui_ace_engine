@@ -75,6 +75,8 @@ const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
 const DirtySwapConfig configDirtySwap = { false, false, false, false, true, false };
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+constexpr Dimension BORDER_RADIUS = 50.0_vp;
+const BorderRadiusProperty& BORDER_RADIUS_PROPERTY = BorderRadiusProperty(BORDER_RADIUS);
 
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -82,6 +84,7 @@ constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
+constexpr double BORDER_RADIUS_RATE = 1.5;
 
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -557,71 +560,6 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg008, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuWrapperPatternTestNg009
- * @tc.desc: test MenuWrapperPattern::CheckAndShowAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create wrapper and child menu
-     */
-    auto wrapperNode =
-        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    auto mainMenu =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-
-    mainMenu->MountToParent(wrapperNode);
-    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    ASSERT_NE(wrapperPattern, nullptr);
-    /**
-     * @tc.steps: step2. execute CheckAndShowAnimation
-     * @tc.expected: property is set as expected
-     */
-    wrapperPattern->isFirstShow_ = false;
-    wrapperPattern->CheckAndShowAnimation();
-    wrapperPattern->isFirstShow_ = true;
-    EXPECT_TRUE(wrapperPattern->isFirstShow_);
-    wrapperPattern->CheckAndShowAnimation();
-    EXPECT_FALSE(wrapperPattern->isFirstShow_);
-}
-
-/**
- * @tc.name: MenuWrapperPatternTestNg010
- * @tc.desc: test MenuWrapperPattern::GetAnimationOffset function.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create wrapper and child menu
-     */
-    auto wrapperNode =
-        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    auto mainMenu =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-
-    auto prop = AceType::MakeRefPtr<MenuLayoutProperty>();
-    mainMenu->SetLayoutProperty(prop);
-    mainMenu->MountToParent(wrapperNode);
-    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    ASSERT_NE(wrapperPattern, nullptr);
-    /**
-     * @tc.steps: step2. execute GetAnimationOffset
-     * @tc.expected: property is set as expected
-     */
-    wrapperPattern->menuPlacement_ = Placement::LEFT;
-    wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::LEFT);
-    wrapperPattern->menuPlacement_ = Placement::RIGHT;
-    wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::RIGHT);
-    wrapperPattern->menuPlacement_ = Placement::TOP;
-    wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::TOP);
-}
-
-/**
  * @tc.name: MenuWrapperPatternTestNg011
  * @tc.desc: Test Verify interaction effect.
  * @tc.type: FUNC
@@ -705,8 +643,9 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg013, TestSize.Level1)
     model.Create();
     auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menu, nullptr);
-    auto container = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
-    auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
+    auto container =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
     menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
     mockScroll->MountToParent(container);
@@ -755,8 +694,9 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg014, TestSize.Level1)
     model.Create();
     auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menu, nullptr);
-    auto container = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
-    auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
+    auto container =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
     menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
     mockScroll->MountToParent(container);
@@ -847,6 +787,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg015, TestSize.Level1)
  */
 HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg016, TestSize.Level1)
 {
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto wrapperNode =
         FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
@@ -969,15 +910,15 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     ASSERT_NE(menuItemPattern2, nullptr);
 
     wrapperPattern->IncreaseEmbeddedSubMenuCount();
-    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
     subMenu->MountToParent(wrapperNode);
 
     menu->GetLayoutProperty<MenuLayoutProperty>()->UpdateExpandingMode(SubMenuExpandingMode::STACK);
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 }
 
@@ -1865,6 +1806,30 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg039, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuWrapperPatternTestNg040
+ * @tc.desc: test SetAnimationBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg040, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    menuWrapperPattern->SetAnimationBorderRadius(BORDER_RADIUS_RATE, BORDER_RADIUS_PROPERTY);
+    auto animationInfo_ = menuWrapperPattern->GetPreviewMenuAnimationInfo();
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusTopLeft.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusTopLeft->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusTopRight.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusTopRight->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusBottomLeft.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusBottomLeft->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusBottomRight.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusBottomRight->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+}
+
+/**
  * @tc.name: MenuWrapperPaintMethodTestNg001
  * @tc.desc: test overlay draw function
  * @tc.type: FUNC
@@ -1888,7 +1853,8 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg001, TestSize.Level1)
     function(canvas);
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     function(canvas);
-    wrapperNode->context_ = PipelineContext::GetCurrentContext().GetRawPtr();
+    auto context = PipelineContext::GetCurrentContext();
+    wrapperNode->context_ = AceType::RawPtr(context);
     auto pipline = wrapperNode->GetContext();
     ASSERT_NE(pipline, nullptr);
     auto menuTheme = pipline->GetTheme<MenuTheme>();

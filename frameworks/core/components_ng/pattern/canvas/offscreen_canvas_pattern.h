@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 class OffscreenCanvasPaintMethod;
 // OffscreenCanvasPattern is the base class for custom paint render node to perform paint canvas.
-class ACE_EXPORT OffscreenCanvasPattern : public Pattern {
+class CJ_FORCE_EXPORT OffscreenCanvasPattern : public Pattern {
     DECLARE_ACE_TYPE(OffscreenCanvasPattern, Pattern);
 
 public:
@@ -55,7 +55,7 @@ public:
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
-    
+
     void DrawImage(const Ace::CanvasImage& image, double width, double height);
     void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image);

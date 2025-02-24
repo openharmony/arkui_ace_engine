@@ -27,7 +27,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_textinput_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/common/ime/text_input_action.h"
 #include "frameworks/core/common/ime/text_input_type.h"
@@ -87,6 +86,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSecurityStateChange", &JSTextField::SetOnSecurityStateChange);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
+    JSClass<JSTextInput>::StaticMethod("onWillChange", &JSTextField::SetOnWillChange);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextInput>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
     JSClass<JSTextInput>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);
@@ -135,13 +135,13 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextInput>::StaticMethod("enableHapticFeedback", &JSTextField::SetEnableHapticFeedback);
     JSClass<JSTextInput>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
+    JSClass<JSTextInput>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextInput::Create(const JSCallbackInfo& info)
 {
     JSTextField::CreateTextInput(info);
-    JSTextInputTheme::ApplyTheme();
 }
 
 void JSTextInputController::JSBind(BindingTarget globalObj)

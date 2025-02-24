@@ -28,13 +28,25 @@ class RotationRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(RotationRecognizer, MultiFingersRecognizer);
 
 public:
-    RotationRecognizer(int32_t fingers, double angle);
+    RotationRecognizer(int32_t fingers, double angle, bool isLimitFingerCount = false);
     ~RotationRecognizer() override = default;
 
     void OnAccepted() override;
     void OnRejected() override;
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
+
+    void SetAngle(double angle)
+    {
+        angle_ = angle;
+    }
+
+    double GetAngle()
+    {
+        return angle_;
+    }
+
+    void CheckCallbackState() override;
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;

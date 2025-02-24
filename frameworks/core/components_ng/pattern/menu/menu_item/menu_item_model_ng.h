@@ -59,6 +59,7 @@ public:
     static void AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode);
     static void UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent);
+
 private:
     void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
 };

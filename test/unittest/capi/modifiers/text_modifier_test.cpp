@@ -1154,10 +1154,10 @@ HWTEST_F(TextModifierTest, setTextOptionsTestValueValidValues, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto baseController = pattern->GetTextController();
     auto textController = AceType::DynamicCast<TextController>(baseController);
-    ASSERT_NE(textController.GetRawPtr(), nullptr);
+    ASSERT_NE(textController, nullptr);
 
     // check that controller in peer is properly set
-    EXPECT_EQ(peer.controller.GetRawPtr(), textController.GetRawPtr());
+    EXPECT_EQ(peer.controller, textController);
 }
 
 /*

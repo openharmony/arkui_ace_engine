@@ -53,6 +53,7 @@ void CheckboxTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeCon
             checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
         theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
         theme->hoverPaddingSize_ = checkboxPattern->GetAttr<Dimension>("checkbox_hover_padding_size", 2.0_vp);
+        theme->showCircleDial_ = static_cast<bool>(checkboxPattern->GetAttr<double>("radio_circle_dial", 0.0));
     }
     theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
     theme->defaultHeight_ = theme->defaultWidth_;
@@ -100,6 +101,10 @@ void SwitchTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeConst
         switchPattern->GetAttr<Dimension>("switch_hotzone_horizontal_padding", 0.0_vp);
     theme->hotZoneVerticalPadding_ =
         switchPattern->GetAttr<Dimension>("switch_hotzone_vertical_padding", 0.0_vp);
+    theme->hotZoneHorizontalSize_ =
+        switchPattern->GetAttr<Dimension>("switch_hotzone_horizontal_size", 6.0_vp);
+    theme->hotZoneVerticalSize_ =
+        switchPattern->GetAttr<Dimension>("switch_hotzone_vertical_size", 14.0_vp);
     theme->aspectRatio_ = switchPattern->GetAttr<double>("switch_aspect_ratio", 0.0);
     theme->backgroundSolid_ =
         static_cast<bool>(switchPattern->GetAttr<double>("switch_inactive_background_solid", 0.0));

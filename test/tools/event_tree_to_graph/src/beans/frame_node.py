@@ -60,7 +60,7 @@ class FrameNode(BaseBean):
 
     def check_parse_result(self):
         if (self.nodeId is None or self.parentId is None or self.tag is None or self.monopolizeEvents is None or
-                self.isHit is None or self.hitTestMode is None or self.responseRegion is None):
+                self.isHit is None or self.hitTestMode is None):
             self.parse_failed()
         else:
             self.parse_succeed()

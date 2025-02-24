@@ -22,11 +22,16 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkGridItemCreate();
+CJ_EXPORT void FfiOHOSAceFrameworkGridItemCreateWithOptions(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkGridItemSetColumnStart(int32_t columnStart);
 CJ_EXPORT void FfiOHOSAceFrameworkGridItemSetColumnEnd(int32_t columnEnd);
 CJ_EXPORT void FfiOHOSAceFrameworkGridItemSetRowStart(int32_t rowStart);
 CJ_EXPORT void FfiOHOSAceFrameworkGridItemSetRowEnd(int32_t rowEnd);
 CJ_EXPORT void FfiOHOSAceFrameworkGridItemForceRebuild(bool forceRebuild);
+CJ_EXPORT void FfiOHOSAceFrameworkGridItemSelectable(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkGridItemSelected(bool value);
+
+CJ_EXPORT void FfiOHOSAceFrameworkGridItemOnSelect(void (*callback)(bool isSelected));
 }
 
 #endif // OHOS_ACE_FRAMWORK_CJ_GRID_ITEM_FFI_H

@@ -514,7 +514,7 @@ HWTEST_F(WebPatternWebTest, OnDetachContextAllTrue, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto pipelineContext = MockPipelineContext::GetCurrent();
     auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
 #endif
 }
@@ -538,7 +538,7 @@ HWTEST_F(WebPatternWebTest, OnDetachContextAllFalse, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->tooltipId_ = 1;
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     EXPECT_EQ(webPattern->tooltipId_, -1);
 #endif
 }
@@ -657,7 +657,7 @@ HWTEST_F(WebPatternWebTest, OnAttachContext, TestSize.Level1)
     };
     auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnAttachContext(pipelineContext.GetRawPtr());
+    webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
 #endif
 }

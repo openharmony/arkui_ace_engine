@@ -18,8 +18,8 @@
 #define private public
 #define protected public
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/accessibility/accessibility_constants.h"
 
 using namespace testing;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
+#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "frameworks/core/event/pointer_event.h"

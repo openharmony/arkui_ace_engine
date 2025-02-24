@@ -45,6 +45,7 @@ void SwiperArrowPattern::OnModifyDone()
         UpdateArrowContent();
     }
     UpdateButtonNode(index_);
+    InitAccessibilityText();
 }
 
 void SwiperArrowPattern::InitOnKeyEvent()
@@ -135,10 +136,6 @@ void SwiperArrowPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto arrowGestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(arrowGestureHub);
-    // Set hit test mode transparent to avoid blocking the touch event of child nodes and sibling nodes.
-    arrowGestureHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
 
@@ -186,6 +183,47 @@ void SwiperArrowPattern::ButtonClickEvent()
     }
 
     OnClick();
+}
+
+void SwiperArrowPattern::InitAccessibilityText()
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(buttonAccessibilityProperty);
+    auto preAccessibilityText = swiperIndicatorTheme->GetPreAccessibilityText();
+    auto nextAccessibilityText = swiperIndicatorTheme->GetNextAccessibilityText();
+    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+        std::string accessibilityLeftText = "";
+        if (swiperPattern->IsHorizontalAndRightToLeft()) {
+            accessibilityLeftText = nextAccessibilityText;
+        } else {
+            accessibilityLeftText = preAccessibilityText;
+        }
+        buttonAccessibilityProperty->SetAccessibilityText(accessibilityLeftText);
+    }
+    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        std::string accessibilityRightText = "";
+        if (swiperPattern->IsHorizontalAndRightToLeft()) {
+            accessibilityRightText = preAccessibilityText;
+        } else {
+            accessibilityRightText = nextAccessibilityText;
+        }
+        buttonAccessibilityProperty->SetAccessibilityText(accessibilityRightText);
+    }
 }
 
 void SwiperArrowPattern::InitNavigationArrow()
@@ -301,7 +339,7 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     if (swiperLayoutProperty->GetHoverShowValue(false)) {
-        swiperPattern->ArrowHover(isHover_);
+        swiperPattern->ArrowHover(isHover_, HOVER_ARROW);
     }
     if (isHovered) {
         if (isTouch_) {
@@ -323,24 +361,17 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     }
 }
 
-void SwiperArrowPattern::SetButtonVisible(bool visible)
+std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
 {
-    isVisible_ = visible;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(buttonNode);
-    auto buttonNodeGestureHub = buttonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(buttonNodeGestureHub);
-    const auto& renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
-    CHECK_NULL_VOID(swiperArrowLayoutProperty);
-    auto isHoverShow = swiperArrowLayoutProperty->GetHoverShowValue(false);
-    auto hostFocusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(hostFocusHub);
-    auto swiperPattern = GetSwiperPattern();
-    CHECK_NULL_VOID(swiperPattern);
+    CHECK_NULL_RETURN(host, std::make_tuple(false, false, true));
+    auto swiperArrowLayoutProperty = host->GetLayoutProperty<SwiperArrowLayoutProperty>();
+    CHECK_NULL_RETURN(swiperArrowLayoutProperty, std::make_tuple(false, false, true));
+
+    auto swiperNode = DynamicCast<FrameNode>(host->GetParent());
+    auto swiperPattern = swiperNode ? swiperNode->GetPattern<SwiperPattern>() : nullptr;
+    CHECK_NULL_RETURN(swiperPattern, std::make_tuple(false, false, true));
+
     auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
@@ -354,27 +385,55 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     auto isLeftArrow = host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
     auto isRightArrow = host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG;
     auto isLoop = swiperArrowLayoutProperty->GetLoopValue(true);
-    auto needHideArrow =
-        (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop) ||
-        (swiperPattern->RealTotalCount() <= displayCount);
-    if (needHideArrow) {
-        renderContext->SetVisible(false);
-        // Set hit test mode NONE to make sure button not respond to the touch events when invisible.
-        buttonNodeGestureHub->SetHitTestMode(HitTestMode::HTMNONE);
+    auto needHideArrow = (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop)
+        || (swiperPattern->RealTotalCount() <= displayCount);
+    auto isHoverShow = swiperArrowLayoutProperty->GetHoverShowValue(false);
+    auto isHoverNone = swiperPattern->IsHoverNone();
+    return std::make_tuple(needHideArrow, isHoverShow, isHoverNone);
+}
+
+void SwiperArrowPattern::SetButtonVisible(bool visible)
+{
+    isVisible_ = visible;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonNodeGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(buttonNodeGestureHub);
+    const auto& renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto hostFocusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(hostFocusHub);
+    auto arrowGestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(arrowGestureHub);
+
+    auto [needHideArrow, isHoverShow, isHoverNone] = CheckHoverStatus();
+    if (needHideArrow || isHoverShow) {
         hostFocusHub->SetParentFocusable(false);
         hostFocusHub->LostSelfFocus();
-        return;
-    }
-    if (isHoverShow) {
-        hostFocusHub->SetParentFocusable(false);
-        hostFocusHub->LostSelfFocus();
+        if (needHideArrow || isHoverNone) {
+            visible = false;
+        }
     } else {
         hostFocusHub->SetParentFocusable(true);
         visible = true;
     }
     renderContext->SetVisible(visible);
     // Set hit test mode BLOCK to make sure button respond to the touch events when visible.
-    buttonNodeGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMNONE);
+    buttonNodeGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMTRANSPARENT);
+    arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMDEFAULT : HitTestMode::HTMTRANSPARENT);
+    if (buttonClickListener_) {
+        buttonNodeGestureHub->RemoveClickEvent(buttonClickListener_);
+        if (visible) {
+            buttonNodeGestureHub->AddClickEvent(buttonClickListener_);
+        }
+    }
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty) {
+        accessibilityProperty->SetAccessibilityLevel(
+            visible ? AccessibilityProperty::Level::AUTO : AccessibilityProperty::Level::NO_STR);
+    }
 }
 
 void SwiperArrowPattern::UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNode,

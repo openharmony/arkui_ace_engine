@@ -80,9 +80,9 @@ public:
 
         auto videoSrcInfo = GetVideoSourceValue(VideoSourceInfo());
         auto src = JsonUtil::Create(true);
-        src->Put("src", videoSrcInfo.GetSrc().c_str());
-        src->Put("bundleName", videoSrcInfo.GetBundleName().c_str());
-        src->Put("moduleName", videoSrcInfo.GetModuleName().c_str());
+        src->Put("src", videoSrcInfo.src_.c_str());
+        src->Put("bundleName", videoSrcInfo.bundleName_.c_str());
+        src->Put("moduleName", videoSrcInfo.moduleName_.c_str());
         json->PutExtAttr("src", src, filter);
 
         auto posterImageInfo = GetPosterImageInfoValue(ImageSourceInfo());

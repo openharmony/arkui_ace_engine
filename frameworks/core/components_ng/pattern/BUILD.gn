@@ -18,7 +18,9 @@ import(
 
 build_component_ng("pattern_ng") {
   sources = [
+    "action_sheet/action_sheet_model_ng.cpp",
     "animator/animator_model_ng.cpp",
+    "app_bar/app_bar_utils.cpp",
     "app_bar/app_bar_view.cpp",
     "app_bar/atomic_service_layout_algorithm.cpp",
     "app_bar/atomic_service_pattern.cpp",
@@ -86,6 +88,7 @@ build_component_ng("pattern_ng") {
     "counter/counter_layout_algorithm.cpp",
     "counter/counter_model_ng.cpp",
     "counter/counter_node.cpp",
+    "custom/custom_app_bar_node.cpp",
     "custom/custom_measure_layout_node.cpp",
     "custom/custom_measure_layout_param.cpp",
     "custom/custom_node.cpp",
@@ -166,6 +169,7 @@ build_component_ng("pattern_ng") {
     "image/image_overlay_modifier.cpp",
     "image/image_paint_method.cpp",
     "image/image_pattern.cpp",
+    "image_animator/controlled_animator.cpp",
     "image_animator/image_animator_model_ng.cpp",
     "image_animator/image_animator_pattern.cpp",
     "indexer/arc_indexer_content_modifier.cpp",
@@ -281,6 +285,7 @@ build_component_ng("pattern_ng") {
     "node_container/node_container_model_ng.cpp",
     "node_container/node_container_node.cpp",
     "node_container/node_container_pattern.cpp",
+    "overlay/dialog_manager.cpp",
     "overlay/group_manager.cpp",
     "overlay/keyboard_base_pattern.cpp",
     "overlay/modal_presentation_pattern.cpp",
@@ -446,6 +451,9 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.cpp",
     "swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.cpp",
     "swiper_indicator/indicator_common/arc_swiper_indicator_pattern.cpp",
+    "swiper_indicator/indicator_common/indicator_accessibility.cpp",
+    "swiper_indicator/indicator_common/indicator_model_ng.cpp",
+    "swiper_indicator/indicator_common/indicator_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_accessibility_property.cpp",
@@ -454,6 +462,18 @@ build_component_ng("pattern_ng") {
     "symbol/symbol_effect_options.cpp",
     "symbol/symbol_model_ng.cpp",
     "symbol/symbol_source_info.cpp",
+    "tabs/tab_bar_accessibility_property.cpp",
+    "tabs/tab_bar_layout_algorithm.cpp",
+    "tabs/tab_bar_layout_property.cpp",
+    "tabs/tab_bar_modifier.cpp",
+    "tabs/tab_bar_paint_method.cpp",
+    "tabs/tab_bar_pattern.cpp",
+    "tabs/tab_content_model_ng.cpp",
+    "tabs/tab_content_node.cpp",
+    "tabs/tabs_layout_algorithm.cpp",
+    "tabs/tabs_model_ng.cpp",
+    "tabs/tabs_node.cpp",
+    "tabs/tabs_pattern.cpp",
     "text/base_text_select_overlay.cpp",
     "text/image_span_view.cpp",
     "text/multiple_click_recognizer.cpp",
@@ -531,9 +551,11 @@ build_component_ng("pattern_ng") {
     "view_context/view_context_model_ng.cpp",
   ]
 
+  # Add Cangjie application window registration
+  sources += [ "$ace_root/frameworks/bridge/cj_frontend/frontend/container_modal_cj_utils.cpp" ]
+
   if (!ace_engine_feature_wearable) {
     sources += [
-      "action_sheet/action_sheet_model_ng.cpp",
       "calendar_picker/calendar_dialog_layout_algorithm.cpp",
       "calendar_picker/calendar_dialog_pattern.cpp",
       "calendar_picker/calendar_dialog_view.cpp",
@@ -565,18 +587,6 @@ build_component_ng("pattern_ng") {
       "stepper/stepper_model_ng.cpp",
       "stepper/stepper_node.cpp",
       "stepper/stepper_pattern.cpp",
-      "tabs/tab_bar_accessibility_property.cpp",
-      "tabs/tab_bar_layout_algorithm.cpp",
-      "tabs/tab_bar_layout_property.cpp",
-      "tabs/tab_bar_modifier.cpp",
-      "tabs/tab_bar_paint_method.cpp",
-      "tabs/tab_bar_pattern.cpp",
-      "tabs/tab_content_model_ng.cpp",
-      "tabs/tab_content_node.cpp",
-      "tabs/tabs_layout_algorithm.cpp",
-      "tabs/tabs_model_ng.cpp",
-      "tabs/tabs_node.cpp",
-      "tabs/tabs_pattern.cpp",
       "text_picker/textpicker_dialog_view.cpp",
       "time_picker/timepicker_dialog_view.cpp",
       "waterflow/layout/sliding_window/water_flow_layout_info_sw.cpp",
@@ -610,7 +620,10 @@ build_component_ng("pattern_ng") {
   }
 
   external_deps = []
-  deps = [ "container_modal/interfaces:customtitle" ]
+  deps = [
+    "app_bar/interfaces:custom_app_bar",
+    "container_modal/interfaces:customtitle",
+  ]
 
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
@@ -625,6 +638,17 @@ build_component_ng("pattern_ng") {
     ]
     if (!use_mingw_win && !use_mac && !use_linux) {
       external_deps += [ "window_manager:scene_session" ]
+    }
+    if (!build_ohos_sdk) {
+      sources += [
+        "form_button/form_button_model_ng.cpp",
+        "form_button/form_button_pattern.cpp",
+      ]
+
+      external_deps += [
+        "ability_base:want",
+        "form_fwk:fmskit_native",
+      ]
     }
   } else if (is_arkui_x) {
     deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]

@@ -119,7 +119,13 @@ void MenuItemGroupTestNg::SetUp()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    RefPtr<MenuTheme> menuTheme_ = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([menuTheme_](ThemeType type) -> RefPtr<Theme> {
+        if (type == MenuTheme::TypeId()) {
+            return menuTheme_;
+        }
+        return AceType::MakeRefPtr<SelectTheme>();
+    });
     MockContainer::SetUp();
 }
 
@@ -906,5 +912,96 @@ HWTEST_F(MenuItemGroupTestNg, AddFooterNull, TestSize.Level1)
     EXPECT_EQ(menuItemPattern->footerContent_, nullptr);
     EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
     EXPECT_EQ(frameNode->isRestoreInfoUsed_, false);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle001
+ * @tc.desc: MenuView UpdateMenuBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.colorMode = ThemeColorMode::DARK;
+    menuParam.blurStyleOption = blurStyleOption;
+
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_NE(renderContext->GetBackBlurStyle(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::DARK);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle002
+ * @tc.desc: MenuView UpdateMenuBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle002, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+
+    MenuParam menuParam;
+    EffectOption effectOption;
+    effectOption.saturation = 6.0f;
+    menuParam.effectOption = effectOption;
+
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_NE(renderContext->GetBackgroundEffect(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, effectOption.saturation);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle003
+ * @tc.desc: MenuView UpdateMenuBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle003, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    effectOption.saturation = 6.0f;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackBlurStyle(), std::nullopt);
+    ASSERT_NE(renderContext->GetBackgroundEffect(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, effectOption.saturation);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

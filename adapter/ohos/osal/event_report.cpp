@@ -38,6 +38,7 @@ constexpr char EVENT_KEY_MESSAGE[] = "MSG";
 constexpr char EVENT_KEY_CMD[] = "CMD";
 constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
+constexpr char APP_RUNNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char EVENT_NAME_JS_ERROR[] = "JS_ERROR";
 constexpr char STATISTIC_DURATION[] = "DURATION";
 constexpr char EVENT_KEY_STARTTIME[] = "STARTTIME";
@@ -66,8 +67,10 @@ constexpr char EVENT_KEY_MAX_HITCH_TIME_SINCE_START[] = "MAX_HITCH_TIME_SINCE_ST
 constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
+constexpr char ACTION_NAME[] = "ACTION_NAME";
 constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
 constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
+constexpr char EVENT_KEY_REAL_SKIPPED_FRAME_TIME[] = "REAL_SKIPPED_FRAME_TIME";
 constexpr char EVENT_KEY_PAGE_NODE_COUNT[] = "PAGE_NODE_COUNT";
 constexpr char EVENT_KEY_PAGE_NODE_THRESHOLD[] = "PAGE_NODE_THRESHOLD";
 constexpr char EVENT_KEY_PAGE_DEPTH[] = "PAGE_DEPTH";
@@ -82,6 +85,11 @@ constexpr char EVENT_KEY_IS_HOVER_MODE[] = "IS_HOVER_MODE";
 constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
 constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
 constexpr char EVENT_KEY_NON_MANUAL_POSTCARD_ACTION[] = "NON_MANUAL_POSTCARD_ACTION";
+constexpr char EVENT_KEY_TEXTFIELD_ERROR[] = "TEXTFIELD_ERROR";
+constexpr char EVENT_KEY_TEXTFIELD_ERROR_TYPE[] = "TEXTFIELD_ERROR_TYPE";
+constexpr char EVENT_KEY_CLIPBOARD_FAIL_TYPE[] = "EVENT_KEY_CLIPBOARD_FAIL_TYPE";
+constexpr char EVENT_KEY_FRAME_NODE_ID[] = "FRAME_NODE_ID";
+constexpr char EVENT_KEY_CLIPBOARD_FAIL[] = "CLIPBOARD_FAIL";
 constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
 constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
 constexpr char EVENT_KEY_FORM_NAME[] = "FORM_NAME";
@@ -106,10 +114,20 @@ constexpr char EVENT_KEY_WINDOW_ID[] = "WINDOW_ID";
 constexpr char EVENT_KEY_INSTANCE_ID[] = "INSTANCE_ID";
 constexpr char EVENT_KEY_VSYNC_TIMESTAMP[] = "VSYNC_TIMESTAMP";
 #endif
+constexpr char EVENT_KEY_RICH_EDITOR_ERROR[] = "RICH_EDITOR_ERROR";
+constexpr char EVENT_KEY_SPAN_LENGTH[] = "SPAN_LENGTH";
+constexpr char EVENT_KEY_TEXT_LENGTH[] = "TEXT_LENGTH";
+constexpr char EVENT_KEY_SPAN_INDEX[] = "SPAN_INDEX";
+constexpr char ACCESSIBILITY_FAIL[] = "ACCESSIBILITY_FAIL";
 constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
 constexpr char UIEXTENSION_TRANSPARENT_DETECTED[] = "UIEXTENSION_TRANSPARENT_DETECTED";
+constexpr char EVENT_KEY_SCROLLABLE_ERROR[] = "SCROLLABLE_ERROR";
+constexpr char EVENT_KEY_NODE_TYPE[] = "NODE_TYPE";
+constexpr char EVENT_KEY_SUB_ERROR_TYPE[] = "SUB_ERROR_TYPE";
+constexpr char EVENT_KEY_TARGET_API_VERSION[] = "TARGET_API_VERSION";
+constexpr char EVENT_KEY_REUSED_NODE_SKIP_MEASURE[] = "REUSED_NODE_SKIP_MEASURE";
 
 void StrTrim(std::string& str)
 {
@@ -244,6 +262,19 @@ void EventReport::SendAccessibilityException(AccessibilityExcepType type)
     SendEventInner(eventInfo);
 }
 
+void EventReport::ReportAccessibilityFailEvent(const std::string& actionName)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    auto processName = AceApplicationInfo::GetInstance().GetProcessName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, ACCESSIBILITY_FAIL,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PROCESS_NAME, processName,
+        ACTION_NAME, actionName);
+}
+
 void EventReport::SendFormException(FormExcepType type)
 {
     EventInfo eventInfo = {
@@ -278,13 +309,14 @@ void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
 }
 
 void EventReport::JsErrReport(
-    const std::string& packageName, const std::string& reason, const std::string& summary)
+    const std::string& packageName, const std::string& reason, const std::string& summary, const std::string& uniqueId)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_NAME_JS_ERROR,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_REASON, reason,
-        EVENT_KEY_SUMMARY, summary);
+        EVENT_KEY_SUMMARY, summary,
+        APP_RUNNING_UNIQUE_ID, uniqueId);
 }
 
 void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
@@ -373,6 +405,25 @@ void EventReport::ReportDragInfo(const DragInfo& dragInfo)
         "SUMMARYTYPE", dragInfo.summaryType,
         "SUMMARYNUM", dragInfo.summaryNum,
         "ALLOW_DROP_TYPE", dragInfo.allowDropType);
+}
+
+void EventReport::ReportRichEditorInfo(const RichEditorInfo& richEditorInfo)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto appVersionCode = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto appVersionName = AceApplicationInfo::GetInstance().GetAppVersionName();
+    StrTrim(packageName);
+    StrTrim(appVersionName);
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_RICH_EDITOR_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_VERSION_CODE, appVersionCode,
+        EVENT_KEY_VERSION_NAME, appVersionName,
+        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(richEditorInfo.errorType),
+        EVENT_KEY_SPAN_LENGTH, richEditorInfo.spanLength,
+        EVENT_KEY_TEXT_LENGTH, richEditorInfo.textLength,
+        EVENT_KEY_SPAN_INDEX, richEditorInfo.spanIndex);
 }
 
 void EventReport::ReportEventComplete(DataBase& data)
@@ -547,6 +598,7 @@ void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
     const auto& versionName = info.baseInfo.versionName;
     const auto& pageName = info.baseInfo.pageName;
     const auto& skippedFrameTime = info.skippedFrameTime;
+    const auto& realSkippedFrameTime = info.realSkippedFrameTime;
     const auto& windowName = info.windowName;
     const auto& filterType = info.filterType;
     const auto& sceneId = info.sceneId;
@@ -561,6 +613,7 @@ void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
         EVENT_KEY_PAGE_NAME, pageName,
         EVENT_KEY_FILTER_TYPE, filterType,
         EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_REAL_SKIPPED_FRAME_TIME, static_cast<uint64_t>(realSkippedFrameTime),
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_UNFILTERED: skipppedFrameTime=%lld(ms), windowName=%s, filterType=%d",
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str(), filterType);
@@ -672,5 +725,49 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
         EVENT_KEY_VERSION_NAME, app_version_name,
         EVENT_KEY_BUNDLE_NAME, bundleName,
         EVENT_KEY_MODULE_NAME, moduleName);
+}
+
+void EventReport::ReportScrollableErrorEvent(
+    const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    auto target_api_version = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    StrTrim(packageName);
+    StrTrim(app_version_name);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_SCROLLABLE_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_NODE_TYPE, nodeType,
+        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(errorType),
+        EVENT_KEY_SUB_ERROR_TYPE, subErrorType,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_TARGET_API_VERSION, target_api_version,
+        EVENT_KEY_VERSION_CODE, app_version_code,
+        EVENT_KEY_VERSION_NAME, app_version_name);
+}
+
+void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_TEXTFIELD_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_FRAME_NODE_ID,
+        frameNodeId, EVENT_KEY_PAGE_DEPTH, depth, EVENT_KEY_TEXTFIELD_ERROR_TYPE, errorType);
+}
+
+void EventReport::ReportClipboardFailEvent(const std::string& errorType)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_CLIPBOARD_FAIL,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_CLIPBOARD_FAIL_TYPE, errorType);
+}
+
+void EventReport::ReportReusedNodeSkipMeasureApp()
+{
+    auto progressName = AceApplicationInfo::GetInstance().GetProcessName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_REUSED_NODE_SKIP_MEASURE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_PACKAGE_NAME, progressName);
+        
 }
 } // namespace OHOS::Ace

@@ -90,7 +90,7 @@ void ScrollBarProxy::UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scroll
 }
 
 void ScrollBarProxy::NotifyScrollableNode(
-    float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar) const
+    float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar, bool isMouseWheelScroll) const
 {
     auto scrollBar = weakScrollBar.Upgrade();
     CHECK_NULL_VOID(scrollBar);
@@ -103,13 +103,13 @@ void ScrollBarProxy::NotifyScrollableNode(
     }
     float controlDistance = scrollBar->GetControlDistance();
     float value = CalcPatternOffset(controlDistance, barScrollableDistance, distance);
-    node.onPositionChanged(value, source, IsNestScroller());
+    node.onPositionChanged(value, source, IsNestScroller(), isMouseWheelScroll);
     if (node.scrollbarFRcallback) {
         node.scrollbarFRcallback(0, SceneStatus::RUNNING);
     }
 }
 
-void ScrollBarProxy::NotifyScrollBarNode(float distance, int32_t source) const
+void ScrollBarProxy::NotifyScrollBarNode(float distance, int32_t source, bool isMouseWheelScroll) const
 {
     auto node = scorllableNode_;
     CHECK_NULL_VOID(node.onPositionChanged);
@@ -117,7 +117,7 @@ void ScrollBarProxy::NotifyScrollBarNode(float distance, int32_t source) const
     if (!scrollable || !CheckScrollable(scrollable)) {
         return;
     }
-    node.onPositionChanged(distance, source, IsNestScroller());
+    node.onPositionChanged(distance, source, IsNestScroller(), isMouseWheelScroll);
     if (node.scrollbarFRcallback) {
         node.scrollbarFRcallback(0, SceneStatus::RUNNING);
     }
@@ -273,7 +273,7 @@ void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
         float offset = reverse ? distance : -distance;
         CHECK_NULL_VOID(scorllableNode_.onPositionChanged);
         NotifyScrollStart();
-        scorllableNode_.onPositionChanged(offset, source, true);
+        scorllableNode_.onPositionChanged(offset, source, true, false);
         NotifyScrollStop();
     }
 }

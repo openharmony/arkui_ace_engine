@@ -49,6 +49,9 @@ struct SwiperParameters {
     std::optional<Color> colorVal;
     std::optional<Color> selectedColorVal;
     std::optional<int32_t> maxDisplayCountVal;
+    std::optional<bool> ignoreSizeValue;
+    std::optional<bool> setIgnoreSizeValue;
+    std::optional<Dimension> dimSpace;
 };
 
 struct SwiperDigitalParameters {
@@ -64,6 +67,8 @@ struct SwiperDigitalParameters {
     std::optional<Dimension> selectedFontSize;
     std::optional<FontWeight> fontWeight;
     std::optional<FontWeight> selectedFontWeight;
+    std::optional<bool> ignoreSizeValue;
+    std::optional<bool> setIgnoreSizeValue;
 };
 
 struct SwiperArcDotParameters {
@@ -99,6 +104,12 @@ struct SwiperAutoPlayOptions {
     bool stopWhenTouched = true;
 };
 
+struct SwiperContentWillScrollResult {
+    int32_t currentIndex;
+    int32_t comingIndex;
+    float offset;
+};
+
 using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
 using AnimationStartEventPtr = std::shared_ptr<AnimationStartEvent>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
@@ -106,6 +117,7 @@ using AnimationEndEventPtr = std::shared_ptr<AnimationEndEvent>;
 using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 using ContentDidScrollEvent =
     std::function<void(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)>;
+using ContentWillScrollEvent = std::function<bool(const SwiperContentWillScrollResult& result)>;
 
 class ACE_FORCE_EXPORT SwiperModel {
 public:
@@ -133,6 +145,7 @@ public:
     virtual void SetCachedCount(int32_t cachedCount);
     virtual void SetCachedIsShown(bool isShown) {}
     virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
+    virtual void SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected) {}
     virtual void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart) {}
     virtual void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd) {}
     virtual void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) {}
@@ -162,9 +175,12 @@ public:
     virtual void SetSwipeByGroup(bool swipeByGroup) {}
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
+    virtual void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
     virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
     virtual void SetDisableTransitionAnimation(bool isDisable) {}
+    virtual void SetBindIndicator(bool bind) {}
+    virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

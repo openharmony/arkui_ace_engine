@@ -191,8 +191,8 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     taskExecutor_->PostTask(
-        [weakContext, instance = instanceId_]() {
-            ContainerScope scope(instance);
+        [weakContext, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
                 return;
@@ -253,8 +253,8 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     taskExecutor_->PostTask(
-        [weakContext, this]() {
-            ContainerScope scope(instanceId_);
+        [weakContext, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
                 return;

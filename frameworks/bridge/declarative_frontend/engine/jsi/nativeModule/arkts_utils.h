@@ -50,6 +50,7 @@ enum class ResourceType : uint32_t {
 class ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
+    static bool ParseJsColorContent(const EcmaVM* vm, const Local<JSValueRef>& value);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(
@@ -101,6 +102,8 @@ public:
     static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
+    static void ParseJsSymbolFontFamilyName(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
+        std::string& customFamilyName);
     static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
     static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
@@ -208,6 +211,8 @@ public:
     static Local<JSValueRef> GetModifierKeyState(
         ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
+    static Local<JSValueRef> JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info);
+    static Local<JSValueRef> JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

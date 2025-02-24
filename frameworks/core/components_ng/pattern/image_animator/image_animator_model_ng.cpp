@@ -16,11 +16,12 @@
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image_animator/controlled_animator.h"
 
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t DEFAULT_DURATION { 1000 };
-    constexpr int32_t DEFAULT_STATUS { static_cast<int32_t>(Animator::Status::IDLE) };
+    constexpr int32_t DEFAULT_STATUS { static_cast<int32_t>(ControlledAnimator::ControlStatus::IDLE) };
     constexpr int32_t DEFAULT_FILL_MODE  { static_cast<int32_t>(FillMode::FORWARDS) };
     constexpr int32_t DEFAULT_ITERATIONS { 1 };
 }
@@ -48,6 +49,11 @@ void ImageAnimatorModelNG::Create()
     stack->Push(frameNode);
 }
 
+void ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(bool autoMonitorInvisibleArea)
+{
+    GetImageAnimatorPattern()->SetAutoMonitorInvisibleArea(autoMonitorInvisibleArea);
+}
+
 void ImageAnimatorModelNG::SetImages(const std::vector<ImageProperties>& images)
 {
     std::vector<ImageProperties> imageList = images;
@@ -56,7 +62,7 @@ void ImageAnimatorModelNG::SetImages(const std::vector<ImageProperties>& images)
 
 void ImageAnimatorModelNG::SetState(int32_t state)
 {
-    GetImageAnimatorPattern()->SetStatus(static_cast<Animator::Status>(state));
+    GetImageAnimatorPattern()->SetStatus(static_cast<ControlledAnimator::ControlStatus>(state));
 }
 
 void ImageAnimatorModelNG::SetDuration(int32_t duration)
@@ -189,7 +195,8 @@ void ImageAnimatorModelNG::SetDuration(FrameNode* frameNode, const std::optional
 void ImageAnimatorModelNG::SetState(FrameNode* frameNode, const std::optional<int32_t>& state)
 {
     CHECK_NULL_VOID(frameNode);
-    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<Animator::Status>(state.value_or(DEFAULT_STATUS)));
+    GetImageAnimatorPattern(frameNode)->SetStatus(
+        static_cast<ControlledAnimator::ControlStatus>(state.value_or(DEFAULT_STATUS)));
 }
 
 void ImageAnimatorModelNG::SetFixedSize(FrameNode* frameNode, bool fixedSize)
@@ -208,6 +215,11 @@ void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, const std::optiona
 {
     CHECK_NULL_VOID(frameNode);
     GetImageAnimatorPattern(frameNode)->SetIteration(iteration.value_or(DEFAULT_ITERATIONS));
+}
+
+void ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(FrameNode* frameNode, bool autoMonitorInvisibleArea)
+{
+    GetImageAnimatorPattern(frameNode)->SetAutoMonitorInvisibleArea(autoMonitorInvisibleArea);
 }
 
 bool ImageAnimatorModelNG::IsReverse(FrameNode* frameNode)

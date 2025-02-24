@@ -201,6 +201,11 @@ public:
         isClipHandleDrawRect_ = isClipHandleDrawRect;
     }
 
+    RefPtr<Pattern> GetSelectOverlayPattern() const
+    {
+        return pattern_.Upgrade();
+    }
+
 private:
     void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, const PaintHandleParams& params);
     void PaintHandle(RSCanvas& canvas, const HandleDrawInfo& handleInfo);

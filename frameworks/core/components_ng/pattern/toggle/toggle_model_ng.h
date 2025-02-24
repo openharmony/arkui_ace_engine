@@ -39,7 +39,7 @@ class ACE_EXPORT ToggleModelNG : public OHOS::Ace::ToggleModel {
 public:
     void Create(ToggleType toggleType, bool isOn) override;
     void SetSelectedColor(const std::optional<Color>& selectedColor) override;
-    void SetSwitchPointColor(const Color& switchPointColor) override;
+    void SetSwitchPointColor(const std::optional<Color>& switchPointColor) override;
     void OnChange(ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
@@ -86,7 +86,7 @@ private:
     static RefPtr<FrameNode> CreateCheckboxFrameNode(int32_t nodeId, bool isOn);
     static RefPtr<FrameNode> CreateSwitchFrameNode(int32_t nodeId, bool isOn);
     static RefPtr<FrameNode> CreateButtonFrameNode(int32_t nodeId, bool isOn);
-    static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index);
+    static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index, ToggleType toggleType);
     static int32_t RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId);
     static void UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
     static void UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);

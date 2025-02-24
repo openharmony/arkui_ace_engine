@@ -244,12 +244,13 @@ private:
     void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
     void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
-    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId);
+    bool IsFormBundleExempt(int64_t formId) const;
+    bool IsFormBundleProtected(const std::string &bundleName, int64_t formId) const;
     void HandleLockEvent(bool isLock);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
+    void UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &renderContext);
     RefPtr<FrameNode> CreateActionNode();
-    Color GetFormStyleBackGroundColor();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;

@@ -61,6 +61,24 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+namespace {
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
+} // namespace
+
 class TextPickerTestUpdate : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -165,16 +183,10 @@ void TextPickerTestUpdate::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1726,6 +1738,215 @@ HWTEST_F(TextPickerTestUpdate, UpdateForwardButtonMargin001, TestSize.Level1)
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     TextPickerDialogView::UpdateForwardButtonMargin(buttonForwardNode, dialogTheme);
     EXPECT_NE(buttonForwardNode->GetLayoutProperty()->margin_, nullptr);
+}
+
+/**
+ * @tc.name: DialogViewUpdateButtonBackwardLayoutProperty001
+ * @tc.desc: Test UpdateButtonBackwardLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, DialogViewUpdateButtonBackwardLayoutProperty001, TestSize.Level1)
+{
+    int32_t settingApiVersion = 14;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.step: step1. create buttonBackwardNode.
+     */
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info;
+    info.fontColor = Color::BLACK;
+    buttonInfos.push_back(info);
+
+    auto moveBackwardFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogMoveBackwardEvent;
+    dialogMoveBackwardEvent["moveBackwardId"] = moveBackwardFunc;
+    auto moveBackwardEvent = dialogMoveBackwardEvent["moveBackwardId"];
+
+    ASSERT_NE(frameNode_, nullptr);
+    auto buttonBackwardNode = TextPickerDialogView::CreateBackwardNode(moveBackwardEvent, frameNode_, buttonInfos);
+    ASSERT_NE(buttonBackwardNode, nullptr);
+    auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonBackwardLayoutProperty, nullptr);
+
+    /**
+     * @tc.step: step2. call UpdateButtonForwardLayoutProperty.
+     * @tc.expected: ButtonType is CAPSULE.
+     */
+    TextPickerDialogView::UpdateButtonBackwardLayoutProperty(buttonBackwardNode, pipelineContext);
+    EXPECT_EQ(buttonBackwardLayoutProperty->GetType(), ButtonType::CAPSULE);
+}
+
+/**
+ * @tc.name: DialogViewUpdateButtonForwardLayoutProperty001
+ * @tc.desc: Test UpdateButtonForwardLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, DialogViewUpdateButtonForwardLayoutProperty001, TestSize.Level1)
+{
+    int32_t settingApiVersion = 14;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.step: step1. create buttonForwardNode.
+     */
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info;
+    info.fontColor = Color::BLACK;
+    buttonInfos.push_back(info);
+
+    auto moveForwardFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogMoveForwardEvent;
+    dialogMoveForwardEvent["moveForwardId"] = moveForwardFunc;
+    auto moveForwardEvent = dialogMoveForwardEvent["moveForwardId"];
+
+    ASSERT_NE(frameNode_, nullptr);
+    auto buttonForwardNode = TextPickerDialogView::CreateForwardNode(moveForwardEvent, frameNode_, buttonInfos);
+    ASSERT_NE(buttonForwardNode, nullptr);
+    auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonForwardLayoutProperty, nullptr);
+
+    /**
+     * @tc.step: step2. call UpdateButtonForwardLayoutProperty.
+     * @tc.expected: ButtonType is CAPSULE.
+     */
+    TextPickerDialogView::UpdateButtonForwardLayoutProperty(buttonForwardNode, pipelineContext);
+    EXPECT_EQ(buttonForwardLayoutProperty->GetType(), ButtonType::CAPSULE);
+}
+
+/**
+ * @tc.name: DialogViewUpdateButtonCancelLayoutProperty001
+ * @tc.desc: Test UpdateButtonCancelLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, DialogViewUpdateButtonCancelLayoutProperty001, TestSize.Level1)
+{
+    int32_t settingApiVersion = 14;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.step: step1. create cancelNode.
+     */
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info;
+    info.fontColor = Color::BLACK;
+    buttonInfos.push_back(info);
+
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    auto cancelEvent = dialogCancelEvent["cancelId"];
+
+    ASSERT_NE(frameNode_, nullptr);
+    auto cancelNode = TextPickerDialogView::CreateCancelNode(cancelEvent, frameNode_, buttonInfos);
+    ASSERT_NE(cancelNode, nullptr);
+    auto buttonCancelLayoutProperty = cancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonCancelLayoutProperty, nullptr);
+
+    /**
+     * @tc.step: step2. call UpdateButtonCancelLayoutProperty.
+     * @tc.expected: ButtonType is CAPSULE.
+     */
+    TextPickerDialogView::UpdateButtonCancelLayoutProperty(cancelNode, pipelineContext);
+    EXPECT_EQ(buttonCancelLayoutProperty->GetType(), ButtonType::CAPSULE);
+}
+
+/**
+ * @tc.name: DialogViewUpdateButtonConfirmLayoutProperty001
+ * @tc.desc: Test UpdateButtonConfirmLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, DialogViewUpdateButtonConfirmLayoutProperty001, TestSize.Level1)
+{
+    int32_t settingApiVersion = 14;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    /**
+     * @tc.step: step1. create confirmNode.
+     */
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info;
+    info.fontColor = Color::BLACK;
+    buttonInfos.push_back(info);
+
+    auto func = [](const std::string& /* info */) {};
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    dialogEvent["acceptId"] = func;
+    auto acceptEvent = dialogEvent["acceptId"];
+
+    ASSERT_NE(frameNode_, nullptr);
+    auto buttonConfirmNode = TextPickerDialogView::CreateConfirmNode(frameNode_, frameNode_, buttonInfos, acceptEvent);
+    ASSERT_NE(buttonConfirmNode, nullptr);
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonConfirmLayoutProperty, nullptr);
+
+    /**
+     * @tc.step: step2. call UpdateButtonConfirmLayoutProperty.
+     * @tc.expected: ButtonType is CAPSULE.
+     */
+    TextPickerDialogView::UpdateButtonConfirmLayoutProperty(buttonConfirmNode, theme);
+    EXPECT_EQ(buttonConfirmLayoutProperty->GetType(), ButtonType::CAPSULE);
+}
+
+/**
+ * @tc.name: UpdateButtonDefaultFocus001
+ * @tc.desc: Test UpdateButtonDefaultFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, UpdateButtonDefaultFocus001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create confirmNode.
+     */
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    buttonInfos.push_back(info1);
+    ButtonInfo info2;
+    info2.isPrimary = true;
+    buttonInfos.push_back(info2);
+
+    auto func = [](const std::string& /* info */) {};
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    dialogEvent["acceptId"] = func;
+    auto acceptEvent = dialogEvent["acceptId"];
+
+    ASSERT_NE(frameNode_, nullptr);
+    auto buttonConfirmNode = TextPickerDialogView::CreateConfirmNode(frameNode_, frameNode_, buttonInfos, acceptEvent);
+    ASSERT_NE(buttonConfirmNode, nullptr);
+
+    auto focusHub = buttonConfirmNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    buttonInfos[0].isPrimary = false;
+    TextPickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
+    EXPECT_FALSE(focusHub->IsDefaultFocus());
+
+    buttonInfos[1].isPrimary = false;
+    TextPickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
+    EXPECT_FALSE(focusHub->IsDefaultFocus());
+
+    TextPickerDialogView::UpdateButtonDefaultFocus(buttonInfos, nullptr, true);
+    EXPECT_FALSE(focusHub->IsDefaultFocus());
+
+    buttonInfos[0].isPrimary = true;
+    TextPickerDialogView::UpdateButtonDefaultFocus(buttonInfos, nullptr, true);
+    EXPECT_FALSE(focusHub->IsDefaultFocus());
 }
 
 /**

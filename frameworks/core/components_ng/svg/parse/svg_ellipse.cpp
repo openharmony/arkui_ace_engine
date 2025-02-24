@@ -52,6 +52,32 @@ RSRecordingPath SvgEllipse::AsPath(const Size& viewPort) const
     return path;
 }
 
+RSRecordingPath SvgEllipse::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
+        return path_.value();
+    }
+    auto rx = GreatNotEqual(ellipseAttr_.rx.Value(), 0.0) ?
+        GetMeasuredLength(ellipseAttr_.rx, lengthRule, SvgLengthType::HORIZONTAL) : 0.0;
+    auto ry = GreatNotEqual(ellipseAttr_.ry.Value(), 0.0) ?
+        GetMeasuredLength(ellipseAttr_.ry, lengthRule, SvgLengthType::VERTICAL) : 0.0;
+    /*if Ellipse x or y invalid, default cirlce*/
+    rx = GreatNotEqual(rx, 0.0) ? rx : ry;
+    ry = GreatNotEqual(ry, 0.0) ? ry : rx;
+    RSRecordingPath path;
+    RSScalar left = GetMeasuredPosition(ellipseAttr_.cx, lengthRule, SvgLengthType::HORIZONTAL) - rx;
+    RSScalar top = GetMeasuredPosition(ellipseAttr_.cy, lengthRule, SvgLengthType::VERTICAL) - ry;
+
+    RSRect rect = RSRect(left, top, rx + rx + left, ry + ry + top);
+    path.AddOval(rect);
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(path);
+    }
+    return path;
+}
+
 bool SvgEllipse::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgEllipseAttribute&)> attrs[] = {

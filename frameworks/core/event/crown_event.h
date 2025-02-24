@@ -15,7 +15,6 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_CROWN_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_CROWN_EVENT_H
-#ifdef SUPPORT_DIGITAL_CROWN
 #include <map>
 #include "core/event/ace_events.h"
 #include "core/event/non_pointer_event.h"
@@ -40,12 +39,14 @@ enum class CrownAction : int32_t {
 };
 
 struct CrownEvent final : public NonPointerEvent {
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     CrownAction action = CrownAction::UNKNOWN;
     TimeStamp timeStamp;
     double angularVelocity = 0.0;
     double degree = 0.0;
     int32_t touchEventId = 0;
     bool isInjected = false;
+
     CrownEvent()
     {
         eventType = UIInputEventType::CROWN;
@@ -73,6 +74,16 @@ struct CrownEvent final : public NonPointerEvent {
     void SetAction(CrownAction crownAction)
     {
         action = crownAction;
+    }
+
+    void SetPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        pointerEvent_ = pointerEvent;
+    }
+
+    const std::shared_ptr<MMI::PointerEvent>& GetPointerEvent() const
+    {
+        return pointerEvent_;
     }
 };
 
@@ -121,5 +132,3 @@ using OnCrownCallbackFunc = std::function<void(CrownEventInfo&)>;
 
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_CROWN_EVENT_H
-#endif // SUPPORT_DIGITAL_CROWN
-

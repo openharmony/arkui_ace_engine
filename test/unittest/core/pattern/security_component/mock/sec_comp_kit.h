@@ -53,6 +53,13 @@ struct SecCompClickEvent {
     };
     ExtraInfo extraInfo;
 };
+
+struct SecCompInfo {
+    int32_t scId;
+    std::string componentInfo;
+    SecCompClickEvent clickInfo;
+};
+
 using OnFirstUseDialogCloseFunc = std::function<void(int32_t)>;
 
 class SecCompUiRegister {
@@ -85,9 +92,8 @@ public:
         return 0;
     };
 
-    static int32_t ReportSecurityComponentClickEvent(int32_t scId,
-        std::string& componentInfo, const SecCompClickEvent& clickInfo,
-        sptr<IRemoteObject> callerToken, OnFirstUseDialogCloseFunc&& func)
+    static int32_t ReportSecurityComponentClickEvent(SecCompInfo& secCompInfo,
+        sptr<IRemoteObject> callerToken, OnFirstUseDialogCloseFunc&& func, std::string& message)
     {
         return 0;
     };

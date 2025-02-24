@@ -90,7 +90,7 @@ public:
 
         auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>(GetThemeScopeId());
         CHECK_NULL_RETURN(switchTheme, FocusPattern());
 
         auto focusPaintcolor = switchTheme->GetActiveColor();
@@ -143,6 +143,7 @@ public:
     }
 
     void SetSwitchIsOn(bool value);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -227,8 +228,9 @@ private:
     bool isDragEvent_ = false;
     RefPtr<SwitchPaintMethod> paintMethod_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
-    bool isTouchPreventDefault_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
+    Dimension hotZoneHorizontalSize_;
+    Dimension hotZoneVerticalSize_;
 };
 } // namespace OHOS::Ace::NG
 

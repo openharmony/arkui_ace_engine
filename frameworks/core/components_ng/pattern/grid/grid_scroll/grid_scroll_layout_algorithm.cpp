@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/log/event_report.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/templates_parser.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 void AddCacheItemsInFront(
@@ -221,13 +223,16 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!props->HasCachedCount()) {
         info_.UpdateDefaultCachedCount();
     }
+    int32_t cacheStart = 0;
+    int32_t cacheEnd = 0; // number of cache items at tail
+    const bool showCached = props->GetShowCachedItemsValue(false);
 
     const int32_t start = info_.startMainLineIndex_ - cacheCount;
     const int32_t end = info_.endMainLineIndex_ + cacheCount;
     float mainPos = -info_.GetHeightInRange(start, info_.startMainLineIndex_, mainGap_);
     for (auto i = start; i <= end; ++i) {
         const bool inRange = i >= info_.startMainLineIndex_ && i <= info_.endMainLineIndex_;
-        const bool isCache = !props->GetShowCachedItemsValue(false) && !inRange;
+        const bool isCache = !showCached && !inRange;
         const auto& line = info_.gridMatrix_.find(i);
         if (line == info_.gridMatrix_.end()) {
             continue;
@@ -275,6 +280,11 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (frSize == itemsCrossSize_.end()) {
                 continue;
             }
+            if (i < info_.startMainLineIndex_) {
+                ++cacheStart;
+            } else if (i > info_.endMainLineIndex_) {
+                ++cacheEnd;
+            }
             SizeF blockSize = SizeF(frSize->second, lineHeight, axis_);
             auto translate = OffsetF(0.0f, 0.0f);
             auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -311,8 +321,12 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         startIndex = endIndex = info_.childrenCount_;
     }
     if (!info_.hasMultiLineItem_) {
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
-            props->GetShowCachedItemsValue(false));
+        if (!showCached || !info_.reachEnd_) {
+            auto cache = CalculateCachedCount(layoutWrapper, cacheCount);
+            cacheStart = cache.first;
+            cacheEnd = cache.second; // only use counting method when last line not completely filled
+        }
+        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
     }
 }
 
@@ -408,7 +422,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (info_.reachStart_) {
         auto offset = info_.currentOffset_;
-        if ((Positive(offset) && !canOverScrollStart_) || (Negative(offset) && !canOverScrollEnd_)) {
+        if ((NonNegative(offset) && !canOverScrollStart_) || (NonPositive(offset) && !canOverScrollEnd_)) {
             info_.currentOffset_ = 0.0;
             info_.prevOffset_ = 0.0;
         }
@@ -573,8 +587,8 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     float lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
     // scroll forward
     if (LessNotEqual(info_.prevOffset_, info_.currentOffset_)) {
-        if ((Positive(info_.currentOffset_) && !canOverScrollStart_) ||
-            (Negative(info_.currentOffset_) && !canOverScrollEnd_)) {
+        if ((NonNegative(info_.currentOffset_) && !canOverScrollStart_) ||
+            (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) {
             info_.reachEnd_ = false;
             return;
         } else if (!isChildrenUpdated_) {
@@ -586,8 +600,8 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
     if (LessNotEqual(lengthOfItemsInViewport, mainSize) && info_.startIndex_ == 0) {
-        if (((Positive(info_.currentOffset_) && !canOverScrollStart_) ||
-                (Negative(info_.currentOffset_) && !canOverScrollEnd_)) ||
+        if (((NonNegative(info_.currentOffset_) && !canOverScrollStart_) ||
+                (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) ||
             isChildrenUpdated_) {
             info_.currentOffset_ = 0;
             info_.prevOffset_ = 0;
@@ -657,7 +671,7 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
         cellAveLength_ = -1.0f;
         bool hasNormalItem = false;
         lastCross_ = 0;
-        for (uint32_t i = (mainIter->second.empty() ? 0 : mainIter->second.rbegin()->first); i < crossCount_; i++) {
+        for (uint32_t i = mainIter->second.size(); i < crossCount_; i++) {
             // Step1. Get wrapper of [GridItem]
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
@@ -1032,7 +1046,7 @@ inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
 }
 } // namespace
 
-bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx, bool& cacheValid)
+bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx)
 {
     auto it = info_.gridMatrix_.find(line);
     if (it == info_.gridMatrix_.end() || info_.lineHeightMap_.find(line) == info_.lineHeightMap_.end()) {
@@ -1068,12 +1082,6 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
     }
 
     if (NonNegative(cellAveLength_)) { // Means at least one item has been measured
-        auto it = info_.lineHeightMap_.find(line);
-        if (it != info_.lineHeightMap_.end() && it->second != cellAveLength_) {
-            // Invalidate cache when item height changes, so that a future line jump would correctly
-            // recalculate lineHeights instead of using bad cache values.
-            cacheValid = false;
-        }
         info_.lineHeightMap_[line] = cellAveLength_;
         mainLength += cellAveLength_ + mainGap_;
     }
@@ -1090,13 +1098,11 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
 bool GridScrollLayoutAlgorithm::UseCurrentLines(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
-    auto& info = info_;
-    bool cacheValid = true;
     bool runOutOfRecord = false;
     // Measure grid items row by row
     int32_t tempEndIndex = -1;
     while (LessNotEqual(mainLength, mainSize)) {
-        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, cacheValid)) {
+        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex)) {
             runOutOfRecord = true;
             break;
         }
@@ -1117,14 +1123,6 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
         }
     } else {
         info_.offsetEnd_ = false;
-    }
-    if (!cacheValid) {
-        info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
-        // run out of record, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
-        info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
-                                                                                  : info.startMainLineIndex_);
-        // If only the height of the GridItem is changed, keep the prevOffset_ and currentOffset_ equal.
-        ResetOffsetWhenHeightChanged();
     }
     return runOutOfRecord;
 }
@@ -1424,6 +1422,9 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             if (currentIndex < info_.childrenCount_) {
                 TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
                     info_.childrenCount_);
+                std::string subErrorType = "can not get item at:" + std::to_string(currentIndex) +
+                                           ", total items:" + std::to_string(info_.childrenCount_);
+                EventReport::ReportScrollableErrorEvent("Grid", ScrollableErrorType::GET_CHILD_FAILED, subErrorType);
             }
             LargeItemNextLineHeight(currentMainLineIndex_, layoutWrapper);
             break;
@@ -1947,7 +1948,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = info_.endIndex_ + 1;
-            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_; i++) {
+            for (uint32_t i = line->second.size(); i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
@@ -2155,9 +2156,8 @@ void GridScrollLayoutAlgorithm::SyncPreload(
 
         float len = 0.0f;
         int32_t endIdx = info_.endIndex_;
-        bool cache = true;
         int32_t line = scope.subEndLine_ + i + 1;
-        if (!MeasureExistingLine(line, len, endIdx, cache)) {
+        if (!MeasureExistingLine(line, len, endIdx)) {
             currentMainLineIndex_ = line - 1;
             FillNewLineBackward(crossSize, mainSize, wrapper, false);
         }
@@ -2199,7 +2199,8 @@ void GridScrollLayoutAlgorithm::UpdateMainLineOnReload(int32_t startIdx)
 
 std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(LayoutWrapper* layoutWrapper, int32_t updateIdx)
 {
-    if (updateIdx == -1) {
+    if (info_.IsOutOfEnd(mainGap_, false) // avoid reset during overScroll
+        || updateIdx == -1) {
         return { 0, 0 };
     }
     bool outOfMatrix = false;

@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -182,6 +183,9 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
 
 void JSTabContent::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSTabContent][pop]", &JSTabContent::Pop);
+    }
     TabContentModel::GetInstance()->Pop();
 }
 

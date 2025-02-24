@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "gesture_recognizer.h"
 
 #include "core/components_ng/base/observer_handler.h"
 
@@ -335,7 +336,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
                 SEC_PLD(%{public}d) ".", SEC_PARAM(host->GetId()));
             break;
         }
-        host = host->GetAncestorNodeOfFrame();
+        host = host->GetAncestorNodeOfFrame(false);
     }
 
     Point temp(localPointF.GetX(), localPointF.GetY());
@@ -353,6 +354,9 @@ void NGGestureRecognizer::SetTransInfo(int transId)
 
 void NGGestureRecognizer::AboutToAccept()
 {
+    if (refereeState_ == RefereeState::FAIL) {
+        return;
+    }
     if (AceType::InstanceOf<RecognizerGroup>(this)) {
         HandleWillAccept();
         OnAccepted();
@@ -558,5 +562,53 @@ bool NGGestureRecognizer::AboutToMinusCurrentFingers(int32_t touchId)
         touchId, node ? node->GetTag().c_str() : "null",
         SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
     return false;
+}
+
+void NGGestureRecognizer::ResetStateVoluntarily()
+{
+    auto group = gestureGroup_.Upgrade();
+    if (!group) {
+        return;
+    }
+    group->ResetStateVoluntarily();
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(group);
+    recognizerGroup->CheckAndSetRecognizerCleanFlag(Claim(this));
+}
+
+void NGGestureRecognizer::SetIsNeedResetRecognizer(bool isNeedResetRecognizerState)
+{
+    isNeedResetRecognizerState_ = isNeedResetRecognizerState;
+}
+
+bool NGGestureRecognizer::IsNeedResetRecognizerState()
+{
+    return isNeedResetRecognizerState_;
+}
+
+void NGGestureRecognizer::UpdateCallbackState(const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (callback == onActionStart_) {
+        callbackState_ = CallbackState::START;
+    }
+    if (callback == onActionUpdate_) {
+        callbackState_ = CallbackState::UPDATE;
+    }
+    if (callback == onActionEnd_) {
+        callbackState_ = CallbackState::END;
+    }
+    if (callback == onActionCancel_) {
+        callbackState_ = CallbackState::CANCEL;
+    }
+}
+
+void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event)
+{
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
+        if ((refereeState_ == RefereeState::PENDING || refereeState_ == RefereeState::PENDING_BLOCKED) &&
+            AceType::InstanceOf<ClickRecognizer>(this)) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

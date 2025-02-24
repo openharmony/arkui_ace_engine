@@ -19,6 +19,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 using namespace std;
@@ -32,22 +33,36 @@ void GetTimePoint(TimePoint& now)
 }
 } // namespace
 
-ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
+ScopedMonitor::ScopedMonitor(MonitorTag tag, int32_t instanceId) : tag_(tag), instanceId_(instanceId)
 {
+    if (instanceId == -1) {
+        return;
+    }
     GetTimePoint(begin_);
-    ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag_, MonitorStatus::RUNNING);
+    ArkUIPerfMonitor::GetPerfMonitor(instanceId)->SetRecordingStatus(tag_, MonitorStatus::RUNNING);
 }
 
 ScopedMonitor::~ScopedMonitor()
 {
+    if (instanceId_ == -1) {
+        return;
+    }
     GetTimePoint(end_);
-    ArkUIPerfMonitor::GetInstance().RecordTimeSlice(tag_, duration_cast<nanoseconds>(end_ - begin_).count());
+    ArkUIPerfMonitor::GetPerfMonitor(instanceId_)->RecordTimeSlice(
+        tag_, duration_cast<nanoseconds>(end_ - begin_).count());
 }
 
-ArkUIPerfMonitor& ArkUIPerfMonitor::GetInstance()
+std::shared_ptr<ArkUIPerfMonitor> ArkUIPerfMonitor::GetPerfMonitor(int32_t instanceId)
 {
-    static ArkUIPerfMonitor instance;
-    return instance;
+    auto container = Container::GetContainer(instanceId);
+    if (!container) {
+        return std::make_shared<ArkUIPerfMonitor>();
+    }
+    auto pipeline = container->GetPipelineContext();
+    if (!pipeline) {
+        return std::make_shared<ArkUIPerfMonitor>();
+    }
+    return pipeline->GetPerfMonitor();
 }
 
 ArkUIPerfMonitor::ArkUIPerfMonitor()

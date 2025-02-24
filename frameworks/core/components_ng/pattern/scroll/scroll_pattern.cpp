@@ -27,6 +27,7 @@ constexpr int32_t COLUMN_NUM = 2;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t SCROLL_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t SCROLL_MEASURE_INFO_COUNT = 30;
+constexpr double SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE = 1.0;
 } // namespace
 
 void ScrollPattern::OnModifyDone()
@@ -302,7 +303,7 @@ bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
 void ScrollPattern::AdjustOffset(float& delta, int32_t source)
 {
     if (NearZero(delta) || NearZero(viewPortLength_) || source == SCROLL_FROM_ANIMATION ||
-        source == SCROLL_FROM_ANIMATION_SPRING) {
+        source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_FOCUS_JUMP) {
         return;
     }
     // the distance above the top, if lower than top, it is zero
@@ -940,7 +941,7 @@ void ScrollPattern::CaleSnapOffsets()
 
 void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
 {
-    CHECK_NULL_VOID(Positive(intervalSize_.Value()));
+    CHECK_NULL_VOID(GreatOrEqual(intervalSize_.Value(), SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE));
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
     auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
     auto start = 0.0f;

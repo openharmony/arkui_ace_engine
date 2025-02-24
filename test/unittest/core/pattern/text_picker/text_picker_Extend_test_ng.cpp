@@ -87,6 +87,20 @@ constexpr double OVER_SCROLL_OFFSET2 = 60.0;
 constexpr double OVER_SCROLL_DELTA = 10.0;
 constexpr uint32_t OVER_SCROLL_ITEMS = 20;
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class TextPickerExTestNg : public testing::Test {
@@ -193,16 +207,10 @@ void TextPickerExTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -399,6 +407,37 @@ HWTEST_F(TextPickerExTestNg, TextPickerRowAccessibilityPropertyGetText002, TestS
      */
     EXPECT_EQ(textPickerRowAccessibilityProperty_->GetText(), TEXT_PICKER_CONTENT);
     DestroyTextPickerExTestNgObject();
+}
+
+/**
+ * @tc.name: TextPickerRowAccessibilityPropertyGetText003
+ * @tc.desc: Test GetText of textPickerRowAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerExTestNg, TextPickerRowAccessibilityPropertyGetText003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_PICKER_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(stackNode, nullptr);
+    auto blendNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+    ASSERT_NE(columnNode, nullptr);
+
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
+    stackNode->MountToParent(frameNode);
+
+    auto RowAccessibilityProperty = frameNode->GetAccessibilityProperty<TextPickerRowAccessibilityProperty>();
+    ASSERT_NE(RowAccessibilityProperty, nullptr);
+
+    EXPECT_EQ(RowAccessibilityProperty->GetText(), "");
 }
 
 /**
@@ -1901,5 +1940,35 @@ HWTEST_F(TextPickerExTestNg, TextPickerModelNGSetGradientHeight001, TestSize.Lev
     TextPickerModelNG::GetInstance()->SetGradientHeight(height);
     ASSERT_TRUE(textPickerLayoutProperty->HasGradientHeight());
     EXPECT_EQ(height, textPickerLayoutProperty->GetGradientHeightValue());
+}
+
+/**
+ * @tc.name: TextPickerPaintTest005
+ * @tc.desc: Test GetForegroundDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerExTestNg, TextPickerPaintTest005, TestSize.Level1)
+{
+#ifdef ARKUI_WEARABLE
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    auto renderContext = frameNode->GetRenderContext();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    auto canvasDrawFunction = textPickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    canvasDrawFunction(rsCanvas);
+#endif
 }
 } // namespace OHOS::Ace::NG

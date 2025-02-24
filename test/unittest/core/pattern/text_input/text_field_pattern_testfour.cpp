@@ -216,7 +216,7 @@ HWTEST_F(TextFieldPatternTestFour, ProcessFocusIndexAction001, TestSize.Level0)
 
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     layoutProperty->UpdateShowPasswordIcon(true);
-    EXPECT_FALSE(pattern->ProcessFocusIndexAction());
+    EXPECT_TRUE(pattern->ProcessFocusIndexAction());
 
     pattern->focusIndex_ = FocuseIndex::UNIT;
     EXPECT_FALSE(pattern->ProcessFocusIndexAction());
