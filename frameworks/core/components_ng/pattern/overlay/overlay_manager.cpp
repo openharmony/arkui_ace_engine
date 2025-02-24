@@ -7768,7 +7768,12 @@ RefPtr<FrameNode> OverlayManager::GetLastChildNotRemoving(const RefPtr<UINode>& 
     const auto& children = rootNode->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        if (!child->IsRemoving()) {
+        if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+            auto atomicNode = child;
+            CHECK_NULL_RETURN(atomicNode, nullptr);
+            auto serviceContainer = FindChildNodeByKey(atomicNode, "AtomicServiceContainerId");
+            return GetLastChildNotRemoving(serviceContainer);
+        } else if (!child->IsRemoving()) {
             return DynamicCast<FrameNode>(child);
         }
     }
