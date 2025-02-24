@@ -520,6 +520,9 @@ class TabClipModifier extends ModifierWithKey<boolean | object> {
 }
 
 class TabEdgeEffectModifier extends ModifierWithKey<EdgeEffect> {
+  constructor(value: EdgeEffect) {
+    super(value);
+  }
   static identity: Symbol = Symbol('tabedgeEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
