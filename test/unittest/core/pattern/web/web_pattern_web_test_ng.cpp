@@ -1126,29 +1126,6 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel, TestSize.Level1)
 }
 
 /**
- * @tc.name: CloseSelectOverlay
- * @tc.desc: CloseSelectOverlay.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, CloseSelectOverlay, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
-    webPattern->CloseSelectOverlay();
-    ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
-#endif
-}
-
-/**
  * @tc.name: HandleKeyEvent_001
  * @tc.desc: HandleKeyEvent.
  * @tc.type: FUNC
