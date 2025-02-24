@@ -2627,7 +2627,7 @@ void WebPattern::OnAreaChangedInner()
             return;
         }
     }
-    if (offset != webOffset_ && webSelectOverlay_) {
+    if (offset != webOffset_ && webSelectOverlay_  && webSelectOverlay_->IsShowHandle()) {
         webOffset_ = offset;
         webSelectOverlay_->UpdateTouchHandleForOverlay();
     }
