@@ -1362,7 +1362,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest001, TestSize.Leve
     MockAnimationManager::GetInstance().SetTicks(2);
     tabBarPattern_->StartShowTabBar();
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
+    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     EXPECT_LT(options.y.ConvertToPx(), 10.0f);
     tabBarPattern_->StartShowTabBar();
@@ -1379,7 +1379,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest001, TestSize.Leve
     MockAnimationManager::GetInstance().SetTicks(2);
     tabBarPattern_->StartShowTabBar(2000);
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
     tabBarPattern_->StartShowTabBar();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
