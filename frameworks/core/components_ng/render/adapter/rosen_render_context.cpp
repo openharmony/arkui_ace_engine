@@ -3516,6 +3516,7 @@ void RosenRenderContext::SetPositionToRSNode()
         rsNode_->SetFrame(
             rect.GetX() + frameOffset_->GetX(), rect.GetY() + frameOffset_->GetY(), rect.Width(), rect.Height());
     }
+    frameNode->OnSyncGeometryFrameFinish(rect);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
 }
 

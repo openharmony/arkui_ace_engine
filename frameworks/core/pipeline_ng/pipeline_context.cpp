@@ -2610,7 +2610,9 @@ void PipelineContext::OnTouchEvent(
     CHECK_RUN_ON(UI);
 
     HandlePenHoverOut(point);
-    if (eventManager_->GetGestureRefereeNG(nullptr)->CheckSourceTypeChange(lastSourceType_)) {
+    auto gestureReferee = eventManager_->GetGestureRefereeNG(nullptr);
+    CHECK_NULL_VOID(gestureReferee);
+    if (gestureReferee->CheckSourceTypeChange(lastSourceType_)) {
         HandleTouchHoverOut(point);
     }
 
@@ -3413,7 +3415,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
 {
     CHECK_RUN_ON(UI);
     UpdateLastMoveEvent(event);
-    lastMouseEvent_->node = AceType::WeakClaim(AceType::RawPtr(node));
+    lastMouseEvent_->node = node;
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE) {
 #ifdef IS_RELEASE_VERSION
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
@@ -5736,7 +5738,7 @@ void PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo
 {
     auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();
     auto offSetPosY_ = displayWindowRectInfo_.Top() - displayWindowRectInfo.Top();
-    if (offSetPosX_ != 0.0 || offSetPosY_ != 0.0) {
+    if (!NearZero(offSetPosX_) || !NearZero(offSetPosY_)) {
         if (lastMouseEvent_) {
             lastMouseEvent_->x += offSetPosX_;
             lastMouseEvent_->y += offSetPosY_;
@@ -5757,14 +5759,13 @@ void PipelineContext::FlushMouseEventForHover()
         return;
     }
     CHECK_NULL_VOID(rootNode_);
-    if (lastMouseEvent_->isMockWindowTransFlag || isWindowSizeChangeFlag) {
+    if (lastMouseEvent_->isMockWindowTransFlag || windowSizeChangeReason_ == WindowSizeChangeReason::DRAG ||
+        windowSizeChangeReason_ == WindowSizeChangeReason::MOVE) {
         return;
     }
     CHECK_RUN_ON(TaskExecutor::TaskType::UI);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
     MouseEvent event;
     event.x = lastMouseEvent_->x;
     event.y = lastMouseEvent_->y;
@@ -5781,6 +5782,10 @@ void PipelineContext::FlushMouseEventForHover()
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+    // The purpose of setting the action here as WINDOW_ENTER is to force the hover node to recalculate.
+    if (windowSizeChangeReason_ == WindowSizeChangeReason::MAXIMIZE) {
+        event.action = MouseAction::WINDOW_ENTER;
+    }
     if (container->IsScenceBoardWindow()) {
         eventManager_->MouseTest(event, lastMouseEvent_->node.Upgrade(), touchRestrict);
     } else {
@@ -5800,11 +5805,6 @@ void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)
     eventManager_->CleanHoverStatusForDragBegin();
 }
 
-void PipelineContext::SetIsWindowSizeChangeFlag(bool result)
-{
-    isWindowSizeChangeFlag = result;
-}
-
 void PipelineContext::FlushMouseEventInVsync()
 {
     auto mouseEventSize = mouseEvents_.size();
@@ -5822,8 +5822,12 @@ void PipelineContext::FlushMouseEventInVsync()
     }
     if (isTransFlag_ && (mouseEventSize == 0 || lastMouseEvent_->mockFlushEvent)) {
         FlushMouseEventForHover();
-        isWindowSizeChangeFlag = false;
         isTransFlag_ = false;
     }
+}
+
+void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
+{
+    windowSizeChangeReason_ = reason;
 }
 } // namespace OHOS::Ace::NG

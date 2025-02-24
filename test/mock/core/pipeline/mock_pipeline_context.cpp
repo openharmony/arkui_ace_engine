@@ -1274,7 +1274,7 @@ void NG::PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRect
 {
     auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();
     auto offSetPosY_ = displayWindowRectInfo_.Top() - displayWindowRectInfo.Top();
-    if (offSetPosX_ != 0.0 || offSetPosY_ != 0.0) {
+    if (!NearZero(offSetPosX_) || !NearZero(offSetPosY_)) {
         if (lastMouseEvent_) {
             lastMouseEvent_->x += offSetPosX_;
             lastMouseEvent_->y += offSetPosY_;
@@ -1288,9 +1288,9 @@ void NG::PipelineContext::SetIsTransFlag(bool result)
     isTransFlag_ = result;
 }
 
-void NG::PipelineContext::SetIsWindowSizeChangeFlag(bool result)
+void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 {
-    isWindowSizeChangeFlag = result;
+    windowSizeChangeReason_ = reason;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

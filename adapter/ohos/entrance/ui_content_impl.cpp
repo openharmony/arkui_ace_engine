@@ -2987,10 +2987,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            if (static_cast<OHOS::Ace::WindowSizeChangeReason>(reason) == WindowSizeChangeReason::DRAG ||
-                static_cast<OHOS::Ace::WindowSizeChangeReason>(reason) == WindowSizeChangeReason::MOVE) {
-                pipelineContext->SetIsWindowSizeChangeFlag(true);
-            }
+            pipelineContext->SetWindowSizeChangeReason(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
             TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {

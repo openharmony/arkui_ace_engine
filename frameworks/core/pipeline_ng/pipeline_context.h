@@ -224,7 +224,7 @@ public:
 
     void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo) override;
 
-    void SetIsWindowSizeChangeFlag(bool result) override;
+    void SetWindowSizeChangeReason(WindowSizeChangeReason reason) override;
 
     void SetIsTransFlag(bool result);
 
@@ -1329,7 +1329,7 @@ private:
     int32_t curFocusNodeId_ = -1;
 
     bool isTransFlag_ = false;
-    bool isWindowSizeChangeFlag = false;
+    OHOS::Ace::WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     SourceType lastSourceType_ = SourceType::NONE;
     bool preIsHalfFoldHoverStatus_ = false;
     bool isHoverModeChanged_ = false;
