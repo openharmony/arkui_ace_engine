@@ -27,6 +27,8 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
+#include "core/components_ng/layout/section/dummy_fill_algorithm.h"
+#include "core/components_ng/pattern/scrollable/lazy_container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -65,8 +67,8 @@ struct ListMainSizeValues {
     bool backward = false;
 };
 
-class ACE_EXPORT ListItemGroupPattern : public Pattern {
-    DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
+class ACE_EXPORT ListItemGroupPattern : public LazyContainer {
+    DECLARE_ACE_TYPE(ListItemGroupPattern, LazyContainer);
 
 public:
     explicit ListItemGroupPattern(
@@ -315,6 +317,11 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
+    RefPtr<FillAlgorithm> CreateFillAlgorithm() override
+    {
+        return MakeRefPtr<DummyFillAlgorithm>();
+    }
+
     bool IsNeedInitClickEventRecorder() const override
     {
         return true;
