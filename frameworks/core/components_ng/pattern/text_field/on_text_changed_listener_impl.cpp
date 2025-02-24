@@ -365,14 +365,14 @@ void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
         auto userName = privateCommand.find(AUTO_FILL_PARAMS_USERNAME);
         textFieldPattern->SetAutoFillUserName(std::get<std::string>(userName->second));
         textFieldPattern->ProcessAutoFill(isPopup, true);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.userName : %{private}s",
-            std::get<std::string>(userName->second).c_str());
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.userName size: %{public}zu",
+            std::get<std::string>(userName->second).size());
     } else if (privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD) != privateCommand.end()) {
         auto newPassword = privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD);
         textFieldPattern->SetAutoFillNewPassword(std::get<std::string>(newPassword->second));
         textFieldPattern->ProcessAutoFill(isPopup, true, true);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.newPassword : %{private}s",
-            std::get<std::string>(newPassword->second).c_str());
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.newPassword size: %{public}zu",
+            std::get<std::string>(newPassword->second).size());
     } else if (privateCommand.find(AUTO_FILL_PARAMS_OTHERACCOUNT) != privateCommand.end()) {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.otherAccount");
         textFieldPattern->SetAutoFillOtherAccount(true);

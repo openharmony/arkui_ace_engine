@@ -1937,8 +1937,8 @@ void TextFieldPattern::HandleOnCut()
     UpdateEditingValueToRecord();
     auto selectedText = contentController_->GetSelectedValue(start, end);
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Cut value is %{private}s",
-            UtfUtils::Str16DebugToStr8(selectedText).c_str());
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Cut value size is %{private}zu",
+            UtfUtils::Str16DebugToStr8(selectedText).size());
         clipboard_->SetData(UtfUtils::Str16DebugToStr8(selectedText),
             layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     }
@@ -8072,7 +8072,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
     SetFillRequestFinish(true);
 
 #if defined(ENABLE_STANDARD_INPUT)
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent is : %{private}s", fillContent.c_str());
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent size is : %{public}zu", fillContent.size());
     if (errCode == AUTO_FILL_CANCEL) {
         if (!fillContent.empty() && IsTriggerAutoFillPassword()) {
             auto jsonObject = JsonUtil::ParseJsonString(fillContent);
@@ -9749,8 +9749,8 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
     spanString->EncodeTlv(info.selectBuffer);
     info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
-    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{private}s",
-        info.selectStart, info.selectEnd, spanString->GetString().c_str());
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content size=%{public}zu",
+        info.selectStart, info.selectEnd, spanString->GetString().size());
 
     // serialize the sentenced-level text
     auto textSize = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
@@ -9774,8 +9774,8 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
     spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
     spanString->EncodeTlv(info.sentenceBuffer);
-    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{private}s",
-        sentenceStart, sentenceEnd, spanString->GetString().c_str());
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content size=%{public}zu",
+        sentenceStart, sentenceEnd, spanString->GetString().size());
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -9812,8 +9812,8 @@ void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vect
 {
     RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
     auto resultText = spanString->GetU16string();
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{private}s",
-        start, end, spanString->GetString().c_str());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content size=%{public}zu",
+        start, end, spanString->GetString().size());
     if (spanString->GetSpanItems().empty()) {
         return;
     }

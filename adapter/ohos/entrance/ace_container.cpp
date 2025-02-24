@@ -1447,7 +1447,8 @@ public:
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, pageUrl=[%{private}s]", viewData.pageUrl.c_str());
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called OnFillRequestSuccess, pageUrl=[%{private}zu]",
+            viewData.pageUrl.size());
         ProcessOnFinish();
         auto pipelineContext = pipelineContext_.Upgrade();
         CHECK_NULL_VOID(pipelineContext);
