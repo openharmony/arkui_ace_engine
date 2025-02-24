@@ -112,7 +112,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     contentMainSize_ = 0.0f;
     totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     scrollSnapAlign_ = listLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
-    ProcessStackFromEnd();
     if (childrenSize_) {
         childrenSize_->ResizeChildrenSize(totalItemCount_);
     }
@@ -148,6 +147,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
         ReviseSpace(listLayoutProperty);
         CheckJumpToIndex();
+        ProcessStackFromEnd();
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
@@ -821,6 +821,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     }
     auto prevTotalItemCount = pattern->GetMaxListItemIndex() + 1;
     ReverseItemPosition(itemPosition_, prevTotalItemCount, prevContentMainSize_);
+    ReverseItemPosition(cachedItemPosition_, prevTotalItemCount, prevContentMainSize_);
     preStartIndex_ = isStackFromEnd_ ? prevTotalItemCount - pattern->GetEndIndexInItemPosition() - 1:
                                        pattern->GetStartIndexInItemPosition();
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO) {
@@ -1665,6 +1666,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     UpdateOverlay(layoutWrapper);
     ProcessStackFromEnd();
     ReverseItemPosition(itemPosition_, totalItemCount_, contentMainSize_);
+    ReverseItemPosition(cachedItemPosition_, totalItemCount_, contentMainSize_);
     totalOffset_ += currentOffset_;
     FixPredictSnapPos();
     FixPredictSnapOffset(listProps);
@@ -2594,7 +2596,7 @@ void ListLayoutAlgorithm::ReverseItemPosition(
 
 void ListLayoutAlgorithm::ProcessStackFromEnd()
 {
-    if (isStackFromEnd_) {
+    if (isStackFromEnd_ && totalItemCount_ > 0) {
         currentDelta_ = -currentDelta_;
         std::swap(canOverScrollStart_, canOverScrollEnd_);
         std::swap(contentStartOffset_, contentEndOffset_);
