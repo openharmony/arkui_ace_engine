@@ -77,6 +77,7 @@ ace_unittest("capi_all_accessors_test") {
     "permission_request_accessor_test.cpp",
     "pinch_gesture_event_accessor_test.cpp",
     "progress_mask_accessor_test.cpp",
+    "rendering_context_settings_accessor_test.cpp",
     "richeditor_base_controller_accessor_test.cpp",
     "richeditor_controller_accessor_callback_test.cpp",
     "richeditor_controller_accessor_test.cpp",
