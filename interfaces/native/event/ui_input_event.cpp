@@ -122,6 +122,13 @@ int32_t OH_ArkUI_UIInputEvent_GetSourceType(const ArkUI_UIInputEvent* event)
             }
             return focusAxisEvent->sourceType;
         }
+        case AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+            }
+            return static_cast<int32_t>(axisEvent->sourceType);
+        }
         default:
             break;
     }
@@ -161,6 +168,13 @@ int32_t OH_ArkUI_UIInputEvent_GetToolType(const ArkUI_UIInputEvent* event)
                 return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
             }
             return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(focusAxisEvent->toolType);
+        }
+        case AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+            }
+            return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(static_cast<int32_t>(axisEvent->sourceTool));
         }
         default:
             break;
