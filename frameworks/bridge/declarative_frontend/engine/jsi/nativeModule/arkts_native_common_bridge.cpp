@@ -4152,9 +4152,9 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityDescription(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
-        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityDescription(nativeNode, stringValue.c_str());
+    std::string value;
+    if (ArkTSUtils::ParseJsString(vm, secondArg, value)) {
+        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityDescription(nativeNode, value.c_str());
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityDescription(nativeNode);
     }
@@ -4519,9 +4519,9 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityText(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
-        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityText(nativeNode, stringValue.c_str());
+    std::string value;
+    if (ArkTSUtils::ParseJsString(vm, secondArg, value)) {
+        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityText(nativeNode, value.c_str());
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityText(nativeNode);
     }

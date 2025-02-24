@@ -4562,12 +4562,7 @@ class ArkComponent {
     return this;
   }
   accessibilityText(value) {
-    if (typeof value === 'string') {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, value);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, value);
     return this;
   }
   accessibilityRole(value) {
@@ -4579,12 +4574,7 @@ class ArkComponent {
     return this;
   }
   accessibilityDescription(value) {
-    if (typeof value !== 'string') {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, undefined);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
     return this;
   }
   accessibilityLevel(value) {
