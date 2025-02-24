@@ -1719,10 +1719,14 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     CHECK_NULL_VOID(popupInfo.markNeedUpdate);
     CHECK_NULL_VOID(popupInfo.popupNode);
 
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(popupPattern);
     const auto& rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.rbegin(), rootChildren.rend(), popupNode);
     if (iter == rootChildren.rend()) {
         MountToParentWithService(rootNode, popupNode);
+    } else if (popupPattern->GetHasTransition()) {
+        return;
     }
 
     // attach popupNode before entering animation
@@ -1730,8 +1734,6 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     popupMap_[targetId].isCurrentOnShow = true;
 
-    auto popupPattern = popupNode->GetPattern<BubblePattern>();
-    CHECK_NULL_VOID(popupPattern);
     popupPattern->AddPipelineCallBack();
     if (!IsContentUpdatePopup(popupPattern)) {
         popupPattern->SetInteractiveDismiss(interactiveDismiss);
