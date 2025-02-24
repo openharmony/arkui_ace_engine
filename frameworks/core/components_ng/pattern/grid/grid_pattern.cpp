@@ -559,6 +559,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     FireOnReachEnd(onReachEnd);
     OnScrollStop(gridEventHub->GetOnScrollStop());
+    if (isSmoothScrolling_ && scrollStop_) {
+        isSmoothScrolling_ = false;
+    }
     CHECK_NULL_VOID(isConfigScrollable_);
     focusHandler_.ProcessFocusEvent(keyEvent_, indexChanged);
 }
@@ -1395,6 +1398,10 @@ bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgo
         ResetExtraOffset();
     } else {
         ACE_SCOPED_TRACE("AnimateToTargetImpl, targetPos:%f", targetPos);
+    }
+    if (NearEqual(targetPos, GetTotalOffset())) {
+        isSmoothScrolling_ = false;
+        return false;
     }
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
