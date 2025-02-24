@@ -92,10 +92,9 @@ void OnBackPressedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onBackPressedEvent = [arkCallback = CallbackHelper(*value)]() -> bool {
-        return true;
+        return arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>().value_or(false);
     };
     NavDestinationModelNG::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
-    LOGE("ARKOALA NavDestination.OnBackPressedImpl -> Method is not fully implemented.");
 }
 void OnResultImpl(Ark_NativePointer node,
                   const Opt_Callback_Object_Void* value)

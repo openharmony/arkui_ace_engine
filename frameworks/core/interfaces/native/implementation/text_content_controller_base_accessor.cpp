@@ -33,10 +33,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
 {
-    // fix a return value
     CHECK_NULL_RETURN(peer && peer->controller_, {});
-    peer->controller_->GetCaretPosition();
-    return {};
+    auto offset = peer->controller_->GetCaretPosition();
+    return Converter::ArkValue<Ark_CaretOffset>(offset);
 }
 Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
 {

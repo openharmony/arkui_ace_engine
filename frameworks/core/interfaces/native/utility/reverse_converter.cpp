@@ -85,6 +85,13 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::
     dst = peer;
 }
 
+void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
+{
+    dst.index = Converter::ArkValue<Ark_Number>(0);
+    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
+}
+
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
@@ -103,6 +110,23 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
         .minute = ArkValue<Ark_Number>(minute),
         .second = ArkValue<Ark_Number>(second),
     };
+}
+
+void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
+{
+    dst.actualBoundingBoxAscent = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxAscent);
+    dst.actualBoundingBoxDescent = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxDescent);
+    dst.actualBoundingBoxLeft = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxLeft);
+    dst.actualBoundingBoxRight = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxRight);
+    dst.alphabeticBaseline = Converter::ArkValue<Ark_Number>(src.alphabeticBaseline);
+    dst.emHeightAscent = Converter::ArkValue<Ark_Number>(src.emHeightAscent);
+    dst.emHeightDescent = Converter::ArkValue<Ark_Number>(src.emHeightDescent);
+    dst.fontBoundingBoxAscent = Converter::ArkValue<Ark_Number>(src.fontBoundingBoxAscent);
+    dst.fontBoundingBoxDescent = Converter::ArkValue<Ark_Number>(src.fontBoundingBoxDescent);
+    dst.hangingBaseline = Converter::ArkValue<Ark_Number>(src.hangingBaseline);
+    dst.ideographicBaseline = Converter::ArkValue<Ark_Number>(src.ideographicBaseline);
+    dst.width = Converter::ArkValue<Ark_Number>(src.width);
+    dst.height = Converter::ArkValue<Ark_Number>(src.height);
 }
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
