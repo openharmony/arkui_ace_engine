@@ -257,7 +257,7 @@ HWTEST_F(CommonMethodModifierTest15, setBindSheetOnAppearTest, TestSize.Level1)
     auto optOnAppearCalback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
     // parameters
     auto optShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
-    auto arkOptions = Ark_SheetOptions { 
+    auto arkOptions = Ark_SheetOptions {
         .onAppear = optOnAppearCalback,
         .onWillAppear = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty()) };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
