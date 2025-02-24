@@ -72,6 +72,7 @@ public:
     void GetTabs();
     TabsModelNG CreateTabs(BarPosition barPosition = BarPosition::START, int32_t index = 0);
     TabContentModelNG CreateTabContent();
+    TabContentModelNG CreateTabContentWithDeepRender(std::function<void()>&& deepRenderFunc);
     void CreateTabContents(int32_t itemNumber = TABCONTENT_NUMBER);
     void CreateTabContentsWithBuilder(int32_t itemNumber = TABCONTENT_NUMBER);
     void CreateTabsDone(TabsModelNG model);
