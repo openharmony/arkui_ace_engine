@@ -723,6 +723,7 @@ void GestureEventHub::HideMenu()
     CHECK_NULL_VOID(pipeline);
     auto dragDrogDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDrogDropManager);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Hide menu. showPreviewAnimation false, startDrag true.");
     SubwindowManager::GetInstance()->HideMenuNG(false, true);
     auto menuWrapperNode = dragDrogDropManager->GetMenuWrapperNode();
     CHECK_NULL_VOID(menuWrapperNode);
@@ -1089,6 +1090,7 @@ void GestureEventHub::HandleOnDragCancel()
 int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey)
 {
     CHECK_NULL_RETURN(unifiedData, -1);
+    ACE_SCOPED_TRACE("drag: set drag data to udmf");
     return UdmfClient::GetInstance()->SetData(unifiedData, udKey);
 }
 
