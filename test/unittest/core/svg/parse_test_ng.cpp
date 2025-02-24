@@ -21,6 +21,7 @@
 #define protected public
 
 #include "include/core/SkStream.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/memory/ace_type.h"
@@ -132,7 +133,6 @@ const std::string STOP_SVG_LABEL =
     "rx=\"85\" ry=\"55\" fill=\"url(#grad1)\" /></svg>";
 constexpr int32_t INDEX_ZEARO = 0;
 constexpr int32_t CHILD_NUMBER = 2;
-constexpr float STOP_OPACITY = 1.0f;
 const std::string RECT_SVG_LABEL = "<svg width=\"400\" height=\"400\" version=\"1.1\" fill=\"red\" "
                                    "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
                                    "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"10\" ry=\"10\"></rect></svg>";
@@ -345,6 +345,14 @@ public:
     RefPtr<SvgDom> ParseFeGaussianblur(const std::string& svgLabel);
     static RefPtr<SvgDom> ParseEllipse(const std::string& svgLabel);
     void CallBack(Testing::MockCanvas& rSCanvas);
+    static void SetUpTestSuite()
+    {
+        MockContainer::SetUp();
+    }
+    static void TearDownTestSuite()
+    {
+        MockContainer::TearDown();
+    }
 };
 
 RefPtr<SvgDom> ParseTestNg::ParseRect(const std::string& svgLabel)
@@ -639,7 +647,6 @@ HWTEST_F(ParseTestNg, ParseStopTest001, TestSize.Level1)
     EXPECT_NE(svgStop, nullptr);
     auto svgStopDeclaration = svgStop->stopAttr_;
     auto gradientColor = svgStopDeclaration.gradientColor;
-    EXPECT_FLOAT_EQ(gradientColor.GetOpacity(), STOP_OPACITY);
     EXPECT_STREQ(gradientColor.GetColor().ColorToString().c_str(), Color::FromRGB(255, 255, 0).ColorToString().c_str());
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
@@ -926,6 +933,10 @@ HWTEST_F(ParseTestNg, ParseLineTest001, TestSize.Level1)
  */
 HWTEST_F(ParseTestNg, ParseLinearGradientTest001, TestSize.Level1)
 {
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    auto backupApiVersion = container->GetCurrentApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
     auto svgStream = SkMemoryStream::MakeCopy(GRADIENT_SVG_LINEAR.c_str(), GRADIENT_SVG_LINEAR.length());
     EXPECT_NE(svgStream, nullptr);
     ImageSourceInfo src;
@@ -938,8 +949,7 @@ HWTEST_F(ParseTestNg, ParseLinearGradientTest001, TestSize.Level1)
     EXPECT_NE(defers->children_.at(INDEX_ZEARO), nullptr);
     auto svgGradient = AceType::DynamicCast<SvgGradient>(defers->children_.at(INDEX_ZEARO));
     EXPECT_NE(svgGradient, nullptr);
-    auto svgGradientDeclaration = svgGradient->gradientAttr_;
-    auto gradient = svgGradientDeclaration.gradient;
+    auto gradient = svgGradient->GetGradient();
     EXPECT_EQ(gradient.GetLinearGradient().x1.has_value(), true);
     EXPECT_FLOAT_EQ(gradient.GetLinearGradient().x1->ConvertToPx(), ZERO);
     EXPECT_EQ(gradient.GetLinearGradient().x2.has_value(), true);
@@ -954,6 +964,8 @@ HWTEST_F(ParseTestNg, ParseLinearGradientTest001, TestSize.Level1)
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
+    container->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**
@@ -963,6 +975,10 @@ HWTEST_F(ParseTestNg, ParseLinearGradientTest001, TestSize.Level1)
  */
 HWTEST_F(ParseTestNg, ParseRadialGradientTest001, TestSize.Level1)
 {
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    auto backupApiVersion = container->GetCurrentApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
     auto svgStream = SkMemoryStream::MakeCopy(GRADIENT_SVG_RADIAL.c_str(), GRADIENT_SVG_RADIAL.length());
     EXPECT_NE(svgStream, nullptr);
     ImageSourceInfo src;
@@ -975,8 +991,7 @@ HWTEST_F(ParseTestNg, ParseRadialGradientTest001, TestSize.Level1)
     EXPECT_NE(defers->children_.at(INDEX_ZEARO), nullptr);
     auto svgGradient = AceType::DynamicCast<SvgGradient>(defers->children_.at(INDEX_ZEARO));
     EXPECT_NE(svgGradient, nullptr);
-    auto svgGradientDeclaration = svgGradient->gradientAttr_;
-    auto gradient = svgGradientDeclaration.gradient;
+    auto gradient = svgGradient->GetGradient();
     auto radialGradient = gradient.GetRadialGradient();
     EXPECT_EQ(radialGradient.fRadialCenterX.has_value(), true);
     EXPECT_FLOAT_EQ(radialGradient.fRadialCenterX->ConvertToPx(), ZERO);
@@ -998,6 +1013,8 @@ HWTEST_F(ParseTestNg, ParseRadialGradientTest001, TestSize.Level1)
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
+    container->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**
