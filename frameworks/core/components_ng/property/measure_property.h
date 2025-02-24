@@ -439,15 +439,34 @@ struct PaddingPropertyT {
             end = value.end;
             needUpdate = true;
         }
-        if (value.top.has_value() && top != value.top) {
+        if (value.top.has_value() && top != value.top && (value.start.has_value() || value.end.has_value())) {
             top = value.top;
             needUpdate = true;
         }
-        if (value.bottom.has_value() && bottom != value.bottom) {
+        if (value.bottom.has_value() && bottom != value.bottom && (value.start.has_value() || value.end.has_value())) {
             bottom = value.bottom;
             needUpdate = true;
         }
+        checkNeedReset(value);
         return needUpdate;
+    }
+
+    void checkNeedReset(const PaddingPropertyT& value)
+    {
+        auto isGreatThanSixteen =
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN);
+        if (!value.start.has_value() && start.has_value() && isGreatThanSixteen) {
+            start.reset();
+        }
+        if (!value.end.has_value() && end.has_value() && isGreatThanSixteen) {
+            end.reset();
+        }
+        if (!value.top.has_value() && top.has_value() && isGreatThanSixteen) {
+            top.reset();
+        }
+        if (!value.bottom.has_value() && bottom.has_value() && isGreatThanSixteen) {
+            bottom.reset();
+        }
     }
 
     std::string ToString() const
