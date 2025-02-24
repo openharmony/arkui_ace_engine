@@ -1751,7 +1751,7 @@ HWTEST_F(ViewAbstractTestNg, ClosePopup, TestSize.Level1)
     ASSERT_NE(overlayManager, nullptr);
     overlayManager->popupMap_[targetNode->GetId()].isCurrentOnShow = true;
     EXPECT_EQ(ViewAbstract::ClosePopup(contentNode), ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(ViewAbstract::ClosePopup(contentNode), ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(ViewAbstract::ClosePopup(contentNode), ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
 }
 
 /**

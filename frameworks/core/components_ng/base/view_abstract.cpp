@@ -2233,7 +2233,7 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
     }
     if (!popupInfo.isCurrentOnShow) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popup is not on show.");
-        return ERROR_CODE_INTERNAL_ERROR;
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
     }
     popupInfo.markNeedUpdate = true;
     overlayManager->HidePopup(targetId, popupInfo);
