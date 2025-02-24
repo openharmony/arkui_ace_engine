@@ -54,21 +54,23 @@ public:
         pattern_->panEvent_->actionEnd_(event);
     }
 
-    void CreateSwiperInFlexLayout();
+    void CreateSwiperInFlexLayout(bool loop = true, int32_t childrenSize = ITEM_NUM,
+        int32_t displayCount = 1, float margin = MARGIN);
     RefPtr<FrameNode> parent_ = nullptr;
     RefPtr<FrameNode> leftSibling_ = nullptr;
     RefPtr<FrameNode> rightSibling_ = nullptr;
 };
 
-void SwiperFlexLayoutTestNg::CreateSwiperInFlexLayout()
+void SwiperFlexLayoutTestNg::CreateSwiperInFlexLayout(
+    bool loop, int32_t childrenSize, int32_t displayCount, float margin)
 {
     SwiperModelNG model = CreateSwiper();
-    model.SetDisplayCount(1);
-    CreateSwiperItems(ITEM_NUM);
+    model.SetDisplayCount(displayCount);
+    CreateSwiperItems(childrenSize);
     CreateSwiperDone();
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->UpdatePrevMargin(Dimension(MARGIN));
-    layoutProperty_->UpdateNextMargin(Dimension(MARGIN));
+    layoutProperty_->UpdateLoop(loop);
+    layoutProperty_->UpdatePrevMargin(Dimension(margin));
+    layoutProperty_->UpdateNextMargin(Dimension(margin));
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FLEX_WIDTH), CalcLength(FLEX_HEIGHT)));
 
     // flex parent node
@@ -357,5 +359,39 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout008, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
     EXPECT_EQ(GetChildX(frameNode_, 1), 10.0f);
     EXPECT_EQ(pattern_->currentIndex_, 1);
+}
+
+/**
+ * @tc.name: SwiperFlexLayout009
+ * @tc.desc: Test OnChange callback in flex layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout009, TestSize.Level1)
+{
+    const bool loop = true;
+    const int32_t childrenSize = 6;
+    const int32_t displayCount = 3;
+    const float margin = 0.0f;
+    CreateSwiperInFlexLayout(loop, childrenSize, displayCount, margin);
+
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 1), 5 * FLEX_WIDTH / (6 * displayCount)));
+
+    int32_t currentIndex = 0;
+    pattern_->UpdateChangeEvent([&currentIndex](int32_t index) {
+        currentIndex = index;
+    });
+    controller_->ChangeIndex(4, false);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentIndex_, 4);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), 2 * 5 * FLEX_WIDTH / (6 * displayCount)));
+    EXPECT_EQ(currentIndex, 4);
+
+    layoutProperty_->UpdateLoop(false);
+    pattern_->OnModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentIndex_, 3);
+    EXPECT_EQ(currentIndex, 3);
 }
 } // namespace OHOS::Ace::NG
