@@ -746,6 +746,10 @@ public:
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
 
+    void UpdateImageOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
+    void PushOverlayInfo(float x, float y, int32_t id);
+    void WebOverlayRequestFocus();
+    
     std::string GetCurrentLanguage() override;
 
 private:
