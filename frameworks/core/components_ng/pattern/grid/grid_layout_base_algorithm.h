@@ -84,6 +84,8 @@ protected:
         pattern->ResetFocusedIndex();
     }
 
+    void UpdateOverlay(LayoutWrapper* layoutWrapper);
+
     GridLayoutInfo info_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);

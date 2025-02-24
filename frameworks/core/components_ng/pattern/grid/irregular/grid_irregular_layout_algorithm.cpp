@@ -85,6 +85,7 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cachedItemCnt.first,
         cachedItemCnt.second, props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cachedItemCnt.first);
+    UpdateOverlay(wrapper_);
 }
 
 float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>& props)
