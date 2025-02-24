@@ -5950,12 +5950,19 @@ typedef enum {
     NODE_WATER_FLOW_NODE_ADAPTER,
 
     /**
-    * @brief Sets the number of cached items in the water flow adapter.
-    * This attribute can be set, reset, and obtained as required through APIs.
-    *
-    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .value[0].i32: number of cached items in the water flow adapter. \n
-    */
+     * @brief Sets the number of cached items in the water flow adapter.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: number of cached items in the water flow adapter. \n
+     * .value[1]?.i32: whether to the cached items will be displayed, 0: not displayed, 1: displayed, default value: 0.
+     * This parameter is supported since API version 16. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: number of cached items in the water flow adapter. \n
+     * .value[1].i32: whether to the cached items will be displayed, 0: not displayed, 1: displayed.
+     * This parameter is supported since API version 16. \n
+     */
     NODE_WATER_FLOW_CACHED_COUNT,
     /**
      * @brief 设置瀑布流组件末尾的自定义显示组件。
