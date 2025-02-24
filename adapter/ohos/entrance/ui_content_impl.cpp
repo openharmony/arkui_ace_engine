@@ -2908,12 +2908,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             container->UpdateResourceOrientation(modifyConfig.Orientation());
         }
     };
-    auto updateDisplayIdAndAreaTask = [container, context, rsWindow = window_]() {
-        if (!rsWindow) {
-            TAG_LOGE(AceLogTag::ACE_WINDOW, "Current container has invalid window data.");
-            return;
-        }
-        auto displayId = rsWindow->GetDisplayId();
+    auto updateDisplayIdAndAreaTask = [container, context, modifyConfig, UICONTENT_IMPL_HELPER(content)]() {
+        auto displayId = modifyConfig.DisplayId();
         if (displayId == DISPLAY_ID_INVALID) {
             TAG_LOGE(AceLogTag::ACE_WINDOW, "Invalid display id.");
             return;
@@ -2929,6 +2925,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 }
             }
         }
+        UICONTENT_IMPL_HELPER_GUARD(content, return);
+        UICONTENT_IMPL_PTR(content)->ChangeDisplayAvailableAreaListener(displayId);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         updateDensityTask(); // ensure density has been updated before load first page
@@ -4779,5 +4777,15 @@ void UIContentImpl::EnableContainerModalCustomGesture(bool enable)
             NG::ContainerModalPattern::EnableContainerModalCustomGesture(pipelineContext, enable);
         },
         TaskExecutor::TaskType::UI, "EnableContainerModalCustomGesture");
+}
+
+void UIContentImpl::ChangeDisplayAvailableAreaListener(uint64_t displayId)
+{
+    if (listenedDisplayId_ != displayId && availableAreaChangedListener_) {
+        auto& manager = Rosen::DisplayManager::GetInstance();
+        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
+        listenedDisplayId_ = displayId;
+        manager.RegisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
+    }
 }
 } // namespace OHOS::Ace
