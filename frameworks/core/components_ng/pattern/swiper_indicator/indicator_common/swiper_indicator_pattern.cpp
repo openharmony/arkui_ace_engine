@@ -1249,7 +1249,7 @@ void SwiperIndicatorPattern::CheckDragAndUpdate(
 void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod)
 {
-    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
+    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex(true));
     auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
 
     auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
