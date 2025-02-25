@@ -1015,6 +1015,7 @@ private:
     bool GlobalOffsetInSelectedArea(const Offset& globalOffset);
     bool LocalOffsetInSelectedArea(const Offset& localOffset);
     void HandleOnCopyWithoutSpanString(const std::string& pasteData);
+    void CheckPressedSpanPosition(const Offset& textOffset);
     void EncodeTlvNoChild(const std::string& pasteData, std::vector<uint8_t>& buff);
     void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
@@ -1034,6 +1035,7 @@ private:
     bool isSensitive_ = false;
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
+    Offset leftMousePressedOffset_;
     bool isEnableHapticFeedback_ = true;
 
     bool urlTouchEventInitialized_ = false;
