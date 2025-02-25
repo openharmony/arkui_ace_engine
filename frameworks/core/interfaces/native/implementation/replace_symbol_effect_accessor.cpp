@@ -32,11 +32,15 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_EffectScope GetScopeImpl(Ark_ReplaceSymbolEffect peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(ARK_EFFECT_SCOPE_LAYER));
+    return Converter::ArkValue<Ark_Int32>(peer->GetScope());
 }
 void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
                   Ark_EffectScope scope)
 {
+    CHECK_NULL_RETURN(peer);
+    auto scopeConv = Converter::Convert<???>(*scope);
+    peer->SetScope(scopeConv);
 }
 } // ReplaceSymbolEffectAccessor
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor()
