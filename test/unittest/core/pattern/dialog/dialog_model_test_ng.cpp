@@ -1832,13 +1832,18 @@ HWTEST_F(DialogModelTestNg, DialogPatternTest033, TestSize.Level1)
      */
     DialogProperties props;
     props.isSysBlurStyle = true;
-    props.effectOption->policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    EffectOption effectOption;
+    effectOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    if (!props.effectOption.has_value()) {
+        props.effectOption.emplace();
+    }
+    props.effectOption.value() = effectOption;
     pattern->UpdateContentRenderContext(dialogNode, props);
 
     auto renderContext = pattern->contentRenderContext_;
     ASSERT_NE(renderContext, nullptr);
 
-    EXPECT_FALSE(renderContext->GetBackgroundEffect().has_value());
-    EXPECT_NE(renderContext->GetBackgroundEffect()->policy, props.effectOption->policy);
+    EXPECT_TRUE(renderContext->GetBackgroundEffect().has_value());
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->policy, props.effectOption->policy);
 }
 } // namespace OHOS::Ace::NG
