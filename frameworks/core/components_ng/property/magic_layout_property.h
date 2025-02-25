@@ -37,7 +37,7 @@ struct MagicItemProperty {
             return;
         }
         json->PutExtAttr("layoutWeight", propLayoutWeight.value_or(0), filter);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         // add version protection, null as default start from API 10 or higher
         if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
             if (propAspectRatio.has_value()) {

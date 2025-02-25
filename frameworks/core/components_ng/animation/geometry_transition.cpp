@@ -306,7 +306,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto renderContext = self->GetRenderContext();
     auto targetRenderContext = target->GetRenderContext();
     auto geometryNode = self->GetGeometryNode();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(renderContext && targetRenderContext && geometryNode && pipeline);
     // get own parent's global position, parent's transform is not taken into account other than translate
     auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectGlobalOffsetWithTranslate(true).first;
@@ -489,7 +489,7 @@ void GeometryTransition::RecordAnimationOption(const WeakPtr<FrameNode>& trigger
             animationOption_ = NG::ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
         }
     } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         if (pipeline && pipeline->GetSyncAnimationOption().IsValid() && IsParent(trigger, inNode_)) {
             animationOption_ = pipeline->GetSyncAnimationOption();
         }

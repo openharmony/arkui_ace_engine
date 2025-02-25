@@ -45,7 +45,7 @@ void ResetPopupItemFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -77,7 +77,7 @@ void ResetSelectedFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -111,7 +111,7 @@ void ResetPopupFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -145,7 +145,7 @@ void ResetAlphabetIndexerFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -168,7 +168,7 @@ void ResetPopupItemBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -189,7 +189,7 @@ void ResetAlphabetIndexerColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -208,7 +208,7 @@ void ResetPopupColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -227,7 +227,7 @@ void ResetAlphabetIndexerSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -246,7 +246,7 @@ void ResetPopupBackground(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -265,7 +265,7 @@ void ResetSelectedBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -284,7 +284,7 @@ void ResetPopupUnselectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -358,7 +358,7 @@ void ResetPopupSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -471,7 +471,7 @@ void ResetPopupTitleBackground(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);

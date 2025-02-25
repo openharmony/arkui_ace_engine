@@ -143,7 +143,7 @@ void ResetProgressColor(ArkUINodeHandle node)
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto progresstype = progressLayoutProperty->GetType();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
@@ -367,7 +367,7 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto progresstype = progressLayoutProperty->GetType();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
