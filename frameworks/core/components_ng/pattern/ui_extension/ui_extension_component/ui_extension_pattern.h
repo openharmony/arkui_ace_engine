@@ -97,6 +97,7 @@ public:
         bool isAsyncModalBinding = false, SessionType sessionType = SessionType::UI_EXTENSION_ABILITY);
     ~UIExtensionPattern() override;
 
+    void Initialize();
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
@@ -400,6 +401,7 @@ private:
     bool isTransferringCaller_ = false;
     bool isVisible_ = true;
     bool isModal_ = false;
+    bool hasInitialize_ = false;
     bool isAsyncModalBinding_ = false;
     PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
     bool isFoldStatusChanged_ = false;
