@@ -65,22 +65,35 @@ Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
 void SetTypeImpl(Ark_TouchEvent peer,
                  Ark_TouchType type)
 {
+    LOGE("TouchEventAccessor::SetTypeImpl we can only GET event type");
 }
 Array_TouchObject GetTouchesImpl(Ark_TouchEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    const std::list<TouchLocationInfo>& touchList = info->GetTouches();
+    return Converter::ArkValue<Array_TouchObject>(touchList, Converter::FC);
 }
 void SetTouchesImpl(Ark_TouchEvent peer,
                     const Array_TouchObject* touches)
 {
+    LOGE("TouchEventAccessor::SetTouchesImpl we can only add new touches. "
+        "We can not set touches array");
 }
 Array_TouchObject GetChangedTouchesImpl(Ark_TouchEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    const std::list<TouchLocationInfo>& touchList = info->GetChangedTouches();
+    return Converter::ArkValue<Array_TouchObject>(touchList, Converter::FC);
 }
 void SetChangedTouchesImpl(Ark_TouchEvent peer,
                            const Array_TouchObject* changedTouches)
 {
+    LOGE("TouchEventAccessor::SetChangedTouchesImpl we can only add new changedTouches. "
+        "We can not set changedTouches array");
 }
 Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
 {
@@ -95,6 +108,7 @@ Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
 void SetStopPropagationImpl(Ark_TouchEvent peer,
                             const Callback_Void* stopPropagation)
 {
+    LOGE("TouchEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
 }
 Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
 {
@@ -114,6 +128,7 @@ Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
 void SetPreventDefaultImpl(Ark_TouchEvent peer,
                            const Callback_Void* preventDefault)
 {
+    LOGE("TouchEventAccessor::SetPreventDefaultImpl wen can only GET preventDefault callback");
 }
 } // TouchEventAccessor
 const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
