@@ -101,5 +101,4 @@ const GENERATED_ArkUIPathShapeAccessor* GetPathShapeAccessor()
     };
     return &PathShapeAccessorImpl;
 }
-
 }
