@@ -230,6 +230,12 @@ class SubscribableHandler {
         // add dependency view model object for V1V2 compatibility
         if (isTracked && this.enableV2Compatible_) {
           ObserveV2.getObserve().addRefV2Compatibility(target, propertyStr);
+
+          // do same as V2 proxy, call to autoProxyObject:
+          // Array, Set, Map length functions fireChange(object, OB_LENGTH)
+          if (typeof result === "object" && (Array.isArray(result) || result instanceof Set || result instanceof Map)) {
+            ObserveV2.getObserve().addRefV2Compatibility(result, ObserveV2.OB_LENGTH);
+          }
         }
       } else {
         // result is function or in compatibility mode (in compat mode cbFunc will never be set)
@@ -238,6 +244,12 @@ class SubscribableHandler {
         // add dependency view model object for V1V2 compatibility
         if (this.enableV2Compatible_ && typeof result !== 'function') {
           ObserveV2.getObserve().addRefV2Compatibility(target, propertyStr);
+
+          // do same as V2 proxy, call to autoProxyObject:
+          // Array, Set, Map length functions fireChange(object, OB_LENGTH)
+          if (typeof result === "object" && (Array.isArray(result) || result instanceof Set || result instanceof Map)) {
+            ObserveV2.getObserve().addRefV2Compatibility(result, ObserveV2.OB_LENGTH);
+          }
         }
       }
       return result;
@@ -508,6 +520,13 @@ class SubscribableMapSetHandler extends SubscribableHandler {
           let item = target.get(prop);
           // change from V2 proxy, this condition is never true in V2Compat
           // (typeof item === 'object' && this.isMakeObserved_) ? RefInfo.get(item)[RefInfo.MAKE_OBSERVED_PROXY] : 
+
+          
+          // do same as V2 proxy, call to autoProxyObject:
+          // Array, Set, Map length functions fireChange(object, OB_LENGTH)
+          if (typeof item === "object" && (Array.isArray(item) || item instanceof Set || item instanceof Map)) {
+            ObserveV2.getObserve().addRefV2Compatibility(item, ObserveV2.OB_LENGTH);
+          }
           return item;
         };
       }
@@ -670,6 +689,13 @@ class SubscribableArrayHandler extends SubscribableHandler {
 
     if (typeof ret !== 'function') {
       ObserveV2.getObserve().addRefV2Compatibility(conditionalTarget, key);
+
+      // do same as V2 proxy, call to autoProxyObject:
+      // Array, Set, Map length functions fireChange(object, OB_LENGTH)
+      if (typeof ret === "object" && (Array.isArray(ret) || ret instanceof Set || ret instanceof Map)) {
+        ObserveV2.getObserve().addRefV2Compatibility(ret, ObserveV2.OB_LENGTH);
+      }
+
       return ret;
     }
 
