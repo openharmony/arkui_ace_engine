@@ -306,6 +306,9 @@ void ImagePainter::ApplyImageFit(
                 ApplyContain(rawPicSize, dstSize, srcRect, dstRect);
             }
             break;
+        case ImageFit::MATRIX:
+            ApplyNone(rawPicSize, dstSize, srcRect, dstRect);
+            break;
         case ImageFit::CONTAIN:
         default:
             ApplyContain(rawPicSize, dstSize, srcRect, dstRect);
