@@ -912,7 +912,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, std::opt
     MountToParentWithService(root, node, levelOrder);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
-    OpenDialogAnimationInner(node);
+    OpenDialogAnimationInner(node, levelOrder);
 }
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
