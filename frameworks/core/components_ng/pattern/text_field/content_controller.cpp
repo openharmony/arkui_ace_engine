@@ -327,7 +327,7 @@ bool ContentController::FilterWithAscii(std::u16string& result)
     if (errorText.empty()) {
         textChange = false;
     } else {
-        LOGI("FilterWithAscii Error text %{private}s", UtfUtils::Str16DebugToStr8(errorText).c_str());
+        LOGI("FilterWithAscii Error text %{public}s", UtfUtils::Str16DebugToStr8(errorText).c_str());
     }
     return textChange;
 }
