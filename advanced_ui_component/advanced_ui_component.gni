@@ -17,6 +17,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 advanced_ui_component_libs = [
   "chip",
   "segmentbuttonv2",
+  "dialog",
 ]
 
 template("advanced_ui_component_lib") {
