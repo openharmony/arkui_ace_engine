@@ -81,6 +81,7 @@ public:
     {
         return dragEvent_;
     }
+    void StartDataLoading(const JSCallbackInfo& args);
 
 private:
     static void Constructor(const JSCallbackInfo& args);

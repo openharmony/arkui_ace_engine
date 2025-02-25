@@ -333,6 +333,9 @@ public:
         FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
     static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
+    static int32_t CancelDataLoading(const std::string& key);
+    static void SetDisableDataPrefetch(bool disableDataPrefetch);
+    static void SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);

@@ -373,6 +373,10 @@ public:
         return customerOnDrop_ != nullptr;
     }
 
+    void SetDisableDataPrefetch(bool disableDataPrefetch);
+    
+    bool GetDisableDataPrefetch() const;
+
     virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
     {
         auto json = JsonUtil::Create(true);
@@ -686,6 +690,7 @@ private:
 
     bool enabled_ { true };
     bool developerEnabled_ { true };
+    bool disableDataPrefetch_ { false };
     std::vector<KeyboardShortcut> keyboardShortcut_;
 
     std::vector<double> visibleAreaUserRatios_;

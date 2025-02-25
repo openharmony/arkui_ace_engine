@@ -578,4 +578,14 @@ void EventHub::FireLayoutNDKCallback(const RefPtr<PipelineContext>& pipeline)
     auto cb = ndkLayoutCallback_;
     executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
 }
+
+void EventHub::SetDisableDataPrefetch(bool disableDataPrefetch)
+{
+    disableDataPrefetch_ = disableDataPrefetch;
+}
+
+bool EventHub::GetDisableDataPrefetch() const
+{
+    return disableDataPrefetch_;
+}
 } // namespace OHOS::Ace::NG

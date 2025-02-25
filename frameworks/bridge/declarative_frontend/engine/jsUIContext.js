@@ -192,6 +192,12 @@ class UIObserver {
         this.ohos_observer.off(...args);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    cancelDataLoading(key) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.cancelDataLoading(key);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class MeasureUtils {

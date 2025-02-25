@@ -274,6 +274,7 @@ struct ArkUIDragEvent {
     ArkUI_Int32 dataTypesCount;
     ArkUI_CharPtr* dataTypes;
     ArkUI_Int32 dataTypesMaxStrLength;
+    ArkUI_CharPtr key;
 };
 
 struct ArkUIFocusAxisEvent {
@@ -2054,6 +2055,7 @@ struct ArkUICommonModifier {
     void (*setNodeBackdropBlur)(
         ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     ArkUIBackdropBlur (*getNodeBackdropBlur)(ArkUINodeHandle node);
+    void (*setDisableDataPrefetch)(ArkUINodeHandle node, ArkUI_Bool disable);
     void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);

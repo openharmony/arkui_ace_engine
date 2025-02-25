@@ -5270,4 +5270,28 @@ void ViewAbstract::RemoveCustomProperty(UINode* frameNode, const std::string& ke
     frameNode->RemoveCustomProperty(key);
 }
 
+int32_t ViewAbstract::CancelDataLoading(const std::string& key)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, -1);
+    return dragDropManager->CancelUDMFDataLoading(key);
+}
+
+void ViewAbstract::SetDisableDataPrefetch(bool disableDataPrefetch)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
+
+void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
 } // namespace OHOS::Ace::NG

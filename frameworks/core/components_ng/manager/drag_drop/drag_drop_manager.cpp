@@ -795,9 +795,15 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     RequestDragSummaryInfoAndPrivilege();
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
-    if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
-        auto unifiedData = RequestUDMFDataWithUDKey(udKey);
-        DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
+    auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->GetDisableDataPrefetch()) {
+        if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
+            auto unifiedData = RequestUDMFDataWithUDKey(udKey);
+            DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
+        }
+    } else {
+        DoDropAction(dragFrameNode, pointerEvent, nullptr, udKey);
     }
 }
 
@@ -2272,5 +2278,10 @@ void DragDropManager::RequireSummaryIfNecessary(const DragPointerEvent& pointerE
         currentPullId_ = pointerEvent.pullId;
         RequireSummary();
     }
+}
+
+int32_t DragDropManager::CancelUDMFDataLoading(const std::string& key)
+{
+    return UdmfClient::GetInstance()->Cancel(key);
 }
 } // namespace OHOS::Ace::NG

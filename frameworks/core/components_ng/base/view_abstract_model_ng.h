@@ -1461,6 +1461,16 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
+    int32_t CancelDataLoading(const std::string& key) override
+    {
+        return ViewAbstract::CancelDataLoading(key);
+    }
+
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override
+    {
+        return ViewAbstract::SetDisableDataPrefetch(disableDataPrefetch);
+    }
+
     void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
     {
         ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
