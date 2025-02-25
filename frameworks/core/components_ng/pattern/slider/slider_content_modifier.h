@@ -65,7 +65,7 @@ public:
     void DrawDefaultBlock(DrawingContext& context);
     void DrawHoverOrPress(DrawingContext& context);
     void DrawShadow(DrawingContext& context);
-
+    void AddStepPoint(float startX, float startY, float endX, float endY, RSCanvas& canvas);
     void UpdateThemeColor()
     {
         auto pipeline = PipelineBase::GetCurrentContext();
