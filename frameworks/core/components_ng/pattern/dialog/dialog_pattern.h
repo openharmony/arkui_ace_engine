@@ -293,6 +293,7 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void UpdateHostWindowRect();
     void UpdateFontScale();
 
     bool GetIsSuitOldMeasure()

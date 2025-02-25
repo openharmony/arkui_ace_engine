@@ -603,16 +603,17 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void DialogLayoutAlgorithm::ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto currentId = Container::CurrentId();
-    if (dialogProp->GetShowInSubWindowValue(false)) {
-        if (!container->IsSubContainer()) {
-            subWindowId_ = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
-        } else {
-            subWindowId_ = currentId;
-        }
+    CHECK_NULL_VOID(dialogProp);
+    if (!dialogProp->GetShowInSubWindowValue(false)) {
+        return;
     }
+
+    subWindowId_ = Container::CurrentId();
+    auto dialogNode = dialogProp->GetHost();
+    CHECK_NULL_VOID(dialogNode);
+    auto pipeline = dialogNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    subWindowId_ = pipeline->GetInstanceId();
 }
 
 void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child)

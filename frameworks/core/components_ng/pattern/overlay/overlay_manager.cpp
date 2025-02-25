@@ -822,7 +822,8 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
     if (isShowInSubWindow && !container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
+        auto pipeline = node->GetContextRefPtr();
+        currentId = pipeline ? pipeline->GetInstanceId() : currentId;
     }
 
     ContainerScope scope(currentId);
@@ -3244,18 +3245,12 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 
 void OverlayManager::DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode)
 {
+    CHECK_NULL_VOID(dialogNode);
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
     CHECK_NULL_VOID(dialogLayoutProp);
     if (dialogLayoutProp->GetShowInSubWindowValue(false)) {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto currentId = Container::CurrentId();
-        if (!container->IsSubContainer()) {
-            currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
-        }
-
         auto pipeline = dialogNode->GetContextRefPtr();
-        currentId = pipeline ? pipeline->GetInstanceId() : currentId;
+        auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentId();
         SubwindowManager::GetInstance()->DeleteHotAreas(currentId, dialogNode->GetId(), SubwindowType::TYPE_DIALOG);
         SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
@@ -7616,8 +7611,7 @@ void OverlayManager::OnUIExtensionWindowSizeChange()
         CHECK_NULL_VOID(dialogNode);
         auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(dialogPattern);
-        dialogPattern->InitHostWindowRect();
-        dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        dialogPattern->UpdateHostWindowRect();
     }
 }
 
@@ -7879,15 +7873,15 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
     auto parentContainer = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
     CHECK_NULL_RETURN(parentContainer, rect);
     auto isCrossWindow = parentContainer->IsCrossAxisWindow();
-    auto isScenceBoard = parentContainer->IsScenceBoardWindow();
-    if (isCrossWindow || isScenceBoard) {
+    auto isSceneBoard = parentContainer->IsScenceBoardWindow();
+    if (isCrossWindow || isSceneBoard) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(pipeContext->GetInstanceId());
         CHECK_NULL_RETURN(subwindow, rect);
         rect = subwindow->GetFoldExpandAvailableRect();
     }
 
     TAG_LOGI(AceLogTag::ACE_OVERLAY,
-        "parentWindow isScenceBoard: %{public}d isCrossWindow: %{public}d availableRect: %{public}s", isScenceBoard,
+        "parentWindow isSceneBoard: %{public}d isCrossWindow: %{public}d availableRect: %{public}s", isSceneBoard,
         isCrossWindow, rect.ToString().c_str());
 
     return rect;
