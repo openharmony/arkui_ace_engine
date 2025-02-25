@@ -2812,18 +2812,18 @@ int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event,
     if (!event) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
-    currentEvent->inputType = event->inputType;
-    currentEvent->eventTypeId = event->eventTypeId;
     auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
     if (!touchEvent) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
     auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!fullImpl) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+    currentEvent->inputType = event->inputType;
+    currentEvent->eventTypeId = event->eventTypeId;
+    ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
     fullImpl->getNodeModifiers()->getCommonModifier()->createClonedTouchEvent(touchEventCloned, touchEvent);
     currentEvent->inputEvent = touchEventCloned;
     currentEvent->isCloned = true;
