@@ -4676,7 +4676,7 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
 
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const
 {
-    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+    if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB)) {
         return;
     }
     auto pattern = webPattern_.Upgrade();
@@ -4686,6 +4686,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
     Recorder::EventParamsBuilder builder;
     builder.SetId(host->GetInspectorIdValue(""))
         .SetType(host->GetHostTag())
+        .SetEventCategory(Recorder::EventCategory::CATEGORY_WEB)
         .SetEventType(eventType)
         .SetText(param)
         .SetHost(host)

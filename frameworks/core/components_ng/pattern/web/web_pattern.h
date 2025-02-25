@@ -713,7 +713,7 @@ public:
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
     void RecordWebEvent(bool isInit = false) override;
-    void GetPageContentAsync(const std::string& jsCode);
+    bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
 
     bool IsPreviewImageNodeExist() const
     {

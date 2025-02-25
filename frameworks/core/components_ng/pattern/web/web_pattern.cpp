@@ -824,6 +824,7 @@ void WebPattern::OnAttachToFrameNode()
         RegisterTextBlurCallback(callback);
     }
     pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
+    EventRecorder::Get().OnAttachWeb(host);
 #endif
 }
 
@@ -849,6 +850,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         UnRegisterTextBlurCallback();
     }
     pipeline->UnRegisterListenerForTranslate(id);
+    EventRecorder::Get().OnDetachWeb(id);
 #endif
 }
 
@@ -3453,19 +3455,14 @@ void WebPattern::RecordWebEvent(bool isInit)
 #endif
 }
 
-void WebPattern::GetPageContentAsync(const std::string& jsCode)
+bool WebPattern::RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback)
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST)
-    CHECK_NULL_VOID(delegate_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto webId = host->GetId();
-    Recorder::InspectorTreeCollector::Get().IncreaseTaskNum();
-    delegate_->ExecuteTypeScript(jsCode, [webId](std::string result) {
-        std::string key = "Web_" + std::to_string(webId);
-        Recorder::InspectorTreeCollector::Get().GetJson()->Put(key.c_str(), result.c_str());
-        Recorder::InspectorTreeCollector::Get().DecreaseTaskNum();
-    });
+    CHECK_NULL_RETURN(delegate_, false);
+    delegate_->ExecuteTypeScript(jsCode, [cb = std::move(callback)](std::string result) { cb(result); });
+    return true;
+#else
+    return false;
 #endif
 }
 
