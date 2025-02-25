@@ -262,9 +262,9 @@ private:
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomObject& dst,
-    const ::OHOS::Ace::NG::GeneratedModifier::NavigationContext::ExternalData& src);
-void AssignArkValue(Ark_NavPathInfo& dst,
-    const ::OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo& src);
-} // namespace OHOS::Ace::NG::GeneratedModifier::Converter
+void AssignArkValue(Ark_CustomObject& dst, const GeneratedModifier::NavigationContext::ExternalData& src);
+void AssignArkValue(Ark_NavPathInfo& dst, const GeneratedModifier::NavigationContext::PathInfo& src);
+template<> GeneratedModifier::NavigationContext::ExternalData Convert(const Ark_CustomObject& src);
+template<> GeneratedModifier::NavigationContext::PathInfo Convert(const Ark_NavPathInfo& src);
+} // namespace OHOS::Ace::NG::Converter
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAVIGATION_CONTEXT_H
