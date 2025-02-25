@@ -18,7 +18,7 @@
  */
 class ObjectProxyHandler {
 
-    private static readonly OB_DATE = '__date__';
+    public static readonly OB_DATE = '__date__';
 
     private isMakeObserved_: boolean;
 
@@ -125,9 +125,12 @@ class ArrayProxyHandler {
     }
 
     // shrinkTo and extendTo is collection.Array api.
-    private static readonly arrayLengthChangingFunctions = new Set(['push', 'pop', 'shift', 'splice', 'unshift', 'shrinkTo', 'extendTo']);
-    private static readonly arrayMutatingFunctions = new Set(['copyWithin', 'fill', 'reverse', 'sort']);
+    public static readonly arrayLengthChangingFunctions = new Set(['push', 'pop', 'shift', 'splice', 'unshift', 'shrinkTo', 'extendTo']);
+    public static readonly arrayMutatingFunctions = new Set(['copyWithin', 'fill', 'reverse', 'sort']);
 
+    // Note: The code of this function is duplicated with adaptation for enableV2Compatibility
+    // when making changes here, review of these changes are also needed in
+    // SubscribableArrayHandler.getV2Compatible function
     get(target: Array<any>, key: string | symbol, receiver: Array<any>): any {
 
         if (typeof key === 'symbol') {
@@ -220,7 +223,7 @@ class ArrayProxyHandler {
  */
 class SetMapProxyHandler {
 
-    private static readonly OB_MAP_SET_ANY_PROPERTY = '___ob_map_set';
+    public static readonly OB_MAP_SET_ANY_PROPERTY = '___ob_map_set';
 
     private isMakeObserved_: boolean;
 
@@ -237,6 +240,9 @@ class SetMapProxyHandler {
         return this.isMakeObserved_ ? RefInfo.get(obj) : obj;
     }
 
+    // Note: The code of this function is duplicated with adaptation for enableV2Compatibility
+    // when making changes here, review of these changes are also needed in
+    // SubscribableMapSetHandler.getV2Compatible function
     get(target: any, key: string | symbol, receiver: any): any {
         if (typeof key === 'symbol') {
             if (key === Symbol.iterator) {
