@@ -359,8 +359,10 @@ const std::string IS_HINT_TYPE = "{\"isHint2Type\": true}";
 const std::string STRING_LF = "\n";
 const std::string DRAG_DATA_TYPE_TEXT = "general.plain-text";
 const std::string DRAG_DATA_TYPE_HTML = "general.html";
-const std::string DRAG_DATA_TYPE_FILE = "general.file";
+const std::set<std::string> FILE_TYPE_SET = {"general.file", "general.audio", "general.video", "general.image"};
 const std::string DRAG_DATA_TYPE_LINK = "general.hyperlink";
+const std::string FAKE_DRAG_DATA_VAL = " ";
+const std::string FAKE_LINK_VAL = "https://xxx.xxx.xxx";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 #define GPU_ABNORMAL_VALUE (32 * 1024)
@@ -2235,28 +2237,27 @@ void WebPattern::SetFakeDragData(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     CHECK_NULL_VOID(delegate_);
     CHECK_NULL_VOID(delegate_->dragData_);
-    std::string emptyFakeVal = " ";
     if (info && !info->GetSummary().empty()) {
         std::map<std::string, int64_t> dragDataSummary = info->GetSummary();
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop, set fake drag data by summary, summary size is %{public}zu",
             dragDataSummary.size());
         std::map<std::string, int64_t>::iterator iter;
         for (iter = dragDataSummary.begin(); iter != dragDataSummary.end(); iter++) {
-            if (DRAG_DATA_TYPE_FILE == iter->first) {
-                delegate_->dragData_->SetFileUri(emptyFakeVal);
+            if (FILE_TYPE_SET.find(iter->first) != FILE_TYPE_SET.end()) {
+                delegate_->dragData_->SetFileUri(FAKE_DRAG_DATA_VAL);
             } else if (DRAG_DATA_TYPE_TEXT == iter->first) {
-                delegate_->dragData_->SetFragmentText(emptyFakeVal);
+                delegate_->dragData_->SetFragmentText(FAKE_DRAG_DATA_VAL);
             } else if (DRAG_DATA_TYPE_HTML == iter->first) {
-                delegate_->dragData_->SetFragmentHtml(emptyFakeVal);
+                delegate_->dragData_->SetFragmentHtml(FAKE_DRAG_DATA_VAL);
             } else if (DRAG_DATA_TYPE_LINK == iter->first) {
-                delegate_->dragData_->SetLinkURL(emptyFakeVal);
-                delegate_->dragData_->SetLinkTitle(emptyFakeVal);
+                delegate_->dragData_->SetLinkURL(FAKE_LINK_VAL);
+                delegate_->dragData_->SetLinkTitle(FAKE_LINK_VAL);
             }
         }
         return;
     }
-    delegate_->dragData_->SetFragmentText(emptyFakeVal);
-    delegate_->dragData_->SetFragmentHtml(emptyFakeVal);
+    delegate_->dragData_->SetFragmentText(FAKE_DRAG_DATA_VAL);
+    delegate_->dragData_->SetFragmentHtml(FAKE_DRAG_DATA_VAL);
 }
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
