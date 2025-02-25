@@ -81,7 +81,9 @@ void PrepareImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
     auto* scrollWindowAdapter = frameNode->GetScrollWindowAdapter();
     CHECK_NULL_VOID(scrollWindowAdapter);
-    scrollWindowAdapter->Prepare(0);
+    scrollWindowAdapter->Prepare(0); // use parameter when new Idl is generated
+    int32_t totalCount = scrollWindowAdapter->GetTotalCount(); // use parameter when new Idl is generated
+    scrollWindowAdapter->SetTotalCount(totalCount);
 }
 void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
 {
