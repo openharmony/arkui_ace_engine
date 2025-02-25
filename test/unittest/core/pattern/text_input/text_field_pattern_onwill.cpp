@@ -48,31 +48,31 @@ class TextFieldPatternOnWillTest : public TextInputBases {
         return os;
     }
 
-    void CreateTextFieldWithCallback(OnWillOrder& order, const std::string& text = "")
+    void CreateTextFieldWithCallback(OnWillOrder& order, const std::string& text = "", bool callbackValue = true)
     {
-        auto callbackWillInsert = [&order](const InsertValueInfo& info) mutable {
+        auto callbackWillInsert = [&order, callbackValue](const InsertValueInfo& info) mutable {
             order.willInsert = ++order.time;
-            return true;
+            return callbackValue;
         };
-        auto callbackDidInsert = [&order](const InsertValueInfo& info) mutable {
+        auto callbackDidInsert = [&order, callbackValue](const InsertValueInfo& info) mutable {
             order.didInsert = ++order.time;
-            return true;
+            return callbackValue;
         };
-        auto callbackWillDelete = [&order](const DeleteValueInfo& info) mutable {
+        auto callbackWillDelete = [&order, callbackValue](const DeleteValueInfo& info) mutable {
             order.willDelete = ++order.time;
-            return true;
+            return callbackValue;
         };
-        auto callbackDidDelete = [&order](const DeleteValueInfo& info) mutable {
+        auto callbackDidDelete = [&order, callbackValue](const DeleteValueInfo& info) mutable {
             order.didDelete = ++order.time;
-            return true;
+            return callbackValue;
         };
-        auto callbackWillChange = [&order](const ChangeValueInfo& info) mutable {
+        auto callbackWillChange = [&order, callbackValue](const ChangeValueInfo& info) mutable {
             order.willChange = ++order.time;
-            return true;
+            return callbackValue;
         };
-        auto callbackChange = [&order](const ChangeValueInfo& info) mutable {
+        auto callbackChange = [&order, callbackValue](const ChangeValueInfo& info) mutable {
             order.onChange = ++order.time;
-            return true;
+            return callbackValue;
         };
         CreateTextField(text, "",
             [&callbackWillInsert, &callbackDidInsert, &callbackWillDelete, &callbackDidDelete, &callbackWillChange,
@@ -446,6 +446,58 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent012, TestSize.Level1)
     expectOrder.time = 4;
     expectOrder.willDelete = 3;
     expectOrder.didDelete = 4;
+    EXPECT_EQ(order, expectOrder);
+}
+
+/**
+ * @tc.name: OnWillEvent013
+ * @tc.desc: Test TextPattern insert one number, callback return false, the order of onWillEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode textInput and add onWillEvent callback
+     */
+
+    OnWillOrder order = { 0, 0, 0, 0, 0, 0, 0 };
+    CreateTextFieldWithCallback(order, "", false);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. insert text, trigger callbacks
+     */
+    pattern_->InsertValue("1", true);
+    FlushLayoutTask(frameNode_);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 1;
+    expectOrder.willInsert = 1;
+    EXPECT_EQ(order, expectOrder);
+}
+
+/**
+ * @tc.name: OnWillEvent014
+ * @tc.desc: Test TextPattern delete one number, callback return false, the order of onWillEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode textInput and add onWillEvent callback
+     */
+    OnWillOrder order = { 0, 0, 0, 0, 0, 0, 0 };
+    CreateTextFieldWithCallback(order, "123", false);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. insert text, trigger callbacks
+     */
+    pattern_->DeleteBackward(1);
+    FlushLayoutTask(frameNode_);
+    OnWillOrder expectOrder = { 0, 0, 0, 0, 0, 0, 0 };
+    expectOrder.time = 2;
+    expectOrder.willDelete = 2;
+    expectOrder.onChange = 1;
     EXPECT_EQ(order, expectOrder);
 }
 } // namespace OHOS::Ace::NG
