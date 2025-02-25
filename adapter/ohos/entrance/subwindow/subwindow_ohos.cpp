@@ -482,10 +482,11 @@ void SubwindowOhos::ResizeWindowForMenu()
     CHECK_NULL_VOID(theme);
 
     Rosen::WMError ret;
-    if (!(theme->GetExpandDisplay()) && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+    if (!(theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         if (parentContainer->IsUIExtensionWindow()) {
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
-                childContainerId_, SubwindowType::TYPE_MENU);
+            auto subwindow =
+                SubwindowManager::GetInstance()->GetSubwindowByType(childContainerId_, SubwindowType::TYPE_MENU);
             CHECK_NULL_VOID(subwindow);
             auto rect = subwindow->GetUIExtensionHostWindowRect();
             ret = window_->Resize(rect.Width(), rect.Height());
