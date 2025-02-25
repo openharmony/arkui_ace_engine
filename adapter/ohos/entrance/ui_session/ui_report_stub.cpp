@@ -108,6 +108,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             SendShowingImage(result);
             break;
         }
+        case SEND_CURRENT_PAGE_NAME: {
+            std::string result = data.ReadString();
+            SendCurrentPageName(result);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -207,6 +212,11 @@ void UiReportStub::RegisterGetWebViewCurrentLanguage(const EventCallback& eventC
     getWebViewCurrentLanguageCallback_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterGetCurrentPageName(const EventCallback& eventCallback)
+{
+    getCurrentPageNameCallback_ = std::move(eventCallback);
+}
+
 void UiReportStub::RegisterGetTranslateTextCallback(const std::function<void(int32_t, std::string)>& eventCallback)
 {
     getTranslateTextCallback_ = std::move(eventCallback);
@@ -236,6 +246,13 @@ void UiReportStub::SendCurrentLanguage(const std::string& data)
 {
     if (getWebViewCurrentLanguageCallback_) {
         getWebViewCurrentLanguageCallback_(data);
+    }
+}
+
+void UiReportStub::SendCurrentPageName(const std::string& result)
+{
+    if (getCurrentPageNameCallback_) {
+        getCurrentPageNameCallback_(result);
     }
 }
 
