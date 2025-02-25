@@ -897,6 +897,24 @@ void FrameNode::DumpOnSizeChangeInfo()
     }
 }
 
+void FrameNode::DumpKeyboardShortcutInfo()
+{
+    auto eventHub = GetEventHubOnly<EventHub>();
+    if (!eventHub) {
+        return;
+    }
+    auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
+    std::string result;
+    for (auto& keyboardShortcut : keyboardShortcuts) {
+        result.append("KeyboardShortcut: ")
+            .append("keys: ")
+            .append(std::to_string(keyboardShortcut.keys))
+            .append(" value: ")
+            .append(keyboardShortcut.value);
+    }
+    DumpLog::GetInstance().AddDesc(result);
+}
+
 void FrameNode::DumpOverlayInfo()
 {
     if (!layoutProperty_->IsOverlayNode()) {
@@ -1049,6 +1067,7 @@ void FrameNode::DumpInfo()
 {
     DumpCommonInfo();
     DumpOnSizeChangeInfo();
+    DumpKeyboardShortcutInfo();
     if (pattern_) {
         pattern_->DumpInfo();
     }
@@ -1061,6 +1080,7 @@ void FrameNode::DumpAdvanceInfo()
 {
     DumpCommonInfo();
     DumpOnSizeChangeInfo();
+    DumpKeyboardShortcutInfo();
     if (pattern_) {
         pattern_->DumpInfo();
         pattern_->DumpAdvanceInfo();
