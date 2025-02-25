@@ -727,7 +727,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
             radius, radius });
         canvas.DetachBrush();
         // progress selected part
-        CHECK_NULL_VOID(Positive(dateLength));
+        CHECK_NULL_VOID(Positive(value_->Get()));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
 #ifndef USE_ROSEN_DRAWING
@@ -758,7 +758,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
             radius, radius });
         canvas.DetachBrush();
         // progress selected part
-        CHECK_NULL_VOID(Positive(dateLength));
+        CHECK_NULL_VOID(Positive(value_->Get()));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
 #ifndef USE_ROSEN_DRAWING
