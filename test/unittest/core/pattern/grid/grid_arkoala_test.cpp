@@ -199,4 +199,43 @@ HWTEST_F(GridArkoalaTest, Jump001, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 45);
     EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (240.00, 466.00) - [240.00 x 450.00]");
 }
+
+/**
+ * @tc.name: Reset001
+ * @tc.desc: Test data reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridArkoalaTest, Reset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(8.0f));
+    InitMockLazy(100);
+    CreateDone(frameNode_);
+    IncrementAndLayout(__LINE__);
+
+    pattern_->ScrollToIndex(50);
+    FlushLayoutTask(frameNode_);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
+    EXPECT_EQ(pattern_->info_.startIndex_, 50);
+
+    frameNode_->NotifyChange(40, 0, -1, UINode::NotificationType::START_CHANGE_POSITION);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
+    EXPECT_EQ(pattern_->info_.startIndex_, 50);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 25);
+
+    frameNode_->NotifyChange(52, 0, -1, UINode::NotificationType::START_CHANGE_POSITION);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    lazy_.NormalModeUpdate(50, nullptr);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
+    FlushLayoutTask(frameNode_);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(pattern_->info_.startIndex_, 50);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 25);
+}
 } // namespace OHOS::Ace::NG

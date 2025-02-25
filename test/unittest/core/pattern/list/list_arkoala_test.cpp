@@ -110,4 +110,35 @@ HWTEST_F(ListArkoalaTest, Jump001, TestSize.Level1)
     EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (0.00, 590.00) - [240.00 x 90.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 94).ToString(), "RectT (0.00, 690.00) - [240.00 x 90.00]");
 }
+
+/**
+ * @tc.name: Reset001
+ * @tc.desc: Test data reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListArkoalaTest, Reset001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetSpace(Dimension(10.0f));
+    InitMockLazy(100);
+    CreateDone(frameNode_);
+    IncrementAndLayout(__LINE__);
+
+    pattern_->ScrollToIndex(50);
+    FlushLayoutTask(frameNode_);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 64));
+    EXPECT_EQ(pattern_->GetStartIndex(), 50);
+
+    frameNode_->NotifyChange(40, 0, -1, LazyForEachNode::NotificationType::START_CHANGE_POSITION);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    frameNode_->NotifyChange(52, 0, -1, LazyForEachNode::NotificationType::START_CHANGE_POSITION);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    lazy_.NormalModeUpdate(50, nullptr);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 64));
+    FlushLayoutTask(frameNode_);
+}
 } // namespace OHOS::Ace::NG

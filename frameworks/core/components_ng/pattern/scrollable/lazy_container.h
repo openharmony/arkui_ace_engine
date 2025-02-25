@@ -50,8 +50,9 @@ protected:
 
     /**
      * @brief Pass latest layout range info to adapter.
+     * @param reset true if previous info needs to be cleared when @c markIdx is provided
      */
-    void UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx, bool firstLayout);
+    void UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx, bool firstLayout, bool resetOnJump = false);
 
     /**
      * @brief Pass scroll offset to adapter.

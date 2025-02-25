@@ -81,7 +81,21 @@ void PrepareImpl(Ark_NativePointer node, Ark_Int32, Ark_Int32)
     CHECK_NULL_VOID(frameNode);
     auto* scrollWindowAdapter = frameNode->GetScrollWindowAdapter();
     CHECK_NULL_VOID(scrollWindowAdapter);
-    scrollWindowAdapter->Prepare(0);
+    scrollWindowAdapter->Prepare(0); // use parameter when new Idl is generated
+    int32_t totalCount = scrollWindowAdapter->GetTotalCount(); // use parameter when new Idl is generated
+    scrollWindowAdapter->SetTotalCount(totalCount);
+}
+void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (startIdx >= 0) {
+        frameNode->NotifyChange(startIdx, changeCnt, -1, LazyForEachNode::NotificationType::START_CHANGE_POSITION);
+    }
+    if (endIdx >= 0) {
+        frameNode->NotifyChange(endIdx, changeCnt, -1, LazyForEachNode::NotificationType::END_CHANGE_POSITION);
+    }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()

@@ -26,14 +26,14 @@ bool LazyContainer::UpdateOffset(float delta)
     return false;
 }
 
-void LazyContainer::UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx, bool firstLayout)
+void LazyContainer::UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx, bool firstLayout, bool resetOnJump)
 {
     if (adapter_) {
         adapter_->UpdateViewport(GetHost()->GetGeometryNode()->GetFrameSize(), axis);
         if (markIdx && *markIdx >= 0) {
-            adapter_->UpdateMarkItem(*markIdx);
+            adapter_->UpdateMarkItem(*markIdx, resetOnJump);
         } else if (firstLayout) {
-            adapter_->UpdateMarkItem(0);
+            adapter_->UpdateMarkItem(0, resetOnJump);
         }
     }
 }

@@ -43,7 +43,7 @@ public:
     /**
      * @param index of the latest pivot item.
      */
-    void UpdateMarkItem(int32_t index);
+    void UpdateMarkItem(int32_t index, bool reset);
 
     void UpdateViewport(const SizeF& size, Axis axis);
 
