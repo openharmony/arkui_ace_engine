@@ -960,21 +960,13 @@ void TimePickerRowPattern::Hour12ChangeBuildTimeRange()
 
 void TimePickerRowPattern::MinuteChangeBuildTimeRange(uint32_t hourOf24)
 {
-    uint32_t startTimeMinute = (startTime_.GetHour() == hourOf24) ? startTime_.GetMinute() : INDEX_MINUTE_STRAT;
-    uint32_t endTimeMinute = (endTime_.GetHour() == hourOf24) ? endTime_.GetMinute() : INDEX_MINUTE_END;
-
+    uint32_t startMinute = (hourOf24 == startTime_.GetHour()) ? startTime_.GetMinute() : INDEX_MINUTE_STRAT;
+    uint32_t endMinute = (hourOf24 == endTime_.GetHour()) ? endTime_.GetMinute() : INDEX_MINUTE_END;
     auto minuteColumn = allChildNode_["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
     optionsTotalCount_[minuteColumn] = 0;
-    uint32_t startMinute = 0;
-    uint32_t endMinute = 59;
-    if (hourOf24 == startTime_.GetHour()) {
-        startMinute = startTimeMinute;
-    } else if (hourOf24 == endTime_.GetHour()) {
-        endMinute = endTimeMinute;
-    }
     uint32_t index = 0;
     for (uint32_t minute = startMinute; minute <= endMinute; minute++) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
