@@ -875,6 +875,10 @@ bool PipelineBase::HasFloatTitle() const
     return true;
 }
 
+void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
+{
+}
+
 void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
 {
     uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
@@ -883,10 +887,6 @@ void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
-}
-
-void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
-{
 }
 
 void PipelineBase::SetUiDvsyncSwitch(bool on)
