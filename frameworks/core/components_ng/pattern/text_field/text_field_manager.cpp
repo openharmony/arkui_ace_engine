@@ -515,7 +515,8 @@ bool TextFieldManagerNG::GetImeShow() const
     return imeShow_ || imeAttachCalled_;
 }
 
-void TextFieldManagerNG::AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
+void TextFieldManagerNG::AddAvoidKeyboardCallback(
+    int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
 {
     if (isCustomKeyboard) {
         avoidCustomKeyboardCallbacks_.insert({ id, std::move(callback) });
