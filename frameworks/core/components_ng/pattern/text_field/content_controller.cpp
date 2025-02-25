@@ -423,6 +423,7 @@ std::u16string ContentController::GetValueBeforeIndex(int32_t index)
 
 std::u16string ContentController::GetValueAfterIndex(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(content_.length()));
     return content_.substr(index, content_.length() - index);
 }
 
