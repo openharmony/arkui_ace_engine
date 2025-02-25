@@ -150,6 +150,7 @@ public:
 
         if (!GetDotIndicatorModifier()) {
             SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>());
+            singleGestureState_ = GestureState::GESTURE_STATE_INIT;
         }
         GetDotIndicatorModifier()->SetAnimationDuration(INDICATOR_DEFAULT_DURATION);
         float motionVelocity = 0.0f;

@@ -179,13 +179,7 @@ void IndicatorPattern::SaveDigitIndicatorProperty()
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
     layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters->selectedFontWeight.value_or(
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
-    auto indicatorModifier = GetDotIndicatorModifier();
-    CHECK_NULL_VOID(indicatorModifier);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto rsRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->RemoveContentModifier(indicatorModifier);
+    ResetDotModifier();
 }
 
 void IndicatorPattern::SaveDotIndicatorProperty()
