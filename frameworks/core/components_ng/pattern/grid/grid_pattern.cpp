@@ -94,7 +94,7 @@ void GridPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(host);
     info_.childrenCount_ = host->GetTotalChildCount();
     if (info_.jumpIndex_ != EMPTY_JUMP_INDEX) {
-        UpdateLayoutRange(GetAxis(), info_.jumpIndex_, false);
+        RequestJump(info_.jumpIndex_, info_.scrollAlign_, info_.extraOffset_.value_or(0.0f));
     }
 }
 
@@ -490,7 +490,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
 
-    UpdateLayoutRange(info_.axis_, info_.jumpForRecompose_, !isInitialized_, true);
+    UpdateLayoutRange(info_.axis_, !isInitialized_);
+    RequestReset(info_.jumpForRecompose_);
     info_.jumpForRecompose_ = EMPTY_JUMP_INDEX;
     isInitialized_ = true;
     if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {

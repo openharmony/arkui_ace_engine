@@ -26,18 +26,26 @@
 
 namespace OHOS::Ace::NG {
 
-void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool reset)
+void ScrollWindowAdapter::PrepareReset(int32_t idx)
 {
-    if (index == LAST_ITEM) {
-        index = totalCount_ - 1;
+    markIndex_ = idx;
+    jumpPending_ = std::make_unique<PendingJump>(idx, ScrollAlign::START, 0.0f);
+    fillAlgorithm_->MarkJump();
+    RequestRecompose(idx);
+}
+
+void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extraOffset)
+{
+    if (idx == LAST_ITEM) {
+        idx = totalCount_ - 1;
     }
-    if (!reset && markIndex_ == index) {
+    if (idx == markIndex_) {
         return;
     }
-    markIndex_ = index;
-    jumpPending_ = true;
+    markIndex_ = idx;
+    jumpPending_ = std::make_unique<PendingJump>(idx, align, extraOffset);
     fillAlgorithm_->MarkJump();
-    RequestRecompose(index);
+    RequestRecompose(idx);
 }
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
@@ -159,12 +167,13 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
     filled_.clear();
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
     if (jumpPending_) {
-        jumpPending_ = false;
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
-            scroll->ScrollToIndex(markIndex_, false, ScrollAlign::START, std::nullopt);
+            std::cout << "scroll to " << markIndex_ << " align = " << (int)jumpPending_->align << "extraOffset = " << jumpPending_->extraOffset << "\n";
+            scroll->ScrollToIndex(markIndex_, false, jumpPending_->align, jumpPending_->extraOffset);
         } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
             swiper->ChangeIndex(markIndex_, false);
         }
+        jumpPending_.reset();
     }
 }
 

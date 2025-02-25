@@ -26,6 +26,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/scroll/scroll_controller_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,12 +41,11 @@ public:
     {}
     ~ScrollWindowAdapter() override = default;
 
-    /**
-     * @param index of the latest pivot item.
-     */
-    void UpdateMarkItem(int32_t index, bool reset);
-
     void UpdateViewport(const SizeF& size, Axis axis);
+
+    void PrepareReset(int32_t idx);
+    void PrepareJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+    void PrepareLoadToTarget(int32_t targetIdx) {}
 
     /**
      * @param x positive if scrolling right, negative if scrolling left
@@ -76,6 +76,11 @@ public:
         return totalCount_;
     }
 
+    /**
+     * @brief initialize layout info when frontend recomposition starts
+     *
+     * @param offset offset of LazyForEach in parent's children list
+     */
     void Prepare(uint32_t offset);
 
 private:
@@ -103,8 +108,18 @@ private:
     std::unordered_set<int32_t> filled_; // to record measured items during Fill
 
     Axis axis_ = Axis::VERTICAL;
-    uint32_t offset_ = 0; // offset of current LazyForEach in node tree
-    bool rangeMode_ = false;   // true if providing item range to frontend directly
-    bool jumpPending_ = false; // will perform a jump on the next recomposition
+    uint32_t offset_ = 0;    // offset of current LazyForEach in node tree
+
+    struct PendingJump {
+        PendingJump(int32_t jumpIdx, ScrollAlign align, float extraOffset)
+            : index(jumpIdx), align(align), extraOffset(extraOffset)
+        {}
+        int32_t index = -1;
+        ScrollAlign align = ScrollAlign::START;
+        float extraOffset = 0.0f;
+    };
+    std::unique_ptr<PendingJump> jumpPending_; // will perform a jump on the next recomposition
+
+    bool rangeMode_ = false; // true if providing item range to frontend directly
 };
 } // namespace OHOS::Ace::NG

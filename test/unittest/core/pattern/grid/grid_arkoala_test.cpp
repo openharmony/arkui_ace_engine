@@ -191,12 +191,14 @@ HWTEST_F(GridArkoalaTest, Jump001, TestSize.Level1)
     CreateDone(frameNode_);
     IncrementAndLayout(__LINE__);
 
-    pattern_->ScrollToIndex(90);
+    pattern_->ScrollToIndex(90,false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(90, 96));
     EXPECT_EQ(pattern_->info_.jumpIndex_, -2);
     EXPECT_EQ(pattern_->info_.startIndex_, 90);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 45);
+    EXPECT_EQ(GetChildRect(frameNode_, 90).ToString(), "RectT (0.00, 8.00) - [240.00 x 450.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (240.00, 466.00) - [240.00 x 450.00]");
 }
 
