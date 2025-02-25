@@ -355,6 +355,15 @@ class __RepeatVirtualScroll2Impl<T> {
         } else {
             this.reRender();
         }
+        this.updateTemplateOptions();
+    }
+
+    private updateTemplateOptions(): void {
+        if (!this.allowUpdate_) {
+            for (const templateType in this.templateOptions_) {
+                this.templateOptions_[templateType] = { cachedCountSpecified: true, cachedCount: 0 };
+            }
+        }
     }
 
     private initialRender(): void {
