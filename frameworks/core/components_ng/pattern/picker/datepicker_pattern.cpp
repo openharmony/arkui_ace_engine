@@ -766,7 +766,7 @@ bool DatePickerPattern::CheckFocusID(int32_t childSize)
     int32_t startIndex = 0;
     int32_t endIndex = 0;
 
-    if (datePickerMode_ == DatePickerMode::DATE) {
+    if (showTime_ || datePickerMode_ == DatePickerMode::DATE) {
         startIndex = INDEX_YEAR;
         endIndex = INDEX_DAY;
     } else if (datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
@@ -976,7 +976,7 @@ void DatePickerPattern::FlushColumn()
 
 void DatePickerPattern::ShowColumnByDatePickMode()
 {
-    if ((datePickerMode_ == DatePickerMode::DATE) && GetIsShowInDialog()) {
+    if (GetIsShowInDialog() && (showTime_ || datePickerMode_ == DatePickerMode::DATE)) {
         return;
     }
     RefPtr<FrameNode> stackYear;
@@ -1126,12 +1126,12 @@ void DatePickerPattern::ShowTitle(int32_t titleId)
         auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
 
-        if (ShowMonthDays() || (datePickerMode_ == DatePickerMode::DATE)) {
-            auto dateStr = GetCurrentDate();
-            textLayoutProperty->UpdateContent(dateStr.ToString(false));
-        } else {
+        if (!showTime_ && (datePickerMode_ != DatePickerMode::DATE)) {
             auto dateStr = GetVisibleColumnsText();
             textLayoutProperty->UpdateContent(dateStr);
+        } else {
+            auto dateStr = GetCurrentDate();
+            textLayoutProperty->UpdateContent(dateStr.ToString(false));
         }
         textTitleNode->MarkModifyDone();
         textTitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
