@@ -578,6 +578,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         }
         currentDelta_ = 0.0f;
     }
+    if (isInit_) {
+        FireSelectedEvent(-1, currentIndex_);
+    }
     if (lastCurrentIndex != currentIndex_ && !isInit_ && !IsUseCustomAnimation()) {
         FireWillShowEvent(currentIndex_);
         FireWillHideEvent(lastCurrentIndex);
