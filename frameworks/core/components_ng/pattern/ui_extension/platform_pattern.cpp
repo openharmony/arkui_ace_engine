@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -195,7 +196,9 @@ void PlatformPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    Platform::CalculatePointerEvent(pointerEvent, host);
+    auto newPointerEvent = PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, tag_);
+    CHECK_NULL_VOID(newPointerEvent);
+    Platform::CalculatePointerEvent(newPointerEvent, host);
     AceExtraInputData::InsertInterpolatePoints(info);
     const auto& changedTouches = info.GetChangedTouches();
     if (!changedTouches.empty() && changedTouches.back().GetTouchType() == TouchType::DOWN) {
@@ -203,7 +206,7 @@ void PlatformPattern::HandleTouchEvent(const TouchEventInfo& info)
         CHECK_NULL_VOID(focusHub);
         focusHub->RequestFocusImmediately();
     }
-    DispatchPointerEvent(pointerEvent);
+    DispatchPointerEvent(newPointerEvent);
 }
 
 void PlatformPattern::HandleMouseEvent(const MouseInfo& info)
@@ -213,7 +216,7 @@ void PlatformPattern::HandleMouseEvent(const MouseInfo& info)
     }
     const auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
-    lastPointerEvent_ = pointerEvent;
+    lastPointerEvent_ = PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, tag_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Platform::CalculatePointerEvent(pointerEvent, host);
