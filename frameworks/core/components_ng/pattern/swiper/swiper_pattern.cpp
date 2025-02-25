@@ -1588,9 +1588,7 @@ void SwiperPattern::HandleSwiperCustomAnimation(float offset)
     }
 
     if (itemPositionInAnimation_.empty()) {
-        for (auto& item : itemPosition_) {
-            UpdateItemInfoInCustomAnimation(item.first, item.second.startPos, item.second.endPos);
-        }
+        CalculateAndUpdateItemInfo();
     }
     indexsInAnimation_.clear();
     CalculateAndUpdateItemInfo(offset);
