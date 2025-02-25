@@ -19,6 +19,6 @@
 #include "core/components/common/properties/color.h"
 
 struct LinearGradientPeer {
-    std::vector<std::pair<OHOS::Ace::Color, OHOS::Ace::Dimension>> colorStops;
+    std::vector<std::pair<std::optional<OHOS::Ace::Color>, OHOS::Ace::Dimension>> colorStops;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_LINEAR_GRADIENT_PEER_H

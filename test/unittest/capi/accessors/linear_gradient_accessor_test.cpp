@@ -100,10 +100,11 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkStringTest, TestSize.Level1)
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
     peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
-    std::vector<std::pair<OHOS::Ace::Color, OHOS::Ace::Dimension>> colorStops = peer_->colorStops;
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < validValues.size(); idx++) {
-        EXPECT_EQ(std::get<0>(colorStops.at(idx)).ToString(), std::get<0>(validValues.at(idx)));
+        ASSERT_TRUE(std::get<0>(colorStops.at(idx)).has_value());
+        EXPECT_EQ(std::get<0>(colorStops.at(idx)).value().ToString(), std::get<0>(validValues.at(idx)));
         EXPECT_EQ(std::get<1>(colorStops.at(idx)).Value(), std::get<1>(validValues.at(idx)));
     }
 }
@@ -127,10 +128,11 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkColorTest, TestSize.Level1)
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
     peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
-    std::vector<std::pair<OHOS::Ace::Color, OHOS::Ace::Dimension>> colorStops = peer_->colorStops;
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < validValues2.size(); idx++) {
-        EXPECT_EQ(std::get<0>(colorStops.at(idx)).ToString(), std::get<0>(validValues.at(idx)));
+        ASSERT_TRUE(std::get<0>(colorStops.at(idx)).has_value());
+        EXPECT_EQ(std::get<0>(colorStops.at(idx)).value().ToString(), std::get<0>(validValues.at(idx)));
         EXPECT_EQ(std::get<1>(colorStops.at(idx)).Value(), std::get<1>(validValues.at(idx)));
     }
 }
@@ -154,10 +156,11 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkNumberTest, TestSize.Level1)
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
     peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
-    std::vector<std::pair<OHOS::Ace::Color, OHOS::Ace::Dimension>> colorStops = peer_->colorStops;
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < validValues3.size(); idx++) {
-        EXPECT_EQ(std::get<0>(colorStops.at(idx)).ToString(), std::get<0>(validValues.at(idx)));
+        ASSERT_TRUE(std::get<0>(colorStops.at(idx)).has_value());
+        EXPECT_EQ(std::get<0>(colorStops.at(idx)).value().ToString(), std::get<0>(validValues.at(idx)));
         EXPECT_EQ(std::get<1>(colorStops.at(idx)).Value(), std::get<1>(validValues.at(idx)));
     }
 }
@@ -181,10 +184,11 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkResourceTest, TestSize.Level1)
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
     peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
-    std::vector<std::pair<OHOS::Ace::Color, OHOS::Ace::Dimension>> colorStops = peer_->colorStops;
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < validValues4.size(); idx++) {
-        EXPECT_EQ(std::get<0>(colorStops.at(idx)).ToString(), std::get<0>(validValues.at(idx)));
+        ASSERT_TRUE(std::get<0>(colorStops.at(idx)).has_value());
+        EXPECT_EQ(std::get<0>(colorStops.at(idx)).value().ToString(), std::get<0>(validValues.at(idx)));
         EXPECT_EQ(std::get<1>(colorStops.at(idx)).Value(), std::get<1>(validValues.at(idx)));
     }
 }
@@ -209,10 +213,10 @@ HWTEST_F(LinearGradientAccessorTest, CtorInvalidValuesTest, TestSize.Level1)
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
     peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
-    std::vector<std::pair<OHOS::Ace::Color, OHOS::Ace::Dimension>> colorStops = peer_->colorStops;
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < invalidValues.size(); idx++) {
-        EXPECT_EQ(std::get<0>(colorStops.at(idx)).ToString(), Color::BLACK.ToString());
+        EXPECT_FALSE(std::get<0>(colorStops.at(idx)).has_value());
         EXPECT_EQ(std::get<1>(colorStops.at(idx)).Value(), std::clamp(std::get<1>(invalidValues.at(idx)), 0.f, 1.f));
     }
 }

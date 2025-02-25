@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_LinearGradient peer)
 Ark_LinearGradient CtorImpl(const Array_ColorStop* colorStops)
 {
     CHECK_NULL_RETURN(colorStops, nullptr);
-    auto colors = Converter::Convert<std::vector<std::pair<Color, Dimension>>>(*colorStops);
+    auto colors = Converter::Convert<std::vector<std::pair<std::optional<Color>, Dimension>>>(*colorStops);
     return new LinearGradientPeer{colors};
 }
 Ark_NativePointer GetFinalizerImpl()

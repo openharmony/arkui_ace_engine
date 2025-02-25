@@ -848,7 +848,7 @@ Gradient Convert(const Ark_LinearGradient& value)
 }
 
 template<>
-std::pair<Color, Dimension> Convert(const Ark_ColorStop& src)
+std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
 {
     auto color = Converter::OptConvert<Color>(src.color);
     auto offset = Converter::Convert<Dimension>(src.offset);
@@ -858,7 +858,7 @@ std::pair<Color, Dimension> Convert(const Ark_ColorStop& src)
     } else {
         offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_1));
     }
-    return std::make_pair(color.has_value() ? color.value() : Color::BLACK, offset);
+    return std::make_pair(color, offset);
 }
 
 template<>
