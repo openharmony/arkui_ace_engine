@@ -936,6 +936,7 @@ private:
     void ParseOriText(const std::string& currentText);
     bool IsMarqueeOverflow() const;
     virtual void ResetAfterTextChange();
+    void CheckPressedSpanPosition(const Offset& textOffset);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -946,10 +947,12 @@ private:
     bool isSensitive_ = false;
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
+    Offset leftMousePressedOffset_;
     bool isEnableHapticFeedback_ = true;
 
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
+    bool moveOverClickThreshold_ = false;
 
     RefPtr<ParagraphManager> pManager_;
     std::vector<int32_t> placeholderIndex_;
