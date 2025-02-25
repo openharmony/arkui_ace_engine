@@ -405,7 +405,7 @@ void JSSpringProp::DestructorCallback(JSSpringProp* obj)
 void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
-    int32_t len = info.Length();
+    int32_t len = static_cast<int32_t>(info.Length());
     if (len != FRICTION_MOTION_LENGTH && len != SPRING_MOTION_LENGTH && len != SCROLL_MOTION_LENGTH) {
         return;
     }
