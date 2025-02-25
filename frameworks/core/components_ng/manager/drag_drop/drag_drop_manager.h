@@ -599,6 +599,8 @@ public:
 
     bool IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, int32_t pointId);
 
+    RefPtr<FrameNode> GetRootNode();
+
     int32_t CancelUDMFDataLoading(const std::string& key);
 
     const DragPointerEvent& GetPreDragPointerEvent() const

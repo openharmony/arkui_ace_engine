@@ -661,6 +661,13 @@ void DragDropManager::NotifyDragFrameNode(
     NotifyDragRegisterFrameNode(nodesForDragNotify_, dragEventType, notifyEvent);
 }
 
+RefPtr<FrameNode> DragDropManager::GetRootNode()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetRootElement();
+}
+
 void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode)
 {
     dragDropState_ = DragDropMgrState::DRAGGING;
