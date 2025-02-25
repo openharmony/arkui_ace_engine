@@ -16,17 +16,17 @@
 import curves from '@ohos.curves';
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
-import { BlankAndDividerDestination, BlankAndDividerRoute } from 'feature/src/main/ets/pages/BlankAndDivider';
-import { RowsColumnsAndStackingDestination, RowsColumnsAndStackingRoute } from 'feature/src/main/ets/pages/RowsColumnsAndStacking'
-import { GridAndColumnLayoutDestination, GridAndColumnLayoutRoute } from 'feature/src/main/ets/pages/GridAndColumnLayout'
-import { ScrollAndSwipeDestination, ScrollAndSwipeRoute } from 'feature/src/main/ets/pages/ScrollAndSwipe'
-import { NavigationAndSwitchingDestination, NavigationAndSwitchingRoute } from 'feature/src/main/ets/pages/NavigationAndSwitching'
-import { ButtonsAndSelectionsDestination, ButtonsAndSelectionsRoute } from 'feature/src/main/ets/pages/ButtonsAndSelections'
-import { TextAndInputDestination, TextAndInputRoute } from 'feature/src/main/ets/pages/TextAndInput'
-import { ImagesAndVideosDestination, ImagesAndVideosRoute } from 'feature/src/main/ets/pages/ImagesAndVideos'
-import { InformationDisplayDestination, InformationDisplayRoute } from 'feature/src/main/ets/pages/InformationDisplay'
-import { MenusDestination, MenusRoute } from 'feature/src/main/ets/pages/Menus'
-import { DialogBoxesDestination, DialogBoxesRoute } from 'feature/src/main/ets/pages/DialogBoxes'
+import { blankAndDividerDestination, blankAndDividerRoute } from 'feature/src/main/ets/pages/BlankAndDivider';
+import { rowsColumnsAndStackingDestination, rowsColumnsAndStackingRoute } from 'feature/src/main/ets/pages/RowsColumnsAndStacking'
+import { gridAndColumnLayoutDestination, gridAndColumnLayoutRoute } from 'feature/src/main/ets/pages/GridAndColumnLayout'
+import { scrollAndSwipeDestination, scrollAndSwipeRoute } from 'feature/src/main/ets/pages/ScrollAndSwipe'
+import { navigationAndSwitchingDestination, navigationAndSwitchingRoute } from 'feature/src/main/ets/pages/NavigationAndSwitching'
+import { buttonsAndSelectionsDestination, buttonsAndSelectionsRoute } from 'feature/src/main/ets/pages/ButtonsAndSelections'
+import { textAndInputDestination, textAndInputRoute } from 'feature/src/main/ets/pages/TextAndInput'
+import { imagesAndVideosDestination, imagesAndVideosRoute } from 'feature/src/main/ets/pages/ImagesAndVideos'
+import { informationDisplayDestination, informationDisplayRoute } from 'feature/src/main/ets/pages/InformationDisplay'
+import { menusDestination, menusRoute } from 'feature/src/main/ets/pages/Menus'
+import { dialogBoxesDestination, dialogBoxesRoute } from 'feature/src/main/ets/pages/DialogBoxes'
 @Styles
 function CardPressedStyle() {
   .backgroundColor('rgba(0,0,0,0.1)')
@@ -52,27 +52,27 @@ function CardDisabledStyle() {
 @Builder
 function Destination(name: string, route: Route) {
   if (name.startsWith('BlankAndDivider/')) {
-    BlankAndDividerDestination(name, route)
+    blankAndDividerDestination(name, route)
   } else if (name.startsWith('RowsColumnsAndStacking/')){
-    RowsColumnsAndStackingDestination(name, route)
+    rowsColumnsAndStackingDestination(name, route)
   } else if (name.startsWith('GridAndColumnLayout/')){
-    GridAndColumnLayoutDestination(name, route)
+    gridAndColumnLayoutDestination(name, route)
   } else if (name.startsWith('ScrollAndSwipe/')){
-    ScrollAndSwipeDestination(name, route)
+    scrollAndSwipeDestination(name, route)
   } else if (name.startsWith('NavigationAndSwitching/')){
-    NavigationAndSwitchingDestination(name, route)
+    navigationAndSwitchingDestination(name, route)
   } else if (name.startsWith('ButtonsAndSelections/')){
-    ButtonsAndSelectionsDestination(name, route)
+    buttonsAndSelectionsDestination(name, route)
   } else if (name.startsWith('TextAndInput/')){
-    TextAndInputDestination(name, route)
+    textAndInputDestination(name, route)
   } else if (name.startsWith('ImagesAndVideos/')){
-    ImagesAndVideosDestination(name, route)
+    imagesAndVideosDestination(name, route)
   }else if (name.startsWith('InformationDisplay/')){
-    InformationDisplayDestination(name, route)
+    informationDisplayDestination(name, route)
   }else if (name.startsWith('Menus/')){
-    MenusDestination(name, route)
+    menusDestination(name, route)
   }else if (name.startsWith('DialogBoxes/')){
-    DialogBoxesDestination(name, route)
+    dialogBoxesDestination(name, route)
   }
 }
 
@@ -81,17 +81,17 @@ function Destination(name: string, route: Route) {
 struct Index {
   @Provide('router') router: NavPathStack = new NavPathStack();
   @State routes: RouteGroup[] = [
-    BlankAndDividerRoute,
-    RowsColumnsAndStackingRoute,
-    GridAndColumnLayoutRoute,
-    ScrollAndSwipeRoute,
-    NavigationAndSwitchingRoute,
-    ButtonsAndSelectionsRoute,
-    TextAndInputRoute,
-    ImagesAndVideosRoute,
-    InformationDisplayRoute,
-    MenusRoute,
-    DialogBoxesRoute
+    blankAndDividerRoute,
+    rowsColumnsAndStackingRoute,
+    gridAndColumnLayoutRoute,
+    scrollAndSwipeRoute,
+    navigationAndSwitchingRoute,
+    buttonsAndSelectionsRoute,
+    textAndInputRoute,
+    imagesAndVideosRoute,
+    informationDisplayRoute,
+    menusRoute,
+    dialogBoxesRoute
   ];
   @State selection: string | null = null;
 

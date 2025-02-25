@@ -28,7 +28,7 @@ import { TimePickerBootcamp } from './TimePickerBootcamp';
 import { ToggleBootcamp } from './ToggleBootcamp';
 
 
-export const ButtonsAndSelectionsRoute: RouteGroup = {
+export const buttonsAndSelectionsRoute: RouteGroup = {
   name: 'ButtonsAndSelections',
   label: '按钮与选择',
   children: [
@@ -49,7 +49,7 @@ export const ButtonsAndSelectionsRoute: RouteGroup = {
 };
 
 @Builder
-export function ButtonsAndSelectionsDestination(name: string, route: Route) {
+export function buttonsAndSelectionsDestination(name: string, route: Route) {
   if (name === 'ButtonsAndSelections/Button') {
     ButtonBootcamp({title: route.label})
   }else if (name === 'ButtonsAndSelections/Toggle'){

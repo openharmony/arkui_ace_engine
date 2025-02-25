@@ -32,7 +32,7 @@ import { TextTimerBootcamp } from './TextTimerBootcamp';
 import { ToastBootcamp } from './ToastBootcamp';
 
 
-export const InformationDisplayRoute: RouteGroup = {
+export const informationDisplayRoute: RouteGroup = {
   name: 'InformationDisplay',
   label: '信息展示',
   children: [
@@ -57,7 +57,7 @@ export const InformationDisplayRoute: RouteGroup = {
 };
 
 @Builder
-export function InformationDisplayDestination(name: string, route: Route) {
+export function informationDisplayDestination(name: string, route: Route) {
   if (name === 'InformationDisplay/AlphabetIndexer') {
     AlphabetIndexerBootcamp({title: route.label})
   }else if (name === 'InformationDisplay/Badge'){

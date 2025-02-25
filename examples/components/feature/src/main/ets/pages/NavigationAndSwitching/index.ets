@@ -21,7 +21,7 @@ import { TabContentBootcamp } from './TabContentBootcamp';
 import { TabsBootcamp } from './TabsBootcamp';
 
 
-export const NavigationAndSwitchingRoute: RouteGroup = {
+export const navigationAndSwitchingRoute: RouteGroup = {
   name: 'NavigationAndSwitching',
   label: '导航与切换',
   children: [
@@ -34,7 +34,7 @@ export const NavigationAndSwitchingRoute: RouteGroup = {
 };
 
 @Builder
-export function NavigationAndSwitchingDestination(name: string, route: Route) {
+export function navigationAndSwitchingDestination(name: string, route: Route) {
   if (name === 'NavigationAndSwitching/Navigation') {
     NavigationBootcamp({title: route.label})
   }else if (name === 'NavigationAndSwitching/NavDestination'){

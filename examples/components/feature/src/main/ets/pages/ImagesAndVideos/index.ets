@@ -18,7 +18,7 @@ import { ImageAnimatorBootcamp } from './ImageAnimatorBootcamp';
 import { ImageboxGroupBootcamp } from './ImageBootcamp';
 
 
-export const ImagesAndVideosRoute: RouteGroup = {
+export const imagesAndVideosRoute: RouteGroup = {
   name: 'ImagesAndVideos',
   label: '图片与视频',
   children: [
@@ -29,7 +29,7 @@ export const ImagesAndVideosRoute: RouteGroup = {
 };
 
 @Builder
-export function ImagesAndVideosDestination(name: string, route: Route) {
+export function imagesAndVideosDestination(name: string, route: Route) {
   if (name === 'ImagesAndVideos/Image') {
     ImageboxGroupBootcamp({title: route.label})
   }else if (name === 'ImagesAndVideos/ImageAnimator'){

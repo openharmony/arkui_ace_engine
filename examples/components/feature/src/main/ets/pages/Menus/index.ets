@@ -18,7 +18,7 @@ import { MenuBootcamp } from './MenuBootcamp';
 import { MenuItemGroupBootcamp } from './MenuItemGroupBootcamp';
 
 
-export const MenusRoute: RouteGroup = {
+export const menusRoute: RouteGroup = {
   name: 'Menus',
   label: '菜单',
   children: [
@@ -29,7 +29,7 @@ export const MenusRoute: RouteGroup = {
 };
 
 @Builder
-export function MenusDestination(name: string, route: Route) {
+export function menusDestination(name: string, route: Route) {
   if (name === 'Menus/Menu') {
     MenuBootcamp({title: route.label})
   }else if (name === 'Menus/MenuItemGroup'){

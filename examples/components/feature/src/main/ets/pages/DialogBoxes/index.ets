@@ -31,7 +31,7 @@ import { TextPickerDialogBootcamp } from './TextPickerDialogBootcamp';
 import { TimePickerDialogBootcamp } from './TimePickerDialogBootcamp';
 
 
-export const DialogBoxesRoute: RouteGroup = {
+export const dialogBoxesRoute: RouteGroup = {
   name: 'DialogBoxes',
   label: '弹窗',
   children: [
@@ -54,7 +54,7 @@ export const DialogBoxesRoute: RouteGroup = {
 };
 
 @Builder
-export function DialogBoxesDestination(name: string, route: Route) {
+export function dialogBoxesDestination(name: string, route: Route) {
   if (name === 'DialogBoxes/AlertDialog') {
     AlertDialogBootcamp({title: route.label})
   }else if (name === 'DialogBoxes/ActionSheet'){

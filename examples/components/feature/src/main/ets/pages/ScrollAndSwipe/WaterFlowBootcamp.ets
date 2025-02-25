@@ -70,14 +70,16 @@ import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
 
 @Styles
-function CardPressedStyle() {
+function cardPressedStyle()
+{
   .backgroundColor('rgba(0,0,0,0.1)')
   .opacity(1)
   .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
 }
 
 @Styles
-function CardNormalStyle() {
+function cardNormalStyle()
+{
   .backgroundColor(Color.White)
   .opacity(1)
   .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
@@ -85,7 +87,8 @@ function CardNormalStyle() {
 }
 
 @Styles
-function CardDisabledStyle() {
+function cardDisabledStyle()
+{
   .backgroundColor('rgba(0,0,0,0)')
   .opacity(0.5)
   .animation({ curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1), duration: 100 })
@@ -2426,9 +2429,9 @@ export struct WaterFlowBootcamp {
       bottom: 18
     })
     .stateStyles({
-      pressed: CardPressedStyle,
-      normal: CardNormalStyle,
-      disabled: CardDisabledStyle,
+      pressed: cardPressedStyle,
+      normal: cardNormalStyle,
+      disabled: cardDisabledStyle,
     })
     .onClick(() => {
       if (this.selection === str) {

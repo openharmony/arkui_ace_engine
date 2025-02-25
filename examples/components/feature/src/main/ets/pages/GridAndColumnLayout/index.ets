@@ -23,7 +23,7 @@ import { SideBarContainerBootcamp } from './SideBarContainerBootcamp';
 import { ToolBarBootcamp } from './ToolBarBootcamp';
 
 
-export const GridAndColumnLayoutRoute: RouteGroup = {
+export const gridAndColumnLayoutRoute: RouteGroup = {
   name: 'GridAndColumnLayout',
   label: '栅格与分栏',
   children: [
@@ -38,7 +38,7 @@ export const GridAndColumnLayoutRoute: RouteGroup = {
 };
 
 @Builder
-export function GridAndColumnLayoutDestination(name: string, route: Route) {
+export function gridAndColumnLayoutDestination(name: string, route: Route) {
   if (name === 'GridAndColumnLayout/GridRow') {
       GridRowBootcamp({title: route.label})
   }else if (name === 'GridAndColumnLayout/GridCol'){

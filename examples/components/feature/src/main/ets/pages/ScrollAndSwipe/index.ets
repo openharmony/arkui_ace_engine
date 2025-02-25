@@ -27,7 +27,7 @@ import { SwiperBootcamp } from './SwiperBootcamp';
 import { WaterFlowBootcamp } from './WaterFlowBootcamp';
 
 
-export const ScrollAndSwipeRoute: RouteGroup = {
+export const scrollAndSwipeRoute: RouteGroup = {
   name: 'ScrollAndSwipe',
   label: '滚动与滑动',
   children: [
@@ -47,7 +47,7 @@ export const ScrollAndSwipeRoute: RouteGroup = {
 };
 
 @Builder
-export function ScrollAndSwipeDestination(name: string, route: Route) {
+export function scrollAndSwipeDestination(name: string, route: Route) {
   if (name === 'ScrollAndSwipe/List') {
     ListBootcamp({title: route.label})
   }else if (name === 'ScrollAndSwipe/ListItem'){

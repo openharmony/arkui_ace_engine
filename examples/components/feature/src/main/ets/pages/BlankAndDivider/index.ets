@@ -17,7 +17,7 @@ import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { DividerBootcamp } from './DividerBootcamp';
 import { BlankBootcamp } from './BlankBootcamp';
 
-export const BlankAndDividerRoute: RouteGroup = {
+export const blankAndDividerRoute: RouteGroup = {
   name: 'BlankAndDivider',
   label: '空白与分割',
   children: [
@@ -27,7 +27,7 @@ export const BlankAndDividerRoute: RouteGroup = {
 };
 
 @Builder
-export function BlankAndDividerDestination(name: string, route: Route) {
+export function blankAndDividerDestination(name: string, route: Route) {
   if (name === 'BlankAndDivider/divider') {
     DividerBootcamp({ title: route.label })
   } else if (name === 'BlankAndDivider/blank') {

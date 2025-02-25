@@ -22,7 +22,7 @@ import { RowBootcamp } from './RowBootcamp';
 import { StackBootcamp } from './StackBootcamp';
 
 
-export const RowsColumnsAndStackingRoute: RouteGroup = {
+export const rowsColumnsAndStackingRoute: RouteGroup = {
   name: 'RowsColumnsAndStacking',
   label: '行列与堆叠',
   children: [
@@ -36,7 +36,7 @@ export const RowsColumnsAndStackingRoute: RouteGroup = {
 };
 
 @Builder
-export function RowsColumnsAndStackingDestination(name: string, route: Route) {
+export function rowsColumnsAndStackingDestination(name: string, route: Route) {
   if (name === 'RowsColumnsAndStacking/Column') {
       ColumnBootcamp({title: route.label})
   }else if (name === 'RowsColumnsAndStacking/Flex'){

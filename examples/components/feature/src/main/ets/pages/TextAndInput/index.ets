@@ -30,8 +30,8 @@ import { TextInputBootcamp } from './TextInputBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 
 
-export const TextAndInputRoute: RouteGroup = {
-  name: 'TextAndInput',
+export const textAndInputRoute: RouteGroup = {
+  name: 'textAndInput',
   label: '文本与输入',
   children: [
     { name: 'Text', label: '文本显示/Text' },
@@ -53,7 +53,7 @@ export const TextAndInputRoute: RouteGroup = {
 };
 
 @Builder
-export function TextAndInputDestination(name: string, route: Route) {
+export function textAndInputDestination(name: string, route: Route) {
   if (name === 'TextAndInput/Text') {
       TextBootcamp({title: route.label})
   }else if (name === 'TextAndInput/TextArea'){
