@@ -714,6 +714,7 @@ private:
     bool nestedScrolling_ = false;
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
+    bool isSlow_ = false;
 
     RefPtr<AxisAnimator> axisAnimator_;
 #ifdef SUPPORT_DIGITAL_CROWN

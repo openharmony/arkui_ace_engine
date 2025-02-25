@@ -54,8 +54,11 @@ class InspectorFilter;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
+constexpr double SLOW_FRICTION_THRESHOLD = 3000.0;
+constexpr double SLOW_FRICTION = 1.0;
 constexpr double MAX_VELOCITY = 9000.0;
 constexpr double VELOCITY_SCALE = 1.0;
+constexpr double SLOW_VELOCITY_SCALE = 1.2;
 constexpr double NEW_VELOCITY_SCALE = 1.5;
 #else
 constexpr double FRICTION = 0.9;

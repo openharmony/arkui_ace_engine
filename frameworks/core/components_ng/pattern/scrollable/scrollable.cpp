@@ -37,7 +37,10 @@ constexpr uint32_t MULTI_FLING_DISTANCE = 125;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
+constexpr double SLOW_FRICTION_THRESHOLD = 3000.0;
+constexpr double SLOW_FRICTION = 1.0;
 constexpr double VELOCITY_SCALE = 1.0;
+constexpr double SLOW_VELOCITY_SCALE = 1.2;
 constexpr double NEW_VELOCITY_SCALE = 1.5;
 constexpr double ADJUSTABLE_VELOCITY = 3000.0;
 #else
@@ -720,8 +723,9 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar)
 
 void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale, bool isScrollFromTouchPad)
 {
+    auto defaultVelocityScale = isSlow_ ? SLOW_VELOCITY_SCALE : velocityScale;
     double ret = SystemProperties::GetSrollableVelocityScale();
-    velocityScale = !NearZero(ret) ? ret : velocityScale;
+    velocityScale = !NearZero(ret) ? ret : defaultVelocityScale;
     velocityScale = isScrollFromTouchPad ? velocityScale * touchPadVelocityScaleRate_ : velocityScale;
     if (isReverseCallback_ && isReverseCallback_()) {
         currentVelocity_ = -gestureVelocity * velocityScale * GetGain(GetDragOffset());
@@ -754,6 +758,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     isDragUpdateStop_ = false;
     scrollPause_ = false;
     lastGestureVelocity_ = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
+    isSlow_ = LessNotEqual(std::abs(lastGestureVelocity_), SLOW_FRICTION_THRESHOLD);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     lastPos_ = GetDragOffset();
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
@@ -838,8 +843,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
         mainPosition, correctVelocity);
     double frictionTmp = friction_;
     if (NearEqual(friction_, -1.0)) {
+        auto defaultFriction = isSlow_ ? SLOW_FRICTION : defaultFriction_;
         double ret = SystemProperties::GetSrollableFriction();
-        frictionTmp = !NearZero(ret) ? ret : defaultFriction_;
+        frictionTmp = !NearZero(ret) ? ret : defaultFriction;
     }
     float friction = frictionTmp;
     initVelocity_ = correctVelocity;
