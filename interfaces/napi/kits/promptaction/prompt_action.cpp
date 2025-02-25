@@ -1836,6 +1836,8 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
     onWillDismiss = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]
         (const int32_t& info) {
         if (onWillDismissRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillDismissFunc = nullptr;
             napi_value value = nullptr;
             napi_value funcValue = nullptr;
@@ -1849,6 +1851,7 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
             napi_set_named_property(env, paramObj, "reason", value);
             napi_get_reference_value(env, onWillDismissRef, &onWillDismissFunc);
             napi_call_function(env, nullptr, onWillDismissFunc, 1, &paramObj, nullptr);
+            napi_close_handle_scope(env, scope);
         }
     };
 }
@@ -1857,34 +1860,46 @@ PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<
 {
     auto onDidAppear = [env = asyncContext->env, onDidAppearRef = asyncContext->onDidAppearRef]() {
         if (onDidAppearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onDidAppearFunc = nullptr;
             napi_get_reference_value(env, onDidAppearRef, &onDidAppearFunc);
             napi_call_function(env, nullptr, onDidAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidAppearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onDidDisappear = [env = asyncContext->env, onDidDisappearRef = asyncContext->onDidDisappearRef]() {
         if (onDidDisappearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onDidDisappearFunc = nullptr;
             napi_get_reference_value(env, onDidDisappearRef, &onDidDisappearFunc);
             napi_call_function(env, nullptr, onDidDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidDisappearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillAppear = [env = asyncContext->env, onWillAppearRef = asyncContext->onWillAppearRef]() {
         if (onWillAppearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillAppearFunc = nullptr;
             napi_get_reference_value(env, onWillAppearRef, &onWillAppearFunc);
             napi_call_function(env, nullptr, onWillAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillAppearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillDisappear = [env = asyncContext->env, onWillDisappearRef = asyncContext->onWillDisappearRef]() {
         if (onWillDisappearRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             napi_value onWillDisappearFunc = nullptr;
             napi_get_reference_value(env, onWillDisappearRef, &onWillDisappearFunc);
             napi_call_function(env, nullptr, onWillDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillDisappearRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     PromptDialogAttr promptDialogAttr = {
