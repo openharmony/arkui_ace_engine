@@ -26,4 +26,14 @@ namespace OHOS::Ace {
         return realpath(fileName.c_str(), realPath) != nullptr;
 #endif
 }
+
+double RoundToMaxPrecision(double value)
+{
+    int precision = std::numeric_limits<double>::digits10;
+    double factor = std::pow(10, precision - 2);
+    if (NearZero(factor)) {
+        return value;
+    }
+    return std::round(value * factor) / factor;
+}
 }
