@@ -13736,7 +13736,7 @@ const ArkUI_AttributeItem* GetWaterFlowNodeAdapter(ArkUI_NodeHandle node)
 int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1) {
+    if (item->size < NUM_1) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
@@ -13744,6 +13744,11 @@ int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
+    ArkUI_Bool isShown = DEFAULT_FALSE;
+    if (item->size > NUM_1 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+        isShown = item->value[1].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setShowCached(node->uiNodeHandle, isShown);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -13751,14 +13756,16 @@ void ResetWaterFlowCachedCount(ArkUI_NodeHandle node)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetShowCached(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetWaterFlowCachedCount(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getCachedCount(node->uiNodeHandle);
+    ArkUI_Int32 isShown = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getShowCached(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
+    g_numberValues[1].i32 = isShown;
     return &g_attributeItem;
 }
 
