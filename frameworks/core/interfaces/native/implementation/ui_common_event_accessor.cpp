@@ -39,7 +39,7 @@ void SetOnClickImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnClick = callback_ ? Converter::OptConvert<Callback_ClickEvent_Void>(*callback_) : std::nullopt;
     
     std::function<void(GestureEvent&)> onClick = nullptr;
@@ -57,7 +57,7 @@ void SetOnTouchImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnTouch = callback_ ? Converter::OptConvert<Callback_TouchEvent_Void>(*callback_) : std::nullopt;
     std::function<void(TouchEventInfo&)> onTouch = nullptr;
     if (arkOnTouch) {
@@ -74,7 +74,7 @@ void SetOnAppearImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnAppear = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
     std::function<void()> onAppear = nullptr;
     if (arkOnAppear) {
@@ -90,7 +90,7 @@ void SetOnDisappearImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnDisAppear = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
     std::function<void()> onDisAppear = nullptr;
     if (arkOnDisAppear) {
@@ -110,7 +110,7 @@ void SetOnFocusImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnFocus = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
     std::function<void()> onFocus = nullptr;
     if (arkOnFocus) {
@@ -126,7 +126,7 @@ void SetOnBlurImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnBlur = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
     std::function<void()> onBlur = nullptr;
     if (arkOnBlur) {
@@ -142,7 +142,7 @@ void SetOnHoverImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnHover = callback_ ? Converter::OptConvert<HoverCallback>(*callback_) : std::nullopt;
     std::function<void(bool, HoverInfo&)> onHover = nullptr;
     if (arkOnHover) {
@@ -160,7 +160,7 @@ void SetOnMouseImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnMouse = callback_ ? Converter::OptConvert<Callback_MouseEvent_Void>(*callback_) : std::nullopt;
     std::function<void(MouseInfo&)> onMouse = nullptr;
     if (arkOnMouse) {
@@ -183,7 +183,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_UICommonEvent peer,
     CHECK_NULL_VOID(options);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = AceType::RawPtr(refPtr);
     auto arkOnVisibleChange = event ? Converter::OptConvert<VisibleAreaChangeCallback>(*event) : std::nullopt;
     CHECK_NULL_VOID(arkOnVisibleChange);
     std::function<void(bool, double)> onVisibleChange = nullptr;
