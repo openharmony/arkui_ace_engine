@@ -2407,7 +2407,7 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
         if (!menuItemPattern) {
             continue;
         }
-        menuItemPattern->HideEmbedded();
+        menuItemPattern->HideEmbedded(false);
     }
     wrapperPattern->HideSubMenu();
     menuWrapperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);

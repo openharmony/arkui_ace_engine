@@ -802,7 +802,7 @@ void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
     }
 }
 
-void MenuItemPattern::HideEmbedded()
+void MenuItemPattern::HideEmbedded(bool isNeedAnimation)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -812,7 +812,7 @@ void MenuItemPattern::HideEmbedded()
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     CHECK_NULL_VOID(embeddedMenu_);
-    HideEmbeddedExpandMenu(embeddedMenu_);
+    HideEmbeddedExpandMenu(embeddedMenu_, isNeedAnimation);
     embeddedMenu_ = nullptr;
     menuPattern->SetShowedSubMenu(nullptr);
     menuPattern->RemoveEmbeddedMenuItem(host);
@@ -957,7 +957,7 @@ void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expanda
     menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
 }
 
-void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
+void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode, bool isNeedAnimation)
 {
     CHECK_NULL_VOID(expandableNode);
     auto host = GetHost();
@@ -971,10 +971,12 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(expandableAreaContext);
 
     AnimationOption option = AnimationOption();
-    auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
-    option.SetCurve(rotateOption);
-    RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
-    expandableAreaContext->UpdateChainedTransition(opacity);
+    if (isNeedAnimation) {
+        auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
+        option.SetCurve(rotateOption);
+        RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
+        expandableAreaContext->UpdateChainedTransition(opacity);
+    }
     MenuRemoveChild(expandableNode, menuFocusType_ == MENU_FOCUS_TYPE);
 
     AnimationUtils::Animate(option, [host, expandableNode, menuWrapperPattern]() {
