@@ -249,7 +249,7 @@ class __Repeat<T> implements RepeatAPI<T> {
             this.impl.render(this.config, isInitialRender);
             return;
         }
-        if (Utils.getApiVersion() < 16) {
+        if (!Utils.isApiVersionEQAbove(16)) {
             // RepeatVirtualScroll
             this.impl ??= new __RepeatVirtualScrollImpl<T>();
             this.impl.render(this.config, isInitialRender);
