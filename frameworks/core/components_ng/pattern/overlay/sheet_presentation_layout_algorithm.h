@@ -106,7 +106,8 @@ private:
     float GetHeightByScreenSizeType(const SizeF& maxSize) const;
     float GetHeightBySheetStyle() const;
     bool SheetInSplitWindow() const;
-    LayoutConstraintF CreateSheetChildConstraint(RefPtr<SheetPresentationProperty> layoutprop);
+    LayoutConstraintF CreateSheetChildConstraint(
+        RefPtr<SheetPresentationProperty> layoutprop, LayoutWrapper* layoutWrapper);
     float arrowOffsetX_ = 0.0f; // reletive to SheetOffsetX
     float sheetHeight_ = 0.0f;
     float sheetWidth_ = 0.0f;

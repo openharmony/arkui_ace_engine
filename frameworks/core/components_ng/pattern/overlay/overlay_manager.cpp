@@ -4468,7 +4468,7 @@ void OverlayManager::PlaySheetTransition(
                 auto overlay = weak.Upgrade();
                 CHECK_NULL_VOID(overlay);
                 pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
-                pattern->FireOnHeightDidChange(overlay->sheetHeight_);
+                pattern->FireOnHeightDidChange();
             });
         ACE_SCOPED_TRACE("Sheet start admission");
         AnimationUtils::Animate(
@@ -4631,16 +4631,11 @@ void OverlayManager::UpdateSheetRender(
 void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
     NG::SheetStyle& currentStyle, bool isPartialUpdate)
 {
-    auto pipeline = sheetNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
     UpdateSheetRender(sheetNode, currentStyle, isPartialUpdate);
     auto maskNode = GetSheetMask(sheetNode);
     if (maskNode) {
         UpdateSheetMask(maskNode, sheetNode, currentStyle, isPartialUpdate);
     }
-    sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    pipeline->FlushUITasks();
-    ComputeSheetOffset(currentStyle, sheetNode);
 }
 
 void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
@@ -4679,6 +4674,13 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
         UpdateSheetProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
     sheetNode->MarkModifyDone();
+
+    auto pipeline = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    pipeline->FlushUITasks();
+    ComputeSheetOffset(sheetStyle, sheetNode);
+
     auto sheetType = sheetNodePattern->GetSheetType();
     if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess() &&
         sheetNodePattern->GetIsPlayTransition()) {
@@ -4929,9 +4931,8 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
     CHECK_NULL_VOID(sheetPattern);
     if (isTransitionIn) {
         sheetPattern->ResetToInvisible();
-        sheetPattern->SetCurrentHeight(sheetHeight_);
         sheetPattern->StartOffsetEnteringAnimation();
-        sheetPattern->FireOnHeightDidChange(sheetHeight_);
+        sheetPattern->FireCommonCallback();
         sheetPattern->StartAlphaEnteringAnimation([sheetWK = WeakClaim(RawPtr(sheetNode))] {
             auto sheet = sheetWK.Upgrade();
             CHECK_NULL_VOID(sheet);

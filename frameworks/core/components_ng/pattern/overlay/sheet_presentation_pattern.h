@@ -176,7 +176,7 @@ public:
         }
     }
 
-    void FireOnHeightDidChange(float height);
+    void FireOnHeightDidChange();
 
     bool HasOnHeightDidChange()
     {
@@ -668,6 +668,8 @@ public:
     {
         return isPlayTransition_;
     }
+
+    void FireCommonCallback();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
