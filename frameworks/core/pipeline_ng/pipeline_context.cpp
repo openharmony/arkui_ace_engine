@@ -85,6 +85,18 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension CARET_AVOID_OFFSET = 24.0_vp;
 
+void ShouldAddToHistory (
+    std::vector<TouchEvent>& history, const TouchEvent& event, const TouchEvent& movePoint)
+{
+#ifdef ARKUI_WEARABLE
+    if (event.x != movePoint.x || event.y != movePoint.y) {
+        history.emplace_back(movePoint);
+    }
+#else
+    history.emplace_back(movePoint);
+#endif
+}
+
 int32_t GetDepthFromParams(const std::vector<std::string>& params)
 {
     int32_t depth = 0;
@@ -2826,7 +2838,7 @@ bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEve
         for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (event.id == movePoint.id) {
-                history.emplace_back(movePoint);
+                ShouldAddToHistory(history, event, movePoint);
                 iter = touchEvents_.erase(iter);
             } else {
                 auto& pointers = iter->pointers;
@@ -2847,7 +2859,7 @@ bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEve
             eventManager_->DispatchTouchEvent(lastMoveEvent);
             eventManager_->SetLastMoveBeforeUp(false);
         } else {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
                 "Finger id: %{public}d, not found unhandled move event, compensate failed.", event.id);
         }
         return true;
