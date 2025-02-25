@@ -856,6 +856,9 @@ public:
     void setIsMoving(bool isMoving)
     {
         isMoving_ = isMoving;
+        for (auto& child : children_) {
+            child->setIsMoving(isMoving);
+        }
     }
 
     bool isCrossLanguageAttributeSetting() const

@@ -593,6 +593,24 @@ void SessionWrapperImpl::InitAllCallback()
     InitNotifyExtensionEventFunc();
     InitGetStatusBarHeightFunc();
 }
+
+void SessionWrapperImpl::UpdateInstanceId(int32_t instanceId)
+{
+    if (instanceId_ == instanceId) {
+        UIEXT_LOGW("InstanceId(%{public}d) has not changed when UpdateInstanceId.", instanceId);
+        return;
+    }
+
+    UIEXT_LOGI("Update instanceId %{public}d to %{public}d.", instanceId_, instanceId);
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    instanceId_ = instanceId;
+    taskExecutor_ = taskExecutor;
+    InitAllCallback();
+    UIEXT_LOGI("Update instanceId success.");
+}
 /************************************************ End: Initialization *************************************************/
 
 /************************************************ Begin: About session ************************************************/

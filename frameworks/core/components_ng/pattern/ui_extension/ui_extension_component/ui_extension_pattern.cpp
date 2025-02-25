@@ -220,6 +220,143 @@ RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionA
     return accessibilitySessionAdapter_;
 }
 
+void UIExtensionPattern::OnAttachToMainTree()
+{
+    UIEXT_LOGI("OnAttachToMainTree, isMoving: %{public}d", IsMoving());
+}
+
+void UIExtensionPattern::OnDetachFromMainTree()
+{
+    UIEXT_LOGI("OnDetachFromMainTree, isMoving: %{public}d", IsMoving());
+}
+
+void UIExtensionPattern::OnAttachContext(PipelineContext *context)
+{
+    CHECK_NULL_VOID(context);
+    auto newInstanceId = context->GetInstanceId();
+    bool isMoving = IsMoving();
+    UIEXT_LOGI("OnAttachContext newInstanceId: %{public}d, oldInstanceId: %{public}d,"
+        " isMoving: %{public}d.", newInstanceId, instanceId_, isMoving);
+    if (newInstanceId != instanceId_) {
+        UnRegisterEvent(instanceId_);
+        RegisterEvent(newInstanceId);
+        instanceId_ = newInstanceId;
+        UpdateSessionInstanceId(newInstanceId);
+    }
+}
+
+void UIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
+{
+    auto sessionWrapperImpl = AceType::DynamicCast<SessionWrapperImpl>(sessionWrapper_);
+    if (!sessionWrapperImpl) {
+        UIEXT_LOGW("DynamicCast failed, sessionWrapperImpl is nullptr");
+        return;
+    }
+
+    sessionWrapperImpl->UpdateInstanceId(instanceId);
+}
+
+void UIExtensionPattern::RegisterEvent(int32_t instanceId)
+{
+    RegisterUIExtensionManagerEvent(instanceId);
+    RegisterPipelineEvent(instanceId);
+    hasDetachContext_ = false;
+}
+
+void UIExtensionPattern::RegisterPipelineEvent(int32_t instanceId)
+{
+    ContainerScope scope(instanceId);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(pipeline);
+    RegisterPipelineEvent(pipeline);
+}
+
+void UIExtensionPattern::RegisterUIExtensionManagerEvent(int32_t instanceId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    // 1. Add alive uec in uiExtensionManager
+    uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
+
+    // 2. Add focus uec in uiExtensionManager
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    bool isFocusd = focusHub && focusHub->IsCurrentFocus();
+    if (isFocusd) {
+        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
+    }
+    UIEXT_LOGI("RegisterUIExtensionManagerEvent");
+}
+
+void UIExtensionPattern::OnDetachContext(PipelineContext *context)
+{
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("InstanceId(%{public}d) is inconsistent with the exist Id(%{public}d),",
+            instanceId, instanceId_);
+        return;
+    }
+
+    bool isMoving = IsMoving();
+    UIEXT_LOGI("OnDetachContext instanceId: %{public}d, isMoving: %{public}d,"
+        " isOnDetachContext: %{public}d.", instanceId, isMoving, hasDetachContext_);
+    if (!isMoving && !hasDetachContext_) {
+        UnRegisterEvent(instanceId);
+    }
+}
+
+void UIExtensionPattern::UnRegisterEvent(int32_t instanceId)
+{
+    UnRegisterUIExtensionManagerEvent(instanceId);
+    UnRegisterPipelineEvent(instanceId);
+    hasDetachContext_ = true;
+}
+
+void UIExtensionPattern::UnRegisterPipelineEvent(int32_t instanceId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(pipeline);
+    ContainerScope scope(instanceId);
+    UnRegisterPipelineEvent(pipeline, AceType::RawPtr(host));
+}
+
+void UIExtensionPattern::UnRegisterUIExtensionManagerEvent(int32_t instanceId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    // 1. Delete alive uec in uiExtensionManager
+    uiExtensionManager->RemoveDestroyedUIExtension(GetNodeId());
+
+    // 2. Delete focus uec in uiExtensionManager
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    bool isFocusd = focusHub && focusHub->IsCurrentFocus();
+    if (isFocusd) {
+        uiExtensionManager->RegisterUIExtensionInFocus(nullptr, nullptr);
+    }
+    UIEXT_LOGI("UnRegisterUIExtensionManagerEvent");
+}
+
+bool UIExtensionPattern::IsMoving()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return host->IsMoving();
+}
+
 void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     if (!wantWrap) {
@@ -714,6 +851,16 @@ void UIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
+    RegisterPipelineEvent(pipeline);
+    UIEXT_LOGI("OnAttachToFrameNode");
+}
+
+void UIExtensionPattern::RegisterPipelineEvent(
+    const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
@@ -753,7 +900,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
     accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
         accessibilitySAObserverCallback_);
 #endif
-    UIEXT_LOGI("OnAttachToFrameNode");
+    UIEXT_LOGI("RegisterPipelineEvent");
 }
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -763,6 +910,15 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     ContainerScope scope(instanceId_);
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
+    UnRegisterPipelineEvent(pipeline, frameNode);
+}
+
+void UIExtensionPattern::UnRegisterPipelineEvent(
+    const RefPtr<PipelineContext>& pipeline, FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(frameNode);
+    auto id = frameNode->GetId();
     pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveWindowStateChangedCallback(id);
@@ -774,6 +930,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
 #endif
+    UIEXT_LOGI("UnRegisterPipelineEvent");
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -1546,6 +1703,11 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
 
 void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
 {
+    if (IsMoving()) {
+        UIEXT_LOGI("HandleVisibleAreaChange when uec is moving.");
+        return;
+    }
+
     UIEXT_LOGI("HandleVisibleAreaChange visible: %{public}d, curVisible: %{public}d, "
         "ratio: %{public}f, displayArea: %{public}s.", visible, curVisible_,
         ratio, displayArea_.ToString().c_str());
