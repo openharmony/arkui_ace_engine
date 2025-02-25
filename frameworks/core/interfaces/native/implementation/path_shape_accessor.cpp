@@ -16,17 +16,18 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "path_shape_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PathShapeAccessor {
 void DestroyPeerImpl(Ark_PathShape peer)
 {
+    delete peer;
 }
 Ark_PathShape CtorImpl(const Opt_PathShapeOptions* options)
 {
-    auto peerImpl = Referenced::MakeRefPtr<PathShapePeerImpl>();
-    peerImpl->IncRefCount();
-    return reinterpret_cast<PathShapePeer*>(Referenced::RawPtr(peerImpl));
+    auto optOptions = options ? Converter::OptConvert<PathShapeOptions>(*options) : std::nullopt;
+    return new PathShapePeerImpl(optOptions.value_or(PathShapeOptions{}));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,22 +36,56 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_PathShape OffsetImpl(Ark_PathShape peer,
                          const Ark_Position* offset)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    if (!offset) {
+        peer->ResetOffset();
+        return peer;
+    }
+    peer->SetOffset(Converter::Convert<PathShapePosition>(*offset));
+    return peer;
 }
 Ark_PathShape FillImpl(Ark_PathShape peer,
                        const Ark_ResourceColor* color)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    if (!color) {
+        peer->ResetFill();
+        return peer;
+    }
+    auto optColor = Converter::OptConvert<Color>(*color);
+    if (!optColor.has_value()) {
+        peer->ResetFill();
+        return peer;
+    }
+    peer->SetFill(optColor.value());
+    return peer;
 }
 Ark_PathShape PositionImpl(Ark_PathShape peer,
                            const Ark_Position* position)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    if (!position) {
+        peer->ResetPosition();
+        return peer;
+    }
+    peer->SetPosition(Converter::Convert<PathShapePosition>(*position));
+    return peer;
 }
 Ark_PathShape CommandsImpl(Ark_PathShape peer,
                            const Ark_String* commands)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    if (!commands) {
+        peer->ResetCommands();
+        return peer;
+    }
+    auto optOptions = commands ? Converter::OptConvert<std::string>(*commands) : std::nullopt;
+    if (!optOptions.has_value()) {
+        peer->ResetCommands();
+        return peer;
+    }
+    peer->SetCommands(optOptions.value_or(""));
+    return peer;
 }
 } // PathShapeAccessor
 const GENERATED_ArkUIPathShapeAccessor* GetPathShapeAccessor()
@@ -67,7 +102,4 @@ const GENERATED_ArkUIPathShapeAccessor* GetPathShapeAccessor()
     return &PathShapeAccessorImpl;
 }
 
-struct PathShapePeer {
-    virtual ~PathShapePeer() = default;
-};
 }
