@@ -24,7 +24,9 @@ void DestroyPeerImpl(Ark_PathShape peer)
 }
 Ark_PathShape CtorImpl(const Opt_PathShapeOptions* options)
 {
-    return {};
+    auto peerImpl = Referenced::MakeRefPtr<PathShapePeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<PathShapePeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
