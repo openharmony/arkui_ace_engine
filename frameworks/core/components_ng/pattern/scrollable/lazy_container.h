@@ -59,7 +59,9 @@ protected:
      */
     bool UpdateOffset(float delta);
 
-    void RequestJump(int32_t idx, ScrollAlign align, float extraOffset);
+    void RequestJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+
+    void RequestFillToTarget(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
 
     /**
      * @brief Should call when layout data needs to be cleared and re-calculated

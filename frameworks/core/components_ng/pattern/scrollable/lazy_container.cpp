@@ -81,4 +81,11 @@ void LazyContainer::RequestReset(int32_t idx)
         adapter_->PrepareReset(idx);
     }
 }
+
+void LazyContainer::RequestFillToTarget(int32_t idx, ScrollAlign align, float extraOffset)
+{
+    if (adapter_) {
+        adapter_->PrepareLoadToTarget(idx, align, extraOffset);
+    }
+}
 } // namespace OHOS::Ace::NG

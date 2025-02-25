@@ -154,9 +154,10 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 
     if (jumpIndex_) {
         algo->SetJumpIndex(jumpIndex_.value());
-        RequestJump(*jumpIndex_, ScrollAlign::START, 0.0f);
+        RequestJump(*jumpIndex_);
     } else if (targetIndex_) {
         algo->SetTargetIndex(targetIndex_.value());
+        RequestFillToTarget(*targetIndex_);
     }
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);

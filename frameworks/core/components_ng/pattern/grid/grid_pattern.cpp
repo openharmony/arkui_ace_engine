@@ -94,7 +94,9 @@ void GridPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(host);
     info_.childrenCount_ = host->GetTotalChildCount();
     if (info_.jumpIndex_ != EMPTY_JUMP_INDEX) {
-        RequestJump(info_.jumpIndex_, info_.scrollAlign_, info_.extraOffset_.value_or(0.0f));
+        RequestJump(info_.jumpIndex_, info_.scrollAlign_, GetExtraOffset().value_or(0.0f));
+    } else if (targetIndex_) {
+        RequestFillToTarget(*targetIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
     }
 }
 

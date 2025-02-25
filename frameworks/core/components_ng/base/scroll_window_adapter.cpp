@@ -50,6 +50,10 @@ void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extr
 
 void ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align, float extraOffset)
 {
+    if (target_ && targetIdx == target_->index) {
+        target_.reset(); // prevent loop and good timing to reset target_
+        return;
+    }
     target_ = std::make_unique<PendingJump>(targetIdx, align, extraOffset);
     RequestRecompose(markIndex_);
 }
@@ -186,9 +190,9 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
         jumpPending_.reset();
     } else if (target_) {
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
-            scroll->ScrollToIndex(markIndex_, true, target_->align, target_->extraOffset);
+            scroll->ScrollToIndex(target_->index, true, target_->align, target_->extraOffset);
         } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
-            swiper->ChangeIndex(markIndex_, false);
+            swiper->ChangeIndex(target_->index, true);
         }
     }
 }
@@ -232,7 +236,7 @@ RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
     return Claim(GetChildPtrByIndex(index));
 }
 
-bool ScrollWindowAdapter::FillToTarget(FillDirection direction, int32_t curIdx)
+bool ScrollWindowAdapter::FillToTarget(FillDirection direction, int32_t curIdx) const
 {
     if (!target_) {
         return true;
@@ -241,7 +245,6 @@ bool ScrollWindowAdapter::FillToTarget(FillDirection direction, int32_t curIdx)
         return false;
     }
     if (curIdx == target_->index) {
-        target_.reset();
         return true;
     }
     return true;

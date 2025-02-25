@@ -97,7 +97,7 @@ private:
      * @brief Determine if more items can be filled in @c direction to reach targetIdx_
      * @return true if need to stop filling in @c direction
      */
-    bool FillToTarget(FillDirection direction, int32_t curIdx);
+    bool FillToTarget(FillDirection direction, int32_t curIdx) const;
 
     SizeF size_ = { 0.0f, 0.0f };
     RefPtr<FillAlgorithm> fillAlgorithm_;
