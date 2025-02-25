@@ -130,7 +130,7 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
     static const LinearMapNode<void (*)(const std::string&, SvgMaskAttribute&)> attrs[] = {
         { SVG_HEIGHT,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.height = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.height);
             } },
         { SVG_MASK_CONTENT_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
@@ -144,15 +144,15 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.width = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.width);
             } },
         { SVG_X,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.x = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.x);
             } },
         { SVG_Y,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.y = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.y);
             } },
     };
     std::string key = name;

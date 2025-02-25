@@ -134,7 +134,7 @@ bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::s
             } },
         { SVG_HEIGHT,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.height = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.height);
             } },
         { SVG_PRIMITIVE_UNITS,
             [](const std::string& val, SvgFilterAttribute& attr) {
@@ -143,15 +143,15 @@ bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::s
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.width = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.width);
             } },
         { SVG_X,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.x = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.x);
             } },
         { SVG_Y,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.y = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.y);
             } },
     };
     std::string key = name;
