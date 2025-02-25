@@ -306,7 +306,7 @@ void MagnifierController::CreateMagnifierChildNode()
     CHECK_NULL_VOID(textBasePattern);
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTINPUT_ETS_TAG, nodeId);
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::MAGNIFIER_TAG, nodeId);
     auto childNode = FrameNode::GetOrCreateFrameNode(V2::MAGNIFIER_TAG, nodeId,
         [weak = WeakClaim(Referenced::RawPtr(textBasePattern))]() {
             auto textBase = weak.Upgrade();

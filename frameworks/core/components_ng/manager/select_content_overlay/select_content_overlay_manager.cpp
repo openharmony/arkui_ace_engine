@@ -545,7 +545,7 @@ void SelectContentOverlayManager::MountNodeToRoot(
     std::vector<std::string> nodeTags = {
         V2::KEYBOARD_ETS_TAG, // keep handle and menu node before keyboard node
         V2::SELECT_OVERLAY_ETS_TAG, // keep handle node before menu node
-        V2::TEXTINPUT_ETS_TAG, // keep handle and menu node before magnifier
+        V2::MAGNIFIER_TAG, // keep handle and menu node before magnifier
         V2::SHEET_WRAPPER_TAG // keep handle and menu node before SheetWrapper
     };
     for (auto it = slotIt; it != children.end(); ++it) {
