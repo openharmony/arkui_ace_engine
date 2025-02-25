@@ -24,7 +24,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-const auto ANTIALIAS_DEFAULT_VALUE = Converter::ArkValue<Opt_Boolean>(false);
+const auto ANTIALIAS_DEFAULT_VALUE = Converter::ArkValue<Ark_Boolean>(false);
 } // namespace
 
 class RenderingContextSettingsAccessorTest
@@ -34,7 +34,8 @@ public:
     void SetUp(void) override
     {
         ASSERT_NE(accessor_->ctor, nullptr);
-        peer_ = accessor_->ctor(&ANTIALIAS_DEFAULT_VALUE);
+        auto optValue = Converter::ArkValue<Opt_Boolean>(ANTIALIAS_DEFAULT_VALUE);
+        peer_ = accessor_->ctor(&optValue);
         ASSERT_NE(peer_, nullptr);
         AccessorTestBaseParent::SetUp();
     }
@@ -42,8 +43,38 @@ public:
     void TearDown() override
     {
         AccessorTestBaseParent::TearDown();
+        RenderingContextSettingsPeer::Destroy(peer_);
     }
 };
+
+/**
+ * @tc.name: ctorRenderingContextSettingsPeerTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderingContextSettingsAccessorTest, ctorRenderingContextSettingsPeerTest, TestSize.Level1)
+{
+    for (const auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
+        RenderingContextSettingsPeer::Destroy(peer_);
+        auto optValue = Converter::ArkValue<Opt_Boolean>(value);
+        peer_ = accessor_->ctor(&optValue);
+        ASSERT_NE(peer_, nullptr);
+        auto result = accessor_->getAntialias(peer_);
+        EXPECT_EQ(result, expected) << "Input value is: "
+            << input << ", method: GetRepeat";
+    }
+    RenderingContextSettingsPeer::Destroy(peer_);
+    auto optValue = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+    peer_ = accessor_->ctor(&optValue);
+    auto result = accessor_->getAntialias(peer_);
+    EXPECT_EQ(result, ANTIALIAS_DEFAULT_VALUE)
+        << "Input value is: empty, method: GetRepeat";
+    RenderingContextSettingsPeer::Destroy(peer_);
+    peer_ = accessor_->ctor(nullptr);
+    result = accessor_->getAntialias(peer_);
+    EXPECT_EQ(result, ANTIALIAS_DEFAULT_VALUE)
+        << "Input value is: nullptr, method: GetRepeat";
+}
 
 /**
  * @tc.name: getAntialiasTest
