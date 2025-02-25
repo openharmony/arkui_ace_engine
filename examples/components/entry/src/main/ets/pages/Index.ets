@@ -26,7 +26,7 @@ import { TextAndInputDestination, TextAndInputRoute } from 'feature/src/main/ets
 import { ImagesAndVideosDestination, ImagesAndVideosRoute } from 'feature/src/main/ets/pages/ImagesAndVideos'
 import { InformationDisplayDestination, InformationDisplayRoute } from 'feature/src/main/ets/pages/InformationDisplay'
 import { MenusDestination, MenusRoute } from 'feature/src/main/ets/pages/Menus'
-
+import { DialogBoxesDestination, DialogBoxesRoute } from 'feature/src/main/ets/pages/DialogBoxes'
 @Styles
 function CardPressedStyle() {
   .backgroundColor('rgba(0,0,0,0.1)')
@@ -71,6 +71,8 @@ function Destination(name: string, route: Route) {
     InformationDisplayDestination(name, route)
   }else if (name.startsWith('Menus/')){
     MenusDestination(name, route)
+  }else if (name.startsWith('DialogBoxes/')){
+    DialogBoxesDestination(name, route)
   }
 }
 
@@ -88,7 +90,8 @@ struct Index {
     TextAndInputRoute,
     ImagesAndVideosRoute,
     InformationDisplayRoute,
-    MenusRoute
+    MenusRoute,
+    DialogBoxesRoute
   ];
   @State selection: string | null = null;
 

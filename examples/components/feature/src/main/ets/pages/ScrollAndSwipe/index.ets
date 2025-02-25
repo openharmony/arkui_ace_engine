@@ -29,7 +29,7 @@ import { WaterFlowBootcamp } from './WaterFlowBootcamp';
 
 export const ScrollAndSwipeRoute: RouteGroup = {
   name: 'ScrollAndSwipe',
-  label: '滚动于滑动',
+  label: '滚动与滑动',
   children: [
     { name: 'List', label: '列表/List' },
     { name: 'ListItem', label: '列表选项/ListItem' },
