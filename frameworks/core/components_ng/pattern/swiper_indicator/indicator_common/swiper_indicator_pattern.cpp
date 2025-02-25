@@ -620,12 +620,12 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
 
     auto [start, end] = CalMouseClickIndexStartAndEnd(itemCount, currentIndex);
     for (int32_t i = start; (start > end ? i > end : i < end); start > end ? i -= step : i += step) {
+        if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
+            hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
+            mouseClickIndex_ = i;
+            break;
+        }
         if (i != currentIndex) {
-            if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
-                hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
-                mouseClickIndex_ = i;
-                break;
-            }
             centerX += itemWidth + space;
         } else {
             centerX += selectedItemWidth + space;
@@ -1409,13 +1409,9 @@ void SwiperIndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)
     CHECK_NULL_VOID(swiperPattern);
     if (swiperPattern->IsSwipeByGroup()) {
         auto clickPageIndex = SwiperUtils::ComputePageIndex(mouseClickIndex.value(), swiperPattern->GetDisplayCount());
-        if (clickPageIndex == swiperPattern->GetCurrentIndex()) {
-            mouseClickIndex_ = std::nullopt;
-            return;
-        }
         mouseClickIndex_ = clickPageIndex;
     }
-    swiperPattern->SwipeTo(mouseClickIndex.value());
+    swiperPattern->SwipeTo(mouseClickIndex_.value());
 }
 
 std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalculateStepAndItemCountDefault() const
