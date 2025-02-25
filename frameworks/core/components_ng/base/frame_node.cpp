@@ -3113,7 +3113,7 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-    auto offset = GetPositionToScreen();
+    auto offset = GetPositionToScreenWithTransform();
     if (gestureHub->GetResponseRegion().empty()) {
         RectF rectToScreen{round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height())};
         responseRegionList.emplace_back(rectToScreen);
@@ -3144,7 +3144,7 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto offset = GetPositionToScreen();
+    auto offset = GetPositionToScreenWithTransform();
     RectF rectToScreen{offset.GetX(), offset.GetY(), origRect.Width(), origRect.Height()};
     auto window = pipelineContext->GetCurrentWindowRect();
     RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
