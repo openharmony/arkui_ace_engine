@@ -185,7 +185,11 @@ void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItem
     CHECK_NULL_VOID(subMenuPattern);
     auto currentHoverMenuItem = subMenuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(currentHoverMenuItem);
-
+    auto geometryNode = subMenuNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto offset = subMenuNode->GetPaintRectOffset(false, true);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto menuZone = RectF(offset.GetX(), offset.GetY(), frameSize.Width(), frameSize.Height());
     auto menuItemNode = menuItemPattern->GetHost();
     CHECK_NULL_VOID(menuItemNode);
     if (currentHoverMenuItem->GetId() != menuItemNode->GetId()) {
@@ -194,11 +198,19 @@ void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItem
     const auto& mousePosition = info.GetGlobalLocation();
     if (!menuItemPattern->IsInHoverRegions(mousePosition.GetX(), mousePosition.GetY()) &&
         menuItemPattern->IsSubMenuShowed()) {
-        HideSubMenu();
-        menuItemPattern->OnHover(false);
-        menuItemPattern->SetIsSubMenuShowed(false);
-        menuItemPattern->ClearHoverRegions();
-        menuItemPattern->ResetWrapperMouseEvent();
+        menuItemPattern->CheckHideSubMenu(
+            [weak = WeakClaim(this), weakSubMenu = WeakClaim(RawPtr(subMenuNode))] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto subMenu = weakSubMenu.Upgrade();
+                CHECK_NULL_VOID(subMenu);
+                if (subMenu == pattern->GetShowedSubMenu()) {
+                    pattern->HideSubMenu();
+                }
+            },
+            PointF(mousePosition.GetX(), mousePosition.GetY()), menuZone);
+    } else {
+        menuItemPattern->CancelHideSubMenuTask(PointF(mousePosition.GetX(), mousePosition.GetY()));
     }
 }
 

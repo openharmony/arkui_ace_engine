@@ -66,8 +66,6 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
-constexpr int32_t TARGET_ID = 3;
-constexpr MenuType TYPE = MenuType::MENU;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
 const std::string MENU_TAG = "menu";
@@ -84,6 +82,9 @@ constexpr float MENU_SIZE_HEIGHT = 150.0f;
 constexpr double MENU_OFFSET_X = 10.0;
 constexpr double MENU_OFFSET_Y = 10.0;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
+constexpr float TWENTY = 20.0f;
+constexpr float ZERO = 0.0f;
+constexpr float FOUR = 4.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
 const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "content2", "" },
@@ -97,9 +98,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    void InitSubMenuTestNg();
-    void InitMenuItemTestNg();
-    void MockPipelineContextGetTheme();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
@@ -117,17 +115,11 @@ void SubMenuTestNg::TearDownTestCase() {}
 void SubMenuTestNg::SetUp()
 {
     MockPipelineContext::SetUp();
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MockContainer::SetUp();
-}
-
-void SubMenuTestNg::MockPipelineContextGetTheme()
-{
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    RefPtr<MenuTheme> menuTheme_ = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([menuTheme_](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -135,7 +127,7 @@ void SubMenuTestNg::MockPipelineContextGetTheme()
         } else if (type == SelectTheme::TypeId()) {
             return AceType::MakeRefPtr<SelectTheme>();
         } else {
-            return AceType::MakeRefPtr<MenuTheme>();
+            return menuTheme_;
         }
     });
 }
@@ -152,29 +144,6 @@ void SubMenuTestNg::TearDown()
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
     MockContainer::TearDown();
-}
-
-void SubMenuTestNg::InitSubMenuTestNg()
-{
-    menuFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
-    ASSERT_NE(menuFrameNode_, nullptr);
-
-    menuAccessibilityProperty_ = menuFrameNode_->GetAccessibilityProperty<MenuAccessibilityProperty>();
-    ASSERT_NE(menuAccessibilityProperty_, nullptr);
-}
-
-void SubMenuTestNg::InitMenuItemTestNg()
-{
-    menuItemFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
-    ASSERT_NE(menuItemFrameNode_, nullptr);
-
-    menuItemPattern_ = menuItemFrameNode_->GetPattern<MenuItemPattern>();
-    ASSERT_NE(menuItemPattern_, nullptr);
-
-    menuItemAccessibilityProperty_ = menuItemFrameNode_->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
-    ASSERT_NE(menuItemAccessibilityProperty_, nullptr);
 }
 
 PaintWrapper* SubMenuTestNg::GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty)
@@ -689,5 +658,134 @@ HWTEST_F(SubMenuTestNg, OnKeyEvent001, TestSize.Level1)
     menuItemPattern->SetSubBuilder(nullptr);
     menuItemPattern->SetIsSubMenuShowed(true);
     EXPECT_FALSE(menuItemPattern->OnKeyEvent(rightEvent));
+}
+
+/**
+ * @tc.name: SubMenuDelayTest001
+ * @tc.desc: Verify PostHoverSubMenuTask to show subMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, SubMenuDelayTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create item node
+     * @tc.expected: pattern is not null
+     */
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    /**
+     * @tc.steps: step2. call PostHoverSubMenuTask
+     * @tc.expected: IsSubMenuShowed is false
+     */
+    menuItemPattern->PostHoverSubMenuTask();
+    EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
+    /**
+     * @tc.steps: step3. set build func and call PostHoverSubMenuTask
+     * @tc.expected: IsSubMenuShowed is false
+     */
+    std::function<void()> buildFun = []() {};
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->PostHoverSubMenuTask();
+    EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
+    /**
+     * @tc.steps: step4. make isSubMenuShowed_ true and call PostHoverSubMenuTask
+     * @tc.expected: IsSubMenuShowed is true
+     */
+    menuItemPattern->isSubMenuShowed_ = true;
+    menuItemPattern->PostHoverSubMenuTask();
+    menuItemPattern->showTask_.impl_->callback_();
+    EXPECT_TRUE(menuItemPattern->IsSubMenuShowed());
+    /**
+     * @tc.steps: step5. make isHover_ true and call PostHoverSubMenuTask
+     * @tc.expected: IsSubMenuShowed is false
+     */
+    menuItemPattern->isHover_  = true;
+    menuItemPattern->PostHoverSubMenuTask();
+    menuItemPattern->showTask_.impl_->callback_();
+    menuItemPattern->isSubMenuShowed_ = false;
+    menuItemPattern->showTask_.impl_->callback_();
+    EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
+    /**
+     * @tc.steps: step6. change post time and call PostHoverSubMenuTask
+     * @tc.expected: IsSubMenuShowed is false
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    menuTheme->subMenuShowDelayDuration_ = 0;
+    menuItemPattern->PostHoverSubMenuTask();
+    EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
+}
+
+/**
+ * @tc.name: SubMenuDelayTest002
+ * @tc.desc: Verify CheckHideSubMenuTask to hide subMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, SubMenuDelayTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create item node
+     * @tc.expected: pattern is not null
+     */
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    menuItemPattern->isSubMenuShowed_ = true;
+    ASSERT_NE(menuItemPattern, nullptr);
+    /**
+     * @tc.steps: step2. set lastInnerPosition_
+     * @tc.expected: sub menu will hide when call CheckHideSubMenu
+     */
+    menuItemPattern->isSubMenuShowed_ = true;
+    auto mousePoint = PointF(MENU_OFFSET_X, TWENTY);
+    auto menuZone = RectF(TWENTY, ZERO, TWENTY, TWENTY);
+    menuItemPattern->CheckHideSubMenu([]() {}, mousePoint, menuZone);
+    EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
+    /**
+     * @tc.steps: step3. change the mouse point
+     * @tc.expected: task will post in this condition
+     */
+    menuItemPattern->isSubMenuShowed_ = true;
+    menuItemPattern->lastInnerPosition_ = PointF();
+    menuItemPattern->CheckHideSubMenu([]() {}, mousePoint, menuZone);
+    EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
+    /**
+     * @tc.steps: step4. change the mouse point
+     * @tc.expected: task will post in this condition
+     */
+    menuItemPattern->isSubMenuShowed_ = true;
+    menuItemPattern->lastInnerPosition_ = PointF();
+    mousePoint = PointF(MENU_OFFSET_X, FOUR);
+    menuItemPattern->CheckHideSubMenu([]() {}, mousePoint, menuZone);
+    EXPECT_TRUE(menuItemPattern->hideTask_);
+    EXPECT_TRUE(menuItemPattern->isSubMenuShowed_);
+    /**
+     * @tc.steps: step5. change mousePoint
+     * @tc.expected: sub menu will hide when call CheckHideSubMenu
+     */
+    menuItemPattern->lastOutterPosition_ = mousePoint;
+    mousePoint = PointF(FOUR, MENU_OFFSET_Y);
+    menuItemPattern->CheckHideSubMenu([]() {}, mousePoint, menuZone);
+    EXPECT_FALSE(menuItemPattern->isSubMenuShowed_);
+    /**
+     * @tc.steps: step6. make subMenuHideDelayDuration_ zero
+     * @tc.expected: sub menu will hide when call CheckHideSubMenu
+     */
+    menuItemPattern->hideTask_.Cancel();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    menuTheme->subMenuHideDelayDuration_ = 0;
+    menuItemPattern->CheckHideSubMenu([]() {}, mousePoint, menuZone);
+    EXPECT_FALSE(menuItemPattern->isSubMenuShowed_);
+    /**
+     * @tc.steps: step7. change expandingMode_
+     * @tc.expected: sub menu will hide when call CheckHideSubMenu
+     */
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    menuItemPattern->isSubMenuShowed_ = true;
+    menuItemPattern->CheckHideSubMenu([]() {}, mousePoint, menuZone);
+    EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
 }
 } // namespace OHOS::Ace::NG
