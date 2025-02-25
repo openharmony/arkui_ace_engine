@@ -21,6 +21,7 @@ const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
+const componentUtils = requireNapi('arkui.componentUtils');
 
 const o = 10003;
 const t = 10002;
@@ -60,7 +61,7 @@ export const a1 = {
         },
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.font_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        e1: {
+        d2: {
             top: LengthMetrics.vp(8),
             bottom: LengthMetrics.vp(8),
             start: LengthMetrics.vp(8),
@@ -68,16 +69,16 @@ export const a1 = {
         },
         minFontSize: 9,
         fontWeight: FontWeight.Medium,
-        f1: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        e2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
     message: {
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontWeight: FontWeight.Regular,
-        g1: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        f2: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
-    h1: {
+    g2: {
         padding: {
             top: LengthMetrics.vp(12),
             bottom: LengthMetrics.vp(12),
@@ -85,7 +86,7 @@ export const a1 = {
             end: LengthMetrics.vp(12)
         },
     },
-    i1: {
+    h2: {
         size: { width: 22, height: 22 },
         padding: {
             top: LengthMetrics.vp(2),
@@ -99,11 +100,12 @@ export const a1 = {
             start: LengthMetrics.vp(12),
             end: LengthMetrics.vp(12)
         },
-        symbolStyle: new SymbolGlyphModifier({ 'id': -1, 'type': 40000, params: ['sys.symbol.xmark'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+        symbolStyle: new SymbolGlyphModifier({ "id": -1, "type": 40000, params: ['sys.symbol.xmark'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        f1: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        backgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        symbolSize: 18
+        e2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        i2: 18,
+        e1: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
 };
 const b1 = () => {
@@ -123,7 +125,7 @@ export function Popup(options, parent = null) {
                     onClose: options.onClose,
                     buttons: options.buttons,
                     maxWidth: options.maxWidth
-                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 205, j1: 3 });
+                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 210, j2: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -483,7 +485,7 @@ export class d1 extends ViewPU {
     getTitlePadding() {
         return {
             start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
-            end: this.theme.i1.margin.end
+            end: this.theme.h2.margin.end
         };
     }
     getTitleMargin() {
@@ -502,25 +504,25 @@ export class d1 extends ViewPU {
         return this.title?.fontColor ?? this.theme.title.fontColor;
     }
     getCloseButtonWidth() {
-        return this.theme.i1.size.width;
+        return this.theme.h2.size.width;
     }
     getCloseButtonHeight() {
-        return this.theme.i1.size.height;
+        return this.theme.h2.size.height;
     }
     getCloseButtonFillColor() {
         return this.closeButtonFillColorWithTheme;
     }
     getCloseButtonHoverColor() {
-        return this.theme.i1.f1;
+        return this.theme.h2.e2;
     }
     getCloseButtonBackgroundColor() {
-        return this.theme.i1.backgroundColor;
+        return this.theme.h2.backgroundColor;
     }
     getCloseButtonPadding() {
-        return this.theme.i1.padding;
+        return this.theme.h2.padding;
     }
     getCloseButtonSymbolSize() {
-        return this.theme.i1.symbolSize;
+        return this.theme.h2.i2;
     }
     getMessageText() {
         return this.message.text;
@@ -538,7 +540,7 @@ export class d1 extends ViewPU {
                 fontColor = this.theme.message.fontColor;
             }
             else {
-                fontColor = this.theme.message.g1;
+                fontColor = this.theme.message.f2;
             }
         }
         return fontColor;
@@ -551,7 +553,7 @@ export class d1 extends ViewPU {
         else {
             padding = {
                 start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
-                end: LengthMetrics.vp(this.theme.i1.margin.end.value)
+                end: LengthMetrics.vp(this.theme.h2.margin.end.value)
             };
         }
         return padding;
@@ -583,8 +585,8 @@ export class d1 extends ViewPU {
                     z1 = -1;
                 }
             }
-            z1 -= (this.theme.h1.padding.start.value - (this.theme.button.margin.end.value / 2));
-            z1 -= this.theme.h1.padding.end.value;
+            z1 -= (this.theme.g2.padding.start.value - (this.theme.button.margin.end.value / 2));
+            z1 -= this.theme.g2.padding.end.value;
             z1 -= this.theme.button.margin.start.value / 2;
             z1 -= this.getCloseButtonWidth();
         }
@@ -595,20 +597,20 @@ export class d1 extends ViewPU {
     }
     getButtonMargin() {
         return {
-            top: LengthMetrics.vp(this.theme.button.e1.top.value / 2 - 4),
-            bottom: LengthMetrics.vp(this.theme.button.e1.bottom.value / 2 - 4),
+            top: LengthMetrics.vp(this.theme.button.d2.top.value / 2 - 4),
+            bottom: LengthMetrics.vp(this.theme.button.d2.bottom.value / 2 - 4),
             start: LengthMetrics.vp(this.theme.button.margin.start.value / 2 - 4),
             end: LengthMetrics.vp(this.theme.button.margin.end.value / 2 - 4)
         };
     }
     getButtonTextMargin() {
-        return { top: LengthMetrics.vp(this.theme.button.e1.bottom.value) };
+        return { top: LengthMetrics.vp(this.theme.button.d2.bottom.value) };
     }
     getButtonTextPadding() {
         return this.theme.button.padding;
     }
     getButtonHoverColor() {
-        return this.theme.button.f1;
+        return this.theme.button.e2;
     }
     getButtonBackgroundColor() {
         return this.theme.button.backgroundColor;
@@ -638,10 +640,10 @@ export class d1 extends ViewPU {
         return this.theme.button.fontWeight;
     }
     getWindowsPadding() {
-        let top = this.theme.h1.padding.top;
-        let bottom = LengthMetrics.vp(this.theme.h1.padding.bottom.value - (this.theme.button.e1.bottom.value / 2));
-        let start = LengthMetrics.vp(this.theme.h1.padding.start.value - (this.theme.button.margin.end.value / 2));
-        let end = this.theme.h1.padding.end;
+        let top = this.theme.g2.padding.top;
+        let bottom = LengthMetrics.vp(this.theme.g2.padding.bottom.value - (this.theme.button.d2.bottom.value / 2));
+        let start = LengthMetrics.vp(this.theme.g2.padding.start.value - (this.theme.button.margin.end.value / 2));
+        let end = this.theme.g2.padding.end;
         let w1 = this.toVp(this.maxWidth);
         if (w1 === 0) {
             start = LengthMetrics.vp(0);
@@ -658,7 +660,7 @@ export class d1 extends ViewPU {
         this.theme.title.fontColor = theme.colors.fontPrimary;
         this.theme.button.fontColor = theme.colors.fontEmphasize;
         this.theme.message.fontColor = theme.colors.fontSecondary;
-        this.theme.message.g1 = theme.colors.fontPrimary;
+        this.theme.message.f2 = theme.colors.fontPrimary;
         this.closeButtonFillColorWithTheme = theme.colors.iconSecondary;
     }
     aboutToAppear() {
@@ -676,14 +678,14 @@ export class d1 extends ViewPU {
             this.beforeScreenStatus = this.currentScreenStatus;
             return u1;
         }
-        u1 = this.applyHeight;
+        u1 = px2vp(componentUtils.getRectangleById('applyContent').size?.height);
         u1 -= this.titleHeight;
         u1 -= this.buttonHeight;
-        u1 -= this.theme.h1.padding.top.value;
-        u1 -= (this.theme.button.e1.bottom.value / 2);
+        u1 -= this.theme.g2.padding.top.value;
+        u1 -= (this.theme.button.d2.bottom.value / 2);
         u1 -= this.theme.title.margin.bottom.value;
-        u1 -= (this.theme.h1.padding.bottom.value -
-            (this.theme.button.e1.bottom.value / 2));
+        u1 -= (this.theme.g2.padding.bottom.value -
+            (this.theme.button.d2.bottom.value / 2));
         if (Math.floor(this.textHeight) > Math.floor(u1 + 1)) {
             return u1;
         }
@@ -821,7 +823,7 @@ export class d1 extends ViewPU {
             m1 = px2vp(o1.height) - 40 - 40;
         }
         n1 = { maxWidth: l1, maxHeight: m1 };
-        this.messageMaxWidth = m1;
+        this.messageMaxWidth = l1;
         this.messageMaxWeight = this.getMessageMaxWeight();
         return n1;
     }
@@ -833,7 +835,8 @@ export class d1 extends ViewPU {
             Row.padding(this.getWindowsPadding());
             Row.constraintSize(ObservedObject.GetRawObject(this.applySizeOptions));
             Row.constraintSize(this.getApplyMaxSize());
-            Row.onAreaChange((n2, rect) => {
+            Row.key('applyContent');
+            Row.onAreaChange((k1, rect) => {
                 this.applyHeight = rect.height;
             });
         }, Row);
@@ -904,6 +907,7 @@ export class d1 extends ViewPU {
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
+                                    Button.accessibilityText(this.theme.h2.e1);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -923,7 +927,7 @@ export class d1 extends ViewPU {
                                     SymbolGlyph.fontColor([this.getCloseButtonFillColor()]);
                                     SymbolGlyph.fontSize(this.getCloseButtonSymbolSize());
                                     SymbolGlyph.direction(this.popupDirection);
-                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.i1.symbolStyle);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.h2.symbolStyle);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -955,7 +959,7 @@ export class d1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
-                        Text.onAreaChange((m2, rect) => {
+                        Text.onAreaChange((i1, rect) => {
                             this.textHeight = rect.height;
                         });
                     }, Text);
@@ -966,7 +970,7 @@ export class d1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((l2, rect) => {
+                        Flex.onAreaChange((h1, rect) => {
                             if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
                                 (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
                                 this.buttonHeight = rect.height;
@@ -1112,7 +1116,7 @@ export class d1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() });
-                        Text.onAreaChange((k2, rect) => {
+                        Text.onAreaChange((f1, rect) => {
                             this.textHeight = rect.height;
                         });
                     }, Text);
@@ -1130,6 +1134,7 @@ export class d1 extends ViewPU {
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
+                                    Button.accessibilityText(this.theme.h2.e1);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1149,7 +1154,7 @@ export class d1 extends ViewPU {
                                     SymbolGlyph.fontColor([this.getCloseButtonFillColor()]);
                                     SymbolGlyph.fontSize(this.getCloseButtonSymbolSize());
                                     SymbolGlyph.direction(this.popupDirection);
-                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.i1.symbolStyle);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.h2.symbolStyle);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -1168,7 +1173,7 @@ export class d1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((k1, rect) => {
+                        Flex.onAreaChange((e1, rect) => {
                             if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
                                 (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
                                 this.buttonHeight = rect.height;
@@ -1284,5 +1289,6 @@ export class d1 extends ViewPU {
         this.updateDirtyElements();
     }
 }
+
 
 export default { Popup };

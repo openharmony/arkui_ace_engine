@@ -943,6 +943,7 @@ void RatingPattern::LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layo
 void RatingPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     HandleEnabled();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -959,7 +960,7 @@ void RatingPattern::OnModifyDone()
     imageSuccessStateCode_ = 0;
     // Constrains ratingScore and starNum in case of the illegal input.
     ConstrainsRatingScore(layoutProperty);
-    FireBuilder();
+
     LoadForeground(layoutProperty, ratingTheme, iconTheme);
     LoadSecondary(layoutProperty, ratingTheme, iconTheme);
     LoadBackground(layoutProperty, ratingTheme, iconTheme);
