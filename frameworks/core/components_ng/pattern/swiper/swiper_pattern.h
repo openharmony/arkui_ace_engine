@@ -47,13 +47,11 @@
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
-namespace {
 enum class GestureStatus {
     INIT = 0,
     START,
     END,
 };
-} // namespace
 
 enum class PageFlipMode {
     CONTINUOUS = 0,
