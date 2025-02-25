@@ -23,13 +23,9 @@
 #include "core/common/container.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/input_event.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -673,6 +669,17 @@ const RefPtr<FrameNode> UnitResponseArea::GetFrameNode()
     auto frameNode = AceType::DynamicCast<FrameNode>(unitNode_);
     CHECK_NULL_RETURN(frameNode, nullptr);
     return frameNode;
+}
+
+void UnitResponseArea::ClearArea()
+{
+    auto hostPattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(hostPattern);
+    auto host = hostPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(unitNode_);
+    host->RemoveChildAndReturnIndex(unitNode_);
+    areaRect_.Reset();
 }
 
 SizeF UnitResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
