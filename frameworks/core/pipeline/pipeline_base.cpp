@@ -99,7 +99,7 @@ void PipelineBase::SetCallBackNode(const WeakPtr<NG::FrameNode>& node)
     pipelineContext->UpdateCurrentActiveNode(node);
 }
 
-RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
+RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
     auto currentContainer = Container::Current();
     CHECK_NULL_RETURN(currentContainer, nullptr);
