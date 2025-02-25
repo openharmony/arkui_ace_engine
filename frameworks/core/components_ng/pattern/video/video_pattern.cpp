@@ -322,8 +322,8 @@ void VideoPattern::ResetMediaPlayerOnBg()
     VideoSourceInfo videoSrc = {videoSrcInfo_.src_, videoSrcInfo_.bundleName_, videoSrcInfo_.moduleName_};
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask(
+    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    bgTaskExecutor.PostTask(
         [weak = WeakClaim(this), mediaPlayerWeak = WeakClaim(AceType::RawPtr(mediaPlayer_)),
         videoSrc, id = instanceId_, showFirstFrame = showFirstFrame_, uiTaskExecutor] {
         auto mediaPlayer = mediaPlayerWeak.Upgrade();
@@ -581,14 +581,9 @@ void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& stat
 
     if (status == PlaybackStatus::PREPARED) {
         ContainerScope scope(instanceId_);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
             return;
         }
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         int32_t milliSecondDuration = 0;
         mediaPlayer_->GetDuration(milliSecondDuration);
         OnPrepared(milliSecondDuration / MILLISECONDS_TO_SECONDS, 0, true);
@@ -792,8 +787,8 @@ void VideoPattern::UpdateLooping()
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), loop = loop_] {
+        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        bgTaskExecutor.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), loop = loop_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetLooping(loop);
@@ -815,8 +810,8 @@ void VideoPattern::UpdateSpeed()
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), progress = progressRate_] {
+        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        bgTaskExecutor.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), progress = progressRate_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
@@ -832,8 +827,8 @@ void VideoPattern::UpdateMuted()
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask(
+        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        bgTaskExecutor.PostTask(
             [weak = WeakClaim(RawPtr(mediaPlayer_)), isMuted = muted_, currentVolume = currentVolume_] {
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
@@ -1742,8 +1737,8 @@ void VideoPattern::Start()
     DestroyAnalyzerOverlay();
     isPaused_ = false;
 
-    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask(
+    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    bgTaskExecutor.PostTask(
         [weak = WeakClaim(RawPtr(mediaPlayer_)), hostId = hostId_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
