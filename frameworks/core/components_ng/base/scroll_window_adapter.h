@@ -45,7 +45,7 @@ public:
 
     void PrepareReset(int32_t idx);
     void PrepareJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
-    void PrepareLoadToTarget(int32_t targetIdx) {}
+    void PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
 
     /**
      * @param x positive if scrolling right, negative if scrolling left
@@ -93,6 +93,12 @@ private:
      */
     void RequestRecompose(int32_t markIdx) const;
 
+    /**
+     * @brief Determine if more items can be filled in @c direction to reach targetIdx_
+     * @return true if need to stop filling in @c direction
+     */
+    bool FillToTarget(FillDirection direction, int32_t curIdx);
+
     SizeF size_ = { 0.0f, 0.0f };
     RefPtr<FillAlgorithm> fillAlgorithm_;
     FrameNode* container_ = nullptr;
@@ -108,7 +114,7 @@ private:
     std::unordered_set<int32_t> filled_; // to record measured items during Fill
 
     Axis axis_ = Axis::VERTICAL;
-    uint32_t offset_ = 0;    // offset of current LazyForEach in node tree
+    uint32_t offset_ = 0; // offset of current LazyForEach in node tree
 
     struct PendingJump {
         PendingJump(int32_t jumpIdx, ScrollAlign align, float extraOffset)
@@ -118,8 +124,8 @@ private:
         ScrollAlign align = ScrollAlign::START;
         float extraOffset = 0.0f;
     };
-    std::unique_ptr<PendingJump> jumpPending_; // will perform a jump on the next recomposition
-
-    bool rangeMode_ = false; // true if providing item range to frontend directly
+    std::unique_ptr<PendingJump> jumpPending_; // to perform a jump on the next recomposition
+    std::unique_ptr<PendingJump> target_;      // to scroll with animation to target index
+    bool rangeMode_ = false;                   // true if providing item range to frontend directly
 };
 } // namespace OHOS::Ace::NG

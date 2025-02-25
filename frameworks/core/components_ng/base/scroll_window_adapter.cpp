@@ -48,6 +48,12 @@ void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extr
     RequestRecompose(idx);
 }
 
+void ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align, float extraOffset)
+{
+    target_ = std::make_unique<PendingJump>(targetIdx, align, extraOffset);
+    RequestRecompose(markIndex_);
+}
+
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 {
     auto* item = GetChildPtrByIndex(markIndex_);
@@ -105,6 +111,11 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     }
     if (index >= totalCount_ - 1 && direction == FillDirection::END) {
         return nullptr;
+    }
+    if (target_) {
+        bool reached = FillToTarget(direction, index);
+        return reached ? nullptr : pendingNode;
+        // keep creating until targetNode is reached
     }
     if (!filled_.count(index)) {
         // 2: measure the pendingNode
@@ -168,12 +179,17 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
     if (jumpPending_) {
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
-            std::cout << "scroll to " << markIndex_ << " align = " << (int)jumpPending_->align << "extraOffset = " << jumpPending_->extraOffset << "\n";
             scroll->ScrollToIndex(markIndex_, false, jumpPending_->align, jumpPending_->extraOffset);
         } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
             swiper->ChangeIndex(markIndex_, false);
         }
         jumpPending_.reset();
+    } else if (target_) {
+        if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
+            scroll->ScrollToIndex(markIndex_, true, target_->align, target_->extraOffset);
+        } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
+            swiper->ChangeIndex(markIndex_, false);
+        }
     }
 }
 
@@ -214,5 +230,20 @@ FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
 RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
 {
     return Claim(GetChildPtrByIndex(index));
+}
+
+bool ScrollWindowAdapter::FillToTarget(FillDirection direction, int32_t curIdx)
+{
+    if (!target_) {
+        return true;
+    }
+    if (direction == FillDirection::START ? curIdx > target_->index : curIdx < target_->index) {
+        return false;
+    }
+    if (curIdx == target_->index) {
+        target_.reset();
+        return true;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
