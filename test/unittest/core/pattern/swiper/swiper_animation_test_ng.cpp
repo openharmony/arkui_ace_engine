@@ -1294,4 +1294,157 @@ HWTEST_F(SwiperAnimationTestNg, FastAnimation001, TestSize.Level1)
     pattern_->FastAnimation(-SWIPE_FOUR);
     EXPECT_EQ(pattern_->currentIndex_, SWIPE_ONE);
 }
+
+/**
+ * @tc.name: CalcComingIndex
+ * @tc.desc: Test CalcComingIndex
+ * @tc.desc: Test CalcComingIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, CalcComingIndex001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    GestureEvent event;
+    event.SetMainDelta(-10.0f);
+    pattern_->panEvent_->actionStart_(event);
+    pattern_->panEvent_->actionUpdate_(event);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->CalcComingIndex(-10.0f), 1);
+    event.SetMainVelocity(0.0f);
+    pattern_->HandleTouchUp();
+    pattern_->panEvent_->actionEnd_(event);
+
+    event.SetMainDelta(10.0f);
+    pattern_->panEvent_->actionStart_(event);
+    pattern_->panEvent_->actionUpdate_(event);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->CalcComingIndex(10.0f), 3);
+}
+
+/**
+ * @tc.name: CalcComingIndex
+ * @tc.desc: Test CalcComingIndex
+ * @tc.desc: Test CalcComingIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, CalcComingIndex002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    GestureEvent event;
+    event.SetMainDelta(10.0f);
+    pattern_->panEvent_->actionStart_(event);
+    pattern_->panEvent_->actionUpdate_(event);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->CalcComingIndex(10.0f), 0);
+    event.SetMainVelocity(0.0f);
+    pattern_->HandleTouchUp();
+    pattern_->panEvent_->actionEnd_(event);
+
+    pattern_->SwipeToWithoutAnimation(3);
+    FlushUITasks();
+
+    event.SetMainDelta(-10.0f);
+    pattern_->panEvent_->actionStart_(event);
+    pattern_->panEvent_->actionUpdate_(event);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->CalcComingIndex(-10.0f), 3);
+}
+
+/**
+ * @tc.name: CalcComingIndex
+ * @tc.desc: Test CalcComingIndex
+ * @tc.desc: Test CalcComingIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, CalcComingIndex003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    GestureEvent event;
+    event.SetMainDelta(-10.0f);
+    pattern_->panEvent_->actionStart_(event);
+    pattern_->panEvent_->actionUpdate_(event);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->CalcComingIndex(-10.0f), 2);
+    event.SetMainVelocity(0.0f);
+    pattern_->HandleTouchUp();
+    pattern_->panEvent_->actionEnd_(event);
+
+    event.SetMainDelta(10.0f);
+    pattern_->panEvent_->actionStart_(event);
+    pattern_->panEvent_->actionUpdate_(event);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->CalcComingIndex(10.0f), 4);
+}
+
+/**
+ * @tc.name: CalcComingIndex
+ * @tc.desc: Test CalcComingIndex
+ * @tc.desc: Test CalcComingIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, CalcComingIndex004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    GestureEvent event;
+    event.SetMainDelta(10.0f);
+    pattern_->panEvent_->actionStart_(event);
+    pattern_->panEvent_->actionUpdate_(event);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->CalcComingIndex(10.0f), 0);
+    event.SetMainVelocity(0.0f);
+    pattern_->HandleTouchUp();
+    pattern_->panEvent_->actionEnd_(event);
+
+    pattern_->SwipeToWithoutAnimation(4);
+    FlushUITasks();
+
+    event.SetMainDelta(-10.0f);
+    pattern_->panEvent_->actionStart_(event);
+    pattern_->panEvent_->actionUpdate_(event);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->CalcComingIndex(-10.0f), 4);
+}
+
+/**
+ * @tc.name: CalcWillScrollOffset
+ * @tc.desc: Test CalcWillScrollOffset
+ * @tc.desc: Test CalcWillScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, CalcWillScrollOffset001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    EXPECT_EQ(pattern_->CalcWillScrollOffset(1), 480.0f);
+}
 } // namespace OHOS::Ace::NG
