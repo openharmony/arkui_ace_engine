@@ -1460,9 +1460,11 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
         preDragStatus != PreDragStatus::ACTION_CANCELED_BEFORE_DRAG)
         || preDragStatus == PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION
         || preDragStatus == PreDragStatus::PREVIEW_LIFT_STARTED) {
-        auto nextPreDragStatus = static_cast<PreDragStatus>(static_cast<int32_t>(preDragStatus) + 1);
-        DragDropGlobalController::GetInstance().SetPreDragStatus(nextPreDragStatus);
-        onPreDragStatus = preDragStatus;
+        if (preDragStatus != PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+            auto nextPreDragStatus = static_cast<PreDragStatus>(static_cast<int32_t>(preDragStatus) + 1);
+            DragDropGlobalController::GetInstance().SetPreDragStatus(nextPreDragStatus);
+            onPreDragStatus = preDragStatus;
+        }
     }
     auto onPreDragFunc = eventHub->GetOnPreDrag();
     CHECK_NULL_VOID(onPreDragFunc);
