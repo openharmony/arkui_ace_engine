@@ -300,6 +300,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
 JSRef<JSObject> JSRichEditor::CreateJSValueResource(const RefPtr<ResourceObject>& valueResource)
 {
     JSRef<JSObject> valueResourceObj = JSRef<JSObject>::New();
+    CHECK_NULL_RETURN(valueResource, valueResourceObj);
     valueResourceObj->SetProperty<std::string>("bundleName", valueResource->GetBundleName());
     valueResourceObj->SetProperty<std::string>("moduleName", valueResource->GetModuleName());
     valueResourceObj->SetProperty<uint32_t>("id", valueResource->GetId());
