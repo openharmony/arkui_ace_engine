@@ -2059,6 +2059,23 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg102, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg103
+ * @tc.desc: Test the function IsFormRenderExceptDynamicComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg103, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    bool isFormRender = context_->IsFormRenderExceptDynamicComponent();
+    ASSERT_EQ(isFormRender, true);
+}
+
+/**
  * @tc.name: IsDirtyLayoutNodesEmpty
  * @tc.desc: Test IsDirtyLayoutNodesEmpty.
  * @tc.type: FUNC
