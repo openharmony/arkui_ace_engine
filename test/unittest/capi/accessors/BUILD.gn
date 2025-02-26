@@ -95,6 +95,7 @@ ace_unittest("capi_all_accessors_test") {
     "pinch_gesture_interface_accessor_test.cpp",
     "progress_mask_accessor_test.cpp",
     "rect_shape_accessor_test.cpp",
+    "rendering_context_settings_accessor_test.cpp",
     "richeditor_base_controller_accessor_test.cpp",
     "richeditor_controller_accessor_callback_test.cpp",
     "richeditor_controller_accessor_test.cpp",
