@@ -33,6 +33,32 @@ bool ListItemAccessibilityProperty::IsSelected() const
 
 void ListItemAccessibilityProperty::SetSpecificSupportAction()
 {
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+
+    if (!listItemPattern->HasStartNode() && !listItemPattern->HasEndNode()) {
+        listItemPattern->SetSwipeState(SwipeState::DISABLED);
+    } else {
+        auto swipeState = listItemPattern->GetSwipeState();
+        auto itemPosition = listItemPattern->GetItemPosition();
+
+        if (listItemPattern->HasStartNode()) {
+            if (swipeState == SwipeState::EXPANDED && itemPosition == ListItemPosition::TAIL) {
+                AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            } else if (swipeState == SwipeState::COLLAPSED) {
+                AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+            }
+        }
+        if (listItemPattern->HasEndNode()) {
+            if (swipeState == SwipeState::EXPANDED && itemPosition == ListItemPosition::HEAD) {
+                AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+            } else if (swipeState == SwipeState::COLLAPSED) {
+                AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            }
+        }
+    }
     AddSupportAction(AceAction::ACTION_SELECT);
     AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
 }
@@ -45,6 +71,35 @@ void ListItemAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElem
     auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(listItemPattern);
     extraElementInfo.SetExtraElementInfo("ListItemIndex", listItemPattern->GetIndexInList());
+    std::string stateStr;
+    switch (listItemPattern->GetSwipeState()) {
+        case SwipeState::DISABLED:
+            stateStr = "disabled";
+            break;
+        case SwipeState::EXPANDED:
+            stateStr = "expanded";
+            break;
+        case SwipeState::COLLAPSED:
+            stateStr = "collapsed";
+            break;
+    }
+    std::string axisStr;
+    switch (listItemPattern->GetAxis()) {
+        case Axis::VERTICAL:
+            axisStr = "vertical";
+            break;
+        case Axis::HORIZONTAL:
+            axisStr = "horizontal";
+            break;
+        case Axis::FREE:
+            axisStr = "free";
+            break;
+        case Axis::NONE:
+            axisStr = "none";
+            break;
+    }
+    extraElementInfo.SetExtraElementInfo("expandedState", stateStr);
+    extraElementInfo.SetExtraElementInfo("direction", axisStr);
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -1302,4 +1302,58 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupOffsetTest001, TestSize.Level1)
     auto group1 = GetChildFrameNode(frameNode_, 1);
     EXPECT_EQ(group1->layoutAlgorithm_, nullptr);
 }
+
+/*
+ * @tc.name: MeasureStartNodeTest001
+ * @tc.desc: Test MeasureStartNodeTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, MeasureStartNodeTest001, TestSize.Level1)
+{
+    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    ASSERT_NE(listItemPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto listItemLayoutProperty = frameNode->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(listItemLayoutProperty, nullptr);
+    listItemLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listItemLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ListItemLayoutAlgorithm listItemLayoutAlgorithm(0, 0, 0);
+    LayoutConstraintF layoutConstraint;
+    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
+    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
+    listItemLayoutAlgorithm.MeasureStartNode(layoutWrapper);
+    EXPECT_EQ(listItemLayoutAlgorithm.GetStartNodeSize(), 0.0f);
+}
+
+/*
+ * @tc.name: MeasureEndNodeTest001
+ * @tc.desc: Test MeasureEndNodeTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, MeasureEndNodeTest001, TestSize.Level1)
+{
+    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    ASSERT_NE(listItemPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto listItemLayoutProperty = frameNode->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(listItemLayoutProperty, nullptr);
+    listItemLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listItemLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ListItemLayoutAlgorithm listItemLayoutAlgorithm(0, 0, 0);
+    LayoutConstraintF layoutConstraint;
+    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
+    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
+    listItemLayoutAlgorithm.MeasureEndNode(layoutWrapper);
+    EXPECT_EQ(listItemLayoutAlgorithm.GetEndNodeSize(), 0.0f);
+}
 } // namespace OHOS::Ace::NG

@@ -39,10 +39,40 @@ enum class ListItemSwipeIndex {
     SWIPER_ACTION = 2,
 };
 
+enum class SwipeState {
+    DISABLED,
+    EXPANDED,
+    COLLAPSED
+};
+
+enum class ListItemPosition {
+    HEAD,
+    TAIL,
+    MIDDLE
+};
+
 class ACE_EXPORT ListItemPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemPattern, Pattern);
 
 public:
+    SwipeState GetSwipeState() const
+    {
+        return swipeState_;
+    }
+
+    void SetSwipeState(SwipeState swipeState)
+    {
+        swipeState_ = swipeState;
+    }
+
+    void SwipeForward();
+
+    void SwipeBackward();
+
+    void SetItemPosition(float);
+
+    ListItemPosition GetItemPosition();
+
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
         : listItemStyle_(listItemStyle), shallowBuilder_(shallowBuilder)
@@ -310,6 +340,8 @@ private:
     bool isLayouted_ = false;
     bool springMotionTraceFlag_ = false;
     bool isDragging_ = false;
+    SwipeState swipeState_ = SwipeState::COLLAPSED;
+    ListItemPosition itemPosition_ = ListItemPosition::MIDDLE;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

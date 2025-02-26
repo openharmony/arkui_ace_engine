@@ -707,6 +707,7 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
     if (newSwiperIndex == swiperIndex_) {
         return;
     }
+    auto oldState = swipeActionState_;
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
 
@@ -727,6 +728,16 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
                 trigStart = false;
             }
             swipeActionState_ = SwipeActionState::COLLAPSED;
+    }
+    if (swipeActionState_ != oldState) {
+        if (swipeActionState_ == SwipeActionState::COLLAPSED) {
+            SetSwipeState(SwipeState::COLLAPSED);
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+        if (swipeActionState_ == SwipeActionState::EXPANDED) {
+            SetSwipeState(SwipeState::EXPANDED);
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
     }
     swiperIndex_ = newSwiperIndex;
     listItemEventHub->FireStateChangeEvent(swipeActionState_, trigStart);
@@ -806,6 +817,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         float width = startNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachLeftSpeed) {
             StartSpringMotion(curOffset_, 0, velocity * friction);
+            SetItemPosition(0);
             FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
             return;
         }
@@ -830,6 +842,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         float width = endNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachRightSpeed) {
             StartSpringMotion(curOffset_, 0, velocity * friction);
+            SetItemPosition(0);
             FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
             return;
         }
@@ -852,6 +865,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         end = width * static_cast<int32_t>(swiperIndex_);
     }
     StartSpringMotion(curOffset_, end, velocity * friction);
+    SetItemPosition(end);
 }
 
 void ListItemPattern::ResetSwipeStatus(bool calledByUser)
@@ -870,6 +884,7 @@ void ListItemPattern::ResetSwipeStatus(bool calledByUser)
         springController_->Stop();
     }
     StartSpringMotion(curOffset_, 0.0f, velocity, calledByUser);
+    SetItemPosition(0.0f);
 }
 
 void ListItemPattern::MarkIsSelected(bool isSelected)
@@ -899,6 +914,84 @@ void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
 {
     json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
     json->PutExtAttr("selected", isSelected_, filter);
+}
+
+void ListItemPattern::SwipeForward()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(host->GetLayoutAlgorithm(false));
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto layoutAlgorithm = DynamicCast<ListItemLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithm);
+    layoutAlgorithm->MeasureEndNode(host);
+    endNodeSize_ = layoutAlgorithm->GetEndNodeSize();
+
+    MarkDirtyNode();
+    float end = 0.0f;
+    auto itemPosition = GetItemPosition();
+    if (itemPosition == ListItemPosition::HEAD) {
+        return;
+    }
+
+    if (itemPosition == ListItemPosition::MIDDLE) {
+        FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_END);
+        end = -endNodeSize_;
+        StartSpringMotion(curOffset_, end, 0.0f, true);
+    }
+    if (itemPosition == ListItemPosition::TAIL) {
+        FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
+        end = 0.0f;
+        StartSpringMotion(curOffset_, end, 0.0f, true);
+    }
+    SetItemPosition(end);
+}
+
+void ListItemPattern::SwipeBackward()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(host->GetLayoutAlgorithm(false));
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto layoutAlgorithm = DynamicCast<ListItemLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithm);
+    layoutAlgorithm->MeasureStartNode(host);
+    startNodeSize_ = layoutAlgorithm->GetStartNodeSize();
+
+    MarkDirtyNode();
+    float end = 0.0f;
+    auto itemPosition = GetItemPosition();
+    if (itemPosition == ListItemPosition::TAIL) {
+        return;
+    }
+
+    if (itemPosition == ListItemPosition::MIDDLE) {
+        FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_START);
+        end = startNodeSize_;
+        StartSpringMotion(curOffset_, end, 0.0f, true);
+    }
+    if (itemPosition == ListItemPosition::HEAD) {
+        FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
+        end = 0.0f;
+        StartSpringMotion(curOffset_, end, 0.0f, true);
+    }
+    SetItemPosition(end);
+}
+
+void ListItemPattern::SetItemPosition(float curOffset)
+{
+    if (curOffset > 0) {
+        itemPosition_ = ListItemPosition::TAIL;
+    } else if (curOffset < 0) {
+        itemPosition_ = ListItemPosition::HEAD;
+    } else if (curOffset == 0) {
+        itemPosition_ = ListItemPosition::MIDDLE;
+    }
+}
+
+ListItemPosition ListItemPattern::GetItemPosition()
+{
+    return itemPosition_;
 }
 
 void ListItemPattern::SetAccessibilityAction()
@@ -934,6 +1027,20 @@ void ListItemPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(context);
         pattern->MarkIsSelected(false);
         context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    });
+    
+    listItemAccessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_EQUAL_VOID(pattern->Selectable(), false);
+        pattern->SwipeForward();
+    });
+
+    listItemAccessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_EQUAL_VOID(pattern->Selectable(), false);
+        pattern->SwipeBackward();
     });
 }
 
