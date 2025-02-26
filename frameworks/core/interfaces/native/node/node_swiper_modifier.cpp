@@ -615,6 +615,15 @@ void InitSwiperArrowParameters(
     swiperArrowParameters.arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
 }
 
+int32_t VectorStringToInt(std::vector<std::string>& vectorStr, int32_t index)
+{
+    int32_t value = 0;
+    if (index < vectorStr.size()) {
+        value = StringUtils::StringToInt(vectorStr[index]);
+    }
+    return value;
+}
+
 void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -622,8 +631,8 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
     std::vector<std::string> res;
     std::string displayArrowValues = std::string(displayArrowStr);
     StringUtils::StringSplitter(displayArrowValues, '|', res);
-    int32_t displayArrowValue = StringUtils::StringToInt(res[DISPLAY_ARROW_VALUE]);
-    int32_t displayArrowCAPI = StringUtils::StringToInt(res[DISPLAY_ARROW_CAPI]);
+    int32_t displayArrowValue = VectorStringToInt(res, DISPLAY_ARROW_VALUE);
+    int32_t displayArrowCAPI = VectorStringToInt(res, DISPLAY_ARROW_CAPI);
     if (displayArrowValue == DISPLAY_ARROW_OBJECT) {
         SwiperArrowParameters swiperArrowParameters;
         if (!GetArrowInfo(res, swiperArrowParameters)) {
@@ -655,7 +664,7 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
         SwiperModelNG::SetDisplayArrow(frameNode, false);
         return;
     }
-    int32_t isHoverShow = StringUtils::StringToInt(res[DISPLAY_ARROW_IS_HOVER_SHOW_INDEX]);
+    int32_t isHoverShow = VectorStringToInt(res, DISPLAY_ARROW_IS_HOVER_SHOW_INDEX);
     if (isHoverShow != DISPLAY_ARROW_IS_HOVER_SHOW_UNDEFINED) {
         SwiperModelNG::SetHoverShow(frameNode, isHoverShow == 1 ? true : false);
     } else {
