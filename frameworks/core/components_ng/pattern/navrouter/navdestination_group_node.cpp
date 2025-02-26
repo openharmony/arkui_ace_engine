@@ -875,7 +875,9 @@ int32_t NavDestinationGroupNode::DoCustomTransition(NavigationOperation operatio
             longestAnimationDuration = transition.duration + transition.delay;
         }
     }
-    if (longestAnimationDuration == INT32_MIN) {
+    if (longestAnimationDuration != INT32_MIN) {
+        SetIsOnAnimation(true);
+    } else {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "navDestination custom transition array is empty!");
     }
     auto pipeline = GetContext();
@@ -903,7 +905,6 @@ void NavDestinationGroupNode::StartCustomTransitionAnimation(NavDestinationTrans
             // do necessary system-side tasks
             auto navDestination = weak.Upgrade();
             CHECK_NULL_VOID(navDestination);
-            navDestination->SetIsOnAnimation(true);
             if (!hasResetProperties && isEnter) {
                 auto pattern = navDestination->GetPattern<NavDestinationPattern>();
                 CHECK_NULL_VOID(pattern);
