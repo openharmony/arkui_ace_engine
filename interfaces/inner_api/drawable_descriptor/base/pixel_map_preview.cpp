@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "pixel_map_preview.h"
+#include "base/pixel_map.h"
 
 namespace OHOS {
 namespace Ace {
@@ -36,9 +36,19 @@ std::shared_ptr<PixelMap> Create(const std::shared_ptr<Media::PixelMap>& pixmap)
     return nullptr;
 }
 
+std::shared_ptr<PixelMap> PixelMap::Create(const std::shared_ptr<Media::PixelMap>& pixmap)
+{
+    return nullptr;
+}
+
 int32_t PixelMapPreview::GetWidth() const
 {
     return -1;
+}
+
+bool PixelMapPreview::IsHdr() const
+{
+    return false;
 }
 
 int32_t PixelMapPreview::GetHeight() const
@@ -49,16 +59,6 @@ int32_t PixelMapPreview::GetHeight() const
 const uint8_t* PixelMapPreview::GetPixels() const
 {
     return nullptr;
-}
-
-PixelFormat PixelMapPreview::GetPixelFormat() const
-{
-    return PixelFormat::UNKNOWN;
-}
-
-AlphaType PixelMapPreview::GetAlphaType() const
-{
-    return AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
 }
 
 int32_t PixelMapPreview::GetRowStride() const
@@ -76,12 +76,12 @@ int32_t PixelMapPreview::GetByteCount() const
     return 0;
 }
 
-void* PixelMapPreview::GetPixelManager() const
+void* PixelMapPreview::GetRawPixelMapPtr() const
 {
     return nullptr;
 }
 
-void* PixelMapPreview::GetRawPixelMapPtr() const
+std::shared_ptr<Media::PixelMap> PixelMapPreview::GetPixelMapSharedPtr()
 {
     return nullptr;
 }

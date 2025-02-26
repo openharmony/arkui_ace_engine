@@ -17,8 +17,9 @@
 
 #include <cstdint>
 
-#include "loader/image_loader.h"
 #include "render_service_base/include/pipeline/rs_recording_canvas.h"
+
+#include "loader/image_loader.h"
 #include "utils/task_pool.h"
 
 namespace OHOS {

@@ -18,8 +18,24 @@
 namespace OHOS {
 namespace Ace {
 namespace Drawable {
+class TaskPoolPreview final : public TaskPool {
+public:
+    TaskPoolPreview() = default;
+    ~TaskPoolPreview() = default;
+
+    void PostTask(Task&& task, const std::string& name) override;
+};
+
 std::unique_ptr<TaskPool> TaskPool::instance_;
 std::once_flag TaskPool::initFlag;
+
+TaskPool* TaskPool::GetInstance()
+{
+    std::call_once(initFlag, []() { instance_.reset(new TaskPoolPreview); });
+    return instance_.get();
+}
+
+void TaskPoolPreview::PostTask(Task&& task, const std::string& name) {}
 } // namespace Drawable
 } // namespace Ace
 } // namespace OHOS
