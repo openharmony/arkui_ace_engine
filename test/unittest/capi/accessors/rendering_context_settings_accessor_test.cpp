@@ -54,13 +54,6 @@ HWTEST_F(RenderingContextSettingsAccessorTest, ctorRenderingContextSettingsPeerT
         auto optValue = Converter::ArkValue<Opt_Boolean>(value);
         peer_ = CreatePeerInstanceT(&optValue);
         auto result = accessor_->getAntialias(peer_);
-        
-        std::printf("ctor: actual: %d result: %d == %d\n",
-            Converter::Convert<bool>(value),
-            Converter::Convert<bool>(result), 
-            Converter::Convert<bool>(expected)
-        );
-
         EXPECT_EQ(result, value) <<
             "Input value is: " << input << ", method: GetRepeat";
     }
@@ -68,25 +61,12 @@ HWTEST_F(RenderingContextSettingsAccessorTest, ctorRenderingContextSettingsPeerT
     auto optValue = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     peer_ = CreatePeerInstanceT(&optValue);
     auto result = accessor_->getAntialias(peer_);
-
-    std::printf("peer: actual: %d result: %d == %d\n",
-        Converter::OptConvert<bool>(optValue)?Converter::OptConvert<bool>(optValue).value():-1, 
-        Converter::Convert<bool>(result),
-        Converter::Convert<bool>(ANTIALIAS_DEFAULT_ARK_VALUE)
-    );
-
-    EXPECT_EQ(result, ANTIALIAS_DEFAULT_ARK_VALUE)
-        << "Input value is: empty, method: GetRepeat";
+    EXPECT_EQ(result, ANTIALIAS_DEFAULT_ARK_VALUE) <<
+        "Input value is: empty, method: GetRepeat";
 
     finalyzer_(peer_);
     peer_ = CreatePeerInstanceT(nullptr);
     result = accessor_->getAntialias(peer_);
-
-    std::printf("peer: actual: nullptr result: %d == %d\n",
-        Converter::Convert<bool>(result),
-        Converter::Convert<bool>(ANTIALIAS_DEFAULT_ARK_VALUE)
-    );
-
     EXPECT_EQ(result, ANTIALIAS_DEFAULT_ARK_VALUE) <<
         "Input value is: nullptr, method: GetRepeat";
 }
@@ -101,14 +81,6 @@ HWTEST_F(RenderingContextSettingsAccessorTest, getAntialiasTest, TestSize.Level1
     for (const auto& [input, expected, value] : AccessorTestFixtures::testFixtureBooleanValues) {
         peer_->antialias = value;
         auto result = accessor_->getAntialias(peer_);
-
-    std::printf("peer: actual: %d result: %d == %d\n",
-        value,
-        Converter::Convert<bool>(result),
-        Converter::Convert<bool>(expected)
-    );
-
-
         EXPECT_EQ(result, expected) <<
             "Input value is: " << input << ", method: GetRepeat";
     }
@@ -125,13 +97,6 @@ HWTEST_F(RenderingContextSettingsAccessorTest, setAntialiasTest, TestSize.Level1
         accessor_->setAntialias(peer_, value);
         auto result = peer_->antialias;
         ASSERT_NE(result, std::nullopt);
-
-        std::printf("peer: actual: %d result: %d == %d\n", 
-            value,
-            result?*result:-1,
-            expected
-        );
-
         EXPECT_EQ(result.value(), expected) <<
             "Input value is: " << input << ", method: SetRepeat";
     }
