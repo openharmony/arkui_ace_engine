@@ -2999,6 +2999,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     }
     if (CanChangeSelectState()) {
         selectController_->UpdateSelectByOffset(info.GetLocalLocation());
+        UpdateCaretInfoToController();
     }
     if (IsSelected()) {
         StopTwinkling();
