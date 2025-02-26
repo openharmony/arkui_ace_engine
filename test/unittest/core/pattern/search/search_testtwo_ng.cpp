@@ -17,6 +17,8 @@
 
 #include "gtest/gtest.h"
 #include "search_base.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2113,5 +2115,218 @@ HWTEST_F(SearchTestTwoNg, testSearchChangeEvent, TestSize.Level1)
     textFieldPattern->contentController_->SetTextValue(u"12312");
     EXPECT_EQ(textFieldLayoutProperty->GetLineHeight(), 2.0_fp);
     EXPECT_EQ(pattern->HandleTextContentLines(), 0);
+}
+
+/**
+ * @tc.name: searchOnKeyEvent001
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchOnKeyEvent001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: pre setting
+    */
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH;
+
+    /**
+    * @tc.steps: case KEY_SHIFT_LEFT + KEY_DPAD_LEFT
+    */
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    keyEvent.pressedCodes = presscodes;
+    keyEvent.pressedCodes.clear();
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_DPAD_LEFT);
+    keyEvent.code = KeyCode::KEY_DPAD_LEFT;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), true);
+
+    /**
+    * @tc.steps: case KEY_SHIFT_RIGHT + KEY_DPAD_RIGHT
+    */
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.clear();
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_RIGHT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_DPAD_RIGHT);
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), true);
+
+    /**
+    * @tc.steps: case KeyAction::UP
+    */
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_TAB;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), false);
+
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), false);
+
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_SHIFT_RIGHT;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), false);
+}
+
+/**
+ * @tc.name: searchHandleFocusChoiceTest
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchHandleFocusChoiceTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto searchTextFieldPattern = AceType::DynamicCast<SearchTextFieldPattern>(textFieldPattern);
+    CHECK_NULL_VOID(searchTextFieldPattern);
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->directionKeysMoveFocusOut_ = true;
+    pattern->HandleFocusChoiceSearch(textFieldPattern, false, searchTextFieldPattern);
+    EXPECT_EQ(textFieldPattern->GetTextUtf16Value().empty(), false);
+
+    pattern->directionKeysMoveFocusOut_ = false;
+    pattern->HandleFocusChoiceSearch(textFieldPattern, true, searchTextFieldPattern);
+    EXPECT_EQ(textFieldPattern->GetTextUtf16Value().empty(), false);
+}
+
+/**
+ * @tc.name: searchGetSearchFocusPaintRectTest
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchGetSearchFocusPaintRectTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);;
+
+    /**
+    * @tc.steps: case
+    */
+    RoundRect focusRect;
+    pattern->GetSearchFocusPaintRect(focusRect);
+    EXPECT_EQ(focusRect.GetRect().Left(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Top(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Right(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Bottom(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Width(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Height(), 0.0f);
+}
+
+/**
+ * @tc.name: searchTriggerButtonMouseEventTest
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchTriggerButtonMouseEventTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);;
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->searchButtonMouseEvent_ = nullptr;
+    pattern->InitButtonMouseEvent(pattern->searchButtonMouseEvent_, BUTTON_INDEX);
+
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    auto events = inputHub->hoverEventActuator_->inputEvents_;
+    for (const auto& callback : events) {
+        if (callback) {
+            (*callback)(true);
+        }
+    }
+    EXPECT_NE(events.size(), 0);
+
+    pattern->searchHoverListener_ = nullptr;
+    pattern->InitHoverEvent();
+    auto callback = pattern->searchHoverListener_->GetOnHoverEventFunc();
+    if (callback) {
+        callback(true);
+    }
+    EXPECT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.name: searchAnimateTouchAndHoverTest
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchAnimateTouchAndHoverTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);;
+
+    /**
+    * @tc.steps: case
+    */
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION);
 }
 } // namespace OHOS::Ace::NG
