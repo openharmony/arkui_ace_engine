@@ -610,6 +610,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      */
     DragDropInfo dragPreviewInfo;
     auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
+    GetUnifiedData(frameNode->GetTag(), dragDropInfo, event);
     auto continueFunc = [id = Container::CurrentId(), weak = WeakClaim(this), dragPreviewInfo, info, event,
         dragDropInfo, frameNode, pipeline]() {
         ContainerScope scope(id);
@@ -777,7 +778,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         return;
     }
     std::string udKey;
-    auto unifiedData = GetUnifiedData(frameNode->GetTag(), dragDropInfo, dragEvent);
+    auto unifiedData = dragEvent->GetData();
     if (unifiedData) {
         DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
     }
