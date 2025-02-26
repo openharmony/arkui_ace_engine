@@ -44,12 +44,13 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
 {
+    Ark_String arkSurfaceId = {};
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer && peer->controller, {});
     auto surfaceId = peer->controller->GetSurfaceId();
-    LOGE("XComponentControllerAccessor::GetXComponentSurfaceIdImpl - return surfaceId need to be supported");
+    arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId, Converter::FC);
 #endif //XCOMPONENT_SUPPORTED
-    return {};
+    return arkSurfaceId;
 }
 Ark_CustomObject GetXComponentContextImpl(Ark_XComponentController peer)
 {
