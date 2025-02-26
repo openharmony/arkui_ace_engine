@@ -1856,6 +1856,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
                     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 }
             }
+            navigation->RemoveDialogDestination();
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
