@@ -343,9 +343,15 @@ void PipelineContext::OnHide() {}
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId) {}
 
-void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
+void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId)
+{
+    onWindowStateChangedCallbacks_.emplace(nodeId);
+}
 
-void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId) {}
+void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId)
+{
+    onWindowStateChangedCallbacks_.erase(nodeId);
+}
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 

@@ -1049,4 +1049,23 @@ HWTEST_F(TextPickerModelTestNg, SetDefaultTextStyle003, TestSize.Level1)
     EXPECT_EQ(Dimension(30.0_vp), pickerProperty->GetDefaultMaxFontSize().value_or(Dimension()));
     EXPECT_EQ(TextOverflow::NONE, pickerProperty->GetDefaultTextOverflow().value_or(TextOverflow::CLIP));
 }
+
+/**
+ * @tc.name: TextPickerModelNGSetEnableHapticFeedback001
+ * @tc.desc: Test SetEnableHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetEnableHapticFeedback001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetEnableHapticFeedback(AceType::RawPtr(frameNode), false);
+    EXPECT_FALSE(textPickerPattern->isEnableHaptic_);
+    auto result = TextPickerModelNG::GetEnableHapticFeedback(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
