@@ -960,11 +960,17 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
     if (IsDraggingPressed(touchPoint.id)) {
         SetDraggingPressedState(false);
     }
+    DragPointerEvent dragPointerEvent;
+    DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
     if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
         SetIsDisableDefaultDropAnimation(true);
-        DragPointerEvent dragPointerEvent;
-        DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
         OnDragEnd(dragPointerEvent, "");
+    }
+    if (touchPoint.type == TouchType::CANCEL) {
+        if (IsUIExtensionComponent(preTargetFrameNode_)) {
+            HandleUIExtensionDragEvent(preTargetFrameNode_, dragPointerEvent, DragEventType::LEAVE);
+        }
+        NotifyDragFrameNode(dragPointerEvent.GetPoint(), DragEventType::LEAVE);
     }
 }
 
