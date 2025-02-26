@@ -137,6 +137,7 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    void GetGestureEventHalfInfo(GestureEvent* info);
     GestureEvent GetGestureEventInfo();
 
     void OnResetStatus() override;

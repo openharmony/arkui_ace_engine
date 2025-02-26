@@ -5446,6 +5446,9 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     if (touchEvent.tiltY.has_value()) {
         event.SetTiltY(touchEvent.tiltY.value());
     }
+    if (touchEvent.rollAngle.has_value()) {
+        event.SetRollAngle(touchEvent.rollAngle.value());
+    }
     event.SetSourceTool(touchEvent.sourceTool);
     EventTarget eventTarget;
     eventTarget.id = GetInspectorId().value_or("").c_str();

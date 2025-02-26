@@ -57,6 +57,9 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     if (event.tiltY.has_value()) {
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
     }
+    if (event.rollAngle.has_value()) {
+        hoverInfo.SetRollAngle(event.rollAngle.value_or(0.0f));
+    }
     NG::PointF lastLocalPoint(event.x, event.y);
     NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
         isPostEventResult_, event.postEventNodeId);
@@ -87,6 +90,9 @@ bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
     }
     if (event.tiltY.has_value()) {
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
+    }
+    if (event.rollAngle.has_value()) {
+        hoverInfo.SetRollAngle(event.rollAngle.value_or(0.0f));
     }
     NG::PointF lastLocalPoint(event.x, event.y);
     NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,

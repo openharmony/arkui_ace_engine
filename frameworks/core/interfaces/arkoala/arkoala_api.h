@@ -154,6 +154,7 @@ struct ArkUITouchPoint {
     ArkUI_Float32 contactAreaHeight;
     ArkUI_Float64 tiltX;
     ArkUI_Float64 tiltY;
+    ArkUI_Float32 rollAngle;
     ArkUI_Float32 toolX;
     ArkUI_Float32 toolY;
     ArkUI_Float32 toolWidth;
@@ -1306,6 +1307,7 @@ struct ArkUIHoverEvent {
     ArkUI_Float32 targetGlobalPositionY;
     ArkUI_Float64 tiltX;
     ArkUI_Float64 tiltY;
+    ArkUI_Float64 rollAngle;
     ArkUI_Float32 width;
     ArkUI_Float32 height;
     ArkUI_Int64 timeStamp;

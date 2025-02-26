@@ -236,6 +236,7 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
         points[i].operatingHand = fingureIterator == fingureEnd ? 0 : fingureIterator->operatingHand_;
@@ -322,6 +323,7 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
     rawInputEvent.actionTouchPoint.tiltX = info->GetTiltX().value_or(0.0f);
     rawInputEvent.actionTouchPoint.tiltY = info->GetTiltY().value_or(0.0f);
+    rawInputEvent.actionTouchPoint.rollAngle = info->GetRollAngle().value_or(0.0f);
     rawInputEvent.actionTouchPoint.toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
     rawInputEvent.actionTouchPoint.pressure = info->GetForce();
     std::array<ArkUITouchPoint, MAX_POINTS> points;
@@ -337,6 +339,7 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
         points[i].nodeY = fingureIterator->localLocation_.GetY();
         points[i].tiltX = rawInputEvent.actionTouchPoint.tiltX;
         points[i].tiltY = rawInputEvent.actionTouchPoint.tiltY;
+        points[i].rollAngle = rawInputEvent.actionTouchPoint.rollAngle;
         fingureIterator++;
     }
     rawInputEvent.touchPointes = &(points[0]);
