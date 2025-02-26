@@ -410,6 +410,7 @@ protected:
     virtual void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) = 0;
 #endif
     void ResetStates();
+    virtual TextDirection GetSystemDirection() = 0;
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
 
     RSBitmapFormat GetBitmapFormat()

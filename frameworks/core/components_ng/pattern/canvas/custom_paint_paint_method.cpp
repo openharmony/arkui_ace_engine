@@ -2060,6 +2060,8 @@ void CustomPaintPaintMethod::ResetStates()
     state_.fillState = PaintState();
     state_.strokeState = StrokePaintState();
     state_.globalState = GlobalPaintState();
+    // Reset Text Direction
+    state_.fillState.SetOffTextDirection(GetSystemDirection());
     // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
     // The default value of TextAlign is TextAlign::START.
