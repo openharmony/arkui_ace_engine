@@ -191,7 +191,7 @@ HWTEST_F(GridArkoalaTest, Jump001, TestSize.Level1)
     CreateDone(frameNode_);
     IncrementAndLayout(__LINE__);
 
-    pattern_->ScrollToIndex(90,false, ScrollAlign::START);
+    pattern_->ScrollToIndex(90, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(90, 96));
