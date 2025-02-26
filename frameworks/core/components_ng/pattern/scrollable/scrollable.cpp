@@ -485,6 +485,9 @@ void Scrollable::HandleTouchUp()
 
 void Scrollable::HandleTouchCancel()
 {
+    if (isDragging_) {
+        return;
+    }
     isTouching_ = false;
     ACE_SCOPED_TRACE("HandleTouchCancel, id:%d, tag:%s", nodeId_, nodeTag_.c_str());
     if (state_ != AnimationState::SPRING && scrollOverCallback_) {
