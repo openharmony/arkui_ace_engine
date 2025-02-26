@@ -142,6 +142,7 @@ private:
     void PlayVerticalEntryOffsetAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, bool rollBack);
     void PlayVerticalScrollEntryBackgroundAnimation(float percent, const RefPtr<FrameNode>& frameNode);
     void PlayVerticalEntryBlurAnimation(const RefPtr<FrameNode>& frameNode, bool rollBack);
+    void ResetBackgroundColor(const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<Color> preNodeBackgroundColor_;
     std::shared_ptr<Color> entryNodeBackgroundColor_;
     std::shared_ptr<Color> parentNodeBackgroundColor_;
