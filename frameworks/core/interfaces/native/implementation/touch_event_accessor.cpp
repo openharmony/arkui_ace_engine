@@ -47,8 +47,7 @@ Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
     CHECK_NULL_RETURN(info, {});
     std::list<TouchLocationInfo> history;
     history = info->GetHistory();
-    LOGE("TouchEventAccessor::GetHistoricalPointsImpl - wrong return");
-    return {};
+    return Converter::ArkValue<Array_HistoricalPoint>(history, Converter::FC);
 }
 Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
 {
