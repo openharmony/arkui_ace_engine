@@ -877,6 +877,11 @@ export struct DatePickerBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
+  // Set DatePickerMode
+  @State datePickerMode: DatePickerMode = DatePickerMode.DATE;
+  @State enableMode: boolean = false;
+  @State enableFlag: boolean = false;
+  @State enableValue: boolean = true;
 
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
@@ -1066,7 +1071,8 @@ export struct DatePickerBootcamp {
         DatePicker({
           start: new Date('1970-1-1'),
           end: new Date('2100-1-1'),
-          selected: this.selectedDate
+          selected: this.selectedDate,
+          mode: useEnabled(this.enableMode, this.datePickerMode)
         })
           .lunar(useEnabled(this.enableLunar, this.lunar))
           .disappearTextStyle({
@@ -1990,6 +1996,7 @@ export struct DatePickerBootcamp {
           .onDateChange((value: Date)=>{
             this.compEventTriggeredLog('选择日期onDateChange触发')
           })
+          .enabled(useEnabled(this.enableFlag, this.enableValue))
       }
     }.width('100%').height('100%')
   }
@@ -2964,6 +2971,27 @@ export struct DatePickerBootcamp {
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'mode',
+          isEnabled: $enableMode,
+          value: $datePickerMode,
+          dataSource: [
+            { label: 'DATE', value: DatePickerMode.DATE },
+            { label: 'YEAR_AND_MONTH', value: DatePickerMode.YEAR_AND_MONTH },
+            { label: 'MONTH_AND_DAY', value: DatePickerMode.MONTH_AND_DAY }
+          ]
+        })
+
+        RadioBlock({
+          title: 'disabled',
+          isEnabled: $enableFlag,
+          value: $enableValue,
+          dataSource: [
+            { label: 'enabled', value: true },
+            { label: 'disabled', value: false }
           ]
         })
       }.width('100%')
