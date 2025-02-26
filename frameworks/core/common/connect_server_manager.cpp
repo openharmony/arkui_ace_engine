@@ -126,7 +126,9 @@ void ConnectServerManager::InitConnectServer()
 #else
     const std::string soDir = "libark_connect_inspector.z.so";
 #endif // ANDROID_PLATFORM
-    handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
+    if (handlerConnectServerSo_ == nullptr) {
+        handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
+    }
     if (handlerConnectServerSo_ == nullptr) {
         LOGE("Cannot find %{public}s", soDir.c_str());
         return;
@@ -147,7 +149,9 @@ void ConnectServerManager::InitConnectServer()
 
 void ConnectServerManager::StartConnectServerWithSocketPair(int32_t socketFd)
 {
-    handlerConnectServerSo_ = dlopen("libark_connect_inspector.z.so", RTLD_LAZY);
+    if (handlerConnectServerSo_ == nullptr) {
+        handlerConnectServerSo_ = dlopen("libark_connect_inspector.z.so", RTLD_LAZY);
+    }
     CHECK_NULL_VOID(handlerConnectServerSo_);
 
     auto startServerForSocketPair =
