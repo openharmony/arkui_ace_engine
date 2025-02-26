@@ -6264,7 +6264,7 @@ int32_t SwiperPattern::CalcComingIndex(float mainDelta) const
     auto firstEndPos = firstItemInfoInVisibleArea.second.endPos;
     auto firstItemLength = firstEndPos - firstStartPos;
     if (LessOrEqual(firstItemLength, 0)) {
-        return true;
+        return GetLoopIndex(currentIndex_);
     }
 
     auto firstIndex = firstItemInfoInVisibleArea.first;
