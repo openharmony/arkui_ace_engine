@@ -2047,4 +2047,20 @@ void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
         child->SetDestroying(false, false);
     }
 }
+
+bool UINode::GreatOrEqualAPITargetVersion(PlatformVersion version) const
+{
+    if (!context_ || context_->GetApiTargetVersion() == 0) {
+        return apiVersion_ >= static_cast<int32_t>(version);
+    }
+    return context_->GreatOrEqualAPITargetVersion(version);
+}
+
+bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
+{
+    if (!context_ || context_->GetApiTargetVersion() == 0) {
+        return apiVersion_ < static_cast<int32_t>(version);
+    }
+    return context_->LessThanAPITargetVersion(version);
+}
 } // namespace OHOS::Ace::NG

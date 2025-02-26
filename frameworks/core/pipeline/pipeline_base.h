@@ -1499,6 +1499,26 @@ public:
 
     std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor();
 
+    void SetApiTargetVersion(int32_t apiTargetVersion)
+    {
+        apiTargetVersion_ = apiTargetVersion;
+    }
+
+    int32_t GetApiTargetVersion() const
+    {
+        return apiTargetVersion_;
+    }
+
+    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
+    {
+        return apiTargetVersion_ >= static_cast<int32_t>(version);
+    }
+
+    bool LessThanAPITargetVersion(PlatformVersion version) const
+    {
+        return apiTargetVersion_ < static_cast<int32_t>(version);
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1684,6 +1704,7 @@ private:
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
+    int32_t apiTargetVersion_ = 0;
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
