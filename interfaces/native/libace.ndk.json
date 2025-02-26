@@ -3070,5 +3070,33 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_SwiperArrowStyle_Destroy"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CustomDialog_CreateOptions"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CustomDialog_DisposeOptions"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CustomDialog_OpenDialog"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CustomDialog_CloseDialog"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CustomDialog_SetLevelMode"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CustomDialog_SetLevelUniqueId"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CustomDialog_SetImmersiveMode"
     }
 ]

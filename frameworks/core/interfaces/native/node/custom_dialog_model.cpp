@@ -18,6 +18,7 @@
 
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
 namespace {
@@ -492,6 +493,49 @@ ArkUI_Int32 RegisterOnDidDisappearDialog(
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->onDidDisappear = callback;
     controllerHandler->onDidDisappearData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
+{
+    CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
+    DialogProperties dialogProperties;
+    ParseDialogProperties(dialogProperties, handle);
+    dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, ERROR_CODE_PARAM_INVALID);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_PARAM_INVALID);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_PARAM_INVALID);
+    if (!dialogProperties.isShowInSubWindow && dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
+    overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, ERROR_CODE_PARAM_INVALID);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_PARAM_INVALID);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_PARAM_INVALID);
+    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
+    if (currentOverlay) {
+        overlayManager = currentOverlay;
+    }
+    overlayManager->CloseCustomDialog(dialogId);
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NG::ViewModel

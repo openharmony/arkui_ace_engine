@@ -85,6 +85,8 @@ ArkUI_Int32 RegisterOnWillAppearDialog(ArkUIDialogHandle handle, void* userData,
 ArkUI_Int32 RegisterOnDidAppearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
 ArkUI_Int32 RegisterOnWillDisappearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
 ArkUI_Int32 RegisterOnDidDisappearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
+ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
+ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId);
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif

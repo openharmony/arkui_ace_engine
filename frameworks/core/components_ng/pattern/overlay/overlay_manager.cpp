@@ -2746,6 +2746,14 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
             callback(-1);
             return;
         }
+    } else if (dialogProps.customCNode.Upgrade()) {
+        auto contentNode = dialogProps.customCNode.Upgrade();
+        customNode = RebuildCustomBuilder(contentNode);
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom cnode.");
+            callback(-1);
+            return;
+        }
     } else {
         auto contentNode = dialogProps.contentNode.Upgrade();
         if (!contentNode) {

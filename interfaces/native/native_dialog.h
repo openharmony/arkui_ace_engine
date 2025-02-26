@@ -78,6 +78,13 @@ typedef bool (*ArkUI_OnWillDismissEvent)(int32_t reason);
 typedef struct ArkUI_DialogDismissEvent ArkUI_DialogDismissEvent;
 
 /**
+ * @brief Defines a struct for the content object of a custom dialog box.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_CustomDialogOptions ArkUI_CustomDialogOptions;
+
+/**
  * @brief Provides the custom dialog box APIs for the native side.
  *
  * @version 1
@@ -450,6 +457,85 @@ void* OH_ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event);
  * @since 12
  */
 int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event);
+
+/**
+ * @brief Displays a custom dialog box.
+ *
+ * @param options Dialog box parameters.
+ * @param callback Indicates the callback for creating dialog. The dialog id is returned.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_OpenDialog(ArkUI_CustomDialogOptions* options, void (*callback)(int32_t dialogId));
+
+/**
+ * @brief Closes a custom dialog box.
+ *
+ * @param dialogId Dialog id.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_CloseDialog(int32_t dialogId);
+
+/**
+ * @brief Creates custom dialog box options.
+ *
+ * @param content Content of the custom dialog box.
+ * @return Returns the pointer to the custom dialog box options.
+ * @since 16
+ */
+ArkUI_CustomDialogOptions* OH_ArkUI_CustomDialog_CreateOptions(ArkUI_NodeHandle content);
+
+/**
+ * @brief Destroys the custom dialog box options.
+ *
+ * @param options The pointer to the custom dialog box options.
+ * @since 16
+ */
+void OH_ArkUI_CustomDialog_DisposeOptions(ArkUI_CustomDialogOptions* options);
+
+/**
+ * @brief Sets the level mode for a custom dialog box.
+ *
+ * @note This method must be called before the <b>OH_ArkUI_CustomDialog_OpenDialog</b> method.
+ * @param options Indicates the pointer to the custom dialog options.
+ * @param levelMode Indicates the level mode. The parameter type is {@link ArkUI_LevelMode}.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_SetLevelMode(ArkUI_CustomDialogOptions* options, ArkUI_LevelMode levelMode);
+
+/**
+ * @brief Sets the level uniqueId for a custom dialog box.
+ *
+ * @note This method must be called before the <b>OH_ArkUI_CustomDialog_OpenDialog</b> method.
+ * @param options Indicates the pointer to the custom dialog options.
+ * @param uniqueId Indicates the unique id of any nodes in router or navigation pages.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_SetLevelUniqueId(ArkUI_CustomDialogOptions* options, int32_t uniqueId);
+
+/**
+ * @brief Sets the immersive mode for a custom dialog box.
+ *
+ * @note This method must be called before the <b>OH_ArkUI_CustomDialog_OpenDialog</b> method.
+ * @param options Indicates the pointer to the custom dialog options.
+ * @param immersiveMode Indicates the immersive mode. The parameter type is {@link ArkUI_ImmersiveMode}.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_SetImmersiveMode(ArkUI_CustomDialogOptions* options, ArkUI_ImmersiveMode immersiveMode);
 
 #ifdef __cplusplus
 };
