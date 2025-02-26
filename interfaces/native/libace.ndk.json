@@ -3162,5 +3162,37 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_XComponent_IsInitialized"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextPickerRangeContentArray_Create"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextPickerRangeContentArray_SetIconAtIndex"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextPickerRangeContentArray_SetTextAtIndex"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextPickerRangeContentArray_Destroy"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextCascadePickerRangeContentArray_Create"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextCascadePickerRangeContentArray_SetTextAtIndex"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextCascadePickerRangeContentArray_Destroy"
     }
 ]

@@ -2376,6 +2376,20 @@ typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
  */
 typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 
+/**
+  * @brief TextPicker single column selector, supports mixing text and images.
+  *
+  * @since 18
+  */
+typedef struct ArkUI_TextPickerRangeContentArray ArkUI_TextPickerRangeContentArray;
+
+ /**
+   * @brief TextPicker multi column selector, supports mixing text and images.
+   *
+   * @since 18
+   */
+typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerRangeContentArray;
+
 typedef struct {
     float x;
     float y;
@@ -4830,6 +4844,84 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions
  * @since 16
  */
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option);
+
+/**
+ *@brief Creates a TextPickerRangeContent instance.
+ *
+ *@param length The length of the picker array.
+ *@return Returns a <b>TextPickerRangeContent</b> instance.
+ *@since 18
+ */
+ArkUI_TextPickerRangeContentArray* OH_ArkUI_TextPickerRangeContentArray_Create(int32_t length);
+
+/**
+ *@brief Sets the icon of items in a text picker ranges.
+ *
+ *@param handle The TextPickerRangeContent instance for obtaining information.
+ *@param icon Icon address.
+ *@param index The index position of the value to be obtained.
+ *@since 18
+ */
+void OH_ArkUI_TextPickerRangeContentArray_SetIconAtIndex(
+    ArkUI_TextPickerRangeContentArray* handle, char* icon, int32_t index);
+
+/**
+ *@brief Sets the text of items in a text picker ranges.
+ *
+ *@param handle The TextPickerRangeContent instance for obtaining information.
+ *@param text Text content.
+ *@param index The index position of the value to be obtained.
+ *@since 18
+ */
+void OH_ArkUI_TextPickerRangeContentArray_SetTextAtIndex(
+    ArkUI_TextPickerRangeContentArray* handle, char* text, int32_t index);
+
+/**
+ *@brief Destroys the TextPickerRangeContent instance.
+ *
+ *@param handle The TextPickerRangeContent instance for obtaining information.
+ *@since 18
+ */
+void OH_ArkUI_TextPickerRangeContentArray_Destroy(ArkUI_TextPickerRangeContentArray* handle);
+
+/**
+ *@brief Creates a TextCascadePickerRangeContent instance.
+ *
+ *@param length The length of the picker arry.
+ *@return Returns a <b>TextCascadePickerRangeContent</b> instance.
+ *@since 18
+ */
+ArkUI_TextCascadePickerRangeContentArray* OH_ArkUI_TextCascadePickerRangeContentArray_Create(int32_t length);
+
+/**
+ *@brief Sets the text of items in a multi text picker ranges.
+ *
+ *@param handle The TextCascadePickerRangeContent instance for obtaining information.
+ *@param text text content.
+ *@param index The index position of the value to be obtained.
+ *@since 18
+ */
+void OH_ArkUI_TextCascadePickerRangeContentArray_SetTextAtIndex(
+    ArkUI_TextCascadePickerRangeContentArray* handle, char* text, int32_t index);
+
+/**
+ *@brief Sets the child info of items in a multi text picker ranges.
+ *
+ *@param handle The TextCascadePickerRangeContent instance for obtaining information.
+ *@param child The child instance.
+ *@param index The index position of the value to be obtained.
+ *@since 18
+ */
+void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
+    ArkUI_TextCascadePickerRangeContentArray* handle, ArkUI_TextCascadePickerRangeContentArray* child, int32_t index);
+
+/**
+ *@brief Destroys the TextCascadePickerRangeContent instance.
+ *
+ *@param handle The TextCascadePickerRangeContent instance for obtaining information.
+ *@since 18
+ */
+void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
 #ifdef __cplusplus
 };
 #endif
