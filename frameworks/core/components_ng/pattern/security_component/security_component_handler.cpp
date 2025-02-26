@@ -580,14 +580,12 @@ bool SecurityComponentHandler::GetWindowSceneWindowId(RefPtr<FrameNode>& node, u
     return true;
 }
 
-bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+bool SecurityComponentHandler::GetPaddingInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
-    buttonInfo.nodeId_ = node->GetId();
-
     auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SecurityComponentTheme>();
@@ -602,6 +600,18 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         layoutProperty->GetBackgroundLeftPadding().value_or(theme->GetBackgroundLeftPadding()).ConvertToVp();
     buttonInfo.textIconSpace_ =
         layoutProperty->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToVp();
+    return true;
+}
+
+bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    buttonInfo.nodeId_ = node->GetId();
+    if (!GetPaddingInfo(buttonInfo, node)) {
+        SC_LOG_WARN("InitBaseInfoWarning: Get padding info failed");
+        return false;
+    }
 
     if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
         SC_LOG_WARN("InitBaseInfoWarning: Get display offset failed");
@@ -620,6 +630,8 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_RETURN(container, false);
     uint32_t windId = container->GetWindowId();
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
     if (pipeline->IsFocusWindowIdSetted()) {
         windId = pipeline->GetFocusWindowId();
     }
@@ -627,6 +639,13 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);
+    buttonInfo.crossAxisState_ = CrossAxisState::STATE_INVALID;
+    auto instanceId = pipeline->GetInstanceId();
+    auto window = Platform::AceContainer::GetUIWindow(instanceId);
+    if (window) {
+        buttonInfo.crossAxisState_ = static_cast<CrossAxisState>(window->GetCrossAxisState());
+        buttonInfo.displayId_ = window->GetDisplayId();
+    }
     return true;
 }
 
