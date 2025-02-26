@@ -3851,3 +3851,12 @@ let KeyProcessingMode;
   KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
   KeyProcessingMode[KeyProcessingMode.ANCESTOR_EVENT = 1] = 'ANCESTOR_EVENT';
 })(KeyProcessingMode || (KeyProcessingMode = {}));
+
+let AxisAction;
+(function (AxisAction) {
+  AxisAction[AxisAction.NONE = 0] = 'NONE';
+  AxisAction[AxisAction.BEGIN = 1] = 'BEGIN';
+  AxisAction[AxisAction.UPDATE = 2] = 'UPDATE';
+  AxisAction[AxisAction.END = 3] = 'END';
+  AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
+})(AxisAction || (AxisAction = {}));
