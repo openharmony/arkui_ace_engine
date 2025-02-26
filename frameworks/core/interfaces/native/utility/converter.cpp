@@ -207,6 +207,14 @@ void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& 
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 }
 
+void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
+{
+    AssignArkValue(dst.touchObject, src);
+    dst.size = ArkValue<Ark_Number>(src.GetSize());
+    dst.force = ArkValue<Ark_Number>(src.GetForce());
+    dst.timestamp = ArkValue<Ark_Number>(src.GetTimeStamp().time_since_epoch().count());
+}
+
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)
 {
     const auto start = PickerDate(1970, 1, 1);

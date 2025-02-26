@@ -115,4 +115,58 @@ HWTEST_F(TouchEventAccessorTest, GetTypeTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: GetHistoricalPointsTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventAccessorTest, GetHistoricalPointsTest, TestSize.Level1)
+{
+    TouchEventInfo* eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    using TimeStamp = std::chrono::high_resolution_clock::time_point;
+    using Duration = std::chrono::high_resolution_clock::duration;
+    constexpr int expectedTime = 123;
+    constexpr float expectedDisplayX = 1.5f;
+    constexpr float expectedDisplayY = 1.7f;
+    constexpr int fingerId = 0;
+    constexpr int expectedDeviceId = 256;
+    constexpr float expectedWindowX = 2.5f;
+    constexpr float expectedWindowY = 3.7f;
+    constexpr float expectedX = 4.5f;
+    constexpr float expectedY = 5.7f;
+    constexpr float expectedForce = 3.5f;
+    constexpr float expectedSize = 1.75f;
+    Duration value = Duration(std::chrono::nanoseconds(expectedTime));
+    TouchLocationInfo locationInfo(fingerId);
+    Offset offset(expectedDisplayX, expectedDisplayY);
+    locationInfo.SetScreenLocation(offset);
+    locationInfo.SetTouchDeviceId(expectedDeviceId);
+    locationInfo.SetForce(expectedForce);
+    locationInfo.SetSize(expectedSize);
+    locationInfo.SetTimeStamp(TimeStamp() + value);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    Offset globalOffset(expectedWindowX, expectedWindowY);
+    locationInfo.SetGlobalLocation(globalOffset);
+    Offset localOffset(expectedX, expectedY);
+    locationInfo.SetLocalLocation(localOffset);
+    eventInfo->AddHistoryLocationInfo(std::move(locationInfo));
+    Array_HistoricalPoint history = accessor_->getHistoricalPoints(peer_);
+    ASSERT_EQ(static_cast<int32_t>(history.length), 1);
+    ASSERT_NE(history.array, nullptr);
+    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.displayX), expectedDisplayX);
+    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.displayY), expectedDisplayY);
+    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.screenX), expectedWindowX);
+    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.screenY), expectedWindowY);
+    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.windowX), expectedWindowX);
+    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.windowY), expectedWindowY);
+    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.x), expectedX);
+    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.y), expectedY);
+    EXPECT_EQ(Converter::Convert<int32_t>(history.array->touchObject.id), expectedDeviceId);
+    EXPECT_EQ(history.array->touchObject.type, Ark_TouchType::ARK_TOUCH_TYPE_DOWN);
+    EXPECT_EQ(Converter::Convert<float>(history.array->force), expectedForce);
+    EXPECT_EQ(Converter::Convert<float>(history.array->size), expectedSize);
+    EXPECT_EQ(Converter::Convert<int32_t>(history.array->timestamp), expectedTime);
+}
+
 }
