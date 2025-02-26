@@ -22,6 +22,7 @@
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -35,6 +36,10 @@ namespace {
     constexpr int32_t NUM_4 = 4;
     constexpr int32_t STD_TM_START_YEAR = 1900;
     constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+    constexpr double NUM_DOUBLE_0 = 0.;
+    constexpr double NUM_DOUBLE_1 = 1.;
+    constexpr double NUM_DOUBLE_100 = 100.;
+    constexpr int32_t NUM_PERCENT_100 = 100;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -848,6 +853,20 @@ Gradient Convert(const Ark_LinearGradient& value)
     Gradient gradient;
     LOGE("Conversion for Ark_LinearGradient to Gradient is not yet implemented!");
     return gradient;
+}
+
+template<>
+std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
+{
+    auto color = Converter::OptConvert<Color>(src.color);
+    auto offset = Converter::Convert<Dimension>(src.offset);
+    // normalize the offset in a range [0.0 ... 1.0]
+    if (offset.Unit() == DimensionUnit::PERCENT) {
+        offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_100) / NUM_PERCENT_100);
+    } else {
+        offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_1));
+    }
+    return std::make_pair(color, offset);
 }
 
 template<>
