@@ -154,9 +154,13 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 
     if (jumpIndex_) {
         algo->SetJumpIndex(jumpIndex_.value());
-        UpdateLayoutRange(GetAxis(), *jumpIndex_, false);
+        RequestJump(*jumpIndex_);
     } else if (targetIndex_) {
-        algo->SetTargetIndex(targetIndex_.value());
+        if (RequestFillToTarget(*targetIndex_)) {
+            algo->SetTargetIndex(targetIndex_.value());
+        } else {
+            targetIndex_.reset(); // postpone targetIndex_ to next frame
+        }
     }
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
@@ -1147,7 +1151,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         indexsInAnimation_.clear();
     }
 
-    UpdateLayoutRange(GetAxis(), std::nullopt, isInit);
+    UpdateLayoutRange(GetAxis(), isInit);
 
     const auto& paddingProperty = props->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;

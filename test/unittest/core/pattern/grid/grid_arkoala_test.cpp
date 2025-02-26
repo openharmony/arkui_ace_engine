@@ -191,13 +191,50 @@ HWTEST_F(GridArkoalaTest, Jump001, TestSize.Level1)
     CreateDone(frameNode_);
     IncrementAndLayout(__LINE__);
 
-    pattern_->ScrollToIndex(90);
+    pattern_->ScrollToIndex(90, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(90, 96));
     EXPECT_EQ(pattern_->info_.jumpIndex_, -2);
     EXPECT_EQ(pattern_->info_.startIndex_, 90);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 45);
+    EXPECT_EQ(GetChildRect(frameNode_, 90).ToString(), "RectT (0.00, 8.00) - [240.00 x 450.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (240.00, 466.00) - [240.00 x 450.00]");
+}
+
+/**
+ * @tc.name: TargetAnimation001
+ * @tc.desc: Test FillToTarget on ScrollWindowAdapter with MockKoala
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridArkoalaTest, TargetAnimation001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(8.0f));
+    InitMockLazy(100);
+    CreateDone(frameNode_);
+    IncrementAndLayout(__LINE__);
+
+    pattern_->ScrollToIndex(10, true, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->info_.endIndex_, 5);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 10));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->info_.endIndex_, 5);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1460.f);
+    EXPECT_EQ(pattern_->info_.endIndex_, 5);
+    UpdateCurrentOffset(-400.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    UpdateCurrentOffset(-450.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
+    EXPECT_EQ(pattern_->info_.endIndex_, 9);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 982.0f);
 }
 
 /**

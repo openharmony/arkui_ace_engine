@@ -322,7 +322,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
     CheckScrollable();
-    UpdateLayoutRange(layoutInfo_->axis_, std::nullopt, !isInitialized_);
+    UpdateLayoutRange(layoutInfo_->axis_, !isInitialized_);
 
     isInitialized_ = true;
 

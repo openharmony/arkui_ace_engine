@@ -26,6 +26,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/scroll/scroll_controller_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,12 +41,14 @@ public:
     {}
     ~ScrollWindowAdapter() override = default;
 
-    /**
-     * @param index of the latest pivot item.
-     */
-    void UpdateMarkItem(int32_t index, bool reset);
-
     void UpdateViewport(const SizeF& size, Axis axis);
+
+    void PrepareReset(int32_t idx);
+    void PrepareJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+    /**
+     * @return true if underlying items are ready
+     */
+    bool PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
 
     /**
      * @param x positive if scrolling right, negative if scrolling left
@@ -76,6 +79,11 @@ public:
         return totalCount_;
     }
 
+    /**
+     * @brief initialize layout info when frontend recomposition starts
+     *
+     * @param offset offset of LazyForEach in parent's children list
+     */
     void Prepare(uint32_t offset);
 
 private:
@@ -87,6 +95,12 @@ private:
      * @param markIdx
      */
     void RequestRecompose(int32_t markIdx) const;
+
+    /**
+     * @brief Determine if more items can be filled in @c direction to reach targetIdx_
+     * @return true if need to stop filling in @c direction
+     */
+    bool FillToTarget(FillDirection direction, int32_t curIdx) const;
 
     SizeF size_ = { 0.0f, 0.0f };
     RefPtr<FillAlgorithm> fillAlgorithm_;
@@ -104,7 +118,17 @@ private:
 
     Axis axis_ = Axis::VERTICAL;
     uint32_t offset_ = 0; // offset of current LazyForEach in node tree
-    bool rangeMode_ = false;   // true if providing item range to frontend directly
-    bool jumpPending_ = false; // will perform a jump on the next recomposition
+
+    struct PendingJump {
+        PendingJump(int32_t jumpIdx, ScrollAlign align, float extraOffset)
+            : index(jumpIdx), align(align), extraOffset(extraOffset)
+        {}
+        int32_t index = -1;
+        ScrollAlign align = ScrollAlign::START;
+        float extraOffset = 0.0f;
+    };
+    std::unique_ptr<PendingJump> jumpPending_; // to perform a jump on the next recomposition
+    std::unique_ptr<PendingJump> target_;      // to scroll with animation to target index
+    bool rangeMode_ = false;                   // true if providing item range to frontend directly
 };
 } // namespace OHOS::Ace::NG

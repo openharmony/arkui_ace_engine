@@ -141,4 +141,34 @@ HWTEST_F(ListArkoalaTest, Reset001, TestSize.Level1)
     EXPECT_EQ(lazy_.GetRange(), std::pair(50, 64));
     FlushLayoutTask(frameNode_);
 }
+
+/**
+ * @tc.name: TargetAnimation001
+ * @tc.desc: Test FillToTarget on ScrollWindowAdapter with MockKoala
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListArkoalaTest, TargetAnimation001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(10.0f));
+    InitMockLazy(100);
+    CreateDone(frameNode_);
+    IncrementAndLayout(__LINE__);
+
+    pattern_->ScrollToIndex(10, true, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 10));
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 690.f);
+    UpdateCurrentOffset(-400.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(pattern_->GetStartIndex(), 4);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(4, 8));
+    UpdateCurrentOffset(-290.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(7, 12));
+    EXPECT_EQ(pattern_->GetStartIndex(), 7);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 210.0f);
+}
 } // namespace OHOS::Ace::NG

@@ -239,7 +239,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckRestartSpring(sizeDiminished);
 
     DrivenRender(dirty);
-    UpdateLayoutRange(GetAxis(), std::nullopt, !isInitialized_);
+    UpdateLayoutRange(GetAxis(), !isInitialized_);
 
     SetScrollSource(SCROLL_FROM_NONE);
     isInitialized_ = true;
@@ -655,12 +655,13 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
-        UpdateLayoutRange(GetAxis(), *jumpIndex_, false);
+        RequestJump(*jumpIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
         jumpIndex_.reset();
     }
     if (targetIndex_) {
         listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
+        RequestFillToTarget(*targetIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
     }
     if (jumpIndexInGroup_) {
         listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
@@ -2723,7 +2724,7 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
-    UpdateLayoutRange(GetAxis(), startIndex, false);
+    RequestReset(startIndex);
 }
 
 void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)

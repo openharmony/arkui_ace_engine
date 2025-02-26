@@ -49,16 +49,28 @@ protected:
     }
 
     /**
-     * @brief Pass latest layout range info to adapter.
-     * @param reset true if previous info needs to be cleared when @c markIdx is provided
+     * @brief Pass latest layout viewport to adapter.
      */
-    void UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx, bool firstLayout, bool resetOnJump = false);
+    void UpdateLayoutRange(Axis axis, bool firstLayout);
 
     /**
      * @brief Pass scroll offset to adapter.
      * @return true if adapter requests a recompose
      */
     bool UpdateOffset(float delta);
+
+    void RequestJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+
+    /**
+     * @return false if a recomposition is required first
+     */
+    bool RequestFillToTarget(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+
+    /**
+     * @brief Should call when layout data needs to be cleared and re-calculated
+     * @param idx first item in viewport after reset
+     */
+    void RequestReset(int32_t idx);
 
 private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;

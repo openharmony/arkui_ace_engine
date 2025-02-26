@@ -26,18 +26,37 @@
 
 namespace OHOS::Ace::NG {
 
-void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool reset)
+void ScrollWindowAdapter::PrepareReset(int32_t idx)
 {
-    if (index == LAST_ITEM) {
-        index = totalCount_ - 1;
+    markIndex_ = idx;
+    jumpPending_ = std::make_unique<PendingJump>(idx, ScrollAlign::START, 0.0f);
+    fillAlgorithm_->MarkJump();
+    RequestRecompose(idx);
+}
+
+void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extraOffset)
+{
+    if (idx == LAST_ITEM) {
+        idx = totalCount_ - 1;
     }
-    if (!reset && markIndex_ == index) {
+    if (idx == markIndex_) {
         return;
     }
-    markIndex_ = index;
-    jumpPending_ = true;
+    markIndex_ = idx;
+    jumpPending_ = std::make_unique<PendingJump>(idx, align, extraOffset);
     fillAlgorithm_->MarkJump();
-    RequestRecompose(index);
+    RequestRecompose(idx);
+}
+
+bool ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align, float extraOffset)
+{
+    if (target_ && targetIdx == target_->index) {
+        target_.reset(); // prevent loop and good timing to reset target_
+        return true;
+    }
+    target_ = std::make_unique<PendingJump>(targetIdx, align, extraOffset);
+    RequestRecompose(markIndex_);
+    return false;
 }
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
@@ -97,6 +116,11 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     }
     if (index >= totalCount_ - 1 && direction == FillDirection::END) {
         return nullptr;
+    }
+    if (target_) {
+        bool reached = FillToTarget(direction, index);
+        return reached ? nullptr : pendingNode;
+        // keep creating until targetNode is reached
     }
     if (!filled_.count(index)) {
         // 2: measure the pendingNode
@@ -159,11 +183,18 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
     filled_.clear();
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
     if (jumpPending_) {
-        jumpPending_ = false;
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
-            scroll->ScrollToIndex(markIndex_, false, ScrollAlign::START, std::nullopt);
+            scroll->ScrollToIndex(markIndex_, false, jumpPending_->align, jumpPending_->extraOffset);
         } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
             swiper->ChangeIndex(markIndex_, false);
+        }
+        jumpPending_.reset();
+    } else if (target_) {
+        if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
+            scroll->ScrollToIndex(target_->index, true, target_->align, target_->extraOffset);
+        } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
+            std::cout << "changeIdx to " << target_->index << "\n";
+            swiper->ChangeIndex(target_->index, true);
         }
     }
 }
@@ -205,5 +236,19 @@ FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
 RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
 {
     return Claim(GetChildPtrByIndex(index));
+}
+
+bool ScrollWindowAdapter::FillToTarget(FillDirection direction, int32_t curIdx) const
+{
+    if (!target_) {
+        return true;
+    }
+    if (direction == FillDirection::START ? curIdx > target_->index : curIdx < target_->index) {
+        return false;
+    }
+    if (curIdx == target_->index) {
+        return true;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

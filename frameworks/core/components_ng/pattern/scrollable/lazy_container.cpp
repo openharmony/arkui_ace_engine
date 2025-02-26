@@ -26,14 +26,12 @@ bool LazyContainer::UpdateOffset(float delta)
     return false;
 }
 
-void LazyContainer::UpdateLayoutRange(Axis axis, std::optional<int32_t> markIdx, bool firstLayout, bool resetOnJump)
+void LazyContainer::UpdateLayoutRange(Axis axis, bool firstLayout)
 {
     if (adapter_) {
         adapter_->UpdateViewport(GetHost()->GetGeometryNode()->GetFrameSize(), axis);
-        if (markIdx && *markIdx >= 0) {
-            adapter_->UpdateMarkItem(*markIdx, resetOnJump);
-        } else if (firstLayout) {
-            adapter_->UpdateMarkItem(0, resetOnJump);
+        if (firstLayout) {
+            adapter_->PrepareReset(0);
         }
     }
 }
@@ -68,5 +66,27 @@ RefPtr<FrameNode> LazyContainer::GetOrCreateChildByIndex(uint32_t index)
 RefPtr<FillAlgorithm> LinearLazyContainer::CreateFillAlgorithm()
 {
     return MakeRefPtr<StaggeredFillAlgorithm>(GetLayoutProperty<LayoutProperty>());
+}
+
+void LazyContainer::RequestJump(int32_t idx, ScrollAlign align, float extraOffset)
+{
+    if (adapter_) {
+        adapter_->PrepareJump(idx, align, extraOffset);
+    }
+}
+
+void LazyContainer::RequestReset(int32_t idx)
+{
+    if (adapter_ && idx >= 0) {
+        adapter_->PrepareReset(idx);
+    }
+}
+
+bool LazyContainer::RequestFillToTarget(int32_t idx, ScrollAlign align, float extraOffset)
+{
+    if (adapter_) {
+        return adapter_->PrepareLoadToTarget(idx, align, extraOffset);
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
