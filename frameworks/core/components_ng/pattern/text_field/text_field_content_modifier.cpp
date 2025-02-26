@@ -16,13 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

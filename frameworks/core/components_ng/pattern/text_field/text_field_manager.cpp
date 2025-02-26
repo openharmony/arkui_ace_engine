@@ -494,6 +494,48 @@ bool TextFieldManagerNG::IsAutoFillPasswordType(const TextFieldInfo& textFieldIn
            textFieldInfo.contentType == TextContentType::NEW_PASSWORD;
 }
 
+void TextFieldManagerNG::SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField)
+{
+    const auto& pattern = onFocusTextField.Upgrade();
+    if (pattern && pattern->GetHost()) {
+        onFocusTextFieldId_ = pattern->GetHost()->GetId();
+    }
+    if (onFocusTextField_ != onFocusTextField) {
+        SetImeAttached(false);
+        GetOnFocusTextFieldInfo(onFocusTextField);
+    }
+    onFocusTextField_ = onFocusTextField;
+}
+
+bool TextFieldManagerNG::GetImeShow() const
+{
+    if (!imeShow_ && imeAttachCalled_) {
+        TAG_LOGI(ACE_KEYBOARD, "imeNotShown but attach called, still consider that as shown");
+    }
+    return imeShow_ || imeAttachCalled_;
+}
+
+void TextFieldManagerNG::AddAvoidKeyboardCallback(
+    int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
+{
+    if (isCustomKeyboard) {
+        avoidCustomKeyboardCallbacks_.insert({ id, std::move(callback) });
+    } else {
+        avoidSystemKeyboardCallbacks_.insert({ id, std::move(callback) });
+    }
+}
+
+void TextFieldManagerNG::OnAfterAvoidKeyboard(bool isCustomKeyboard)
+{
+    auto callbacks =
+        isCustomKeyboard ? std::move(avoidCustomKeyboardCallbacks_) : std::move(avoidSystemKeyboardCallbacks_);
+    for (const auto& pair : callbacks) {
+        if (pair.second) {
+            pair.second();
+        }
+    }
+}
+
 TextFieldManagerNG::~TextFieldManagerNG()
 {
     textFieldInfoMap_.clear();

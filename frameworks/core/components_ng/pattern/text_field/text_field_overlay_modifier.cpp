@@ -16,13 +16,9 @@
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/image_painter.h"
 
 namespace OHOS::Ace::NG {
 namespace {

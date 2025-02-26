@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
-#include "core/pipeline/pipeline_base.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/i18n/localization.h"
@@ -58,14 +57,8 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_style.h"
-#include "core/components_ng/pattern/search/search_event_hub.h"
-#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -10774,6 +10767,139 @@ void TextFieldPattern::HandleButtonMouseEvent(const RefPtr<TextInputResponseArea
         textFieldOverlayModifier_->ClearHoverColorAndRects();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+double TextFieldPattern::GetPercentReferenceWidth() const
+{
+    auto host = GetHost();
+    if (host && host->GetGeometryNode() && host->GetGeometryNode()->GetParentLayoutConstraint().has_value()) {
+        return host->GetGeometryNode()->GetParentLayoutConstraint()->percentReference.Width();
+    }
+    return 0.0f;
+}
+
+void TextFieldPattern::NotifyKeyboardClosedByUser()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosedByUser");
+    isKeyboardClosedByUser_ = true;
+    FocusHub::LostFocusToViewRoot();
+    isKeyboardClosedByUser_ = false;
+}
+
+void TextFieldPattern::NotifyKeyboardClosed()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
+    CHECK_NULL_VOID(IsStopEditWhenCloseKeyboard()); // false when specified product
+    if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
+        FocusHub::LostFocusToViewRoot();
+    }
+}
+
+void TextFieldPattern::AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto dragDropManager = context->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+}
+
+void TextFieldPattern::RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto dragDropManager = context->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->RemoveDragFrameNode(frameNode->GetId());
+}
+
+bool TextFieldPattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    if (!IsSelected()) {
+        return false;
+    }
+    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
+    auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
+    auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
+    Offset offset = localOffset - Offset(offsetX, offsetY);
+    for (const auto& rect : selectController_->GetSelectedRects()) {
+        bool isInRange = rect.IsInRegion({ offset.GetX(), offset.GetY() });
+        if (isInRange) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void TextFieldPattern::SetUnitNode(const RefPtr<NG::UINode>& unitNode)
+{
+    if (unitNode_ && responseArea_) {
+        // clear old node
+        auto unitResponseArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
+        CHECK_NULL_VOID(unitResponseArea);
+        unitResponseArea->ClearArea();
+        responseArea_ = nullptr;
+    }
+    unitNode_ = unitNode;
+}
+
+void TextFieldPattern::SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
+{
+    if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        // close customKeyboard and request system keyboard
+        CloseCustomKeyboard();
+        customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+        RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
+        StartTwinkling();
+        return;
+    }
+    if (!customKeyboardBuilder_ && keyboardBuilder) {
+        // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        if (imeShown_) {
+            CloseKeyboard(true);
+            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
+            StartTwinkling();
+            return;
+        }
+#endif
+    }
+    customKeyboardBuilder_ = keyboardBuilder;
+}
+
+void TextFieldPattern::SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)
+{
+    if (customKeyboard_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        // close customKeyboard and request system keyboard
+        CloseCustomKeyboard();
+        customKeyboard_ = keyboardBuilder; // refresh current keyboard
+        RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
+        StartTwinkling();
+        return;
+    }
+    if (!customKeyboard_ && keyboardBuilder) {
+        // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        if (imeShown_) {
+            CloseKeyboard(true);
+            customKeyboard_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
+            StartTwinkling();
+            return;
+        }
+#endif
+    }
+    customKeyboard_ = keyboardBuilder;
+}
+
+bool TextFieldPattern::IsStopEditWhenCloseKeyboard()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, true);
+    return !(context->GetIsFocusActive() && independentControlKeyboard_);
 }
 
 } // namespace OHOS::Ace::NG

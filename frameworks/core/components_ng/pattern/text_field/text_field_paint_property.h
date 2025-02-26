@@ -16,13 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PAINT_PROPERTY_H
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
