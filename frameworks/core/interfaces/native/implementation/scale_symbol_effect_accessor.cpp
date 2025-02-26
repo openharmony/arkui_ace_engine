@@ -15,17 +15,23 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "scale_symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScaleSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
 {
+    CHECK_NULL_VOID(peer);
+    delete peer;
 }
 Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
                                const Opt_EffectDirection* direction)
 {
-    return {};
+    auto convScore = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(*scope);
+    auto convDirection = Converter::Convert<std::optional<OHOS::Ace::CommonSubType>>(*direction);
+    return new ScaleSymbolEffectPeer(convScore.value(), convDirection.value());
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,19 +39,39 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_EffectScope GetScopeImpl(Ark_ScaleSymbolEffect peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_EffectScope>(ARK_EFFECT_SCOPE_LAYER));
+    auto optValue = peer->effectOptions->GetScopeType();
+    CHECK_NULL_RETURN(optValue, Converter::ArkValue<Ark_EffectScope>(ARK_EFFECT_SCOPE_LAYER));
+    return Converter::ArkValue<Ark_EffectScope>(optValue.value());
 }
 void SetScopeImpl(Ark_ScaleSymbolEffect peer,
                   Ark_EffectScope scope)
 {
+    CHECK_NULL_VOID(peer);
+    auto scopeConv = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(scope);
+    if (scopeConv) {
+        peer->effectOptions->SetScopeType(scopeConv.value());
+    } else {
+        peer->effectOptions->SetScopeType(OHOS::Ace::ScopeType::LAYER);
+    }
 }
 Ark_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_EffectDirection>(ARK_EFFECT_DIRECTION_DOWN));
+    auto optValue = peer->effectOptions->GetCommonSubType();
+    CHECK_NULL_RETURN(optValue, Converter::ArkValue<Ark_EffectDirection>(ARK_EFFECT_DIRECTION_DOWN));
+    return Converter::ArkValue<Ark_EffectDirection>(optValue.value());
 }
 void SetDirectionImpl(Ark_ScaleSymbolEffect peer,
                       Ark_EffectDirection direction)
 {
+    CHECK_NULL_VOID(peer);
+    auto directionConv = Converter::Convert<std::optional<OHOS::Ace::CommonSubType>>(direction);
+    if (directionConv) {
+        peer->effectOptions->SetCommonSubType(directionConv.value());
+    } else {
+        peer->effectOptions->SetCommonSubType(OHOS::Ace::CommonSubType::DOWN);
+    }
 }
 } // ScaleSymbolEffectAccessor
 const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()

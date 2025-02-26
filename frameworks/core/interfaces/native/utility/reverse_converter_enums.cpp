@@ -782,4 +782,21 @@ void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
             break;
     }
 }
+
+void AssignArkValue(Ark_EffectScope& dst, const OHOS::Ace::ScopeType& src)
+{
+    switch (src) {
+        case OHOS::Ace::ScopeType::LAYER: dst = ARK_EFFECT_SCOPE_LAYER; break;
+        case OHOS::Ace::ScopeType::WHOLE: dst = ARK_EFFECT_SCOPE_WHOLE; break;
+        default: dst = static_cast<Ark_EffectScope>(-1);
+    }
+}
+void AssignArkValue(Ark_EffectDirection& dst, const OHOS::Ace::CommonSubType& src)
+{
+    switch (src) {
+        case OHOS::Ace::CommonSubType::DOWN: dst = ARK_EFFECT_DIRECTION_DOWN; break;
+        case OHOS::Ace::CommonSubType::UP: dst = ARK_EFFECT_DIRECTION_UP; break;
+        default: dst = static_cast<Ark_EffectDirection>(-1);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

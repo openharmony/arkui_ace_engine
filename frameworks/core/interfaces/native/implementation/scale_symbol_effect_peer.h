@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
- #pragma once
+#pragma once
 
- #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+
+struct ScaleSymbolEffectPeer {
+public:
+    ScaleSymbolEffectPeer(OHOS::Ace::ScopeType scope, OHOS::Ace::CommonSubType direction) {
+        effectOptions = new OHOS::Ace::NG::SymbolEffectOptions(OHOS::Ace::SymbolEffectType::SCALE, scope, direction);
+    }
+    OHOS::Ace::NG::SymbolEffectOptions* effectOptions;
+};
+
  
- struct ReplaceSymbolEffectPeer {
- public:
-     ReplaceSymbolEffectPeer(OHOS::Ace::ScopeType scope) {
-         effectOptions = new OHOS::Ace::NG::SymbolEffectOptions(OHOS::Ace::SymbolEffectType::REPLACE, scope);
-     }
-     OHOS::Ace::NG::SymbolEffectOptions* effectOptions;
- };

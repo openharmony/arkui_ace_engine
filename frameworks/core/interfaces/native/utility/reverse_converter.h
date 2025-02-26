@@ -163,6 +163,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
+    void AssignArkValue(Ark_EffectDirection& dst, const OHOS::Ace::CommonSubType& src);
+    void AssignArkValue(Ark_EffectScope& dst, const OHOS::Ace::ScopeType& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src);
     void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);

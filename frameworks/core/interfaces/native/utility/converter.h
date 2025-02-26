@@ -581,6 +581,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src);
     template<> void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src);
     template<> void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::CommonSubType>& dst, const Ark_EffectDirection& src);
     template<> void AssignCast(std::optional<ContentClipMode>& dst, const Ark_ContentClipMode& src);
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
@@ -649,6 +650,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src);
     template<> void AssignCast(
         std::optional<RenderProcessNotRespondingReason>& dst, const Ark_RenderProcessNotRespondingReason& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::ScopeType>& dst, const Ark_EffectScope& src);
     template<> void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src);
     template<> void AssignCast(std::optional<ScrollSizeMode>& dst, const Ark_ScrollSizeMode& src);
     template<> void AssignCast(std::optional<ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src);
