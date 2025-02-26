@@ -414,6 +414,18 @@ typedef struct {
      */
     int32_t (*registerOnDidDisappear)(
         ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+
+    /**
+     * @brief Sets whether to get focus when the custom dialog is displayed.
+     *
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param focusable Specifies whether to get focus when the custom dialog is displayed. The default value is true.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 16
+     */
+    int32_t (*setFocusable)(ArkUI_NativeDialogHandle handle, bool focusable);
 } ArkUI_NativeDialogAPI_3;
 
 /**

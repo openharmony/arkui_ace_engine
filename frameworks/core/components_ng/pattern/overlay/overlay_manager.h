@@ -770,10 +770,10 @@ private:
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
     bool IsContextMenuBindedOnOrigNode();
-    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
-    void OpenDialogAnimation(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
+    void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
-    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void CloseDialogMatchTransition(const RefPtr<FrameNode>& node);
     void SetContainerButtonEnable(bool isEnabled);
 
@@ -801,7 +801,7 @@ private:
     RefPtr<FrameNode> GetPrevOverlayNodeWithOrder(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetBottomOrderFirstNode(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetBottomOrderFirstOverlayNode(std::optional<double> levelOrder);
-    bool IsNeedChangeFocus(std::optional<double> levelOrder);
+    bool IsNeedChangeFocus(std::optional<double> levelOrder, bool focusable = true);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);
     bool DialogInMapHoldingFocus();

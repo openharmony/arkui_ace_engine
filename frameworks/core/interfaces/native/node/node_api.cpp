@@ -1974,6 +1974,11 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
     return CustomDialog::SetLevelOrder(handle, levelOrder);
 }
 
+ArkUI_Int32 SetFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
+{
+    return CustomDialog::SetFocusable(handle, focusable);
+}
+
 ArkUI_Int32 RegisterOnWillAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
 {
     return CustomDialog::RegisterOnWillAppearDialog(handle, userData, callback);
@@ -2021,6 +2026,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .setLevelUniqueId = SetDialogLevelUniqueId,
         .setImmersiveMode = SetDialogImmersiveMode,
         .setLevelOrder = SetLevelOrder,
+        .setFocusable = SetFocusable,
         .registerOnWillAppear = RegisterOnWillAppear,
         .registerOnDidAppear = RegisterOnDidAppear,
         .registerOnWillDisappear = RegisterOnWillDisappear,

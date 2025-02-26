@@ -802,7 +802,8 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
         .blurStyleOption = dialogAttr.blurStyleOption,
-        .effectOption = dialogAttr.effectOption
+        .effectOption = dialogAttr.effectOption,
+        .focusable = dialogAttr.focusable,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

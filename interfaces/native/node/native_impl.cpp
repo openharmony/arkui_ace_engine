@@ -130,6 +130,7 @@ ArkUI_NativeDialogAPI_3 dialogImpl_3 = {
     OHOS::Ace::DialogModel::RegisterOnDidAppear,
     OHOS::Ace::DialogModel::RegisterOnWillDisappear,
     OHOS::Ace::DialogModel::RegisterOnDidDisappear,
+    OHOS::Ace::DialogModel::SetFocusable,
 };
 
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
