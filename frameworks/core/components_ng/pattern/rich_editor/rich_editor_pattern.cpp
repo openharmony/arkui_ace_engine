@@ -9887,6 +9887,8 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::u16string& inse
         int32_t delLength = HandleOnDragDeleteForward();
         caretPosition_ -= delLength;
         lastCaretPosition_ = currentPosition - strLength;
+    } else {
+        lastCaretPosition_ = dragRange_.first;
     }
 
     AfterContentChange(changeValue);
