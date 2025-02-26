@@ -1263,6 +1263,30 @@ void ArcSwiperPattern::PlayScrollAnimation(float currentDelta, float currentInde
     }
 }
 
+void ArcSwiperPattern::ResetBackgroundColor(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto parentFrameNode = frameNode->GetParentFrameNode();
+    CHECK_NULL_VOID(parentFrameNode);
+    auto parentContext = parentFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(parentContext);
+    auto parentColorPtr = GetBackgroundColorValue(parentFrameNode);
+    if (axis_ == Axis::HORIZONTAL) {
+        CHECK_NULL_VOID(parentColorPtr);
+        parentContext->OnBackgroundColorUpdate(*parentColorPtr);
+    } else {
+        parentNodeBackgroundColor_ = GetBackgroundColorValue(parentFrameNode);
+        preNodeBackgroundColor_ = GetBackgroundColorValue(frameNode);
+        if (preNodeBackgroundColor_ && *preNodeBackgroundColor_ != Color::TRANSPARENT) {
+            parentContext->OnBackgroundColorUpdate(*preNodeBackgroundColor_);
+        } else {
+            CHECK_NULL_VOID(parentColorPtr);
+            preNodeBackgroundColor_ = parentColorPtr;
+            parentContext->OnBackgroundColorUpdate(*parentColorPtr);
+        }
+    }
+}
+
 void ArcSwiperPattern::ResetAnimationParam()
 {
     horizontalExitNodeScale_ = 1.0f;
@@ -1278,35 +1302,21 @@ void ArcSwiperPattern::ResetAnimationParam()
     verticalEntryNodeScale_ = VERTICAL_ENTRY_SCALE_VALUE;
     verticalEntryNodeOpacity_ = 0.0f;
     verticalEntryNodeBlur_ = 0.0f;
-    auto axis = GetDirection();
-    if (axis_ == axis && axis == Axis::HORIZONTAL) {
-        return;
-    }
-    axis_ = axis;
-    auto curInter = itemPosition_.find(currentIndex_);
-    if (curInter == itemPosition_.end()) {
-        return;
-    }
-    auto curFrameNode = curInter->second.node;
-    CHECK_NULL_VOID(curFrameNode);
-    auto parentFrameNode = curFrameNode->GetParentFrameNode();
-    CHECK_NULL_VOID(parentFrameNode);
-    auto parentContext = parentFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(parentContext);
-    auto parentColorPtr = GetBackgroundColorValue(parentFrameNode);
-    if (axis_ == Axis::HORIZONTAL) {
-        CHECK_NULL_VOID(parentColorPtr);
-        parentContext->OnBackgroundColorUpdate(*parentColorPtr);
-    } else {
-        parentNodeBackgroundColor_ = GetBackgroundColorValue(parentFrameNode);
-        preNodeBackgroundColor_ = GetBackgroundColorValue(curFrameNode);
-        if (preNodeBackgroundColor_ && *preNodeBackgroundColor_ != Color::TRANSPARENT) {
-            parentContext->OnBackgroundColorUpdate(*preNodeBackgroundColor_);
-        } else {
-            CHECK_NULL_VOID(parentColorPtr);
-            preNodeBackgroundColor_ = parentColorPtr;
-            parentContext->OnBackgroundColorUpdate(*parentColorPtr);
+    for (auto item : itemPosition_) {
+        auto node = item.second.node;
+        CHECK_NULL_CONTINUE(node);
+        auto context = node->GetRenderContext();
+        CHECK_NULL_CONTINUE(context);
+        context->UpdateOpacity(1);
+        context->UpdateTransformScale({1.0f, 1.0f});
+        BlurOption blurOption;
+        context->UpdateBackBlur(Dimension(0.0f, DimensionUnit::PERCENT), blurOption);
+        auto axis = GetDirection();
+        if (axis_ == axis && axis == Axis::HORIZONTAL) {
+            continue;
         }
+        axis_ = axis;
+        ResetBackgroundColor(node);
     }
 }
 

@@ -1159,6 +1159,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     PlayScrollAnimation(currentDelta_, currentIndexOffset_);
     if (jumpIndex_) {
+        ResetAnimationParam();
         auto pipeline = GetContext();
         if (pipeline) {
             pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
@@ -6898,7 +6899,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     if (indicatorType == SwiperIndicatorType::DOT) {
         json->PutExtAttr(indicator, SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
     } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
-            json->PutExtAttr(indicator, SwiperPattern::GetArcDotIndicatorStyle().c_str(), filter);
+            json->PutExtAttr(indicator, GetArcDotIndicatorStyle().c_str(), filter);
     } else {
         json->PutExtAttr(
             indicator, SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters()).c_str(), filter);
