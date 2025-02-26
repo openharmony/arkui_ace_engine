@@ -16,6 +16,20 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+
+namespace OHOS::Ace::NG::Converter {
+    void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
+    {
+        dst.id = Converter::ArkValue<Ark_Number>(src.fingerId_);
+        dst.globalX = Converter::ArkValue<Ark_Number>(src.globalLocation_.GetX());
+        dst.globalY = Converter::ArkValue<Ark_Number>(src.globalLocation_.GetY());
+        dst.localX = Converter::ArkValue<Ark_Number>(src.localLocation_.GetX());
+        dst.localY = Converter::ArkValue<Ark_Number>(src.localLocation_.GetY());
+        dst.displayX = Converter::ArkValue<Ark_Number>(src.screenLocation_.GetX());
+        dst.displayY = Converter::ArkValue<Ark_Number>(src.screenLocation_.GetY());
+    }
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseGestureEventAccessor {
@@ -33,7 +47,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Array_FingerInfo GetFingerListImpl(Ark_BaseGestureEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetBaseGestureInfo();
+    CHECK_NULL_RETURN(info, {});
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    return Converter::ArkValue<Array_FingerInfo>(fingerList, Converter::FC);
 }
 void SetFingerListImpl(Ark_BaseGestureEvent peer,
                        const Array_FingerInfo* fingerList)
