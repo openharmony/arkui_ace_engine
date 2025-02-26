@@ -333,6 +333,8 @@ public:
         axisEvent.time = timeStamp_;
         axisEvent.localX = static_cast<float>(localLocation_.GetX());
         axisEvent.localY = static_cast<float>(localLocation_.GetY());
+        axisEvent.sourceType = deviceType_;
+        axisEvent.sourceTool = sourceTool_;
         return axisEvent;
     }
 
@@ -404,6 +406,7 @@ public:
             event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
         AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
         info.SetScreenLocation(Offset(event.screenX, event.screenY));
+        info.SetSourceTool(event.sourceTool);
         onAxisCallback_(info);
         return true;
     }
