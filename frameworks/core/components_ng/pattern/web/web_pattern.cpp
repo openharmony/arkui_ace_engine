@@ -1896,7 +1896,9 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
-    StartVibraFeedback("longPress.light");
+    if (IsPreviewImageNodeExist()) {
+        StartVibraFeedback("longPress.light");
+    }
     if (!isMouseEvent_) {
         // mouse drag does not need long press action
         gestureHub->StartLongPressActionForWeb();
