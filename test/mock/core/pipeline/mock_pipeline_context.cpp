@@ -496,7 +496,18 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
-void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
+{
+    animationClosuresList_.emplace_back(std::move(animation));
+}
+
+void PipelineContext::FlushAnimationClosure()
+{
+    decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
+    for (const auto& animation : temp) {
+        animation();
+    }
+}
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}
 
