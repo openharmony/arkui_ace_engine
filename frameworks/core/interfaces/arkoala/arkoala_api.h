@@ -3522,7 +3522,7 @@ struct ArkUIGestureModifier {
     ArkUI_Int32 (*gestureEventTargetInfoIsScrollEnd)(ArkUIGestureEventTargetInfo* info, bool* ret);
     ArkUI_Int32 (*getPanGestureDirectionMask)(ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction);
     ArkUI_Int32 (*getSwipeGestureDirectionMask)(
-        ArkUIGestureRecognizer* recognizer, ArkUISwipeGestureDirection* direction);
+        ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction);
     ArkUI_Int32 (*getGestureFingerCount)(ArkUIGestureRecognizer* recognizer, int* finger);
     ArkUI_Int32 (*getGestureLimitFingerCount)(ArkUIGestureRecognizer* recognizer, bool* isLimited);
     ArkUI_Int32 (*getLongPressGestureRepeat)(ArkUIGestureRecognizer* recognizer, bool* isRepeat);

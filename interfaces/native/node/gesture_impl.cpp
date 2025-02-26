@@ -431,7 +431,7 @@ int32_t OH_ArkUI_GetGestureParam_DirectMask(ArkUI_GestureRecognizer* recognizer,
     }
     switch (recognizer->type) {
         case SWIPE_GESTURE: {
-            ArkUISwipeGestureDirection direction = ArkUISwipeGestureDirection::ArkUI_SWIPE_GESTURE_DIRECTION_ALL;
+            ArkUIGestureDirection direction = ArkUIGestureDirection::ArkUI_GESTURE_DIRECTION_ALL;
             auto result = OHOS::Ace::NodeModel::GetFullImpl()
                               ->getNodeModifiers()
                               ->getGestureModifier()
