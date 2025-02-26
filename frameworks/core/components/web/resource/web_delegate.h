@@ -758,7 +758,7 @@ public:
         const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     void WebHandleAxisEvent(const double& x, const double& y,
-        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes);
+        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes, const int32_t source);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);

@@ -914,7 +914,8 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
         TAG_LOGD(AceLogTag::ACE_WEB, "HandleDragMove Axis deltaX: %{public}f deltaY: %{public}f",
             event.GetDelta().GetX(), event.GetDelta().GetY());
         delegate_->WebHandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
-            event.GetDelta().GetX() / DEFAULT_AXIS_RATIO, event.GetDelta().GetY() / DEFAULT_AXIS_RATIO, pressedCodes);
+            event.GetDelta().GetX() / DEFAULT_AXIS_RATIO, event.GetDelta().GetY() / DEFAULT_AXIS_RATIO,
+            pressedCodes, static_cast<int32_t>(event.GetSourceTool()));
     }
 }
 

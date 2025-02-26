@@ -5750,10 +5750,13 @@ void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double
 }
 
 void WebDelegate::WebHandleAxisEvent(const double& x, const double& y,
-    const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes)
+    const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes, const int32_t source)
 {
     if (nweb_) {
-        nweb_->WebSendMouseWheelEvent(x, y, deltaX, deltaY, pressedCodes);
+        bool result = nweb_->WebSendMouseWheelEventV2(x, y, deltaX, deltaY, pressedCodes, source);
+        if (!result) {
+            nweb_->WebSendMouseWheelEvent(x, y, deltaX, deltaY, pressedCodes);
+        }
     }
 }
 
