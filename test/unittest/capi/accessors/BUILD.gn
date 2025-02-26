@@ -54,6 +54,7 @@ ace_unittest("capi_all_accessors_test") {
     "gesture_recognizer_accessor_test.cpp",
     "global_scope_common_accessor_test.cpp",
     "global_scope_ohos_arkui_performance_monitor_accessor_test.cpp",
+    "global_scope_ohos_font_accessor_test.cpp",
     "hover_event_accessor_test.cpp",
     "http_auth_handler_accessor_test.cpp",
     "i_curve_accessor_test.cpp",
