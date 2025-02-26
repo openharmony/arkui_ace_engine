@@ -5937,14 +5937,14 @@ RefPtr<Curve> RosenRenderContext::UpdatePlayAnimationValue(const ClickEffectLeve
     return AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
 }
 
-void RosenRenderContext::RegisterSharedTransition(const RefPtr<RenderContext>& other)
+void RosenRenderContext::RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow)
 {
     auto otherContext = AceType::DynamicCast<RosenRenderContext>(other);
     if (!otherContext) {
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    RSNode::RegisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
+    RSNode::RegisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId(), isInSameWindow);
 }
 
 void RosenRenderContext::UnregisterSharedTransition(const RefPtr<RenderContext>& other)
