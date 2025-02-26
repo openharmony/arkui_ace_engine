@@ -120,8 +120,15 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayoutBase001, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     CreateSwiperInFlexLayout();
 
+    /**
+     * @tc.steps: step2. Simulate drag update
+     * @tc.expected: Swiper offset will not jump to zero after second flush task.
+     */
     pattern_->UpdateCurrentOffset(-100.0f);
     FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), -90.0f);
@@ -136,8 +143,10 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout001, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     CreateSwiperInFlexLayout();
-
     layoutProperty_->UpdateLoop(false);
     layoutProperty_->UpdatePrevMargin(Dimension(0.0f));
     layoutProperty_->UpdateNextMargin(Dimension(0.0f));
@@ -146,9 +155,12 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout002, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
     EXPECT_EQ(GetChildWidth(frameNode_, 0), 5 * FLEX_WIDTH / 6);
 
+    /**
+     * @tc.steps: step2. Simulate swipe to to right, test for spring animation
+     * @tc.expected: Spring animation runs properly and finished after second tick.
+     */
     SimulateSwipe(200.0f, 200.0f);
     FlushUITasks();
-
     auto visibleSize = pattern_->CalculateVisibleSize();
     ASSERT_TRUE(visibleSize > 0.0f);
     auto realOffset = 200.0f * SwiperHelper::CalculateFriction(200.0f / visibleSize);
@@ -172,13 +184,19 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout002, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     CreateSwiperInFlexLayout();
-
     layoutProperty_->UpdateLoop(false);
     layoutProperty_->UpdatePrevMargin(Dimension(0.0f));
     layoutProperty_->UpdateNextMargin(Dimension(0.0f));
     FlushUITasks();
 
+    /**
+     * @tc.steps: step2. Test showNext translate animation in flex layout
+     * @tc.expected: Translate animation runs properly and finished after second tick.
+     */
     controller_->ShowNext();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     MockAnimationManager::GetInstance().Tick();
@@ -195,6 +213,10 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout003, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 1), 0);
     EXPECT_EQ(pattern_->currentIndex_, 1);
 
+    /**
+     * @tc.steps: step3. Test showPrevious translate animation in flex layout
+     * @tc.expected: Translate animation runs properly and finished after second tick.
+     */
     controller_->ShowPrevious();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     MockAnimationManager::GetInstance().Tick();
@@ -217,8 +239,14 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout003, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout004, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     CreateSwiperInFlexLayout();
 
+    /**
+     * @tc.steps: step2. Change left sibling's width to zero
+     */
     leftSibling_->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(FLEX_HEIGHT)));
     FlushUITasks();
     FlushUITasks();
@@ -227,6 +255,10 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout004, TestSize.Level1)
     EXPECT_EQ(GetChildWidth(frameNode_, 0), FLEX_WIDTH - 20.0f);
     EXPECT_EQ(GetChildX(frameNode_, 1), FLEX_WIDTH - 10.0f);
 
+    /**
+     * @tc.steps: step3. Change left sibling's width to 100
+     * @tc.expected: Width of swiper item changes proportionally
+     */
     leftSibling_->layoutProperty_->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(COLUMN_WIDTH), CalcLength(FLEX_HEIGHT)));
     FlushUITasks();
@@ -244,8 +276,15 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout004, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout005, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     CreateSwiperInFlexLayout();
 
+    /**
+     * @tc.steps: step2. Change parent's layout constraint
+     * @tc.expected: No extra offset in swiper's layout.
+     */
     parent_->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FLEX_WIDTH_NEW), CalcLength(FLEX_HEIGHT)));
     FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_.size(), 2);
@@ -261,16 +300,21 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout005, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout006, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     CreateSwiperInFlexLayout();
-
     layoutProperty_->UpdateLoop(false);
     layoutProperty_->UpdatePrevMargin(Dimension(0.0f));
     layoutProperty_->UpdateNextMargin(Dimension(0.0f));
     FlushUITasks();
 
+    /**
+     * @tc.steps: step2. Simulate swipe to to right
+     * @tc.expected: Running spring animation
+     */
     SimulateSwipe(200.0f, 200.0f);
     FlushUITasks();
-
     auto visibleSize = pattern_->CalculateVisibleSize();
     ASSERT_TRUE(visibleSize > 0.0f);
     auto realOffset = 200.0f * SwiperHelper::CalculateFriction(200.0f / visibleSize);
@@ -280,6 +324,10 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout006, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), realOffset / 2));
 
+    /**
+     * @tc.steps: step3. Change left sibling's width to zero
+     * @tc.expected: Swiper's layout constraint is changed and spring animation is finished immediately.
+     */
     leftSibling_->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(FLEX_HEIGHT)));
     FlushUITasks();
     MockAnimationManager::GetInstance().Tick();
@@ -297,21 +345,30 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout006, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout007, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     CreateSwiperInFlexLayout();
-
     layoutProperty_->UpdateLoop(false);
     layoutProperty_->UpdatePrevMargin(Dimension(0.0f));
     layoutProperty_->UpdateNextMargin(Dimension(0.0f));
     FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Change index to 1 and check itemPosition
+     */
     controller_->ChangeIndex(1, false);
     FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_.size(), 1);
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
     EXPECT_EQ(GetChildWidth(frameNode_, 1), 5 * FLEX_WIDTH / 6);
 
+    /**
+     * @tc.steps: step3. Simulate swipe to to left
+     * @tc.expected: Running spring animation
+     */
     SimulateSwipe(-200.0f, -200.0f);
     FlushUITasks();
-
     auto visibleSize = pattern_->CalculateVisibleSize();
     ASSERT_TRUE(visibleSize > 0.0f);
     auto realOffset = -200.0f * SwiperHelper::CalculateFriction(200.0f / visibleSize);
@@ -321,6 +378,10 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout007, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 1), realOffset / 2));
 
+    /**
+     * @tc.steps: step4. Change left sibling's width to zero
+     * @tc.expected: Swiper's layout constraint is changed and spring animation is finished immediately.
+     */
     leftSibling_->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(FLEX_HEIGHT)));
     FlushUITasks();
     // check offset after spring animation finished
@@ -339,10 +400,17 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout007, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout008, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     CreateSwiperInFlexLayout();
     EXPECT_EQ(GetChildX(frameNode_, 0), 10.0f);
     EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 1), 5 * FLEX_WIDTH / 6 - 10.0f));
 
+    /**
+     * @tc.steps: step2. Start translate animation using showNext
+     * @tc.expected: Running animation
+     */
     controller_->ShowNext();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     MockAnimationManager::GetInstance().Tick();
@@ -352,6 +420,11 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout008, TestSize.Level1)
         auto translate = GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty();
         EXPECT_TRUE(NearEqual(translate, OffsetF(-mainSize / 2, 0.0f)));
     }
+
+    /**
+     * @tc.steps: step3. Change right sibling's width to zero
+     * @tc.expected: Swiper's layout constraint is changed and translate animation is finished immediately.
+     */
     leftSibling_->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(FLEX_HEIGHT)));
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -368,16 +441,27 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout008, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout009, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
     const bool loop = true;
     const int32_t childrenSize = 6;
     const int32_t displayCount = 3;
     const float margin = 0.0f;
     CreateSwiperInFlexLayout(loop, childrenSize, displayCount, margin);
 
+    /**
+     * @tc.steps: step2. check initial currentIndex
+     * @tc.expected: Initial index is zero and swiper is properly layout in flex
+     */
     EXPECT_EQ(pattern_->currentIndex_, 0);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
     EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 1), 5 * FLEX_WIDTH / (6 * displayCount)));
 
+    /**
+     * @tc.steps: step3. Change to index 4 using swiper controller.
+     * @tc.expected: OnChange callback is triggered as expexted.
+     */
     int32_t currentIndex = 0;
     pattern_->UpdateChangeEvent([&currentIndex](int32_t index) {
         currentIndex = index;
@@ -388,10 +472,63 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout009, TestSize.Level1)
     EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), 2 * 5 * FLEX_WIDTH / (6 * displayCount)));
     EXPECT_EQ(currentIndex, 4);
 
+    /**
+     * @tc.steps: step4. Update loop attribute from true to false
+     * @tc.expected: Current index changed to 3 and OnChange callback is triggered
+     */
     layoutProperty_->UpdateLoop(false);
     pattern_->OnModifyDone();
     FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 3);
     EXPECT_EQ(currentIndex, 3);
+}
+
+/**
+ * @tc.name: SwiperFlexLayout010
+ * @tc.desc: Test prevMargin/nextMargin display status when swiper mainSize changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with sibling inside flex layout
+     */
+    const bool loop = true;
+    const int32_t childrenSize = 7;
+    const int32_t displayCount = 3;
+    const float margin = 90.0f;
+    CreateSwiperInFlexLayout(loop, childrenSize, displayCount, margin);
+
+    /**
+     * @tc.steps: step2. margin is 90.0f, check display status
+     * @tc.expected: Do not display prevMargin/nextMargin, because margin is larger than swiper item.
+     */
+    EXPECT_EQ(layoutProperty_->GetCalculatedPrevMargin(), 0.0f);
+    EXPECT_EQ(layoutProperty_->GetCalculatedNextMargin(), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 1), 5 * FLEX_WIDTH / (6 * displayCount)));
+
+    /**
+     * @tc.steps: step3. reduce left sibling's width to zero
+     * @tc.expected: Display prevMargin/nextMargin, because margin is smaller than swiper item.
+     */
+    leftSibling_->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(FLEX_HEIGHT)));
+    FlushUITasks();
+    EXPECT_EQ(layoutProperty_->GetCalculatedPrevMargin(), margin);
+    EXPECT_EQ(layoutProperty_->GetCalculatedNextMargin(), margin);
+    EXPECT_EQ(GetChildX(frameNode_, 0), margin);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 1), margin + (FLEX_WIDTH - 2 * margin) / displayCount));
+
+    /**
+     * @tc.steps: step4. increase right sibling's width to 100
+     * @tc.expected: Do not display prevMargin/nextMargin, because margin is larger than swiper item.
+     */
+    rightSibling_->layoutProperty_->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(COLUMN_WIDTH), CalcLength(FLEX_HEIGHT)));
+    FlushUITasks();
+    EXPECT_EQ(layoutProperty_->GetCalculatedPrevMargin(), 0.0f);
+    EXPECT_EQ(layoutProperty_->GetCalculatedNextMargin(), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 1), 5 * FLEX_WIDTH / (6 * displayCount)));
 }
 } // namespace OHOS::Ace::NG
