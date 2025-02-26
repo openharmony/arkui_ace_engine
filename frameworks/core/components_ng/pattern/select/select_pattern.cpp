@@ -135,7 +135,9 @@ void SelectPattern::OnModifyDone()
     InitFocusEvent();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetBackgroundColor().has_value()) {
+    auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(selectPaintProperty);
+    if (selectPaintProperty->HasBackgroundColor()) {
         return;
     }
     auto context = host->GetContextRefPtr();
