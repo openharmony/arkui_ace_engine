@@ -467,7 +467,7 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     if (uiTaskExecutor.IsRunOnCurrentThread()) {
         task();
     } else {
-        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly", PriorityType::VIP);
+        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly");
     }
 }
 
