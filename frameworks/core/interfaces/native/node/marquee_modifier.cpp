@@ -31,7 +31,7 @@ void SetMarqueeFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, int unit)
 
     if (fontSize < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
         unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -46,7 +46,7 @@ void ResetMarqueeFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);

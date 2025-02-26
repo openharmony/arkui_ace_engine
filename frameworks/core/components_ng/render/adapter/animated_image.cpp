@@ -131,7 +131,7 @@ int AnimatedImage::GenerateIteration(const std::unique_ptr<SkCodec>& codec)
     if (iteration == 0) {
         iteration = INT_MAX;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 1);
     if (pipeline->IsFormRender()) {
         iteration = FORM_REPEAT_COUNT;

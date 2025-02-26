@@ -73,7 +73,7 @@ void BuildDialogPropertiesCallbacks(const Ark_DatePickerDialogOptions options, D
 DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options)
 {
     DialogProperties dialogProps;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, dialogProps);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, dialogProps);

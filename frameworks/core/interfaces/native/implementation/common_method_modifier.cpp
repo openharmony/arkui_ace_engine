@@ -4252,7 +4252,7 @@ void BindMenuBase(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.placement = Placement::BOTTOM_LEFT;
     menuParam.isShowInSubWindow = false;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);

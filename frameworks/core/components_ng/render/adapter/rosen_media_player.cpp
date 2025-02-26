@@ -166,7 +166,7 @@ bool RosenMediaPlayer::SetSourceByFd(int32_t fd)
 // Interim programme
 bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto assetManager = pipelineContext->GetAssetManager();
     CHECK_NULL_RETURN(assetManager, false);
@@ -257,7 +257,7 @@ bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const s
 
 bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto assetManager = pipelineContext->GetAssetManager();
     CHECK_NULL_RETURN(assetManager, false);
@@ -298,7 +298,7 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
 bool RosenMediaPlayer::RelativePathPlay(const std::string& filePath)
 {
     // relative path
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto assetManager = pipelineContext->GetAssetManager();
     CHECK_NULL_RETURN(assetManager, false);
@@ -363,7 +363,7 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
     if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://") ||
         StringUtils::StartWith(filePath, "file://media")) {
         // dataability:// or datashare://
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, false);
         auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
         CHECK_NULL_RETURN(dataProvider, false);
