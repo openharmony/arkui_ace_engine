@@ -20,6 +20,10 @@
 
 namespace OHOS::Ace {
 
+namespace {
+    std::pair<std::string, std::function<void()>> registerCallback_;
+}
+
 std::string FontManager::appCustomFont_ = "";
 const std::vector<std::string>& FontManager::GetFontNames() const
 {
@@ -29,6 +33,7 @@ const std::vector<std::string>& FontManager::GetFontNames() const
 bool FontManager::RegisterCallbackNG(
     const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
+    registerCallback_ = {familyName, callback};
     return false;
 }
 
@@ -37,7 +42,10 @@ bool FontManager::IsDefaultFontChanged()
     return false;
 }
 
-void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node) {}
+void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node)
+{
+    registerCallback_ = {};
+}
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
 {
@@ -68,4 +76,20 @@ const std::string& FontManager::GetAppCustomFont() const
 void FontManager::AddFontObserver(WeakPtr<FontChangeObserver> node) {}
 
 void FontManager::RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node) {}
+
+void FontManager::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
+{
+    if (std::find(std::begin(fontNames_), std::end(fontNames_), familyName) == std::end(fontNames_)) {
+        fontNames_.emplace_back(familyName);
+    }
+    if (registerCallback_.first == familyName) {
+        registerCallback_.second();
+    }
+}
+
+void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    fontList = fontNames_;
+}
 } // namespace OHOS::Ace
