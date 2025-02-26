@@ -3317,22 +3317,36 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, const std::optional<bool>&
     }
 }
 
-void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
+void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
-    if (renderContext->GetForegroundColorStrategy().has_value()) {
-        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
-        renderContext->ResetForegroundColorStrategy();
+    if (color) {
+        if (renderContext->GetForegroundColorStrategy().has_value()) {
+            renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+            renderContext->ResetForegroundColorStrategy();
+        }
+        renderContext->UpdateForegroundColor(color.value());
+        renderContext->UpdateForegroundColorFlag(true);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
     }
-    renderContext->UpdateForegroundColor(color);
-    renderContext->UpdateForegroundColorFlag(true);
 }
 
-void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy)
+void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode,
+    const std::optional<ForegroundColorStrategy>& strategy)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    if (strategy) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy.value(), frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
+    }
 }
 
 void ViewAbstract::SetLightPosition(
