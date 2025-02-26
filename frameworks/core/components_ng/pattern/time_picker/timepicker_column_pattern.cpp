@@ -1713,7 +1713,7 @@ void TimePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 
     TimePickerScrollDirection dir =
         GreatNotEqual(scrollDelta_, 0.0f) ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / MIDDLE_CHILD_INDEX;
+    auto middleIndex = static_cast<int32_t>(GetShowCount()) / MIDDLE_CHILD_INDEX;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / MIDDLE_CHILD_INDEX;

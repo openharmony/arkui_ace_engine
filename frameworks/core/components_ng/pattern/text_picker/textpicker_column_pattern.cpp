@@ -2274,7 +2274,7 @@ void TextPickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
     }
 
     ScrollDirection dir = GreatNotEqual(scrollDelta_, 0.0f) ? ScrollDirection::DOWN : ScrollDirection::UP;
-    int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
+    auto middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
     auto shiftDistance = (dir == ScrollDirection::DOWN) ? optionProperties_[middleIndex].nextDistance
                                                         : optionProperties_[middleIndex].prevDistance;
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
