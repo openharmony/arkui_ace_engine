@@ -102,6 +102,26 @@ struct FfiHeader {
     ExternalString value;
 };
 
+struct FfiNativeEmbedInfo {
+    const char* id;
+    const char* type;
+    const char* src;
+    int32_t width;
+    int32_t height;
+    const char* url;
+    const char* tag;
+    int32_t x;
+    int32_t y;
+    VectorHeaderHandle params;
+};
+
+struct FfiNativeEmbedDataInfo {
+    int32_t status;
+    const char* surfaceId;
+    const char* embedId;
+    FfiNativeEmbedInfo info;
+};
+
 typedef void (*RequestResultCallback)(void*, CArrString, void*);
 
 CJ_EXPORT void FfiOHOSAceFrameworkWebHandleCancel(void* result);
@@ -228,5 +248,12 @@ CJ_EXPORT void FfiWebContextMenuResultCopy(void* ptr);
 CJ_EXPORT void FfiWebContextMenuResultPaste(void* ptr);
 CJ_EXPORT void FfiWebContextMenuResultCut(void* ptr);
 CJ_EXPORT void FfiWebContextMenuResultSelectAll(void* ptr);
+CJ_EXPORT void FfiOHOSAceFrameworkWebOnShowFileSelector(bool (*callback)(void* param, void* result));
+CJ_EXPORT void FfiWebFileSelectorResultSetHandleFileList(VectorStringHandle listPtr, void* ptr);
+CJ_EXPORT ExternalString FfiWebFileSelectorParamGetTitle(void* ptr);
+CJ_EXPORT int32_t FfiWebFileSelectorParamGetMode(void* ptr);
+CJ_EXPORT VectorStringHandle FfiWebFileSelectorParamGetAcceptType(void* ptr);
+CJ_EXPORT bool FfiWebFileSelectorParamIsCapture(void* ptr);
+CJ_EXPORT void FfiOHOSAceFrameworkWebOnNativeEmbedLifecyccleChange(void (*callback)(FfiNativeEmbedDataInfo datainfo));
 };
 #endif // OHOS_ACE_FRAMEWORK_CJ_WEB_H
