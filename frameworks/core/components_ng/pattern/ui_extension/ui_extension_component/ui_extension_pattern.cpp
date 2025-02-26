@@ -155,10 +155,6 @@ UIExtensionPattern::UIExtensionPattern(
     isAsyncModalBinding_(isAsyncModalBinding), sessionType_(sessionType)
 {
     uiExtensionId_ = UIExtensionIdUtility::GetInstance().ApplyExtensionId();
-    sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
-        sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
-    accessibilitySessionAdapter_ =
-        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
 }
 
@@ -203,6 +199,19 @@ void UIExtensionPattern::LogoutModalUIExtension()
     auto overlay = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->ResetRootNode(-(sessionId));
+}
+
+void UIExtensionPattern::Initialize()
+{
+    if (hasInitialize_) {
+        return;
+    }
+
+    sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
+        sessionType_, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
+    accessibilitySessionAdapter_ =
+        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
+    hasInitialize_ = true;
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
@@ -847,6 +856,7 @@ private:
 void UIExtensionPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);
+    Initialize();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
