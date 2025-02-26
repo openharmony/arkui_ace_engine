@@ -58,6 +58,7 @@ const std::u16string SYMBOL_TRANS = u"\uF0001";
 const std::u16string WIDE_NEWLINE = u"\n";
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
+constexpr Dimension CLICK_THRESHOLD = 5.0_vp;
 const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 
 bool IsJumpLink(const std::string& content)
@@ -964,6 +965,16 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
+
+    if (IsUsingMouse() && isMousePressed_ && leftMousePressed_) {
+        Offset clickOffset {textOffset.GetX(), textOffset.GetY()};
+        auto distance = (clickOffset - leftMousePressedOffset_).GetDistance();
+        if (distance >= CLICK_THRESHOLD.ConvertToPx()) {
+            TAG_LOGI(ACE_TEXT, "TextOffset not match not trigger click");
+            return;
+        }
+    }
+
     if (IsSelectableAndCopy() || NeedShowAIDetect()) {
         CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     }
@@ -1803,6 +1814,7 @@ void TextPattern::HandleMouseLeftButton(const MouseInfo& info, const Offset& tex
 void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset)
 {
     isMousePressed_ = true;
+    CheckPressedSpanPosition(textOffset);
     leftMousePressed_ = true;
     ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlPressColor());
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
@@ -1824,6 +1836,11 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     if (scrollableParent_.Upgrade() && host) {
         host->RegisterNodeChangeListener();
     }
+}
+
+void TextPattern::CheckPressedSpanPosition(const Offset& textOffset)
+{
+    leftMousePressedOffset_ = textOffset;
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
