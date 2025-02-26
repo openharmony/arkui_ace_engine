@@ -141,7 +141,7 @@ void ViewAbstractModelNG::BindMenu(FrameNode* frameNode,
         BindMenuGesture(frameNode, std::move(params), std::move(buildFunc), menuParam);
     }
     // delete menu when target node destroy
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);

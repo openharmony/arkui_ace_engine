@@ -111,7 +111,7 @@ public:
         auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
 #endif
         CHECK_NULL_RETURN(builder, nullptr);
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         builder->PushStyle(ToRSTextStyle(pipelineContext, textStyle));
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -159,7 +159,7 @@ public:
 
     bool IsCustomFont()
     {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, false);
         auto fontManager = pipelineContext->GetFontManager();
         CHECK_NULL_RETURN(fontManager, false);

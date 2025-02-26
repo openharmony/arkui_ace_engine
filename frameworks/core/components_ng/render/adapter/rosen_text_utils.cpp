@@ -36,7 +36,7 @@ const std::u16string ELLIPSIS = u"\u2026";
 
 bool IsApplyIndent(const MeasureContext& context, double& indent)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     if (context.textIndent.value().Unit() != DimensionUnit::PERCENT) {
         indent = context.textIndent.value().ConvertToPx();
@@ -95,7 +95,7 @@ double TextUtils::MeasureText(const MeasureContext& context)
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
 #endif
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, 0.0);
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -199,7 +199,7 @@ Size TextUtils::MeasureTextSize(const MeasureContext& context)
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
 #endif
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, Size(0.0, 0.0));
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -219,7 +219,7 @@ Size TextUtils::MeasureTextSize(const MeasureContext& context)
 #else
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
     auto fontWeightValue = (static_cast<int32_t>(ConvertTxtFontWeight(fontWeightStr)) + 1) * 100;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
     }

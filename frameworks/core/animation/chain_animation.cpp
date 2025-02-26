@@ -79,12 +79,12 @@ ChainAnimation::ChainAnimation(float space, float maxSpace, float minSpace, RefP
         CHECK_NULL_VOID(chain);
         chain->TickAnimation();
     };
-    scheduler_ = AceType::MakeRefPtr<Scheduler>(callback, PipelineBase::GetCurrentContext());
+    scheduler_ = AceType::MakeRefPtr<Scheduler>(callback, PipelineBase::GetCurrentContextSafelyWithCheck());
 }
 
 void ChainAnimation::SetDelta(float delta, float overOffset)
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto timestamp = context->GetVsyncTime();
     double duration = 0.0;
@@ -116,7 +116,7 @@ void ChainAnimation::SetDelta(float delta, float overOffset)
 
 void ChainAnimation::TickAnimation()
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto timestamp = context->GetVsyncTime();
     double duration = 0.0;
@@ -153,7 +153,7 @@ float ChainAnimation::GetValue(int32_t index)
 
 float ChainAnimation::GetValuePredict(int32_t index, float delta)
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, 0);
     auto timestamp = context->GetVsyncTime();
     double duration = 0.0;

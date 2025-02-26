@@ -371,7 +371,7 @@ bool RosenRenderSurface::CompareBufferSize(
 {
     int32_t bufferWidth = surfaceNode->buffer_->GetSurfaceBufferWidth();
     int32_t bufferHeight = surfaceNode->buffer_->GetSurfaceBufferHeight();
-    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_RETURN(pipeline, true);
     ACE_SCOPED_TRACE("Web CompareBufferSize (width %d, height %d, bufferWidth %d, bufferHeight %d)"
                      " pipeline freeze status = %d",
