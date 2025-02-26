@@ -1604,6 +1604,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -1987,6 +1988,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2170,6 +2172,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2355,6 +2358,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea8, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2516,6 +2520,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea9, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2678,6 +2683,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2857,6 +2863,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -3023,8 +3030,9 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
+    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(2));
     ASSERT_NE(scrollNode, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
     auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
