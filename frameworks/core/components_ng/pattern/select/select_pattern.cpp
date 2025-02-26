@@ -702,7 +702,7 @@ void SelectPattern::BuildChild()
     text_->SetInternal();
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
-    InitTextProps(textProps, theme);
+    InitTextProps(textProps);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         SystemProperties::IsNeedSymbol()) {
         spinner_ = FrameNode::GetOrCreateFrameNode(
@@ -1121,8 +1121,14 @@ void SelectPattern::UpdateText(int32_t index)
     selectValue_ = newSelected->GetText();
 }
 
-void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)
+void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
 {
+    auto select = GetHost();
+    CHECK_NULL_VOID(select);
+    auto* pipeline = select->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
     textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());

@@ -284,7 +284,7 @@ private:
     // update text to selected option's text
     void UpdateText(int32_t index);
 
-    void InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme);
+    void InitTextProps(const RefPtr<TextLayoutProperty>& textProps);
     void InitSpinner(
         const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
     void InitSpinner(const RefPtr<FrameNode>& spinner, const RefPtr<SelectTheme>& selectTheme);
