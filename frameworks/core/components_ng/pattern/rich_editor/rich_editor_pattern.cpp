@@ -829,6 +829,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     IF_TRUE(spanIndex == -1, spanIndex = static_cast<int32_t>(host->GetChildren().size()));
 
     imageNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
+    imageNode->MountToParent(host, spanIndex);
     std::function<ImageSourceInfo()> createSourceInfoFunc = CreateImageSourceInfo(options);
     imageLayoutProperty->UpdateImageSourceInfo(createSourceInfoFunc());
     auto renderContext = imageNode->GetRenderContext();
@@ -929,6 +930,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     CHECK_NULL_RETURN(placeholderSpanNode, 0);
     customNode->MountToParent(placeholderSpanNode);
+    SetSelfAndChildDraggableFalse(customNode);
     IF_PRESENT(oneStepDragController_, EnableOneStepDrag(TextSpanType::BUILDER, placeholderSpanNode));
     auto focusHub = placeholderSpanNode->GetOrCreateFocusHub();
     focusHub->SetFocusable(false);
@@ -939,6 +941,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
     }
     builderNodes.push_back(WeakClaim(placeholderSpanNode.GetRawPtr()));
+    placeholderSpanNode->MountToParent(host, spanIndex);
     auto renderContext = placeholderSpanNode->GetRenderContext();
     if (renderContext) {
         renderContext->SetNeedAnimateFlag(false);
