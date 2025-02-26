@@ -55,32 +55,11 @@ void TestNG::FlushUITasks()
     MockPipelineContext::GetCurrent()->FlushUITasks();
 }
 
-RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)
+void TestNG::FlushUITasks(const RefPtr<FrameNode>& frameNode)
 {
-    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
-        if (frameNode) {
-            frameNode->SetActive();
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            MockPipelineContext::GetCurrent()->FlushUITasks();
-            return frameNode->CreatePaintWrapper();
-        }
-        FlushUITasks();
-        return nullptr;
-    }
-    if (markDirty) {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
     frameNode->SetActive();
-    frameNode->isLayoutDirtyMarked_ = true;
-    frameNode->CreateLayoutTask();
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    auto wrapper = frameNode->CreatePaintWrapper();
-    if (wrapper != nullptr) {
-        wrapper->FlushRender();
-    }
-    paintProperty->CleanDirty();
-    frameNode->SetActive(false);
-    return wrapper;
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    MockPipelineContext::GetCurrent()->FlushUITasks();
 }
 
 void TestNG::FlushExpandSafeAreaTask()

@@ -1141,7 +1141,7 @@ HWTEST_F(ArcListAttrTestNg, FadingEdge002, TestSize.Level1)
      * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
      */
     pattern_->ScrollTo(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->startMainPos_, 150.f);
     EXPECT_EQ(pattern_->endMainPos_, 480.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), -150.f);
@@ -1151,7 +1151,7 @@ HWTEST_F(ArcListAttrTestNg, FadingEdge002, TestSize.Level1)
      * @tc.expected: startMainPos_ < 0
      */
     pattern_->ScrollTo(50);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->startMainPos_, -50.f);
     EXPECT_EQ(pattern_->endMainPos_, 500.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);

@@ -18,6 +18,7 @@
 void PatternLockTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
@@ -65,7 +66,7 @@ void PatternLockTestNg::Create(const std::function<void(PatternLockModelNG)>& ca
         callback(model);
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 /**
@@ -884,7 +885,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest018, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     }
     auto scrollNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    FlushLayoutTask(scrollNode);
+    FlushUITasks(scrollNode);
 
     /**
      * @tc.steps: step1. because colNode padding, patternLockNode offsetY is 100
@@ -917,7 +918,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest018, TestSize.Level1)
      * @tc.expected: cellCenter_ is equal to locationInfo
      */
     scrollPattern->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE); // scroll view
-    FlushLayoutTask(scrollNode);
+    FlushUITasks(scrollNode);
     EXPECT_EQ(scrollPattern->GetTotalOffset(), 100);
     mockRenderContext->rect_ = RectF(40, 0, PATTERNLOCK_WIDTH, PATTERNLOCK_HEIGHT);
 
@@ -960,7 +961,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest019, TestSize.Level1)
     float height = 300.f;
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(width));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(height));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect().Width(), width));
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect().Height(), height));
 
@@ -1242,7 +1243,7 @@ HWTEST_F(PatternLockTestNg, StartModifierCanceledAnimate, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     }
     auto scrollNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    FlushLayoutTask(scrollNode);
+    FlushUITasks(scrollNode);
 
     /**
      * @tc.steps: step1. because colNode padding, patternLockNode offsetY is 100
@@ -1289,7 +1290,7 @@ HWTEST_F(PatternLockTestNg, AddPassPointToChoosePoint, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     }
     auto scrollNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    FlushLayoutTask(scrollNode);
+    FlushUITasks(scrollNode);
 
     /**
      * @tc.steps: step1. because colNode padding, patternLockNode offsetY is 100

@@ -93,7 +93,7 @@ HWTEST_F(ArcListLayoutTestNg, PaintMethod003, TestSize.Level1)
      */
     layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     paint = UpdateOverlayModifier();
     scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
     scrollBar = paint->scrollBar_.Upgrade();
@@ -350,7 +350,7 @@ HWTEST_F(ArcListLayoutTestNg, ListLayout_SafeArea001, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone();
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));
 }
@@ -370,7 +370,7 @@ HWTEST_F(ArcListLayoutTestNg, ListLayout_SafeArea002, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone();
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));
 }

@@ -40,7 +40,7 @@ void GridScrollLayoutTestNg::UpdateLayoutInfo()
 {
     GetGrid();
     ViewStackProcessor::GetInstance()->Finish();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     pattern_->info_.lineHeightMap_[0] = ITEM_MAIN_SIZE;
     pattern_->info_.gridMatrix_[0][0] = 0;
     pattern_->info_.gridMatrix_[0][1] = 1;
@@ -414,7 +414,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateGridMatrix001, TestSize.Level1)
      * @tc.expected: Scroll to the correct position,lineHeightMap_ size is 25
      */
     pattern_->ScrollToIndex(99, true, ScrollAlign::END);
-    EXPECT_TRUE(IsEqual<int32_t>(pattern_->info_.lineHeightMap_.size(), 25));
+    EXPECT_TRUE(IsEqual(pattern_->info_.lineHeightMap_.size(), 25));
 }
 
 /**

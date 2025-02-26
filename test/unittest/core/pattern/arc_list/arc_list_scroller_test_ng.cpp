@@ -266,7 +266,7 @@ HWTEST_F(ArcListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
      * @tc.expected: bottom Align
      */
     ScrollTo(1300);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1300);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 1300));
 
@@ -397,7 +397,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController007, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtBottom());
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY);
@@ -407,7 +407,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController007, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
 }
@@ -473,7 +473,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController008, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME_008;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtBottom());
 
@@ -496,7 +496,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController008, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME_008;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
 
@@ -570,7 +570,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController009, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME_009;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtBottom());
 
@@ -586,7 +586,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController009, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME_009;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
 
@@ -595,7 +595,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController009, TestSize.Level1)
      * expected: top Align
      */
     pattern_->ScrollTo(1000);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1000);
 }
 
@@ -661,7 +661,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController010, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS_010; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME_010;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtBottom());
 
@@ -684,7 +684,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController010, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS_010; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME_010;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
 
@@ -793,7 +793,7 @@ HWTEST_F(ArcListScrollerTestNg, Pattern013, TestSize.Level1)
      * @tc.steps: step3. swipe backward 2.5 listItem
      */
     pattern_->ScrollBy(-2.5 * LIST_HEIGHT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     float offsetX = LIST_WIDTH * (1 - ARC_LIST_ITER_SCALE) / 2.0;
     float offsetY = LIST_HEIGHT * (1 - ARC_LIST_ITER_SCALE);
     EXPECT_FALSE(IsEqual(pattern_->GetItemRect(0),
@@ -803,7 +803,7 @@ HWTEST_F(ArcListScrollerTestNg, Pattern013, TestSize.Level1)
      * @tc.steps: step4. swipe forward 3 listItem
      */
     pattern_->ScrollBy(3 * LIST_HEIGHT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 
     /**
      * @tc.steps: step5. swipe backward 2.5 listItem
@@ -855,19 +855,19 @@ HWTEST_F(ArcListScrollerTestNg, Pattern017, TestSize.Level1)
     EXPECT_EQ(pattern_->currentOffset_, 0);
 
     pattern_->ScrollPage(false, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->startIndex_, 0);
     EXPECT_EQ(pattern_->endIndex_, 2);
     EXPECT_EQ(pattern_->currentOffset_, -MID_OFFSET);
 
     pattern_->ScrollPage(true, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->startIndex_, 0);
     EXPECT_FALSE(pattern_->endIndex_ > 3);
     EXPECT_EQ(pattern_->currentOffset_, -MID_OFFSET);
 
     pattern_->ScrollPage(false, true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->finalPosition_, -MID_OFFSET + 400);
 }
 

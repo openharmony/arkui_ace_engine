@@ -86,6 +86,20 @@ void TextInputBases::ExpectCallParagraphMethods(ExpectParagraphParams params)
     EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
 }
 
+void TextInputBases::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
+
 void TextInputBases::CreateTextField(
     const std::string& text, const std::string& placeHolder, const std::function<void(TextFieldModelNG&)>& callback)
 {

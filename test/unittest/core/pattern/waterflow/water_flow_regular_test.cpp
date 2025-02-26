@@ -983,7 +983,7 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->layoutInfo_->UpdateOffset(100.0f);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 100.0f);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 100.0f);
     EXPECT_EQ(pattern_->layoutInfo_->itemStart_, true);
@@ -998,7 +998,7 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
     // layout in overScroll status at bottom.
     pattern_->layoutInfo_->UpdateOffset(-150.0f);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), -50.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_,
         pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN ? 0 : Infinity<int32_t>());
@@ -1032,7 +1032,7 @@ HWTEST_F(WaterFlowTestNg, Delete006, TestSize.Level1)
         frameNode_->ChildrenUpdatedFrom(1);
     }
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 

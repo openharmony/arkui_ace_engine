@@ -27,11 +27,27 @@ const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color(0XFFFFFF00);
 namespace {} // namespace
 class ArcScrollBarTestNg : public ScrollTestNg {
 public:
+    void FlushUITasks(const RefPtr<FrameNode>& frameNode);
     void DragScrollBarStart(GestureEvent& gesture);
     void DragScrollBarUpdate(GestureEvent& gesture);
     void DragScrollBarEnd(GestureEvent& gesture);
     void DragScrollBarAction(Offset startOffset, float dragDelta, float velocity = 0);
 };
+
+void ArcScrollBarTestNg::FlushUITasks(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
 
 void ArcScrollBarTestNg::DragScrollBarStart(GestureEvent& gesture)
 {
@@ -53,7 +69,7 @@ void ArcScrollBarTestNg::DragScrollBarUpdate(GestureEvent& gesture)
     gesture.SetMainVelocity(velocity);
     auto HandleDragUpdate = *(scrollBar_->panRecognizer_->onActionUpdate_);
     HandleDragUpdate(gesture);
-    FlushLayoutTask(ScrollTestNg::frameNode_);
+    FlushUITasks(ScrollTestNg::frameNode_);
 }
 
 void ArcScrollBarTestNg::DragScrollBarEnd(GestureEvent& gesture)
@@ -64,7 +80,7 @@ void ArcScrollBarTestNg::DragScrollBarEnd(GestureEvent& gesture)
     gesture.SetLocalLocation(gesture.GetLocalLocation());
     auto HandleDragEnd = *(scrollBar_->panRecognizer_->onActionEnd_);
     HandleDragEnd(gesture);
-    FlushLayoutTask(ScrollTestNg::frameNode_);
+    FlushUITasks(ScrollTestNg::frameNode_);
 }
 
 void ArcScrollBarTestNg::DragScrollBarAction(Offset startOffset, float dragDelta, float velocity)
@@ -213,7 +229,7 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg005, TestSize.Level1)
     GestureEvent info;
     info.SetMainDelta(10.f);
     pattern_->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, 0);
     auto scrollBar = AceType::MakeRefPtr<ArcScrollBar>();
     EXPECT_NE(scrollBar, nullptr);
@@ -223,7 +239,7 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg005, TestSize.Level1)
     info.SetMainDelta(10.f);
     auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, 0);
 
     scrollBar->PlayScrollBarAppearAnimation();

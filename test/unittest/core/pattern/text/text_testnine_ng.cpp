@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "text_base.h"
 
@@ -20,6 +21,7 @@ namespace OHOS::Ace::NG {
 
 class TextTestNineNg : public TextBases {
 public:
+    static void SetUpTestSuite();
     RefPtr<FrameNode> frameNode;
     RefPtr<TextPattern> pattern;
     void CreateText(std::string value)
@@ -32,10 +34,16 @@ public:
         auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
         auto pattern = frameNode->GetPattern<TextPattern>();
         auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-        FlushLayoutTask(frameNode);
+        FlushUITasks(frameNode);
         return;
     }
 };
+
+void TextTestNineNg::SetUpTestSuite()
+{
+    TextBases::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+}
 
 /**
  * @tc.name: OnHandleScrolling001
@@ -86,14 +94,14 @@ HWTEST_F(TextTestNineNg, HandleOnTranslate001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    FlushLayoutTask(frameNode);
+    FlushUITasks(frameNode);
 
     auto textSelectOverlay = pattern->selectOverlay_;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 5, 5) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
     pattern->HandleOnSelectAll();
-    FlushLayoutTask(frameNode);
+    FlushUITasks(frameNode);
     textSelectOverlay->HandleOnTranslate();
     EXPECT_FALSE(textSelectOverlay->originalMenuIsShow_);
 }
@@ -113,7 +121,7 @@ HWTEST_F(TextTestNineNg, OnHandleMoveStart001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    FlushLayoutTask(frameNode);
+    FlushUITasks(frameNode);
 
     GestureEvent info;
     auto manager = SelectContentOverlayManager::GetOverlayManager();
@@ -142,14 +150,14 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    FlushLayoutTask(frameNode);
+    FlushUITasks(frameNode);
 
     /**
      * @tc.steps: step2. request focus
      */
     auto focusHub = frameNode->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
-    FlushLayoutTask(frameNode);
+    FlushUITasks(frameNode);
 
     /**
      * @tc.step: step3. create a scene where the text menu has popped up
@@ -204,7 +212,7 @@ HWTEST_F(TextTestNineNg, CheckHandleVisible001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    FlushLayoutTask(frameNode);
+    FlushUITasks(frameNode);
 
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
