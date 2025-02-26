@@ -69,7 +69,11 @@ void SetTypeImpl(Ark_TouchEvent peer,
 }
 Array_TouchObject GetTouchesImpl(Ark_TouchEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    const std::list<TouchLocationInfo>& touchList = info->GetTouches();
+    return Converter::ArkValue<Array_TouchObject>(touchList, Converter::FC);
 }
 void SetTouchesImpl(Ark_TouchEvent peer,
                     const Array_TouchObject* touches)
@@ -79,7 +83,11 @@ void SetTouchesImpl(Ark_TouchEvent peer,
 }
 Array_TouchObject GetChangedTouchesImpl(Ark_TouchEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    const std::list<TouchLocationInfo>& touchList = info->GetChangedTouches();
+    return Converter::ArkValue<Array_TouchObject>(touchList, Converter::FC);
 }
 void SetChangedTouchesImpl(Ark_TouchEvent peer,
                            const Array_TouchObject* changedTouches)

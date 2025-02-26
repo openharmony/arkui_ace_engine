@@ -169,4 +169,94 @@ HWTEST_F(TouchEventAccessorTest, GetHistoricalPointsTest, TestSize.Level1)
     EXPECT_EQ(Converter::Convert<int32_t>(history.array->timestamp), expectedTime);
 }
 
+/**
+ * @tc.name: GetTouchesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventAccessorTest, GetTouchesTest, TestSize.Level1)
+{
+    TouchEventInfo* eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    constexpr float expectedDisplayX = 1.5f;
+    constexpr float expectedDisplayY = 1.7f;
+    constexpr int fingerId = 0;
+    constexpr int expectedDeviceId = 256;
+    constexpr float expectedWindowX = 2.5f;
+    constexpr float expectedWindowY = 3.7f;
+    constexpr float expectedX = 4.5f;
+    constexpr float expectedY = 5.7f;
+
+    TouchLocationInfo locationInfo(fingerId);
+    Offset offset(expectedDisplayX, expectedDisplayY);
+    locationInfo.SetScreenLocation(offset);
+    locationInfo.SetTouchDeviceId(expectedDeviceId);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    Offset globalOffset(expectedWindowX, expectedWindowY);
+    locationInfo.SetGlobalLocation(globalOffset);
+    Offset localOffset(expectedX, expectedY);
+    locationInfo.SetLocalLocation(localOffset);
+
+    eventInfo->AddTouchLocationInfo(std::move(locationInfo));
+    Array_TouchObject touches = accessor_->getTouches(peer_);
+
+    ASSERT_EQ(static_cast<int32_t>(touches.length), 1);
+    ASSERT_NE(touches.array, nullptr);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->displayX), expectedDisplayX);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->displayY), expectedDisplayY);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->screenX), expectedWindowX);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->screenY), expectedWindowY);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->windowX), expectedWindowX);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->windowY), expectedWindowY);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->x), expectedX);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->y), expectedY);
+    EXPECT_EQ(Converter::Convert<int32_t>(touches.array->id), expectedDeviceId);
+    EXPECT_EQ(touches.array->type, Ark_TouchType::ARK_TOUCH_TYPE_DOWN);
+}
+
+/**
+ * @tc.name: GetChangedTouchesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventAccessorTest, GetChangedTouchesTest, TestSize.Level1)
+{
+    TouchEventInfo* eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    constexpr float expectedDisplayX = 1.5f;
+    constexpr float expectedDisplayY = 1.7f;
+    constexpr int fingerId = 0;
+    constexpr int expectedDeviceId = 256;
+    constexpr float expectedWindowX = 2.5f;
+    constexpr float expectedWindowY = 3.7f;
+    constexpr float expectedX = 4.5f;
+    constexpr float expectedY = 5.7f;
+
+    TouchLocationInfo locationInfo(fingerId);
+    Offset offset(expectedDisplayX, expectedDisplayY);
+    locationInfo.SetScreenLocation(offset);
+    locationInfo.SetTouchDeviceId(expectedDeviceId);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    Offset globalOffset(expectedWindowX, expectedWindowY);
+    locationInfo.SetGlobalLocation(globalOffset);
+    Offset localOffset(expectedX, expectedY);
+    locationInfo.SetLocalLocation(localOffset);
+
+    eventInfo->AddChangedTouchLocationInfo(std::move(locationInfo));
+    Array_TouchObject touches = accessor_->getChangedTouches(peer_);
+
+    ASSERT_EQ(static_cast<int32_t>(touches.length), 1);
+    ASSERT_NE(touches.array, nullptr);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->displayX), expectedDisplayX);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->displayY), expectedDisplayY);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->screenX), expectedWindowX);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->screenY), expectedWindowY);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->windowX), expectedWindowX);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->windowY), expectedWindowY);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->x), expectedX);
+    EXPECT_EQ(Converter::Convert<float>(touches.array->y), expectedY);
+    EXPECT_EQ(Converter::Convert<int32_t>(touches.array->id), expectedDeviceId);
+    EXPECT_EQ(touches.array->type, Ark_TouchType::ARK_TOUCH_TYPE_DOWN);
+}
+
 }
