@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -419,6 +419,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     }
 #endif
     auto mainDelta = info.GetMainDelta();
+    lastMainDelta_ = mainDelta;
     auto source = IsMouseWheelScroll(info) ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     ACE_SCOPED_TRACE(
         "HandleDragUpdate, mainDelta:%f, source:%d, id:%d, tag:%s", mainDelta, source, nodeId_, nodeTag_.c_str());
@@ -443,8 +444,13 @@ void Scrollable::LayoutDirectionEst(double& correctVelocity)
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
     // avoid no render frame when drag end
-    HandleDragUpdate(info);
-
+    if (NearZero(info.GetMainDelta())) {
+        auto tempInfo = info;
+        tempInfo.SetMainDelta(lastMainDelta_);
+        HandleDragUpdate(tempInfo);
+    } else {
+        HandleDragUpdate(info);
+    }
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s",
         info.GetMainVelocity(), nodeId_, nodeTag_.c_str());
     if (dragFRCSceneCallback_) {
@@ -464,9 +470,11 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
     mainPosition = Round(mainPosition);
-    ACE_SCOPED_TRACE("HandleDragEnd, mainPosition:%f, gestureVelocity:%f, currentVelocity:%f, moved_:%u "
-                     "canOverScroll_:%u, id:%d, tag:%s",
-        mainPosition, gestureVelocity, currentVelocity_, moved_, canOverScroll_, nodeId_, nodeTag_.c_str());
+    ACE_SCOPED_TRACE(
+        "HandleDragEnd, mainPosition:%f, getureDelta:%lf, gestureVelocity:%lf, currentVelocity:%f, moved_:%u "
+        "canOverScroll_:%u, id:%d, tag:%s",
+        mainPosition, info.GetMainDelta(), gestureVelocity, currentVelocity_, moved_, canOverScroll_, nodeId_,
+        nodeTag_.c_str());
     if (!moved_ || IsMouseWheelScroll(info)) {
         ResetContinueDragCount();
         if (calePredictSnapOffsetCallback_) {

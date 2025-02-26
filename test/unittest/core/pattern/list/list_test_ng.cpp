@@ -395,6 +395,7 @@ void ListTestNg::ScrollSnap(double offset, double endVelocity)
     info.SetMainVelocity(endVelocity);
     info.SetMainDelta(0.0);
     scrollable->HandleTouchUp();
+    scrollable->lastMainDelta_ = 0.0;
     scrollable->HandleDragEnd(info);
     scrollable->isDragging_ = false;
     FlushLayoutTask(frameNode_);
