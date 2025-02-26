@@ -597,6 +597,7 @@ public:
     }
 
     RefPtr<Curve> GetCurveIncludeMotion();
+    RefPtr<Curve> GetIndicatorHeadCurve() const;
     float GetMotionVelocity()
     {
         return motionVelocity_;
