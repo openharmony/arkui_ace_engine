@@ -5676,6 +5676,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
             pipeline->FlushMessages();
         }
 
+        FireUnselectedEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         FireChangeEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         // lazyBuild feature.
         SetLazyLoadFeature(true);
