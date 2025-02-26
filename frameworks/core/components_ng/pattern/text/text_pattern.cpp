@@ -1512,7 +1512,7 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     if (keyEvent.IsCtrlWith(KeyCode::KEY_A)) {
         auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
         HandleSelectionChange(0, textSize);
-        CalculateHandleOffsetAndShowOverlay();
+        CloseSelectOverlay();
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
