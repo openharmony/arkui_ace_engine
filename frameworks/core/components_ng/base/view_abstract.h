@@ -548,8 +548,9 @@ public:
     static void SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseEffect(FrameNode* frameNode, const std::optional<bool>& useEffect);
-    static void SetForegroundColor(FrameNode* frameNode, const Color& color);
-    static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
+    static void SetForegroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetForegroundColorStrategy(FrameNode* frameNode,
+        const std::optional<ForegroundColorStrategy>& strategy);
     static void SetMotionPath(FrameNode* frameNode, const std::optional<MotionPathOption>& motionPath);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
