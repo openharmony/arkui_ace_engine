@@ -18,6 +18,7 @@
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
@@ -99,12 +100,10 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         if (!selectedColor.has_value()) {
-            auto theme = pipeline->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
-            CHECK_NULL_VOID(theme);
-            color = theme->GetActiveColor();
+            CheckBoxModelNG::ResetSelectedColor(frameNode);
+        } else {
+            CheckBoxModelNG::SetSelectedColor(frameNode, color);
         }
-        CheckBoxModelNG checkBoxModelNG;
-        checkBoxModelNG.SetSelectedColor(color);
         return;
     }
     auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();

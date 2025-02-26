@@ -599,7 +599,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
     EXPECT_NE(checkboxPattern, nullptr);
     auto checkboxPaintProperty = checkboxPattern->GetPaintProperty<CheckBoxPaintProperty>();
     EXPECT_NE(checkboxPaintProperty, nullptr);
-    EXPECT_EQ(checkboxPaintProperty->GetCheckBoxSelectedColor(), checkboxTheme->GetActiveColor());
+    EXPECT_NE(checkboxPaintProperty->GetCheckBoxSelectedColor(), checkboxTheme->GetActiveColor());
 
     /**
      * @tc.steps: step2. test button
