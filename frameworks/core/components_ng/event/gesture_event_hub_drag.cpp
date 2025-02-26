@@ -739,13 +739,29 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
     ACE_SCOPED_TRACE("drag: to start");
-    auto eventHub = eventHub_.Upgrade();
-    CHECK_NULL_VOID(eventHub);
+    auto dragNodePipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(dragNodePipeline);
+    auto overlayManager = dragNodePipeline->GetOverlayManager();
     auto pipeline = AceType::DynamicCast<PipelineContext>(context);
     CHECK_NULL_VOID(pipeline);
 
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
+
+    bool needChangeFwkForLeaveWindow = false;
+    if (DragDropGlobalController::GetInstance().GetAsyncDragCallback()) {
+        auto rootNode = dragDropManager->GetRootNode();
+        CHECK_NULL_VOID(rootNode);
+        auto geometryNode = rootNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        RectF rectF = geometryNode->GetFrameRect();
+        auto point = dragDropManager->GetDragMoveLastPoint();
+        if (!rectF.IsInRegion(PointF(static_cast<float>(point.GetX()), static_cast<float>(point.GetY())))) {
+            needChangeFwkForLeaveWindow = true;
+        }
+    }
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
     if (dragDropProxy_) {
         dragDropProxy_ = nullptr;
     }
@@ -796,9 +812,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     SetDragGatherPixelMaps(info);
     dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
-    auto dragNodePipeline = frameNode->GetContextRefPtr();
-    CHECK_NULL_VOID(dragNodePipeline);
-    auto overlayManager = dragNodePipeline->GetOverlayManager();
     bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
     if (isMenuShow) {
         dragDropManager->SetIsDragWithContextMenu(true);
@@ -815,7 +828,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->GetUpdateDragMovePosition(), pixelMap, nullptr };
     dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
-    if (IsNeedSwitchToSubWindow(data)) {
+    if (!needChangeFwkForLeaveWindow && IsNeedSwitchToSubWindow(data)) {
         auto imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode, defaultPixelMapScale);
         CHECK_NULL_VOID(imageNode);
@@ -906,7 +919,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragEventActuator_->NotifyDragStart();
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
     bool isSwitchedToSubWindow = false;
-    if (subWindow && TryDoDragStartAnimation(context, subWindow, info, data)) {
+    if (!needChangeFwkForLeaveWindow && subWindow && TryDoDragStartAnimation(context, subWindow, info, data)) {
         dragDropManager->SetIsReDragStart(pipeline != dragNodePipeline);
         isSwitchedToSubWindow = true;
     } else {
@@ -926,7 +939,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(eventManager);
     eventManager->DoMouseActionRelease();
     eventManager->SetIsDragging(true);
-    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_ != nullptr &&
+    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && needChangeFwkForLeaveWindow) {
+        overlayManager->RemovePixelMap();
+        overlayManager->RemovePreviewBadgeNode();
+        overlayManager->RemoveGatherNode();
+        dragEventActuator_->NotifyTransDragWindowToFwk();
+        pipeline->AddAfterRenderTask([]() {
+            ACE_SCOPED_TRACE("drag: set drag window visible, touch");
+            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        });
+    } else if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_ != nullptr &&
         dragEventActuator_->GetIsNotInPreviewState()) {
         if (!isSwitchedToSubWindow) {
             overlayManager->RemovePixelMap();
@@ -945,6 +967,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                 ACE_SCOPED_TRACE("drag: set drag window visible, mouse");
                 InteractionInterface::GetInstance()->SetDragWindowVisible(true);
             });
+            pipeline->RequestFrame();
         }
         dragDropManager->SetIsDragWindowShow(true);
     }
