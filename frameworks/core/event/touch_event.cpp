@@ -291,6 +291,7 @@ void TouchEvent::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void TouchEvent::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    CHECK_NULL_VOID(json);
     id = json->GetInt("id");
     x = json->GetDouble("x");
     y = json->GetDouble("y");
