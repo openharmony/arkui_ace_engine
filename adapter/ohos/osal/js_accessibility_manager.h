@@ -60,6 +60,9 @@ struct CommonProperty {
     std::vector<std::string> pagePaths;
     std::vector<RefPtr<NG::FrameNode>> pageNodes;
     bool isReduceMode = false;
+    RotateTransform rotateTransform;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
 };
 
 struct ActionTable {
@@ -257,6 +260,7 @@ public:
         const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset = 0) override;
     bool ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
+    Rect GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node) override;
 #ifdef WEB_SUPPORTED
     void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) override;

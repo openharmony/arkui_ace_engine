@@ -1899,7 +1899,7 @@ NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node)
 }
 
 void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo,
-    const CommonProperty& commonProperty, const float& scaleX, const float& scaleY)
+    const CommonProperty& commonProperty)
 {
     if (node->IsAccessibilityVirtualNode()) {
         auto rect = node->GetVirtualNodeTransformRectRelativeToWindow();
@@ -1911,9 +1911,20 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
         nodeInfo.SetRectInScreen(bounds);
     } else if (node->IsVisible()) {
         auto rect = GetFinalRealRect(node);
-        if ((scaleX != 0) && (scaleY != 0)) {
-            rect.SetRect(rect.GetX() * scaleX, rect.GetY() * scaleY,
-                rect.Width() * scaleX, rect.Height() * scaleY);
+        auto rotateTransformData = commonProperty.rotateTransform;
+        auto currentDegree = rotateTransformData.rotateDegree;
+        if (!NearZero(currentDegree, 0)) {
+            AccessibilityRect rotateRect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+            rotateRect.Rotate(rotateTransformData.innerCenterX, rotateTransformData.innerCenterY, currentDegree);
+            rotateRect.ApplyTransformation(rotateTransformData, commonProperty.scaleX, commonProperty.scaleY);
+            Accessibility::Rect bounds { rotateRect.GetX(), rotateRect.GetY(),
+                rotateRect.GetX() + rotateRect.GetWidth(), rotateRect.GetY() + rotateRect.GetHeight()};
+            nodeInfo.SetRectInScreen(bounds);
+            return;
+        }
+        if (!NearZero(commonProperty.scaleX, 0) && !NearZero(commonProperty.scaleY, 0)) {
+            rect.SetRect(rect.GetX() * commonProperty.scaleX, rect.GetY() * commonProperty.scaleY,
+                rect.Width() * commonProperty.scaleX, rect.Height() * commonProperty.scaleY);
         }
         auto left = rect.Left() + commonProperty.windowLeft;
         auto top = rect.Top() + commonProperty.windowTop;
@@ -1923,6 +1934,13 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
         nodeInfo.SetRectInScreen(bounds);
     }
 }
+}
+
+Rect JsAccessibilityManager::GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node)
+{
+    auto rect = GetFinalRealRect(node);
+    Rect rectInfo(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    return rectInfo;
 }
 
 void JsAccessibilityManager::UpdateAccessibilityVisible(
@@ -1970,7 +1988,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
     nodeInfo.SetIsActive(node->IsActive());
-    SetRectInScreen(node, nodeInfo, commonProperty, scaleX_, scaleY_);
+    SetRectInScreen(node, nodeInfo, commonProperty);
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     // is abnormal that pageId equals to 0, use last pageId to fix pageId
@@ -2855,6 +2873,7 @@ void JsAccessibilityManager::RegisterGetParentRectHandler()
             parentRectInfo.top = uecRectInfo.top;
             parentRectInfo.scaleX = uecRectInfo.scaleX;
             parentRectInfo.scaleY = uecRectInfo.scaleY;
+            parentRectInfo.rotateTransform = uecRectInfo.rotateTransform;
         } else {
             auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(jsAccessibilityManager->context_.Upgrade());
             CHECK_NULL_VOID(ngPipeline);
@@ -2887,9 +2906,10 @@ void JsAccessibilityManager::RegisterUIExtBusinessConsumeCallback()
         info.top = data.GetIntParam("top", 0);
         info.scaleX = data.GetFloatParam("scaleX", 1.0f);
         info.scaleY = data.GetFloatParam("scaleY", 1.0f);
-        info.centerX = data.GetIntParam("centerX", 0);
-        info.centerY = data.GetIntParam("centerY", 0);
-        info.rotateDegree = data.GetIntParam("rotateDegree", 0);
+        RotateTransform rotateTransform(data.GetFloatParam("rotateDegree", 0), data.GetFloatParam("centerX", 0),
+            data.GetFloatParam("centerY", 0), data.GetFloatParam("innerCenterX", 0),
+            data.GetFloatParam("innerCenterY", 0));
+        info.rotateTransform = rotateTransform;
         info.isChanged = true;
         jsAccessibilityManager->UpdateUECAccessibilityParentRectInfo(info);
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
@@ -7234,8 +7254,10 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     output.windowTop = windowInfo.top;
     scaleX_ = windowInfo.scaleX;
     scaleY_ = windowInfo.scaleY;
+    output.scaleX = windowInfo.scaleX;
+    output.scaleY = windowInfo.scaleY;
     output.innerWindowId = windowInfo.innerWindowId;
-
+    output.rotateTransform = windowInfo.rotateTransform;
     // handle this time page info
     GetCurrentWindowPages(ngPipeline, output.pageNodes, output.pagePaths);
     if (context->GetWindowId() != mainContext->GetWindowId()) {

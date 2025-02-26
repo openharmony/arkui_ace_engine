@@ -6309,6 +6309,12 @@ void RosenRenderContext::SetMarkNodeGroup(bool isNodeGroup)
     rsNode_->MarkNodeGroup(isNodeGroup);
 }
 
+int32_t RosenRenderContext::GetRotateDegree()
+{
+    CHECK_NULL_RETURN(rsNode_, 0);
+    return static_cast<int32_t>(rsNode_->GetStagingProperties().GetRotation());
+}
+
 void RosenRenderContext::ResetSurface(int width, int height)
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
