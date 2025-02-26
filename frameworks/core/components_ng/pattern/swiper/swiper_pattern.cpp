@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/arc_swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
@@ -6823,13 +6824,23 @@ void SwiperPattern::UpdateNodeRate()
     }
 }
 
+std::shared_ptr<SwiperParameters> SwiperPattern::GetBindIndicatorParameters() const
+{
+    auto bindIndicatorNode = GetIndicatorNode();
+    CHECK_NULL_RETURN(bindIndicatorNode, nullptr);
+    auto indicatorPattern = bindIndicatorNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_RETURN(indicatorPattern, nullptr);
+    return indicatorPattern->GetIndicatorParameters();
+}
+
 int32_t SwiperPattern::GetMaxDisplayCount() const
 {
-    if (!swiperParameters_ || !swiperParameters_->maxDisplayCountVal.has_value()) {
+    auto indicatorParameters = isBindIndicator_ ? GetBindIndicatorParameters() : swiperParameters_;
+    if (!indicatorParameters || !indicatorParameters->maxDisplayCountVal.has_value()) {
         return 0;
     }
 
-    auto maxDisplayCount = swiperParameters_->maxDisplayCountVal.value();
+    auto maxDisplayCount = indicatorParameters->maxDisplayCountVal.value();
     if (maxDisplayCount < MAX_DISPLAY_COUNT_MIN || maxDisplayCount > MAX_DISPLAY_COUNT_MAX) {
         return 0;
     }

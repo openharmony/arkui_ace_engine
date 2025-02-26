@@ -216,6 +216,11 @@ public:
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    std::shared_ptr<SwiperParameters> GetIndicatorParameters() const
+    {
+        return swiperParameters_;
+    }
+
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;
 

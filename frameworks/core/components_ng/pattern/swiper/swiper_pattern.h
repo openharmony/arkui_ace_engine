@@ -1217,6 +1217,7 @@ private:
     void UpdateItemsLatestSwitched();
     void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
     void PostIdleTaskToCleanTabContent();
+    std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
 
     friend class SwiperHelper;
 
