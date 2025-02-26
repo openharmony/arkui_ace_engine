@@ -15,13 +15,14 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "rendering_context_settings_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RenderingContextSettingsAccessor {
 namespace {
-const auto ANTIALIAS_DEFAULT_VALUE = false;
+const auto ANTIALIAS_DEFAULT_VALUE = Converter::ArkValue<Ark_Boolean>(false);
 } // namespace
 
 void DestroyPeerImpl(Ark_RenderingContextSettings peer)
