@@ -1441,7 +1441,6 @@ private:
     std::shared_ptr<OffsetF> lastHostParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
-    const static std::set<std::string> layoutTags_;
     std::function<void()> removeCustomProperties_;
     std::function<std::string(const std::string& key)> getCustomProperty_;
     std::optional<RectF> viewPort_;

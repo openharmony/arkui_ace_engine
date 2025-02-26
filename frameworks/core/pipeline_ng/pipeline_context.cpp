@@ -35,6 +35,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
+#include "base/log/dump_recorder.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
@@ -79,6 +80,9 @@ constexpr int32_t DELAY_TIME = 500;
 constexpr int32_t PARAM_NUM = 2;
 constexpr int32_t MAX_MISS_COUNT = 3;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
+constexpr int32_t MAX_RECORD_SECOND = 15;
+constexpr int32_t DEFAULT_RECORD_SECOND = 5;
+constexpr int32_t SECOND_TO_MILLISEC = 1000;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -656,6 +660,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FireAccessibilityEvents();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
+    TriggerFrameDumpFuncIfExist();
     window_->Unlock();
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
@@ -3099,8 +3104,50 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         DumpLog::GetInstance().OutPutByCompress();
     } else if (params[0] == "-resource") {
         DumpResLoadError();
+    } else if (params[0] == "-start") {
+        OnDumpRecorderStart(params);
+    } else if (params[0] == "-end") {
+        DumpRecorder::GetInstance().Stop();
     }
     return true;
+}
+
+void PipelineContext::OnDumpRecorderStart(const std::vector<std::string>& params) const
+{
+    int32_t recordTime = DEFAULT_RECORD_SECOND;
+    if (static_cast<uint32_t>(sizeof(params)) <= 1) {
+        return;
+    }
+    int32_t inputTime = StringUtils::StringToInt(params[1]);
+    if (inputTime > 0) {
+        recordTime = inputTime;
+    }
+    recordTime = std::min(recordTime, MAX_RECORD_SECOND);
+    int64_t startTime = GetCurrentTimestamp();
+    auto taskExecutor = GetTaskExecutor();
+    std::function<bool()> dumpFunc = [startTime, recordTime, weakRoot = WeakClaim(RawPtr(rootNode_)),
+                                         executor = WeakClaim(RawPtr(taskExecutor))]() {
+        int64_t currentTime = GetCurrentTimestamp();
+        if ((currentTime - startTime) >= recordTime * SECOND_TO_MILLISEC) {
+            return false;
+        }
+        auto root = weakRoot.Upgrade();
+        CHECK_NULL_RETURN(root, false);
+        auto jsonRoot = JsonUtil::Create(true);
+        root->DumpTreeJsonForDiff(jsonRoot);
+        DumpRecorder::GetInstance().Record(currentTime, std::move(jsonRoot), executor);
+        return true;
+    };
+    DumpRecorder::GetInstance().Start(std::move(dumpFunc));
+}
+
+void PipelineContext::TriggerFrameDumpFuncIfExist() const
+{
+    auto frameDumpFunc = DumpRecorder::GetInstance().GetFrameDumpFunc();
+    CHECK_NULL_VOID(frameDumpFunc);
+    if (!frameDumpFunc()) {
+        DumpRecorder::GetInstance().Stop();
+    }
 }
 
 void PipelineContext::DumpUIExt() const

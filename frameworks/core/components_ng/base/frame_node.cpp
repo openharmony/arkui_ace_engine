@@ -88,9 +88,6 @@ constexpr int32_t DEFAULT_PRECISION = 2;
 } // namespace
 namespace OHOS::Ace::NG {
 
-const std::set<std::string> FrameNode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
-    "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
-
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
     struct FrameChildNode {
@@ -5645,7 +5642,8 @@ bool FrameNode::IsContextTransparent()
     if (renderContext_->GetOpacity().has_value() && renderContext_->GetOpacity().value() <= MIN_OPACITY) {
         return true;
     }
-    if (layoutTags_.find(GetTag()) == layoutTags_.end()) {
+    auto layoutTags = GetLayoutTags();
+    if (layoutTags.find(GetTag()) == layoutTags.end()) {
         if (width > MIN_WIDTH && height > MIN_HEIGHT &&
             static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) == 0) {
             return false;

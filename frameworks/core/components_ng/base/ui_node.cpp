@@ -23,6 +23,8 @@
 namespace OHOS::Ace::NG {
 
 thread_local int64_t currentAccessibilityId_ = 0;
+const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
+    "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
@@ -995,6 +997,34 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson);
     }
+}
+
+void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
+{
+    auto currentNode = JsonUtil::Create(true);
+    auto childrenNodeArray = JsonUtil::CreateArray(true);
+    auto children = GetChildren();
+    currentNode->Put("childSize", static_cast<int32_t>(children.size()));
+    currentNode->Put("ID", nodeId_);
+    currentNode->Put("Depth", GetDepth());
+    currentNode->Put("InstanceId", instanceId_);
+    currentNode->Put("AccessibilityId", accessibilityId_);
+    if (IsDisappearing()) {
+        currentNode->Put("IsDisappearing", IsDisappearing());
+    }
+    DumpInfo(currentNode);
+    for (auto& child : children) {
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
+        if (frameNode && layoutTags_.find(frameNode->GetTag()) != layoutTags_.end() && !frameNode->IsActive()) {
+            continue;
+        }
+        auto childNode = JsonUtil::Create(true);
+        child->DumpTreeJsonForDiff(childNode);
+        childrenNodeArray->PutRef(std::move(childNode));
+    }
+    currentNode->PutRef("children", std::move(childrenNodeArray));
+    std::string key = isRoot_ ? tag_ : tag_ + "_" + std::to_string(nodeId_);
+    json->PutRef(key.c_str(), std::move(currentNode));
 }
 
 void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
