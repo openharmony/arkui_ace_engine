@@ -3453,10 +3453,11 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
         return currentIndex_;
     }
 
+    auto currentEndIndex = SwiperUtils::ComputePageEndIndex(currentIndex_, displayCount);
     auto dragDistance = iter->second.endPos;
     auto dragForward = currentIndex_ > firstIndex;
     auto dragThresholdFlag = dragForward ? dragDistance > swiperWidth / swiperProportion_ :
-        dragDistance < swiperWidth / swiperProportion_;
+        (dragDistance < swiperWidth / swiperProportion_) | (currentEndIndex < firstIndex);
     auto nextIndex = currentIndex_;
     if (dragThresholdFlag) {
         nextIndex = dragForward ? currentIndex_ - displayCount : currentIndex_ + displayCount;
