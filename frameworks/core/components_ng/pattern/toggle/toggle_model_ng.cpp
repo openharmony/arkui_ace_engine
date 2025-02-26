@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
