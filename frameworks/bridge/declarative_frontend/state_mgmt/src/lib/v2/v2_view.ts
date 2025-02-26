@@ -360,7 +360,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         if (this.isReusable_ === true) {
             const isReusableAllowed = this.allowReusableV2Descendant();
             if (!isReusableAllowed) {
-                const error = `using @ReusableV2 component inside Repeat.template is not allowed!`;
+                const error = `Using @ReusableV2 component inside Repeat.template or other invalid parent component is not allowed!`;
                 stateMgmtConsole.applicationError(error);
                 throw new Error(error);
             }
