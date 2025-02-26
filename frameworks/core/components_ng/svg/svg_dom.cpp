@@ -359,8 +359,13 @@ void SvgDom::DrawImage(
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
     } else {
+        Size viewPort = svgContext_->GetRootViewBox().GetSize();
+        if (LessOrEqual(viewPort.Width(), 0.0) || LessOrEqual(viewPort.Height(), 0.0)) {
+            viewPort = svgContext_->GetViewPort();
+        }
         SvgLengthScaleRule lengthRule(Rect(0, 0, svgContext_->GetViewPort().Width(),
-            svgContext_->GetViewPort().Height()), SvgLengthScaleUnit::USER_SPACE_ON_USE);
+            svgContext_->GetViewPort().Height()), viewPort,
+            SvgLengthScaleUnit::USER_SPACE_ON_USE);
         svgContext_->SetFillColor(fillColor_);
         root_->Draw(canvas, lengthRule);
     }

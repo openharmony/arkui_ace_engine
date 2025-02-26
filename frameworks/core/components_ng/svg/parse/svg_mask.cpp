@@ -17,6 +17,7 @@
 
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,30 +28,13 @@ RefPtr<SvgNode> SvgMask::Create()
     return AceType::MakeRefPtr<SvgMask>();
 }
 
-SvgLengthScaleRule SvgMask::TransformForCurrentOBB(RSCanvas& canvas,
-    const SvgCoordinateSystemContext& svgCoordinateSystemContext)
-{
-    if (maskAttr_.maskContentUnits == SvgLengthScaleUnit::USER_SPACE_ON_USE) {
-        return svgCoordinateSystemContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
-    }
-    // create default rect to draw graphic
-    Rect defaultRect(0, 0, 1, 1);
-    SvgLengthScaleRule maskContentRule = SvgLengthScaleRule(defaultRect, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
-    auto obb = svgCoordinateSystemContext.GetBoundingBoxRect();
-    // scale the graphic content of the given element non-uniformly
-    // such that the element's bounding box exactly matches the viewport rectangle.
-    canvas.Translate(obb.Left(), obb.Top());
-    canvas.Scale(obb.Width(), obb.Height());
-    return maskContentRule;
-}
-
 void SvgMask::OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
 {
     auto maskRule = svgCoordinateSystemContext.BuildScaleRule(maskAttr_.maskUnits);
-    auto measuredX = GetMeasuredPosition(maskAttr_.x, maskRule, SvgLengthType::HORIZONTAL);
-    auto measuredY = GetMeasuredPosition(maskAttr_.y, maskRule, SvgLengthType::VERTICAL);
-    auto measuredWidth = GetMeasuredLength(maskAttr_.width, maskRule, SvgLengthType::HORIZONTAL);
-    auto measuredHeight = GetMeasuredLength(maskAttr_.height, maskRule, SvgLengthType::VERTICAL);
+    auto measuredX = GetRegionPosition(maskAttr_.x, maskRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetRegionPosition(maskAttr_.y, maskRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetRegionLength(maskAttr_.width, maskRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetRegionLength(maskAttr_.height, maskRule, SvgLengthType::VERTICAL);
     Rect maskRect = {
         measuredX,
         measuredY,
@@ -64,7 +48,8 @@ void SvgMask::OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& s
     // ready to render mask content
     auto canvasLayerCount = static_cast<int32_t>(canvas.GetSaveCount());
     RosenSvgPainter::SetMask(&canvas);
-    auto maskContentRule = TransformForCurrentOBB(canvas, svgCoordinateSystemContext);
+    auto maskContentRule = TransformForCurrentOBB(canvas, svgCoordinateSystemContext, maskAttr_.maskContentUnits,
+        svgCoordinateSystemContext.GetContainerRect().Left(), svgCoordinateSystemContext.GetContainerRect().Top());
     DrawChildren(canvas, maskContentRule);
     canvas.RestoreToCount(canvasLayerCount);
     // create content layer and render content
@@ -156,6 +141,11 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             } },
         { SVG_MASK_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
+                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                    attr.maskUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
+                        SvgLengthScaleUnit::USER_SPACE_ON_USE;
+                    return;
+                }
                 attr.maskUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
                     SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
             } },

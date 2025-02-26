@@ -95,10 +95,10 @@ void SvgFilter::OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContex
     float useOffsetX, float useOffsetY)
 {
     auto filterRule = svgCoordinateSystemContext.BuildScaleRule(filterAttr_.filterUnits);
-    auto measuredX = GetMeasuredPosition(filterAttr_.x, filterRule, SvgLengthType::HORIZONTAL);
-    auto measuredY = GetMeasuredPosition(filterAttr_.y, filterRule, SvgLengthType::VERTICAL);
-    auto measuredWidth = GetMeasuredLength(filterAttr_.width, filterRule, SvgLengthType::HORIZONTAL);
-    auto measuredHeight = GetMeasuredLength(filterAttr_.height, filterRule, SvgLengthType::VERTICAL);
+    auto measuredX = GetRegionPosition(filterAttr_.x, filterRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetRegionPosition(filterAttr_.y, filterRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetRegionLength(filterAttr_.width, filterRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetRegionLength(filterAttr_.height, filterRule, SvgLengthType::VERTICAL);
     Rect effectFilterArea = {
         measuredX + useOffsetX,
         measuredY + useOffsetY,
