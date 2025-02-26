@@ -332,7 +332,7 @@ public:
     std::list<StateRecord> stateHistory;
 };
 
-class ACE_EXPORT TouchEventTarget : public virtual AceType {
+class ACE_FORCE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
 public:
