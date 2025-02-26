@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PROGRESS_DEFAULT_VALUE = 0.0f;
+constexpr float PROGRESS_MAX_VALUE = 100.0f;
 }
 bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
@@ -509,7 +510,7 @@ void ProgressPattern::DumpInfo()
     CHECK_NULL_VOID(paintProperty);
     
     auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
-    auto maxValue = paintProperty->GetMaxValue().value();
+    auto maxValue = paintProperty->GetMaxValue().value_or(PROGRESS_MAX_VALUE);
     auto jsonValue = JsonUtil::Create(true);
     auto color = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
@@ -725,8 +726,8 @@ RefPtr<FrameNode> ProgressPattern::BuildContentModifierNode()
     }
     auto renderProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_RETURN(renderProperty, nullptr);
-    auto value = renderProperty->GetValue().value_or(0);
-    auto total = renderProperty->GetMaxValue().value_or(0);
+    auto value = renderProperty->GetValue().value_or(PROGRESS_DEFAULT_VALUE);
+    auto total = renderProperty->GetMaxValue().value_or(PROGRESS_MAX_VALUE);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -747,7 +748,7 @@ void ProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(paintProperty);
 
     auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
-    auto maxValue = paintProperty->GetMaxValue().value();
+    auto maxValue = paintProperty->GetMaxValue().value_or(PROGRESS_MAX_VALUE);
     auto jsonValue = JsonUtil::Create(true);
     auto color = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
