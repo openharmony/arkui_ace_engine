@@ -9420,6 +9420,7 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "In OnDragEnded,"
             " the released location is not in the current richEditor, id:" SEC_PLD(%{public}d),
                 SEC_PARAM(host->GetId()));
+        IF_TRUE(HasFocus(), CloseKeyboard(false));
         focusHub->LostFocus();
         StopTwinkling();
         return;
