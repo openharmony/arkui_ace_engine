@@ -364,7 +364,7 @@ public:
     {
         return {};
     }
-
+    virtual int32_t GetRotateDegree() { return 0; }
     virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}

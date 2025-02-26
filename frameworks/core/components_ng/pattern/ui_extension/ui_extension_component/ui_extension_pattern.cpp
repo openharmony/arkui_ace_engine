@@ -2110,11 +2110,36 @@ AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
             auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            rectInfo.left =
-                rectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
-            rectInfo.top = rectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
+            auto rectFinal = accessibilityManager->GetFinalRealRectInfo(host);
+            rectInfo.left = static_cast<int32_t>(rectFinal.Left());
+            rectInfo.top = static_cast<int32_t>(rectFinal.Top());
+            RotateTransform rotateData;
+            RotateTransform windowRotateData = windowInfo.rotateTransform;
+            rotateData.rotateDegree = host->GetTransformRotateRelativeToWindow();
+            AccessibilityRect rotateRect(rectFinal.Left(), rectFinal.Top(),
+                rectFinal.Width(), rectFinal.Height());
+            if (windowRotateData.rotateDegree) {
+                rotateRect.Rotate(windowRotateData.innerCenterX, windowRotateData.innerCenterY,
+                    windowRotateData.rotateDegree);
+                rotateRect.ApplyTransformation(windowRotateData, windowInfo.scaleX, windowInfo.scaleY);
+                rotateData.rotateDegree += windowRotateData.rotateDegree;
+            } else {
+                RotateTransform roateDataTemp(0, windowInfo.left, windowInfo.top, 0, 0);
+                rotateRect.ApplyTransformation(roateDataTemp, windowInfo.scaleX, windowInfo.scaleY);
+            }
+            rectInfo.left = rotateRect.GetX();
+            rectInfo.top = rotateRect.GetY();
             rectInfo.scaleX *= windowInfo.scaleX;
             rectInfo.scaleY *= windowInfo.scaleY;
+            if (rotateData.rotateDegree) {
+                rotateData.centerX = static_cast<int32_t>(rotateRect.GetWidth()) * 0.5f + rotateRect.GetX();
+                rotateData.centerY = static_cast<int32_t>(rotateRect.GetHeight()) * 0.5f + rotateRect.GetY();
+                auto renderContext = host->GetRenderContext();
+                CHECK_NULL_RETURN(renderContext, rectInfo);
+                auto rectOrigin = renderContext->GetPaintRectWithoutTransform();
+                rotateData.innerCenterX = rectOrigin.Width() * 0.5f;
+                rotateData.innerCenterY = rectOrigin.Height() * 0.5f;
+            }
         }
     }
     return rectInfo;
@@ -2132,6 +2157,11 @@ void UIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     data.SetParam("top", parentRectInfo.top);
     data.SetParam("scaleX", parentRectInfo.scaleX);
     data.SetParam("scaleY", parentRectInfo.scaleY);
+    data.SetParam("centerX", parentRectInfo.rotateTransform.centerX);
+    data.SetParam("centerY", parentRectInfo.rotateTransform.centerY);
+    data.SetParam("innerCenterX", parentRectInfo.rotateTransform.innerCenterX);
+    data.SetParam("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
+    data.SetParam("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
         parentRectInfo.scaleX, parentRectInfo.scaleY);
