@@ -457,7 +457,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
     }
     styledString_->RemoveString(start, length);
     if (isUpdateCaret) {
-        SetCaretPosition(start);
+        SetCaretPosition(start, !isModifyingContent_);
     }
     if ((!caretVisible_ || isSingleHandleMoving) && HasFocus()) {
         StartTwinkling();
