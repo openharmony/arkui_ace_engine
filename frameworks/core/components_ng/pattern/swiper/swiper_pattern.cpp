@@ -4078,6 +4078,8 @@ void SwiperPattern::PlayTranslateAnimation(
         [weak](float value) {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
+            // currentDelta_ needs to be adjusted when the previous frame has not been processed.
+            value += swiper->currentDelta_;
             swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
         },
         PropertyUnit::PIXEL_POSITION);
