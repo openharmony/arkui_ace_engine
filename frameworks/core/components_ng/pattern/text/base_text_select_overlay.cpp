@@ -871,7 +871,7 @@ void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(
         manager->HideOptionMenu(true);
         return;
     }
-    if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG) {
+    if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG && !GetIsHandleDragging()) {
         manager->ShowOptionMenu();
         return;
     }

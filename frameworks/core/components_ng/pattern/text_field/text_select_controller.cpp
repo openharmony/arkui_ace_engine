@@ -601,6 +601,7 @@ void TextSelectController::UpdateFirstHandleOffset()
         GetFirstHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
     firstHandleInfo_.rect.SetOffset(caretMetrics.offset);
     firstHandleInfo_.rect.SetHeight(caretMetrics.height);
+    firstHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     AdjustHandleOffset(firstHandleInfo_.rect);
     AdjustHandleOffsetWithBoundary(firstHandleInfo_.rect);
 }
@@ -612,6 +613,7 @@ void TextSelectController::UpdateSecondHandleOffset()
         GetSecondHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     secondHandleInfo_.rect.SetOffset(caretMetrics.offset);
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
+    secondHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     AdjustHandleOffset(secondHandleInfo_.rect);
     AdjustHandleOffsetWithBoundary(secondHandleInfo_.rect);
 }
