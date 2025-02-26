@@ -1024,7 +1024,7 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
             iconSize = std::min(iconSize, frameSize.Height());
         }
         auto hotZoneSize = NearZero(iconSize) ? 0.0f : iconSize + rightOffset;
-        stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
+        stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), CalcLength(iconSize)));
         iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
         if (IsSymbolIcon()) {
             auto symbolProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
