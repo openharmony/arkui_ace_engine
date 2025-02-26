@@ -48,14 +48,15 @@ void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extr
     RequestRecompose(idx);
 }
 
-void ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align, float extraOffset)
+bool ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align, float extraOffset)
 {
     if (target_ && targetIdx == target_->index) {
         target_.reset(); // prevent loop and good timing to reset target_
-        return;
+        return true;
     }
     target_ = std::make_unique<PendingJump>(targetIdx, align, extraOffset);
     RequestRecompose(markIndex_);
+    return false;
 }
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
@@ -192,6 +193,7 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
             scroll->ScrollToIndex(target_->index, true, target_->align, target_->extraOffset);
         } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
+            std::cout << "changeIdx to " << target_->index << "\n";
             swiper->ChangeIndex(target_->index, true);
         }
     }

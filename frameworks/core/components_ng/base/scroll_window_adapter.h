@@ -45,7 +45,10 @@ public:
 
     void PrepareReset(int32_t idx);
     void PrepareJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
-    void PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+    /**
+     * @return true if underlying items are ready
+     */
+    bool PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
 
     /**
      * @param x positive if scrolling right, negative if scrolling left

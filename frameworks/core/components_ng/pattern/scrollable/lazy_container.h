@@ -61,7 +61,10 @@ protected:
 
     void RequestJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
 
-    void RequestFillToTarget(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+    /**
+     * @return false if a recomposition is required first
+     */
+    bool RequestFillToTarget(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
 
     /**
      * @brief Should call when layout data needs to be cleared and re-calculated

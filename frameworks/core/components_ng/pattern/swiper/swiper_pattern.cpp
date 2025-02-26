@@ -156,8 +156,11 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
         algo->SetJumpIndex(jumpIndex_.value());
         RequestJump(*jumpIndex_);
     } else if (targetIndex_) {
-        algo->SetTargetIndex(targetIndex_.value());
-        RequestFillToTarget(*targetIndex_);
+        if (RequestFillToTarget(*targetIndex_)) {
+            algo->SetTargetIndex(targetIndex_.value());
+        } else {
+            targetIndex_.reset(); // postpone targetIndex_ to next frame
+        }
     }
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
