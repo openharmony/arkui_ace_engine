@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RootModifier {
@@ -33,6 +34,20 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     CHECK_NULL_RETURN(stageManager, nullptr);
     auto stageNode = stageManager->GetStageNode();
     TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
+
+    // create page node as CAPI root node to support existing
+    // PageNode functionality like status bar offset supporting for example
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(id, "", "");
+    CHECK_NULL_RETURN(pageInfo, AceType::RawPtr(stageNode));
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
+    CHECK_NULL_RETURN(pagePattern, AceType::RawPtr(stageNode));
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, id, pagePattern);
+    CHECK_NULL_RETURN(pageNode, AceType::RawPtr(stageNode));
+    pageNode->SetHostPageId(id);
+    if (stageManager->PushPage(pageNode, true, false)) {
+        return AceType::RawPtr(pageNode);
+    }
+
     return AceType::RawPtr(stageNode);
 }
 } // RootModifier

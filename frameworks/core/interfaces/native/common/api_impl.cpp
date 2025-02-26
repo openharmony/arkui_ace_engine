@@ -330,19 +330,26 @@ void* GetAttachNodePtr(Ark_NodeHandle nodePtr)
 Ark_Int32 MeasureLayoutAndDraw(Ark_VMContext vmContext, Ark_NodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
+    CHECK_NULL_RETURN(root, 0);
+    while (root->GetTag() != V2::STAGE_ETS_TAG) {
+        auto parentNode = AceType::DynamicCast<FrameNode>(root->GetParent());
+        CHECK_NULL_RETURN(parentNode, 0);
+        root = AceType::RawPtr(parentNode);
+    }
     float width = root->GetGeometryNode()->GetFrameSize().Width();
     float height = root->GetGeometryNode()->GetFrameSize().Height();
+    auto stagePtr = reinterpret_cast<Ark_NodeHandle>(root);
     // measure
     Ark_Float32 measureData[] = { width, height, width, height, width, height };
-    MeasureNode(vmContext, rootPtr, &measureData[0]);
+    MeasureNode(vmContext, stagePtr, &measureData[0]);
     // layout
     Ark_Float32 layoutData[] = { 0, 0 };
-    LayoutNode(vmContext, rootPtr, &layoutData);
+    LayoutNode(vmContext, stagePtr, &layoutData);
     // draw
     Ark_Float32 drawData[] = { 0, 0, 0, 0 };
-    DrawNode(vmContext, rootPtr, &drawData[0]);
+    DrawNode(vmContext, stagePtr, &drawData[0]);
 
-    if (auto companionNode = GetCompanion(rootPtr); companionNode) {
+    if (auto companionNode = GetCompanion(stagePtr); companionNode) {
         companionNode->SetVMContext(vmContext);
     }
     return 0;
