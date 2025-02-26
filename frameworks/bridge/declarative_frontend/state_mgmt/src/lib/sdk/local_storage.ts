@@ -25,7 +25,7 @@
  * 
  * @since 9
  */
-
+/// <reference path="../common/local_storage_native.d.ts" />
 class LocalStorage extends NativeLocalStorage {
 
   protected storage_: Map<string, ObservedPropertyAbstract<any>>;

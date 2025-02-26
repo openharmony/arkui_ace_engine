@@ -24,6 +24,7 @@
  */
 
 /// <reference path="../../../../ark_theme/export/ark_theme_scope_manager.d.ts" />
+/// <reference path="./puv2_view_native_base.d.ts" />
 
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
@@ -66,10 +67,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // Map elmtId -> Repeat instance in this ViewPU
   protected elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
 
-  private id_: number;
-
   protected parent_: IView | undefined = undefined;
-  protected childrenWeakrefMap_ = new Map<number, WeakRef<IView>>();
 
   // static flag for paused rendering
   // when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
@@ -83,10 +81,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   protected isDeleting_: boolean = false;
 
   protected isCompFreezeAllowed_: boolean = false;
-
-  // registry of update functions
-  // the key is the elementId of the Component/Element that's the result of this function
-  protected updateFuncByElmtId = new UpdateFuncsByElmtId();
 
   protected static prebuildFuncQueues: Map<number, Array<PrebuildFunc>> = new Map();
 
@@ -104,15 +98,13 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   protected isPrebuilding_: boolean = false;
   protected static prebuildingElmtId_: number = -1;
 
-  protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined
-
   static readonly doRecycle: boolean = true;
   static readonly doReuse: boolean = false;
 
   private nativeViewPartialUpdate: NativeViewPartialUpdate;
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
-    super();
+    super(true);
     this.nativeViewPartialUpdate = new NativeViewPartialUpdate(this);
     // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
     // these matching is requirement for updateChildViewById(elmtId) being able to
@@ -137,8 +129,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
-  public static create(view: NativeViewPartialUpdate): void {
-    return NativeViewPartialUpdate.create(view);
+  public static create(view: PUV2ViewBase): void {
+    return NativeViewPartialUpdate.create(view.nativeViewPartialUpdate);
   }
   
   static createRecycle(componentCall: object, isRecycling: boolean, reuseId: string, callback: () => void): void {
@@ -265,25 +257,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   /**
-  * add given child and set 'this' as its parent
-  * @param child child to add
-  * @returns returns false if child with given child's id already exists
-  *
-  * framework internal function
-  * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
-  * The add. Set<ids> is required to reliably tell what children still exist.
-  */
-  public addChild(child: IView): boolean {
-    if (this.childrenWeakrefMap_.has(child.id__())) {
-      stateMgmtConsole.warn(`${this.debugInfo__()}: addChild '${child?.debugInfo__()}' elmtId already exists ${child.id__()}. Internal error!`);
-      return false;
-    }
-    this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
-    child.setParent(this as unknown as IView); // FIXME
-    return true;
-  }
-
-  /**
    * remove given child and remove 'this' as its parent
    * @param child child to add
    * @returns returns false if child with given child's id does not exist
@@ -296,16 +269,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       child.setParent(undefined);
     }
     return hasBeenDeleted;
-  }
-
-  /**
-   * Retrieve child by given id
-   * @param id
-   * @returns child if in map and weak ref resolves to IView object
-   */
-  public getChildById(id: number): IView | undefined {
-    const childWeakRef = this.childrenWeakrefMap_.get(id);
-    return childWeakRef ? childWeakRef.deref() : undefined;
   }
 
   // inform the subscribed property
@@ -390,15 +353,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return result;
   }
 
-  public debugInfoElmtId(elmtId: number, isProfiler: boolean = false): string | ElementType {
-
-    return isProfiler ? {
-      elementId: elmtId,
-      elementTag: this.updateFuncByElmtId.get(elmtId).getComponentName(),
-      isCustomNode: this.childrenWeakrefMap_.has(elmtId)
-    } : this.updateFuncByElmtId.debugInfoElmtId(elmtId);
-  }
-
   public dumpStateVars(): void {
     stateMgmtConsole.debug(`${this.debugInfo__()}:  State variables:\n ${this.debugInfoStateVars()}`);
   }
@@ -422,41 +376,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public dumpReport(): void {
     stateMgmtConsole.warn(`Printing profiler information`);
     stateMgmtProfiler.report();
-  }
-
-  public updateStateVarsOfChildByElmtId(elmtId, params: Object): void {
-    stateMgmtProfiler.begin('ViewPU/V2.updateStateVarsOfChildByElmtId');
-    stateMgmtConsole.debug(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - start`);
-
-    if (elmtId < 0) {
-      stateMgmtConsole.warn(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
-      stateMgmtProfiler.end();
-      return;
-    }
-    let iChild: IView = this.getChildById(elmtId);
-    if (!iChild || !((iChild instanceof ViewPU) || (iChild instanceof ViewV2))) {
-      stateMgmtConsole.warn(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
-      stateMgmtProfiler.end();
-      return;
-    }
-    const child = iChild as ViewPU | ViewV2;
-    if ('updateStateVars' in child) {
-      child.updateStateVars(params);
-    }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - end`);
-    stateMgmtProfiler.end();
-  }
-
-  // request list of all (global) elmtIds of deleted UINodes and unregister from the all ViewPUs/ViewV2
-  // this function equals purgeDeletedElmtIdsRecursively because it does un-registration for all ViewPU/V2's
-  protected purgeDeletedElmtIds(): void {
-    stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) start ...`);
-    // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
-    UINodeRegisterProxy.obtainDeletedElmtIds();
-    // unregister the removed elmtIds requested from the cpp side for all ViewPUs/ViewV2, it will make the first ViewPUs/ViewV2 slower
-    // than before, but the rest ViewPUs/ViewV2 will be faster
-    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) end... `);
   }
 
   /**
@@ -543,50 +462,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   public static restoreRendering(): void {
     PUV2ViewBase.renderingPaused = false;
-  }
-
-  // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
-  public ifElseBranchUpdateFunction(branchId: number, branchfunc: () => void): void {
-    const oldBranchid: number = If.getBranchId();
-
-    if (branchId === oldBranchid) {
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ifElseBranchUpdateFunction: IfElse branch unchanged, no work to do.`);
-      return;
-    }
-    PUV2ViewBase.arkThemeScopeManager?.onIfElseBranchUpdateEnter()
-    // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
-    // ifElseNode stores the most recent branch, so we can compare
-    // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
-    let removedChildElmtIds = new Array<number>();
-    let reservedChildElmtIds = new Array<number>();
-    If.branchId(branchId, removedChildElmtIds, reservedChildElmtIds);
-
-    for (const reservedChildElmtId of reservedChildElmtIds) {
-      this.updateFuncByElmtId.get(reservedChildElmtId)?.setPending(true);
-    }
-
-    //un-registers the removed child elementIDs using proxy
-    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
-
-    // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
-    stateMgmtConsole.debug(`${this.debugInfo__()}: ifElseBranchUpdateFunction: elmtIds need unregister after if/else branch switch: ${JSON.stringify(removedChildElmtIds)}`);
-    this.purgeDeletedElmtIds();
-
-    branchfunc();
-
-    let retakenElmtIds = new Array<number>();
-    const res: boolean = If.getRetakenElmtIds(retakenElmtIds);
-    if (res) {
-      for (const retakenElmtId of retakenElmtIds) {
-        this.updateFuncByElmtId.get(retakenElmtId)?.setPending(false);
-        if (this.updateFuncByElmtId.get(retakenElmtId)?.isChanged() && !this.dirtDescendantElementIds_.has(retakenElmtId)) {
-          this.dirtRetakenElementIds_.add(retakenElmtId);
-        }
-        this.updateFuncByElmtId.get(retakenElmtId)?.setIsChanged(false);
-      }
-    }
-
-    PUV2ViewBase.arkThemeScopeManager?.onIfElseBranchUpdateExit(removedChildElmtIds)
   }
 
   /**
@@ -705,20 +580,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     stateMgmtProfiler.end();
   }
 
-  public createOrGetNode(elmtId: number, builder: () => ArkComponent): object {
-    const entry = this.updateFuncByElmtId.get(elmtId);
-    if (entry === undefined) {
-      stateMgmtConsole.warn(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
-      return builder();
-    }
-    let nodeInfo = entry.getNode();
-    if (nodeInfo === undefined) {
-      nodeInfo = builder();
-      entry.setNode(nodeInfo);
-    }
-    return nodeInfo;
-  }
-
   /**
    * getNodeById is used to get ArkComponent stored updateFuncByElmtId
    * @param elmtId -  the id of the component
@@ -795,13 +656,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
    * @returns
    */
   abstract __mkRepeatAPI<I>(arr: Array<I>): RepeatAPI<I>;
-
-  onGlobalThemeChanged(): void {
-  }
-
-  public static setArkThemeScopeManager(mgr: ArkThemeScopeManager): void {
-    PUV2ViewBase.arkThemeScopeManager = mgr
-  }
 
   public findViewInHierarchy(id: number): ViewPU | ViewV2 {
     let weakChild = this.childrenWeakrefMap_.get(id);
@@ -1008,5 +862,18 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   protected isEnablePrebuildInMultiFrame(): boolean {
     return !this.isViewV2;
+  }
+  public ifElseBranchUpdateFunctionDirtyRetaken(): void {
+    let retakenElmtIds = new Array<number>();
+    const res: boolean = If.getRetakenElmtIds(retakenElmtIds);
+    if (res) {
+      for (const retakenElmtId of retakenElmtIds) {
+        this.updateFuncByElmtId.get(retakenElmtId)?.setPending(false);
+        if (this.updateFuncByElmtId.get(retakenElmtId)?.isChanged() && !this.dirtDescendantElementIds_.has(retakenElmtId)) {
+          this.dirtRetakenElementIds_.add(retakenElmtId);
+        }
+        this.updateFuncByElmtId.get(retakenElmtId)?.setIsChanged(false);
+      }
+    }
   }
 } // class PUV2ViewBase

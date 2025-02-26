@@ -27,7 +27,7 @@
 // stackOfRenderedComponentsItem[0] and stackOfRenderedComponentsItem[1] is faster than
 // the stackOfRenderedComponentsItem.id and the stackOfRenderedComponentsItem.cmp.
 // So use the array to keep id and cmp.
-type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | PersistenceV2Impl];
+type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase];
 
 // in the case of ForEach, Repeat, AND If, two or more UINodes / elementIds can render at the same time
 // e.g. ForEach -> ForEach child Text, Repeat -> Nested Repeat, child Text
@@ -36,7 +36,7 @@ type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | P
 class StackOfRenderedComponents {
   private stack_: Array<StackOfRenderedComponentsItem> = new Array<StackOfRenderedComponentsItem>();
 
-  public push(id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl): void {
+  public push(id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase): void {
     this.stack_.push([id, cmp]);
   }
 
@@ -138,7 +138,7 @@ class ObserveV2 {
 
   // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
-  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl, id: number, doClearBinding: boolean = true): void {
+  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase, id: number, doClearBinding: boolean = true): void {
     if (cmp != null) {
       doClearBinding && this.clearBinding(id);
       this.stackOfRenderedComponents_.push(id, cmp);
@@ -819,7 +819,7 @@ class ObserveV2 {
    *                   The default value is false. 
    */
   public getElementInfoById(elmtId: number, isProfiler: boolean = false): string | ElementType {
-    let weak: WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
+    let weak: WeakRef<ViewBuildNodeBase> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
     let view;
     return (weak && (view = weak.deref()) && (view instanceof PUV2ViewBase)) ? view.debugInfoElmtId(elmtId, isProfiler) : `unknown component type[${elmtId}]`;
   }

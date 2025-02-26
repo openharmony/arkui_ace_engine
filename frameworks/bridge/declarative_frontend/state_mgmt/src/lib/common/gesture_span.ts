@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="./gesture_span_native.d.ts" />
 class GestureStyle extends NativeGestureStyle {
 // hold arg so NativeGestureStyle can make use of the functions
 // contained in it without root (global) cycle dependency problems. like

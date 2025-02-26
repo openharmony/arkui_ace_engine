@@ -959,7 +959,7 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
 
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-        auto* view = JSView::GetNativeView(object);
+        auto view = object->Unwrap<JSView>();
         if (view == nullptr) {
             LOGE("View is null");
             return;
