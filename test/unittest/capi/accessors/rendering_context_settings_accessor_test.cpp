@@ -24,7 +24,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-const auto ANTIALIAS_DEFAULT_ARK_VALUE = Converter::ArkValue<Ark_Boolean>(false);
+const auto ANTIALIAS_DEFAULT_VALUE = false;
 } // namespace
 
 class RenderingContextSettingsAccessorTest
@@ -37,7 +37,7 @@ public:
     }
     void* CreatePeerInstance() override
     {
-        auto optValue = Converter::ArkValue<Opt_Boolean>(ANTIALIAS_DEFAULT_ARK_VALUE);
+        auto optValue = Converter::ArkValue<Opt_Boolean>(ANTIALIAS_DEFAULT_VALUE);
         return CreatePeerInstanceT(&optValue);
     }
 };
@@ -50,24 +50,28 @@ public:
 HWTEST_F(RenderingContextSettingsAccessorTest, ctorRenderingContextSettingsPeerTest, TestSize.Level1)
 {
     for (const auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
-        finalyzer_(peer_);
         auto optValue = Converter::ArkValue<Opt_Boolean>(value);
-        peer_ = CreatePeerInstanceT(&optValue);
-        auto result = accessor_->getAntialias(peer_);
-        EXPECT_EQ(result, value) <<
+        auto peer = CreatePeerInstanceT(&optValue);
+        auto result = peer->antialias;
+        finalyzer_(peer);
+        ASSERT_NE(result, std::nullopt);
+        EXPECT_EQ(result.value(), expected) <<
             "Input value is: " << input << ", method: GetRepeat";
     }
-    finalyzer_(peer_);
+
     auto optValue = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    peer_ = CreatePeerInstanceT(&optValue);
-    auto result = accessor_->getAntialias(peer_);
-    EXPECT_EQ(result, ANTIALIAS_DEFAULT_ARK_VALUE) <<
+    auto peer = CreatePeerInstanceT(&optValue);
+    auto result = peer->antialias;
+    ASSERT_NE(result, std::nullopt);
+    finalyzer_(peer);
+    EXPECT_EQ(result, ANTIALIAS_DEFAULT_VALUE) <<
         "Input value is: empty, method: GetRepeat";
 
-    finalyzer_(peer_);
-    peer_ = CreatePeerInstanceT(nullptr);
-    result = accessor_->getAntialias(peer_);
-    EXPECT_EQ(result, ANTIALIAS_DEFAULT_ARK_VALUE) <<
+    peer = CreatePeerInstanceT(nullptr);
+    result = peer->antialias;
+    finalyzer_(peer);
+    ASSERT_NE(result, std::nullopt);
+    EXPECT_EQ(result, ANTIALIAS_DEFAULT_VALUE) <<
         "Input value is: nullptr, method: GetRepeat";
 }
 

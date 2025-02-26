@@ -22,7 +22,8 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RenderingContextSettingsAccessor {
 namespace {
-const auto ANTIALIAS_DEFAULT_VALUE = Converter::ArkValue<Ark_Boolean>(false);
+const auto DEFAULT_VALUE = false;
+const auto DEFAULT_ARK_VALUE = Converter::ArkValue<Ark_Boolean>(DEFAULT_VALUE);
 } // namespace
 
 void DestroyPeerImpl(Ark_RenderingContextSettings peer)
@@ -31,8 +32,7 @@ void DestroyPeerImpl(Ark_RenderingContextSettings peer)
 }
 Ark_RenderingContextSettings CtorImpl(const Opt_Boolean* antialias)
 {
-    CHECK_NULL_RETURN(antialias, nullptr);
-    auto value = Converter::OptConvert<bool>(*antialias);
+    auto value = antialias ? Converter::OptConvert<bool>(*antialias).value_or(DEFAULT_VALUE) : DEFAULT_VALUE;
     return RenderingContextSettingsPeer::Create(value);
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -41,8 +41,8 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean GetAntialiasImpl(Ark_RenderingContextSettings peer)
 {
-    CHECK_NULL_RETURN(peer, ANTIALIAS_DEFAULT_VALUE);
-    return peer->antialias.value_or(ANTIALIAS_DEFAULT_VALUE);
+    CHECK_NULL_RETURN(peer, DEFAULT_ARK_VALUE);
+    return peer->antialias.value_or(DEFAULT_ARK_VALUE);
 }
 void SetAntialiasImpl(Ark_RenderingContextSettings peer,
                       Ark_Boolean antialias)
