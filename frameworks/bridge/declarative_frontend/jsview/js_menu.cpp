@@ -266,41 +266,41 @@ void JSMenu::SetItemDivider(const JSCallbackInfo& args)
     V2::ItemDivider divider;
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto modeVal = obj->GetProperty("mode");
+        if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {
+            mode = DividerMode::EMBEDDED_IN_MENU;
+        }
         CalcDimension value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value)) {
             value.Reset();
-            value.SetUnit(DimensionUnit::INVALID);
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         if (value.IsNegative()) {
             value.Reset();
-            value.SetUnit(DimensionUnit::INVALID);
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         divider.strokeWidth = value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value)) {
             value.Reset();
-            value.SetUnit(DimensionUnit::INVALID);
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         if (value.IsNegative()) {
             value.Reset();
-            value.SetUnit(DimensionUnit::INVALID);
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         divider.startMargin = value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value)) {
             value.Reset();
-            value.SetUnit(DimensionUnit::INVALID);
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         if (value.IsNegative()) {
             value.Reset();
-            value.SetUnit(DimensionUnit::INVALID);
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         divider.endMargin = value;
 
         if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
             divider.color = Color::TRANSPARENT;
-        }
-        auto modeVal = obj->GetProperty("mode");
-        if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {
-            mode = DividerMode::EMBEDDED_IN_MENU;
         }
     }
     MenuModel::GetInstance()->SetItemDivider(divider, mode);
