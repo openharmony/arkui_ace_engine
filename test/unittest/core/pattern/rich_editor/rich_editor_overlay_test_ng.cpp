@@ -1293,7 +1293,10 @@ HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction003, TestSize.Level1)
     /**
      * @tc.step: step6. test OnMenuItemAction again
      */
-    
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
     selectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
     auto selectOverlayInfo = selectOverlay->GetSelectOverlayInfo();
     auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
