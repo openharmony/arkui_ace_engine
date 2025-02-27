@@ -6171,8 +6171,13 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         return;
     }
     if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
-        renderContext->UpdateAccessibilityFocusRect(rect);
-        renderContext->UpdateAccessibilityFocus(true);
+        if (rect.Width() <= 1 || rect.Height() <= 1) {
+            renderContext->ResetAccessibilityFocusRect();
+            renderContext->UpdateAccessibilityFocus(false);
+        } else {
+            renderContext->UpdateAccessibilityFocusRect(rect);
+            renderContext->UpdateAccessibilityFocus(true);
+        }
     } else {
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
