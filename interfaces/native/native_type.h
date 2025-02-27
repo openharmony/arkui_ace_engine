@@ -217,7 +217,7 @@ typedef struct ArkUI_CustomProperty ArkUI_CustomProperty;
 /**
  * @brief Define the information of the HostWindowInfo class for window properties.
  *
- * @since 16
+ * @since 15
  */
 typedef struct ArkUI_HostWindowInfo ArkUI_HostWindowInfo;
 
@@ -4550,7 +4550,7 @@ const char* OH_ArkUI_CustomProperty_GetStringValue(ArkUI_CustomProperty* handle)
  *
  * @param info HostWindowInfo object pointer.
  * @return Window name in HostWindowInfo.
- * @since 16
+ * @since 15
  */
 const char* OH_ArkUI_HostWindowInfo_GetName(ArkUI_HostWindowInfo* info);
 
@@ -4558,7 +4558,7 @@ const char* OH_ArkUI_HostWindowInfo_GetName(ArkUI_HostWindowInfo* info);
  * @brief Destroy the instance of HostWindowInfo.
  *
  * @param info Instance of HostWindowInfo to be destroyed.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_HostWindowInfo_Destroy(ArkUI_HostWindowInfo* info);
 
