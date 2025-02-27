@@ -20,6 +20,7 @@
 #include "ui/base/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "core/animation/animation_pub.h"
+#include <vector>
 namespace OHOS::Ace {
 
 using AnimatorEvent = std::function<void()>;
