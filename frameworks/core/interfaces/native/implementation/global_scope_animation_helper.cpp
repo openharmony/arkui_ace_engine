@@ -13,46 +13,24 @@
  * limitations under the License.
  */
 
+#include "global_scope_animation_helper.h"
+
 #include "base/log/jank_frame_report.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "arkoala_api_generated.h"
 
-struct GlobalScopePeer {};
 namespace {
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
 }
+
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace GlobalScope_commonAccessor {
-void DestroyPeerImpl(Ark_GlobalScope_common peer)
-{
-}
-Ark_Context GetContextImpl(const Opt_CustomObject* component)
-{
-    return {};
-}
-void PostCardActionImpl(const Ark_CustomObject* component,
-                        const Ark_CustomObject* action)
-{
-}
-Ark_Resource Dollar_rImpl(const Ark_String* value,
-                          const Array_CustomObject* params)
-{
-    return {};
-}
-Ark_Resource Dollar_rawfileImpl(const Ark_String* value)
-{
-    return {};
-}
 int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
 {
     CHECK_NULL_RETURN(pipelineContext, 0);
@@ -279,151 +257,4 @@ void AnimateToInner(const Ark_AnimateParam* value,
     }
     StartAnimateTo(option, event, count, immediately, onFinishEvent);
 }
-void AnimateToImpl(const Ark_AnimateParam* value,
-                   const Callback_Void* event)
-{
-    AnimateToInner(value, event, false);
-}
-void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
-                              const Callback_Void* event)
-{
-    AnimateToInner(value, event, true);
-}
-Ark_Int32 Vp2pxImpl(const Ark_Number* value)
-{
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
-    double vpValue = Converter::Convert<double>(*value);
-    double density = PipelineBase::GetCurrentDensity();
-    double pxValue = vpValue * density;
-    return static_cast<Ark_Int32>(pxValue);
-}
-Ark_Int32 Px2vpImpl(const Ark_Number* value)
-{
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
-    double pxValue = Converter::Convert<double>(*value);
-    double density = PipelineBase::GetCurrentDensity();
-    if (NearZero(density) || density == 0) {
-        return Converter::ArkValue<Ark_Int32>(0);
-    }
-    double vpValue = pxValue / density;
-    return static_cast<Ark_Int32>(vpValue);
-}
-Ark_Int32 Fp2pxImpl(const Ark_Number* value)
-{
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
-    double density = PipelineBase::GetCurrentDensity();
-    double fpValue = Converter::Convert<double>(*value);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Int32>(0));
-    auto pipelineContext = container->GetPipelineContext();
-    double fontScale = 1.0;
-    if (pipelineContext) {
-        fontScale = pipelineContext->GetFontScale();
-    }
-    double pxValue = fpValue * density * fontScale;
-    return static_cast<Ark_Int32>(pxValue);
-}
-Ark_Int32 Px2fpImpl(const Ark_Number* value)
-{
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
-    double density = PipelineBase::GetCurrentDensity();
-    if (NearZero(density)) {
-        return Converter::ArkValue<Ark_Int32>(0);
-    }
-    double pxValue = Converter::Convert<double>(*value);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Int32>(0));
-    auto pipelineContext = container->GetPipelineContext();
-    double fontScale = 1.0;
-    if (pipelineContext) {
-        fontScale = pipelineContext->GetFontScale();
-    }
-    double ratio = density * fontScale;
-    double fpValue = pxValue / ratio;
-    return static_cast<Ark_Int32>(fpValue);
-}
-Ark_Int32 Lpx2pxImpl(const Ark_Number* value)
-{
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Int32>(0));
-
-    auto pipelineContext = container->GetPipelineContext();
-#ifdef ARKUI_CAPI_UNITTEST
-    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Int32>(0));
-    auto width = pipelineContext->GetCurrentWindowRect().Width();
-    static WindowConfig windowConfig;
-#else
-    auto window = container->GetWindow();
-    CHECK_NULL_RETURN(window, Converter::ArkValue<Ark_Int32>(0));
-    auto width = window->GetCurrentWindowRect().Width();
-    auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, Converter::ArkValue<Ark_Int32>(0));
-    auto windowConfig = frontend->GetWindowConfig();
-#endif // ARKUI_CAPI_UNITTEST
-    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
-        int32_t multiplier = 2;
-        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
-    }
-    if (!windowConfig.autoDesignWidth) {
-        windowConfig.UpdateDesignWidthScale(width);
-    }
-    double lpxValue = Converter::Convert<double>(*value);
-    double pxValue = lpxValue * windowConfig.designWidthScale;
-    return static_cast<Ark_Int32>(pxValue);
-}
-Ark_Int32 Px2lpxImpl(const Ark_Number* value)
-{
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Int32>(0));
-
-    auto pipelineContext = container->GetPipelineContext();
-#ifdef ARKUI_CAPI_UNITTEST
-    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Int32>(0));
-    auto width = pipelineContext->GetCurrentWindowRect().Width();
-    static WindowConfig windowConfig;
-#else
-    auto window = container->GetWindow();
-    CHECK_NULL_RETURN(window, Converter::ArkValue<Ark_Int32>(0));
-    auto width = window->GetCurrentWindowRect().Width();
-    auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, Converter::ArkValue<Ark_Int32>(0));
-    auto windowConfig = frontend->GetWindowConfig();
-#endif // ARKUI_CAPI_UNITTEST
-    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
-        int32_t multiplier = 2;
-        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
-    }
-    if (!windowConfig.autoDesignWidth) {
-        windowConfig.UpdateDesignWidthScale(width);
-    }
-    double pxValue = Converter::Convert<double>(*value);
-    double lpxValue = pxValue / windowConfig.designWidthScale;
-    return static_cast<Ark_Int32>(lpxValue);
-}
-} // GlobalScope_commonAccessor
-const GENERATED_ArkUIGlobalScope_commonAccessor* GetGlobalScope_commonAccessor()
-{
-    static const GENERATED_ArkUIGlobalScope_commonAccessor GlobalScope_commonAccessorImpl {
-        GlobalScope_commonAccessor::DestroyPeerImpl,
-        GlobalScope_commonAccessor::GetContextImpl,
-        GlobalScope_commonAccessor::PostCardActionImpl,
-        GlobalScope_commonAccessor::Dollar_rImpl,
-        GlobalScope_commonAccessor::Dollar_rawfileImpl,
-        GlobalScope_commonAccessor::AnimateToImpl,
-        GlobalScope_commonAccessor::AnimateToImmediatelyImpl,
-        GlobalScope_commonAccessor::Vp2pxImpl,
-        GlobalScope_commonAccessor::Px2vpImpl,
-        GlobalScope_commonAccessor::Fp2pxImpl,
-        GlobalScope_commonAccessor::Px2fpImpl,
-        GlobalScope_commonAccessor::Lpx2pxImpl,
-        GlobalScope_commonAccessor::Px2lpxImpl,
-    };
-    return &GlobalScope_commonAccessorImpl;
-}
-
-struct GlobalScope_commonPeer {
-    virtual ~GlobalScope_commonPeer() = default;
-};
 }

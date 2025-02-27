@@ -51,7 +51,7 @@ HWTEST_F(SwipeGestureEventAccessorTest, GetAngleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32Values) {
         eventInfo_->SetAngle(value);
-        auto arkRes = accessor_->getAngle(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getAngle(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetAngle";
     }
@@ -80,7 +80,7 @@ HWTEST_F(SwipeGestureEventAccessorTest, GetSpeedTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32Values) {
         eventInfo_->SetSpeed(value);
-        auto arkRes = accessor_->getSpeed(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getSpeed(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetSpeed";
     }

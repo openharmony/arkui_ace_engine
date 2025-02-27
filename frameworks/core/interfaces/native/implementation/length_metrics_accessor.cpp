@@ -55,12 +55,12 @@ void SetUnitImpl(Ark_LengthMetrics peer,
     auto convValue = Converter::OptConvert<DimensionUnit>(unit);
     peer->value.SetUnit(convValue.value_or(DimensionUnit::VP));
 }
-Ark_Int32 GetValueImpl(Ark_LengthMetrics peer)
+Ark_Number GetValueImpl(Ark_LengthMetrics peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto value = static_cast<int32_t>(peer->value.Value());
     LOGE("LengthMetricsAccessor::GetValueImpl wrong return type");
-    return Converter::ArkValue<Ark_Int32>(value);
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetValueImpl(Ark_LengthMetrics peer,
                   const Ark_Number* value)

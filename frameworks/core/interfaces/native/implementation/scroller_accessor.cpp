@@ -103,13 +103,15 @@ Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
     CHECK_NULL_RETURN(peer, {}); // need to fix default value
     return peer->TriggerGetItemRect(index);
 }
-Ark_Int32 GetItemIndexImpl(Ark_VMContext vmContext,
-                           Ark_Scroller peer,
-                           const Ark_Number* x,
-                           const Ark_Number* y)
+Ark_Number GetItemIndexImpl(Ark_VMContext vmContext,
+                            Ark_Scroller peer,
+                            const Ark_Number* x,
+                            const Ark_Number* y)
 {
-    CHECK_NULL_RETURN(peer, -1); // need to fix default value
-    return peer->TriggerGetItemIndex(x, y);
+    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    CHECK_NULL_RETURN(peer, errValue); // need to fix default value
+    auto res = peer->TriggerGetItemIndex(x, y);
+    return Converter::ArkValue<Ark_Number>(res);
 }
 } // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()

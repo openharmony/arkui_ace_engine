@@ -32,11 +32,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetHeightImpl(Ark_ImageData peer)
+Ark_Number GetHeightImpl(Ark_ImageData peer)
 {
     return {};
 }
-Ark_Int32 GetWidthImpl(Ark_ImageData peer)
+Ark_Number GetWidthImpl(Ark_ImageData peer)
 {
     return {};
 }

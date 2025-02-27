@@ -170,6 +170,7 @@ void OnSurfaceDestroyedImpl(Ark_XComponentController peer,
 #endif //XCOMPONENT_SUPPORTED
 }
 void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
                             Ark_XComponentController peer,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)

@@ -31,7 +31,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetAngleImpl(Ark_RotationGestureEvent peer)
+Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
 {
     return {};
 }

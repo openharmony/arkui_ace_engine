@@ -47,6 +47,34 @@ Ark_Boolean EqualsImpl(Ark_TextMenuItemId peer,
     CHECK_NULL_RETURN(peer->id && id->id, false);
     return Converter::ArkValue<Ark_Boolean>(peer->id == id->id);
 }
+Ark_TextMenuItemId GetCUTImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCOPYImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetPASTEImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetSELECT_ALLImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCOLLABORATION_SERVICEImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCAMERA_INPUTImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetAI_WRITERImpl()
+{
+    return {};
+}
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
 {
@@ -56,6 +84,13 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
         TextMenuItemIdAccessor::GetFinalizerImpl,
         TextMenuItemIdAccessor::OfImpl,
         TextMenuItemIdAccessor::EqualsImpl,
+        TextMenuItemIdAccessor::GetCUTImpl,
+        TextMenuItemIdAccessor::GetCOPYImpl,
+        TextMenuItemIdAccessor::GetPASTEImpl,
+        TextMenuItemIdAccessor::GetSELECT_ALLImpl,
+        TextMenuItemIdAccessor::GetCOLLABORATION_SERVICEImpl,
+        TextMenuItemIdAccessor::GetCAMERA_INPUTImpl,
+        TextMenuItemIdAccessor::GetAI_WRITERImpl,
     };
     return &TextMenuItemIdAccessorImpl;
 }

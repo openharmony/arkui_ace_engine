@@ -46,12 +46,12 @@ const std::string EMPTY_STRING = "";
 const auto IMAGE_QUALITY_DEFAULT = 0.92f;
 
 // test plans
-typedef std::pair<double, Ark_Int32> DoubleValueTestStep;
+typedef std::pair<double, double> DoubleValueTestStep;
 const std::vector<DoubleValueTestStep> DOUBLE_VALUE_TEST_PLAN = {
-    { 0, ArkValue<Ark_Int32>(static_cast<int32_t>(0)) },
-    { 1.25, ArkValue<Ark_Int32>(static_cast<int32_t>(1.25)) },
-    { 100.15, ArkValue<Ark_Int32>(static_cast<int32_t>(100.15)) },
-    { -2.35, ArkValue<Ark_Int32>(static_cast<int32_t>(-2.35)) },
+    { 0, 0 },
+    { 1.25, 1.25 },
+    { 100.15, 100.15 },
+    { -2.35, -2.35 },
 };
 
 const std::vector<ImageAnalyzerType> IMAGE_TYPE_TEST_PLAN {
@@ -117,6 +117,7 @@ public:
     MockCanvasPattern* mockPattern_ = nullptr;
     RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
     Ark_VMContext vmContext_ = nullptr;
+    Ark_AsyncWorkerPtr asyncWorker_ = nullptr;
 };
 
 /**
@@ -133,12 +134,12 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
     std::vector<Ark_ImageAnalyzerType> src = ARK_IMAGE_TYPE_TEST_PLAN;
     Ark_ImageAnalyzerConfig arkConfig = {
         .types.array = reinterpret_cast<Ark_ImageAnalyzerType*>(src.data()),
-        .types.length = ArkValue<Ark_Int32>(static_cast<int32_t>(src.size())),
+        .types.length = static_cast<Ark_Int32>(src.size()),
     };
 
     ASSERT_NE(accessor_->startImageAnalyzer, nullptr);
     Callback_Opt_Array_String_Void cont{};
-    accessor_->startImageAnalyzer(vmContext_, peer_, &arkConfig, &cont);
+    accessor_->startImageAnalyzer(vmContext_, asyncWorker_, peer_, &arkConfig, &cont);
 
     ImageAnalyzerConfig* configPtr = reinterpret_cast<ImageAnalyzerConfig*>(holder->config);
     ASSERT_NE(configPtr, nullptr);
@@ -153,7 +154,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
 
     // check callback
     holder->SetUp();
-    accessor_->startImageAnalyzer(vmContext_, peer_, &arkConfig, &cont);
+    accessor_->startImageAnalyzer(vmContext_, asyncWorker_, peer_, &arkConfig, &cont);
     EXPECT_FALSE(holder->isCalled);
 
     EXPECT_EQ(holder->config, nullptr);
@@ -162,7 +163,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
 
     holder->SetUp();
     (onAnalyzed.value())(ImageAnalyzerState::FINISHED);
-    accessor_->startImageAnalyzer(vmContext_, peer_, &arkConfig, &cont);
+    accessor_->startImageAnalyzer(vmContext_, asyncWorker_, peer_, &arkConfig, &cont);
     EXPECT_TRUE(holder->isCalled);
     EXPECT_NE(holder->config, nullptr);
     EXPECT_NE(holder->onAnalyzed, nullptr);
@@ -204,8 +205,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getHeightTest, TestSize.Level1)
 
     for (auto& [actual, expected] : DOUBLE_VALUE_TEST_PLAN) {
         holder->height = actual;
-        auto result = accessor_->getHeight(peer_);
-        EXPECT_DOUBLE_EQ(result, expected);
+        auto result = Convert<double>(accessor_->getHeight(peer_));
+        EXPECT_FLOAT_EQ(result, expected);
     }
     EXPECT_EQ(holder->counter, DOUBLE_VALUE_TEST_PLAN.size());
     holder->TearDown();
@@ -225,8 +226,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getWidthTest, TestSize.Level1)
 
     for (auto& [actual, expected] : DOUBLE_VALUE_TEST_PLAN) {
         holder->width = actual;
-        auto result = accessor_->getWidth(peer_);
-        EXPECT_DOUBLE_EQ(result, expected);
+        auto result = Convert<double>(accessor_->getWidth(peer_));
+        EXPECT_FLOAT_EQ(result, expected);
     }
     EXPECT_EQ(holder->counter, DOUBLE_VALUE_TEST_PLAN.size());
     holder->TearDown();

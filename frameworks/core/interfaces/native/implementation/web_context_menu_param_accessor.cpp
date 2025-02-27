@@ -35,15 +35,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 XImpl(Ark_WebContextMenuParam peer)
+Ark_Number XImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    return static_cast<Ark_Int32>(peer->handler->GetXCoord());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetXCoord());
 }
-Ark_Int32 YImpl(Ark_WebContextMenuParam peer)
+Ark_Number YImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    return static_cast<Ark_Int32>(peer->handler->GetYCoord());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetYCoord());
 }
 Ark_String GetLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
@@ -111,20 +113,23 @@ Ark_Boolean IsEditableImpl(Ark_WebContextMenuParam peer)
     CHECK_NULL_RETURN(peer && peer->handler, false);
     return Converter::ArkValue<Ark_Boolean>(peer->handler->IsEditable());
 }
-Ark_Int32 GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
+Ark_Number GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    return static_cast<Ark_Int32>(peer->handler->GetEditStateFlags());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetEditStateFlags());
 }
-Ark_Int32 GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
+Ark_Number GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    return static_cast<Ark_Int32>(peer->GetPreviewWidth());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->GetPreviewWidth());
 }
-Ark_Int32 GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
+Ark_Number GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    return static_cast<Ark_Int32>(peer->GetPreviewHeight());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->GetPreviewHeight());
 }
 } // WebContextMenuParamAccessor
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()

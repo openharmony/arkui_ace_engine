@@ -251,8 +251,6 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor();
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor();
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
-const GENERATED_ArkUIGlobalScope_focusControl_commonAccessor* GetGlobalScope_focusControl_commonAccessor();
-const GENERATED_ArkUIGlobalScope_cursorControl_commonAccessor* GetGlobalScope_cursorControl_commonAccessor();
 const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor();
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor();
@@ -270,7 +268,6 @@ const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor();
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor();
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor();
-const GENERATED_ArkUIGlobalScope_commonAccessor* GetGlobalScope_commonAccessor();
 const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor();
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor();
 const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor();
@@ -366,8 +363,7 @@ const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor
 const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
-const GENERATED_ArkUIGlobalScope_Profiler_inspectorAccessor* GetGlobalScope_Profiler_inspectorAccessor();
-const GENERATED_ArkUIGlobalScope_inspectorAccessor* GetGlobalScope_inspectorAccessor();
+const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
     static const GENERATED_ArkUINodeModifiers modifiersImpl = {
@@ -537,8 +533,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetICurveAccessor,
         GetDrawModifierAccessor,
         GetTransitionEffectAccessor,
-        GetGlobalScope_focusControl_commonAccessor,
-        GetGlobalScope_cursorControl_commonAccessor,
         GetBaseEventAccessor,
         GetClickEventAccessor,
         GetHoverEventAccessor,
@@ -556,7 +550,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetChildrenMainSizeAccessor,
         GetUICommonEventAccessor,
         GetGestureModifierAccessor,
-        GetGlobalScope_commonAccessor,
         GetContextMenuAccessor,
         GetCustomDialogControllerAccessor,
         GetLinearGradientAccessor,
@@ -652,8 +645,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetImageAttachmentAccessor,
         GetCustomSpanAccessor,
         GetLinearIndicatorControllerAccessor,
-        GetGlobalScope_Profiler_inspectorAccessor,
-        GetGlobalScope_inspectorAccessor,
+        GetGlobalScopeAccessor,
     };
     return &accessorsImpl;
 }

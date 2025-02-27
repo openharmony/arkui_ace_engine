@@ -39,16 +39,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetDisplayXImpl(Ark_ClickEvent peer)
+Ark_Number GetDisplayXImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetScreenLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
     LOGE("ARKOALA ClickEventAccessor::GetDisplayXImpl return type Ark_Int32 "
         "should be replaced with a Ark_Number type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(x));
 }
 void SetDisplayXImpl(Ark_ClickEvent peer,
                      const Ark_Number* displayX)
@@ -64,16 +65,17 @@ void SetDisplayXImpl(Ark_ClickEvent peer,
     offset.SetX(x, animation);
     info->SetScreenLocation(offset);
 }
-Ark_Int32 GetDisplayYImpl(Ark_ClickEvent peer)
+Ark_Number GetDisplayYImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetScreenLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     LOGE("ARKOALA ClickEventAccessor::GetDisplayYImpl return type Ark_Int32 "
         "should be replaced with a Ark_Number type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(y));
 }
 void SetDisplayYImpl(Ark_ClickEvent peer,
                      const Ark_Number* displayY)
@@ -89,16 +91,17 @@ void SetDisplayYImpl(Ark_ClickEvent peer,
     offset.SetY(y, animation);
     info->SetScreenLocation(offset);
 }
-Ark_Int32 GetWindowXImpl(Ark_ClickEvent peer)
+Ark_Number GetWindowXImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetGlobalLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
     LOGE("ARKOALA ClickEventAccessor::GetWindowXImpl return type Ark_Int32 "
         "should be replaced with a Ark_Number type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(x));
 }
 void SetWindowXImpl(Ark_ClickEvent peer,
                     const Ark_Number* windowX)
@@ -114,16 +117,17 @@ void SetWindowXImpl(Ark_ClickEvent peer,
     offset.SetX(x, animation);
     info->SetGlobalLocation(offset);
 }
-Ark_Int32 GetWindowYImpl(Ark_ClickEvent peer)
+Ark_Number GetWindowYImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetGlobalLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     LOGE("ARKOALA ClickEventAccessor::GetWindowYImpl return type Ark_Int32 "
         "should be replaced with a Ark_Number type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(y));
 }
 void SetWindowYImpl(Ark_ClickEvent peer,
                     const Ark_Number* windowY)
@@ -139,7 +143,7 @@ void SetWindowYImpl(Ark_ClickEvent peer,
     offset.SetY(y, animation);
     info->SetGlobalLocation(offset);
 }
-Ark_Int32 GetScreenXImpl(Ark_ClickEvent peer)
+Ark_Number GetScreenXImpl(Ark_ClickEvent peer)
 {
     return GetWindowXImpl(peer);
 }
@@ -148,7 +152,7 @@ void SetScreenXImpl(Ark_ClickEvent peer,
 {
     SetWindowXImpl(peer, screenX);
 }
-Ark_Int32 GetScreenYImpl(Ark_ClickEvent peer)
+Ark_Number GetScreenYImpl(Ark_ClickEvent peer)
 {
     return GetWindowYImpl(peer);
 }
@@ -157,16 +161,17 @@ void SetScreenYImpl(Ark_ClickEvent peer,
 {
     SetWindowYImpl(peer, screenY);
 }
-Ark_Int32 GetXImpl(Ark_ClickEvent peer)
+Ark_Number GetXImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetLocalLocation();
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
     LOGE("ARKOALA ClickEventAccessor::GetXImpl return type Ark_Int32 "
         "should be replaced with a Ark_Number type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(x));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(x));
 }
 void SetXImpl(Ark_ClickEvent peer,
               const Ark_Number* x)
@@ -182,16 +187,17 @@ void SetXImpl(Ark_ClickEvent peer,
     offset.SetX(newX, animation);
     info->SetLocalLocation(offset);
 }
-Ark_Int32 GetYImpl(Ark_ClickEvent peer)
+Ark_Number GetYImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
     const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, errValue);
     const auto& offset = info->GetLocalLocation();
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     LOGI("ARKOALA ClickEventAccessor::GetYImpl return type Ark_Int32 "
         "should be replaced with a Ark_Number type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(y));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(y));
 }
 void SetYImpl(Ark_ClickEvent peer,
               const Ark_Number* y)

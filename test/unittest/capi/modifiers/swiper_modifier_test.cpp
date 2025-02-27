@@ -1684,7 +1684,10 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
     void (*fakeDeveloperCallbackFunc)(const Ark_Int32 resourceId, const Ark_SwiperContentTransitionProxy parameter) =
         [](const Ark_Int32 resourceId, const Ark_SwiperContentTransitionProxy peer) {
             // get to further test: incoming resource, data from incoming peer via accessor
-            checkInvoke = { resourceId, accessor->getIndex(peer) };
+            checkInvoke = {
+                resourceId,
+                Converter::Convert<int32_t>(accessor->getIndex(peer))
+            };
 
             auto destroy = reinterpret_cast<void (*)(SwiperContentTransitionProxyPeer *)>(accessor->getFinalizer());
             if (destroy) {

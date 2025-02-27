@@ -34,11 +34,11 @@ Ark_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_Int32 GetTextIndentImpl(Ark_ParagraphStyle peer)
+Ark_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_Int32 GetMaxLinesImpl(Ark_ParagraphStyle peer)
+Ark_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }

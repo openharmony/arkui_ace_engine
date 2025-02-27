@@ -78,7 +78,7 @@ HWTEST_F(TextEditControllerExAccessorTest, GetCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
     EXPECT_CALL(*peer_, GetCaretOffset()).Times(1).WillOnce(Return(OFFSET));
-    auto checkValue = accessor_->getCaretOffset(peer_);
+    auto checkValue = Converter::Convert<int32_t>(accessor_->getCaretOffset(peer_));
     EXPECT_EQ(checkValue, OFFSET);
 }
 

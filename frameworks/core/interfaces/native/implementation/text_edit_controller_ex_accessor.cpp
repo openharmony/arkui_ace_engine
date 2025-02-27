@@ -50,10 +50,10 @@ Ark_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
     auto offsetConv = Converter::Convert<int32_t>(*offset);
     return Converter::ArkValue<Ark_Boolean>(peer->SetCaretOffset(offsetConv));
 }
-Ark_Int32 GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
+Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
-    return Converter::ArkValue<Ark_Int32>(peer->GetCaretOffset());
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
+    return Converter::ArkValue<Ark_Number>(peer->GetCaretOffset());
 }
 Ark_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
 {

@@ -20,7 +20,7 @@
 #include "arkoala_api_generated.h"
 
 namespace {
-constexpr int32_t BAD_REQUEST = 400;
+const  Ark_Number BAD_REQUEST = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(400);
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -85,10 +85,10 @@ Array_Header GetResponseHeaderImpl(Ark_WebResourceResponse peer)
     LOGE("WebResourceResponseAccessor::GetResponseHeaderImpl - return value need to be supported");
     return {};
 }
-Ark_Int32 GetResponseCodeImpl(Ark_WebResourceResponse peer)
+Ark_Number GetResponseCodeImpl(Ark_WebResourceResponse peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, BAD_REQUEST);
-    return static_cast<Ark_Int32>(peer->handler->GetStatusCode());
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetStatusCode());
 }
 void SetResponseDataImpl(Ark_WebResourceResponse peer,
                          const Ark_Union_String_Number_Resource_Buffer* data)

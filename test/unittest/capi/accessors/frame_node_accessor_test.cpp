@@ -638,14 +638,14 @@ HWTEST_F(FrameNodeAccessorTest, DISABLED_GetOpacityTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getOpacity, nullptr);
     // wait for a correct return type
-    auto opacity = accessor_->getOpacity(peer_);
-    EXPECT_EQ(opacity, 1.00);
+    auto opacity = Converter::Convert<float>(accessor_->getOpacity(peer_));
+    EXPECT_FLOAT_EQ(opacity, 1.00);
 
     auto fnode = reinterpret_cast<FrameNode *>(peer_->node.GetRawPtr());
     ASSERT_NE(fnode, nullptr);
     ViewAbstract::SetOpacity(fnode, 0.55f);
-    opacity = accessor_->getOpacity(peer_);
-    EXPECT_EQ(opacity, 0.55);
+    opacity = Converter::Convert<float>(accessor_->getOpacity(peer_));
+    EXPECT_FLOAT_EQ(opacity, 0.55);
 }
 
 /**

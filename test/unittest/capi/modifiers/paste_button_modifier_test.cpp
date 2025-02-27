@@ -382,8 +382,8 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .nodeId = resourceId,
-            .offsetX = accessor->getWindowX(peer),
-            .offsetY = accessor->getWindowY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
             .result = result
         };
         accessor->destroyPeer(peer);

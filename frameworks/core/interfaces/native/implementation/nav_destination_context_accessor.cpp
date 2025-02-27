@@ -66,10 +66,18 @@ Opt_RouteMapConfig GetConfigInRouteMapImpl(Ark_NavDestinationContext peer)
 
     return invalid; // fix a return value
 }
+Ark_NavPathInfo GetPathInfoImpl(Ark_NavDestinationContext peer)
+{
+    return {};
+}
 void SetPathInfoImpl(Ark_NavDestinationContext peer,
                      Ark_NavPathInfo pathInfo)
 {
     LOGE("NavDestinationContext doesn't support set path info");
+}
+Ark_NavPathStack GetPathStackImpl(Ark_NavDestinationContext peer)
+{
+    return {};
 }
 void SetPathStackImpl(Ark_NavDestinationContext peer,
                       Ark_NavPathStack pathStack)
@@ -98,7 +106,9 @@ const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAcce
         NavDestinationContextAccessor::CtorImpl,
         NavDestinationContextAccessor::GetFinalizerImpl,
         NavDestinationContextAccessor::GetConfigInRouteMapImpl,
+        NavDestinationContextAccessor::GetPathInfoImpl,
         NavDestinationContextAccessor::SetPathInfoImpl,
+        NavDestinationContextAccessor::GetPathStackImpl,
         NavDestinationContextAccessor::SetPathStackImpl,
         NavDestinationContextAccessor::GetNavDestinationIdImpl,
         NavDestinationContextAccessor::SetNavDestinationIdImpl,

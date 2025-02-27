@@ -35,13 +35,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetLineCountImpl(Ark_LayoutManager peer)
+Ark_Number GetLineCountImpl(Ark_LayoutManager peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
     auto handler = peer->handler.Upgrade();
-    CHECK_NULL_RETURN(handler, 0);
+    CHECK_NULL_RETURN(handler, errValue);
     int32_t count = handler->GetLineCount();
-    return Converter::ArkValue<Ark_Int32>(count);
+    return Converter::ArkValue<Ark_Number>(count);
 }
 Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
                                                           const Ark_Number* x,

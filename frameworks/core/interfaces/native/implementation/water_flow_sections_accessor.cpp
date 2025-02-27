@@ -122,11 +122,13 @@ Array_SectionOptions ValuesImpl(Ark_WaterFlowSections peer)
     CHECK_NULL_RETURN(peer->GetController(), {});
     return {};
 }
-Ark_Int32 LengthImpl(Ark_WaterFlowSections peer)
+Ark_Number LengthImpl(Ark_WaterFlowSections peer)
 {
-    CHECK_NULL_RETURN(peer, false);
-    CHECK_NULL_RETURN(peer->GetController(), false);
-    return peer->GetController()->GetSectionInfo().size();
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->GetController(), errValue);
+    auto res = peer->GetController()->GetSectionInfo().size();
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(res));
 }
 } // WaterFlowSectionsAccessor
 const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor()

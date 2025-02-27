@@ -144,7 +144,7 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseCodeTest, TestSize.Level1)
     Ark_Int32 arkStatusCode = Converter::ArkValue<Ark_Int32>(statusCode);
 
     peer_->handler->SetStatusCode(statusCode);
-    EXPECT_EQ(arkStatusCode, accessor_->getResponseCode(peer_));
+    EXPECT_EQ(arkStatusCode, Converter::Convert<int32_t>(accessor_->getResponseCode(peer_)));
 }
 
 /**

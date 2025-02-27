@@ -60,6 +60,10 @@ void InvalidateImpl(Ark_DrawingRenderingContext peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerInvalidate();
 }
+Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
+{
+    return {};
+}
 } // DrawingRenderingContextAccessor
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
 {
@@ -68,6 +72,7 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
         DrawingRenderingContextAccessor::CtorImpl,
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,
+        DrawingRenderingContextAccessor::GetCanvasImpl,
     };
     return &DrawingRenderingContextAccessorImpl;
 }

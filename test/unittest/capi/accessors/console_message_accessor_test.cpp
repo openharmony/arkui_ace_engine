@@ -91,7 +91,7 @@ HWTEST_F(ConsoleMessageAccessorTest, DISABLED_getMessageLevelTest, TestSize.Leve
 HWTEST_F(ConsoleMessageAccessorTest, getLineNumberTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getLineNumber, nullptr);
-    EXPECT_EQ(g_lineNumber, accessor_->getLineNumber(peer_));
+    EXPECT_EQ(g_lineNumber, Converter::Convert<int>(accessor_->getLineNumber(peer_)));
 }
 
 } // namespace OHOS::Ace::NG

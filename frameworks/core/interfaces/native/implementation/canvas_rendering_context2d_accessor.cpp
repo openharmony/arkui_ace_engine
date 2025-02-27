@@ -25,7 +25,7 @@
 #include "arkoala_api_generated.h"
 
 namespace {
-constexpr auto ERROR_VALUE = -1;
+const Ark_Number ERROR_VALUE = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(-1);
 constexpr auto IMAGE_TYPE_DEFAULT = "image/png";
 constexpr auto IMAGE_QUALITY_MIN = 0.0f;
 constexpr auto IMAGE_QUALITY_MAX = 1.0f;
@@ -95,6 +95,7 @@ Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
     return {};
 }
 void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
                             Ark_CanvasRenderingContext2D peer,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
@@ -149,17 +150,21 @@ void OffOnDetachImpl(Ark_VMContext vmContext,
     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
-Ark_Int32 GetHeightImpl(Ark_CanvasRenderingContext2D peer)
+Ark_Number GetHeightImpl(Ark_CanvasRenderingContext2D peer)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, ::ERROR_VALUE);
-    return peerImpl->TriggerGetHeight();
+    return Converter::ArkValue<Ark_Number>(peerImpl->TriggerGetHeight());
 }
-Ark_Int32 GetWidthImpl(Ark_CanvasRenderingContext2D peer)
+Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, ::ERROR_VALUE);
-    return peerImpl->TriggerGetWidth();
+    CHECK_NULL_RETURN(peerImpl, {});
+    return Converter::ArkValue<Ark_Number>(peerImpl->TriggerGetWidth());
+}
+Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
+{
+    return {};
 }
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()
@@ -177,6 +182,7 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
         CanvasRenderingContext2DAccessor::OffOnDetachImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,
+        CanvasRenderingContext2DAccessor::GetCanvasImpl,
     };
     return &CanvasRenderingContext2DAccessorImpl;
 }

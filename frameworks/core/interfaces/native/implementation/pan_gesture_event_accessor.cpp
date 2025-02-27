@@ -32,18 +32,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetOffsetXImpl(Ark_PanGestureEvent peer)
+Ark_Number GetOffsetXImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetOffsetXImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetX());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetOffsetXImpl(Ark_PanGestureEvent peer,
                     const Ark_Number* offsetX)
@@ -56,18 +56,18 @@ void SetOffsetXImpl(Ark_PanGestureEvent peer,
     auto convValue = Converter::Convert<float>(*offsetX);
     event->SetOffsetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
 }
-Ark_Int32 GetOffsetYImpl(Ark_PanGestureEvent peer)
+Ark_Number GetOffsetYImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetOffsetYImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetY());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetOffsetYImpl(Ark_PanGestureEvent peer,
                     const Ark_Number* offsetY)
@@ -80,18 +80,18 @@ void SetOffsetYImpl(Ark_PanGestureEvent peer,
     auto convValue = Converter::Convert<float>(*offsetY);
     event->SetOffsetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
 }
-Ark_Int32 GetVelocityXImpl(Ark_PanGestureEvent peer)
+Ark_Number GetVelocityXImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetVelocityXImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityX());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetVelocityXImpl(Ark_PanGestureEvent peer,
                       const Ark_Number* velocityX)
@@ -106,18 +106,18 @@ void SetVelocityXImpl(Ark_PanGestureEvent peer,
     offsetPerSecond.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     event->SetVelocity(Velocity(offsetPerSecond));
 }
-Ark_Int32 GetVelocityYImpl(Ark_PanGestureEvent peer)
+Ark_Number GetVelocityYImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetVelocityYImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityY());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetVelocityYImpl(Ark_PanGestureEvent peer,
                       const Ark_Number* velocityY)
@@ -132,18 +132,18 @@ void SetVelocityYImpl(Ark_PanGestureEvent peer,
     offsetPerSecond.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     event->SetVelocity(Velocity(offsetPerSecond));
 }
-Ark_Int32 GetVelocityImpl(Ark_PanGestureEvent peer)
+Ark_Number GetVelocityImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetVelocityImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityValue());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetVelocityImpl(Ark_PanGestureEvent peer,
                      const Ark_Number* velocity)

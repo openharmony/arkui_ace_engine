@@ -95,6 +95,7 @@ void PushPath1Impl(Ark_NavPathStack peer,
     peer->InvokeUpdateCallback();
 }
 void PushDestination0Impl(Ark_VMContext vmContext,
+                          Ark_AsyncWorkerPtr asyncWorker,
                           Ark_NavPathStack peer,
                           Ark_NavPathInfo info,
                           const Opt_Boolean* animated,
@@ -115,6 +116,7 @@ void PushDestination0Impl(Ark_VMContext vmContext,
     peer->InvokeUpdateCallback();
 }
 void PushDestination1Impl(Ark_VMContext vmContext,
+                          Ark_AsyncWorkerPtr asyncWorker,
                           Ark_NavPathStack peer,
                           Ark_NavPathInfo info,
                           const Opt_NavigationOptions* options,
@@ -174,6 +176,7 @@ void PushPathByName1Impl(Ark_NavPathStack peer,
     navStack->Nav::PathStack::PushPathByName(convName, convParam, convOnPop, convAnimated);
 }
 void PushDestinationByName0Impl(Ark_VMContext vmContext,
+                                Ark_AsyncWorkerPtr asyncWorker,
                                 Ark_NavPathStack peer,
                                 const Ark_String* name,
                                 const Ark_CustomObject* param,
@@ -197,6 +200,7 @@ void PushDestinationByName0Impl(Ark_VMContext vmContext,
     navStack->Nav::PathStack::PushDestinationByName(convName, convParam, Nav::OnPopCallback(), convAnimated);
 }
 void PushDestinationByName1Impl(Ark_VMContext vmContext,
+                                Ark_AsyncWorkerPtr asyncWorker,
                                 Ark_NavPathStack peer,
                                 const Ark_String* name,
                                 const Ark_CustomObject* param,
@@ -243,6 +247,7 @@ void ReplacePath1Impl(Ark_NavPathStack peer,
 {
 }
 void ReplaceDestinationImpl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
                             Ark_NavPathStack peer,
                             Ark_NavPathInfo info,
                             const Opt_NavigationOptions* options,
@@ -255,13 +260,13 @@ void ReplacePathByNameImpl(Ark_NavPathStack peer,
                            const Opt_Boolean* animated)
 {
 }
-Ark_Int32 RemoveByIndexesImpl(Ark_NavPathStack peer,
-                              const Array_Number* indexes)
+Ark_Number RemoveByIndexesImpl(Ark_NavPathStack peer,
+                               const Array_Number* indexes)
 {
     return {};
 }
-Ark_Int32 RemoveByNameImpl(Ark_NavPathStack peer,
-                           const Ark_String* name)
+Ark_Number RemoveByNameImpl(Ark_NavPathStack peer,
+                            const Ark_String* name)
 {
     return {};
 }
@@ -297,16 +302,16 @@ Opt_NavPathInfo Pop1Impl(Ark_NavPathStack peer,
     peer->InvokeUpdateCallback();
     return Converter::ArkValue<Opt_NavPathInfo>(pathInfo);
 }
-Ark_Int32 PopToName0Impl(Ark_NavPathStack peer,
-                         const Ark_String* name,
-                         const Opt_Boolean* animated)
+Ark_Number PopToName0Impl(Ark_NavPathStack peer,
+                          const Ark_String* name,
+                          const Opt_Boolean* animated)
 {
     return {};
 }
-Ark_Int32 PopToName1Impl(Ark_NavPathStack peer,
-                         const Ark_String* name,
-                         const Ark_CustomObject* result,
-                         const Opt_Boolean* animated)
+Ark_Number PopToName1Impl(Ark_NavPathStack peer,
+                          const Ark_String* name,
+                          const Ark_CustomObject* result,
+                          const Opt_Boolean* animated)
 {
     return {};
 }
@@ -321,9 +326,9 @@ void PopToIndex1Impl(Ark_NavPathStack peer,
                      const Opt_Boolean* animated)
 {
 }
-Ark_Int32 MoveToTopImpl(Ark_NavPathStack peer,
-                        const Ark_String* name,
-                        const Opt_Boolean* animated)
+Ark_Number MoveToTopImpl(Ark_NavPathStack peer,
+                         const Ark_String* name,
+                         const Opt_Boolean* animated)
 {
     return {};
 }
@@ -363,7 +368,7 @@ Opt_NavPathStack GetParentImpl(Ark_NavPathStack peer)
 {
     return {};
 }
-Ark_Int32 SizeImpl(Ark_NavPathStack peer)
+Ark_Number SizeImpl(Ark_NavPathStack peer)
 {
     return {};
 }

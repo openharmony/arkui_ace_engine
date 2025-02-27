@@ -570,13 +570,13 @@ HWTEST_F(ScrollerAccessorTest, getItemIndexTest, TestSize.Level1)
     ASSERT_NE(accessor_->getItemIndex, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemIndex(x, y)).Times(1).WillOnce(Return(arkIndex));
-    auto result = accessor_->getItemIndex(vmContext_, peer_, &arkX, &arkY);
+    auto result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, &arkX, &arkY));
     EXPECT_EQ(result, arkIndex);
-    result = accessor_->getItemIndex(vmContext_, peer_, nullptr, &arkY);
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, nullptr, &arkY));
     EXPECT_EQ(result, arkIndexInavid);
-    result = accessor_->getItemIndex(vmContext_, peer_, &arkX, nullptr);
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, &arkX, nullptr));
     EXPECT_EQ(result, arkIndexInavid);
-    result = accessor_->getItemIndex(vmContext_, peer_, nullptr, nullptr);
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, nullptr, nullptr));
     EXPECT_EQ(result, arkIndexInavid);
 }
 

@@ -90,11 +90,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
+Ark_Number GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto result = peer->GetCaretOffset();
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
 Ark_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
                                const Ark_Number* offset)

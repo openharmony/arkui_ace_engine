@@ -40,11 +40,11 @@ void FinishTransitionImpl(Ark_TabContentTransitionProxy peer)
     CHECK_NULL_VOID(peer);
     peer->FinishTransition();
 }
-Ark_Int32 GetFromImpl(Ark_TabContentTransitionProxy peer)
+Ark_Number GetFromImpl(Ark_TabContentTransitionProxy peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto idx = peer->GetFrom();
-    return Converter::ArkValue<Ark_Int32>(idx);
+    return Converter::ArkValue<Ark_Number>(idx);
 }
 void SetFromImpl(Ark_TabContentTransitionProxy peer,
                  const Ark_Number* from)
@@ -54,11 +54,11 @@ void SetFromImpl(Ark_TabContentTransitionProxy peer,
     int32_t idx = Converter::Convert<int32_t>(*from);
     peer->SetFrom(idx);
 }
-Ark_Int32 GetToImpl(Ark_TabContentTransitionProxy peer)
+Ark_Number GetToImpl(Ark_TabContentTransitionProxy peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto idx = peer->GetTo();
-    return Converter::ArkValue<Ark_Int32>(idx);
+    return Converter::ArkValue<Ark_Number>(idx);
 }
 void SetToImpl(Ark_TabContentTransitionProxy peer,
                const Ark_Number* to)

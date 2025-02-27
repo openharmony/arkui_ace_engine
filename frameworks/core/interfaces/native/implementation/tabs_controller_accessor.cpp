@@ -47,6 +47,7 @@ void ChangeIndexImpl(Ark_TabsController peer,
     peerImpl->TriggerChangeIndex(index);
 }
 void PreloadItemsImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
                       Ark_TabsController peer,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)

@@ -177,26 +177,24 @@ void CanvasRenderingContext2DPeerImpl::TriggerStopImageAnalyzer()
     pattern_->StopImageAnalyzer();
 }
 
-Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetHeight()
+double CanvasRenderingContext2DPeerImpl::TriggerGetHeight()
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetHeight pattern "
             "not bound to component.");
         return ::ERROR_VALUE;
     }
-    auto height = PipelineBase::Px2VpWithCurrentDensity(pattern_-> GetHeight());
-    return  Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(height));
+    return PipelineBase::Px2VpWithCurrentDensity(pattern_->GetHeight());
 }
 
-Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetWidth()
+double CanvasRenderingContext2DPeerImpl::TriggerGetWidth()
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetWidth pattern "
             "not bound to component.");
         return ::ERROR_VALUE;
     }
-    auto width = PipelineBase::Px2VpWithCurrentDensity(pattern_-> GetWidth());
-    return  Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width));
+    return PipelineBase::Px2VpWithCurrentDensity(pattern_->GetWidth());
 }
 
 void CanvasRenderingContext2DPeerImpl::ToDataURL(const std::string& type, float& quality)
