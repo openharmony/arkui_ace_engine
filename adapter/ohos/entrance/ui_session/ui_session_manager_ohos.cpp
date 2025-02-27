@@ -309,7 +309,7 @@ void UiSessionManagerOhos::GetWebViewLanguage()
     }
 }
 
-void UiSessionManagerOhos::RegisterGetCurrentPageName(const std::function<std::string()>&& callback)
+void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback)
 {
     pipelineContextPageNameCallback_ = std::move(callback);
 }

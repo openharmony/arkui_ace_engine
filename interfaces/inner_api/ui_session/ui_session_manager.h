@@ -116,7 +116,7 @@ public:
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
     virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) {};
     virtual void GetWebViewLanguage() {};
-    virtual void RegisterGetCurrentPageName(const std::function<std::string()>&& callback) {};
+    virtual void RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback) {};
     virtual void GetCurrentPageName() {};
     virtual void SendCurrentPageName(const std::string result) {};
     virtual void SendCurrentLanguage(std::string result) {};
