@@ -490,7 +490,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     info_.reachStart_ = info_.startIndex_ == 0 && GreatOrEqual(info_.currentOffset_, 0.0f);
 
+    auto curDelta = info_.currentOffset_ - info_.prevOffset_;
     info_.currentHeight_ = EstimateHeight();
+    bool sizeDiminished =
+        IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
+
     if (!offsetEnd && info_.offsetEnd_) {
         endHeight_ = info_.currentHeight_;
     }
@@ -505,7 +509,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
     }
     if (!preSpring_) {
-        CheckRestartSpring(false);
+        CheckRestartSpring(sizeDiminished);
     }
     CheckScrollable();
     MarkSelectedItems();
