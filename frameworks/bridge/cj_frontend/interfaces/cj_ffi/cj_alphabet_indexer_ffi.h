@@ -41,6 +41,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerItemSize(double size, int32_t u
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerAlignStyle(int32_t alignStyle);
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerSelected(int32_t selected);
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupPosition(double x, double y);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupPositionWithUnit(double x, int32_t xUnit,
+    double y, int32_t yUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerOnSelected(void (*callback)(int32_t idx));
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerOnRequestPopupData(VectorStringHandle (*callback)(int32_t idx));
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerOnPopupSelected(void (*callback)(int32_t idx));

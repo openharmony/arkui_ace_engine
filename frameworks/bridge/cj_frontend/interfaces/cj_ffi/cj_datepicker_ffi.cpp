@@ -22,6 +22,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components/chart/chart_component.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 
@@ -244,5 +245,11 @@ void FfiOHOSAceFrameworkDatePickerSetSelectedTextStyle(uint32_t color, double si
     textStyle.fontStyle = static_cast<FontStyle>(style);
 
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+}
+
+void FfiOHOSAceFrameworkDatePickerSetOpacity(double opacity)
+{
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity);
+    DatePickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 }
