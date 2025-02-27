@@ -31,7 +31,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
 
     if (imageSourceInfo.IsValid()) {
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(context, nullptr);
         auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>(themeScopeId);
         CHECK_NULL_RETURN(dialogTheme, nullptr);
@@ -84,7 +84,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
 {
     CHECK_NULL_RETURN(iconNode, nullptr);
     int32_t themeScopeId = iconNode->GetThemeScopeId();
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
     auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>(themeScopeId);
     CHECK_NULL_RETURN(dialogTheme, nullptr);
@@ -138,7 +138,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(
     const RefPtr<FrameNode>& columnNode, int32_t themeScopeId)
 {
     CHECK_NULL_RETURN(columnNode, nullptr);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
     auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>(themeScopeId);
     CHECK_NULL_RETURN(dialogTheme, nullptr);
@@ -175,7 +175,7 @@ void AgingAdapationDialogUtil::CreateDialogTextNode(
     const RefPtr<FrameNode>& columnNode, const std::u16string& message, int32_t themeScopeId)
 {
     CHECK_NULL_VOID(columnNode);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>(themeScopeId);
     CHECK_NULL_VOID(dialogTheme);
@@ -215,7 +215,7 @@ void AgingAdapationDialogUtil::CreateDialogTextNode(
 
 float AgingAdapationDialogUtil::GetDialogBigFontSizeScale()
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, 0.0);
     auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, 0.0);

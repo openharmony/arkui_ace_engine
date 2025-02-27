@@ -362,10 +362,10 @@ void VideoElement::PreparePlayer()
 // Interim programme
 void VideoElement::MediaPlay(const std::string& filePath)
 {
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto assetManager = PipelineBase::GetCurrentContextSafelyWithCheck()->GetAssetManager();
     uint32_t resId = 0;
     if (GetResourceId(filePath, resId)) {
-        auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
+        auto themeManager = PipelineBase::GetCurrentContextSafelyWithCheck()->GetThemeManager();
         auto themeConstants = themeManager->GetThemeConstants();
         std::string mediaPath;
         auto state1 = themeConstants->GetMediaById(resId, mediaPath);
@@ -397,7 +397,7 @@ void VideoElement::MediaPlay(const std::string& filePath)
 
 void VideoElement::RawFilePlay(const std::string& filePath)
 {
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto assetManager = PipelineBase::GetCurrentContextSafelyWithCheck()->GetAssetManager();
     auto path = "resources/rawfile/" + filePath.substr(RAWFILE_PREFIX_LENGTH);
     MediaFileInfo fileInfo;
     auto state1 = assetManager->GetFileInfo(path, fileInfo);
@@ -423,7 +423,7 @@ void VideoElement::RawFilePlay(const std::string& filePath)
 void VideoElement::RelativePathPlay(const std::string& filePath)
 {
     // relative path
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto assetManager = PipelineBase::GetCurrentContextSafelyWithCheck()->GetAssetManager();
     MediaFileInfo fileInfo;
     auto state = assetManager->GetFileInfo(assetManager->GetAssetPath(filePath, false), fileInfo);
     if (!state) {

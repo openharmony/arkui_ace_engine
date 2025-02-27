@@ -618,7 +618,7 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
 #endif
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, 0.0);
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -756,7 +756,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
 #endif
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, Size(0.0, 0.0));
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -777,7 +777,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
     auto fontWeightValue = (static_cast<int32_t>(
             ConvertTxtFontWeight(fontWeightStr)) + 1) * 100;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
     }

@@ -610,7 +610,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         const double RESIZE_MAX_PROPORTION = ImageCompressor::GetInstance()->CanCompress() ? 1.0 : 0.25;
         bool needCacheResizedImageFile =
             (1.0 * dstWidth * dstHeight) / (rawImage->width() * rawImage->height()) < RESIZE_MAX_PROPORTION;
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(context, scaledImage);
         // card doesn't encode and cache image file.
         if (needCacheResizedImageFile && !srcKey.empty() && context && !context->IsFormRender()) {
@@ -660,7 +660,7 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
         const double RESIZE_MAX_PROPORTION = ImageCompressor::GetInstance()->CanCompress() ? 1.0 : 0.25;
         bool needCacheResizedImageFile =
             (1.0 * dstWidth * dstHeight) / (rawRSImage->GetWidth() * rawRSImage->GetHeight()) < RESIZE_MAX_PROPORTION;
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         // card doesn't encode and cache image file.
         if (needCacheResizedImageFile && !srcKey.empty() && context && !context->IsFormRender()) {
             BackgroundTaskExecutor::GetInstance().PostTask(

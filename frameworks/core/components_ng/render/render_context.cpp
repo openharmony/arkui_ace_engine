@@ -50,7 +50,7 @@ void RenderContext::RequestNextFrame() const
         CHECK_NULL_VOID(node);
         auto eventHub = node->GetEventHubOnly<NG::EventHub>();
         if (node->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
-            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(node));
         }

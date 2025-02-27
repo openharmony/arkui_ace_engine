@@ -47,7 +47,7 @@ ScreenSizeType ScreenSystemManager::GetSize(double width) const
 {
     std::lock_guard<std::mutex> guard(lock);
     ScreenSizeType size = ScreenSizeType::UNDEFINED;
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, size);
     auto dipScale = context->GetDipScale();
     if (width < MAX_SCREEN_WIDTH_SM.Value() * dipScale) {

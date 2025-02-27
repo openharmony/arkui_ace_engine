@@ -82,7 +82,7 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
     patternSrc->BuildSharedTransitionMap();
     patternDest->BuildSharedTransitionMap();
     PrepareSharedTransition(pageSrc, pageDest);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     for (const auto& effect : effects_) {
         auto controller = effect->GetController();
         if (controller) {

@@ -512,10 +512,14 @@ HWTEST_F(SearchModifierTest, DISABLED_setCancelButtonTestDefault, TestSize.Level
     auto fullJsonDefault = GetJsonValue(node_);
     auto defaultCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJsonDefault, CANCEL_BUTTON_ATTR);
     auto defaultButtonIconStyleAttr = GetAttrValue<std::string>(defaultCancelButtonAttrs, CANCEL_BUTTON_STYLE_ATTR);
-    auto defaultCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(defaultCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
-    auto defaultCancelButtonIconSrc = GetAttrValue<std::string>(defaultCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SRC_ATTR);
-    auto defaultCancelButtonIconColor = GetAttrValue<std::string>(defaultCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
-    auto defaultCancelButtonIconSize = GetAttrValue<std::string>(defaultCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SIZE_ATTR);
+    auto defaultCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(defaultCancelButtonAttrs,
+        CANCEL_BUTTON_ICON_ATTR);
+    auto defaultCancelButtonIconSrc = GetAttrValue<std::string>(defaultCancelButtonIconAttrs,
+        CANCEL_BUTTON_ICON_SRC_ATTR);
+    auto defaultCancelButtonIconColor = GetAttrValue<std::string>(defaultCancelButtonIconAttrs,
+        CANCEL_BUTTON_ICON_COLOR_ATTR);
+    auto defaultCancelButtonIconSize = GetAttrValue<std::string>(defaultCancelButtonIconAttrs,
+        CANCEL_BUTTON_ICON_SIZE_ATTR);
     EXPECT_EQ(defaultButtonIconStyleAttr, BUTTON_STYLE_INPUT);
     EXPECT_EQ(defaultCancelButtonIconSrc, EMPTY_TEXT);
     EXPECT_EQ(defaultCancelButtonIconColor, CHECK_DEFAULT_BLACK_COLOR_ARRAY);
@@ -555,7 +559,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidColorValues, TestSize.Level
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
@@ -593,7 +598,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidNumberValues, TestSize.Leve
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
@@ -631,7 +637,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidStringValues, TestSize.Leve
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
@@ -660,7 +667,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestInvalidNumberValues, TestSize.Le
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
@@ -690,7 +698,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestTestInvalidStringValues, TestSiz
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
@@ -711,8 +720,10 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSize, TestSize.Level1)
         modifier_->setCancelButton(node_, &attrs);
         auto fullJson = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
-        auto customCancelButtonIconSize = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SIZE_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
+        auto customCancelButtonIconSize = GetAttrValue<std::string>(customCancelButtonIconAttrs,
+            CANCEL_BUTTON_ICON_SIZE_ATTR);
         EXPECT_EQ(customCancelButtonIconSize, testSize.second);
     }
 }
@@ -733,7 +744,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSrc, TestSize.Level1)
         modifier_->setCancelButton(node_, &attrs);
         auto jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs, CANCEL_BUTTON_ICON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SRC_ATTR);
         EXPECT_EQ(resultStr, expected);
     }

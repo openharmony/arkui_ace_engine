@@ -1882,8 +1882,7 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsPrimaryButtonTest, Tes
 {
     struct CheckEvent { int32_t resourceId; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    void (*checkCallback)(const Ark_Int32) =
-        [](const Ark_Int32 resourceId) { checkEvent = { .resourceId = resourceId }; };
+    auto checkCallback = [](const Ark_Int32 resourceId) { checkEvent = { .resourceId = resourceId }; };
 
     Ark_Literal_String_value_Callback_Void_action buttonAction = {
         .value = Converter::ArkValue<Ark_String>(PRIMARY_BUTTON_TEXT),
@@ -1898,9 +1897,8 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsPrimaryButtonTest, Tes
     TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
-    UINode* blankNode = reinterpret_cast<UINode *>(node_);
-    RefPtr<UINode> blankRef = AceType::Claim(blankNode);
-    auto context = blankNode->GetContext();
+    RefPtr<UINode> blankRef = AceType::Claim(reinterpret_cast<UINode *>(node_));
+    auto context = blankRef->GetContext();
     ASSERT_NE(context, nullptr);
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
@@ -1948,8 +1946,7 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsSecondaryButtonTest, T
 {
     struct CheckEvent { int32_t resourceId; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    void (*checkCallback)(const Ark_Int32) =
-        [](const Ark_Int32 resourceId) { checkEvent = { .resourceId = resourceId }; };
+    auto checkCallback = [](const Ark_Int32 resourceId) { checkEvent = { .resourceId = resourceId }; };
 
     Ark_Literal_String_value_Callback_Void_action buttonAction = {
         .value = Converter::ArkValue<Ark_String>(SECONDARY_BUTTON_TEXT),
@@ -1964,9 +1961,8 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsSecondaryButtonTest, T
     TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
-    UINode* blankNode = reinterpret_cast<UINode *>(node_);
-    RefPtr<UINode> blankRef = AceType::Claim(blankNode);
-    auto context = blankNode->GetContext();
+    RefPtr<UINode> blankRef = AceType::Claim(reinterpret_cast<UINode *>(node_));
+    auto context = blankRef->GetContext();
     ASSERT_NE(context, nullptr);
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);

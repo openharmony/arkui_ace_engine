@@ -947,7 +947,7 @@ void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
 void Inspector::GetInspectorTree(InspectorTreeMap& treesInfo)
 {
     treesInfo.clear();
-    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -987,7 +987,7 @@ void Inspector::RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, Inspector
 void Inspector::GetRecordAllPagesNodes(InspectorTreeMap& treesInfo)
 {
     treesInfo.clear();
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
