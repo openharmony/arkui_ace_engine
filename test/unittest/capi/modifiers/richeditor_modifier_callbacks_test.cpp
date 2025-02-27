@@ -249,7 +249,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, AboutToIMEInputTest, TestSize.Level1)
  * @tc.desc: setOnIMEInputComplete test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnIMEInputCompleteTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
@@ -613,7 +613,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidChangeTest, TestSize.Level1)
  * @tc.desc: setOnCopy test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCopyTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -624,7 +624,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCopyTest, TestSize.Level1)
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        // implement CallbackHelper and ArkValue for Ark_SubmitEvent
+        auto arkCallback = Converter::OptConvert<Callback_Void>(parameter.preventDefault);
+        if (arkCallback) {
+            auto helper = CallbackHelper(*arkCallback);
+            helper.Invoke();
+        }
     };
     auto arkCallback = Converter::ArkValue<Callback_CopyEvent_Void>(nullptr, testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
@@ -644,7 +648,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCopyTest, TestSize.Level1)
  * @tc.desc: setOnCut test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCutTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -655,7 +659,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCutTest, TestSize.Level1)
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        // implement CallbackHelper and ArkValue for Ark_SubmitEvent
+        auto arkCallback = Converter::OptConvert<Callback_Void>(parameter.preventDefault);
+        if (arkCallback) {
+            auto helper = CallbackHelper(*arkCallback);
+            helper.Invoke();
+        }
     };
     auto arkCallback = Converter::ArkValue<Callback_CutEvent_Void>(nullptr, testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
