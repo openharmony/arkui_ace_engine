@@ -886,10 +886,10 @@ public:
         isDestroyingState_ = isDestroying;
     }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
-    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
-    {
-        return apiVersion_ >= static_cast<int32_t>(version);
-    }
+
+    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const;
+
+    bool LessThanAPITargetVersion(PlatformVersion version) const;
 
     bool IsArkTsRenderNode() const
     {

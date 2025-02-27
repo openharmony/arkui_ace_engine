@@ -1521,6 +1521,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
+            pipeline->SetApiTargetVersion(container->GetApiTargetVersion());
         }
     } else {
         Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
@@ -1530,6 +1531,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
+            pipeline->SetApiTargetVersion(container->GetApiTargetVersion());
         }
     }
     if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
@@ -2152,6 +2154,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             }
         }
     }
+    pipeline->SetApiTargetVersion(container->GetApiTargetVersion());
     container->CheckAndSetFontFamily();
     SetFontScaleAndWeightScale(container, instanceId_);
     if (pipeline) {
