@@ -68,7 +68,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "bridge/js_frontend/js_frontend.h"
-#include "bridge/koala_frontend/koala_frontend.h"
+#include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
@@ -465,8 +465,8 @@ void AceContainer::InitializeFrontend()
             frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
             return;
         }
-    } else if (type_ == FrontendType::KOALA) {
-        frontend_ = MakeRefPtr<KoalaFrontend>(sharedRuntime_);
+    } else if (type_ == FrontendType::ARK_TS) {
+        frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
     } else {
         LOGE("Frontend type not supported");
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);

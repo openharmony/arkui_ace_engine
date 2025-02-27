@@ -1766,7 +1766,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
-    // if (bundleName_ == "com.example.trivial.application") { // TODO: use AbilityContext to distinguish KoalaFrontend
+    // if (bundleName_ == "com.example.trivial.application") { // TODO: use AbilityContext to distinguish ArktsFrontend
     //     frontendType = FrontendType::KOALA;
     // }
     auto container =

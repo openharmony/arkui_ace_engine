@@ -14,12 +14,12 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-ohos_source_set("koala_frontend") {
+ohos_source_set("arkts_frontend") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   configs = [ "$ace_root:ace_config" ]
   include_dirs = [ "//arkcompiler/runtime_core/static_core" ]
 
-  sources = [ "koala_frontend.cpp" ]
+  sources = [ "arkts_frontend.cpp" ]
   external_deps = [ "hilog:libhilog" ]
 }

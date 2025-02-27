@@ -39,7 +39,7 @@ template("framework_bridge") {
       "common:bridge_common_$platform",
       "common/accessibility:bridge_accessibility_$platform",
       "js_frontend:js_frontend_$platform",
-      "koala_frontend:koala_frontend",
+      "arkts_frontend:arkts_frontend",
       "plugin_frontend:plugin_frontend_$platform",
     ]
 
@@ -73,7 +73,7 @@ template("framework_bridge_ng") {
       "common:bridge_common_ng_$platform",
       "common/accessibility:bridge_accessibility_$platform",
       "declarative_frontend:declarative_frontend_$platform",
-      "koala_frontend:koala_frontend",
+      "arkts_frontend:arkts_frontend",
     ]
 
     if (defined(config.js_pa_support) && config.js_pa_support) {

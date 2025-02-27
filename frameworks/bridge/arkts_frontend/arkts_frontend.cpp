@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/koala_frontend/koala_frontend.h"
+#include "bridge/arkts_frontend/arkts_frontend.h"
 
 #include "interfaces/inner_api/ace/constants.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
@@ -20,7 +20,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace {
 
-UIContentErrorCode KoalaFrontend::RunPage(
+UIContentErrorCode ArktsFrontend::RunPage(
     const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
 {
     return UIContentErrorCode::NO_ERRORS;
@@ -81,7 +81,7 @@ void RunArkoalaEventLoop(EtsEnv& env, ets_object app)
 }
 } // namespace
 
-UIContentErrorCode KoalaFrontend::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
 {
     ets_class appClass = env_->FindClass(KOALA_APP_INFO.className);
     if (!appClass) {
@@ -114,7 +114,7 @@ UIContentErrorCode KoalaFrontend::RunPage(const std::string& url, const std::str
     return UIContentErrorCode::NO_ERRORS;
 }
 
-void KoalaFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
+void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     pipeline_ = DynamicCast<NG::PipelineContext>(context);
 }

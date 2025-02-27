@@ -28,12 +28,12 @@ namespace OHOS::Ace {
  * @brief Proxy class to interact with Koala frontend and static ArkTS runtime.
  *
  */
-class ACE_EXPORT KoalaFrontend : public Frontend {
-    DECLARE_ACE_TYPE(KoalaFrontend, Frontend);
+class ACE_EXPORT ArktsFrontend : public Frontend {
+    DECLARE_ACE_TYPE(ArktsFrontend, Frontend);
 
 public:
-    explicit KoalaFrontend(void* runtime) : env_(reinterpret_cast<ets_env*>(runtime)) {}
-    ~KoalaFrontend() override = default;
+    explicit ArktsFrontend(void* runtime) : env_(reinterpret_cast<ets_env*>(runtime)) {}
+    ~ArktsFrontend() override = default;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
     {
@@ -183,7 +183,7 @@ private:
     RefPtr<NG::PipelineContext> pipeline_;
     ets_env* env_; // ani_env
     bool foregroundFrontend_ = false;
-    ACE_DISALLOW_COPY_AND_MOVE(KoalaFrontend);
+    ACE_DISALLOW_COPY_AND_MOVE(ArktsFrontend);
 };
 
 } // namespace OHOS::Ace
