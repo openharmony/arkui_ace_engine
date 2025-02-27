@@ -50,13 +50,12 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
             CHECK_NULL_VOID(peerImplPtr);
             peerImplPtr->SetInstanceId(Container::CurrentId());
             peerImplPtr->SetCanvasPattern(pattern);
-            peerImplPtr->UpdateAntiAlias();
-            peerImplPtr->UpdateDensity();
+            peerImplPtr->CanvasRendererPeerImpl::SetAntiAlias();
+            peerImplPtr->CanvasRendererPeerImpl::SetDensity();
         },
         [pattern](const Ark_DrawingRenderingContext &peer) {
             DrawingRenderingContextPeerImpl* peerImplPtr = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
             CHECK_NULL_VOID(peerImplPtr);
-
             peerImplPtr->SetInstanceId(Container::CurrentId());
             peerImplPtr->SetCanvasPattern(pattern);
         },

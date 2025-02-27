@@ -15,44 +15,18 @@
 #include <utility>
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "canvas_rendering_context2d_peer_impl.h"
-#include "drawing_rendering_context_peer_impl.h"
-#include "rendering_context_settings_peer.h"
-
 #include "arkoala_api_generated.h"
-
-namespace {
-const Ark_Number ERROR_VALUE = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(-1);
-constexpr auto IMAGE_TYPE_DEFAULT = "image/png";
-constexpr auto IMAGE_QUALITY_MIN = 0.0f;
-constexpr auto IMAGE_QUALITY_MAX = 1.0f;
-constexpr auto IMAGE_QUALITY_DEFAULT = 0.92f;
-constexpr auto EMPTY_STRING = "";
-} // namespace
-
-namespace OHOS::Ace::NG {
-namespace Validator {
-void ValidateNonEmpty(std::optional<std::string>& opt)
-{
-    if (opt.has_value() && opt.value().empty()) {
-        opt.reset();
-    }
-}
-} // namespace Validator
-namespace Converter {
-template<>
-inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
-{
-    dst = src->antialias;
-}
-} // namespace OHOS::Ace::NG::Converter
-} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRenderingContext2DAccessor {
+const Ark_Number ARK_ERROR_VALUE = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(-1);
+const auto EMPTY_STRING = "";
+const Ark_String ARK_EMPTY_STRING = Converter::ArkValue<Ark_String>(EMPTY_STRING, Converter::FC);
+
 void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl *>(peer);
@@ -63,13 +37,10 @@ void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
 Ark_CanvasRenderingContext2D CtorImpl(const Opt_RenderingContextSettings* settings)
 {
     CHECK_NULL_RETURN(settings, nullptr);
-
     auto peerImpl = Referenced::MakeRefPtr<CanvasRenderingContext2DPeerImpl>();
     peerImpl->IncRefCount();
-    auto antialias = Converter::OptConvert<bool>(*settings);
-    if (antialias) {
-        peerImpl->SetAntiAlias(*antialias);
-    }
+    auto optSettings = Converter::OptConvert<Ark_RenderingContextSettings>(*settings);
+    peerImpl->SetOptions(optSettings);
     return reinterpret_cast<CanvasRenderingContext2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -80,19 +51,15 @@ Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
                          const Opt_String* type,
                          const Opt_Float32* quality)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, ARK_EMPTY_STRING);
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(type, {});
-    CHECK_NULL_RETURN(quality, {});
+    CHECK_NULL_RETURN(peerImpl, ARK_EMPTY_STRING);
+    CHECK_NULL_RETURN(type, ARK_EMPTY_STRING);
+    CHECK_NULL_RETURN(quality, ARK_EMPTY_STRING);
     auto optType = Converter::OptConvert<std::string>(*type);
-    Validator::ValidateNonEmpty(optType);
     auto optQuality = Converter::OptConvert<float>(*quality);
-    Validator::ValidateByRange(optQuality, IMAGE_QUALITY_MIN, IMAGE_QUALITY_MAX);
-    auto imageType = optType.value_or(IMAGE_TYPE_DEFAULT);
-    auto imageQuality = optQuality.value_or(IMAGE_QUALITY_DEFAULT);
-    auto dataURL = peerImpl->ToDataURL(imageType, imageQuality);
-    return Converter::ArkValue<Ark_String>(dataURL);
+    auto result = peerImpl->ToDataURL(optType, optQuality);
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
@@ -102,13 +69,13 @@ void StartImageAnalyzerImpl(Ark_VMContext vmContext,
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerStartImageAnalyzer(config, outputArgumentForReturningPromise);
+    peerImpl->StartImageAnalyzer(config, outputArgumentForReturningPromise);
 }
 void StopImageAnalyzerImpl(Ark_CanvasRenderingContext2D peer)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerStopImageAnalyzer();
+    peerImpl->StopImageAnalyzer();
 }
 void OnOnAttachImpl(Ark_VMContext vmContext,
                     Ark_CanvasRenderingContext2D peer,
@@ -153,14 +120,14 @@ void OffOnDetachImpl(Ark_VMContext vmContext,
 Ark_Number GetHeightImpl(Ark_CanvasRenderingContext2D peer)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, ::ERROR_VALUE);
-    return Converter::ArkValue<Ark_Number>(peerImpl->TriggerGetHeight());
+    CHECK_NULL_RETURN(peerImpl, ARK_ERROR_VALUE);
+    return Converter::ArkValue<Ark_Number>(peerImpl->GetHeight());
 }
 Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    return Converter::ArkValue<Ark_Number>(peerImpl->TriggerGetWidth());
+    CHECK_NULL_RETURN(peerImpl, ARK_ERROR_VALUE);
+    return Converter::ArkValue<Ark_Number>(peerImpl->GetWidth());
 }
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {

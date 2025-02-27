@@ -15,162 +15,177 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 
-
-#include "base/geometry/animatable_dimension.h"
-#include "base/geometry/rect.h"
-#include "base/image/pixel_map.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "base/utils/string_utils.h"
-#include "core/common/container_consts.h"
+#include "core/components_ng/pattern/canvas/rendering_context_2d_model.h"
+#include "canvas_path_peer_impl.h"
 #include "arkoala_api_generated.h"
-#include "canvas_path_accessor_peer_impl.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
-#include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
-#include "core/components/common/properties/paint_state.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-struct ImageSizeExt {
-    ImageSizeExt()
-    {
-        x = std::nullopt;
-        y = std::nullopt;
-        dirtyX = std::nullopt;
-        dirtyY = std::nullopt;
-        dirtyWidth = std::nullopt;
-        dirtyHeight = std::nullopt;
-    }
-    ~ImageSizeExt() = default;
-    std::optional<double> x;
-    std::optional<double> y;
-    std::optional<double> dirtyX;
-    std::optional<double> dirtyY;
-    std::optional<double> dirtyWidth;
-    std::optional<double> dirtyHeight;
-};
+const auto IMAGE_FLAG_0 = 0;
+const auto IMAGE_FLAG_1 = 1;
+const auto IMAGE_FLAG_2 = 2;
 class CanvasRendererPeerImpl : public CanvasPathPeerImpl {
 public:
-    CanvasRendererPeerImpl();
-    ~CanvasRendererPeerImpl() override = default;
+    enum class SizeParam {
+        TWO_ARGS, FOUR_ARGS, SIX_ARGS, EIGHT_ARGS
+    };
+    struct DrawImageParam {
+        double sx;
+        double sy;
+        double sWidth;
+        double sHeight;
+        double dx;
+        double dy;
+        double dWidth;
+        double dHeight;
+        SizeParam size;
+    };
+    struct PutImageDataParam {
+        std::optional<Dimension> x;
+        std::optional<Dimension> y;
+        std::optional<Dimension> dirtyX;
+        std::optional<Dimension> dirtyY;
+        std::optional<Dimension> dirtyWidth;
+        std::optional<Dimension> dirtyHeight;
+        SizeParam size;
+    };
+    struct LinearGradientParam {
+        double x0;
+        double y0;
+        double x1;
+        double y1;
+    };
+    struct RadialGradientParam {
+        double x0;
+        double y0;
+        double r0;
+        double x1;
+        double y1;
+        double r1;
+    };
+    struct ConicGradientParam {
+        double x;
+        double y;
+        double startAngle;
+    };
 
-    void TriggerBeginPathImpl();
-    void TriggerDrawImageImpl(const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& info);
-    void TriggerStroke0Impl();
-    void TriggerRestoreImpl();
-    void TriggerSaveImpl();
-    void TriggerResetTransformImpl();
-    void TriggerSaveLayerImpl();
-    void TriggerRestoreLayerImpl();
-    void TriggerResetImpl();
-    std::optional<LineDashParam> TriggerGetLineDashImpl();
-    void TriggerSetLineDashImpl(const std::vector<double>& segments);
-    void TriggerClearRectImpl(const Rect& rect);
-    void TriggerFillRectImpl(const Rect& rect);
-    void TriggerStrokeRectImpl(const Rect& rect);
-    void TriggerRotateImpl(double angle);
-    void TriggerScaleImpl(double x, double y);
-    void TriggerTranslateImpl(double x, double y);
-    void TriggerSetGlobalAlphaImpl(double alpha);
-    void TriggerFillTextImpl(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void TriggerStrokeTextImpl(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void TriggerSetTransformImpl(const TransformParam& param);
-    void TriggerTransformImpl(const TransformParam& param);
-    void TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type);
-    void TriggerSetFilterImpl(const std::string& filterStr);
-    void TriggerSetImageSmoothingEnabledImpl(bool imageSmoothingEnabled);
-    double TriggerGetLineDashOffsetImpl();
-    void TriggerSetLineDashOffsetImpl(double dash);
-    void TriggerSetLineWidthImpl(double width);
-    void TriggerSetMiterLimitImpl(double limit);
-    void TriggerSetShadowBlurImpl(double blur);
-    void TriggerSetShadowColorImpl(Color& color);
-    void TriggerSetShadowOffsetXImpl(double offsetX);
-    void TriggerSetShadowOffsetYImpl(double offsetY);
-    void TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path);
-    #ifdef PIXEL_MAP_SUPPORTED
-    void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap);
-    #else
-    void TriggerTransferFromImageBitmapImpl(const double width, const double height);
-    #endif
-    void TriggerSetFillStyleImpl(const Color& color);
-    void TriggerSetFillStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
-    void TriggerSetFillStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
-    void TriggerSetStrokeStyleImpl(const Color& color);
-    void TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
-    void TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
-    void TriggerArcImpl(double x,
-                        double y,
-                        double radius,
-                        double startAngle,
-                        double endAngle,
-                        bool counterclockwise) override;
-    void TriggerArcToImpl(double x1, double y1, double x2, double y2, double radius) override;
-    void TriggerBezierCurveToImpl(double cp1x,
-                                  double cp1y,
-                                  double cp2x,
-                                  double cp2y,
-                                  double x,
-                                  double y) override;
-    void TriggerClosePathImpl() override;
-    void TriggerEllipseImpl(double x,
-                            double y,
-                            double radiusX,
-                            double radiusY,
-                            double rotation,
-                            double startAngle,
-                            double endAngle,
-                            bool counterclockwise) override;
-    void TriggerLineToImpl(double x, double y) override;
-    void TriggerMoveToImpl(double x, double y) override;
-    void TriggerQuadraticCurveToImpl(double cpx, double cpy, double x, double y) override;
-    void TriggerRectImpl(double x, double y, double w, double h) override;
-    void SetFont(std::string fontStr);
-    std::shared_ptr<OHOS::Ace::Gradient> CreateLinearGradient(
-        const double x0, const double y0, const double x1, const double y1);
-    std::shared_ptr<OHOS::Ace::Gradient> CreateRadialGradient(const std::vector<double> params);
-    std::shared_ptr<OHOS::Ace::Gradient> CreateConicGradient(const double startAngle, const double x, const double y);
-    void ClearImageData();
-    ImageSize GetImageSize(const double& x, const double& y, const double& width, const double& height);
-    std::unique_ptr<Ace::ImageData> GetImageData(const ImageSize& imageSize);
-    void GetPixelMap(const ImageSize& imageSize);
-    double GetDimension(const Dimension& value, const bool force = false);
-    void PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext);
-    std::optional<OHOS::Ace::TextMetrics> GetTextMetrics(const std::string& text);
-    std::optional<TransformParam> GetTransform();
-    void SetPixelMap(RefPtr<PixelMap> pixelMap);
+    CanvasRendererPeerImpl();
+    ~CanvasRendererPeerImpl() override;
+
+    static RefPtr<CanvasPath2D> MakePath2D();
+    void DrawImage(ImageBitmapPeer* bitmap, const DrawImageParam& params);
+    void DrawSvgImage(ImageBitmapPeer* bitmap, const DrawImageParam& params);
+    void DrawPixelMap(PixelMapPeer* pixelMap, const DrawImageParam& params);
+    void BeginPath();
+    void Clip(const std::optional<std::string>& ruleStr);
+    void Clip(const std::optional<std::string>& ruleStr, const RefPtr<CanvasPath2D>& path);
+    void Fill(const std::optional<std::string>& ruleStr);
+    void Fill(const std::optional<std::string>& ruleStr, const RefPtr<CanvasPath2D>& path);
+    void Stroke();
+    void Stroke(const RefPtr<CanvasPath2D>& path);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateLinearGradient(double x0, double y0, double x1, double y1);
+    void CreatePattern(
+        ImageBitmapPeer* bitmap, CanvasPatternPeer* canvasPattern, std::optional<std::string>& repetition);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateRadialGradient(const RadialGradientParam& params);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateConicGradient(double x, double y, double startangle);
+    void CreateImageData(
+        std::vector<uint8_t>& vbuffer, double fWidth, double fHeight, uint32_t& width, uint32_t& height);
+    void CreateImageData(std::vector<uint8_t>& vbuffer, uint32_t& width, uint32_t& height);
+    void GetImageData(std::vector<uint8_t>& vbuffer, Ace::ImageSize& imageSize, uint32_t& width, uint32_t& height);
+    RefPtr<Ace::PixelMap> GetPixelMap(const double x, const double y, const double width, const double height);
+    void PutImageData(Ace::ImageData& src, const PutImageDataParam& params);
+    std::vector<double> GetLineDash();
+    void SetLineDash(const std::vector<double>& segments);
+    void ClearRect(const double x, const double y, const double width, const double height);
+    void FillRect(const double x, const double y, const double width, const double height);
+    void StrokeRect(const double x, const double y, const double width, const double height);
+    void Restore();
+    void Save();
+    void FillText(const std::string& text, double x, double y, const std::optional<float>& optWidth);
+    void MeasureText(Ace::TextMetrics& textMetrics, const std::string& text);
+    void StrokeText(const std::string& text, double x, double y, const std::optional<float>& optWidth);
+    void GetTransform(Matrix2DPeer* matrix);
+    void ResetTransform();
+    void Rotate(double angle);
+    void Scale(double x, double y);
+    void SetTransform(TransformParam& param);
+    void SetTransform(const std::optional<Matrix2DPeer*>& optMatrix);
+    void SetTransform(unsigned int id, const TransformParam& transform);
+    void Transform(TransformParam& param);
+    void Translate(double x, double y);
+    void SetPixelMap(const RefPtr<Ace::PixelMap>& pixelMap);
+    void TransferFromImageBitmap(ImageBitmapPeer* bitmap);
+    void SaveLayer();
+    void RestoreLayer();
+    void Reset();
+    void SetGlobalAlpha(double alpha);
+    void SetGlobalCompositeOperation(const std::string& compositeStr);
+    void SetFillStyle(const std::string& colorStr);
+    void SetFillStyle(const uint32_t colorNum);
+    void SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient);
+    void SetFillStyle(const int32_t id);
+    void SetStrokeStyle(const std::string& colorStr);
+    void SetStrokeStyle(const uint32_t colorNum);
+    void SetStrokeStyle(const std::shared_ptr<Ace::Gradient>& gradient);
+    void SetStrokeStyle(const int32_t id);
+    void SetFilter(const std::string& filterStr);
+    void SetImageSmoothingEnabled(bool enabled);
     void SetImageSmoothingQuality(const std::string& quality);
-    void SetLineCap(const std::string& quality);
-    void SetLineJoin(const std::string& quality);
-    void Clip(const Ace::CanvasFillRule& fillRule);
-    void Clip(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path);
-    void Fill(const Ace::CanvasFillRule& fillRule);
-    void Fill(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path);
-    void SetTextDirection(const Ace::TextDirection& direction);
-    void SetTextAlign(const TextAlign& align);
-    void SetTextBaseline(const TextBaseline& baseline);
-    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas) {}
-    void SetInstanceId(int32_t instanceId) {}
-    void SetUnit(CanvasUnit unit)
+    void SetLineCap(const std::string& capStr);
+    void SetLineDashOffset(double lineDashOffset);
+    void SetLineJoin(const std::string& joinStr);
+    void SetLineWidth(double lineWidth);
+    void SetMiterLimit(double limit);
+    void SetShadowBlur(double blur);
+    void SetShadowColor(const std::string& colorStr);
+    void SetShadowOffsetX(double offsetX);
+    void SetShadowOffsetY(double offsetY);
+    void SetTextDirection(const std::string& directionStr);
+    void SetFont(std::string fontStr);
+    void SetTextAlign(const std::string& alignStr);
+    void SetTextBaseline(const std::string& baselineStr);
+
+    // inheritance
+    void ResetPaintState();
+    void SetAntiAlias();
+    void SetDensity();
+    std::string ToDataURL(const std::optional<std::string>& optType, const std::optional<float>& optQuality);
+
+    void SetCanvasPattern(const RefPtr<AceType>& canvas)
     {
-        unit_ = unit;
-    }
-    CanvasUnit GetUnit()
-    {
-        return unit_;
-    }
-    void SetDensity()
-    {
-        double density = GetDensity(true);
-        if (!pattern_) {
-            LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontFamilies pattern not bound to component.");
+        CHECK_NULL_VOID(renderingContext2DModel_);
+        CHECK_NULL_VOID(canvas);
+        renderingContext2DModel_->SetPattern(canvas);
+        if (isInitializeShadow_) {
             return;
         }
-        pattern_->SetDensity(density);
+        isInitializeShadow_ = true;
+        renderingContext2DModel_->SetShadowColor(Color::TRANSPARENT);
     }
-    inline double GetDensity(bool useSystemDensity = false)
+
+    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
+    {
+        offscreenPattern_ = offscreenCanvas;
+        CHECK_NULL_VOID(renderingContext2DModel_);
+        CHECK_NULL_VOID(offscreenCanvas);
+        renderingContext2DModel_->SetPattern(offscreenCanvas);
+        if (isOffscreenInitializeShadow_) {
+            return;
+        }
+        isOffscreenInitializeShadow_ = true;
+        renderingContext2DModel_->SetShadowColor(Color::TRANSPARENT);
+    }
+
+    void SetAnti(bool anti)
+    {
+        anti_ = anti;
+    }
+
+    bool GetAnti()
+    {
+        return anti_;
+    }
+
+    double GetDensity(bool useSystemDensity = false)
     {
         if (useSystemDensity) {
             return !NearZero(density_) ? density_ : 1.0;
@@ -178,38 +193,40 @@ public:
             return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
         }
     }
-    RefPtr<CanvasPattern> GetCanvasPattern()
+
+    void SetInstanceId(int32_t id)
     {
-        return pattern_;
-    }
-    void SetCanvasPattern(const RefPtr<AceType>& pattern)
-    {
-        CHECK_NULL_VOID(pattern);
-        auto canvasPattern = AceType::DynamicCast<CanvasPattern>(pattern);
-        CHECK_NULL_VOID(canvasPattern);
-        if (pattern_ == canvasPattern) {
-            return;
-        }
-        pattern_ = canvasPattern;
+        instanceId_ = id;
     }
 
-public:
-    Ace::ImageData imageData;
-    std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> patterns;
-    uint32_t patternCount = 0;
+    // test support
+    void SetRenderingContext2DModel(const RefPtr<OHOS::Ace::RenderingContext2DModel>& renderingContext2DModel)
+    {
+        renderingContext2DModel_ = renderingContext2DModel;
+    }
 
 protected:
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern> pattern_;
+    OHOS::Ace::RefPtr<OHOS::Ace::RenderingContext2DModel> renderingContext2DModel_;
+    OHOS::Ace::RefPtr<OHOS::Ace::AceType> offscreenPattern_;
+    bool anti_ = false;
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
-    void ParseImageData(const ImageSizeExt& ext);
+    void ExtractInfoToImage(Ace::CanvasImage& image, const DrawImageParam& params, bool isImage);
     Dimension GetDimensionValue(const std::string& str);
+    Dimension GetDimensionValue(const Dimension& dimension);
+    Ace::Pattern GetPattern(unsigned int id);
+    std::shared_ptr<Ace::Pattern> GetPatternPtr(int32_t id);
+    void ParseImageData(Ace::ImageData& imageData, const PutImageDataParam& params);
 
-    OHOS::Ace::CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    static std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> pattern_;
+    static unsigned int patternCount_;
     double density_ = 1.0;
-    int32_t densityCallbackId_ = 0;
     std::vector<OHOS::Ace::PaintState> savePaintState_;
     OHOS::Ace::PaintState paintState_;
+    bool isInitializeShadow_ = false;
+    bool isOffscreenInitializeShadow_ = false;
+    int32_t densityCallbackId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

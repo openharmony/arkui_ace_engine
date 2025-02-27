@@ -13,41 +13,49 @@
  * limitations under the License.
  */
 
-#include "canvas_rendering_context2d_peer_impl.h"
+#include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 #include "core/interfaces/native/utility/peer_utils.h"
-
-namespace {
-constexpr auto ERROR_VALUE = -1;
-constexpr auto EMPTY_STRING = "";
-
-} // namespace
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "canvas_rendering_context2d_peer_impl.h"
+#include "image_bitmap_peer_impl.h"
+#include "rendering_context_settings_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-
-void CanvasRenderingContext2DPeerImpl::SetCanvasPattern(const RefPtr<AceType>& pattern)
+CanvasRenderingContext2DPeerImpl::CanvasRenderingContext2DPeerImpl()
 {
-    CHECK_NULL_VOID(pattern);
-    auto canvasPattern = AceType::DynamicCast<CanvasPattern>(pattern);
-    CHECK_NULL_VOID(canvasPattern);
-    if (pattern_ == canvasPattern) {
-        return;
+#ifdef NG_BUILD
+    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+        auto onAttach = [weakCtx = WeakClaim(this)]() {
+            auto ctx = weakCtx.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->OnAttachToCanvas();
+        };
+        auto onDetach = [weakCtx = WeakClaim(this)]() {
+            auto ctx = weakCtx.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->OnDetachFromCanvas();
+        };
+        auto canvasRenderingContext2DModel =
+            AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+        CHECK_NULL_VOID(canvasRenderingContext2DModel);
+        canvasRenderingContext2DModel->SetOnAttach(onAttach);
+        canvasRenderingContext2DModel->SetOnDetach(onDetach);
+    } else {
+        renderingContext2DModel_ = nullptr;
     }
-    auto onAttach = [weakCtx = WeakClaim(this)]() {
-        auto ctx = weakCtx.Upgrade();
-        CHECK_NULL_VOID(ctx);
-        ctx->OnAttachToCanvas();
-    };
-    auto onDetach = [weakCtx = WeakClaim(this)]() {
-        auto ctx = weakCtx.Upgrade();
-        CHECK_NULL_VOID(ctx);
-        ctx->OnDetachFromCanvas();
-    };
-    pattern_ = canvasPattern;
-    pattern_->SetOnContext2DAttach(onAttach);
-    pattern_->SetOnContext2DDetach(onDetach);
-    pattern_->AttachRenderContext();
+#endif
 }
-
+void CanvasRenderingContext2DPeerImpl::SetOptions(const std::optional<RenderingContextSettingsPeer*>& optSettings)
+{
+    if (optSettings && optSettings.value() && optSettings.value()->antialias) {
+        bool anti = optSettings.value()->antialias.value();
+        SetAnti(anti);
+    }
+}
 void CanvasRenderingContext2DPeerImpl::OnAttachToCanvas()
 {
     ContainerScope scope(instanceId_);
@@ -57,7 +65,6 @@ void CanvasRenderingContext2DPeerImpl::OnAttachToCanvas()
         }
     }
 }
-
 void CanvasRenderingContext2DPeerImpl::OnDetachFromCanvas()
 {
     ContainerScope scope(instanceId_);
@@ -67,14 +74,12 @@ void CanvasRenderingContext2DPeerImpl::OnDetachFromCanvas()
         }
     }
 }
-
 CanvasRenderingContext2DPeerImpl::CanvasCallbackIterator CanvasRenderingContext2DPeerImpl::FindCallbackInList(
     const CanvasCallbackList& callbackFuncPairList,
     const CallbackHelper<Callback_Void>& callback) const
 {
     return std::find(callbackFuncPairList.begin(), callbackFuncPairList.end(), callback);
 }
-
 void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(const CallbackHelper<Callback_Void>& callback,
     const CanvasCallbackType& type)
 {
@@ -98,7 +103,6 @@ void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(const CallbackHelp
         }
     }
 }
-
 void CanvasRenderingContext2DPeerImpl::AddCallbackToList(CallbackHelper<Callback_Void> &&callback,
     const CanvasCallbackType& type)
 {
@@ -114,21 +118,18 @@ void CanvasRenderingContext2DPeerImpl::AddCallbackToList(CallbackHelper<Callback
         }
     }
 }
-
 void CanvasRenderingContext2DPeerImpl::On(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type)
 {
     AddCallbackToList(std::move(callback), type);
 }
-
 void CanvasRenderingContext2DPeerImpl::Off(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type)
 {
     DeleteCallbackFromList(callback, type);
 }
-
-void CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
+void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
     const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(pattern_);
+    CHECK_NULL_VOID(renderingContext2DModel_);
     CHECK_NULL_VOID(config);
     CHECK_NULL_VOID(outputArgumentForReturningPromise);
     auto onError = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
@@ -164,46 +165,45 @@ void CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(const Ark_Image
         ctx->isImageAnalyzing_ = false;
     };
 
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
     isImageAnalyzing_ = true;
-    pattern_->StartImageAnalyzer(aceConfig, onAnalyzed);
+    canvasRenderingContext2DModel->StartImageAnalyzer(aceConfig, onAnalyzed);
 }
-
-void CanvasRenderingContext2DPeerImpl::TriggerStopImageAnalyzer()
+void CanvasRenderingContext2DPeerImpl::StopImageAnalyzer()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerStopImageAnalyzer pattern "
-            "not bound to component.");
-        return;
-    }
-    pattern_->StopImageAnalyzer();
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    ContainerScope scope(instanceId_);
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    canvasRenderingContext2DModel->StopImageAnalyzer();
 }
-
-double CanvasRenderingContext2DPeerImpl::TriggerGetHeight()
+double CanvasRenderingContext2DPeerImpl::GetHeight()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetHeight pattern "
-            "not bound to component.");
-        return ::ERROR_VALUE;
+    double height = 0.0;
+    CHECK_NULL_RETURN(renderingContext2DModel_, height);
+    auto renderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_RETURN(renderingContext2DModel_, height);
+    renderingContext2DModel->GetHeight(height);
+    double density = GetDensity();
+    if (density == 0) {
+        return height;
     }
-    return PipelineBase::Px2VpWithCurrentDensity(pattern_->GetHeight());
+    height /= density;
+    return height;
 }
-
-double CanvasRenderingContext2DPeerImpl::TriggerGetWidth()
+double CanvasRenderingContext2DPeerImpl::GetWidth()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetWidth pattern "
-            "not bound to component.");
-        return ::ERROR_VALUE;
+    double width = 0.0;
+    CHECK_NULL_RETURN(renderingContext2DModel_, width);
+    auto renderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_RETURN(renderingContext2DModel_, width);
+    renderingContext2DModel->GetWidth(width);
+    double density = GetDensity();
+    if (density == 0) {
+        return width;
     }
-    return PipelineBase::Px2VpWithCurrentDensity(pattern_->GetWidth());
-}
-
-std::string CanvasRenderingContext2DPeerImpl::ToDataURL(const std::string& type, float& quality)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetWidth pattern not bound to component.");
-        return EMPTY_STRING;
-    }
-    return pattern_->ToDataURL(type, quality);
+    width /= density;
+    return width;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

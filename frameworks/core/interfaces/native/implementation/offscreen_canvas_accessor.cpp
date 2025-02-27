@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "offscreen_canvas_peer.h"
+#include "offscreen_canvas_rendering_context2d_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -25,14 +26,14 @@ const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanv
 
 namespace OffscreenCanvasAccessor {
 const auto EMPTY_STRING = "";
-const Ark_String ARK_EMPTY_STRING = Converter::ArkValue<Ark_String>(EMPTY_STRING);
+const Ark_String ARK_EMPTY_STRING = Converter::ArkValue<Ark_String>(EMPTY_STRING, Converter::FC);
 const double ERROR_VALUE = -1;
 const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(ERROR_VALUE);
 
 void DestroyPeerImpl(Ark_OffscreenCanvas peer)
 {
     if (peer) {
-        peer->Destructor();
+        peer->RemoveOptions();
         delete peer;
     }
 }
@@ -44,8 +45,7 @@ Ark_OffscreenCanvas CtorImpl(const Ark_Number* width,
     auto cw = static_cast<double>(Converter::Convert<float>(*width));
     auto ch = static_cast<double>(Converter::Convert<float>(*height));
     auto peer = new OffscreenCanvasPeer();
-    std::vector<double> params = { cw, ch };
-    peer->Constructor(params);
+    peer->SetOptions(cw, ch);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

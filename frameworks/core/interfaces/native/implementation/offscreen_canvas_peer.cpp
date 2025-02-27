@@ -14,26 +14,27 @@
  */
 
 #include "offscreen_canvas_peer.h"
+#include "core/common/container_scope.h"
+#include "image_bitmap_peer_impl.h"
+#include "rendering_context_settings_peer.h"
 
-void OffscreenCanvasPeer::Constructor(const std::vector<double>& params)
+void OffscreenCanvasPeer::SetOptions(const double cw, const double ch)
 {
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
     double density = GetDensity();
-    double fWidth = params[0] * density;
-    double fHeight = params[1] * density;
+    double fWidth = cw * density;
+    double fHeight = ch * density;
     SetWidth(fWidth);
     SetHeight(fHeight);
     offscreenCanvasPattern = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::OffscreenCanvasPattern>(
         static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
     offscreenCanvasPattern->IncRefCount();
 }
-
-void OffscreenCanvasPeer::Destructor()
+void OffscreenCanvasPeer::RemoveOptions()
 {
     CHECK_NULL_VOID(offscreenCanvasPattern);
     offscreenCanvasPattern->DecRefCount();
 }
-
 ImageBitmapPeer* OffscreenCanvasPeer::TransferToImageBitmap(ImageBitmapPeer* bitmap)
 {
     CHECK_NULL_RETURN(offscreenCanvasPattern, nullptr);
@@ -41,7 +42,7 @@ ImageBitmapPeer* OffscreenCanvasPeer::TransferToImageBitmap(ImageBitmapPeer* bit
     CHECK_NULL_RETURN(bitmap, nullptr);
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
     auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
-    bitmap->LoadImage(pixelMap);
+    ImageBitmapPeer::LoadImageConstructor(bitmap, pixelMap);
 #ifndef PIXEL_MAP_SUPPORTED
     auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width, height);
     if (imageData == nullptr) {
@@ -54,7 +55,6 @@ ImageBitmapPeer* OffscreenCanvasPeer::TransferToImageBitmap(ImageBitmapPeer* bit
     bitmap->SetHeight(GetHeight());
     return bitmap;
 }
-
 OffscreenCanvasRenderingContext2DPeer* OffscreenCanvasPeer::GetContext2D(
     OffscreenCanvasRenderingContext2DPeer* offscreenCanvasContextPeer,
     RenderingContextSettingsPeer* offscreenCanvasSettingsPeer)
@@ -75,28 +75,38 @@ OffscreenCanvasRenderingContext2DPeer* OffscreenCanvasPeer::GetContext2D(
     offscreenCanvasContext =
         reinterpret_cast<OHOS::Ace::NG::GeneratedModifier::OffscreenCanvasRenderingContext2DPeerImpl*>(
             offscreenCanvasContextPeer);
+    CHECK_NULL_RETURN(offscreenCanvasContext, nullptr);
     offscreenCanvasContext->SetInstanceId(OHOS::Ace::Container::CurrentId());
     offscreenCanvasContext->SetOffscreenPattern(offscreenCanvasPattern);
     offscreenCanvasContext->AddOffscreenCanvasPattern(offscreenCanvasPattern);
     offscreenCanvasContext->SetWidth(width);
     offscreenCanvasContext->SetHeight(height);
-    if (offscreenCanvasSettingsPeer) {
-        offscreenCanvasSettings = offscreenCanvasSettingsPeer;
+    offscreenCanvasSettings = offscreenCanvasSettingsPeer;
+    if (offscreenCanvasSettings && offscreenCanvasContext) {
+        if (offscreenCanvasSettings->antialias) {
+            bool anti = offscreenCanvasSettings->antialias.value();
+            offscreenCanvasContext->SetAnti(anti);
+            offscreenCanvasContext->SetAntiAlias();
+        }
     }
     offscreenCanvasContext->SetUnit(GetUnit());
     offscreenCanvasContext->SetDensity();
     return offscreenCanvasContextPeer;
 }
-
 double OffscreenCanvasPeer::OnGetHeight(double errValue)
 {
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
     if (isDetached) {
         return errValue;
     }
-    return GetHeight() / GetDensity();
+    auto density = GetDensity();
+    auto fHeight = GetHeight();
+    if (density == 0) {
+        return errValue;
+    }
+    fHeight /= density;
+    return fHeight;
 }
-
 void OffscreenCanvasPeer::OnSetHeight(double value)
 {
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
@@ -114,16 +124,20 @@ void OffscreenCanvasPeer::OnSetHeight(double value)
         }
     }
 }
-
 double OffscreenCanvasPeer::OnGetWidth(double errValue)
 {
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
     if (isDetached) {
         return errValue;
     }
-    return GetWidth() / GetDensity();
+    auto density = GetDensity();
+    auto fWidth = GetWidth();
+    if (density == 0) {
+        return errValue;
+    }
+    fWidth /= density;
+    return fWidth / density;
 }
-
 void OffscreenCanvasPeer::OnSetWidth(double value)
 {
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
