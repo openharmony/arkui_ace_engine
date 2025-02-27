@@ -22,46 +22,8 @@
 
 namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
 
+
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomObject& dst, const Nav::ExternalData& src)
-{
-    if (src) {
-        dst = src->data_;
-    }
-}
-void AssignArkValue(Ark_NavPathInfo& dst, const Nav::PathInfo& src)
-{
-#ifdef WRONG_TYPE
-    dst.name = ArkValue<Ark_String>(src.name_);
-    dst.param = ArkValue<Opt_CustomObject>(src.param_);
-    dst.onPop = ArkValue<Opt_Callback_PopInfo_Void>();
-    dst.isEntry = ArkValue<Opt_Boolean>(src.isEntry_);
-#endif
-}
-
-template<>
-Nav::ExternalData Convert(const Ark_CustomObject& src)
-{
-    return Referenced::MakeRefPtr<Nav::ExternalDataKeeper>(src);
-}
-
-template<>
-Nav::PathInfo Convert(const Ark_NavPathInfo& src)
-{
-#ifdef WRONG_TYPE
-    auto name = Convert<std::string>(src.name);
-    auto isEntryOpt = OptConvert<bool>(src.isEntry);
-    auto paramOpt = OptConvert<Nav::ExternalData>(src.param);
-    Nav::OnPopCallback onPop;
-    if (auto onPopOpt = OptConvert<Callback_PopInfo_Void>(src.onPop); onPopOpt) {
-        onPop = *onPopOpt;
-    }
-    return Nav::PathInfo(name, paramOpt.value_or(nullptr), onPop, isEntryOpt.value_or(false));
-#else
-    return {};
-#endif
-}
-
 template<>
 void AssignCast(std::optional<Nav::LaunchMode>& dst, const Ark_LaunchMode& src)
 {
@@ -316,11 +278,9 @@ Opt_NavPathInfo Pop0Impl(Ark_NavPathStack peer,
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalid);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
-    navStack->Nav::PathStack::Pop(Nav::PopResultType(), convAnimated);
-    // convert the result of above to Ark_NavPathInfo should be here
-    LOGE("NavPathStackAccessor::Pop0Impl - the result type does not match to documentation");
+    auto pathInfo = navStack->Nav::PathStack::Pop(Nav::PopResultType(), convAnimated);
     peer->InvokeUpdateCallback();
-    return invalid;
+    return Converter::ArkValue<Opt_NavPathInfo>(pathInfo);
 }
 Opt_NavPathInfo Pop1Impl(Ark_NavPathStack peer,
                          const Ark_CustomObject* result,
@@ -333,11 +293,9 @@ Opt_NavPathInfo Pop1Impl(Ark_NavPathStack peer,
     CHECK_NULL_RETURN(navStack, invalid);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     auto convResult = Converter::Convert<Nav::ExternalData>(*result);
-    navStack->Nav::PathStack::Pop(convResult, convAnimated);
-    // convert the result of above to Ark_NavPathInfo should be here
-    LOGE("NavPathStackAccessor::Pop1Impl - the result type does not match to documentation");
+    auto pathInfo = navStack->Nav::PathStack::Pop(convResult, convAnimated);
     peer->InvokeUpdateCallback();
-    return invalid;
+    return Converter::ArkValue<Opt_NavPathInfo>(pathInfo);
 }
 Ark_Int32 PopToName0Impl(Ark_NavPathStack peer,
                          const Ark_String* name,
