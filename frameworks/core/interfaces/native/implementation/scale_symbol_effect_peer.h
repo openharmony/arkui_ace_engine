@@ -19,8 +19,8 @@
 
 struct ScaleSymbolEffectPeer {
 public:
-    ScaleSymbolEffectPeer(OHOS::Ace::ScopeType scope, OHOS::Ace::CommonSubType direction) {
-        effectOptions = new OHOS::Ace::NG::SymbolEffectOptions(OHOS::Ace::SymbolEffectType::SCALE, scope, direction);
+    ScaleSymbolEffectPeer() {
+        effectOptions = new OHOS::Ace::NG::SymbolEffectOptions(OHOS::Ace::SymbolEffectType::SCALE);
     }
     OHOS::Ace::NG::SymbolEffectOptions* effectOptions;
 };

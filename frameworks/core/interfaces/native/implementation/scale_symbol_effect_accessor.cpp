@@ -31,7 +31,10 @@ Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
 {
     auto convScore = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(*scope);
     auto convDirection = Converter::Convert<std::optional<OHOS::Ace::CommonSubType>>(*direction);
-    return new ScaleSymbolEffectPeer(convScore.value(), convDirection.value());
+    auto peer = new ScaleSymbolEffectPeer();
+    peer->effectOptions->SetScopeType(convScore.value());
+    peer->effectOptions->SetCommonSubType(convDirection.value());
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
