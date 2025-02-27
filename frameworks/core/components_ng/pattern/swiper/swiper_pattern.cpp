@@ -99,6 +99,8 @@ constexpr float MASS = 1.0f;
 constexpr float STIFFNESS = 328.0f;
 constexpr float DAMPING = 34.0f;
 constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
+constexpr float MAX_INDICATOR_VELOCITY = 1200.0f;
+constexpr Dimension DEFAULT_INDICATOR_HEAD_DISTANCE = 14.0_vp;
 } // namespace
 
 SwiperPattern::SwiperPattern()
@@ -4008,6 +4010,34 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
     // use spring motion feature.
     // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
     return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, MASS, STIFFNESS, DAMPING);
+}
+
+RefPtr<Curve> SwiperPattern::GetIndicatorHeadCurve() const
+{
+    auto curve = GetCurve();
+    auto maxMotionVelocity = static_cast<float>(MAX_INDICATOR_VELOCITY / DEFAULT_INDICATOR_HEAD_DISTANCE.ConvertToPx());
+    auto motionVelocity = std::min(motionVelocity_, maxMotionVelocity);
+    if (!curve) {
+        return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity, MASS, STIFFNESS, DAMPING);
+    }
+
+    if (InstanceOf<SpringCurve>(curve)) {
+        auto springCurve = DynamicCast<SpringCurve>(curve);
+        if (springCurve->GetCurrentVelocity() < 0) {
+            return AceType::MakeRefPtr<SpringCurve>(
+                motionVelocity, springCurve->GetMass(), springCurve->GetStiffness(), springCurve->GetDamping());
+        }
+    }
+
+    if (InstanceOf<InterpolatingSpring>(curve)) {
+        auto interpolatingSpring = DynamicCast<InterpolatingSpring>(curve);
+        if (interpolatingSpring->GetVelocity() < 0) {
+            return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity, interpolatingSpring->GetMass(),
+                interpolatingSpring->GetStiffness(), interpolatingSpring->GetDamping());
+        }
+    }
+
+    return curve;
 }
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex)

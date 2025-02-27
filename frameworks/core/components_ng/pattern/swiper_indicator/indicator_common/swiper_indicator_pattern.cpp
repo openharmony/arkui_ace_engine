@@ -1155,7 +1155,7 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
 
     overlongDotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
     overlongDotIndicatorModifier_->SetLongPointHeadCurve(
-        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+        swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     overlongDotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
 
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
@@ -1179,7 +1179,7 @@ RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintM
 
     dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
     dotIndicatorModifier_->SetLongPointHeadCurve(
-        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+        swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     dotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
