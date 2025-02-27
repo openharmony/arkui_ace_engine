@@ -96,6 +96,7 @@ void SelectOverlayTestNg::SetUpTestCase()
 void SelectOverlayTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 std::vector<MenuOptionsParam> SelectOverlayTestNg::GetMenuOptionItems()
