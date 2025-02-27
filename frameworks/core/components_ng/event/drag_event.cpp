@@ -1478,6 +1478,8 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 callback(onPreDragStatus);
             },
             TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
+    } else if (preDragStatus == PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+        onPreDragFunc(preDragStatus);
     } else {
         onPreDragFunc(onPreDragStatus);
     }
