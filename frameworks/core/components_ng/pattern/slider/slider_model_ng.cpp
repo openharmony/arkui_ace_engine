@@ -452,9 +452,15 @@ void SliderModelNG::SetBlockColor(FrameNode* frameNode, const std::optional<Colo
         ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, frameNode);
     }
 }
-void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
+
+void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode,
+    const std::optional<Gradient>& value, bool isResourceColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, frameNode);
+    }
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
 

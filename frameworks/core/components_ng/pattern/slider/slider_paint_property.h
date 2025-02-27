@@ -50,7 +50,7 @@ public:
         Gradient colors;
         if (HasTrackBackgroundColor()) {
             colors = GetTrackBackgroundColor().value();
-            if (GetTrackBackgroundIsResourceColor()) {
+            if (GetTrackBackgroundIsResourceColor() && GetTrackBackgroundIsResourceColor().value() == true) {
                 return colors.GetColors()[0].GetLinearColor().ToColor().ColorToString();
             }
             return GradientToJson(colors);

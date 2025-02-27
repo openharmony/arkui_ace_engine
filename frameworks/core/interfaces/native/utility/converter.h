@@ -507,7 +507,6 @@ namespace Converter {
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> std::map<std::string, std::string> Convert(const Map_String_String& src);
     template<> std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src);
-    template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
@@ -607,6 +606,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src);
+    template<> void AssignCast (std::optional<Gradient>& dst, const Ark_LinearGradient& src);
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src);
     template<> void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src);

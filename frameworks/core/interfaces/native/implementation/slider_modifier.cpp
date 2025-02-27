@@ -151,8 +151,20 @@ void TrackColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("SliderModifier::TrackColorImpl is not implemented, incorrect LinearGradient passed!");
-    // LinearGradient issue https://gitee.com/nikolay-igotti/idlize/issues/IAW4DU
+
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_ResourceColor& value) {
+            auto colorOpt = Converter::OptConvert<Color>(value);
+            auto gradientOpt = colorOpt.has_value() ?
+                std::optional<Gradient>{SliderModelNG::CreateSolidGradient(colorOpt.value())} : std::nullopt;
+            SliderModelNG::SetTrackBackgroundColor(frameNode, gradientOpt, true);
+        },
+        [frameNode](const Ark_LinearGradient& value) {
+            auto gradientOpt = Converter::OptConvert<Gradient>(value);
+            SliderModelNG::SetTrackBackgroundColor(frameNode, gradientOpt);
+        },
+        []() {}
+    );
 }
 void SelectedColorImpl(Ark_NativePointer node,
                        const Ark_ResourceColor* value)

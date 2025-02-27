@@ -856,6 +856,38 @@ Gradient Convert(const Ark_LinearGradient& value)
 }
 
 template<>
+void AssignCast (std::optional<Gradient>& dst, const Ark_LinearGradient& src)
+{
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    auto peer = reinterpret_cast<LinearGradientPeer*>(src);
+    auto gradientColors = src->colorStops;
+
+    if (gradientColors.size() == 1) {
+        auto item = gradientColors.front();
+        if (!item.first.has_value()) {
+            return;
+        }
+        GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(item.first.value()));
+        gradientColor.SetDimension(item.second);
+        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
+    } else {
+        for (auto item : gradientColors) {
+            if (!item.first.has_value()) {
+                return;
+            }
+            GradientColor gradientColor;
+            gradientColor.SetLinearColor(LinearColor(item.first.value()));
+            gradientColor.SetDimension(item.second);
+            gradient.AddColor(gradientColor);
+        }
+    }
+    dst = gradient;
+}
+
+template<>
 std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
 {
     auto color = Converter::OptConvert<Color>(src.color);
