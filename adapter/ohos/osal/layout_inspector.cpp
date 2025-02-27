@@ -15,34 +15,18 @@
 
 #include "core/common/layout_inspector.h"
 
-#include <mutex>
-#include <string>
-
 #include "include/core/SkImage.h"
 #include "include/core/SkString.h"
-#include "include/core/SkColorSpace.h"
 #include "include/utils/SkBase64.h"
-
-#include "wm/window.h"
-#include "dm/display_manager.h"
 
 #include "connect_server_manager.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
-#include "base/json/json_util.h"
-#include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 

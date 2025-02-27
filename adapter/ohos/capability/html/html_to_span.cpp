@@ -15,28 +15,6 @@
 
 #include "html_to_span.h"
 
-#include "base/geometry/dimension.h"
-#include "base/image/file_uri_helper.h"
-#include "base/image/image_source.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utf_helper.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/image_provider/image_provider.h"
-#include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {

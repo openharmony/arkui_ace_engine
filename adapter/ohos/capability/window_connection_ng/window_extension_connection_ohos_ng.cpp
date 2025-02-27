@@ -14,7 +14,6 @@
  */
 #include "window_extension_connection_ohos_ng.h"
 
-#include "element_name.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
 #include "base/memory/ace_type.h"

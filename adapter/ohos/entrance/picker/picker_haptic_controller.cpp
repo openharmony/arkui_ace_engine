@@ -14,7 +14,6 @@
  */
 
 #include "adapter/ohos/entrance/picker/picker_haptic_controller.h"
-#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -17,8 +17,6 @@
 
 #include "display_manager.h"
 
-#include "core/common/display_info.h"
-
 namespace OHOS::Ace {
 RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo(int32_t displayId)
 {

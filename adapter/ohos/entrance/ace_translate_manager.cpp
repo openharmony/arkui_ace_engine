@@ -17,12 +17,9 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
-#include "base/json/json_util.h"
-#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+
 namespace OHOS::Ace {
 const std::set<std::string> UiTranslateManagerImpl::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene",
     "root", "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };

@@ -15,7 +15,6 @@
 
 #include "base/utils/system_properties.h"
 
-#include <shared_mutex>
 #include <regex>
 
 #include "display_info.h"
@@ -27,6 +26,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
+
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
 #endif

@@ -15,7 +15,6 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
-#include "input_manager.h"
 
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"

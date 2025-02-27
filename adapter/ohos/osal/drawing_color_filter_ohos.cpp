@@ -15,7 +15,6 @@
 
 #include "drawing_color_filter_ohos.h"
 
-#include "base/utils/utils.h"
 #include "color_filter_napi/js_color_filter.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 

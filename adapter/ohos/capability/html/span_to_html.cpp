@@ -19,8 +19,6 @@
 #include <unistd.h>
 
 #include "base/image/image_packer.h"
-#include "base/utils/utf_helper.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {

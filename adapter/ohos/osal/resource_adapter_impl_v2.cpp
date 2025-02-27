@@ -22,10 +22,9 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
-#include "base/utils/utils.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/components/theme/theme_attributes.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace {
 namespace {
 constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
