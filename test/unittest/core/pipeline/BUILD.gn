@@ -110,6 +110,7 @@ ace_unittest("pipeline_context_test_ng") {
     "mock_input_method_manager.cpp",
     "pipeline_context_test_ng.cpp",
     "pipeline_context_test_ng_new.cpp",
+    "pipeline_context_test_ng_two.cpp",
   ]
   extra_deps = []
   extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]
