@@ -530,6 +530,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOpacity(double opacity);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractDismiss();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSpringBack();
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractHitTestBehavior(int32_t hitTestMode);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractHoverEffect(int32_t hoverEffectValue);
 
 struct CJSetRotate {
     float dx;
