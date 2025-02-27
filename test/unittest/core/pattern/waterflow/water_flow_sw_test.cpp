@@ -119,10 +119,10 @@ HWTEST_F(WaterFlowSWTest, NoConvert001, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
-    std::mt19937 rng(1); // random number generator
-    std::uniform_int_distribution<int> dist(100, 300);
-    for (int i = 0; i < 45; ++i) {
-        CreateItemWithHeight(dist(rng));
+    vector<int> heights = {};
+    ASSERT_EQ(heights.size(), 45);
+    for (int i = 0; i < heights.size(); ++i) {
+        CreateItemWithHeight(heights);
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_16);
