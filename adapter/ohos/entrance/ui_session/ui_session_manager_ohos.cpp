@@ -309,6 +309,31 @@ void UiSessionManagerOhos::GetWebViewLanguage()
     }
 }
 
+void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback)
+{
+    pipelineContextPageNameCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::GetCurrentPageName()
+{
+    if (pipelineContextPageNameCallback_) {
+        auto result = pipelineContextPageNameCallback_();
+        SendCurrentPageName(result);
+    }
+}
+
+void UiSessionManagerOhos::SendCurrentPageName(const std::string result)
+{
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->SendCurrentPageName(result);
+        } else {
+            LOGW("report send current page name failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
 void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
 {
     processMap_[key] = id;
