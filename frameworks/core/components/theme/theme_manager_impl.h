@@ -45,6 +45,11 @@ public:
         themeConstants_->LoadTheme(themeId);
     }
 
+    int32_t GetSystemTheme() override
+    {
+        return currentThemeId_;
+    }
+
     void ParseSystemTheme() override
     {
         themeConstants_->ParseTheme();

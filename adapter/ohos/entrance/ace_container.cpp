@@ -87,6 +87,7 @@ const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
+const std::string THEME_JSON = "theme_config.json";
 
 #ifndef NG_BUILD
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
@@ -100,6 +101,30 @@ constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_
 const char* GetDeclarativeSharedLibrary()
 {
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
+}
+
+void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext)
+{
+    std::string themeJsonContent;
+    bool loadThemeJsonFlag = OHOS::Ace::Framework::GetAssetContentImpl(assetManager, THEME_JSON, themeJsonContent);
+    if (loadThemeJsonFlag) {
+        auto themeRootJson = JsonUtil::ParseJsonString(themeJsonContent);
+        if (themeRootJson) {
+            auto systemThemeId = themeRootJson->GetInt("systemTheme", -1);
+            if (systemThemeId != -1) {
+                auto themeManager = pipelineContext->GetThemeManager();
+                themeManager->LoadSystemTheme(systemThemeId);
+                auto checkTheme = themeManager->GetSystemTheme();
+                LOGI("get systemTheme id from json success, systemTheme id = %{public}d", checkTheme);
+            } else {
+                LOGW("get systemTheme id from json failed, not a number");
+            }
+        } else {
+            LOGW("get systemTheme id from json failed, parse theme json file failed");
+        }
+    } else {
+        LOGW("get systemTheme id from json failed, %{public}s not found", THEME_JSON.c_str());
+    }
 }
 
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
@@ -132,6 +157,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     ThemeConstants::InitDeviceType();
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext->SetThemeManager(themeManager);
+    LoadSystemThemeFromJson(assetManager, pipelineContext);
     themeManager->SetColorScheme(colorScheme);
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
