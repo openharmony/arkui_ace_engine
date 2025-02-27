@@ -1159,13 +1159,11 @@ void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnaly
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask(
-        [weak = WeakClaim(this)] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->CreateAnalyzerOverlay();
-        },
-        "ArkUICanvasStartImageAnalyzer", PriorityType::VIP);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateAnalyzerOverlay();
+    }, "ArkUICanvasStartImageAnalyzer");
 }
 
 void CanvasPattern::StopImageAnalyzer()

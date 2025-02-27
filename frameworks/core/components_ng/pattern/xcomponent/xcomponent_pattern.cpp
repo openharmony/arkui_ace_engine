@@ -1944,7 +1944,7 @@ void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onA
             CHECK_NULL_VOID(pattern);
             pattern->CreateAnalyzerOverlay();
         },
-        "ArkUIXComponentCreateAnalyzerOverlay", PriorityType::VIP);
+        "ArkUIXComponentCreateAnalyzerOverlay");
 }
 
 void XComponentPattern::StopImageAnalyzer()
