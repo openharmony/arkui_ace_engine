@@ -255,6 +255,7 @@ HWTEST_F(SheetPresentationTestNg, CheckBuilderChange001, TestSize.Level1)
     contentNode->MountToParent(scrollNode);
     scrollNode->MountToParent(sheetNode);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
@@ -1630,6 +1631,7 @@ HWTEST_F(SheetPresentationTestNg, IsScrollable, TestSize.Level1)
      * @tc.steps: step2. get sheetPattern and scrollPattern.
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
     auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
@@ -1673,24 +1675,30 @@ HWTEST_F(SheetPresentationTestNg, ChangeScrollHeight, TestSize.Level1)
         AceType::MakeRefPtr<SheetPresentationPattern>(03, "SheetPresentation", std::move(callback)));
     ASSERT_NE(sheetNode, nullptr);
     sheetNode->MountToParent(rootNode);
+    auto operationColumn =
+        FrameNode::CreateFrameNode("Column", 04, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(operationColumn, nullptr);
+    operationColumn->MountToParent(sheetNode);
     auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 04, AceType::MakeRefPtr<SheetDragBarPattern>());
+        FrameNode::CreateFrameNode("SheetDragBar", 05, AceType::MakeRefPtr<SheetDragBarPattern>());
     ASSERT_NE(dragBarNode, nullptr);
     dragBarNode->MountToParent(sheetNode);
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 05, AceType::MakeRefPtr<ScrollPattern>());
+    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 06, AceType::MakeRefPtr<ScrollPattern>());
     ASSERT_NE(scrollNode, nullptr);
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 06,
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 07,
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     ASSERT_NE(contentNode, nullptr);
     contentNode->MountToParent(scrollNode);
     scrollNode->MountToParent(sheetNode);
     
     /**
-     * @tc.steps: step2. get sheetPattern.
+     * @tc.steps: step2. Get sheetPattern and set scroll node.
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
+    sheetPattern->SetTitleBuilderNode(WeakPtr<FrameNode>(operationColumn));
 
     /**
      * @tc.steps: step3. init sheetStyle.
@@ -1825,6 +1833,7 @@ HWTEST_F(SheetPresentationTestNg, GetFirstChildHeight001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    sheetPattern->SetTitleBuilderNode(WeakPtr<FrameNode>(operationColumn));
 
     /**
      * @tc.steps: step3. init SheetStyle and set sheetHeight.
@@ -1956,6 +1965,7 @@ HWTEST_F(SheetPresentationTestNg, InitScrollProps001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
 
     /**
      * @tc.steps: step3. init sheetPattern value.
@@ -2031,6 +2041,7 @@ HWTEST_F(SheetPresentationTestNg, InitScrollProps002, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
 
     /**
      * @tc.steps: step3. init sheetPattern value.

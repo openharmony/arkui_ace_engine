@@ -649,7 +649,6 @@ public:
         return detentsFinalIndex_;
     }
     bool IsScrollOutOfBoundary();
-    RefPtr<FrameNode> GetScrollNode();
 
     void UpdateSheetType()
     {
@@ -719,6 +718,36 @@ public:
     void OnFontScaleConfigurationUpdate() override;
 
     void FireCommonCallback();
+
+    void SetCloseButtonNode(const WeakPtr<FrameNode>& node) {
+        closeButtonNode_ = node;
+    }
+
+    void SetScrollNode(const WeakPtr<FrameNode>& node) {
+        scrolNode_ = node;
+    }
+
+    void SetTitleBuilderNode(const WeakPtr<FrameNode>& node) {
+        titleBuilderNode_ = node;
+    }
+    
+    RefPtr<FrameNode> GetSheetCloseIcon() const
+    {
+        auto closeButtonNode = closeButtonNode_.Upgrade();
+        return closeButtonNode;
+    }
+
+    RefPtr<FrameNode> GetTitleBuilderNode() const
+    {
+        auto titleBuilderNode = titleBuilderNode_.Upgrade();
+        return titleBuilderNode;
+    }
+
+    RefPtr<FrameNode> GetSheetScrollNode() const
+    {
+        auto scrollNode = scrolNode_.Upgrade();
+        return scrollNode;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -905,6 +934,9 @@ private:
     bool showArrow_ = true;
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
     SheetPopupInfo sheetPopupInfo_;
+    WeakPtr<FrameNode> closeButtonNode_;
+    WeakPtr<FrameNode> scrolNode_;
+    WeakPtr<FrameNode> titleBuilderNode_;
 };
 } // namespace OHOS::Ace::NG
 
