@@ -350,11 +350,13 @@ public:
     void UpdateTextColorWithoutCheck(Color color)
     {
         fontStyle->propTextColor = color;
+        MarkDirty();
     }
 
     void UpdateTextDecorationColorWithoutCheck(Color color)
     {
         fontStyle->propTextDecorationColor = color;
+        MarkDirty();
     }
 
 private:
