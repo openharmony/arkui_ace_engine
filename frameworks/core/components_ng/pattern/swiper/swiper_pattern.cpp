@@ -609,15 +609,18 @@ void SwiperPattern::UpdateItemsLatestSwitched()
         return;
     }
 
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto currentIndex = props->GetIndexValue(0);
     auto indexNeedInsert = -1;
     if (IsUseCustomAnimation()) {
-        auto props = GetLayoutProperty<SwiperLayoutProperty>();
-        CHECK_NULL_VOID(props);
-        indexNeedInsert = customAnimationToIndex_.value_or(props->GetIndexValue(0));
+        indexNeedInsert = customAnimationToIndex_.value_or(currentIndex);
     } else if (jumpIndex_) {
         indexNeedInsert = jumpIndex_.value();
     } else if (targetIndex_) {
         indexNeedInsert = targetIndex_.value();
+    } else if (itemsLatestSwitched_.empty()) {
+        indexNeedInsert = currentIndex;
     }
     if (indexNeedInsert < 0) {
         return;
