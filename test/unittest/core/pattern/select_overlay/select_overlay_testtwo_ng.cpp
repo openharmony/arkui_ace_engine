@@ -887,4 +887,218 @@ HWTEST_F(SelectOverlayTestTwoNg, GetIsMenuShowInSubWindow002, TestSize.Level1)
     ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
     EXPECT_EQ(selectOverlayLayoutAlgorithm->GetIsMenuShowInSubWindow(AceType::RawPtr(layoutWrapper)), false);
 }
+
+/**
+ * @tc.name: BuildButtonPasteButton
+ * @tc.desc: Test BuildButtonPasteButton different parameter .
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, BuildButtonPasteButton, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.showCopy = false;
+    selectInfo.menuInfo.showPaste = true;
+    selectInfo.menuInfo.showCopyAll = false;
+    selectInfo.menuInfo.showCameraInput = false;
+    float maxWidth = 3.0f;
+    float allocatedSize = 2.0f;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    int32_t pasteCount = 0;
+    infoPtr->menuCallback.onPaste = [&]() {
+        pasteCount++;
+    };
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode->selectMenuInner_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
+    /**
+     * @tc.steps: step2. call ShowPaste.
+     */
+    selectOverlayNode->isDefaultBtnOverMaxWidth_ = false;
+    selectOverlayNode->ShowPaste(maxWidth, allocatedSize, infoPtr);
+    
+    auto button = AceType::DynamicCast<FrameNode>(selectOverlayNode->selectMenuInner_->GetLastChild());
+    EXPECT_NE(button, nullptr);
+    auto gestureEventHubPtr = button->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureEventHubPtr, nullptr);
+    if (gestureEventHubPtr->clickEventActuator_) {
+        auto playClickCallback = gestureEventHubPtr->clickEventActuator_->userCallback_->callback_;
+        GestureEvent gestureEvent = GestureEvent();
+        playClickCallback(gestureEvent);
+    }
+
+    if (gestureEventHubPtr->userParallelClickEventActuator_) {
+        auto playClickCallback = gestureEventHubPtr->userParallelClickEventActuator_->userCallback_->callback_;
+        GestureEvent gestureEvent = GestureEvent();
+        playClickCallback(gestureEvent);
+    }
+    EXPECT_EQ(pasteCount, 0);
+}
+
+/**
+ * @tc.name: AddCreateMenuItems
+ * @tc.desc: Test AddCreateMenuItems different parameter .
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuItems, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.showCopy = false;
+    selectInfo.menuInfo.showPaste = true;
+    selectInfo.menuInfo.showCopyAll = false;
+    selectInfo.menuInfo.showCameraInput = false;
+    selectInfo.onCreateCallback.onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>& params) {
+        std::vector<MenuOptionsParam> paramlist;
+        return paramlist;
+    };
+    selectInfo.onCreateCallback.onMenuItemClick = [](const NG::MenuItemParam& param) {
+        return true;
+    };
+    selectInfo.onCreateCallback.textRangeCallback = [](int32_t& start, int32_t& end) {
+    };
+    float maxWidth = 3.0f;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    int32_t pasteCount = 0;
+    infoPtr->menuCallback.onPaste = [&]() { pasteCount++; };
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode->selectMenuInner_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
+    /**
+     * @tc.steps: step2. call AddCreateMenuItems.
+     */
+    selectOverlayNode->isDefaultBtnOverMaxWidth_ = false;
+    std::vector<NG::MenuOptionsParam> menuItems = { { .id = "OH_DEFAULT_PASTE" } };
+    selectOverlayNode->AddCreateMenuItems(menuItems, infoPtr, maxWidth);
+
+    auto button = AceType::DynamicCast<FrameNode>(selectOverlayNode->selectMenuInner_->GetLastChild());
+    EXPECT_NE(button, nullptr);
+    auto gestureEventHubPtr = button->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureEventHubPtr, nullptr);
+    if (gestureEventHubPtr->clickEventActuator_) {
+        auto playClickCallback = gestureEventHubPtr->clickEventActuator_->userCallback_->callback_;
+        GestureEvent gestureEvent = GestureEvent();
+        playClickCallback(gestureEvent);
+    }
+
+    if (gestureEventHubPtr->userParallelClickEventActuator_) {
+        auto playClickCallback = gestureEventHubPtr->userParallelClickEventActuator_->userCallback_->callback_;
+        GestureEvent gestureEvent = GestureEvent();
+        playClickCallback(gestureEvent);
+    }
+    EXPECT_EQ(pasteCount, 0);
+}
+
+/**
+ * @tc.name: OnCustomSelectMenuAppear
+ * @tc.desc: Test OnCustomSelectMenuAppear.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, OnCustomSelectMenuAppear, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.menuInfo.showCopy = false;
+    selectInfo.menuInfo.showPaste = true;
+    selectInfo.menuInfo.showCopyAll = false;
+    selectInfo.menuInfo.showCameraInput = false;
+    selectInfo.onCreateCallback.onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>& params) {
+        std::vector<MenuOptionsParam> paramlist;
+        return paramlist;
+    };
+    selectInfo.onCreateCallback.onMenuItemClick = [](const NG::MenuItemParam& param) { return true; };
+    selectInfo.onCreateCallback.textRangeCallback = [](int32_t& start, int32_t& end) {};
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    int32_t pasteCount = 0;
+    infoPtr->menuCallback.onPaste = [&]() { pasteCount++; };
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode->selectMenuInner_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    auto overlayEventHub = selectOverlayNode->GetEventHub<SelectOverlayEventHub>();
+    EXPECT_NE(overlayEventHub, nullptr);
+    bool isAppear = false;
+    bool isMenuShow = false;
+    bool isMenuHide = false;
+    overlayEventHub->SetMenuAppearCallback([&]() { isAppear = true; });
+    overlayEventHub->SetMenuShowCallback([&]() { isMenuShow = true; });
+    overlayEventHub->SetMenuHideCallback([&]() { isMenuHide = true; });
+    /**
+     * @tc.steps: step2. call OnCustomSelectMenuAppear.
+     */
+    selectOverlayNode->isDefaultBtnOverMaxWidth_ = false;
+    selectOverlayNode->OnCustomSelectMenuAppear();
+    EXPECT_TRUE(selectOverlayNode->isCustomMenuAppear_);
+    EXPECT_TRUE(isAppear);
+    EXPECT_TRUE(isMenuShow);
+    infoPtr->menuInfo.menuIsShow = false;
+    overlayEventHub->lastMenuIsShow_.reset();
+    selectOverlayNode->OnCustomSelectMenuAppear();
+    EXPECT_TRUE(isMenuHide);
+}
+
+/**
+ * @tc.name: FireCustomMenuChangeEvent
+ * @tc.desc: Test FireCustomMenuChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, FireCustomMenuChangeEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = false;
+    selectInfo.menuInfo.showCopy = false;
+    selectInfo.menuInfo.showPaste = true;
+    selectInfo.menuInfo.showCopyAll = false;
+    selectInfo.menuInfo.showCameraInput = false;
+    selectInfo.onCreateCallback.onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>& params) {
+        std::vector<MenuOptionsParam> paramlist;
+        return paramlist;
+    };
+    selectInfo.onCreateCallback.onMenuItemClick = [](const NG::MenuItemParam& param) { return true; };
+    selectInfo.onCreateCallback.textRangeCallback = [](int32_t& start, int32_t& end) {};
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    int32_t pasteCount = 0;
+    infoPtr->menuCallback.onPaste = [&]() { pasteCount++; };
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode->selectMenuInner_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    auto overlayEventHub = selectOverlayNode->GetEventHub<SelectOverlayEventHub>();
+    EXPECT_NE(overlayEventHub, nullptr);
+    bool isMenuShow = false;
+    bool isMenuHide = false;
+    overlayEventHub->SetMenuShowCallback([&]() { isMenuShow = true; });
+    overlayEventHub->SetMenuHideCallback([&]() { isMenuHide = true; });
+    /**
+     * @tc.steps: step2. call FireCustomMenuChangeEvent.
+     */
+    selectOverlayNode->OnCustomSelectMenuAppear();
+    EXPECT_TRUE(selectOverlayNode->isCustomMenuAppear_);
+    selectOverlayNode->FireCustomMenuChangeEvent(true);
+    EXPECT_TRUE(isMenuShow);
+    selectOverlayNode->FireCustomMenuChangeEvent(false);
+    EXPECT_TRUE(isMenuHide);
+}
 } // namespace OHOS::Ace::NG
