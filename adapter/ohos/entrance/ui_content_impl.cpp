@@ -1766,9 +1766,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
-    if (bundleName_ == "com.example.trivial.application") { // TODO: use AbilityContext to distinguish KoalaFrontend
-        frontendType = FrontendType::KOALA;
-    }
+    // if (bundleName_ == "com.example.trivial.application") { // TODO: use AbilityContext to distinguish KoalaFrontend
+    //     frontendType = FrontendType::KOALA;
+    // }
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
             std::make_unique<ContentEventCallback>(
