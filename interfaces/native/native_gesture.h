@@ -544,7 +544,7 @@ int32_t OH_ArkUI_SetGestureRecognizerEnabled(ArkUI_GestureRecognizer* recognizer
 * @param limitFingerCount Indicates whether to enable strict finger count checking.
 * @return Returns <b>0</b> if the operation is successful.
 *         Returns <b>401</b> if a parameter error occurs.
-* @since 16
+* @since 15
 */
 int32_t OH_ArkUI_SetGestureRecognizerLimitFingerCount(ArkUI_GestureRecognizer* recognizer, bool limitFingerCount);
 
