@@ -139,6 +139,11 @@ FoldStatus Container::GetCurrentFoldStatus()
     return MockContainer::Current()->GetMockDisplayInfo()->GetFoldStatus();
 }
 
+std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
+{
+    return {};
+}
+
 RefPtr<Container> Container::GetFoucsed()
 {
     RefPtr<Container> foucsContainer;
