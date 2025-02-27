@@ -687,16 +687,17 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         }
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
-        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode]
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, weakNode = frameNode]
             (BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
-            PipelineContext::SetCallBackNode(node);
+            PipelineContext::SetCallBackNode(weakNode);
             func->Execute(*clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::string label = "";
-            if (!node.Invalid()) {
+            auto node = weakNode.Upgrade();
+            if (node) {
                 auto pattern = node.GetRawPtr()->GetPattern();
                 CHECK_NULL_VOID(pattern);
                 auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();

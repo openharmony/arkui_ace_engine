@@ -51,7 +51,7 @@ public:
 
     static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    static void ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::string text = "");
+    static void ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::string text = "");
 #endif
 
 protected:
