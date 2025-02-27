@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

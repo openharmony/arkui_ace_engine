@@ -23,6 +23,7 @@
 #include "core/common/container.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
