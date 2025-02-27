@@ -197,8 +197,8 @@ sptr<IRemoteObject> AceFormAbility::GetFormRemoteObject()
     if (formProviderRemoteObject_ == nullptr) {
         sptr<FormProviderClient> providerClient = new (std::nothrow) FormProviderClient();
         std::shared_ptr<Ability> thisAbility = this->shared_from_this();
-        if (thisAbility == nullptr) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "Get form remote object failed, ability is nullptr");
+        if (thisAbility == nullptr || providerClient == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "Get form remote object failed, ability or providerClient is nullptr");
             return nullptr;
         }
         providerClient->SetOwner(thisAbility);
