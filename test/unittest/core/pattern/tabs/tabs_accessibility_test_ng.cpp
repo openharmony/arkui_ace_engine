@@ -43,9 +43,8 @@ HWTEST_F(TabsAccessibilityTestNg, TabBarAccessibilityProperty001, TestSize.Level
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
 
     tabBarAccessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step2. TabBar at middle
@@ -57,10 +56,8 @@ HWTEST_F(TabsAccessibilityTestNg, TabBarAccessibilityProperty001, TestSize.Level
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
 
     tabBarAccessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step3. TabBar at bottom
@@ -72,9 +69,8 @@ HWTEST_F(TabsAccessibilityTestNg, TabBarAccessibilityProperty001, TestSize.Level
     EXPECT_TRUE(tabBarPattern_->IsAtBottom());
 
     tabBarAccessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step4. Set tabs width to make unScrollable
@@ -86,8 +82,8 @@ HWTEST_F(TabsAccessibilityTestNg, TabBarAccessibilityProperty001, TestSize.Level
     EXPECT_TRUE(tabBarPattern_->IsAtBottom());
 
     tabBarAccessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), expectActions);
+    expectedActions = {};
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -132,8 +128,8 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.steps: step4. Check some info
      */
     tabBarAccessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -177,8 +173,8 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
     tabBarAccessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**

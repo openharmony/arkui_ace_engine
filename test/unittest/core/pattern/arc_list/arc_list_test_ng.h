@@ -110,6 +110,7 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
+    void FlushUITasks(const RefPtr<FrameNode>& frameNode);
     void GetList();
     ListModelNG CreateList();
     void AddHeader(ListModelNG* model);

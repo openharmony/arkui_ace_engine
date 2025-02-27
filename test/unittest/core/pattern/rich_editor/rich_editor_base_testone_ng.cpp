@@ -35,10 +35,26 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     void GetFocus(const RefPtr<RichEditorPattern>& pattern);
     void OnDrawVerify(const SelectSpanType& type, const std::u16string& text, SymbolSpanOptions options, Offset offset,
         bool selected = false);
 };
+
+void RichEditorBaseTestOneNg::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
 
 void RichEditorBaseTestOneNg::GetFocus(const RefPtr<RichEditorPattern>& pattern)
 {

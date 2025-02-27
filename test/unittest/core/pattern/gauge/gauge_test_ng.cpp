@@ -115,6 +115,7 @@ public:
 void GaugeTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
@@ -159,7 +160,7 @@ void GaugeTestNg::Create(float values, float min, float max, const std::function
         callback(model);
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 /**
@@ -1378,7 +1379,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(Infinity<float>() / SIZE_INFINITY + 1.0f));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(Infinity<float>() / SIZE_INFINITY + 1.0f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(),
         SizeF(Infinity<float>() / SIZE_INFINITY + 1.0f, Infinity<float>() / SIZE_INFINITY + 1.0f)));
 
@@ -1387,7 +1388,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
      */
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(WIDTH_1));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(HEIGHT_1));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(WIDTH_1, HEIGHT_1)));
 }
 

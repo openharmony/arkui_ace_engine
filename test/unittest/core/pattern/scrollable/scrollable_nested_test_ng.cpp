@@ -165,7 +165,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest001, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto listNode = AceType::DynamicCast<FrameNode>(element);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
 
     auto listPattern = listNode->GetPattern<ListPattern>();
     auto eventHub = listNode->GetEventHub<ListEventHub>();
@@ -189,15 +189,15 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest001, TestSize.Level1)
     auto scrollable = GetScrollable(listNode);
     DragStart(scrollable);
     DragUpdate(scrollable, -100);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 50);
     EXPECT_FALSE(scrollable->canOverScroll_);
     DragUpdate(scrollable, -100);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 50);
     EXPECT_FALSE(scrollable->canOverScroll_);
     DragEnd(scrollable, -1200);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FALSE(scrollable->canOverScroll_);
 
     /**
@@ -206,15 +206,15 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest001, TestSize.Level1)
      */
     DragStart(scrollable);
     DragUpdate(scrollable, 100);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FALSE(scrollable->canOverScroll_);
     DragUpdate(scrollable, 100);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FALSE(scrollable->canOverScroll_);
     DragEnd(scrollable, 1200);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FALSE(scrollable->canOverScroll_);
 }
 
@@ -244,7 +244,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest002, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto rootNode = AceType::DynamicCast<FrameNode>(element);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto listNode = GetChildFrameNode(rootNode, 1);
     auto listPattern = listNode->GetPattern<ListPattern>();
@@ -269,15 +269,15 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest002, TestSize.Level1)
     auto scrollable = GetScrollable(listNode);
     DragStart(scrollable);
     DragUpdate(scrollable, -100);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 50);
     EXPECT_FALSE(scrollable->canOverScroll_);
     DragUpdate(scrollable, -100);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 50);
     EXPECT_FALSE(scrollable->canOverScroll_);
     DragEnd(scrollable, -1200);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FALSE(scrollable->canOverScroll_);
 
     /**
@@ -286,15 +286,15 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest002, TestSize.Level1)
      */
     DragStart(scrollable);
     DragUpdate(scrollable, 100);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FALSE(scrollable->canOverScroll_);
     DragUpdate(scrollable, 100);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FALSE(scrollable->canOverScroll_);
     DragEnd(scrollable, 1200);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FALSE(scrollable->canOverScroll_);
 }
 
@@ -328,7 +328,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest003, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto rootNode = AceType::DynamicCast<FrameNode>(element);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto listNode = GetChildFrameNode(rootNode, 0);
     auto listPattern = listNode->GetPattern<ListPattern>();
@@ -341,11 +341,11 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest003, TestSize.Level1)
     auto scrollable = GetScrollable(listNode);
     DragStart(scrollable);
     DragUpdate(scrollable, -150);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 50);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -100);
     DragUpdate(scrollable, -100);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 100);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -100);
 
@@ -355,11 +355,11 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest003, TestSize.Level1)
      */
     DragStart(scrollable);
     DragUpdate(scrollable, 150);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -50);
     DragUpdate(scrollable, 150);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -0);
 }
@@ -378,7 +378,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest004, TestSize.Level1)
         .forward = NestedScrollMode::PARENT_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
     });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -395,8 +395,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest004, TestSize.Level1)
     auto listScrollable = GetScrollable(listNode);
     DragStart(listScrollable);
     DragUpdate(listScrollable, -150);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -150);
 
@@ -405,8 +405,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest004, TestSize.Level1)
      * @tc.expected: parent reach bottom, child scroll
      */
     DragUpdate(listScrollable, -150);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 100);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -415,8 +415,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest004, TestSize.Level1)
      * @tc.expected: parent and child reach bottom, parent over scroll
      */
     DragUpdate(listScrollable, -150);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -250);
 
@@ -425,8 +425,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest004, TestSize.Level1)
      * @tc.expected: parent out of bottom, parent scroll
      */
     DragUpdate(listScrollable, 25);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -225);
 
@@ -435,8 +435,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest004, TestSize.Level1)
      * @tc.expected: parent scroll at bottom, child scroll
      */
     DragUpdate(listScrollable, 50);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 175);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 }
@@ -455,7 +455,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest005, TestSize.Level1)
         .forward = NestedScrollMode::PARENT_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
     });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -472,8 +472,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest005, TestSize.Level1)
      */
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -482,8 +482,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest005, TestSize.Level1)
      * @tc.expected: parent reach bottom, child scroll
      */
     DragUpdate(listScrollable, -200);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -492,8 +492,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest005, TestSize.Level1)
      * @tc.expected: parent and child reach bottom, child over scroll
      */
     DragUpdate(listScrollable, -50);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 250);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -502,8 +502,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest005, TestSize.Level1)
      * @tc.expected: parent out of bottom, parent scroll
      */
     DragUpdate(listScrollable, 25);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 225);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -512,8 +512,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest005, TestSize.Level1)
      * @tc.expected: parent scroll at bottom, child scroll
      */
     DragUpdate(listScrollable, 50);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 175);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 }
@@ -549,7 +549,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest006, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto rootNode = AceType::DynamicCast<FrameNode>(element);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto listNode = GetChildFrameNode(rootNode, 0);
     auto listPattern = listNode->GetPattern<ListPattern>();
@@ -562,7 +562,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest006, TestSize.Level1)
      */
     DragStart(listScrollable);
     DragUpdate(listScrollable, -30);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 30);
 
     /**
@@ -570,7 +570,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest006, TestSize.Level1)
      * @tc.expected: child reach left, parent over scroll
      */
     DragUpdate(listScrollable, -100);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 60);
     EXPECT_TRUE(swiperPattern->IsOutOfEnd());
 
@@ -579,7 +579,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest006, TestSize.Level1)
      * @tc.expected: parent over scroll, parent scroll first
      */
     DragUpdate(listScrollable, 20);
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 60);
     EXPECT_TRUE(swiperPattern->IsOutOfEnd());
 }
@@ -598,7 +598,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest007, TestSize.Level1)
         .forward = NestedScrollMode::PARALLEL,
         .backward = NestedScrollMode::PARALLEL,
     });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -613,8 +613,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest007, TestSize.Level1)
      */
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -623,8 +623,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest007, TestSize.Level1)
      * @tc.expected: parent reach bottom, child scroll
      */
     DragUpdate(listScrollable, 200);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
 }
@@ -643,7 +643,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
         .forward = NestedScrollMode::PARENT_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
     });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -662,8 +662,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
     listScrollable->InitFriction(FRICTION);
     DragStart(listScrollable);
     DragUpdate(listScrollable, 100);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 100);
 
@@ -674,14 +674,14 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(2);
     listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 1000);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 100);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 50);
 
@@ -691,8 +691,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      */
     MockPipelineContext::GetCurrent()->SetVsyncTime(scrollScrollable->lastVsyncTime_ + 30 * MS);
     MockAnimationManager::GetInstance().TickByVelocity(-60);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
 
@@ -702,13 +702,13 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      */
     float distance = 2000 / (SLOW_FRICTION * -FRICTION_SCALE);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, distance / 2 - 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -(distance - 200));
 }
@@ -727,7 +727,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
         .forward = NestedScrollMode::PARENT_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
     });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -763,8 +763,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
     listScrollable->InitFriction(FRICTION);
     DragStart(listScrollable);
     DragUpdate(listScrollable, -10);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -10);
 
@@ -775,8 +775,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(3);
     listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, -420);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -10);
     EXPECT_TRUE(listOnScrollStart);
@@ -784,14 +784,14 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
 
     MockPipelineContext::GetCurrent()->SetVsyncTime(GetSysTimestamp());
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -50);
     MockPipelineContext::GetCurrent()->SetVsyncTime(scrollPattern->nestedScrollTimestamp_ + 50 * MS);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -90);
 
@@ -801,13 +801,13 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
      */
     TouchEventInfo touchEvent = TouchEventInfo("unknown");
     scrollPattern->OnTouchDown(touchEvent);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_TRUE(listOnScrollStop);
     EXPECT_TRUE(scrollOnScrollStop);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -90);
 }
@@ -844,7 +844,7 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
     ASSERT_NE(scrollNode, nullptr);
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    FlushLayoutTask(sheetNode, true);
+    FlushUITasks(sheetNode);
 
     /**
      * @tc.steps: step2. Scroll 100
@@ -853,7 +853,7 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
     auto scrollable = GetScrollable(scrollNode);
     DragStart(scrollable);
     DragUpdate(scrollable, -100);
-    FlushLayoutTask(sheetNode, true);
+    FlushUITasks(sheetNode);
     EXPECT_FLOAT_EQ(scrollPattern->GetTotalOffset(), 100);
 
     /**
@@ -861,7 +861,7 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
      * @tc.expected: Scroll offset is 0, Sheet offset is 100
      */
     DragUpdate(scrollable, 200);
-    FlushLayoutTask(sheetNode, true);
+    FlushUITasks(sheetNode);
     EXPECT_FLOAT_EQ(scrollPattern->GetTotalOffset(), 0);
     EXPECT_FLOAT_EQ(sheetPattern->currentOffset_, 100);
 
@@ -870,7 +870,7 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
      * @tc.expected: Scroll offset is 0, Sheet offset is 100
      */
     DragUpdate(scrollable, -100);
-    FlushLayoutTask(sheetNode, true);
+    FlushUITasks(sheetNode);
     EXPECT_FLOAT_EQ(scrollPattern->GetTotalOffset(), 0);
     EXPECT_FLOAT_EQ(sheetPattern->currentOffset_, 0);
 
@@ -893,7 +893,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest001, TestSize.Level1)
             .forward = NestedScrollMode::PARALLEL,
             .backward = NestedScrollMode::PARALLEL,
         });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -907,12 +907,12 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest001, TestSize.Level1)
      */
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     scrollPattern->OnStatusBarClick();
     listPattern->OnStatusBarClick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -925,11 +925,11 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest001, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollPattern->OnStatusBarClick();
     listPattern->OnStatusBarClick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 }
@@ -949,7 +949,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
             .forward = NestedScrollMode::PARALLEL,
             .backward = NestedScrollMode::PARALLEL,
         });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -964,12 +964,12 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
     MockPipelineContext::GetCurrent()->onShow_ = true;
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     scrollPattern->OnStatusBarClick();
     listPattern->OnStatusBarClick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -981,11 +981,11 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(1);
     listPattern->OnStatusBarClick();
     scrollPattern->OnStatusBarClick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 
@@ -996,11 +996,11 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
     scrollPattern->SetBackToTop(true);
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollPattern->OnStatusBarClick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
 }
@@ -1020,7 +1020,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest003, TestSize.Level1)
             .forward = NestedScrollMode::PARALLEL,
             .backward = NestedScrollMode::PARALLEL,
         });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -1036,18 +1036,18 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest003, TestSize.Level1)
     MockPipelineContext::GetCurrent()->onShow_ = true;
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     listPattern->SetBackToTop(true);
     scrollPattern->SetBackToTop(true);
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollPattern->OnStatusBarClick();
     listPattern->OnStatusBarClick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
 }
@@ -1067,7 +1067,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
             .forward = NestedScrollMode::PARALLEL,
             .backward = NestedScrollMode::PARALLEL,
         });
-    FlushLayoutTask(rootNode);
+    FlushUITasks(rootNode);
 
     auto colNode = GetChildFrameNode(rootNode, 0);
     auto listNode = GetChildFrameNode(colNode, 1);
@@ -1089,8 +1089,8 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
     DragUpdate(listScrollable, -200);
     listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 0);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     listPattern->SetBackToTop(true);
     scrollPattern->SetBackToTop(true);
     scrollPattern->OnStatusBarClick();
@@ -1099,13 +1099,13 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
     TouchEventInfo touchEvent = TouchEventInfo("unknown");
     listPattern->OnTouchDown(touchEvent);
     scrollPattern->OnTouchDown(touchEvent);
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_TRUE(listOnScrollStop);
     EXPECT_TRUE(scrollOnScrollStop);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(rootNode);
-    FlushLayoutTask(listNode);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,8 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void FlushUITasks();
+    void FlushUITasks(const RefPtr<FrameNode>& frameNode);
     void CreateDone();
-    RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty = false);
     RefPtr<FrameNode> GetStageNode();
     void MountToStageNode(const RefPtr<FrameNode>& frameNode);
     void RemoveFromStageNode();
@@ -61,15 +61,40 @@ public:
     AssertionResult IsExistAndActive(const RefPtr<FrameNode>& frameNode, int32_t index);
     AssertionResult IsExistAndInActive(const RefPtr<FrameNode>& frameNode, int32_t index);
 
-    AssertionResult IsEqual(Color actual, Color expected)
+    AssertionResult IsEqual(const double& actual, const double& expected)
     {
         if (NearEqual(actual, expected)) {
             return AssertionSuccess();
         }
-        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
     }
 
-    AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
+    AssertionResult IsEqual(const float& actual, const float& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
+    }
+
+    AssertionResult IsEqual(const int32_t& actual, const int32_t& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
+    }
+
+    AssertionResult IsEqual(const std::string& actual, const std::string& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
+    }
+
+    template<typename T>
+    AssertionResult IsEqual(const T& actual, const T& expected)
     {
         if (NearEqual(actual, expected)) {
             return AssertionSuccess();
@@ -86,38 +111,6 @@ public:
                                   << " Expected: " << "{ " << expected.start << " , " << expected.end << " }";
     }
 
-    AssertionResult IsEqual(const Offset& actual, const Offset& expected)
-    {
-        if (NearEqual(actual, expected)) {
-            return AssertionSuccess();
-        }
-        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
-    }
-
-    AssertionResult IsEqual(const OffsetF& actual, const OffsetF& expected)
-    {
-        if (NearEqual(actual, expected)) {
-            return AssertionSuccess();
-        }
-        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
-    }
-
-    AssertionResult IsEqual(const Rect& actual, const Rect& expected)
-    {
-        if (NearEqual(actual, expected)) {
-            return AssertionSuccess();
-        }
-        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
-    }
-
-    AssertionResult IsEqual(const RectF& actual, const RectF& expected)
-    {
-        if (NearEqual(actual, expected)) {
-            return AssertionSuccess();
-        }
-        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
-    }
-
     AssertionResult IsEqual(const ListItemIndex& actual, const ListItemIndex& expected)
     {
         if (actual.index == expected.index && actual.area == expected.area &&
@@ -127,23 +120,6 @@ public:
         return AssertionFailure() << "Actual: " << "{ " << actual.index << " , " << actual.area << " , "
                                   << actual.indexInGroup << " }" << " Expected: " << "{ " << expected.index << " , "
                                   << expected.area << " , " << expected.indexInGroup << " }";
-    }
-
-    AssertionResult IsEqual(const BorderRadiusProperty& actual, const BorderRadiusProperty& expected)
-    {
-        if (NearEqual(actual, expected)) {
-            return AssertionSuccess();
-        }
-        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
-    }
-
-    template<typename T>
-    AssertionResult IsEqual(const T& actual, const T& expected)
-    {
-        if (NearEqual(actual, expected)) {
-            return AssertionSuccess();
-        }
-        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
     }
 
     RefPtr<FrameNode> GetChildFrameNode(const RefPtr<FrameNode>& frameNode, int32_t index)

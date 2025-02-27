@@ -15,7 +15,6 @@
 
 #include "swiper_test_ng.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components/swiper/swiper_component.h"
 
@@ -31,7 +30,6 @@ public:
     void HandleDragUpdate(GestureEvent info);
     void HandleDragEnd(GestureEvent info);
     void HandleDragCancel();
-    void MockPaintRect(const RefPtr<FrameNode>& frameNode);
     GestureEvent CreateDragInfo(bool moveDirection);
 };
 
@@ -40,7 +38,6 @@ void SwiperEventTestNg::HandleDrag(GestureEvent info)
     HandleDragStart(info);
     HandleDragUpdate(info);
     HandleDragEnd(info);
-    FlushUITasks();
 }
 
 void SwiperEventTestNg::HandleDragStart(GestureEvent info)
@@ -51,22 +48,19 @@ void SwiperEventTestNg::HandleDragStart(GestureEvent info)
 void SwiperEventTestNg::HandleDragUpdate(GestureEvent info)
 {
     pattern_->panEvent_->GetActionUpdateEventFunc()(info);
+    FlushUITasks();
 }
 
 void SwiperEventTestNg::HandleDragEnd(GestureEvent info)
 {
     pattern_->panEvent_->GetActionEndEventFunc()(info);
+    FlushUITasks();
 }
 
 void SwiperEventTestNg::HandleDragCancel()
 {
     pattern_->panEvent_->GetActionCancelEventFunc()();
-}
-
-void SwiperEventTestNg::MockPaintRect(const RefPtr<FrameNode>& frameNode)
-{
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_);
-    mockRenderContext->paintRect_ = RectF(0.f, 0.f, SWIPER_WIDTH, SWIPER_HEIGHT);
+    FlushUITasks();
 }
 
 GestureEvent SwiperEventTestNg::CreateDragInfo(bool moveDirection)
@@ -133,7 +127,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag002, TestSize.Level1)
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragCancel
@@ -159,7 +152,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag003, TestSize.Level1)
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -168,7 +160,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag003, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), DRAG_DELTA);
 
     /**
@@ -176,7 +167,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag003, TestSize.Level1)
      * @tc.expected: Item(index:0) OffsetX not more than SWIPER_WIDTH
      */
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), SWIPER_WIDTH);
 
     /**
@@ -184,7 +174,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag003, TestSize.Level1)
      * @tc.expected: Change CurrentIndex by MainVelocity direction
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(3));
 }
 
@@ -202,7 +191,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag004, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -211,7 +199,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag004, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 3), -DRAG_DELTA);
 
     /**
@@ -219,7 +206,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag004, TestSize.Level1)
      * @tc.expected: Item(index:3) OffsetX not more than SWIPER_WIDTH
      */
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 3), -SWIPER_WIDTH);
 
     /**
@@ -227,7 +213,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag004, TestSize.Level1)
      * @tc.expected: Change CurrentIndex by MainVelocity direction
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
 }
 
@@ -245,7 +230,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag005, TestSize.Level1)
     model.SetLoop(false);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -254,7 +238,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag005, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 0), DRAG_DELTA);
     EXPECT_GT(GetChildX(frameNode_, 0), 0.f);
 
@@ -264,7 +247,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag005, TestSize.Level1)
      */
     float preDelta = GetChildX(frameNode_, 0);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 0), DRAG_DELTA * 2);
     EXPECT_GT(GetChildX(frameNode_, 0), preDelta);
 
@@ -273,7 +255,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag005, TestSize.Level1)
      * @tc.expected: Change still 0
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(0));
 }
 
@@ -292,7 +273,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag006, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -301,7 +281,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag006, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 3), 0.f);
     EXPECT_GT(GetChildX(frameNode_, 3), -DRAG_DELTA);
 
@@ -311,7 +290,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag006, TestSize.Level1)
      */
     float preDelta = GetChildX(frameNode_, 3);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 3), preDelta);
     EXPECT_GT(GetChildX(frameNode_, 3), -DRAG_DELTA * 2);
 
@@ -320,7 +298,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag006, TestSize.Level1)
      * @tc.expected: Change still 3
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
 }
 
@@ -339,7 +316,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag007, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::FADE);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -348,14 +324,12 @@ HWTEST_F(SwiperEventTestNg, HandleDrag007, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->fadeOffset_, DRAG_DELTA);
 
     /**
      * @tc.steps: step3. HandleDragEnd
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
 
@@ -375,7 +349,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag008, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -384,14 +357,12 @@ HWTEST_F(SwiperEventTestNg, HandleDrag008, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->fadeOffset_, -DRAG_DELTA);
 
     /**
      * @tc.steps: step3. HandleDragEnd
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
 
@@ -440,14 +411,11 @@ HWTEST_F(SwiperEventTestNg, HandleDrag010, TestSize.Level1)
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(3));
 
     /**
@@ -457,14 +425,11 @@ HWTEST_F(SwiperEventTestNg, HandleDrag010, TestSize.Level1)
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
     info = CreateDragInfo(false);
     info.SetMainDelta(DRAG_DELTA / 2);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(3));
 
     /**
@@ -474,15 +439,12 @@ HWTEST_F(SwiperEventTestNg, HandleDrag010, TestSize.Level1)
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
     info = CreateDragInfo(false);
     info.SetMainDelta(DRAG_DELTA / 2);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(0));
 }
 
@@ -502,14 +464,11 @@ HWTEST_F(SwiperEventTestNg, HandleDrag011, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(0));
 
     /**
@@ -520,14 +479,11 @@ HWTEST_F(SwiperEventTestNg, HandleDrag011, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
     info = CreateDragInfo(true);
     info.SetMainDelta(-DRAG_DELTA / 2);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(0));
 
     /**
@@ -538,15 +494,12 @@ HWTEST_F(SwiperEventTestNg, HandleDrag011, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
     info = CreateDragInfo(true);
     info.SetMainDelta(-DRAG_DELTA / 2);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(3));
 }
 
@@ -605,7 +558,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag002, TestSize.Level1)
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragCancel
@@ -632,7 +584,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag003, TestSize.Level1)
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -641,7 +592,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag003, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     int32_t invert = -1;
     EXPECT_EQ(GetChildX(frameNode_, 0), DRAG_DELTA * invert);
 
@@ -650,7 +600,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag003, TestSize.Level1)
      * @tc.expected: Item(index:0) OffsetX not more than SWIPER_WIDTH
      */
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), SWIPER_WIDTH);
 
     /**
@@ -658,7 +607,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag003, TestSize.Level1)
      * @tc.expected: Change CurrentIndex by MainVelocity direction
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(3));
 }
 
@@ -677,7 +625,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag004, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -686,7 +633,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag004, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     int32_t invert = -1;
     EXPECT_EQ(GetChildX(frameNode_, 3), -DRAG_DELTA * invert);
 
@@ -695,7 +641,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag004, TestSize.Level1)
      * @tc.expected: Item(index:3) OffsetX not more than SWIPER_WIDTH
      */
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 3), -SWIPER_WIDTH);
 
     /**
@@ -703,7 +648,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag004, TestSize.Level1)
      * @tc.expected: Change CurrentIndex by MainVelocity direction
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
 }
 
@@ -722,7 +666,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag005, TestSize.Level1)
     model.SetLoop(false);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -731,7 +674,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag005, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_GT(GetChildX(frameNode_, 0), -DRAG_DELTA);
     EXPECT_LT(GetChildX(frameNode_, 0), 0.f);
 
@@ -741,7 +683,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag005, TestSize.Level1)
      */
     float preDelta = GetChildX(frameNode_, 0);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_GT(GetChildX(frameNode_, 0), -DRAG_DELTA * 2);
     EXPECT_LT(GetChildX(frameNode_, 0), preDelta);
 
@@ -750,7 +691,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag005, TestSize.Level1)
      * @tc.expected: Change still 0
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_TRUE(CurrentIndex(0));
 }
 
@@ -770,7 +710,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag006, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -779,7 +718,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag006, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_GT(GetChildX(frameNode_, 3), 0.f);
     EXPECT_LT(GetChildX(frameNode_, 3), DRAG_DELTA);
 
@@ -789,7 +727,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag006, TestSize.Level1)
      */
     float preDelta = GetChildX(frameNode_, 3);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_GT(GetChildX(frameNode_, 3), preDelta);
     EXPECT_LT(GetChildX(frameNode_, 3), DRAG_DELTA * 2);
 
@@ -798,7 +735,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag006, TestSize.Level1)
      * @tc.expected: Change still 3
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
 }
 
@@ -818,7 +754,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag007, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::FADE);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -827,14 +762,12 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag007, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->fadeOffset_, DRAG_DELTA);
 
     /**
      * @tc.steps: step3. HandleDragEnd
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
 
@@ -855,7 +788,6 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag008, TestSize.Level1)
     model.SetIndex(3);
     CreateSwiperItems();
     CreateSwiperDone();
-    MockPaintRect(frameNode_);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH
@@ -864,14 +796,12 @@ HWTEST_F(SwiperEventTestNg, RTLHandleDrag008, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->fadeOffset_, -DRAG_DELTA);
 
     /**
      * @tc.steps: step3. HandleDragEnd
      */
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
 
@@ -1895,13 +1825,11 @@ HWTEST_F(SwiperEventTestNg, OnContentWillScroll001, TestSize.Level1)
     info.SetMainDelta(-20.0f);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_.begin()->first, 0);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
 
     info.SetMainDelta(20.0f);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
 }
 
@@ -1930,23 +1858,19 @@ HWTEST_F(SwiperEventTestNg, OnContentWillScroll002, TestSize.Level1)
     info.SetMainDelta(20.0f);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
 
     info.SetMainDelta(-20.0f);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
 
     info.SetMainDelta(20.0f);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 40.0f);
 
     info.SetMainVelocity(-1000.0f);
     info.SetMainDelta(0.0f);
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_.begin()->first, 0);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
 
@@ -1954,13 +1878,11 @@ HWTEST_F(SwiperEventTestNg, OnContentWillScroll002, TestSize.Level1)
     info.SetMainDelta(300.0f);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 300.0f);
 
     info.SetMainVelocity(-1000.0f);
     info.SetMainDelta(0.0f);
     HandleDragEnd(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_.begin()->first, -1);
     EXPECT_EQ(pattern_->itemPosition_[-1].startPos, 0.0f);
 }
@@ -1992,13 +1914,11 @@ HWTEST_F(SwiperEventTestNg, OnContentWillScroll003, TestSize.Level1)
     info.SetMainDelta(-20.0f);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_.begin()->first, 0);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
 
     info.SetMainDelta(20.0f);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
 
     pattern_->ChangeIndex(4, false);
@@ -2008,7 +1928,6 @@ HWTEST_F(SwiperEventTestNg, OnContentWillScroll003, TestSize.Level1)
     info.SetMainDelta(100.0f);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 100.0f);
 }
 
@@ -2039,13 +1958,11 @@ HWTEST_F(SwiperEventTestNg, OnContentWillScroll004, TestSize.Level1)
     info.SetMainDelta(-20.0f);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_.begin()->first, 0);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
 
     info.SetMainDelta(20.0f);
     HandleDragUpdate(info);
-    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -20.0f);
 }
 
