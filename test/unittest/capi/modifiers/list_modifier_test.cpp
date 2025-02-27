@@ -482,7 +482,7 @@ HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
  * @tc.desc: Check the functionality of ListModifier.setEdgeEffect
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, DISABLED_setEdgeEffectTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setEdgeEffectTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);

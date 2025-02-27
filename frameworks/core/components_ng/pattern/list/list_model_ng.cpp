@@ -578,8 +578,8 @@ void ListModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_
     const std::optional<bool>& alwaysEnabled)
 {
     ScrollableModelNG::SetEdgeEffect(frameNode,
-        static_cast<EdgeEffect>(edgeEffect.value_or(GetEdgeEffect(frameNode))),
-        alwaysEnabled.value_or(GetEdgeEffectAlways(frameNode)));
+        edgeEffect ? std::optional(static_cast<EdgeEffect>(*edgeEffect)) : std::nullopt,
+        alwaysEnabled);
 }
 
 int32_t ListModelNG::GetListDirection(FrameNode* frameNode)
