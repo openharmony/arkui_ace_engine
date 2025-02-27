@@ -121,6 +121,7 @@ public:
     void UpdateAccessibilityHoverNode(const TouchEvent& event, const TouchTestResult& testResult);
     void PenHoverTest(const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
     void UpdatePenHoverNode(const TouchEvent& event, const TouchTestResult& testResult);
+    void UpdatePenHoverMoveNode(const TouchEvent& event, const TouchTestResult& testResult);
     void UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
@@ -128,6 +129,7 @@ public:
     void DispatchHoverEffectEvent(const MouseEvent& event);
     void DispatchAccessibilityHoverEventNG(const TouchEvent& event);
     void DispatchPenHoverEventNG(const TouchEvent& event);
+    void DispatchPenHoverMoveEventNG(const TouchEvent& event);
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
     bool DispatchAxisEvent(const AxisEvent& event);
@@ -337,6 +339,7 @@ private:
     HoverTestResult curAccessibilityHoverResults_;
     HoverTestResult lastAccessibilityHoverResults_;
     HoverTestResult curPenHoverResults_;
+    HoverTestResult curPenHoverMoveResults_;
     HoverTestResult lastPenHoverResults_;
     AxisTestResult axisTestResults_;
     WeakPtr<NG::FrameNode> lastHoverNode_;

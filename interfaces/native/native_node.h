@@ -5912,6 +5912,17 @@ typedef enum {
     NODE_DISPATCH_KEY_EVENT = 24,
     
     /**
+     * @brief Defines the hover event.
+     * 
+     * The event is triggered when the pointer is hovered by a pen device.
+     * within the component. \n
+     * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+     * {@link ArkUI_UIInputEvent} object. \n
+     * @since16
+    */
+    NODE_ON_HOVER_MOVE = 29,
+
+    /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
      * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n

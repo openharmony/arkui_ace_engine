@@ -2029,6 +2029,21 @@ class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
   }
 }
 
+declare type HoverMoveEventCallback = (event: HoverEvent) => void;
+class OnHoverMoveModifier extends ModifierWithKey<HoverMoveEventCallback> {
+  constructor(value: HoverMoveEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onHoverMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnHoverMove(node);
+    } else {
+      getUINativeModule().common.setOnHoverMove(node, this.value);
+    }
+  }
+}
+
 declare type MouseEventCallback = (event: MouseEvent) => void;
 class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   constructor(value: MouseEventCallback) {
@@ -3852,6 +3867,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onHoverMove(event: (event?: HoverMoveEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
+    return this;
+  }
+
   hoverEffect(value: HoverEffect): this {
     modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
@@ -4717,6 +4737,7 @@ class UICommonEvent {
   private _onFocusEvent?: () => void;
   private _onBlur?: () => void;
   private _onHoverEvent?: (isHover: boolean, event: HoverEvent) => void;
+  private _onHoverMoveEvent?: (event: HoverEvent) => void;
   private _onMouseEvent?: (event: MouseEvent) => void;
   private _onSizeChangeEvent?: SizeChangeCallback;
   private _onVisibleAreaApproximateChange?: VisibleAreaChangeCallback;
@@ -4770,6 +4791,10 @@ class UICommonEvent {
   setOnHover(callback: (isHover: boolean, event: HoverEvent) => void): void {
     this._onHoverEvent = callback;
     getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
+  }
+  setOnHoverMove(callback: (event: HoverMoveEvent) => void): void {
+    this._onHoverMoveEvent = callback;
+    getUINativeModule().frameNode.setOnHoverMove(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback: (event: MouseEvent) => void): void {
     this._onMouseEvent = callback;
