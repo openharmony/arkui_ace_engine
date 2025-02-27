@@ -906,30 +906,46 @@ HWTEST_F(CommonMethodModifierTest2, setOpacity, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
+    using OneTestStep = std::pair<Ark_Union_ResourceColor_ColoringStrategy, std::string>;
     static const std::string PROP_NAME("foregroundColor");
     const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
     const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-        { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
-        { CreateResourceUnion<Ark_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)), "#FFFFFFFF" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)), "#FF123456" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f)), "#00000000" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_String>("65535")), "#FF00FFFF" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            CreateResourceUnion<Ark_ResourceColor>(RES_NAME)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            CreateResourceUnion<Ark_ResourceColor>(RES_ID)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ColoringStrategy>(
+            Ark_ColoringStrategy::ARK_COLORING_STRATEGY_INVERT), "#00000001" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ColoringStrategy>(
+            Ark_ColoringStrategy::ARK_COLORING_STRATEGY_AVERAGE), "#00000001" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ColoringStrategy>(
+            Ark_ColoringStrategy::ARK_COLORING_STRATEGY_PRIMARY), "#00000001" },
     };
 
     ASSERT_NE(modifier_->setForegroundColor0, nullptr);
 
-    for (const auto &[arkResColor, expected]: testPlan) {
-        Ark_Union_ResourceColor_ColoringStrategy value = {
-            .selector = 0,
-            .value0 = arkResColor
-        };
+    for (const auto &[value, expected]: testPlan) {
         modifier_->setForegroundColor0(node_, &value);
+        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        EXPECT_EQ(checkColor, expected);
+    }
+
+    for (const auto &[value, expected]: testPlan) {
+        auto optValue = ArkValue<Opt_Union_ResourceColor_ColoringStrategy>(value);
+        modifier_->setForegroundColor1(node_, &optValue);
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);
     }

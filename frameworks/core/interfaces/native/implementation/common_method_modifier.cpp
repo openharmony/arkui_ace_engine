@@ -108,7 +108,6 @@ struct SheetCallbacks {
 
 using PositionWithLocalization = std::pair<std::optional<OffsetT<Dimension>>, bool>;
 
-using ColorOrStrategy = std::variant<std::monostate, std::optional<Color>, std::optional<ForegroundColorStrategy>>;
 using OffsetOrEdgesParam = std::variant<
     std::monostate,
     std::optional<OffsetT<Dimension>>,
@@ -548,36 +547,6 @@ DragDropInfo Ark_DragItemInfoToDragDropInfo(const Ark_DragItemInfo& src, Ark_Nat
     auto optBuilder = Converter::OptConvert<CustomNodeBuilder>(src.builder);
     dst.customNode = optBuilder.has_value() ? CallbackHelper(optBuilder.value()).BuildSync(node) : nullptr;
     return dst;
-}
-
-template<>
-void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_Color& src)
-{
-    dst = OptConvert<Color>(src);
-}
-
-template<>
-void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_Resource& src)
-{
-    dst = OptConvert<Color>(src);
-}
-
-template<>
-void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_String& src)
-{
-    dst = OptConvert<Color>(src);
-}
-
-template<>
-void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_Number& src)
-{
-    dst = OptConvert<Color>(src);
-}
-
-template<>
-void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_ColoringStrategy& src)
-{
-    dst = OptConvert<ForegroundColorStrategy>(src);
 }
 
 template<>
@@ -2483,25 +2452,35 @@ void ForegroundColor0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto var = Converter::OptConvert<ColorOrStrategy>(*value);
-    if (var && var->index() == 1) {
-        const auto& color = std::get<1>(*var);
-        if (color) {
-            ViewAbstract::SetForegroundColor(frameNode, color.value());
-        } else {
-            LOGI("#### CommonMethod::ForegroundColorImpl: color is empty");
-        }
-    } else {
-        LOGE("#### CommonMethod::ForegroundColorImpl: strategy handling is not implemented!");
-    }
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_ResourceColor& resourceColor) {
+            auto colorOpt = Converter::OptConvert<Color>(resourceColor);
+            ViewAbstract::SetForegroundColor(frameNode, colorOpt);
+        },
+        [frameNode](const Ark_ColoringStrategy& colorStrategy) {
+            auto colorStrategyOpt = Converter::OptConvert<ForegroundColorStrategy>(colorStrategy);
+            ViewAbstract::SetForegroundColorStrategy(frameNode, colorStrategyOpt);
+        },
+        []() {}
+    );
 }
 void ForegroundColor1Impl(Ark_NativePointer node,
                           const Opt_Union_ResourceColor_ColoringStrategy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetForegroundColor1(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_ResourceColor& resourceColor) {
+            auto colorOpt = Converter::OptConvert<Color>(resourceColor);
+            ViewAbstract::SetForegroundColor(frameNode, colorOpt);
+        },
+        [frameNode](const Ark_ColoringStrategy& colorStrategy) {
+            auto colorStrategyOpt = Converter::OptConvert<ForegroundColorStrategy>(colorStrategy);
+            ViewAbstract::SetForegroundColorStrategy(frameNode, colorStrategyOpt);
+        },
+        []() {}
+    );
 }
 void OnClick0Impl(Ark_NativePointer node,
                   const Callback_ClickEvent_Void* value)
