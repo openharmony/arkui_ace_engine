@@ -623,6 +623,7 @@ public:
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
     void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     void CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
+    void CopyTextSpanUrlStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     void CopyGestureOption(const RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position, bool needLeadingMargin = false);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
@@ -779,6 +780,7 @@ public:
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
+    void UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::optional<std::u16string>& urlAddressOpt);
     const std::u16string& GetPasteStr() const
     {
         return pasteStr_;
@@ -1202,6 +1204,7 @@ protected:
     bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
+    std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem) override;
 
 private:
     friend class RichEditorSelectOverlay;
@@ -1390,13 +1393,13 @@ private:
         std::optional<struct UpdateParagraphStyle>& spanParaStyle, const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
     void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::u16string& insertValue,
         int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
-        bool isCreate = false, bool fixDel = true);
+        std::optional<std::u16string> urlAddress = std::nullopt, bool isCreate = false, bool fixDel = true);
     void GetReplacedSpanFission(RichEditorChangeValue& changeValue, int32_t& innerPosition, std::u16string& content,
         int32_t startSpanIndex, int32_t offsetInSpan, std::optional<TextStyle> textStyle,
-        std::optional<struct UpdateParagraphStyle> paraStyle);
+        std::optional<struct UpdateParagraphStyle> paraStyle, const std::optional<std::u16string>& urlAddress);
     void CreateSpanResult(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t spanIndex,
         int32_t offsetInSpan, int32_t endInSpan, std::u16string content, std::optional<TextStyle> textStyle,
-        std::optional<struct UpdateParagraphStyle> paraStyle);
+        std::optional<struct UpdateParagraphStyle> paraStyle, const std::optional<std::u16string>& urlAddress);
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
     void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
     void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,

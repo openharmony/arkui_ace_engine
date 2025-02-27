@@ -882,6 +882,7 @@ protected:
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
+    virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -959,7 +960,6 @@ private:
     void HandleUrlTouchEvent(const TouchEventInfo& info);
     void URLOnHover(bool isHover);
     bool HandleUrlClick();
-    std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
     void SetAccessibilityAction();

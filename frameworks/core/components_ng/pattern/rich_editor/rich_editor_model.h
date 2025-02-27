@@ -113,6 +113,7 @@ struct UpdateSpanStyle {
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
+    std::optional<std::u16string> updateUrlAddress = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
     std::optional<bool> updateHalfLeading = std::nullopt;
@@ -222,6 +223,7 @@ struct TextSpanOptions : SpanOptionBase {
     std::u16string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
+    std::optional<std::u16string> urlAddress;
     UserGestureOptions userGestureOption;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;

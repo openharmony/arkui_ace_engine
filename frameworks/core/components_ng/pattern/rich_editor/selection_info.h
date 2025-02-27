@@ -158,6 +158,7 @@ struct ResultObject {
     int32_t offsetInSpan[2] = { 0, 0 };
     std::u16string valueString;
     std::u16string previewText;
+    std::u16string urlAddress;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
