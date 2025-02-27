@@ -172,6 +172,11 @@ public:
         return currentOffset_;
     }
 
+    float GetContentStartOffset() const override
+    {
+        return contentStartOffset_;
+    }
+
     RefPtr<ScrollControllerBase> GetPositionController() const
     {
         return positionController_;

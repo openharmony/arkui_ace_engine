@@ -278,4 +278,27 @@ void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mod
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, rect), frameNode);
 }
+
+void ScrollableModelNG::SetBackToTop(bool backToTop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBackToTop(frameNode, backToTop);
+}
+
+void ScrollableModelNG::SetBackToTop(FrameNode* frameNode, bool backToTop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBackToTop(backToTop);
+}
+
+bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetBackToTop();
+}
 } // namespace OHOS::Ace::NG

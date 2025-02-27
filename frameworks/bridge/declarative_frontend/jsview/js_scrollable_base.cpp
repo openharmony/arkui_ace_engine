@@ -102,6 +102,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
+    JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -126,5 +127,10 @@ void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
     }
     // default
     NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
+}
+
+void JSScrollableBase::JSBackToTop(bool backToTop)
+{
+    NG::ScrollableModelNG::SetBackToTop(backToTop);
 }
 } // namespace OHOS::Ace::Framework
