@@ -805,8 +805,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
 
@@ -860,8 +860,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + MONTHINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
 
@@ -916,8 +916,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay() + DAYINDEX));
+                                                    std::to_string(pickerDate.GetMonth() + DAYINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
 }
 
 /**
@@ -971,8 +971,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay()));
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay() + YEARINDEX));
 }
 
 /**
@@ -1136,8 +1136,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay() + YEARINDEX));
+                                                    std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
 }
 
 /**
@@ -1191,8 +1191,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay()));
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay() + MONTHINDEX));
 }
 
 /**
@@ -1301,8 +1301,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay()));
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay() + YEARINDEX));
 }
 
 /**
@@ -1356,8 +1356,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay() + MONTHINDEX));
+                                                    std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
 }
 
 /**
@@ -1686,8 +1686,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay()));
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay() + MONTHINDEX));
 }
 
 /**
@@ -1741,8 +1741,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay() + DAYINDEX));
+                                                    std::to_string(pickerDate.GetMonth() + DAYINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
 }
 
 /**

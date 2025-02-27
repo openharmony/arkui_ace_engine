@@ -388,6 +388,7 @@ void DatePickerPattern::OnModifyDone()
     }
     ClearFocus();
     isForceUpdate_ = false;
+    isDateOrderChange_ = false;
     InitDisabled();
     if (ShowMonthDays()) {
         FlushMonthDaysColumn();
@@ -432,31 +433,18 @@ void DatePickerPattern::InitDisabled()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void DatePickerPattern::UpdateConfirmButtonMargin(
-    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+void DatePickerPattern::UpdateButtonMargin(
+    const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmNode)
 {
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    isRtl = isConfirmNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
         DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
     }
-    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
-}
-
-void DatePickerPattern::UpdateCancelButtonMargin(
-    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
-{
-    MarginProperty margin;
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
-    } else {
-        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
-            ModuleDialogType::DATEPICKER_DIALOG);
-    }
-    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+    buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
 void DatePickerPattern::OnFontConfigurationUpdate()
@@ -471,39 +459,59 @@ void DatePickerPattern::OnFontScaleConfigurationUpdate()
     closeDialogEvent_();
 }
 
-void DatePickerPattern::OnLanguageConfigurationUpdate()
+void DatePickerPattern::UpdateButtonNode(const RefPtr<FrameNode>& buttonNode, const bool isConfirmNode)
 {
-    auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
-    CHECK_NULL_VOID(buttonConfirmNode);
-    auto confirmNode = AceType::DynamicCast<FrameNode>(buttonConfirmNode->GetFirstChild());
-    CHECK_NULL_VOID(confirmNode);
-    auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(confirmNodeLayout);
-    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
-    auto pipeline = confirmNode->GetContextRefPtr();
+    CHECK_NULL_VOID(buttonNode);
+    auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(updateNode);
+    auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(updateNodeLayout);
+
+    std::string lettersStr = isConfirmNode ? "common.ok" : "common.cancel";
+    updateNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters(lettersStr));
+
+    auto pipeline = updateNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
-    confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    UpdateButtonMargin(buttonNode, dialogTheme, isConfirmNode);
+    updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 
-    auto buttonCancelNode = weakButtonCancel_.Upgrade();
-    CHECK_NULL_VOID(buttonCancelNode);
-    auto cancelNode = AceType::DynamicCast<FrameNode>(buttonCancelNode->GetFirstChild());
-    CHECK_NULL_VOID(cancelNode);
-    auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(cancelNodeLayout);
-    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
-    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
-    cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
+void DatePickerPattern::UpdateLunarSwitch()
+{
     auto lunarSwitchNode = weakLunarSwitchText_.Upgrade();
     CHECK_NULL_VOID(lunarSwitchNode);
+
     auto lunarSwitchTextLayoutProperty = lunarSwitchNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lunarSwitchTextLayoutProperty);
     lunarSwitchTextLayoutProperty->UpdateContent(
         Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
     lunarSwitchNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void DatePickerPattern::UpdateDateOrder()
+{
+    auto language = AceApplicationInfo::GetInstance().GetLanguage();
+    std::string dateOrder = "y-d-M";
+    if (language != "ug") {
+        DateTimeSequence sequence;
+        OrderResult orderResult = sequence.GetDateOrder(language);
+        dateOrder = orderResult.dateOrder;
+    }
+    SetDateOrder(dateOrder);
+}
+
+void DatePickerPattern::OnLanguageConfigurationUpdate()
+{
+    auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
+    UpdateButtonNode(buttonConfirmNode, true);
+
+    auto buttonCancelNode = weakButtonCancel_.Upgrade();
+    UpdateButtonNode(buttonCancelNode, false);
+
+    UpdateLunarSwitch();
+    UpdateDateOrder();
 }
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
