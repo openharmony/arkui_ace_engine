@@ -619,6 +619,7 @@ public:
     void CheckMarkForIndicatorBoundary();
     bool IsHorizontalAndRightToLeft() const;
     TextDirection GetNonAutoLayoutDirection() const;
+    void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -931,7 +932,6 @@ private:
     void FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex);
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
-    void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
     void HandleSwiperCustomAnimation(float offset);
     void CalculateAndUpdateItemInfo(float offset = 0.0f);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
