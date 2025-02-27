@@ -788,6 +788,7 @@ struct ArkUIMenuDividerOptions {
     ArkUI_Uint32 color;
     ArkUIDimensionType startMargin;
     ArkUIDimensionType endMargin;
+    ArkUI_Int32 mode;
 };
 
 struct ArkUIBackdropBlur {
@@ -5148,6 +5149,8 @@ struct ArkUISelectModifier {
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
     void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetSelectDirection)(ArkUINodeHandle node);
+    void (*setSelectDividerStyle)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo);
+    void (*resetSelectDividerStyle)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

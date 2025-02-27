@@ -166,6 +166,11 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
     return this;
   }
+  dividerStyle(value: Optional<DividerStyleOptions>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, SelectDividerStyleModifier.identity, SelectDividerStyleModifier, value);
+    return this;
+  }
   direction(value: Direction): this {
     modifierWithKey(this._modifiersWithKeys, SelectDirectionModifier.identity, SelectDirectionModifier, value);
     return this;
@@ -593,6 +598,34 @@ class SelectDividerModifier extends ModifierWithKey<DividerOptions | null> {
       this.stageValue?.color === this.value?.color &&
       this.stageValue?.startMargin === this.value?.startMargin &&
       this.stageValue?.endMargin === this.value?.endMargin);
+  }
+}
+
+class SelectDividerStyleModifier extends ModifierWithKey<Optional<DividerStyleOptions>> {
+  constructor(value: Optional<DividerStyleOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectDividerStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetDividerStyle(node);
+    } else {
+      getUINativeModule().select.setDividerStyle(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin, this.value.mode);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
+        (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
+        (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
+        (this.stageValue as DividerStyleOptions).endMargin === (this.value as DividerStyleOptions).endMargin &&
+        (this.stageValue as DividerStyleOptions).mode === (this.value as DividerStyleOptions).mode);
+    } else {
+      return true;
+    }
   }
 }
 

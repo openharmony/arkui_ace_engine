@@ -114,6 +114,7 @@ public:
         if (!isOptionPattern_) {
             GetHost()->MarkModifyDone();
         }
+        UpdateDividerSelectedStatus(isSelected_);
     }
 
     bool IsSelected() const
@@ -168,6 +169,7 @@ public:
     void SetChange()
     {
         isSelected_ = !isSelected_;
+        UpdateDividerSelectedStatus(isSelected_);
     }
 
     bool IsChange() const
@@ -185,6 +187,21 @@ public:
     RefPtr<FrameNode> GetLabelNode()
     {
         return label_;
+    }
+
+    RefPtr<FrameNode> GetBottomDivider()
+    {
+        return bottomDivider_;
+    }
+
+    void SetTopDivider(WeakPtr<FrameNode> topDivider)
+    {
+        topDivider_ = topDivider;
+    }
+
+    RefPtr<FrameNode> GetTopDivider()
+    {
+        return topDivider_.Upgrade();
     }
 
     void PlayBgColorAnimation(bool isHoverChange = true);
@@ -392,10 +409,13 @@ public:
     {
         optionBgColor_ = color;
     }
+    void AttachBottomDivider();
+    void RemoveBottomDivider();
 
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
+    void CreateBottomDivider();
     void RegisterOnPress();
     void OnAfterModifyDone() override;
     RefPtr<FrameNode> GetMenuWrapper();
@@ -486,6 +506,9 @@ private:
     void ClearFocusStyle();
     void PostHoverSubMenuTask();
     void PerformHideSubMenu(std::function<void()> callback);
+    void UpdateDividerSelectedStatus(bool isSelected);
+    void UpdateDividerHoverStatus(bool isHover);
+    void UpdateDividerPressStatus(bool isPress);
     inline bool IsOptionPattern()
     {
         return isOptionPattern_;
@@ -523,6 +546,8 @@ private:
     RefPtr<FrameNode> expandIcon_ = nullptr;
     RefPtr<FrameNode> embeddedMenu_ = nullptr;
     RefPtr<FrameNode> clickableArea_ = nullptr;
+    RefPtr<FrameNode> bottomDivider_ = nullptr;
+    WeakPtr<FrameNode> topDivider_ = nullptr;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> onTouchEvent_;
     std::function<void(UIState)> onPressEvent_;

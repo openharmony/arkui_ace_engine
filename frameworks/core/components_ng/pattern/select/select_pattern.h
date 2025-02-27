@@ -204,6 +204,7 @@ public:
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
     void SetDivider(const SelectDivider& divider);
+    void SetDividerMode(const std::optional<DividerMode>& mode);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
     Dimension GetSelectLeftRightMargin() const;

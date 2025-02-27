@@ -19850,6 +19850,10 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
     return this;
   }
+  dividerStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectDividerStyleModifier.identity, SelectDividerStyleModifier, value);
+    return this;
+  }
   direction(value) {
     modifierWithKey(this._modifiersWithKeys, SelectDirectionModifier.identity, SelectDirectionModifier, value);
     return this;
@@ -20039,6 +20043,32 @@ class SelectDividerModifier extends ModifierWithKey {
   }
 }
 SelectDividerModifier.identity = Symbol('selectDivider');
+class SelectDividerStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetDividerStyle(node);
+    } else {
+      getUINativeModule().select.setDividerStyle(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin, this.value.mode);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
+        this.stageValue.color === this.value.color &&
+        this.stageValue.startMargin === this.value.startMargin &&
+        this.stageValue.endMargin === this.value.endMargin &&
+        this.stageValue.mode === this.value.mode);
+    } else {
+      return true;
+    }
+  }
+}
+SelectDividerStyleModifier.identity = Symbol('selectDividerStyle');
 class ControlSizeModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -26048,7 +26078,8 @@ class MenuItemDividerModifier extends ModifierWithKey {
     if (reset || !this.value) {
       getUINativeModule().menu.resetMenuItemDivider(node);
     } else {
-      getUINativeModule().menu.setMenuItemDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+      getUINativeModule().menu.setMenuItemDivider(node, this.value.strokeWidth,
+        this.value.color, this.value.startMargin, this.value.endMargin, this.value.mode);
     }
   }
   checkObjectDiff() {
@@ -26058,7 +26089,8 @@ class MenuItemDividerModifier extends ModifierWithKey {
       return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
         this.stageValue.color === this.value.color &&
         this.stageValue.startMargin === this.value.startMargin &&
-        this.stageValue.endMargin === this.value.endMargin);
+        this.stageValue.endMargin === this.value.endMargin &&
+        this.stageValue.mode === this.value.mode);
     } else {
       return true;
     }
@@ -26073,7 +26105,8 @@ class MenuItemGroupDividerModifier extends ModifierWithKey {
     if (reset || !this.value) {
       getUINativeModule().menu.resetMenuItemGroupDivider(node);
     } else {
-      getUINativeModule().menu.setMenuItemGroupDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+      getUINativeModule().menu.setMenuItemGroupDivider(node, this.value.strokeWidth, this.value.color,
+        this.value.startMargin, this.value.endMargin, this.value.mode);
     }
   }
 
@@ -26084,7 +26117,8 @@ class MenuItemGroupDividerModifier extends ModifierWithKey {
       return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
         this.stageValue.color === this.value.color &&
         this.stageValue.startMargin === this.value.startMargin &&
-        this.stageValue.endMargin === this.value.endMargin);
+        this.stageValue.endMargin === this.value.endMargin &&
+        this.stageValue.mode === this.value.mode);
     } else {
       return true;
     }

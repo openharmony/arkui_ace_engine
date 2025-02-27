@@ -223,8 +223,8 @@ HWTEST_F(MenuPattern2TestNg, ModifyDivider, TestSize.Level1)
     MneuModelInstance.SetFontSize(Dimension(TARGET_FONT));
     MneuModelInstance.SetFontColor(Color::RED);
     MneuModelInstance.SetFontWeight(FontWeight::BOLD);
-    MneuModelInstance.SetItemDivider(ITEM_DIVIDER);
-    MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER);  // add divider
+    MneuModelInstance.SetItemDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
+    MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);  // add divider
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);

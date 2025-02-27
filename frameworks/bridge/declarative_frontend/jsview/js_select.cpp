@@ -137,6 +137,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("divider", &JSSelect::SetDivider);
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
+    JSClass<JSSelect>::StaticMethod("dividerStyle", &JSSelect::SetDividerStyle);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -886,6 +887,49 @@ void JSSelect::SetDivider(const JSCallbackInfo& info)
         divider.strokeWidth = 0.0_vp;
     }
     SelectModel::GetInstance()->SetDivider(divider);
+}
+
+void JSSelect::SetDividerStyle(const JSCallbackInfo& info)
+{
+    NG::SelectDivider divider;
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Dimension defaultMargin = -1.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    auto selectTheme = GetTheme<SelectTheme>();
+    if (selectTheme) {
+        defaultStrokeWidth = selectTheme->GetDefaultDividerWidth();
+        defaultColor = selectTheme->GetLineColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+        divider.startMargin = defaultMargin;
+        divider.endMargin = defaultMargin;
+    }
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        auto mode = DividerMode::FLOATING_ABOVE_MENU;
+        divider.isDividerStyle = true;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        CalcDimension value;
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value) && value.IsNonNegative()) {
+            divider.strokeWidth = value;
+        }
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value) && value.IsNonNegative()) {
+            divider.startMargin = value;
+        }
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value) && value.IsNonNegative()) {
+            divider.endMargin = value;
+        }
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            divider.color = Color::TRANSPARENT;
+        }
+        auto modeVal = obj->GetProperty("mode");
+        if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {
+            mode = DividerMode::EMBEDDED_IN_MENU;
+        }
+        SelectModel::GetInstance()->SetDividerStyle(divider, mode);
+    } else {
+        divider.isDividerStyle = false;
+        SelectModel::GetInstance()->SetDivider(divider);
+    }
 }
 
 bool JSSelect::CheckDividerValue(const Dimension &dimension)

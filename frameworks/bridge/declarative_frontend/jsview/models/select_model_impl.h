@@ -67,6 +67,7 @@ public:
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetDivider(const NG::SelectDivider& divider) override {}
+    void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode) override {};
     void SetControlSize(const std::optional<ControlSize>& controlSize) override {}
     void SetLayoutDirection(TextDirection value) override;
     ControlSize GetControlSize() override { return ControlSize{}; }

@@ -3439,6 +3439,12 @@ let ImageAnalyzerType;
   ImageAnalyzerType[ImageAnalyzerType.OBJECT_LOOKUP = 2] = 'OBJECT_LOOKUP';
 })(ImageAnalyzerType || (ImageAnalyzerType = {}));
 
+let DividerMode;
+(function (DividerMode) {
+  DividerMode[DividerMode.FLOATING_ABOVE_MENU = 0] = 'FLOATING_ABOVE_MENU';
+  DividerMode[DividerMode.EMBEDDED_IN_MENU = 1] = 'EMBEDDED_IN_MENU';
+})(DividerMode || (DividerMode = {}));
+
 function wrapBuilder(builder) {
   return new WrappedBuilder(builder);
 }
