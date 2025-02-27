@@ -559,7 +559,8 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         return;
     }
 
-    ACE_SCOPED_TRACE("StartDecoding imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
+    ACE_SCOPED_TRACE("StartDecoding imageInfo: [%d-%d-%s]", imageDfxConfig_.nodeId_,
+        static_cast<int32_t>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
 
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);
