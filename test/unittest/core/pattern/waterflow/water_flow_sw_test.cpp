@@ -50,7 +50,7 @@ HWTEST_F(WaterFlowSWTest, LazyforeachReloaded01, TestSize.Level1)
 
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 7);
-    
+
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(1));
     EXPECT_EQ(mockLazy->GetHistoryTotalCount(), 50);
     EXPECT_EQ(lazyForEachNode->FrameCount(), 50);
@@ -119,10 +119,12 @@ HWTEST_F(WaterFlowSWTest, NoConvert001, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
-    vector<int> heights = {};
+    vector<int> heights = { 183, 300, 244, 287, 100, 125, 160, 300, 129, 147, 118, 179, 137, 177, 169, 234, 179, 288,
+        208, 270, 184, 162, 237, 205, 141, 189, 276, 146, 105, 207, 234, 283, 183, 191, 212, 186, 128, 288, 139, 256,
+        260, 243, 294, 261, 162 }; // randomly generated
     ASSERT_EQ(heights.size(), 45);
-    for (int i = 0; i < heights.size(); ++i) {
-        CreateItemWithHeight(heights);
+    for (int i = 0; i < 45; ++i) {
+        CreateItemWithHeight(heights[i]);
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_16);
