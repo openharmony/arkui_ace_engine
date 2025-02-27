@@ -1464,6 +1464,7 @@ class TextDataDetectorConfig {
 
 class ArkDragPreviewOptions {
   mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
+  sizeChangeEffect: DraggingSizeChangeEffect | undefined;
   numberBadge: boolean | number | undefined;
   isMultiSelectionEnabled: boolean | undefined;
   defaultAnimationBeforeLifting: boolean | undefined;
@@ -1474,6 +1475,7 @@ class ArkDragPreviewOptions {
   constructor() {
     this.mode = undefined;
     this.numberBadge = undefined;
+    this.sizeChangeEffect = undefined;
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
@@ -1485,6 +1487,7 @@ class ArkDragPreviewOptions {
     return (
       this.mode === another.mode &&
       this.numberBadge === another.numberBadge &&
+      this.sizeChangeEffect === another.sizeChangeEffect &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
       this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&

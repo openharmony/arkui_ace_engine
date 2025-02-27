@@ -3700,6 +3700,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
             previewOption.isMultiTiled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
+            break;
         default:
             break;
     }
@@ -3728,6 +3731,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     } else {
         option.isShowBadge = dragPreviewOptions.isShowBadge;
     }
+    option.sizeChangeEffect = static_cast<NG::DraggingSizeChangeEffect>(dragPreviewOptions.sizeChangeEffect);
     option.isNumber = dragPreviewOptions.isBadgeNumber;
     option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;

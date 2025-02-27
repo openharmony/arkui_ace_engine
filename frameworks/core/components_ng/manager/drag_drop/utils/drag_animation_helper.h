@@ -87,6 +87,17 @@ public:
     static void SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible);
     static void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
         const OffsetF& gatherNodeCenter, Point point, int32_t containerId);
+    static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode,
+        float dragPreviewScale, const PreparedInfoForDrag& data);
+    static void UpdatePreview(
+        const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& dragNode);
+    static void MountPixelMap(const RefPtr<OverlayManager>& manager, const RefPtr<GestureEventHub>& gestureHub,
+        const PreparedInfoForDrag& data, bool isDragPixelMap);
+    static void MountPixelMapSizeContentTransition(
+        const PreparedInfoForDrag& data, const RefPtr<FrameNode>& columnNode);
+
+private:
+    static void CreateAndMountMenuPreviewNode(const PreparedInfoForDrag& data, const RefPtr<FrameNode>& stackFrameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif

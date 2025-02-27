@@ -3683,6 +3683,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (typeof value === 'object') {
       arkDragPreviewOptions.mode = value.mode;
       arkDragPreviewOptions.numberBadge = value.numberBadge;
+      arkDragPreviewOptions.sizeChangeEffect = value.sizeChangeEffect;
     }
     if (typeof options === 'object') {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;

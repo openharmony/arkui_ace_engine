@@ -3389,8 +3389,16 @@ let DragPreviewMode;
   DragPreviewMode.ENABLE_DEFAULT_SHADOW = 3;
   DragPreviewMode.ENABLE_DEFAULT_RADIUS = 4;
   DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT = 5;
-  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT  = 6;
+  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT = 6;
+  DragPreviewMode.ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW = 7;
 })(DragPreviewMode || (DragPreviewMode = {}));
+
+let DraggingSizeChangeEffect;
+(function (DraggingSizeChangeEffect) {
+    DraggingSizeChangeEffect.DEFAULT = 0;
+    DraggingSizeChangeEffect.SIZE_TRANSITION = 1;
+    DraggingSizeChangeEffect.SIZE_CONTENT_TRANSITION = 2;
+})(DraggingSizeChangeEffect || (DraggingSizeChangeEffect = {}));
 
 let FoldStatus;
 (function (FoldStatus) {

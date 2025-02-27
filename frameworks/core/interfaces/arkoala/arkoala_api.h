@@ -1686,6 +1686,7 @@ struct ArkUITransitionEffectOption {
 struct ArkUIDragPreViewOptions {
     ArkUI_Int32 mode;
     ArkUI_Int32 modeArrayLength;
+    ArkUI_Int32 sizeChangeEffect;
     ArkUI_Int32 badgeNumber;
     ArkUI_Int32* modeArray;
     ArkUI_Bool isModeArray;
