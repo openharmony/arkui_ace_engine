@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/web/transitional_node_info.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/event/event_info_convertor.h"
 #include "nweb_handler.h"
 
 namespace OHOS::Ace::NG {
@@ -783,7 +784,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             break;
         case OptionMenuActionId::CUT:
             quickMenuCallback_->Continue(
-                OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+                OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
             pattern->CloseSelectOverlay();
             break;
         case OptionMenuActionId::PASTE:
@@ -980,10 +981,13 @@ void WebSelectOverlay::OnHandleReverse(bool isReverse)
 
 void WebSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
-    auto pattern = GetPattern<WebPattern>();
-    CHECK_NULL_VOID(pattern);
-    SelectCancel();
-    pattern->CloseSelectOverlay();
+    if (EventInfoConvertor::MatchCompatibleCondition() && IsMouseClickDown(sourceType, touchType)) {
+        return;
+    }
+    if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        SelectCancel();
+    }
 }
 
 void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, int32_t requestCode)
