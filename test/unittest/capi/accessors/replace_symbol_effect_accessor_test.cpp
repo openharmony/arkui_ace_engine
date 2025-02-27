@@ -58,5 +58,5 @@ HWTEST_F(ReplaceSymbolEffectAccessorTest, scopeTest, TestSize.Level1)
     ASSERT_EQ(arkScope, ARK_EFFECT_SCOPE_WHOLE);
 }
 
- } // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG
  

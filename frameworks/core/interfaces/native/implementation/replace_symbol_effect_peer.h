@@ -19,8 +19,9 @@
 
 struct ReplaceSymbolEffectPeer {
 public:
-    ReplaceSymbolEffectPeer() {
-       effectOptions = new OHOS::Ace::NG::SymbolEffectOptions(OHOS::Ace::SymbolEffectType::REPLACE);
+    ReplaceSymbolEffectPeer()
+    {
+        effectOptions = new OHOS::Ace::NG::SymbolEffectOptions(OHOS::Ace::SymbolEffectType::REPLACE);
     }
     OHOS::Ace::NG::SymbolEffectOptions* effectOptions;
 };
