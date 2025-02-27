@@ -22,6 +22,7 @@ const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 const componentUtils = requireNapi('arkui.componentUtils');
+const Configuration = requireNapi('arkui.modifier').Configuration;
 
 const o = 10003;
 const t = 10002;
@@ -893,6 +894,7 @@ export class d1 extends ViewPU {
                         Text.fontSize(this.getTitleFontSize());
                         Text.fontColor(this.getTitleFontColor());
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
+                        Text.textAlign(Configuration.getLocale().dir === 'rtl' ? TextAlign.End : TextAlign.Start);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
