@@ -22,10 +22,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
@@ -470,7 +470,13 @@ ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 
 ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF("GetAttachedNodeHandleById doesn't run on UI thread");
+        abort();
+    }
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
+    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
@@ -751,6 +757,29 @@ void GetCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, char** value)
     (*value)[size] = '\0';
 }
 
+ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (!frameNode->IsOnMainTree()) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
+    auto context = frameNode->GetAttachedContext();
+    CHECK_NULL_RETURN(context, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    if (!context->CheckThreadSafe()) {
+        LOGF("GetWindowInfoByNode doesn't run on UI thread");
+        abort();
+    }
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    std::string windowName = window->GetWindowName();
+    size_t nameSize = windowName.size();
+    *name = new char[nameSize + 1];
+    windowName.copy(*name, nameSize);
+    (*name)[nameSize] = '\0';
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -767,7 +796,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr,
         GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty, SetDrawCompleteEvent,
         ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent, RequestFocus, ClearFocus, FocusActivate,
-        SetAutoFocusTransfer, SetCrossLanguageOptions, GetCrossLanguageOptions,
+        SetAutoFocusTransfer, GetWindowInfoByNode, SetCrossLanguageOptions, GetCrossLanguageOptions,
         CheckIfCanCrossLanguageAttributeSetting, SetKeyProcessingMode };
     return &modifier;
 }
