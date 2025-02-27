@@ -41,6 +41,7 @@ declare class RepeatNative {
   static moveChild(fromIndex: number): void;
   static createNewChildStart(id: string): void;
   static createNewChildFinish(id: string): void;
+  static afterAddChild(): void;
   static onMove(handler: (from: number, to: number) => void);
 }
 
@@ -73,6 +74,7 @@ declare class RepeatVirtualScroll2Native {
       onGetRid4Index: (forIndex: number) => [number, number],
       onRecycleItems: (fromIndex: number, toIndex: number) => void,
       onActiveRange: (fromIndex: number, toIndex: number, isLoop: boolean) => void,
+      onMoveFromTo: (moveFrom: number, moveTo: number) => void,
       onPurge: () => void;
     }
   ): void;
@@ -92,5 +94,5 @@ declare class RepeatVirtualScroll2Native {
     l1rid4index: Array<Array<number>>): void;
 
   // drag and drop
-  static onMove(handler: (from: number, to: number) => void);
+  static onMove(repeatElmtId: number, handler: (from: number, to: number) => void);
 }

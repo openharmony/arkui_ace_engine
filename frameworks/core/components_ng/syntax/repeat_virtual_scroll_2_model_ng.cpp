@@ -27,13 +27,14 @@ void RepeatVirtualScroll2ModelNG::Create(uint32_t totalCount,
     const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
     const std::function<void(int32_t, int32_t)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+    const std::function<void(int32_t, int32_t)>& onMoveFromTo,
     const std::function<void()>& onPurge)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll2ModelNG::Create");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        nodeId, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onPurge);
+        nodeId, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
 
     stack->Push(repeatNode);
     stack->PopContainer();
@@ -84,12 +85,15 @@ void RepeatVirtualScroll2ModelNG::UpdateL1Rid4Index(int32_t repeatElmtId, uint32
     repeatNode->RequestContainerReLayout(invalidateContainerLayoutFromChildIndex);
 }
 
-void RepeatVirtualScroll2ModelNG::OnMove(std::function<void(int32_t, int32_t)>&& onMove)
+void RepeatVirtualScroll2ModelNG::OnMove(int32_t repeatElmtId, std::function<void(int32_t, int32_t)>&& onMove)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto node = AceType::DynamicCast<RepeatVirtualScroll2Node>(stack->GetMainElementNode());
-    CHECK_NULL_VOID(node);
-    node->SetOnMove(std::move(onMove));
+    auto repeatNode = AceType::DynamicCast<RepeatVirtualScroll2Node>(stack->GetMainElementNode());
+    if (repeatNode == nullptr) {
+        repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(repeatElmtId);
+    }
+    CHECK_NULL_VOID(repeatNode);
+    repeatNode->SetOnMove(std::move(onMove));
 }
 
 } // namespace OHOS::Ace::NG

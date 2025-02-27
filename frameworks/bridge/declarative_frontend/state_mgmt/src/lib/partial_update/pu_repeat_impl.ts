@@ -135,6 +135,7 @@ class __RepeatImpl<T> {
                 // render new UINode children
                 itemInfo.repeatItem = this.mkRepeatItem_(item, index);
                 this.initialRenderItem(key, itemInfo.repeatItem);
+                this.afterAddChild();
             }
 
             index++;
@@ -154,6 +155,13 @@ class __RepeatImpl<T> {
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`__RepeatImpl: reRender elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
+    }
+
+    private afterAddChild(): void {
+        if (this.onMoveHandler_ == undefined || this.onMoveHandler_ == null) {
+            return;
+        }
+        RepeatNative.afterAddChild();
     }
 
     private initialRenderItem(key: string, repeatItem: __RepeatItemFactoryReturn<T>): void {

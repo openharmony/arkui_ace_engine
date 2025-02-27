@@ -61,6 +61,7 @@ static bool ParseAndVerifyParams(const JSCallbackInfo& info)
     return (handlers->GetProperty("onGetRid4Index")->IsFunction() &&
             handlers->GetProperty("onRecycleItems")->IsFunction() &&
             handlers->GetProperty("onActiveRange")->IsFunction() &&
+            handlers->GetProperty("onMoveFromTo")->IsFunction() &&
             handlers->GetProperty("onPurge")->IsFunction());
 }
 
@@ -108,12 +109,19 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
 
+    auto onMoveFromTo = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onMoveFromTo")](
+                              int32_t moveFrom, int32_t moveTo) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto params = ConvertToJSValues(moveFrom, moveTo);
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    };
+
     auto onPurge = [execCtx = info.GetExecutionContext(), func = GetJSFunc(handlers, "onPurge")]() {
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), 0, nullptr);
     };
 
     RepeatVirtualScroll2Model::GetInstance()->Create(totalCount, onGetRid4Index, onRecycleItems, onActiveRange,
-        onPurge);
+        onMoveFromTo, onPurge);
 }
 
 void JSRepeatVirtualScroll2::RemoveNode(const JSCallbackInfo& info)
@@ -210,16 +218,25 @@ void JSRepeatVirtualScroll2::UpdateL1Rid4Index(const JSCallbackInfo& info)
 
 void JSRepeatVirtualScroll2::OnMove(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        RepeatVirtualScroll2Model::GetInstance()->OnMove(nullptr);
+    enum OnMoveParam {
+        ELMTID = 0,
+        ON_MOVE = 1,
+    };
+    if (!info[OnMoveParam::ELMTID]->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::OnMove - invalid parameters ERROR");
         return;
     }
-    auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](
+    auto repeatElmtId = info[OnMoveParam::ELMTID]->ToNumber<int32_t>();
+    if (!info[OnMoveParam::ON_MOVE]->IsFunction()) {
+        RepeatVirtualScroll2Model::GetInstance()->OnMove(repeatElmtId, nullptr);
+        return;
+    }
+    auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[OnMoveParam::ON_MOVE])](
                       int32_t from, int32_t to) {
         auto params = ConvertToJSValues(from, to);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
-    RepeatVirtualScroll2Model::GetInstance()->OnMove(std::move(onMove));
+    RepeatVirtualScroll2Model::GetInstance()->OnMove(repeatElmtId, std::move(onMove));
 }
 
 void JSRepeatVirtualScroll2::JSBind(BindingTarget globalObj)

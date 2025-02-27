@@ -38,6 +38,7 @@ public:
     // key: string
     // parentView?: JSView
     static void CreateNewChildFinish(const JSCallbackInfo& info);
+    static void AfterAddChild();
     static void OnMove(const JSCallbackInfo& info);
 };
 
