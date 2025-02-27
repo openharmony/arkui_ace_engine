@@ -517,11 +517,9 @@ public:
         return elementsStack_.empty();
     }
 
-    void SetIsPrebuildingAndDeadline(bool isPrebuilding, int64_t prebuildDeadline)
+    void SetIsPrebuilding(bool isPrebuilding)
     {
         isPrebuilding_ = isPrebuilding;
-        prebuildDeadline_ = prebuildDeadline;
-        isPrebuildTimeout_ = false;
     }
 
     bool CheckIsPrebuildTimeout()

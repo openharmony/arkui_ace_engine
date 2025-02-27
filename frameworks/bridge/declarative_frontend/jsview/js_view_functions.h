@@ -80,7 +80,7 @@ public:
     std::string ExecuteOnFormRecycle();
     void ExecuteOnFormRecover(const std::string &statusData);
     void ExecutePrebuildComponent();
-    void ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase);
+    bool ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase);
     bool ExecuteIsEnablePrebuildInMultiFrame();
     void ExecuteOnNewParam(const std::string &newParam);
 

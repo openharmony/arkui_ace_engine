@@ -198,16 +198,18 @@ void ViewFunctions::ExecutePrebuildComponent()
     }
 }
 
-void ViewFunctions::ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase)
+bool ViewFunctions::ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase)
 {
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
     auto func = jsSetPrebuildPhase_.Lock();
     if (!func->IsEmpty()) {
         auto jsPrebuildPhase = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(prebuildPhase)));
         func->Call(jsObject_.Lock(), 1, &jsPrebuildPhase);
+        return true;
     } else {
         LOGE("the set prebuild phase func is null");
     }
+    return false;
 }
 
 bool ViewFunctions::ExecuteIsEnablePrebuildInMultiFrame()
