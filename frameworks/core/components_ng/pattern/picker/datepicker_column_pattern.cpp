@@ -94,7 +94,7 @@ void DatePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (hapticController_) {
         hapticController_->Stop();
     }
-    UnregisterWindowStateChangedCallback();
+    UnregisterWindowStateChangedCallback(frameNode);
 }
 
 void DatePickerColumnPattern::OnModifyDone()
@@ -185,13 +185,12 @@ void DatePickerColumnPattern::RegisterWindowStateChangedCallback()
     pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
-void DatePickerColumnPattern::UnregisterWindowStateChangedCallback()
+void DatePickerColumnPattern::UnregisterWindowStateChangedCallback(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
 
 void DatePickerColumnPattern::OnWindowHide()
@@ -346,12 +345,12 @@ void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
 
 void DatePickerColumnPattern::OnTouchDown()
 {
+    SetSelectedMark();
     PlayPressAnimation(pressColor_);
 }
 
 void DatePickerColumnPattern::OnTouchUp()
 {
-    SetSelectedMark();
     if (hoverd_) {
         PlayPressAnimation(GetButtonHoverColor());
     } else {
@@ -361,6 +360,12 @@ void DatePickerColumnPattern::OnTouchUp()
 
 void DatePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
 {
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    CHECK_EQUAL_VOID(pickerTheme->IsCircleDial(), true);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blend = host->GetParent();

@@ -72,7 +72,8 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
 
 RSRecordingPath SvgPolygon::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    if (path_.has_value() && lengthRule_ == lengthRule) {
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
         return path_.value();
     }
     RSRecordingPath path;
@@ -86,11 +87,13 @@ RSRecordingPath SvgPolygon::AsPath(const SvgLengthScaleRule& lengthRule)
     }
     ConvertPoints(rsPoints, lengthRule);
     path.AddPoly(rsPoints, rsPoints.size(), isClose_);
-    if (attributes_.clipState.IsEvenodd()) {
-        path.SetFillStyle(RSPathFillType::EVENTODD);
-    }
+
     if (attributes_.fillState.IsEvenodd()) {
         path.SetFillStyle(RSPathFillType::EVENTODD);
+    }
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(path);
     }
     return path;
 }

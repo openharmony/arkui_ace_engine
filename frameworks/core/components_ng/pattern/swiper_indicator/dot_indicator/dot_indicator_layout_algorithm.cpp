@@ -26,9 +26,6 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-} // namespace
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -74,20 +71,29 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto indicatorHeight =
         static_cast<float>(((userItemHeight > userSelectedItemHeight) ?
             userItemHeight : userSelectedItemHeight) + indicatorHeightPadding.ConvertToPx() * 2);
+    auto noPaddingIndicatorHeight = indicatorHeight - indicatorHeightPadding.ConvertToPx();
     auto allPointDiameterSum = userItemWidth * (indicatorDisplayCount_ + 1);
     if (paintProperty->GetIsCustomSizeValue(false)) {
         allPointDiameterSum = userItemWidth * (indicatorDisplayCount_ - 1) + userSelectedItemWidth;
     }
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (indicatorDisplayCount_ - 1);
+    
+    auto indicatorDotItemSpace = paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
+    auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (indicatorDisplayCount_ - 1);
     auto paddingSide = theme->GetIndicatorPaddingDot().ConvertToPx();
+    
     auto indicatorWidth = paddingSide + allPointDiameterSum + allPointSpaceSum + paddingSide;
-
+    auto noPaddingIndicatorWidth = indicatorWidth - paddingSide * 1.5;
+    auto ignoreSize = paintProperty->GetIgnoreSizeValue(false);
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;
         indicatorHeight_ = indicatorHeight;
+        ignorSizeIndicatorWidth_ = indicatorWidth;
+        ignorSizeIndicatorHeight_ = ignoreSize ? noPaddingIndicatorHeight : indicatorHeight;
     } else {
         indicatorWidth_ = indicatorHeight;
         indicatorHeight_ = indicatorWidth;
+        ignorSizeIndicatorWidth_ = indicatorHeight;
+        ignorSizeIndicatorHeight_ = ignoreSize ? noPaddingIndicatorWidth : indicatorWidth;
     }
 
     const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
@@ -104,7 +110,6 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             indicatorHeight_ = std::max(indicatorHeight_, idealSize.Height());
         }
     }
-
     SizeF frameSize = { -1.0f, -1.0f };
     do {
         frameSize.SetSizeT(SizeF { indicatorWidth_, indicatorHeight_ });
@@ -127,7 +132,8 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
     CHECK_NULL_VOID(indicatorPattern);
     OffsetF currentOffset = OffsetF(0.0f, 0.0f);
-    auto needSet = indicatorPattern->GetDotCurrentOffset(currentOffset, indicatorWidth_, indicatorHeight_);
+    auto needSet = indicatorPattern->GetDotCurrentOffset(currentOffset, ignorSizeIndicatorWidth_,
+        ignorSizeIndicatorHeight_);
     if (needSet) {
         auto geometryNode = layoutWrapper->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -293,6 +293,7 @@ void WaterFlowTestNg::HandleDrag(float offset)
 
     info.SetMainVelocity(0.0);
     info.SetMainDelta(0.0);
+    pattern_->scrollableEvent_->GetScrollable()->lastMainDelta_ = 0.0;
     pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
     FlushUITasks();
 }

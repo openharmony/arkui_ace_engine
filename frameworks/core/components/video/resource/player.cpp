@@ -243,8 +243,8 @@ void Player::OnCompletion(const std::string& param)
 void Player::OnSeekComplete(const std::string& param)
 {
     currentPos_ = static_cast<uint32_t>(GetIntParam(param, PLAYER_PARAM_CURRENTPOS));
-    if (!onCurrentPosListener_.empty()) {
-        onCurrentPosListener_.back()(currentPos_);
+    if (!onSeekDoneListener_.empty()) {
+        onSeekDoneListener_.back()(currentPos_);
     }
 }
 
@@ -497,6 +497,30 @@ void Player::OnAddCurrentPosListener(CurrentPosListener&& listener)
     onCurrentPosListener_.push_back(std::move(listener));
 }
 
+void Player::AddSeekDoneListener(SeekDoneListener&& listener)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context");
+        return;
+    }
+
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), listener = std::move(listener)]() mutable {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnAddSeekDoneListener(std::move(listener));
+            }
+        },
+        "ArkUIVideoAddSeekDoneListener");
+}
+
+void Player::OnAddSeekDoneListener(SeekDoneListener&& listener)
+{
+    onSeekDoneListener_.push_back(std::move(listener));
+}
+
 void Player::AddCompletionListener(CompletionListener&& listener)
 {
     auto context = context_.Upgrade();
@@ -583,6 +607,7 @@ void Player::OnPopListener()
     onPreparedListener_.pop_back();
     onPlayStatusListener_.pop_back();
     onCurrentPosListener_.pop_back();
+    onSeekDoneListener_.pop_back();
     onCompletionListener_.pop_back();
     if (!onCurrentPosListener_.empty()) {
         onCurrentPosListener_.back()(currentPos_);

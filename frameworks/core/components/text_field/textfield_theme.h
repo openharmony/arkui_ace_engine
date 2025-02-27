@@ -401,6 +401,26 @@ public:
         return iconSize_;
     }
 
+    const Dimension& GetCancelIconSize() const
+    {
+        return cancelIconSize_;
+    }
+
+    const Dimension& GetPasswordIconSize() const
+    {
+        return passwordIconSize_;
+    }
+
+    const Dimension& GetCancelIconPadding() const
+    {
+        return cancelIconPadding_;
+    }
+
+    const Dimension& GetPasswordIconPadding() const
+    {
+        return passwordIconPadding_;
+    }
+
     const Dimension& GetIconHotZoneSize() const
     {
         return iconHotZoneSize_;
@@ -897,6 +917,10 @@ private:
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
+    Dimension cancelIconSize_ = 16.0_vp;
+    Dimension passwordIconSize_ = 20.0_vp;
+    Dimension cancelIconPadding_ = 14.0_vp;
+    Dimension passwordIconPadding_ = 10.0_vp;
 
     // Replace image(icon) with symbol
     Dimension symbolSize_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,13 +53,16 @@ void ScrollableUtilsTestNG::DragEnd(float velocityDelta)
 {
     auto pattern = dragNode_->GetPattern<ScrollablePattern>();
     auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
-    float velocity = velocityDelta * FRICTION * -FRICTION_SCALE;
+    auto friction = std::abs(velocityDelta) < SLOW_FRICTION_THRESHOLD ? SLOW_FRICTION : FRICTION;
+    float scale = std::abs(velocityDelta) < SLOW_FRICTION_THRESHOLD ? SLOW_VELOCITY_SCALE : VELOCITY_SCALE;
+    float velocity = velocityDelta * friction * -FRICTION_SCALE / scale;
     dragInfo_.SetMainDelta(0);
     dragInfo_.SetMainVelocity(velocity);
     dragInfo_.SetGlobalPoint(dragInfo_.GetGlobalPoint());
     dragInfo_.SetGlobalLocation(dragInfo_.GetGlobalLocation());
     dragInfo_.SetLocalLocation(dragInfo_.GetLocalLocation());
     scrollable->HandleTouchUp();
+    scrollable->lastMainDelta_ = 0.0;
     scrollable->HandleDragEnd(dragInfo_);
     scrollable->isDragging_ = false;
     FlushUITasks();

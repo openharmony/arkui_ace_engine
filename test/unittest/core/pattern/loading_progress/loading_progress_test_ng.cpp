@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -725,7 +726,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest009, TestSize.Level1)
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level1)
 {
-    SystemProperties::SetColorMode(ColorMode::DARK);
+    MockContainer::SetMockColorMode(ColorMode::DARK);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
@@ -765,7 +766,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level1)
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest011, TestSize.Level1)
 {
-    SystemProperties::SetColorMode(ColorMode::DARK);
+    MockContainer::SetMockColorMode(ColorMode::DARK);
     LoadingProgressModifier loadingProgressModifier;
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };

@@ -322,17 +322,27 @@ public:
     {
         return blendDuration_;
     }
+    float GetMinimumAmplitudeRatio() const
+    {
+        return minimumAmplitudeRatio_;
+    }
+    void UpdateMinimumAmplitudeRatio(float minimumAmplitudeRatio)
+    {
+        minimumAmplitudeRatio_ = minimumAmplitudeRatio;
+    }
     static constexpr float DEFAULT_SPRING_MOTION_RESPONSE = 0.55f;
     static constexpr float DEFAULT_SPRING_MOTION_DAMPING_RATIO = 0.825f;
     static constexpr float DEFAULT_SPRING_MOTION_BLEND_DURATION = 0.0f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE = 0.15f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO = 0.86f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION = 0.25f;
+    static constexpr float DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 
 private:
     float response_;
     float dampingRatio_;
     float blendDuration_;
+    float minimumAmplitudeRatio_ = DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO;
 };
 
 class InterpolatingSpring final : public Curve {

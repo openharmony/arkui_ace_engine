@@ -464,11 +464,11 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataSyncReplyTest001, TestSi
     UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
     AAFwk::Want want;
     AAFwk::Want reply;
-    auto ret = pattern->SendBusinessDataSyncReply(code, std::move(want), reply);
+    auto ret = pattern->SendBusinessDataSyncReply(code, want, reply);
     ASSERT_EQ(ret, false);
     
     pattern->sessionWrapper_ = nullptr;
-    ret = pattern->SendBusinessDataSyncReply(code, std::move(want), reply);
+    ret = pattern->SendBusinessDataSyncReply(code, want, reply);
     ASSERT_EQ(ret, false);
 #endif
 }
@@ -499,11 +499,11 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataTest001, TestSize.Level1
     UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
     AAFwk::Want want;
     BusinessDataSendType type = BusinessDataSendType::ASYNC;
-    auto ret = pattern->SendBusinessData(code, std::move(want), type);
+    auto ret = pattern->SendBusinessData(code, want, type);
     ASSERT_EQ(ret, false);
     
     pattern->sessionWrapper_ = nullptr;
-    ret = pattern->SendBusinessData(code, std::move(want), type);
+    ret = pattern->SendBusinessData(code, want, type);
     ASSERT_EQ(ret, false);
 #endif
 }

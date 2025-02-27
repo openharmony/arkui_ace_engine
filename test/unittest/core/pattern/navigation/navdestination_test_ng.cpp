@@ -68,6 +68,17 @@ struct UIComponents {
     RefPtr<GeometryNode> titleGeometryNode = nullptr;
     RefPtr<GeometryNode> subtitleGeometryNode = nullptr;
 };
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == NavigationBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<NavigationBarTheme>();
+    } else if (type == AgingAdapationDialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+    } else {
+        return AceType::MakeRefPtr<DialogTheme>();
+    }
+}
 } // namespace
 
 class NavdestinationTestNg : public testing::Test {
@@ -103,14 +114,10 @@ void NavdestinationTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == NavigationBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<NavigationBarTheme>();
-        } else if (type == AgingAdapationDialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
-        } else {
-            return AceType::MakeRefPtr<DialogTheme>();
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 RefPtr<LayoutWrapperNode> NavdestinationTestNg::CreateNavDestinationWrapper()
@@ -1092,7 +1099,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 1.0f;
     float subtitleHeight = 0.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_ = 2.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1112,7 +1119,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 100.0f;
     float subtitleHeight = 1.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_  = 2.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1133,7 +1140,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 99.0f;
     float subtitleHeight = 1.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 0.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_  = 0.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));

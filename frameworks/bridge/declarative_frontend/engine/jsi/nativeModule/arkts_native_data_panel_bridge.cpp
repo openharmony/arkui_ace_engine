@@ -131,6 +131,9 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
     std::vector<OHOS::Ace::NG::Gradient> shadowColors;
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
         auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
+        if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
+            return panda::JSValueRef::Undefined(vm);
+        }
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;
@@ -221,6 +224,10 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
         shadowColors.clear();
         auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
+        if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
+            SetTrackShadowObject(nativeNode, shadowColors, radius, offsetX, offsetY);
+            return panda::JSValueRef::Undefined(vm);
+        }
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;

@@ -574,6 +574,64 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrInitIndex008
+ * @tc.desc: Test property about initialIndex when list is layout from the end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrInitIndex008, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Not set initialIndex
+     * @tc.expected: List default at bottom
+     */
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
+}
+
+/**
+ * @tc.name: AttrInitIndex003
+ * @tc.desc: Test property about initialIndex when list is layout from the end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrInitIndex009, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set initialIndex:1, total ListItem size less than viewport
+     * @tc.expected: List is unScrollable, list is at bottom
+     */
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetInitialIndex(1);
+    CreateListItems(2);
+    CreateDone();
+    EXPECT_FALSE(pattern_->IsScrollable());
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: AttrInitIndex005
+ * @tc.desc: Test property about initialIndex when list is layout from the end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrInitIndex010, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set initialIndex:100, the initialIndex greater than max Index(itemSize-1)
+     * @tc.expected: List is at bottom, ignore initialIndex
+     */
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetInitialIndex(100);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
  * @tc.name: AttrScrollBar001
  * @tc.desc: Test property about scrollBar
  * @tc.type: FUNC

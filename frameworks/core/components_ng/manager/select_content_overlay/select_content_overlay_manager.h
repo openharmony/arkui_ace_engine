@@ -101,7 +101,7 @@ public:
     OffsetF GetContainerModalOffset();
     bool IsStopBackPress() const;
     bool IsRightClickSubWindowMenu();
-    bool IsSeletctOverlaySubWindowMenu();
+    bool IsSelectOverlaySubWindowMenu();
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);

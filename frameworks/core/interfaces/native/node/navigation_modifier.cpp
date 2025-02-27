@@ -446,7 +446,8 @@ void SetOnCoordScrollStartAction(ArkUINodeHandle node, void (*onCoordScrollStart
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
-        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
         onCoordScrollStartAction(nodeHandle);
     };
     NavigationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
@@ -459,7 +460,8 @@ void SetOnCoordScrollUpdateAction(ArkUINodeHandle node,
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollUpdateActionCallBack =
         [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
-            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+            auto frameNode = node.Upgrade();
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
             onCoordScrollUpdateAction(nodeHandle, currentOffset);
         };
     NavigationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
@@ -470,7 +472,8 @@ void SetOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndActi
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
-        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
         onCoordScrollEndAction(nodeHandle);
     };
     NavigationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));

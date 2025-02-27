@@ -23,7 +23,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr int32_t POINT_HOVER_ANIMATION_DURATION = 100;
 constexpr int32_t COMPONENT_DILATE_ANIMATION_DURATION = 250;
 constexpr int32_t COMPONENT_SHRINK_ANIMATION_DURATION = 300;
@@ -117,7 +116,7 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     if (isCustomSize_) {
         allPointDiameterSum = itemWidth * static_cast<float>(pointNumber - 1) + selectedItemWidth;
     }
-    float allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (pointNumber - 1);
+    float allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (pointNumber - 1);
 
     // Background necessary property
     float rectWidth =

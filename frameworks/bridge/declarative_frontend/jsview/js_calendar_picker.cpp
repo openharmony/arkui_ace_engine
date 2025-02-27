@@ -478,18 +478,16 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
         auto disabledDateRange = obj->GetProperty("disabledDateRange");
         ParseDisabledDateRange(disabledDateRange, settingData);
         PickerDate::SortAndMergeDisabledDateRange(settingData.disabledDateRange);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-            auto startDate = obj->GetProperty("start");
-            auto endDate = obj->GetProperty("end");
-            auto parseStartDate = ParseDate(startDate, false);
-            auto parseEndDate = ParseDate(endDate, false);
-            if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
-                parseStartDate = PickerDate();
-                parseEndDate = PickerDate();
-            }
-            settingData.startDate = parseStartDate;
-            settingData.endDate = parseEndDate;
+        auto startDate = obj->GetProperty("start");
+        auto endDate = obj->GetProperty("end");
+        auto parseStartDate = ParseDate(startDate, false);
+        auto parseEndDate = ParseDate(endDate, false);
+        if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
+            parseStartDate = PickerDate();
+            parseEndDate = PickerDate();
         }
+        settingData.startDate = parseStartDate;
+        settingData.endDate = parseEndDate;
     } else {
         dayRadius = calendarTheme->GetCalendarDayRadius();
     }
@@ -875,6 +873,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         properties.borderRadius = dialogRadius;
     }
     JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
+    JSViewAbstract::SetDialogBlurStyleOption(paramObj, properties);
+    JSViewAbstract::SetDialogEffectOption(paramObj, properties);
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

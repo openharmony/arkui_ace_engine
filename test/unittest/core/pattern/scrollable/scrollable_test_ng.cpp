@@ -1252,16 +1252,16 @@ HWTEST_F(ScrollableTestNg, FadingEdge001, TestSize.Level1)
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     auto paintProperty = scrollPn->GetPaintProperty<ScrollablePaintProperty>();
-    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), false);
+    NG::ScrollableModelNG::SetFadingEdge(Referenced::RawPtr(scroll_), false);
     EXPECT_FALSE(paintProperty->GetFadingEdge().value_or(false));
     /**
      * @tc.cases: SetFadingEdge true and SetFadingEdgeLength
      * @tc.expected: FadingEdge true and FadingEdgeLength is the same as SetFadingEdgeLength
      */
-    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), true);
+    NG::ScrollableModelNG::SetFadingEdge(Referenced::RawPtr(scroll_), true);
     EXPECT_TRUE(paintProperty->GetFadingEdge().value_or(false));
     EXPECT_EQ(paintProperty->GetFadingEdgeLength().value(), Dimension(32.0f, DimensionUnit::VP)); // default value;
-    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), true, Dimension(50.0f, DimensionUnit::PERCENT));
+    NG::ScrollableModelNG::SetFadingEdge(Referenced::RawPtr(scroll_), true, Dimension(50.0f, DimensionUnit::PERCENT));
     EXPECT_TRUE(paintProperty->GetFadingEdge().value_or(false));
     EXPECT_EQ(paintProperty->GetFadingEdgeLength().value(), Dimension(50.0f, DimensionUnit::PERCENT));
 }

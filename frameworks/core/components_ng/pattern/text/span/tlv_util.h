@@ -137,6 +137,8 @@ constexpr uint8_t TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR = 0x94;
 constexpr uint8_t TLV_SPAN_BACKGROUND_BACKGROUNDRADIUS = 0x95;
 constexpr uint8_t TLV_SPAN_BACKGROUND_GROUPID = 0x96;
 
+constexpr uint8_t TLV_CUSTOM_MARSHALL_BUFFER_START = 0x97;
+
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
     static void Write##type(std::vector<uint8_t>& buff, type value)         \

@@ -225,6 +225,22 @@ void ResetSubMenuExpandingMode(ArkUINodeHandle node)
     MenuModelNG::SetExpandingMode(frameNode, SubMenuExpandingMode::SIDE);
 }
 
+void SetMenuFontSize(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension fontSize = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    MenuModelNG::SetFontSize(frameNode, fontSize);
+}
+
+void ResetMenuFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::CalcDimension reset;
+    MenuModelNG::SetFontSize(frameNode, reset);
+}
+
 namespace NodeModifier {
 const ArkUIMenuModifier* GetMenuModifier()
 {
@@ -244,6 +260,8 @@ const ArkUIMenuModifier* GetMenuModifier()
         .resetMenuItemGroupDivider = ResetMenuItemGroupDivider,
         .setSubMenuExpandingMode = SetSubMenuExpandingMode,
         .resetSubMenuExpandingMode = ResetSubMenuExpandingMode,
+        .setMenuFontSize = SetMenuFontSize,
+        .resetMenuFontSize = ResetMenuFontSize,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

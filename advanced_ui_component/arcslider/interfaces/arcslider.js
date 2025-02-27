@@ -965,7 +965,6 @@ export class ArcSlider extends ViewV2 {
     }
 
     isHotRegion(touchX, touchY) {
-        this.isFocus = false;
         const radius = Math.sqrt(Math.pow(touchX - this.normalRadius, 2) + Math.pow(touchY - this.normalRadius, 2));
         let isRadiusNoFitted = (radius < this.normalRadius - this.options.styleOptions.activeTrackThickness) ||
             (radius > this.normalRadius);
@@ -990,13 +989,7 @@ export class ArcSlider extends ViewV2 {
         const isAntiClockAngleFitted = angleToRadian <= this.selectedStartAngle &&
             angleToRadian >= this.trackEndAngle;
         const isClockAngleFitted = angleToRadian >= this.selectedStartAngle && angleToRadian <= this.trackEndAngle;
-        if (this.isAntiClock && isAntiClockAngleFitted) {
-            this.isFocus = true;
-        }
-        if (!this.isAntiClock && isClockAngleFitted) {
-            this.isFocus = true;
-        }
-        if (this.isFocus) {
+        if (this.isAntiClock && isAntiClockAngleFitted || !this.isAntiClock && isClockAngleFitted) {
             return true;
         }
         return false;
@@ -1026,12 +1019,16 @@ export class ArcSlider extends ViewV2 {
         const isTouchTypeUp = this.isEnlarged && event.type === TouchType.Up;
         const isTouchTypeMove = this.isEnlarged && this.isTouchAnimatorFinished && event.type === TouchType.Move;
         if (event.type === TouchType.Down) {
+            this.isFocus = false;
+            if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+                this.isFocus = true;
+            }
             this.onTouchDown(event);
         }
         else if (isTouchTypeUp) {
+            this.clearTimeout();
             if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
                 this.options.onTouch?.(event);
-                this.clearTimeout();
             }
             this.meter = setTimeout(() => {
                 if (this.isEnlarged) {
@@ -1043,13 +1040,11 @@ export class ArcSlider extends ViewV2 {
             }, RESTORE_TIMEOUT);
             this.isMaxOrMinAnimator();
         }
-        else if (isTouchTypeMove) {
-            if (this.isFocus) {
-                this.options.onTouch?.(event);
-                this.onTouchMove(event.touches[0].y);
-                this.options.onChange?.(this.options.valueOptions.progress);
-                this.clearTimeout();
-            }
+        else if (isTouchTypeMove && this.isFocus) {
+            this.options.onTouch?.(event);
+            this.onTouchMove(event.touches[0].y);
+            this.options.onChange?.(this.options.valueOptions.progress);
+            this.clearTimeout();
         }
     }
 

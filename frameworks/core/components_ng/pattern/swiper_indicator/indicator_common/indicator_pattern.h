@@ -150,6 +150,7 @@ public:
 
         if (!GetDotIndicatorModifier()) {
             SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>());
+            singleGestureState_ = GestureState::GESTURE_STATE_INIT;
         }
         GetDotIndicatorModifier()->SetAnimationDuration(INDICATOR_DEFAULT_DURATION);
         float motionVelocity = 0.0f;
@@ -181,6 +182,7 @@ public:
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
         paintMethod->SetTouchBottomTypeLoop(singleIndicatorTouchBottomTypeLoop_);
+        singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
         paintMethod->SetFirstIndex(lastIndex_);
         ResetOptinalMouseClickIndex();
     }
@@ -214,6 +216,11 @@ public:
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    std::shared_ptr<SwiperParameters> GetIndicatorParameters() const
+    {
+        return swiperParameters_;
+    }
+
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;
 

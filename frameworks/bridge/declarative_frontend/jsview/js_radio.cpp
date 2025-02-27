@@ -14,21 +14,20 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_radio.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 namespace OHOS::Ace {
@@ -362,9 +361,7 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Radio.onChange");
     };
     RadioModel::GetInstance()->SetOnChange(std::move(onChange));
     args.ReturnSelf();

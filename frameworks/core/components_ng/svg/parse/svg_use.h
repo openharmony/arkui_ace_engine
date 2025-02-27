@@ -36,6 +36,7 @@ public:
     RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
     void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+    void ApplyOpacity(RSCanvas& canvas);
 
 private:
     // saves the current attributes of the svg node, and restores them when the scope exits.
@@ -49,6 +50,7 @@ private:
         WeakPtr<SvgNode> node_;
     };
     SvgAttributes useAttr_;
+    bool isDrawingPath_ = false;
 };
 
 } // namespace OHOS::Ace::NG

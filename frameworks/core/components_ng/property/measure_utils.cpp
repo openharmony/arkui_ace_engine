@@ -15,47 +15,47 @@
 
 #include "core/components_ng/property/measure_utils.h"
 
-#include "core/common/container.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 const static int32_t PLATFORM_VERSION_TEN = 10;
 }
 
-SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
+SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference,
+    const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp)
 {
-    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width());
-    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height());
+    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width(), calcRpnexp.first);
+    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height(), calcRpnexp.second);
     return { width.value_or(-1.0f), height.value_or(-1.0f) };
 }
 
-OptionalSizeF ConvertToOptionalSize(
-    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
+OptionalSizeF ConvertToOptionalSize(const CalcSize& size, const ScaleProperty& scaleProperty,
+    const SizeF& percentReference, const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp)
 {
-    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width());
-    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height());
+    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width(), calcRpnexp.first);
+    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height(), calcRpnexp.second);
     return { width, height };
 }
 
-std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float percentReference)
+std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float percentReference,
+    const std::vector<std::string>& rpnexp)
 {
     double result = -1.0;
     if (!value.NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
         return std::nullopt;
     }
     return static_cast<float>(result);
 }
 
-std::optional<float> ConvertToPx(
-    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float percentReference)
+std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
+    float percentReference, const std::vector<std::string>& rpnexp)
 {
     if (!value) {
         return std::nullopt;
     }
     double result = -1.0;
     if (!value.value().NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -117,18 +117,17 @@ PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const
     bool versionSatisfy =
         AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
     if (roundPixel && versionSatisfy) {
-        bool versionSecondaryCheck = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
         if (left.has_value()) {
-            left = versionSecondaryCheck ? round(left.value()) : floor(left.value());
+            left = floor(left.value());
         }
         if (right.has_value()) {
-            right = versionSecondaryCheck ? round(right.value()) : floor(right.value());
+            right = floor(right.value());
         }
         if (top.has_value()) {
-            top = versionSecondaryCheck ? round(top.value()) : floor(top.value());
+            top = floor(top.value());
         }
         if (bottom.has_value()) {
-            bottom = versionSecondaryCheck ? round(bottom.value()) : floor(bottom.value());
+            bottom = floor(bottom.value());
         }
     }
     if (nonNegative && versionSatisfy) {
@@ -177,26 +176,18 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
     if (roundPixel && AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        bool versionSecondaryCheck = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
         if (left.has_value()) {
-            left = (GreatOrEqual(left.value(), 1.0f) || NearEqual(left.value(), 0.0f))
-                       ? (versionSecondaryCheck ? round(left.value()) : floor(left.value()))
-                       : 1.0f;
+            left = (GreatOrEqual(left.value(), 1.0f) || NearEqual(left.value(), 0.0f)) ? floor(left.value()) : 1.0f;
         }
         if (right.has_value()) {
-            right = (GreatOrEqual(right.value(), 1.0f) || NearEqual(right.value(), 0.0f))
-                        ? (versionSecondaryCheck ? round(right.value()) : floor(right.value()))
-                        : 1.0f;
+            right = (GreatOrEqual(right.value(), 1.0f) || NearEqual(right.value(), 0.0f)) ? floor(right.value()) : 1.0f;
         }
         if (top.has_value()) {
-            top = (GreatOrEqual(top.value(), 1.0f) || NearEqual(top.value(), 0.0f))
-                      ? (versionSecondaryCheck ? round(top.value()) : floor(top.value()))
-                      : 1.0f;
+            top = (GreatOrEqual(top.value(), 1.0f) || NearEqual(top.value(), 0.0f)) ? floor(top.value()) : 1.0f;
         }
         if (bottom.has_value()) {
-            bottom = (GreatOrEqual(bottom.value(), 1.0f) || NearEqual(bottom.value(), 0.0f))
-                         ? (versionSecondaryCheck ? round(bottom.value()) : floor(bottom.value()))
-                         : 1.0f;
+            bottom =
+                (GreatOrEqual(bottom.value(), 1.0f) || NearEqual(bottom.value(), 0.0f)) ? floor(bottom.value()) : 1.0f;
         }
     }
     return BorderWidthPropertyF { left, top, right, bottom };

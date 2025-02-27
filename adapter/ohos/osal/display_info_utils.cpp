@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,6 @@
 #include "core/common/display_info.h"
 
 namespace OHOS::Ace {
-DisplayInfoUtils& DisplayInfoUtils::GetInstance()
-{
-    static DisplayInfoUtils instance;
-    return instance;
-}
-
 RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo(int32_t displayId)
 {
     auto displayManager = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
@@ -33,28 +27,14 @@ RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo(int32_t displayId)
         displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     }
     CHECK_NULL_RETURN(displayManager, nullptr);
-    auto dmRotation = displayManager->GetRotation();
-    auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
-    auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
-    std::vector<Rect> rects;
-    auto foldCreaseRegion = Rosen::DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
-    if (foldCreaseRegion) {
-        auto creaseRects = foldCreaseRegion->GetCreaseRects();
-        if (!creaseRects.empty()) {
-            for (const auto& item : creaseRects) {
-                Rect rect;
-                rect.SetRect(item.posX_, item.posY_, item.width_, item.height_);
-                rects.insert(rects.end(), rect);
-            }
-        }
-    }
     displayInfo_->SetWidth(displayManager->GetWidth());
     displayInfo_->SetHeight(displayManager->GetHeight());
     displayInfo_->SetDisplayId(displayManager->GetId());
-    displayInfo_->SetIsFoldable(isFoldable);
-    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
+    auto dmRotation = displayManager->GetRotation();
     displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
-    displayInfo_->SetCurrentFoldCreaseRegion(rects);
+    GetIsFoldable();
+    GetCurrentFoldStatus();
+    GetCurrentFoldCreaseRegion();
     return displayInfo_;
 }
 
@@ -64,14 +44,14 @@ void DisplayInfoUtils::InitIsFoldable()
     displayInfo_->SetIsFoldable(isFoldable);
 }
 
-bool DisplayInfoUtils::IsFoldable()
+bool DisplayInfoUtils::GetIsFoldable()
 {
-    if (hasInitIsFoldable) {
+    if (hasInitIsFoldable_) {
         return displayInfo_->GetIsFoldable();
     }
     auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
     displayInfo_->SetIsFoldable(isFoldable);
-    hasInitIsFoldable = true;
+    hasInitIsFoldable_ = true;
     return isFoldable;
 }
 
@@ -84,6 +64,9 @@ FoldStatus DisplayInfoUtils::GetCurrentFoldStatus()
 
 std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
 {
+    if (hasInitFoldCreaseRegion_) {
+        return displayInfo_->GetCurrentFoldCreaseRegion();
+    }
     std::vector<Rect> rects;
     auto foldCreaseRegion = Rosen::DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
     if (!foldCreaseRegion) {
@@ -101,6 +84,8 @@ std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
         rect.SetRect(item.posX_, item.posY_, item.width_, item.height_);
         rects.insert(rects.end(), rect);
     }
+    displayInfo_->SetCurrentFoldCreaseRegion(rects);
+    hasInitFoldCreaseRegion_ = true;
     return rects;
 }
 

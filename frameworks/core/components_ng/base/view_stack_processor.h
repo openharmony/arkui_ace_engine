@@ -534,7 +534,7 @@ public:
 
     bool IsPrebuilding() const
     {
-        return isPrebuilding_ && isPrebuildTimeout_;
+        return isPrebuilding_;
     }
 
     std::queue<PrebuildCompCmd>& GetPrebuildComponentCmds()

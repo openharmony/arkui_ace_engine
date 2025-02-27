@@ -297,11 +297,11 @@ void SecuritySessionWrapperImpl::InitAllCallback()
                 TaskExecutor::TaskType::UI, "ArkUIUIExtensionBindModalCallback");
         };
     sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ =
-        [instanceId = instanceId_](Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
+        [instanceId = instanceId_](Rosen::AvoidAreaType type, int32_t apiVersion) -> Rosen::AvoidArea {
             Rosen::AvoidArea avoidArea;
             auto container = Platform::AceContainer::GetContainer(instanceId);
             CHECK_NULL_RETURN(container, avoidArea);
-            avoidArea = container->GetAvoidAreaByType(type);
+            avoidArea = container->GetAvoidAreaByType(type, apiVersion);
             return avoidArea;
         };
     sessionCallbacks->notifyExtensionEventFunc_ =
@@ -331,12 +331,9 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    customWant_ = std::make_shared<Want>(want);
     auto wantPtr = std::make_shared<Want>(want);
-    AAFwk::WantParams configParam;
-    container->GetExtensionConfig(configParam);
-    AAFwk::WantParams wantParam(wantPtr->GetParams());
-    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
-    wantPtr->SetParams(wantParam);
+    UpdateWantPtr(wantPtr);
     if (sessionType_ != SessionType::SECURITY_UI_EXTENSION_ABILITY) {
         PLATFORM_LOGE("The UIExtensionComponent does not allow nested pulling of another.");
         auto pattern = hostPattern_.Upgrade();
@@ -383,7 +380,20 @@ void SecuritySessionWrapperImpl::DestroySession()
     if (dataHandler) {
         dataHandler->UnregisterDataConsumer(subSystemId_);
     }
+    customWant_ = nullptr;
     session_ = nullptr;
+}
+
+void SecuritySessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
+{
+    CHECK_NULL_VOID(wantPtr);
+    AAFwk::WantParams configParam;
+    auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
+    CHECK_NULL_VOID(container);
+    container->GetExtensionConfig(configParam);
+    AAFwk::WantParams wantParam(wantPtr->GetParams());
+    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    wantPtr->SetParams(wantParam);
 }
 
 bool SecuritySessionWrapperImpl::IsSessionValid()
@@ -398,7 +408,7 @@ int32_t SecuritySessionWrapperImpl::GetSessionId() const
 
 const std::shared_ptr<AAFwk::Want> SecuritySessionWrapperImpl::GetWant()
 {
-    return session_ ? session_->GetSessionInfo().want : nullptr;
+    return session_ ? customWant_ : nullptr;
 }
 /******************************* End: About session ***************************************/
 
@@ -505,16 +515,7 @@ void SecuritySessionWrapperImpl::NotifyForeground()
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
     auto wantPtr = session_->EditSessionInfo().want;
-    if (wantPtr) {
-        AAFwk::WantParams configParam;
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
-        if (container) {
-            container->GetExtensionConfig(configParam);
-            AAFwk::WantParams wantParam(wantPtr->GetParams());
-            wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
-            wantPtr->SetParams(wantParam);
-        }
-    }
+    UpdateWantPtr(wantPtr);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
@@ -783,7 +784,7 @@ void SecuritySessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& p
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessDataSyncReply(
-    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;
@@ -819,7 +820,7 @@ int32_t SecuritySessionWrapperImpl::GetInstanceIdFromHost() const
 }
 
 bool SecuritySessionWrapperImpl::SendBusinessData(
-    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const  AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     if (code == UIContentBusinessCode::UNDEFINED) {
         return false;

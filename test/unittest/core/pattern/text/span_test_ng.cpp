@@ -69,6 +69,7 @@ constexpr double IMAGE_SOURCESIZE_WIDTH = 300.0;
 constexpr double IMAGE_SOURCESIZE_HEIGHT = 200.0;
 constexpr double WIDTH = 400.0;
 constexpr double HEIGHT = 500.0;
+const std::string SYMBOL_SPAN_FONT_FAMILY = "Symbol Test";
 } // namespace
 
 class SpanTestNg : public testing::Test {};
@@ -1001,6 +1002,75 @@ HWTEST_F(SpanTestNg, SymbolSpanPropertyTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SymbolSpanPropertyTest004
+ * @tc.desc: Test symbolType and fontFamily of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbolType and fontFamilies property
+     */
+    symbolSpanModelNG.SetSymbolType(SymbolType::CUSTOM);
+    EXPECT_EQ(spanNode->GetSymbolType(), SymbolType::CUSTOM);
+
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_SPAN_FONT_FAMILY);
+    symbolSpanModelNG.SetFontFamilies(testFontFamilies);
+
+    auto fontFamilies = spanNode->GetFontFamily();
+    ASSERT_NE(fontFamilies->size(), 0);
+    auto familyNameValue = fontFamilies->front();
+    EXPECT_EQ(familyNameValue, SYMBOL_SPAN_FONT_FAMILY);
+}
+
+/**
+ * @tc.name: SymbolSpanPropertyTest005
+ * @tc.desc: Test InitialCustomSymbol of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    auto node = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
+
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
+
+    ASSERT_NE(frameNode, nullptr);
+    SymbolSpanModelNG::InitialCustomSymbol(frameNode, SYMBOL_ID, SYMBOL_SPAN_FONT_FAMILY.c_str());
+    
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbolType and fontFamilies property
+     */
+    EXPECT_EQ(spanNode->GetSymbolType(), SymbolType::CUSTOM);
+
+    auto fontFamilies = spanNode->GetFontFamily();
+    ASSERT_NE(fontFamilies->size(), 0);
+    auto familyNameValue = fontFamilies->front();
+    EXPECT_EQ(familyNameValue, SYMBOL_SPAN_FONT_FAMILY);
+}
+
+/**
  * @tc.name: SymbolSpanCreateTest001
  * @tc.desc: Test render strategy and effect strategy of symbolspan.
  * @tc.type: FUNC
@@ -1102,9 +1172,9 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
      */
     Font font;
     std::optional<Dimension> fontSize;
-    UINode* uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode().GetRawPtr();
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     spanModelNG.SetFont(font);
-    spanModelNG.SetFont(uiNode, font);
+    spanModelNG.SetFont(AceType::RawPtr(uiNode), font);
     EXPECT_EQ(spanNode->GetFontSize(), fontSize);
     /**
      * @tc.steps: step3. Set Font, call SetFont
@@ -1114,7 +1184,7 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
     font.fontWeight = FontWeight::BOLD;
     font.fontFamilies = FONT_FAMILY_VALUE;
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
-    spanModelNG.SetFont(uiNode, font);
+    spanModelNG.SetFont(AceType::RawPtr(uiNode), font);
     /**
      * @tc.steps: step4. Gets the relevant properties of the Font
      * @tc.expected: Check the font value

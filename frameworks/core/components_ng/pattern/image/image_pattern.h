@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,10 @@
 
 #include <memory>
 
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
 #include "base/geometry/offset.h"
+#include "base/image/image_defines.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
@@ -26,19 +29,18 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
-#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
@@ -51,18 +53,12 @@ class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
-    enum class ImageType {
-        BASE,
-        ANIMATION,
-        UNDEFINED,
-    };
-
     ImagePattern();
     ~ImagePattern() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+        return RenderContext::ContextParam { .type = RenderContext::ContextType::CANVAS, .surfaceName = std::nullopt };
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -141,7 +137,7 @@ public:
 
     void SetImageQuality(AIImageQuality imageQuality)
     {
-        isImageReloadNeeded_ = isImageReloadNeeded_  | (imageQuality_ != imageQuality);
+        isImageReloadNeeded_ = isImageReloadNeeded_ | (imageQuality_ != imageQuality);
         imageQuality_ = imageQuality;
     }
 
@@ -233,7 +229,7 @@ public:
     bool hasSceneChanged();
     void OnSensitiveStyleChange(bool isSensitive) override;
 
-    //animation
+    // animation
     struct CacheImageStruct {
         CacheImageStruct() = default;
         CacheImageStruct(const RefPtr<FrameNode>& imageNode) : imageNode(imageNode) {}
@@ -410,8 +406,7 @@ private:
         void DrawToRSCanvas(
             RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override
         {}
-        void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override
-        {}
+        void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override {}
         int32_t GetWidth() const override
         {
             return 0;
@@ -493,7 +488,7 @@ private:
     void ClearAltData();
     void UpdateSvgSmoothEdgeValue();
 
-    //animation
+    // animation
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void AdaptSelfSize();
     void SetShowingIndex(int32_t index);
@@ -564,7 +559,7 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
-    //animation
+    // animation
     ImageType imageType_ = ImageType::BASE;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;

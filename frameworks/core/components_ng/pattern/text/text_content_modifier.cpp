@@ -424,7 +424,11 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
         textPattern->DumpRecord("onDraw GetParagraphs empty:" + std::to_string(host->GetId()));
         return;
     }
-    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto contentRect = geometryNode->GetContentRect();
+    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
+        paintOffset_.GetY(), contentRect.ToString().c_str());
 
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {

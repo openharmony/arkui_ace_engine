@@ -799,4 +799,40 @@ void DynamicComponentRendererImpl::InitializeDynamicAccessibility()
     CHECK_NULL_VOID(pattern);
     pattern->InitializeAccessibility();
 }
+
+void DynamicComponentRendererImpl::NotifyForeground()
+{
+    if (isForeground_) {
+        return;
+    }
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    isForeground_ = true;
+    taskExecutor->PostTask(
+        [uiContent = uiContent_, aceLogTag = aceLogTag_]() {
+            CHECK_NULL_VOID(uiContent);
+            ContainerScope scope(uiContent->GetInstanceId());
+            TAG_LOGI(aceLogTag, "NotifyForeground");
+            uiContent->Foreground();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentNotifyForeground");
+}
+
+void DynamicComponentRendererImpl::NotifyBackground()
+{
+    if (!isForeground_) {
+        return;
+    }
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    isForeground_ = false;
+    taskExecutor->PostTask(
+        [uiContent = uiContent_, aceLogTag = aceLogTag_]() {
+            CHECK_NULL_VOID(uiContent);
+            ContainerScope scope(uiContent->GetInstanceId());
+            TAG_LOGI(aceLogTag, "NotifyBackground");
+            uiContent->Background();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentNotifyBackground");
+}
 } // namespace OHOS::Ace::NG

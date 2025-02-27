@@ -16,7 +16,7 @@
 #include "core/components/slider/render_slider.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/utils.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

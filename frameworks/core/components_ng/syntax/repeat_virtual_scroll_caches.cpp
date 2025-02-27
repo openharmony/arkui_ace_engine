@@ -19,6 +19,8 @@
 
 namespace OHOS::Ace::NG {
 
+using CacheItem = RepeatVirtualScrollCaches::CacheItem;
+
 RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
     const std::map<std::string, std::pair<bool, uint32_t>>& cacheCountL24ttype,
     const std::function<void(uint32_t)>& onCreateNode,
@@ -462,6 +464,7 @@ void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
 
         // don't fire OnRecycle here, as we manage reuse/recycle indepedently
         RemoveKeyFromL1(keyIter->second, false);
+        isModified_ = true;
     }
 }
 

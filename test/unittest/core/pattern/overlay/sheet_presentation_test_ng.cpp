@@ -988,26 +988,28 @@ HWTEST_F(SheetPresentationTestNg, GetHeightBySheetStyle001, TestSize.Level1)
     EXPECT_NE(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::MEDIUM);
     EXPECT_NE(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::LARGE);
     EXPECT_FALSE(algorithm->sheetStyle_.sheetHeight.height.has_value());
-    algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    auto maxHeight = 1000;
+    auto maxWidth = 1000;
+    algorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
 
     algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::MEDIUM;
     EXPECT_EQ(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::MEDIUM);
     EXPECT_FALSE(algorithm->sheetStyle_.sheetHeight.height.has_value());
-    algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    algorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
 
     algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::LARGE;
     algorithm->sheetStyle_.sheetHeight.height = 100.0_vp;
     EXPECT_EQ(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::LARGE);
     EXPECT_TRUE(algorithm->sheetStyle_.sheetHeight.height.has_value());
     EXPECT_FALSE(algorithm->SheetInSplitWindow());
-    algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    algorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
 
     algorithm->sheetType_ = SheetType::SHEET_CENTER;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto windowManager = pipelineContext->windowManager_;
     windowManager->SetWindowGetModeCallBack([]() -> WindowMode { return WindowMode::WINDOW_MODE_SPLIT_PRIMARY; });
     EXPECT_TRUE(algorithm->SheetInSplitWindow());
-    algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    algorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     SheetPresentationTestNg::TearDownTestCase();
 }
 

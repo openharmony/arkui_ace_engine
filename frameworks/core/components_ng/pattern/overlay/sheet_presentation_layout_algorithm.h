@@ -77,9 +77,15 @@ public:
     void CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper);
     void CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper);
 private:
-    float GetWidthByScreenSizeType(const SizeF& maxSize, LayoutWrapper* layoutWrapper) const;
-    float GetHeightByScreenSizeType(const SizeF& maxSize, LayoutWrapper* layoutWrapper) const;
-    float GetHeightBySheetStyle(LayoutWrapper* layoutWrapper) const;
+    float GetWidthByScreenSizeType(const float maxWidth, LayoutWrapper* layoutWrapper) const;
+    float GetHeightByScreenSizeType(const float maxHeight, const float maxWidth, LayoutWrapper* layoutWrapper) const;
+    void ComputeCenterStyleOffset(LayoutWrapper* layoutWrapper);
+    void ComputePopupStyleOffset(LayoutWrapper* layoutWrapper);
+    void ComputeWidthAndHeight(LayoutWrapper* layoutWrapper);
+    float ComputeMaxHeight(const float parentConstraintHeight, const float parentConstraintWidth,
+        LayoutWrapper* layoutWrapper) const;
+    float GetHeightBySheetStyle(const float parentConstraintHeight, const float parentConstraintWidth,
+        LayoutWrapper* layoutWrapper) const;
     bool SheetInSplitWindow() const;
     LayoutConstraintF CreateSheetChildConstraint(
         RefPtr<SheetPresentationProperty> layoutprop, LayoutWrapper* layoutWrapper);

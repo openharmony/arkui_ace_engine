@@ -112,6 +112,24 @@ class MenuWidthModifier extends ModifierWithKey<Length> {
   }
 }
 
+class MenuFontSizeModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menuFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().menu.resetFontSize(node);
+    } else {
+      getUINativeModule().menu.setFontSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class MenuItemDividerModifier extends ModifierWithKey<DividerStyleOptions> {
   constructor(value: DividerStyleOptions) {
     super(value);
@@ -188,8 +206,9 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     modifierWithKey(this._modifiersWithKeys, MenuWidthModifier.identity, MenuWidthModifier, value);
     return this;
   }
-  fontSize(value: any): this {
-    throw new Error('Method not implemented.');
+  fontSize(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, MenuFontSizeModifier.identity, MenuFontSizeModifier, value);
+    return this;
   }
   font(value: Font): this {
     modifierWithKey(this._modifiersWithKeys, MenuFontModifier.identity, MenuFontModifier, value);

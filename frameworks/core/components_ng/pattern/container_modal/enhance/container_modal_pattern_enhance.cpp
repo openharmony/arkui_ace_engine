@@ -245,11 +245,8 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         EventHubOnModifyDone(customTitleRow);
         EventHubOnModifyDone(gestureRow);
         EventHubOnModifyDone(floatingTitleRow);
-        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
-    } else {
-        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
-    
+
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
@@ -548,8 +545,8 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNo
     CHECK_NULL_RETURN(menuList, nullptr);
     auto subWindowManger = SubwindowManager::GetInstance();
     CHECK_NULL_RETURN(subWindowManger, nullptr);
-    if ((!subWindowManger->GetSubwindow(Container::CurrentId()) ||
-            !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
+    auto menuSubwindow = subWindowManger->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    if ((!menuSubwindow || !menuSubwindow->GetShown())) {
         ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
         MenuParam menuParam {};
         menuParam.type = MenuType::CONTEXT_MENU;
@@ -668,6 +665,20 @@ void ContainerModalPatternEnhance::EnableTapGestureOnNode(
     }
 }
 
+void ContainerModalPatternEnhance::HandleGestureRowHitTestMode(RefPtr<FrameNode>& gestureRow)
+{
+    if (!gestureRow) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "gestureRow is not exist when HandleHitTestMode");
+        return;
+    }
+
+    if (enableContainerModalGesture_) {
+        gestureRow->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    } else {
+        gestureRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    }
+}
+
 void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "set event on container modal is %{public}d", isEnable);
@@ -677,6 +688,7 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
     auto floatingTitleRow = GetFloatingTitleRow();
     auto customTitleRow = GetCustomTitleRow();
     auto gestureRow = GetGestureRow();
+    HandleGestureRowHitTestMode(gestureRow);
     EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
     EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
     EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
@@ -728,7 +740,9 @@ void ContainerModalPatternEnhance::SetColorConfigurationUpdate()
     TAG_LOGI(AceLogTag::ACE_APPBAR, "SetColorConfigurationUpdate");
     auto customButtonNode = GetCustomButtonNode();
     CHECK_NULL_VOID(customButtonNode);
-    auto isDark = SystemProperties::GetColorMode() == ColorMode::DARK;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto isDark = context->GetColorMode() == ColorMode::DARK;
     TAG_LOGI(AceLogTag::ACE_APPBAR, "SetColorConfigurationUpdate isDark = %{public}d", isDark);
     customButtonNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION, isDark);
 }
@@ -831,7 +845,20 @@ CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
     auto buttonRow = GetButtonRowByInspectorId();
     CHECK_NULL_RETURN(buttonRow, CalcLength(Dimension(0, DimensionUnit::VP)));
     auto width = buttonRow->GetGeometryNode()->GetFrameRect().Width();
-    return CalcLength(Dimension(width, DimensionUnit::VP));
+    if (NearZero(width)) {
+        // If the width is 0, initialize the width according to UX specifications.
+        int32_t buttonNum = 0;
+        const auto& children = buttonRow->GetChildren();
+        for (const auto& child : children) {
+            auto childButton = AceType::DynamicCast<FrameNode>(child);
+            if (childButton && childButton->IsVisible()) {
+                buttonNum++;
+            }
+        }
+        return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
+                          CONTROL_BUTTON_ROW_LEFT_PADDING + CONTROL_BUTTON_ROW_RIGHT_PADDING);
+    }
+    return CalcLength(Dimension(width, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
 }
 
 bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
@@ -892,9 +919,11 @@ bool ContainerModalPatternEnhance::GetContainerModalComponentRect(RectF& contain
 
 void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
 {
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
     std::string text = "";
     if (SystemProperties::GetResourceDecoupling()) {
-        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter(context->GetInstanceId());
         text = resAdapter->GetString(resId);
     }
     if (text.empty()) {

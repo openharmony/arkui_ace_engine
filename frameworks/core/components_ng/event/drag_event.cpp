@@ -413,7 +413,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->RemoveDeadlineTimer();
+        
         if (dragDropManager->IsAboutToPreview()) {
             dragDropManager->ResetDragging();
         }
@@ -426,12 +426,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             overlayManager->RemovePixelMap();
             return;
         }
-        if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
-            actuator->FireCustomerOnDragEnd();
-        }
         CHECK_NULL_VOID(actuator->userCallback_);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
+        if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
+            auto frameNode = gestureHub->GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto eventHub = frameNode->GetEventHub<EventHub>();
+            CHECK_NULL_VOID(eventHub);
+            auto pipeline = frameNode->GetContextRefPtr();
+            gestureHub->FireCustomerOnDragEnd(pipeline, eventHub);
+        }
         actuator->HideEventColumn();
         if (gestureHub->GetTextDraggable()) {
             actuator->textPixelMap_ = nullptr;
@@ -805,22 +810,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     taskExecutor->PostDelayedTask(
         preDragStatusCallback, TaskExecutor::TaskType::UI, curDuration, "ArkUIPreDragLongPressTimer");
 }
-
-void DragEventActuator::FireCustomerOnDragEnd()
-{
-    auto gestureHub = gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
-    auto frameNode = gestureHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode ->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    CHECK_NULL_VOID(dragEvent);
-    dragEvent->SetResult(DragRet::DRAG_FAIL);
-    dragEvent->SetDragBehavior(DragBehavior::UNKNOWN);
-    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
-}
-
 void DragEventActuator::ResetDragStatus()
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1471,9 +1460,11 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
         preDragStatus != PreDragStatus::ACTION_CANCELED_BEFORE_DRAG)
         || preDragStatus == PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION
         || preDragStatus == PreDragStatus::PREVIEW_LIFT_STARTED) {
-        auto nextPreDragStatus = static_cast<PreDragStatus>(static_cast<int32_t>(preDragStatus) + 1);
-        DragDropGlobalController::GetInstance().SetPreDragStatus(nextPreDragStatus);
-        onPreDragStatus = preDragStatus;
+        if (preDragStatus != PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+            auto nextPreDragStatus = static_cast<PreDragStatus>(static_cast<int32_t>(preDragStatus) + 1);
+            DragDropGlobalController::GetInstance().SetPreDragStatus(nextPreDragStatus);
+            onPreDragStatus = preDragStatus;
+        }
     }
     auto onPreDragFunc = eventHub->GetOnPreDrag();
     CHECK_NULL_VOID(onPreDragFunc);
@@ -1486,7 +1477,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 CHECK_NULL_VOID(callback);
                 callback(onPreDragStatus);
             },
-            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
     } else {
         onPreDragFunc(onPreDragStatus);
     }
@@ -2202,7 +2193,7 @@ std::optional<Shadow> DragEventActuator::GetDefaultShadow()
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
     shadow.SetIsFilled(true);
     return shadow;

@@ -263,6 +263,12 @@ _arkui_shared_libs = [
     part_name = "ace_engine"
     lib_names = [ "arcscrollbar" ]
   },
+  {
+    label = "//foundation/arkui/ace_engine/component_ext/arc_swiper:arcswiper"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "arcswiper" ]
+  },
 ]
 
 if (defined(current_platform.config)) {
@@ -293,13 +299,6 @@ napi_modules = [
         subsystem_name = "multimedia"
         part_name = "av_session"
         lib_names = [ "avcastpicker" ]
-      },
-      {
-        label =
-            "//foundation/arkui/ace_engine/component_ext/arc_swiper:arcswiper"
-        subsystem_name = "arkui"
-        part_name = "ace_engine"
-        lib_names = [ "arcswiper" ]
       },
     ]
   },

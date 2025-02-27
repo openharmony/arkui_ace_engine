@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
@@ -27,28 +28,11 @@
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#ifdef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
-
 namespace OHOS::Ace::NG {
 
 RefPtr<ImageData> ImageLoadingContext::QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 {
     ACE_FUNCTION_TRACE();
-#ifndef USE_ROSEN_DRAWING
-    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
-    if (cachedData) {
-        dataHit = true;
-        return NG::ImageData::MakeFromDataWrapper(&cachedData);
-    }
-    auto skData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
-    if (skData) {
-        sk_sp<SkData> data = SkData::MakeWithCopy(skData->data(), skData->size());
-
-        return NG::ImageData::MakeFromDataWrapper(&data);
-    }
-#else
     std::shared_ptr<RSData> rsData = nullptr;
     rsData = ImageLoader::QueryImageDataFromImageCache(src);
     if (rsData) {
@@ -64,7 +48,6 @@ RefPtr<ImageData> ImageLoadingContext::QueryDataFromCache(const ImageSourceInfo&
         data->BuildWithCopy(drawingData->GetData(), drawingData->GetSize());
         return AceType::MakeRefPtr<NG::DrawingImageData>(data);
     }
-#endif
     return nullptr;
 }
 
@@ -519,7 +502,7 @@ SizeF ImageLoadingContext::GetImageSize() const
     auto imageSize = imageObj_->GetImageSize();
     auto orientation = imageObj_->GetOrientation();
     if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
-        return {imageSize.Height(), imageSize.Width()};
+        return { imageSize.Height(), imageSize.Width() };
     }
     return imageSize;
 }

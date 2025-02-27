@@ -43,8 +43,8 @@ export struct Drawer {
   @Consume('router') router: NavPathStack;
   @State tabSelectedIndexes: number[] = [0];
   @State tabOptions: SegmentButtonOptions = SegmentButtonOptions.tab({
-    buttons: [{ text: '参数列表' },{ text: '基础属性' }, { text: '日志' }],
-    textPadding: { top: 8, bottom: 8 },backgroundColor:'#E1E3E5'
+    buttons: [{ text: '参数列表' }, { text: '基础属性' }, { text: '日志' }],
+    textPadding: { top: 8, bottom: 8 }
   });
   @StorageProp('Block') listBlockTags: Array<BlockTag> = [];
   @State dividerHeight: number = 1;
@@ -71,13 +71,14 @@ export struct Drawer {
       }
       .width('100%')
       .padding(16)
+
       Stack() {
         this.content()
       }.layoutWeight(1)
 
       if (this.showParameters) {
         Column() {
-          Row(){
+          Row() {
             SegmentButton({ options: this.tabOptions, selectedIndexes: $tabSelectedIndexes })
               .width(380)
             Row() {
@@ -95,9 +96,9 @@ export struct Drawer {
           .justifyContent(FlexAlign.SpaceBetween)
           .margin({ bottom: 12, top: 8 })
 
-          if (this.tabSelectedIndexes[0] === 0 ) {
+          if (this.tabSelectedIndexes[0] === 0) {
             this.parameters()
-          } else if (this.tabSelectedIndexes[0] === 1){
+          } else if (this.tabSelectedIndexes[0] === 1) {
             this.generic()
           } else {
             Stack() {

@@ -269,7 +269,7 @@ bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskE
             }
             jsEngine->Initialize(weakDelegate.Upgrade());
         },
-        TaskExecutor::TaskType::JS, "ArkUIInitJsEngine", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIInitJsEngine");
     LOGI("JsFrontend initialize end.");
     return true;
 }

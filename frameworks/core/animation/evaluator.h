@@ -18,8 +18,6 @@
 
 #include <cmath>
 
-#include "animator.h"
-
 #include "base/geometry/transform_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"

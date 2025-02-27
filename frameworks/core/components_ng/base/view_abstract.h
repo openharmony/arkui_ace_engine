@@ -39,10 +39,11 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/focus_box.h"
+#include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/menu_property.h"
@@ -297,6 +298,7 @@ public:
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnAxisEvent(OnAxisEventFunc &&onAxisEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
+    static void SetOnHoverMove(OnHoverMoveFunc &&onHoverMoveEventFunc);
     static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
@@ -437,6 +439,7 @@ public:
     static void DisableOnCrownEvent();
 #endif
     static void DisableOnHover();
+    static void DisableOnHoverMove();
     static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
     static void DisableOnAppear();
@@ -464,6 +467,7 @@ public:
     static void DisableOnCrownEvent(FrameNode* frameNode);
 #endif
     static void DisableOnHover(FrameNode* frameNode);
+    static void DisableOnHoverMove(FrameNode* frameNode);
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
     static void DisableOnDisappear(FrameNode* frameNode);
@@ -700,6 +704,7 @@ public:
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
+    static void SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHoverMoveEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
     static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);
     static void SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback);
@@ -769,6 +774,7 @@ public:
     static void SetJSFrameNodeOnFocusCallback(FrameNode* frameNode, OnFocusFunc&& onFocusCallback);
     static void SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback);
     static void SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
+    static void SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc);
     static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
     static void SetJSFrameNodeOnSizeChange(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
@@ -783,6 +789,7 @@ public:
     static void ClearJSFrameNodeOnFocusCallback(FrameNode* frameNode);
     static void ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode);
     static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnHoverMove(FrameNode* frameNode);
     static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
     static void ClearJSFrameNodeOnSizeChange(FrameNode* frameNode);
     static void ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode);
@@ -872,9 +879,6 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
-    static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
-    static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
-    static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

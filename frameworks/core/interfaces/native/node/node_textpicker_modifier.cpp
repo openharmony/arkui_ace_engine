@@ -16,6 +16,7 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -30,7 +31,7 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr uint32_t MAX_SIZE = 12;
 constexpr float MAX_PERCENT = 100.0f;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
-std::string g_strValue;
+thread_local std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
@@ -635,7 +636,34 @@ ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
     }
     return TextPickerModelNG::GetSelectedSize(frameNode);
 }
-
+void SetTextPickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange =
+        reinterpret_cast<std::function<void(const std::vector<std::string>&, const std::vector<double>&)>*>(callback);
+    TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(*onChange));
+}
+void ResetTextPickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetOnCascadeChange(frameNode, nullptr);
+}
+void SetTextPickerOnScrollStopExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange =
+        reinterpret_cast<std::function<void(const std::vector<std::string>&, const std::vector<double>&)>*>(callback);
+    TextPickerModelNG::SetOnScrollStop(frameNode, std::move(*onChange));
+}
+void ResetTextPickerOnScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetOnScrollStop(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -668,8 +696,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .setTextPickerValue = SetTextPickerValue,
         .setTextPickerColumnWidths = SetTextPickerColumnWidths,
         .resetTextPickerColumnWidths = ResetTextPickerColumnWidths,
-        .getTextPickerColumnWidthsSize = GetTextPickerColumnWidthsSize,
         .getTextPickerColumnWidths = GetTextPickerColumnWidths,
+        .getTextPickerColumnWidthsSize = GetTextPickerColumnWidthsSize,
         .setTextPickerDivider = SetTextPickerDivider,
         .resetTextPickerDivider = ResetTextPickerDivider,
         .setTextPickerGradientHeight = SetTextPickerGradientHeight,
@@ -687,6 +715,10 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .resetTextPickerEnableHapticFeedback = ResetTextPickerEnableHapticFeedback,
         .setTextPickerDigitalCrownSensitivity = SetTextPickerDigitalCrownSensitivity,
         .resetTextPickerDigitalCrownSensitivity = ResetTextPickerDigitalCrownSensitivity,
+        .setTextPickerOnChange = SetTextPickerOnChangeExt,
+        .resetTextPickerOnChange = ResetTextPickerOnChange,
+        .setTextPickerOnScrollStop = SetTextPickerOnScrollStopExt,
+        .resetTextPickerOnScrollStop = ResetTextPickerOnScrollStop,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

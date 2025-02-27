@@ -479,7 +479,7 @@ HWTEST_F(ArcListLayoutTestNg, UpdatePosMap001, TestSize.Level1)
     std::vector<float> mainSize = {10, 20, 30};
     float defaultSize;
     RefPtr<ListChildrenMainSize> childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
-    posMap->UpdatePosMap(frameNode_.GetRawPtr(), 2, spaceWidth, childrenSize_);
+    posMap->UpdatePosMap(Referenced::RawPtr(frameNode_), 2, spaceWidth, childrenSize_);
 
     EXPECT_EQ(posMap->GetTotalHeight(), 70.f);
 }
@@ -556,7 +556,7 @@ HWTEST_F(ArcListLayoutTestNg, MeasureList001, TestSize.Level1)
     listLayoutAlgorithm->SetPredictSnapEndPosition(200.0);
 
     listLayoutAlgorithm->SetTargetIndex(1);
-    listLayoutAlgorithm->MeasureList(frameNode_.GetRawPtr());
+    listLayoutAlgorithm->MeasureList(Referenced::RawPtr(frameNode_));
 
     EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetTargetIndex().value_or(-99), -99));
 }

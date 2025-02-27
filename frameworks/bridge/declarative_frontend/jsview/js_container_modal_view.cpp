@@ -106,6 +106,7 @@ void JSContainerModal::CallButtonsRectChange(const JSCallbackInfo& info)
     auto pattern = GetContainerModalPattern();
     CHECK_NULL_VOID(pattern);
     pattern->CallButtonsRectChange();
+    pattern->InitAllTitleRowLayoutProperty();
 }
 
 void JSContainerModal::CallMenuWidthChange(const JSCallbackInfo& info)

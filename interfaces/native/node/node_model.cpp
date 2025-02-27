@@ -480,6 +480,7 @@ void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 
 void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
     uiEvent.eventTypeId = C_KEY_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->keyEvent);
 }
@@ -551,6 +552,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_AXIS, HandleAxisEvent},
             {NODE_ON_CLICK_EVENT, HandleClickEvent},
             {NODE_ON_HOVER_EVENT, HandleHoverEvent},
+            {NODE_ON_HOVER_MOVE, HandleTouchEvent},
         };
 
         auto it = eventHandlers.find(eventType);

@@ -67,11 +67,6 @@ RefPtr<FrameNode> RenderContext::GetHost() const
     return host_.Upgrade();
 }
 
-FrameNode* RenderContext::GetUnsafeHost() const
-{
-    return UnsafeRawPtr(host_);
-}
-
 void RenderContext::SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
 {
     sharedTransitionOption_ = option;

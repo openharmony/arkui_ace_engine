@@ -67,11 +67,11 @@ CheckBoxModifier::CheckBoxModifier(bool isSelect, const Color& boardColor, const
     AttachProperty(checkBoxShape_);
 }
 
-void CheckBoxModifier::InitializeParam()
+void CheckBoxModifier::InitializeParam(TokenThemeScopeId themeScopeId)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(themeScopeId);
     CHECK_NULL_VOID(checkBoxTheme);
     borderWidth_ = checkBoxTheme->GetBorderWidth().ConvertToPx();
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();

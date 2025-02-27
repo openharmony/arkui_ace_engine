@@ -27,8 +27,10 @@ import { promptActionCustomDialogBootcamp } from './promptActionCustomDialogBoot
 import { ActionMenuBootcamp } from './ActionMenuBootcamp';
 import { DialogBootcamp } from './DialogBootcamp';
 import { ActionDialogBootcamp } from './ActionDialogBootcamp';
+import { AlertDialogBootcamp } from './AlertDialogBootcamp';
 import { CustomDialogBootcamp } from './CustomDialogBootcamp';
 import { AlertDialogBootcamp } from './AlertDialogBootcamp';
+import { BindContentCoverBootcamp } from './BindContentCoverBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
@@ -48,6 +50,7 @@ export const operatesRoute: RouteGroup = {
     { name: 'Dialog', label: '对话框/Dialog' },
     { name: 'ActionSheet', label: '列表选择弹窗/ActionSheet' },
     { name: 'customDialog', label: '自定义弹窗/CustomDialog' },
+    { name: 'BindContentCover', label: '全模态/BindContentCover' }
   ]
 };
 
@@ -81,6 +84,8 @@ export function OperatesDestination(name: string, route: Route) {
     ActionDialogBootcamp({ title: route.label })
   } else if (name === 'operates/customDialog') {
     CustomDialogBootcamp({ title: route.label })
+  } else if (name === 'operates/BindContentCover') {
+    BindContentCoverBootcamp({ title: route.label })
   }
 }
 

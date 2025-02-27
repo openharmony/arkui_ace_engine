@@ -112,10 +112,6 @@ public:
     virtual void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern) = 0;
     virtual void SetBoundsOrResize(const Size& drawSize, const Offset& offset) = 0;
     virtual int GetWebId() = 0;
-    virtual void DragResize(const double& width,
-                            const double& height,
-                            const double& pre_height,
-                            const double& pre_width) = 0;
     virtual void UpdateOptimizeParserBudgetEnabled(const bool enable) = 0;
 };
 }

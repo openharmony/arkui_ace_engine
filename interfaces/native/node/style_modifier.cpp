@@ -69,6 +69,7 @@ const int ALLOW_SIZE_4(4);
 const int ALLOW_SIZE_5(5);
 const int ALLOW_SIZE_7(7);
 const int ALLOW_SIZE_8(8);
+const int ALLOW_SIZE_9(9);
 const int ALLOW_SIZE_16(16);
 const int ALLOW_SIZE_10(10);
 
@@ -6489,6 +6490,37 @@ const ArkUI_AttributeItem* GetListMaintainVisibleContentPosition(ArkUI_NodeHandl
     return &g_attributeItem;
 }
 
+int32_t SetListStackFromEnd(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Bool enabled = false;
+    if (InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        enabled = item->value[NUM_0].i32;
+    }
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getListModifier()->setListStackFromEnd(node->uiNodeHandle, enabled);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListStackFromEnd(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getListModifier()->resetListStackFromEnd(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListStackFromEnd(ArkUI_NodeHandle node)
+{
+    auto value = GetFullImpl()->getNodeModifiers()->getListModifier()->getListStackFromEnd(node->uiNodeHandle);
+    //ScrollPagingStatus::VALID is true and VALID value is 2, others is false
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 // TextArea
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -7893,8 +7925,21 @@ int32_t SetSwiperDisplayCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     auto* fullImpl = GetFullImpl();
     std::string type = "number";
     std::string displayCount = std::to_string(item->value[0].i32);
+    if (item->string) {
+        std::string displayCountValue = std::string(item->string);
+        if (displayCountValue == "auto") {
+            type = "string";
+            displayCount = "auto";
+        }
+    }
     fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperDisplayCount(
         node->uiNodeHandle, displayCount.c_str(), type.c_str());
+
+    ArkUI_Bool swipeByGroup = DEFAULT_FALSE;
+    if (item->size == 2 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+        swipeByGroup = item->value[1].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperSwipeByGroup(node->uiNodeHandle, swipeByGroup);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7902,12 +7947,16 @@ void ResetSwiperDisplayCount(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperDisplayCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperSwipeByGroup(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetSwiperDisplayCount(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getSwiperModifier();
     g_numberValues[0].i32 = modifier->getSwiperDisplayCount(node->uiNodeHandle);
+    g_numberValues[1].i32 = modifier->getSwiperSwipeByGroup(node->uiNodeHandle);
+    g_attributeItem.string = modifier->getSwiperDisplayMode(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_TWO_PARAM;
     return &g_attributeItem;
 }
 
@@ -7938,6 +7987,16 @@ const ArkUI_AttributeItem* GetSwiperDisableSwipe(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+std::string DeleteLastChar(std::stringstream& sStream)
+{
+    std::string result;
+    sStream >> result;
+    if (!result.empty()) {
+        result.pop_back(); // 删除最后一个字符
+    }
+    return result;
+}
+
 int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == 0) {
@@ -7947,10 +8006,25 @@ int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeIt
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    double defaultBackgroundColor = StringToColorInt("#00000000", 0);
-    double defaultArrowColor = StringToColorInt("#FF182431", 0);
-    double displayArrow[ALLOW_SIZE_8] = { 1, 0, 0, DEFAULT_SIZE_24, defaultBackgroundColor, DEFAULT_SIZE_18,
-        defaultArrowColor, 0 };
+    ArkUI_SwiperArrowStyle* arrowStyle = reinterpret_cast<ArkUI_SwiperArrowStyle*>(item->object);
+    double displayArrow[ALLOW_SIZE_9] = { 1, 0, 0, DEFAULT_SIZE_24, 0, DEFAULT_SIZE_18, 0, 0, 1 };
+    double showBackground = 0.0;
+    double showSidebarMiddle = 0.0;
+    double backgroundSize = 0.0;
+    double backgroundColor = 0.0;
+    double arrowSize = 0.0;
+    double arrowColor = 0.0;
+    if (!arrowStyle) {
+        backgroundColor = StringToColorInt("#00000000", 0);
+        arrowColor = StringToColorInt("#FF182431", 0);
+    } else {
+        showBackground = arrowStyle->showBackground.value;
+        showSidebarMiddle = arrowStyle->showSidebarMiddle.value;
+        backgroundSize = arrowStyle->backgroundSize.value;
+        backgroundColor = arrowStyle->backgroundColor.value;
+        arrowSize = arrowStyle->arrowSize.value;
+        arrowColor = arrowStyle->arrowColor.value;
+    }
     if (item->value[0].i32 == ArkUI_SwiperArrow::ARKUI_SWIPER_ARROW_SHOW_ON_HOVER) {
         displayArrow[NUM_0] = DISPLAY_ARROW_TRUE;
         displayArrow[NUM_7] = DISPLAY_ARROW_TRUE;
@@ -7958,16 +8032,17 @@ int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeIt
         displayArrow[NUM_0] = item->value[0].i32;
         displayArrow[NUM_7] = DISPLAY_ARROW_FALSE;
     }
+    displayArrow[NUM_1] = showBackground;
+    displayArrow[NUM_2] = showSidebarMiddle;
+    displayArrow[NUM_3] = backgroundSize;
+    displayArrow[NUM_4] = backgroundColor;
+    displayArrow[NUM_5] = arrowSize;
+    displayArrow[NUM_6] = arrowColor;
     std::stringstream ss;
     for (const auto& str : displayArrow) {
-        ss << str << "|";
-    }
-    std::string result;
-    ss >> result;
-    if (!result.empty()) {
-        result.pop_back(); // 删除最后一个字符
-    }
-    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperDisplayArrow(node->uiNodeHandle, result.c_str());
+        ss << std::fixed << std::setprecision(0) << str << "|";
+    } 
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperDisplayArrow(node->uiNodeHandle, DeleteLastChar(ss).c_str());
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7981,6 +8056,21 @@ const ArkUI_AttributeItem* GetSwiperShowDisplayArrow(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getSwiperModifier();
     g_numberValues[0].i32 = modifier->getSwiperShowDisplayArrow(node->uiNodeHandle);
+    auto arrowStyle = modifier->getSwiperArrowStyle(node->uiNodeHandle);
+    ArkUI_SwiperArrowStyle* swiperArrowStyle = new ArkUI_SwiperArrowStyle;
+    swiperArrowStyle->showBackground.value = arrowStyle.showBackground.value;
+    swiperArrowStyle->showBackground.isSet = arrowStyle.showBackground.isSet;
+    swiperArrowStyle->showSidebarMiddle.value = arrowStyle.showSidebarMiddle.value;
+    swiperArrowStyle->showSidebarMiddle.isSet = arrowStyle.showSidebarMiddle.isSet;
+    swiperArrowStyle->backgroundSize.value = arrowStyle.backgroundSize.value;
+    swiperArrowStyle->backgroundSize.isSet = arrowStyle.backgroundSize.isSet;
+    swiperArrowStyle->backgroundColor.value = arrowStyle.backgroundColor.value;
+    swiperArrowStyle->backgroundColor.isSet = arrowStyle.backgroundColor.isSet;
+    swiperArrowStyle->arrowSize.value = arrowStyle.arrowSize.value;
+    swiperArrowStyle->arrowSize.isSet = arrowStyle.arrowSize.isSet;
+    swiperArrowStyle->arrowColor.value = arrowStyle.arrowColor.value;
+    swiperArrowStyle->arrowColor.isSet = arrowStyle.arrowColor.isSet;
+    g_attributeItem.object = swiperArrowStyle;
     return &g_attributeItem;
 }
 
@@ -8199,6 +8289,42 @@ const ArkUI_AttributeItem* GetSwiperNextMargin(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetSwiperDigitIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->value[0].i32 == ARKUI_SWIPER_INDICATOR_TYPE_DIGIT) {
+        ArkUI_SwiperDigitIndicator* indicator = reinterpret_cast<ArkUI_SwiperDigitIndicator*>(item->object);
+        CHECK_NULL_RETURN(indicator, ERROR_CODE_PARAM_INVALID);
+        node->swiperIndicator = indicator;
+        ArkUISwiperDigitIndicator indicatorProp;
+        indicatorProp.type = ArkUISwiperIndicatorType::DIGIT;
+        indicatorProp.dimUnit = GetDefaultUnit(node, UNIT_VP);
+        indicatorProp.dimLeft = ArkUIOptionalFloat { indicator->dimLeft.isSet, indicator->dimLeft.value };
+        indicatorProp.dimTop = ArkUIOptionalFloat { indicator->dimTop.isSet, indicator->dimTop.value };
+        indicatorProp.dimRight = ArkUIOptionalFloat { indicator->dimRight.isSet, indicator->dimRight.value };
+        indicatorProp.dimBottom = ArkUIOptionalFloat { indicator->dimBottom.isSet, indicator->dimBottom.value };
+        if (indicator->type == ARKUI_SWIPER_INDICATOR_TYPE_DIGIT) {
+            indicatorProp.fontColor = ArkUIOptionalUint { indicator->fontColor.isSet, indicator->fontColor.value };
+            indicatorProp.selectedFontColor =
+                ArkUIOptionalUint { indicator->selectedFontColor.isSet, indicator->selectedFontColor.value };
+            indicatorProp.fontSize = ArkUIOptionalFloat { indicator->fontSize.isSet, indicator->fontSize.value };
+            indicatorProp.selectedFontSize =
+                ArkUIOptionalFloat { indicator->selectedFontSize.isSet, indicator->selectedFontSize.value };
+            indicatorProp.fontWeight = ArkUIOptionalUint { indicator->fontWeight.isSet, indicator->fontWeight.value };
+            indicatorProp.selectedFontWeight =
+                ArkUIOptionalUint { indicator->selectedFontWeight.isSet, indicator->selectedFontWeight.value };
+            indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet,
+                indicator->ignoreSizeValue.value };
+        } else {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        auto* fullImpl = GetFullImpl();
+        fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperDigitIndicatorStyle(
+            node->uiNodeHandle, &indicatorProp);
+        return ERROR_CODE_NO_ERROR;
+    }
+    return ERROR_CODE_PARAM_INVALID;
+}
+
 int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == 0) {
@@ -8206,6 +8332,10 @@ int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     }
     if (!CheckAttributeIndicator(item)) {
         return ERROR_CODE_PARAM_INVALID;
+    }
+
+    if (item->value[0].i32 == ARKUI_SWIPER_INDICATOR_TYPE_DIGIT) {
+        return SetSwiperDigitIndicator(node, item);
     }
 
     ArkUI_SwiperIndicator* indicator = reinterpret_cast<ArkUI_SwiperIndicator*>(item->object);
@@ -8217,6 +8347,8 @@ int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     indicatorProp.dimTop = ArkUIOptionalFloat { indicator->dimTop.isSet, indicator->dimTop.value };
     indicatorProp.dimRight = ArkUIOptionalFloat { indicator->dimRight.isSet, indicator->dimRight.value };
     indicatorProp.dimBottom = ArkUIOptionalFloat { indicator->dimBottom.isSet, indicator->dimBottom.value };
+    indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet,
+        indicator->ignoreSizeValue.value };
     if (indicator->type == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         indicatorProp.type = ArkUISwiperIndicatorType::DOT;
         indicatorProp.itemWidth = ArkUIOptionalFloat { indicator->itemWidth.isSet, indicator->itemWidth.value };
@@ -8231,6 +8363,8 @@ int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             ArkUIOptionalUint { indicator->selectedColorValue.isSet, indicator->selectedColorValue.value };
         indicatorProp.maxDisplayCount =
         ArkUIOptionalInt { indicator->maxDisplayCount.isSet, indicator->maxDisplayCount.value };
+        indicatorProp.dimSpace =
+            ArkUIOptionalFloat { indicator->dimSpace.isSet, indicator->dimSpace.value };
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -8244,16 +8378,58 @@ void ResetSwiperIndicator(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperIndicator(node->uiNodeHandle);
-    node->swiperIndicator = nullptr;
+}
+
+const ArkUI_AttributeItem* GetSwiperDigitIndicator(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUISwiperIndicatorType indicatiorType =
+        fullImpl->getNodeModifiers()->getSwiperModifier()->getIndicatorType(node->uiNodeHandle);
+    if (indicatiorType != ArkUISwiperIndicatorType::DIGIT) {
+        return &g_attributeItem;
+    }
+
+    ArkUI_SwiperDigitIndicator* indicator = reinterpret_cast<ArkUI_SwiperDigitIndicator*>(node->swiperIndicator);
+    if (!indicator) {
+        return &g_attributeItem;
+    }
+
+    ArkUISwiperDigitIndicator indicatorProp;
+    fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperDigitIndicator(node->uiNodeHandle, &indicatorProp);
+    indicator->dimLeft.value = indicatorProp.dimLeft.value;
+    indicator->dimTop.value = indicatorProp.dimTop.value;
+    indicator->dimRight.value = indicatorProp.dimRight.value;
+    indicator->dimBottom.value = indicatorProp.dimBottom.value;
+    if (indicatorProp.type == ArkUISwiperIndicatorType::DIGIT) {
+        indicator->fontColor.value = indicatorProp.fontColor.value;
+        indicator->selectedFontColor.value = indicatorProp.selectedFontColor.value;
+        indicator->fontSize.value = indicatorProp.fontSize.value;
+        indicator->selectedFontSize.value = indicatorProp.selectedFontSize.value;
+        indicator->fontWeight.value = indicatorProp.fontWeight.value;
+        indicator->selectedFontWeight.value = indicatorProp.selectedFontWeight.value;
+    } else {
+        indicator = nullptr;
+    }
+
+    g_numberValues[0].i32 = static_cast<int32_t>(indicatorProp.type);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    g_attributeItem.object = indicator;
+    return &g_attributeItem;
 }
 
 const ArkUI_AttributeItem* GetSwiperIndicator(ArkUI_NodeHandle node)
 {
+    auto* fullImpl = GetFullImpl();
+    ArkUISwiperIndicatorType indicatiorType =
+        fullImpl->getNodeModifiers()->getSwiperModifier()->getIndicatorType(node->uiNodeHandle);
+    if (indicatiorType == ArkUISwiperIndicatorType::DIGIT) {
+        return GetSwiperDigitIndicator(node);
+    }
+
     ArkUI_SwiperIndicator* indicator = reinterpret_cast<ArkUI_SwiperIndicator*>(node->swiperIndicator);
     if (!indicator) {
         return &g_attributeItem;
     }
-    auto* fullImpl = GetFullImpl();
     ArkUISwiperIndicator props;
     fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperIndicator(node->uiNodeHandle, &props);
     indicator->dimLeft.value = props.dimLeft.value;
@@ -11392,11 +11568,7 @@ int32_t SetCalendarPickerStartDate(ArkUI_NodeHandle node, const ArkUI_AttributeI
     auto startYear = StringToInt(date[NUM_0].c_str());
     auto startMonth = StringToInt(date[NUM_1].c_str());
     auto startDay = StringToInt(date[NUM_2].c_str());
-    if (startYear > 0 && startMonth > 0 && startDay > 0) {
-        startYear = static_cast<uint32_t>(startYear);
-        startMonth = static_cast<uint32_t>(startMonth);
-        startDay = static_cast<uint32_t>(startDay);
-    } else {
+    if (startYear <= 0 || startMonth <= 0 || startDay <= 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!IsValidDate(startYear, startMonth, startDay)) {
@@ -11435,11 +11607,7 @@ int32_t SetCalendarPickerEndDate(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     auto endYear = StringToInt(date[NUM_0].c_str());
     auto endMonth = StringToInt(date[NUM_1].c_str());
     auto endDay = StringToInt(date[NUM_2].c_str());
-    if (endYear > 0 && endMonth > 0 && endDay > 0) {
-        endYear = static_cast<uint32_t>(endYear);
-        endMonth = static_cast<uint32_t>(endMonth);
-        endDay = static_cast<uint32_t>(endDay);
-    } else {
+    if (endYear <= 0 || endMonth <= 0 || endDay <= 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!IsValidDate(endYear, endMonth, endDay)) {
@@ -13568,7 +13736,7 @@ const ArkUI_AttributeItem* GetWaterFlowNodeAdapter(ArkUI_NodeHandle node)
 int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1) {
+    if (item->size < NUM_1) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
@@ -13576,6 +13744,11 @@ int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
+    ArkUI_Bool isShown = DEFAULT_FALSE;
+    if (item->size > NUM_1 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+        isShown = item->value[1].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setShowCached(node->uiNodeHandle, isShown);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -13583,14 +13756,16 @@ void ResetWaterFlowCachedCount(ArkUI_NodeHandle node)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetShowCached(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetWaterFlowCachedCount(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getCachedCount(node->uiNodeHandle);
+    ArkUI_Int32 isShown = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getShowCached(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
+    g_numberValues[1].i32 = isShown;
     return &g_attributeItem;
 }
 
@@ -15431,13 +15606,51 @@ void ResetStackAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     setters[subTypeId](node);
 }
 
+int32_t SetSwiperAutoFill(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < NUM_0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].f32, 0.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Bool swipeByGroup = DEFAULT_FALSE;
+    if (item->size == 2 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+        swipeByGroup = item->value[1].i32;
+    }
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperSwipeByGroup(node->uiNodeHandle, swipeByGroup);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperMinSize(
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetSwiperAutoFill(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperMinSize(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperSwipeByGroup(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetSwiperAutoFill(ArkUI_NodeHandle node)
+{
+    auto modifier = GetFullImpl()->getNodeModifiers()->getSwiperModifier();
+    g_numberValues[0].f32 = modifier->getSwiperMinSize(node->uiNodeHandle);
+    g_numberValues[1].i32 = modifier->getSwiperSwipeByGroup(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_TWO_PARAM;
+    return &g_attributeItem;
+}
+
 int32_t SetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
     static Setter* setters[] = { SetSwiperLoop, SetSwiperAutoPlay, SetSwiperShowIndicator, SetSwiperInterval,
         SetSwiperVertical, SetSwiperDuration, SetSwiperCurve, SetSwiperItemSpace, SetSwiperIndex, SetSwiperDisplayCount,
         SetSwiperDisableSwipe, SetSwiperShowDisplayArrow, SetSwiperEffectMode, SetSwiperNodeAdapter,
         SetSwiperCachedCount, SetSwiperPrevMargin, SetSwiperNextMargin, SetSwiperIndicator, SetSwiperNestedScroll,
-        SetSwiperToIndex, SetSwiperIndicatorInteractive, SetSwiperPageFlipMode };
+        SetSwiperToIndex, SetSwiperIndicatorInteractive, SetSwiperPageFlipMode, SetSwiperAutoFill };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15452,7 +15665,7 @@ void ResetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSwiperIndex, ResetSwiperDisplayCount, ResetSwiperDisableSwipe, ResetSwiperShowDisplayArrow,
         ResetSwiperEffectMode, ResetSwiperNodeAdapter, ResetSwiperCachedCount, ResetSwiperPrevMargin,
         ResetSwiperNextMargin, ResetSwiperIndicator, ResetSwiperNestedScroll, nullptr, ResetSwiperIndicatorInteractive,
-        ResetSwiperPageFlipMode };
+        ResetSwiperPageFlipMode, ResetSwiperAutoFill };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -15466,7 +15679,7 @@ const ArkUI_AttributeItem* GetSwiperAttribute(ArkUI_NodeHandle node, int32_t sub
         GetSwiperVertical, GetSwiperDuration, GetSwiperCurve, GetSwiperItemSpace, GetSwiperIndex, GetSwiperDisplayCount,
         GetSwiperDisableSwipe, GetSwiperShowDisplayArrow, GetSwiperEffectMode, GetSwiperNodeAdapter,
         GetSwiperCachedCount, GetSwiperPrevMargin, GetSwiperNextMargin, GetSwiperIndicator, GetSwiperNestedScroll,
-        nullptr, GetSwiperIndicatorInteractive, GetSwiperPageFlipMode };
+        nullptr, GetSwiperIndicatorInteractive, GetSwiperPageFlipMode, GetSwiperAutoFill };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -15522,7 +15735,7 @@ int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 {
     static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter, SetListCachedCount,
         SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize, SetListInitialIndex, SetListDivider,
-        SetListScrollToItemInGroup, SetListLanes, SetListScrollSnapAlign, SetListMaintainVisibleContentPosition };
+        SetListScrollToItemInGroup, SetListLanes, SetListScrollSnapAlign, SetListMaintainVisibleContentPosition, SetListStackFromEnd };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15534,7 +15747,7 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
 {
     static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace, GetListNodeAdapter, GetListCachedCount,
         nullptr, GetListAlignListItem, nullptr, GetListInitialIndex, GetListDivider, nullptr, GetListLanes,
-        GetListScrollSnapAlign, GetListMaintainVisibleContentPosition };
+        GetListScrollSnapAlign, GetListMaintainVisibleContentPosition, GetListStackFromEnd };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -15546,7 +15759,8 @@ void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetListDirection, ResetListSticky, ResetListSpace, ResetListNodeAdapter,
         ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize, ResetListInitialIndex,
-        ResetListDivider, nullptr, ResetListLanes, ResetListScrollSnapAlign, ResetListMaintainVisibleContentPosition };
+        ResetListDivider, nullptr, ResetListLanes, ResetListScrollSnapAlign, ResetListMaintainVisibleContentPosition,
+        ResetListStackFromEnd };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

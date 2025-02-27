@@ -116,6 +116,8 @@ export struct DatePickerDialogBootcamp {
   @State dialogShadow: ShadowStyle = ShadowStyle.OUTER_FLOATING_SM;
   @State enableHapticFeedback: boolean = false;
   @State isHapticFeedback: boolean = true;
+  @State datePickerMode: DatePickerMode = DatePickerMode.DATE;
+  @State enableMode: boolean = false;
 
   build() {
     NavDestination() {
@@ -144,6 +146,7 @@ export struct DatePickerDialogBootcamp {
             start: new Date('2000-1-1'),
             end: new Date('2100-12-31'),
             selected: this.selectedDate,
+            mode: useEnabled(this.enableMode, this.datePickerMode),
             lunar: useEnabled(this.enableLunar, this.lunar),
             lunarSwitch: useEnabled(this.enableLunarSwitch, this.lunarSwitch),
             showTime: useEnabled(this.enableShowTime, this.showTime),
@@ -651,6 +654,16 @@ export struct DatePickerDialogBootcamp {
           dataSource: [
             { label: '开启', value: true },
             { label: '关闭', value: false },
+          ]
+        })
+        RadioBlock({
+          title: '是否设置选项列',
+          isEnabled: $enableMode,
+          value: $datePickerMode,
+          dataSource: [
+            { label: '年月日', value: DatePickerMode.DATE },
+            { label: '年和月', value: DatePickerMode.YEAR_AND_MONTH },
+            { label: '月和日', value: DatePickerMode.MONTH_AND_DAY }
           ]
         })
       }.width('100%')

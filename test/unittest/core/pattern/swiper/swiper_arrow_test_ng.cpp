@@ -416,6 +416,240 @@ HWTEST_F(SwiperArrowTestNg, HoverEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HoverEvent003
+ * @tc.desc: When has no indicator, check hover event time sequence of swiper and arrow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Hide indicator
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // hide indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+
+    /**
+     * @tc.steps: step2. Hover swiper
+     * @tc.expected: Only show right arrow
+     */
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step3. Hover from swiper to left arrow
+     * @tc.expected: Only show right arrow
+     */
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, true);
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step4. Hover from left arrow to swiper
+     * @tc.expected: Only show right arrow
+     */
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step5. Hover from swiper to right arrow
+     * @tc.expected: Only show right arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, true);
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step6. Hover out of arrow
+     * @tc.expected: Do not show arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, false);
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: HoverEvent004
+ * @tc.desc: When has indicator, check hover event time sequence of arrow and indicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show indicator
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(true); // show indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+
+    /**
+     * @tc.steps: step2. Hover arrow
+     * @tc.expected: Only show right arrow
+     */
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step3. Hover from arrow to indicator
+     * @tc.expected: Only show right arrow
+     */
+    indicatorPattern->HandleHoverEvent(true);
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step4. Hover from indicator to arrow
+     * @tc.expected: Only show right arrow
+     */
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, true);
+    indicatorPattern->HandleHoverEvent(false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step5. Hover out of arrow
+     * @tc.expected: Do not show arrow
+     */
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, false);
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: HoverEvent005
+ * @tc.desc: When has indicator, test arrow status when hover attribute changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show indicator
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(true); // show indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+
+    /**
+     * @tc.steps: step2. Hover arrow
+     * @tc.expected: Only show right arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step3. Change hover show to false
+     * @tc.expected: Only show right arrow
+     */
+    layoutProperty_->UpdateHoverShow(false);
+    frameNode_->MarkModifyDone();
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step4. Hover out of arrow
+     * @tc.expected: Only show right arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, false);
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step5. Change hover show to true
+     * @tc.expected: Do not show arrow
+     */
+    layoutProperty_->UpdateHoverShow(true);
+    frameNode_->MarkModifyDone();
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: HoverEvent006
+ * @tc.desc: Test arrow status when indicator changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Hide indicator
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // hide indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+
+    /**
+     * @tc.steps: step2. Hover swiper
+     * @tc.expected: Only show right arrow
+     */
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step3. Show indicator
+     * @tc.expected: Do not show arrow
+     */
+    layoutProperty_->UpdateShowIndicator(true);
+    frameNode_->MarkModifyDone();
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    /**
+     * @tc.steps: step4. Hover arrow
+     * @tc.expected: Only show right arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+}
+
+/**
  * @tc.name: MouseEvent001
  * @tc.desc: When has indicator and IsSidebarMiddle:false, test mouse event
  * @tc.type: FUNC

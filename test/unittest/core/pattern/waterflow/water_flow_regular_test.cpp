@@ -23,6 +23,8 @@
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
+#include "core/components_ng/syntax/if_else_model_ng.h"
+#include "core/components_ng/syntax/if_else_node.h"
 #undef protected
 #undef private
 
@@ -1032,5 +1034,92 @@ HWTEST_F(WaterFlowTestNg, Delete006, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: IfElseNode001
+ * @tc.desc: Test the updateIdx when IfElseNode's branch changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, IfElseNode001, TestSize.Level1)
+{
+    std::list<int32_t> removedElmtIds;
+    std::list<int32_t> reservedElmtIds;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    IfElseModelNG ifElse;
+    ifElse.Create();
+    ifElse.SetBranchId(1, removedElmtIds, reservedElmtIds);
+    EXPECT_EQ(ifElse.GetBranchId(), 1);
+    auto ifElseNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(ifElseNode != nullptr && ifElseNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
+    EXPECT_EQ(ifElseNode->GetBranchId(), 1);
+    /**
+    // corresponding ets code:
+    //     if () {
+    //       Blank()
+    //     }
+    */
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ifElseNode->AddChild(childFrameNode);
+    frameNode_->AddChild(ifElseNode);
+    ifElseNode->FlushUpdateAndMarkDirty();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 22);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 21);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+
+    // make [if] to empty branch.
+    ifElseNode->SetBranchId(0, removedElmtIds, reservedElmtIds);
+    ifElseNode->FlushUpdateAndMarkDirty();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 21);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: Footer001
+ * @tc.desc: Put [if] to footer, test the updateIdx when IfElseNode's branch changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Footer001, TestSize.Level1)
+{
+    std::list<int32_t> removedElmtIds;
+    std::list<int32_t> reservedElmtIds;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter([]() {
+        IfElseModelNG ifElse;
+        ifElse.Create();
+    });
+    CreateWaterFlowItems(20);
+    CreateDone();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 20);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), -1);
+
+    auto ifElseNode = AceType::DynamicCast<IfElseNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_TRUE(ifElseNode != nullptr && ifElseNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
+    ifElseNode->SetBranchId(1, removedElmtIds, reservedElmtIds);
+    EXPECT_EQ(ifElseNode->GetBranchId(), 1);
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ifElseNode->AddChild(childFrameNode);
+    ifElseNode->FlushUpdateAndMarkDirty();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+
+    // make [if] to empty branch.
+    ifElseNode->SetBranchId(0, removedElmtIds, reservedElmtIds);
+    ifElseNode->FlushUpdateAndMarkDirty();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 20);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
 }
 } // namespace OHOS::Ace::NG

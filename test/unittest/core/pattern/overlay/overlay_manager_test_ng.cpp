@@ -941,94 +941,6 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet002, TestSize.Level1)
 }
 
 /**
- * @tc.name: DestroySheet003
- * @tc.desc: Test OverlayManager::DestroySheet func
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    auto targetNode = CreateTargetNode();
-    auto targetId = targetNode->GetId();
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    stageNode->MountToParent(rootNode);
-    targetNode->MountToParent(stageNode);
-    rootNode->MarkDirtyNode();
-
-    /**
-     * @tc.steps: step2. create builder.
-     */
-    auto builderFunc = []() -> RefPtr<UINode> {
-        auto frameNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-        frameNode->AddChild(childFrameNode);
-        return frameNode;
-    };
-
-    auto buildTitleNodeFunc = []() -> RefPtr<UINode> {
-        auto frameNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        frameNode->AddChild(childFrameNode);
-        return frameNode;
-    };
-
-    /**
-     * @tc.steps: step3. create sheet node.
-     * @tc.expected: Make sure the modalStack holds the sheetNode.
-     */
-    SheetStyle sheetStyle;
-    CreateSheetStyle(sheetStyle);
-    bool isShow = true;
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
-    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
-
-    /**
-     * @tc.steps: step4. run destroySheet func
-     */
-    sheetNode->tag_ = V2::SHEET_MASK_TAG;
-    EXPECT_NE(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
-    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-
-    sheetNode->tag_ = V2::SHEET_PAGE_TAG;
-    sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId - 1;
-    EXPECT_NE(sheetNode->GetPattern<SheetPresentationPattern>()->targetId_, targetId);
-    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-
-    sheetNode->tag_ = V2::SHEET_PAGE_TAG;
-    sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId;
-    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-
-    auto targetNodeSecond = CreateTargetNode();
-    targetNodeSecond->MountToParent(stageNode);
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        targetNodeSecond);
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-}
-
-/**
  * @tc.name: OnBindSheet003
  * @tc.desc: Test OverlayManager::OnBindSheet destroy sheet node.
  * @tc.type: FUNC
@@ -1093,7 +1005,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet003, TestSize.Level1)
     overlayManager->OnBindSheet(!isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr,
         nullptr, nullptr, onWillDisappear, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(stageNode)));
-    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
+    overlayManager->RemoveSheet(sheetNode);
     overlayManager->FindWindowScene(targetNode);
     overlayManager->DeleteModal(targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
@@ -1182,7 +1094,7 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
     overlayManager->OnBindSheet(!isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, nullptr,
         nullptr, onWillDisappear, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(stageNode)));
-    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
+    overlayManager->RemoveSheet(sheetNode);
     overlayManager->FindWindowScene(targetNode);
     overlayManager->DeleteModal(targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
@@ -3657,7 +3569,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
     sheetStyle.interactive = true;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     topSheetPattern->UpdateMaskBackgroundColor();
-    overlayManager->PlaySheetMaskTransition(maskNode, true);
+    overlayManager->PlaySheetMaskTransition(maskNode, topSheetNode, true);
     EXPECT_EQ(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 
     /**
@@ -3667,7 +3579,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
     sheetStyle.interactive = false;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     topSheetPattern->UpdateMaskBackgroundColor();
-    overlayManager->PlaySheetMaskTransition(maskNode, true);
+    overlayManager->PlaySheetMaskTransition(maskNode, topSheetNode, true);
     EXPECT_NE(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 }
 
@@ -3840,7 +3752,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern10, TestSize.Level1)
      */
     topSheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     topSheetNode->GetGeometryNode()->SetFrameSize(SizeF({ 500, 500 }));
-    topSheetPattern->FireOnHeightDidChange(0);
+    topSheetPattern->FireOnHeightDidChange();
     EXPECT_EQ(topSheetNode->GetGeometryNode()->GetFrameSize().Height(), 500);
 
     /**
@@ -3850,7 +3762,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern10, TestSize.Level1)
     topSheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     topSheetPattern->SetCurrentHeight(500);
     topSheetPattern->currentOffset_ = 0;
-    topSheetPattern->FireOnHeightDidChange(0);
+    topSheetPattern->FireOnHeightDidChange();
     EXPECT_EQ(topSheetPattern->height_, 500);
 }
 
@@ -4091,7 +4003,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(topSheetNode, topSheetNode->GetGeometryNode(),
         topSheetNode->GetLayoutProperty());
-    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize, layoutWrapper.GetRawPtr());
+    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     auto onWidthDidChangeFunc = [&widthVal](float width) { widthVal = width; };
     topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
     topSheetPattern->FireOnWidthDidChange(topSheetNode);
@@ -4436,9 +4348,9 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
     auto maxSize = SizeF(10.0f, 10.0f);
     sheetLayoutAlgorithm->Measure(AceType::RawPtr(sheetNode));
-    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize, AceType::RawPtr(sheetNode));
+    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize.Height(), maxSize.Height(), AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
-    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize, AceType::RawPtr(sheetNode));
+    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize.Height(), maxSize.Width(), AceType::RawPtr(sheetNode));
     EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 320);
 }
 
@@ -4472,27 +4384,29 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
      * @tc.steps: step2. set sheetStyle_.height and sheetStyle_.width.
      * @tc.expected: height and width value are equal expected value.
      */
-    sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    auto maxHeight = 1000;
+    auto maxWidth = 1000;
+    sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
 
     sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = 2.5_pct;
-    sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = 2.5_px;
-    sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = 0.0_px;
-    auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     EXPECT_EQ(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx());
     sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = -1.0_px;
-    height = sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
+    height = sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     EXPECT_EQ(height, SHEET_BIG_WINDOW_HEIGHT.ConvertToPx());
 
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
     auto maxSize = SizeF(10.0f, 10.0f);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(),
         sheetNode->GetLayoutProperty());
-    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize, layoutWrapper.GetRawPtr());
+    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(width, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
     sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
-    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize, layoutWrapper.GetRawPtr());
+    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(width, SHEET_POPUP_WIDTH.ConvertToPx());
 }
 

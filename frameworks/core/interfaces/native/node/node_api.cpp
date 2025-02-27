@@ -138,8 +138,9 @@ void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    std::function<bool(uint64_t)>* func = reinterpret_cast<std::function<bool(uint64_t)>*>(callback);
+    std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
     eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+    func = nullptr;
 }
 
 void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
@@ -409,9 +410,11 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
     NodeModifier::SetOnKeyEventDispatch,
+    nullptr,
     NodeModifier::SetOnAxisEvent,
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
+    NodeModifier::SetOnHoverMove,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -631,7 +634,11 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnKeyPreIme,
     NodeModifier::ResetOnFocusAxisEvent,
     nullptr,
+    nullptr,
     NodeModifier::ResetOnAxisEvent,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnHoverMove,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1962,6 +1969,31 @@ ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
     return CustomDialog::SetImmersiveMode(handle, mode);
 }
 
+ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
+{
+    return CustomDialog::SetLevelOrder(handle, levelOrder);
+}
+
+ArkUI_Int32 RegisterOnWillAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnWillDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidDisappearDialog(handle, userData, callback);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -1988,6 +2020,11 @@ const ArkUIDialogAPI* GetDialogAPI()
         .setLevelMode = SetDialogLevelMode,
         .setLevelUniqueId = SetDialogLevelUniqueId,
         .setImmersiveMode = SetDialogImmersiveMode,
+        .setLevelOrder = SetLevelOrder,
+        .registerOnWillAppear = RegisterOnWillAppear,
+        .registerOnDidAppear = RegisterOnDidAppear,
+        .registerOnWillDisappear = RegisterOnWillDisappear,
+        .registerOnDidDisappear = RegisterOnDidDisappear
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
@@ -2316,7 +2353,8 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
     SpanString* spanString = new SpanString(u"");
-    spanString->DecodeTlvExt(vec, spanString);
+    std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
+    spanString->DecodeTlvExt(vec, spanString, std::move(unmarshallCallback));
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

@@ -20,7 +20,6 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
-#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 
@@ -601,6 +600,7 @@ void TextSelectController::UpdateFirstHandleOffset()
         GetFirstHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
     firstHandleInfo_.rect.SetOffset(caretMetrics.offset);
     firstHandleInfo_.rect.SetHeight(caretMetrics.height);
+    firstHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     AdjustHandleOffset(firstHandleInfo_.rect);
     AdjustHandleOffsetWithBoundary(firstHandleInfo_.rect);
 }
@@ -612,6 +612,7 @@ void TextSelectController::UpdateSecondHandleOffset()
         GetSecondHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     secondHandleInfo_.rect.SetOffset(caretMetrics.offset);
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
+    secondHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     AdjustHandleOffset(secondHandleInfo_.rect);
     AdjustHandleOffsetWithBoundary(secondHandleInfo_.rect);
 }

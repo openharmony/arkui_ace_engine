@@ -1000,7 +1000,7 @@ HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -1238,7 +1238,7 @@ HWTEST_F(TextFieldModifyTest, OnHandleMoveDone001, TestSize.Level1)
 
     pattern_->SetIsSingleHandle(true);
     pattern_->selectOverlay_->OnHandleMoveDone(handleRect, false);
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
 }
 
 /**

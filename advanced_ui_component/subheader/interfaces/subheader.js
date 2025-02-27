@@ -1545,7 +1545,6 @@ export class SubHeader extends ViewPU {
             SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
             SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.focusable(true);
             SymbolGlyph.width(ARROW_ICON_WIDTH);
             SymbolGlyph.height(OPERATE_ITEM_LENGTH);
         }, SymbolGlyph);

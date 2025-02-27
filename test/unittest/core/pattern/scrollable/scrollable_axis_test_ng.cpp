@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,7 @@ RefPtr<Scrollable> ScrollableAxisTestNg::GetScrollable(RefPtr<FrameNode> node)
     return pattern->scrollableEvent_->scrollable_;
 }
 
-void ScrollableAxisTestNg::DragStart(RefPtr<Scrollable> scrollable)
+void ScrollableAxisTestNg::AxisDragStart(RefPtr<Scrollable> scrollable)
 {
     CHECK_NULL_VOID(scrollable);
     scrollable->HandleTouchDown();
@@ -73,7 +73,7 @@ void ScrollableAxisTestNg::DragStart(RefPtr<Scrollable> scrollable)
     (*(scrollable->panRecognizerNG_->onActionStart_))(info);
 }
 
-void ScrollableAxisTestNg::DragUpdate(RefPtr<Scrollable> scrollable, float offset)
+void ScrollableAxisTestNg::AxisDragUpdate(RefPtr<Scrollable> scrollable, float offset)
 {
     CHECK_NULL_VOID(scrollable);
     CHECK_NULL_VOID(scrollable->panRecognizerNG_);
@@ -84,7 +84,7 @@ void ScrollableAxisTestNg::DragUpdate(RefPtr<Scrollable> scrollable, float offse
     (*(scrollable->panRecognizerNG_->onActionUpdate_))(info);
 }
 
-void ScrollableAxisTestNg::DragEnd(RefPtr<Scrollable> scrollable, float velocity)
+void ScrollableAxisTestNg::AxisDragEnd(RefPtr<Scrollable> scrollable, float velocity)
 {
     CHECK_NULL_VOID(scrollable);
     CHECK_NULL_VOID(scrollable->panRecognizerNG_);
@@ -92,6 +92,38 @@ void ScrollableAxisTestNg::DragEnd(RefPtr<Scrollable> scrollable, float velocity
     GestureEvent info = GestureEvent();
     info.SetMainVelocity(velocity);
     info.SetInputEventType(InputEventType::AXIS);
+    (*(scrollable->panRecognizerNG_->onActionEnd_))(info);
+    scrollable->HandleTouchUp();
+}
+
+void ScrollableAxisTestNg::DragStart(RefPtr<Scrollable> scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    scrollable->HandleTouchDown();
+    CHECK_NULL_VOID(scrollable->panRecognizerNG_);
+    CHECK_NULL_VOID(scrollable->panRecognizerNG_->onActionStart_);
+    GestureEvent info = GestureEvent();
+    (*(scrollable->panRecognizerNG_->onActionStart_))(info);
+}
+
+void ScrollableAxisTestNg::DragUpdate(RefPtr<Scrollable> scrollable, float offset)
+{
+    CHECK_NULL_VOID(scrollable);
+    CHECK_NULL_VOID(scrollable->panRecognizerNG_);
+    CHECK_NULL_VOID(scrollable->panRecognizerNG_->onActionStart_);
+    GestureEvent info = GestureEvent();
+    info.SetMainDelta(offset);
+    (*(scrollable->panRecognizerNG_->onActionUpdate_))(info);
+}
+
+void ScrollableAxisTestNg::DragEnd(RefPtr<Scrollable> scrollable, float velocity, double mainDelta)
+{
+    CHECK_NULL_VOID(scrollable);
+    CHECK_NULL_VOID(scrollable->panRecognizerNG_);
+    CHECK_NULL_VOID(scrollable->panRecognizerNG_->onActionStart_);
+    GestureEvent info = GestureEvent();
+    info.SetMainDelta(mainDelta);
+    info.SetMainVelocity(velocity);
     (*(scrollable->panRecognizerNG_->onActionEnd_))(info);
     scrollable->HandleTouchUp();
 }
@@ -120,10 +152,11 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
     FlushLayoutTask(listNode);
 
     /**
-     * @tc.steps: step2. trigger the drag event.
-     * @tc.expected: the position of axisAnimator is correct.
+     * @tc.steps: step2. Trigger the drag event.
+     * @tc.expected: The position of axisAnimator is correct.
      */
     auto scrollable = GetScrollable(listNode);
+    scrollable->InitAxisAnimator();
     ASSERT_NE(scrollable, nullptr);
     scrollable->context_ = PipelineContext::GetCurrentContext();
     auto context = scrollable->context_.Upgrade();
@@ -131,7 +164,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
     auto eventHub = listNode->GetEventHub<ListEventHub>();
     auto startEventTrigger = false;
     eventHub->SetOnScrollStart([&startEventTrigger]() { startEventTrigger = true; });
-    DragStart(scrollable);
+    AxisDragStart(scrollable);
     ASSERT_NE(scrollable->axisAnimator_, nullptr);
     auto axisScrollMotion = scrollable->axisAnimator_->axisScrollMotion_;
     ASSERT_NE(axisScrollMotion, nullptr);
@@ -139,7 +172,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(axisScrollMotion->currentPos_, 0.f);
 
     context->SetVsyncTime(1);
-    DragUpdate(scrollable, -100.f);
+    AxisDragUpdate(scrollable, -100.f);
     ASSERT_NE(scrollable->axisAnimator_->axisScrollAnimator_, nullptr);
     EXPECT_TRUE(startEventTrigger);
     auto startPos = axisScrollMotion->startPos_;
@@ -149,7 +182,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
 
     context->SetVsyncTime(2);
     auto lastFinalPos = finalPos;
-    DragUpdate(scrollable, -620.f);
+    AxisDragUpdate(scrollable, -620.f);
     startPos = axisScrollMotion->startPos_;
     EXPECT_FLOAT_EQ(startPos, -100.f);
     finalPos = axisScrollMotion->finalPos_;
@@ -158,7 +191,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
     auto currentPos = axisScrollMotion->currentPos_;
     EXPECT_FLOAT_EQ(distance, finalPos - currentPos);
 
-    DragEnd(scrollable, -500.f);
+    AxisDragEnd(scrollable, -500.f);
     EXPECT_FLOAT_EQ(scrollable->lastGestureVelocity_, 0.f);
 }
 
@@ -191,46 +224,99 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest002, TestSize.Level1)
     ASSERT_NE(listPattern, nullptr);
 
     /**
-     * @tc.steps: step2. trigger the drag start event.
-     * @tc.expected: the position of axisAnimator is correct.
+     * @tc.steps: step2. Trigger the drag start event.
+     * @tc.expected: The position of axisAnimator is correct.
      */
     auto scrollable = GetScrollable(listNode);
     ASSERT_NE(scrollable, nullptr);
+    scrollable->InitAxisAnimator();
     scrollable->context_ = PipelineContext::GetCurrentContext();
     auto context = scrollable->context_.Upgrade();
     ASSERT_NE(context, nullptr);
-    DragStart(scrollable);
+    AxisDragStart(scrollable);
     ASSERT_NE(scrollable->axisAnimator_, nullptr);
     auto axisScrollMotion = scrollable->axisAnimator_->axisScrollMotion_;
     ASSERT_NE(axisScrollMotion, nullptr);
     EXPECT_FLOAT_EQ(axisScrollMotion->currentPos_, 0.f);
 
     /**
-     * @tc.steps: step3. modify the vysnc time and trigger the drag update event.
-     * @tc.expected: the drag update event can be executed and the lastAxisVsyncTime_ is correct.
+     * @tc.steps: step3. Modify the vysnc time and trigger the drag update event.
+     * @tc.expected: The drag update event can be executed and the lastAxisVsyncTime_ is correct.
      */
     EXPECT_EQ(scrollable->lastAxisVsyncTime_, 0);
     context->SetVsyncTime(1);
-    DragUpdate(scrollable, -100.f);
+    AxisDragUpdate(scrollable, -100.f);
     ASSERT_NE(scrollable->axisAnimator_->axisScrollAnimator_, nullptr);
     EXPECT_EQ(scrollable->lastAxisVsyncTime_, 1);
     context->SetVsyncTime(2);
-    DragUpdate(scrollable, -100.f);
+    AxisDragUpdate(scrollable, -100.f);
     EXPECT_EQ(scrollable->lastAxisVsyncTime_, 2);
 
     /**
-     * @tc.steps: step4. modify the ScrollSnapAlign of list and the vysnc time.
-     * @tc.expected: the drag update event can be executed and the lastAxisVsyncTime_ is correct.
+     * @tc.steps: step4. Modify the ScrollSnapAlign of list and the vysnc time.
+     * @tc.expected: The drag update event can be executed and the lastAxisVsyncTime_ is correct.
      */
     listLayoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
     EXPECT_EQ(scrollable->GetSnapType(), SnapType::LIST_SNAP);
     context->SetVsyncTime(2);
-    DragUpdate(scrollable, -100.f);
+    AxisDragUpdate(scrollable, -100.f);
     EXPECT_EQ(scrollable->lastAxisVsyncTime_, 2);
     EXPECT_EQ(scrollable->snapDirection_, SnapDirection::NONE);
     context->SetVsyncTime(3);
-    DragUpdate(scrollable, -100.f);
+    AxisDragUpdate(scrollable, -100.f);
     EXPECT_EQ(scrollable->lastAxisVsyncTime_, 3);
     EXPECT_EQ(scrollable->snapDirection_, SnapDirection::BACKWARD);
+}
+
+/**
+ * @tc.name: DragEnd001
+ * @tc.desc: Test the lastMainDelta_ of DragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableAxisTestNg, DragEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     * @tc.expected: Create List successfully.
+     */
+    ListModelNG listModel;
+    listModel.Create();
+    listModel.SetEdgeEffect(EdgeEffect::NONE, false);
+    ViewAbstract::SetWidth(CalcLength(SCROLLABLE_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLLABLE_HEIGHT));
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(450));
+    ViewStackProcessor::GetInstance()->Pop();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto listNode = AceType::DynamicCast<FrameNode>(element);
+    FlushLayoutTask(listNode);
+    auto scrollable = GetScrollable(listNode);
+    ASSERT_NE(scrollable, nullptr);
+    EXPECT_EQ(scrollable->lastMainDelta_, 0.0);
+
+    /**
+     * @tc.steps: step2. Trigger the drag update event.
+     * @tc.expected: The lastMainDelta_ of scrollable is correct.
+     */
+    DragUpdate(scrollable, 100.0);
+    EXPECT_EQ(scrollable->lastMainDelta_, 100.0);
+    auto lastMainDelta = scrollable->lastMainDelta_;
+
+    /**
+     * @tc.steps: step3. Trigger the drag end event.
+     * @tc.expected: The lastMainDelta_ of scrollable has not changed.
+     */
+    DragEnd(scrollable, 50.0);
+    EXPECT_EQ(scrollable->lastMainDelta_, lastMainDelta);
+    lastMainDelta = scrollable->lastMainDelta_;
+
+    /**
+     * @tc.steps: step4. Trigger the drag end event again.
+     * @tc.expected: the lastMainDelta_ of scrollable has changed.
+     */
+    DragEnd(scrollable, 50, 200.0);
+    EXPECT_NE(scrollable->lastMainDelta_, lastMainDelta);
+    EXPECT_EQ(scrollable->lastMainDelta_, 200.0);
 }
 } // namespace OHOS::Ace::NG

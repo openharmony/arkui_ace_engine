@@ -59,6 +59,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
 
     RefPtr<FrameNode> GetDialogNode()
@@ -80,7 +82,7 @@ private:
     void ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNode);
 
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
-    void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
+    void UpdateBackgroundStyle();
 
     NavigationToolbarOptions options_;
     RefPtr<FrameNode> dialogNode_;

@@ -270,7 +270,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             deviceHeight, density_);
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density_, false);
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
+    ColorMode colorMode = ColorMode::LIGHT;
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();
@@ -289,10 +289,10 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
         }
         if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
-            SystemProperties::SetColorMode(ColorMode::DARK);
+            colorMode = ColorMode::DARK;
             LOGI("UIContent set dark mode");
         } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
+            colorMode = ColorMode::LIGHT;
             LOGI("UIContent set light mode");
         }
         SystemProperties::SetDeviceAccess(
@@ -383,12 +383,13 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         false, useNewPipe);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
+    container->SetColorMode(colorMode);
     container->SetToken(token_);
     auto aceResCfg = container->GetResourceConfiguration();
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
-    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+    aceResCfg.SetColorMode(container->GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
@@ -612,8 +613,7 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
                 configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
-        TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration");
     LOGI("AceAbility OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 
@@ -716,8 +716,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Platform::AceViewOhos::SurfaceChanged(aceView, rect.width_, rect.height_,
                 rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIAbilitySurfaceChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIAbilitySurfaceChanged");
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -734,7 +733,7 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
         },
-        TaskExecutor::TaskType::UI, "ArkUIWindowModeChange", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIWindowModeChange");
 }
 
 void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
@@ -756,8 +755,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
                 CHECK_NULL_VOID(context);
                 context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
-            TaskExecutor::TaskType::UI, "ArkUIAbilityVirtualKeyboardAreaChange",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::UI, "ArkUIAbilityVirtualKeyboardAreaChange");
     }
 }
 
@@ -899,8 +897,7 @@ void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHO
                 pipeline->UpdateCutoutSafeArea(safeArea);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIAbilityAvoidAreaChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIAbilityAvoidAreaChanged");
 }
 
 } // namespace Ace

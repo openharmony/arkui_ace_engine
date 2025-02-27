@@ -20,18 +20,12 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class TextFieldOverlayModifier : public ScrollBarOverlayModifier {
@@ -91,6 +85,9 @@ public:
         caretLanding_ = caretLanding;
     }
 
+    void SetHoverColorAndRects(const std::vector<RoundRect>& hoverRects, uint32_t hoverColor);
+    void ClearHoverColorAndRects();
+
 private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
@@ -134,10 +131,11 @@ private:
     RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyColor> previewTextDecorationColor_;
     RectF textRect_;
-
     RefPtr<AnimatablePropertyOffsetF> floatingCursorOffset_;
     RefPtr<PropertyBool> floatingCursorVisible_;
     RefPtr<PropertyBool> showOriginCursor_;
+    std::vector<RoundRect> hoverRects_;
+    RefPtr<PropertyInt> hoverColor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };

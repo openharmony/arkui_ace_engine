@@ -29,7 +29,7 @@ void LongFrameReportImpl::SubmitEvent()
 {
     ffrtTask = ffrt::submit_h([] {
         ResSchedReport::GetInstance().ResSchedDataReport("long_frame_start");
-    }, {}, {}, ffrt::task_attr().delay(LONG_FRAME_EVENT_DELAY));
+    }, {}, {}, ffrt::task_attr().delay(LONG_FRAME_EVENT_DELAY).qos(ffrt::qos_user_interactive));
 }
 
 void LongFrameReportImpl::CancelEvent()

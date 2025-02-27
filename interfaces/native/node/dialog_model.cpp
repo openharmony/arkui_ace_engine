@@ -19,6 +19,11 @@
 #include "base/error/error_code.h"
 
 namespace OHOS::Ace::DialogModel {
+namespace {
+    constexpr double LEVEL_ORDER_MIN = -100000.0;
+    constexpr double LEVEL_ORDER_MAX = 100000.0;
+} // namespace
+
 ArkUI_NativeDialogHandle Create()
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -253,6 +258,61 @@ int32_t SetImmersiveMode(ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMode im
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     return impl->getDialogAPI()->setImmersiveMode(handle->controller, static_cast<int32_t>(immersiveMode));
+}
+
+int32_t SetLevelOrder(ArkUI_NativeDialogHandle handle, double levelOrder)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+    }
+    if (!handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (levelOrder < LEVEL_ORDER_MIN || levelOrder > LEVEL_ORDER_MAX) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setLevelOrder(handle->controller, levelOrder);
+}
+
+int32_t RegisterOnWillAppear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    int result = impl->getDialogAPI()->registerOnWillAppear(handle->controller, userData, callback);
+    return result;
+}
+
+int32_t RegisterOnDidAppear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    int result = impl->getDialogAPI()->registerOnDidAppear(handle->controller, userData, callback);
+    return result;
+}
+
+int32_t RegisterOnWillDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    int result = impl->getDialogAPI()->registerOnWillDisappear(handle->controller, userData, callback);
+    return result;
+}
+
+int32_t RegisterOnDidDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    int result = impl->getDialogAPI()->registerOnDidDisappear(handle->controller, userData, callback);
+    return result;
 }
 } // namespace OHOS::Ace::NG::DialogModel
 

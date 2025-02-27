@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/string_expression.h"
 #include "core/components_ng/layout/layout_property.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
@@ -380,6 +381,19 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
 
+std::pair<std::vector<std::string>, std::vector<std::string>> LayoutProperty::CalcToString(const CalcSize& calcSize)
+{
+    std::vector<std::string> widthString;
+    std::vector<std::string> heightString;
+    if (calcSize.Width().has_value() && !calcSize.Width()->CalcValue().empty()) {
+        widthString = StringExpression::ConvertDal2Rpn(calcSize.Width()->CalcValue());
+    }
+    if (calcSize.Height().has_value() && !calcSize.Height()->CalcValue().empty()) {
+        heightString = StringExpression::ConvertDal2Rpn(calcSize.Width()->CalcValue());
+    }
+    return std::pair<std::vector<std::string>, std::vector<std::string>>(widthString, heightString);
+}
+
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
@@ -400,25 +414,45 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     auto originMax = layoutConstraint_->maxSize;
-    if (calcLayoutConstraint_) {
-        if (calcLayoutConstraint_->maxSize.has_value()) {
-            layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
-        }
-        if (calcLayoutConstraint_->minSize.has_value()) {
-            layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
-        }
-        if (calcLayoutConstraint_->selfIdealSize.has_value()) {
-            layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
-                    parentConstraint.percentReference));
-        }
-    }
-
-    CheckSelfIdealSize(parentConstraint, originMax);
+    
+    CheckCalcLayoutConstraint(parentConstraint);
+    CheckSelfIdealSize(originMax);
     CheckBorderAndPadding();
     CheckAspectRatio();
+}
+
+void LayoutProperty::CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint)
+{
+    if (calcLayoutConstraint_) {
+        if (calcLayoutConstraint_->maxSize.has_value()) {
+            if (!calcLayoutConstraint_->preMaxSize.has_value() ||
+                calcLayoutConstraint_->preMaxSize.value() != calcLayoutConstraint_->maxSize.value()) {
+                calcMaxSizeRpn_ = CalcToString(calcLayoutConstraint_->maxSize.value());
+                calcLayoutConstraint_->preMaxSize = calcLayoutConstraint_->maxSize;
+            }
+            layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
+                parentConstraint.scaleProperty, parentConstraint.percentReference, calcMaxSizeRpn_));
+        }
+        if (calcLayoutConstraint_->minSize.has_value()) {
+            if (!calcLayoutConstraint_->preMinSize.has_value() ||
+                calcLayoutConstraint_->preMinSize.value() != calcLayoutConstraint_->minSize.value()) {
+                calcMinSizeRpn_ = CalcToString(calcLayoutConstraint_->minSize.value());
+                calcLayoutConstraint_->preMinSize = calcLayoutConstraint_->minSize;
+            }
+            layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
+                parentConstraint.scaleProperty, parentConstraint.percentReference, calcMinSizeRpn_));
+        }
+        if (calcLayoutConstraint_->selfIdealSize.has_value()) {
+            if (!calcLayoutConstraint_->preSelfIdealSize.has_value() ||
+                calcLayoutConstraint_->preSelfIdealSize.value() != calcLayoutConstraint_->selfIdealSize.value()) {
+                calcSelfIdealSizeRpn_ = CalcToString(calcLayoutConstraint_->selfIdealSize.value());
+                calcLayoutConstraint_->preSelfIdealSize = calcLayoutConstraint_->selfIdealSize;
+            }
+            layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
+                    parentConstraint.percentReference, calcSelfIdealSizeRpn_));
+        }
+    }
 }
 
 void LayoutProperty::UpdateLayoutConstraintWithLayoutRect()
@@ -552,7 +586,7 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     return true;
 }
 
-void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax)
+void LayoutProperty::CheckSelfIdealSize(const SizeF& originMax)
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
         layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
@@ -564,11 +598,11 @@ void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstrain
     SizeF maxSize(-1.0f, -1.0f);
     if (calcLayoutConstraint_->maxSize.has_value()) {
         maxSize = ConvertToSize(calcLayoutConstraint_->maxSize.value(), layoutConstraint_->scaleProperty,
-            layoutConstraint_->percentReference);
+            layoutConstraint_->percentReference, calcMaxSizeRpn_);
     }
     if (calcLayoutConstraint_->minSize.has_value()) {
         minSize = ConvertToSize(calcLayoutConstraint_->minSize.value(), layoutConstraint_->scaleProperty,
-            layoutConstraint_->percentReference);
+            layoutConstraint_->percentReference, calcMinSizeRpn_);
     }
     if (calcLayoutConstraint_->maxSize.has_value()) {
         layoutConstraint_->selfIdealSize.UpdateWidthWhenSmaller(maxSize);
@@ -1115,6 +1149,7 @@ void LayoutProperty::ResetCalcMinSize()
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
     calcLayoutConstraint_->minSize.reset();
+    calcLayoutConstraint_->preMinSize.reset();
 }
 
 void LayoutProperty::ResetCalcMaxSize()
@@ -1126,6 +1161,7 @@ void LayoutProperty::ResetCalcMaxSize()
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
     calcLayoutConstraint_->maxSize.reset();
+    calcLayoutConstraint_->preMaxSize.reset();
 }
 
 void LayoutProperty::ResetCalcMinSize(bool resetWidth)

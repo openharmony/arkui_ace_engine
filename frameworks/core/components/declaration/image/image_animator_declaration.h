@@ -34,6 +34,21 @@ struct ImageProperties {
     CalcDimension top;
     CalcDimension left;
     int32_t duration = 0;
+    
+    bool operator==(const ImageProperties& info) const
+    {
+        return src == info.src &&
+            ((!pixelMap && !info.pixelMap) ||
+                (pixelMap->GetPixels() == info.pixelMap->GetPixels() &&
+                pixelMap->GetRawPixelMapPtr() == info.pixelMap->GetRawPixelMapPtr())) &&
+            bundleName == info.bundleName &&
+            moduleName == info.moduleName &&
+            width == info.width &&
+            height == info.height &&
+            top == info.top &&
+            left == info.left &&
+            duration == info.duration;
+    }
 };
 
 struct ImageAnimatorAttribute : Attribute {

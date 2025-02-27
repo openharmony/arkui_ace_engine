@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 using TimeChangeEvent = std::function<void(const BaseEventInfo* info)>;
 
-class ACE_EXPORT TimePickerModelNG : public TimePickerModel {
+class ACE_FORCE_EXPORT TimePickerModelNG : public TimePickerModel {
 public:
     void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) override;
     void SetStartTime(const PickerTime& value) override;

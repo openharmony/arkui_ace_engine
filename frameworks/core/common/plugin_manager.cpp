@@ -69,8 +69,7 @@ void PluginManager::UpdateConfigurationInPlugin(
                 CHECK_NULL_VOID(pluginSubContainer);
                 pluginSubContainer->FlushReload();
             },
-            TaskExecutor::TaskType::JS, "ArkUIPluginFlushReload",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::JS, "ArkUIPluginFlushReload");
     }
 }
 

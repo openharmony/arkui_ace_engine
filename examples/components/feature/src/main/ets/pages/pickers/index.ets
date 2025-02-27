@@ -60,7 +60,7 @@ export function PickersDestination(name: string, route: Route) {
     RadioBootcamp({ title: route.label })
   } else if (name === 'pickers/Slider') {
     SliderBootcamp({ title: route.label })
-  } else if (name==='pickers/text-picker'){
+  } else if (name === 'pickers/text-picker') {
     TextPickerBootcamp({title: route.label})
   } else if (name === 'pickers/Timepicker') {
     TimePickerBootcamp({ title: route.label })

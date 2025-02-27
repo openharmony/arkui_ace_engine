@@ -16,6 +16,7 @@
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 #include "bridge/common/utils/engine_helper.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 
 namespace OHOS::Ace::Napi {
 static NG::FrameNode* ParseFrameNode(napi_env env, napi_callback_info info)
@@ -67,6 +68,46 @@ static napi_value JSAddFrameNode(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    return nullptr;
+}
+
+static std::optional<double> ParseLevelOrder(napi_env env, napi_value value)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType != napi_object) {
+        return std::nullopt;
+    }
+
+    NG::LevelOrder* levelOrder = nullptr;
+    napi_status status = napi_unwrap(env, value, reinterpret_cast<void**>(&levelOrder));
+    if (status != napi_ok || !levelOrder) {
+        return std::nullopt;
+    }
+
+    double order = levelOrder->GetOrder();
+    return std::make_optional(order);
+}
+
+static napi_value JSAddFrameNodeWithOrder(napi_env env, napi_callback_info info)
+{
+    NG::FrameNode* frameNode = ParseFrameNode(env, info);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        return nullptr;
+    }
+
+    size_t argc = 2;
+    napi_value argv[2] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    std::optional<double> levelOrder = std::nullopt;
+    if (argc > 1) {
+        levelOrder = ParseLevelOrder(env, argv[1]);
+    }
+
+    delegate->AddFrameNodeWithOrder(AceType::Claim(frameNode), levelOrder);
     return nullptr;
 }
 
@@ -186,6 +227,7 @@ static napi_value OverlayManagerExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor overlayManagerDesc[] = {
         DECLARE_NAPI_FUNCTION("addFrameNode", JSAddFrameNode),
+        DECLARE_NAPI_FUNCTION("addFrameNodeWithOrder", JSAddFrameNodeWithOrder),
         DECLARE_NAPI_FUNCTION("removeFrameNode", JSRemoveFrameNode),
         DECLARE_NAPI_FUNCTION("showNode", JSShowNode),
         DECLARE_NAPI_FUNCTION("hideNode", JSHideNode),

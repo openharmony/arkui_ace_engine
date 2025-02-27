@@ -77,7 +77,6 @@ float WaterFlowLayoutInfoSW::CalibrateOffset()
         // can calibrate totalOffset when at top
         const float prev = totalOffset_;
         totalOffset_ = startPos_ - TopMargin();
-
         if (!NearEqual(totalOffset_, prev)) {
             maxHeight_ = endPos_;
             knowTotalHeight_ = false;
@@ -342,7 +341,7 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
 
 void WaterFlowLayoutInfoSW::PrepareJump()
 {
-    if (startIndex_ > endIndex_) {
+    if (startIndex_ > endIndex_ || jumpIndex_ != EMPTY_JUMP_INDEX) {
         return;
     }
     align_ = ScrollAlign::START;

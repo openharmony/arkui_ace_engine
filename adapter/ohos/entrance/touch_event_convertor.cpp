@@ -34,4 +34,14 @@ void ConvertToAxisEvent(AxisEvent& event, const std::shared_ptr<MMI::PointerEven
 {
     Platform::ConvertAxisEvent(srcPointerEvent, event);
 }
+
+void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned)
+{
+    Platform::SetClonedPointerEvent(pointerEvent, arkUITouchEventCloned);
+}
+
+void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent)
+{
+    Platform::SetPostPointerEvent(pointerEvent, touchEvent);
+}
 }

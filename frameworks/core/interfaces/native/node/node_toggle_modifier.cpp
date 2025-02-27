@@ -340,6 +340,26 @@ void SetToggleState(ArkUINodeHandle node, ArkUI_Bool isOn)
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::SetToggleState(frameNode, static_cast<bool>(isOn));
 }
+
+void SetToggleOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        ToggleModelNG::OnChange(frameNode, std::move(*onChange));
+    } else {
+        ToggleModelNG::OnChange(frameNode, nullptr);
+    }
+}
+
+void ResetToggleOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::OnChange(frameNode, nullptr);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
@@ -373,6 +393,8 @@ const ArkUIToggleModifier* GetToggleModifier()
         .resetToggleTrackBorderRadius = ResetToggleTrackBorderRadius,
         .getToggleUnselectedColor = GetToggleUnselectedColor,
         .setToggleState = SetToggleState,
+        .setToggleOnChange = SetToggleOnChange,
+        .resetToggleOnChange = ResetToggleOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -27,16 +27,16 @@ const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 class ButtonGestureModifier {
-    constructor(h9) {
+    constructor(n36) {
         this.fontSize = 1;
         this.controller = null;
-        this.controller = h9;
+        this.controller = n36;
     }
-    applyGesture(g9) {
+    applyGesture(m36) {
         if (this.fontSize >= ButtonGestureModifier.minFontSize) {
-            g9.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+            m36.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
                 .onAction(() => {
-                    if (g9) {
+                    if (m36) {
                         this.controller?.open();
                     }
                 })
@@ -45,19 +45,19 @@ class ButtonGestureModifier {
                 }));
         }
         else {
-            g9.clearGestures();
+            m36.clearGestures();
         }
     }
 }
 ButtonGestureModifier.longPressTime = 500;
 ButtonGestureModifier.minFontSize = 1.75;
 export class SelectTitleBar extends ViewPU {
-    constructor(a9, b9, c9, d9 = -1, e9 = undefined, f9) {
-        super(a9, c9, d9, f9);
-        if (typeof e9 === 'function') {
-            this.paramsGenerator_ = e9;
+    constructor(g36, h36, i36, j36 = -1, k36 = undefined, l36) {
+        super(g36, i36, j36, l36);
+        if (typeof k36 === 'function') {
+            this.paramsGenerator_ = k36;
         }
-        this.__selected = new SynchedPropertySimpleOneWayPU(b9.selected, this, 'selected');
+        this.__selected = new SynchedPropertySimpleOneWayPU(h36.selected, this, 'selected');
         this.options = [];
         this.menuItems = [];
         this.subtitle = '';
@@ -67,48 +67,48 @@ export class SelectTitleBar extends ViewPU {
         this.onSelected = () => { };
         this.__selectMaxWidth = new ObservedPropertySimplePU(0, this, 'selectMaxWidth');
         this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
-        this.setInitiallyProvidedValue(b9);
+        this.setInitiallyProvidedValue(h36);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(z8) {
-        if (z8.selected === undefined) {
+    setInitiallyProvidedValue(f36) {
+        if (f36.selected === undefined) {
             this.__selected.set(0);
         }
-        if (z8.options !== undefined) {
-            this.options = z8.options;
+        if (f36.options !== undefined) {
+            this.options = f36.options;
         }
-        if (z8.menuItems !== undefined) {
-            this.menuItems = z8.menuItems;
+        if (f36.menuItems !== undefined) {
+            this.menuItems = f36.menuItems;
         }
-        if (z8.subtitle !== undefined) {
-            this.subtitle = z8.subtitle;
+        if (f36.subtitle !== undefined) {
+            this.subtitle = f36.subtitle;
         }
-        if (z8.badgeValue !== undefined) {
-            this.badgeValue = z8.badgeValue;
+        if (f36.badgeValue !== undefined) {
+            this.badgeValue = f36.badgeValue;
         }
-        if (z8.hidesBackButton !== undefined) {
-            this.hidesBackButton = z8.hidesBackButton;
+        if (f36.hidesBackButton !== undefined) {
+            this.hidesBackButton = f36.hidesBackButton;
         }
-        if (z8.messageDesc !== undefined) {
-            this.messageDesc = z8.messageDesc;
+        if (f36.messageDesc !== undefined) {
+            this.messageDesc = f36.messageDesc;
         }
-        if (z8.onSelected !== undefined) {
-            this.onSelected = z8.onSelected;
+        if (f36.onSelected !== undefined) {
+            this.onSelected = f36.onSelected;
         }
-        if (z8.selectMaxWidth !== undefined) {
-            this.selectMaxWidth = z8.selectMaxWidth;
+        if (f36.selectMaxWidth !== undefined) {
+            this.selectMaxWidth = f36.selectMaxWidth;
         }
-        if (z8.fontSize !== undefined) {
-            this.fontSize = z8.fontSize;
+        if (f36.fontSize !== undefined) {
+            this.fontSize = f36.fontSize;
         }
     }
-    updateStateVars(y8) {
-        this.__selected.reset(y8.selected);
+    updateStateVars(e36) {
+        this.__selected.reset(e36.selected);
     }
-    purgeVariableDependenciesOnElmtId(x8) {
-        this.__selected.purgeDependencyOnElmtId(x8);
-        this.__selectMaxWidth.purgeDependencyOnElmtId(x8);
-        this.__fontSize.purgeDependencyOnElmtId(x8);
+    purgeVariableDependenciesOnElmtId(d36) {
+        this.__selected.purgeDependencyOnElmtId(d36);
+        this.__selectMaxWidth.purgeDependencyOnElmtId(d36);
+        this.__fontSize.purgeDependencyOnElmtId(d36);
     }
     aboutToBeDeleted() {
         this.__selected.aboutToBeDeleted();
@@ -120,23 +120,23 @@ export class SelectTitleBar extends ViewPU {
     get selected() {
         return this.__selected.get();
     }
-    set selected(w8) {
-        this.__selected.set(w8);
+    set selected(c36) {
+        this.__selected.set(c36);
     }
     get selectMaxWidth() {
         return this.__selectMaxWidth.get();
     }
-    set selectMaxWidth(v8) {
-        this.__selectMaxWidth.set(v8);
+    set selectMaxWidth(b36) {
+        this.__selectMaxWidth.set(b36);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(u8) {
-        this.__fontSize.set(u8);
+    set fontSize(a36) {
+        this.__fontSize.set(a36);
     }
     initialRender() {
-        this.observeComponentCreation2((o8, p8) => {
+        this.observeComponentCreation2((u35, v35) => {
             Flex.create({
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Stretch
@@ -144,51 +144,51 @@ export class SelectTitleBar extends ViewPU {
             Flex.width('100%');
             Flex.height(SelectTitleBar.totalHeight);
             Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Flex.onAreaChange((q8, r8) => {
-                let s8 = Number(r8.width);
+            Flex.onAreaChange((w35, x35) => {
+                let y35 = Number(x35.width);
                 if (!this.hidesBackButton) {
-                    s8 -= ImageMenuItem.imageHotZoneWidth;
-                    s8 += SelectTitleBar.leftPadding;
-                    s8 -= SelectTitleBar.leftPaddingWithBack;
+                    y35 -= ImageMenuItem.imageHotZoneWidth;
+                    y35 += SelectTitleBar.leftPadding;
+                    y35 -= SelectTitleBar.leftPaddingWithBack;
                 }
                 if (this.menuItems !== undefined) {
-                    let t8 = this.menuItems.length;
-                    if (t8 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
-                        s8 -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
+                    let z35 = this.menuItems.length;
+                    if (z35 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
+                        y35 -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
                     }
-                    else if (t8 > 0) {
-                        s8 -= ImageMenuItem.imageHotZoneWidth * t8;
+                    else if (z35 > 0) {
+                        y35 -= ImageMenuItem.imageHotZoneWidth * z35;
                     }
                 }
                 if (this.badgeValue) {
-                    this.selectMaxWidth = s8 - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding -
+                    this.selectMaxWidth = y35 - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding -
                     SelectTitleBar.rightPadding - SelectTitleBar.badgePadding;
                 }
                 else {
-                    this.selectMaxWidth = s8 - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding;
+                    this.selectMaxWidth = y35 - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding;
                 }
             });
         }, Flex);
-        this.observeComponentCreation2((m8, n8) => {
+        this.observeComponentCreation2((s35, t35) => {
             Row.create();
             Row.margin({ left: this.hidesBackButton ? { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_start'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_start'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
         }, Row);
-        this.observeComponentCreation2((g8, h8) => {
+        this.observeComponentCreation2((m35, n35) => {
             If.create();
             if (!this.hidesBackButton) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((i8, j8) => {
-                            if (j8) {
-                                let k8 = new ImageMenuItem(this, { item: {
+                        this.observeComponentCreation2((o35, p35) => {
+                            if (p35) {
+                                let q35 = new ImageMenuItem(this, { item: {
                                     value: '',
                                     symbolStyle: new SymbolGlyphModifier(PUBLIC_BACK),
                                     isEnabled: true,
                                     label: getContext()?.resourceManager?.getStringByNameSync('icon_back'),
                                     action: () => this.getUIContext()?.getRouter()?.back()
-                                }, index: -1 }, undefined, i8, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 105, col: 11 });
-                                ViewPU.create(k8);
-                                let l7 = () => {
+                                }, index: -1 }, undefined, o35, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 105, col: 11 });
+                                ViewPU.create(q35);
+                                let r35 = () => {
                                     return {
                                         item: {
                                             value: '',
@@ -200,10 +200,10 @@ export class SelectTitleBar extends ViewPU {
                                         index: -1
                                     };
                                 };
-                                k8.paramsGenerator_ = l7;
+                                q35.paramsGenerator_ = r35;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(i8, {});
+                                this.updateStateVarsOfChildByElmtId(o35, {});
                             }
                         }, { name: 'ImageMenuItem' });
                     }
@@ -215,17 +215,17 @@ export class SelectTitleBar extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((e8, f8) => {
+        this.observeComponentCreation2((k35, l35) => {
             Column.create();
             Column.justifyContent(FlexAlign.Start);
             Column.alignItems(HorizontalAlign.Start);
             Column.constraintSize({ maxWidth: this.selectMaxWidth });
         }, Column);
-        this.observeComponentCreation2((s7, t7) => {
+        this.observeComponentCreation2((y34, z34) => {
             If.create();
             if (this.badgeValue) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c8, d8) => {
+                    this.observeComponentCreation2((i35, j35) => {
                         Badge.create({
                             count: this.badgeValue,
                             position: BadgePosition.Right,
@@ -238,12 +238,12 @@ export class SelectTitleBar extends ViewPU {
                         Badge.accessibilityGroup(true);
                         Badge.accessibilityLevel('no');
                     }, Badge);
-                    this.observeComponentCreation2((a8, b8) => {
+                    this.observeComponentCreation2((g35, h35) => {
                         Row.create();
                         Row.justifyContent(FlexAlign.Start);
                         Row.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_l'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
                     }, Row);
-                    this.observeComponentCreation2((y7, z7) => {
+                    this.observeComponentCreation2((e35, f35) => {
                         Select.create(this.options);
                         Select.selected(this.selected);
                         Select.value(this.selected >= 0 && this.selected < this.options.length ?
@@ -265,11 +265,11 @@ export class SelectTitleBar extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((w7, x7) => {
+                    this.observeComponentCreation2((c35, d35) => {
                         Row.create();
                         Row.justifyContent(FlexAlign.Start);
                     }, Row);
-                    this.observeComponentCreation2((u7, v7) => {
+                    this.observeComponentCreation2((a35, b35) => {
                         Select.create(this.options);
                         Select.selected(this.selected);
                         Select.value(this.selected >= 0 && this.selected < this.options.length ?
@@ -288,16 +288,16 @@ export class SelectTitleBar extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((m7, n7) => {
+        this.observeComponentCreation2((s34, t34) => {
             If.create();
             if (this.subtitle !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((q7, r7) => {
+                    this.observeComponentCreation2((w34, x34) => {
                         Row.create();
                         Row.justifyContent(FlexAlign.Start);
                         Row.margin({ left: SelectTitleBar.subtitleLeftPadding });
                     }, Row);
-                    this.observeComponentCreation2((o7, p7) => {
+                    this.observeComponentCreation2((u34, v34) => {
                         Text.create(this.subtitle);
                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_over_line'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -318,25 +318,25 @@ export class SelectTitleBar extends ViewPU {
         If.pop();
         Column.pop();
         Row.pop();
-        this.observeComponentCreation2((g7, h7) => {
+        this.observeComponentCreation2((m34, n34) => {
             If.create();
             if (this.menuItems !== undefined && this.menuItems.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((i7, j7) => {
-                            if (j7) {
-                                let k7 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + SelectTitleBar.instanceCount++ }, undefined, i7, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 185, col: 9 });
-                                ViewPU.create(k7);
-                                let f7 = () => {
+                        this.observeComponentCreation2((o34, p34) => {
+                            if (p34) {
+                                let q34 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + SelectTitleBar.instanceCount++ }, undefined, o34, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 185, col: 9 });
+                                ViewPU.create(q34);
+                                let r34 = () => {
                                     return {
                                         menuItems: this.menuItems,
                                         index: 1 + SelectTitleBar.instanceCount++
                                     };
                                 };
-                                k7.paramsGenerator_ = f7;
+                                q34.paramsGenerator_ = r34;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(i7, {});
+                                this.updateStateVarsOfChildByElmtId(o34, {});
                             }
                         }, { name: 'CollapsibleMenuSection' });
                     }
@@ -352,14 +352,14 @@ export class SelectTitleBar extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let o10 = getContext().resourceManager;
+            let l34 = getContext().resourceManager;
             this.messageDesc =
-                o10?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new', this.badgeValue);
+                l34?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new', this.badgeValue);
         }
-        catch (l10) {
-            let m10 = l10.code;
-            let n10 = l10.message;
-            hilog.error(0x3900, 'Ace', `Faild to getPluralStringByNameSync,cause, code: ${m10}, message: ${n10}`);
+        catch (i34) {
+            let j34 = i34.code;
+            let k34 = i34.message;
+            hilog.error(0x3900, 'Ace', `Faild to getPluralStringByNameSync,cause, code: ${j34}, message: ${k34}`);
         }
     }
     rerender() {
@@ -375,10 +375,10 @@ SelectTitleBar.badgePadding = 16;
 SelectTitleBar.subtitleLeftPadding = 4;
 SelectTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
-    constructor(x6, y6, z6, a7 = -1, b7 = undefined, c7) {
-        super(x6, z6, a7, c7);
-        if (typeof b7 === 'function') {
-            this.paramsGenerator_ = b7;
+    constructor(a34, b34, c34, d34 = -1, e34 = undefined, f34) {
+        super(a34, c34, d34, f34);
+        if (typeof e34 === 'function') {
+            this.paramsGenerator_ = e34;
         }
         this.menuItems = [];
         this.item = {
@@ -395,10 +395,10 @@ class CollapsibleMenuSection extends ViewPU {
         this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
         this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
         this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
-        this.__fontSize = new SynchedPropertySimpleOneWayPU(y6.fontSize, this, 'fontSize');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(b34.fontSize, this, 'fontSize');
         this.dialogController = new CustomDialogController({
             builder: () => {
-                let d7 = new SelectTitleBarDialog(this, {
+                let g34 = new SelectTitleBarDialog(this, {
                     cancel: () => {
                     },
                     confirm: () => {
@@ -407,9 +407,9 @@ class CollapsibleMenuSection extends ViewPU {
                     selectTitleBarDialog: this.item.label ? this.item.label : '',
                     fontSize: this.fontSize,
                 }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 254, col: 14 });
-                d7.setController(this.dialogController);
-                ViewPU.create(d7);
-                let e7 = () => {
+                g34.setController(this.dialogController);
+                ViewPU.create(g34);
+                let h34 = () => {
                     return {
                         cancel: () => {
                         },
@@ -420,74 +420,74 @@ class CollapsibleMenuSection extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                d7.paramsGenerator_ = e7;
+                g34.paramsGenerator_ = h34;
             },
             maskColor: Color.Transparent,
             isModal: true,
             customStyle: true
         }, this);
         this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
-        this.setInitiallyProvidedValue(y6);
+        this.setInitiallyProvidedValue(b34);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(w6) {
-        if (w6.menuItems !== undefined) {
-            this.menuItems = w6.menuItems;
+    setInitiallyProvidedValue(z33) {
+        if (z33.menuItems !== undefined) {
+            this.menuItems = z33.menuItems;
         }
-        if (w6.item !== undefined) {
-            this.item = w6.item;
+        if (z33.item !== undefined) {
+            this.item = z33.item;
         }
-        if (w6.index !== undefined) {
-            this.index = w6.index;
+        if (z33.index !== undefined) {
+            this.index = z33.index;
         }
-        if (w6.minFontSize !== undefined) {
-            this.minFontSize = w6.minFontSize;
+        if (z33.minFontSize !== undefined) {
+            this.minFontSize = z33.minFontSize;
         }
-        if (w6.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = w6.isFollowingSystemFontScale;
+        if (z33.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = z33.isFollowingSystemFontScale;
         }
-        if (w6.maxFontScale !== undefined) {
-            this.maxFontScale = w6.maxFontScale;
+        if (z33.maxFontScale !== undefined) {
+            this.maxFontScale = z33.maxFontScale;
         }
-        if (w6.systemFontScale !== undefined) {
-            this.systemFontScale = w6.systemFontScale;
+        if (z33.systemFontScale !== undefined) {
+            this.systemFontScale = z33.systemFontScale;
         }
-        if (w6.firstFocusableIndex !== undefined) {
-            this.firstFocusableIndex = w6.firstFocusableIndex;
+        if (z33.firstFocusableIndex !== undefined) {
+            this.firstFocusableIndex = z33.firstFocusableIndex;
         }
-        if (w6.isPopupShown !== undefined) {
-            this.isPopupShown = w6.isPopupShown;
+        if (z33.isPopupShown !== undefined) {
+            this.isPopupShown = z33.isPopupShown;
         }
-        if (w6.isMoreIconOnFocus !== undefined) {
-            this.isMoreIconOnFocus = w6.isMoreIconOnFocus;
+        if (z33.isMoreIconOnFocus !== undefined) {
+            this.isMoreIconOnFocus = z33.isMoreIconOnFocus;
         }
-        if (w6.isMoreIconOnHover !== undefined) {
-            this.isMoreIconOnHover = w6.isMoreIconOnHover;
+        if (z33.isMoreIconOnHover !== undefined) {
+            this.isMoreIconOnHover = z33.isMoreIconOnHover;
         }
-        if (w6.isMoreIconOnClick !== undefined) {
-            this.isMoreIconOnClick = w6.isMoreIconOnClick;
+        if (z33.isMoreIconOnClick !== undefined) {
+            this.isMoreIconOnClick = z33.isMoreIconOnClick;
         }
-        if (w6.fontSize === undefined) {
+        if (z33.fontSize === undefined) {
             this.__fontSize.set(1);
         }
-        if (w6.dialogController !== undefined) {
-            this.dialogController = w6.dialogController;
+        if (z33.dialogController !== undefined) {
+            this.dialogController = z33.dialogController;
         }
-        if (w6.buttonGestureModifier !== undefined) {
-            this.buttonGestureModifier = w6.buttonGestureModifier;
+        if (z33.buttonGestureModifier !== undefined) {
+            this.buttonGestureModifier = z33.buttonGestureModifier;
         }
     }
-    updateStateVars(v6) {
-        this.__fontSize.reset(v6.fontSize);
+    updateStateVars(y33) {
+        this.__fontSize.reset(y33.fontSize);
     }
-    purgeVariableDependenciesOnElmtId(u6) {
-        this.__isPopupShown.purgeDependencyOnElmtId(u6);
-        this.__isMoreIconOnFocus.purgeDependencyOnElmtId(u6);
-        this.__isMoreIconOnHover.purgeDependencyOnElmtId(u6);
-        this.__isMoreIconOnClick.purgeDependencyOnElmtId(u6);
-        this.__fontSize.purgeDependencyOnElmtId(u6);
-        this.__buttonGestureModifier.purgeDependencyOnElmtId(u6);
+    purgeVariableDependenciesOnElmtId(x33) {
+        this.__isPopupShown.purgeDependencyOnElmtId(x33);
+        this.__isMoreIconOnFocus.purgeDependencyOnElmtId(x33);
+        this.__isMoreIconOnHover.purgeDependencyOnElmtId(x33);
+        this.__isMoreIconOnClick.purgeDependencyOnElmtId(x33);
+        this.__fontSize.purgeDependencyOnElmtId(x33);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(x33);
     }
     aboutToBeDeleted() {
         this.__isPopupShown.aboutToBeDeleted();
@@ -502,38 +502,38 @@ class CollapsibleMenuSection extends ViewPU {
     get isPopupShown() {
         return this.__isPopupShown.get();
     }
-    set isPopupShown(t6) {
-        this.__isPopupShown.set(t6);
+    set isPopupShown(w33) {
+        this.__isPopupShown.set(w33);
     }
     get isMoreIconOnFocus() {
         return this.__isMoreIconOnFocus.get();
     }
-    set isMoreIconOnFocus(s6) {
-        this.__isMoreIconOnFocus.set(s6);
+    set isMoreIconOnFocus(v33) {
+        this.__isMoreIconOnFocus.set(v33);
     }
     get isMoreIconOnHover() {
         return this.__isMoreIconOnHover.get();
     }
-    set isMoreIconOnHover(r6) {
-        this.__isMoreIconOnHover.set(r6);
+    set isMoreIconOnHover(u33) {
+        this.__isMoreIconOnHover.set(u33);
     }
     get isMoreIconOnClick() {
         return this.__isMoreIconOnClick.get();
     }
-    set isMoreIconOnClick(q6) {
-        this.__isMoreIconOnClick.set(q6);
+    set isMoreIconOnClick(t33) {
+        this.__isMoreIconOnClick.set(t33);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(p6) {
-        this.__fontSize.set(p6);
+    set fontSize(s33) {
+        this.__fontSize.set(s33);
     }
     get buttonGestureModifier() {
         return this.__buttonGestureModifier.get();
     }
-    set buttonGestureModifier(o6) {
-        this.__buttonGestureModifier.set(o6);
+    set buttonGestureModifier(r33) {
+        this.__buttonGestureModifier.set(r33);
     }
     getMoreIconFgColor() {
         return this.isMoreIconOnClick
@@ -552,26 +552,26 @@ class CollapsibleMenuSection extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let n6 = this.getUIContext();
-            this.isFollowingSystemFontScale = n6.isFollowingSystemFontScale();
-            this.maxFontScale = n6.getMaxFontScale();
+            let q33 = this.getUIContext();
+            this.isFollowingSystemFontScale = q33.isFollowingSystemFontScale();
+            this.maxFontScale = q33.getMaxFontScale();
         }
-        catch (k6) {
-            let l6 = k6.code;
-            let m6 = k6.message;
-            hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${l6}, message: ${m6}`);
+        catch (n33) {
+            let o33 = n33.code;
+            let p33 = n33.message;
+            hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${o33}, message: ${p33}`);
         }
-        this.menuItems.forEach((i6, j6) => {
-            if (i6.isEnabled && this.firstFocusableIndex === -1 &&
-                j6 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-                this.firstFocusableIndex = this.index * 1000 + j6 + 1;
+        this.menuItems.forEach((l33, m33) => {
+            if (l33.isEnabled && this.firstFocusableIndex === -1 &&
+                m33 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+                this.firstFocusableIndex = this.index * 1000 + m33 + 1;
             }
         });
         this.fontSize = this.decideFontScale();
     }
     decideFontScale() {
-        let h6 = this.getUIContext();
-        this.systemFontScale = h6.getHostContext()?.config?.fontSizeScale ?? 1;
+        let k33 = this.getUIContext();
+        this.systemFontScale = k33.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
@@ -581,76 +581,76 @@ class CollapsibleMenuSection extends ViewPU {
         this.buttonGestureModifier.fontSize = this.fontSize;
     }
     initialRender() {
-        this.observeComponentCreation2((f6, g6) => {
+        this.observeComponentCreation2((i33, j33) => {
             Column.create();
             Column.height('100%');
             Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
             Column.justifyContent(FlexAlign.Center);
         }, Column);
-        this.observeComponentCreation2((d6, e6) => {
+        this.observeComponentCreation2((g33, h33) => {
             Row.create();
         }, Row);
-        this.observeComponentCreation2((z4, a5) => {
+        this.observeComponentCreation2((c32, d32) => {
             If.create();
             if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((t5, u5) => {
+                    this.observeComponentCreation2((w32, x32) => {
                         ForEach.create();
-                        const v5 = (w5, x5) => {
-                            const y5 = w5;
+                        const y32 = (z32, a33) => {
+                            const b33 = z32;
                             {
-                                this.observeComponentCreation2((z5, a6) => {
-                                    if (a6) {
-                                        let b6 = new ImageMenuItem(this, { item: y5, index: this.index * 1000 + x5 + 1 }, undefined, z5, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 324, col: 13 });
-                                        ViewPU.create(b6);
-                                        let c6 = () => {
+                                this.observeComponentCreation2((c33, d33) => {
+                                    if (d33) {
+                                        let e33 = new ImageMenuItem(this, { item: b33, index: this.index * 1000 + a33 + 1 }, undefined, c33, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 324, col: 13 });
+                                        ViewPU.create(e33);
+                                        let f33 = () => {
                                             return {
-                                                item: y5,
-                                                index: this.index * 1000 + x5 + 1
+                                                item: b33,
+                                                index: this.index * 1000 + a33 + 1
                                             };
                                         };
-                                        b6.paramsGenerator_ = c6;
+                                        e33.paramsGenerator_ = f33;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(z5, {});
+                                        this.updateStateVarsOfChildByElmtId(c33, {});
                                     }
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(t5, this.menuItems, v5, undefined, true, false);
+                        this.forEachUpdateFunction(w32, this.menuItems, y32, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((j5, k5) => {
+                    this.observeComponentCreation2((m32, n32) => {
                         ForEach.create();
-                        const l5 = (m5, n5) => {
-                            const o5 = m5;
+                        const o32 = (p32, q32) => {
+                            const r32 = p32;
                             {
-                                this.observeComponentCreation2((p5, q5) => {
-                                    if (q5) {
-                                        let r5 = new ImageMenuItem(this, { item: o5, index: this.index * 1000 + n5 + 1 }, undefined, p5, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 329, col: 15 });
-                                        ViewPU.create(r5);
-                                        let s5 = () => {
+                                this.observeComponentCreation2((s32, t32) => {
+                                    if (t32) {
+                                        let u32 = new ImageMenuItem(this, { item: r32, index: this.index * 1000 + q32 + 1 }, undefined, s32, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 329, col: 15 });
+                                        ViewPU.create(u32);
+                                        let v32 = () => {
                                             return {
-                                                item: o5,
-                                                index: this.index * 1000 + n5 + 1
+                                                item: r32,
+                                                index: this.index * 1000 + q32 + 1
                                             };
                                         };
-                                        r5.paramsGenerator_ = s5;
+                                        u32.paramsGenerator_ = v32;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(p5, {});
+                                        this.updateStateVarsOfChildByElmtId(s32, {});
                                     }
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(j5, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), l5, undefined, true, false);
+                        this.forEachUpdateFunction(m32, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), o32, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
-                    this.observeComponentCreation2((d5, e5) => {
+                    this.observeComponentCreation2((g32, h32) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: true });
                         Button.accessibilityText({ 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Button.width(ImageMenuItem.imageHotZoneWidth);
@@ -673,23 +673,23 @@ class CollapsibleMenuSection extends ViewPU {
                         ViewStackProcessor.visualState();
                         Button.onFocus(() => this.isMoreIconOnFocus = true);
                         Button.onBlur(() => this.isMoreIconOnFocus = false);
-                        Button.onHover((i5) => this.isMoreIconOnHover = i5);
-                        Button.onKeyEvent((h5) => {
-                            if (h5.keyCode !== KeyCode.KEYCODE_ENTER && h5.keyCode !== KeyCode.KEYCODE_SPACE) {
+                        Button.onHover((l32) => this.isMoreIconOnHover = l32);
+                        Button.onKeyEvent((k32) => {
+                            if (k32.keyCode !== KeyCode.KEYCODE_ENTER && k32.keyCode !== KeyCode.KEYCODE_SPACE) {
                                 return;
                             }
-                            if (h5.type === KeyType.Down) {
+                            if (k32.type === KeyType.Down) {
                                 this.isMoreIconOnClick = true;
                             }
-                            if (h5.type === KeyType.Up) {
+                            if (k32.type === KeyType.Up) {
                                 this.isMoreIconOnClick = false;
                             }
                         });
-                        Button.onTouch((g5) => {
-                            if (g5.type === TouchType.Down) {
+                        Button.onTouch((j32) => {
+                            if (j32.type === TouchType.Down) {
                                 this.isMoreIconOnClick = true;
                             }
-                            if (g5.type === TouchType.Up || g5.type === TouchType.Cancel) {
+                            if (j32.type === TouchType.Up || j32.type === TouchType.Cancel) {
                                 this.isMoreIconOnClick = false;
                                 if (this.fontSize >= this.minFontSize) {
                                     this.dialogController?.close();
@@ -703,15 +703,15 @@ class CollapsibleMenuSection extends ViewPU {
                             placement: Placement.Bottom,
                             popupColor: Color.White,
                             enableArrow: false,
-                            onStateChange: (f5) => {
-                                this.isPopupShown = f5.isVisible;
-                                if (!f5.isVisible) {
+                            onStateChange: (i32) => {
+                                this.isPopupShown = i32.isVisible;
+                                if (!i32.isVisible) {
                                     this.isMoreIconOnClick = false;
                                 }
                             }
                         });
                     }, Button);
-                    this.observeComponentCreation2((b5, c5) => {
+                    this.observeComponentCreation2((e32, f32) => {
                         SymbolGlyph.create(PUBLIC_MORE);
                         SymbolGlyph.fontSize(ImageMenuItem.imageSize);
                         SymbolGlyph.draggable(false);
@@ -726,14 +726,14 @@ class CollapsibleMenuSection extends ViewPU {
         Row.pop();
         Column.pop();
     }
-    onPlaceChildren(v4, w4, x4) {
-        w4.forEach((y4) => {
-            y4.layout({ x: 0, y: 0 });
+    onPlaceChildren(y31, z31, a32) {
+        z31.forEach((b32) => {
+            b32.layout({ x: 0, y: 0 });
         });
         this.fontSize = this.decideFontScale();
     }
-    popupBuilder(i4 = null) {
-        this.observeComponentCreation2((t4, u4) => {
+    popupBuilder(l31 = null) {
+        this.observeComponentCreation2((w31, x31) => {
             Column.create();
             Column.width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
             Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
@@ -741,33 +741,33 @@ class CollapsibleMenuSection extends ViewPU {
                 focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
             });
         }, Column);
-        this.observeComponentCreation2((j4, k4) => {
+        this.observeComponentCreation2((m31, n31) => {
             ForEach.create();
-            const l4 = (m4, n4) => {
-                const o4 = m4;
+            const o31 = (p31, q31) => {
+                const r31 = p31;
                 {
-                    this.observeComponentCreation2((p4, q4) => {
-                        if (q4) {
-                            let r4 = new ImageMenuItem(this, { item: o4, index: this.index * 1000 +
-                            CollapsibleMenuSection.maxCountOfVisibleItems + n4, isPopup: false }, undefined, p4, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 420, col: 11 });
-                            ViewPU.create(r4);
-                            let s4 = () => {
+                    this.observeComponentCreation2((s31, t31) => {
+                        if (t31) {
+                            let u31 = new ImageMenuItem(this, { item: r31, index: this.index * 1000 +
+                            CollapsibleMenuSection.maxCountOfVisibleItems + q31, isPopup: false }, undefined, s31, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 420, col: 11 });
+                            ViewPU.create(u31);
+                            let v31 = () => {
                                 return {
-                                    item: o4,
+                                    item: r31,
                                     index: this.index * 1000 +
-                                    CollapsibleMenuSection.maxCountOfVisibleItems + n4,
+                                    CollapsibleMenuSection.maxCountOfVisibleItems + q31,
                                     isPopup: false
                                 };
                             };
-                            r4.paramsGenerator_ = s4;
+                            u31.paramsGenerator_ = v31;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(p4, {});
+                            this.updateStateVarsOfChildByElmtId(s31, {});
                         }
                     }, { name: 'ImageMenuItem' });
                 }
             };
-            this.forEachUpdateFunction(j4, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), l4, undefined, true, false);
+            this.forEachUpdateFunction(m31, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), o31, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Column.pop();
@@ -780,10 +780,10 @@ CollapsibleMenuSection.maxCountOfVisibleItems = 3;
 CollapsibleMenuSection.focusPadding = 4;
 CollapsibleMenuSection.marginsNum = 2;
 class ImageMenuItem extends ViewPU {
-    constructor(a4, b4, c4, d4 = -1, e4 = undefined, f4) {
-        super(a4, c4, d4, f4);
-        if (typeof e4 === 'function') {
-            this.paramsGenerator_ = e4;
+    constructor(d31, e31, f31, g31 = -1, h31 = undefined, i31) {
+        super(d31, f31, g31, i31);
+        if (typeof h31 === 'function') {
+            this.paramsGenerator_ = h31;
         }
         this.item = {};
         this.index = 0;
@@ -795,10 +795,10 @@ class ImageMenuItem extends ViewPU {
         this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
         this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
         this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
-        this.__fontSize = new SynchedPropertySimpleOneWayPU(b4.fontSize, this, 'fontSize');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(e31.fontSize, this, 'fontSize');
         this.dialogController = new CustomDialogController({
             builder: () => {
-                let g4 = new SelectTitleBarDialog(this, {
+                let j31 = new SelectTitleBarDialog(this, {
                     cancel: () => {
                     },
                     confirm: () => {
@@ -807,9 +807,9 @@ class ImageMenuItem extends ViewPU {
                     selectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
                     fontSize: this.fontSize,
                 }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/selecttitlebar.ets', line: 454, col: 14 });
-                g4.setController(this.dialogController);
-                ViewPU.create(g4);
-                let h4 = () => {
+                j31.setController(this.dialogController);
+                ViewPU.create(j31);
+                let k31 = () => {
                     return {
                         cancel: () => {
                         },
@@ -820,67 +820,67 @@ class ImageMenuItem extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                g4.paramsGenerator_ = h4;
+                j31.paramsGenerator_ = k31;
             },
             maskColor: Color.Transparent,
             isModal: true,
             customStyle: true
         }, this);
         this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
-        this.setInitiallyProvidedValue(b4);
+        this.setInitiallyProvidedValue(e31);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(z3) {
-        if (z3.item !== undefined) {
-            this.item = z3.item;
+    setInitiallyProvidedValue(c31) {
+        if (c31.item !== undefined) {
+            this.item = c31.item;
         }
-        if (z3.index !== undefined) {
-            this.index = z3.index;
+        if (c31.index !== undefined) {
+            this.index = c31.index;
         }
-        if (z3.minFontSize !== undefined) {
-            this.minFontSize = z3.minFontSize;
+        if (c31.minFontSize !== undefined) {
+            this.minFontSize = c31.minFontSize;
         }
-        if (z3.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = z3.isFollowingSystemFontScale;
+        if (c31.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = c31.isFollowingSystemFontScale;
         }
-        if (z3.maxFontScale !== undefined) {
-            this.maxFontScale = z3.maxFontScale;
+        if (c31.maxFontScale !== undefined) {
+            this.maxFontScale = c31.maxFontScale;
         }
-        if (z3.systemFontScale !== undefined) {
-            this.systemFontScale = z3.systemFontScale;
+        if (c31.systemFontScale !== undefined) {
+            this.systemFontScale = c31.systemFontScale;
         }
-        if (z3.isPopup !== undefined) {
-            this.isPopup = z3.isPopup;
+        if (c31.isPopup !== undefined) {
+            this.isPopup = c31.isPopup;
         }
-        if (z3.isOnFocus !== undefined) {
-            this.isOnFocus = z3.isOnFocus;
+        if (c31.isOnFocus !== undefined) {
+            this.isOnFocus = c31.isOnFocus;
         }
-        if (z3.isOnHover !== undefined) {
-            this.isOnHover = z3.isOnHover;
+        if (c31.isOnHover !== undefined) {
+            this.isOnHover = c31.isOnHover;
         }
-        if (z3.isOnClick !== undefined) {
-            this.isOnClick = z3.isOnClick;
+        if (c31.isOnClick !== undefined) {
+            this.isOnClick = c31.isOnClick;
         }
-        if (z3.fontSize === undefined) {
+        if (c31.fontSize === undefined) {
             this.__fontSize.set(1);
         }
-        if (z3.dialogController !== undefined) {
-            this.dialogController = z3.dialogController;
+        if (c31.dialogController !== undefined) {
+            this.dialogController = c31.dialogController;
         }
-        if (z3.buttonGestureModifier !== undefined) {
-            this.buttonGestureModifier = z3.buttonGestureModifier;
+        if (c31.buttonGestureModifier !== undefined) {
+            this.buttonGestureModifier = c31.buttonGestureModifier;
         }
     }
-    updateStateVars(y3) {
-        this.__fontSize.reset(y3.fontSize);
+    updateStateVars(b31) {
+        this.__fontSize.reset(b31.fontSize);
     }
-    purgeVariableDependenciesOnElmtId(x3) {
-        this.__isOnFocus.purgeDependencyOnElmtId(x3);
-        this.__isOnHover.purgeDependencyOnElmtId(x3);
-        this.__isOnClick.purgeDependencyOnElmtId(x3);
-        this.__fontSize.purgeDependencyOnElmtId(x3);
-        this.__buttonGestureModifier.purgeDependencyOnElmtId(x3);
+    purgeVariableDependenciesOnElmtId(a31) {
+        this.__isOnFocus.purgeDependencyOnElmtId(a31);
+        this.__isOnHover.purgeDependencyOnElmtId(a31);
+        this.__isOnClick.purgeDependencyOnElmtId(a31);
+        this.__fontSize.purgeDependencyOnElmtId(a31);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(a31);
     }
     aboutToBeDeleted() {
         this.__isOnFocus.aboutToBeDeleted();
@@ -894,32 +894,32 @@ class ImageMenuItem extends ViewPU {
     get isOnFocus() {
         return this.__isOnFocus.get();
     }
-    set isOnFocus(w3) {
-        this.__isOnFocus.set(w3);
+    set isOnFocus(z30) {
+        this.__isOnFocus.set(z30);
     }
     get isOnHover() {
         return this.__isOnHover.get();
     }
-    set isOnHover(v3) {
-        this.__isOnHover.set(v3);
+    set isOnHover(y30) {
+        this.__isOnHover.set(y30);
     }
     get isOnClick() {
         return this.__isOnClick.get();
     }
-    set isOnClick(u3) {
-        this.__isOnClick.set(u3);
+    set isOnClick(x30) {
+        this.__isOnClick.set(x30);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(t3) {
-        this.__fontSize.set(t3);
+    set fontSize(w30) {
+        this.__fontSize.set(w30);
     }
     get buttonGestureModifier() {
         return this.__buttonGestureModifier.get();
     }
-    set buttonGestureModifier(s3) {
-        this.__buttonGestureModifier.set(s3);
+    set buttonGestureModifier(v30) {
+        this.__buttonGestureModifier.set(v30);
     }
     textDialog() {
         if (this.item.value === PUBLIC_MORE) {
@@ -949,43 +949,43 @@ class ImageMenuItem extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let r3 = this.getUIContext();
-            this.isFollowingSystemFontScale = r3.isFollowingSystemFontScale();
-            this.maxFontScale = r3.getMaxFontScale();
+            let u30 = this.getUIContext();
+            this.isFollowingSystemFontScale = u30.isFollowingSystemFontScale();
+            this.maxFontScale = u30.getMaxFontScale();
         }
-        catch (o3) {
-            let p3 = o3.code;
-            let q3 = o3.message;
-            hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${p3}, message: ${q3}`);
+        catch (r30) {
+            let s30 = r30.code;
+            let t30 = r30.message;
+            hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${s30}, message: ${t30}`);
         }
         this.fontSize = this.decideFontScale();
     }
     decideFontScale() {
-        let n3 = this.getUIContext();
-        this.systemFontScale = n3.getHostContext()?.config?.fontSizeScale ?? 1;
+        let q30 = this.getUIContext();
+        this.systemFontScale = q30.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
         return Math.min(this.systemFontScale, this.maxFontScale);
     }
-    toStringFormat(i3) {
-        if (typeof i3 === 'string') {
-            return i3;
+    toStringFormat(l30) {
+        if (typeof l30 === 'string') {
+            return l30;
         }
-        else if (typeof i3 === 'undefined') {
+        else if (typeof l30 === 'undefined') {
             return '';
         }
         else {
-            let j3 = '';
+            let m30 = '';
             try {
-                j3 = getContext()?.resourceManager?.getStringSync(i3);
+                m30 = getContext()?.resourceManager?.getStringSync(l30);
             }
-            catch (k3) {
-                let l3 = k3?.code;
-                let m3 = k3?.message;
-                hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${l3},message:${m3}`);
+            catch (n30) {
+                let o30 = n30?.code;
+                let p30 = n30?.message;
+                hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${o30},message:${p30}`);
             }
-            return j3;
+            return m30;
         }
     }
     getAccessibilityReadText() {
@@ -1003,9 +1003,9 @@ class ImageMenuItem extends ViewPU {
         }
         return ' ';
     }
-    onPlaceChildren(e3, f3, g3) {
-        f3.forEach((h3) => {
-            h3.layout({ x: 0, y: 0 });
+    onPlaceChildren(h30, i30, j30) {
+        i30.forEach((k30) => {
+            k30.layout({ x: 0, y: 0 });
         });
         this.fontSize = this.decideFontScale();
     }
@@ -1013,11 +1013,11 @@ class ImageMenuItem extends ViewPU {
         this.buttonGestureModifier.fontSize = this.fontSize;
     }
     initialRender() {
-        this.observeComponentCreation2((y1, z1) => {
+        this.observeComponentCreation2((b29, c29) => {
             If.create();
             if (this.isPopup) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((z2, a3) => {
+                    this.observeComponentCreation2((c30, d30) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
                         Button.accessibilityText(this.getAccessibilityReadText());
                         Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
@@ -1048,36 +1048,36 @@ class ImageMenuItem extends ViewPU {
                             this.isOnFocus = true;
                         });
                         Button.onBlur(() => this.isOnFocus = false);
-                        Button.onHover((d3) => {
+                        Button.onHover((g30) => {
                             if (!this.item.isEnabled) {
                                 return;
                             }
-                            this.isOnHover = d3;
+                            this.isOnHover = g30;
                         });
-                        Button.onKeyEvent((c3) => {
+                        Button.onKeyEvent((f30) => {
                             if (!this.item.isEnabled) {
                                 return;
                             }
-                            if (c3.keyCode !== KeyCode.KEYCODE_ENTER && c3.keyCode !== KeyCode.KEYCODE_SPACE) {
+                            if (f30.keyCode !== KeyCode.KEYCODE_ENTER && f30.keyCode !== KeyCode.KEYCODE_SPACE) {
                                 return;
                             }
-                            if (c3.type === KeyType.Down) {
+                            if (f30.type === KeyType.Down) {
                                 this.isOnClick = true;
                             }
-                            if (c3.type === KeyType.Up) {
+                            if (f30.type === KeyType.Up) {
                                 this.isOnClick = false;
                             }
                         });
-                        Button.onTouch((b3) => {
+                        Button.onTouch((e30) => {
                             if (!this.item.isEnabled) {
                                 return;
                             }
-                            if (b3.type === TouchType.Down) {
+                            if (e30.type === TouchType.Down) {
                                 this.isOnClick = true;
                             }
-                            if (b3.type === TouchType.Up || b3.type === TouchType.Cancel) {
+                            if (e30.type === TouchType.Up || e30.type === TouchType.Cancel) {
                                 this.isOnClick = false;
-                                if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+                                if (this.fontSize >= this.minFontSize) {
                                     this.dialogController?.close();
                                 }
                             }
@@ -1085,11 +1085,11 @@ class ImageMenuItem extends ViewPU {
                         Button.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
                         Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
                     }, Button);
-                    this.observeComponentCreation2((p2, q2) => {
+                    this.observeComponentCreation2((s29, t29) => {
                         If.create();
                         if (this.item.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((x2, y2) => {
+                                this.observeComponentCreation2((a30, b30) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.item.symbolStyle);
@@ -1103,11 +1103,11 @@ class ImageMenuItem extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((r2, s2) => {
+                                this.observeComponentCreation2((u29, v29) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.item.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((v2, w2) => {
+                                            this.observeComponentCreation2((y29, z29) => {
                                                 SymbolGlyph.create(this.item.value);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(ImageMenuItem.imageSize);
@@ -1119,7 +1119,7 @@ class ImageMenuItem extends ViewPU {
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((t2, u2) => {
+                                            this.observeComponentCreation2((w29, x29) => {
                                                 Image.create(this.item.value);
                                                 Image.draggable(false);
                                                 Image.width(ImageMenuItem.imageSize);
@@ -1141,7 +1141,7 @@ class ImageMenuItem extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((k2, l2) => {
+                    this.observeComponentCreation2((n29, o29) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
                         Button.accessibilityText(this.getAccessibilityReadText());
                         Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
@@ -1172,47 +1172,47 @@ class ImageMenuItem extends ViewPU {
                             this.isOnFocus = true;
                         });
                         Button.onBlur(() => this.isOnFocus = false);
-                        Button.onHover((o2) => {
+                        Button.onHover((r29) => {
                             if (!this.item.isEnabled) {
                                 return;
                             }
-                            this.isOnHover = o2;
+                            this.isOnHover = r29;
                         });
-                        Button.onKeyEvent((n2) => {
+                        Button.onKeyEvent((q29) => {
                             if (!this.item.isEnabled) {
                                 return;
                             }
-                            if (n2.keyCode !== KeyCode.KEYCODE_ENTER && n2.keyCode !== KeyCode.KEYCODE_SPACE) {
+                            if (q29.keyCode !== KeyCode.KEYCODE_ENTER && q29.keyCode !== KeyCode.KEYCODE_SPACE) {
                                 return;
                             }
-                            if (n2.type === KeyType.Down) {
+                            if (q29.type === KeyType.Down) {
                                 this.isOnClick = true;
                             }
-                            if (n2.type === KeyType.Up) {
+                            if (q29.type === KeyType.Up) {
                                 this.isOnClick = false;
                             }
                         });
-                        Button.onTouch((m2) => {
+                        Button.onTouch((p29) => {
                             if (!this.item.isEnabled) {
                                 return;
                             }
-                            if (m2.type === TouchType.Down) {
+                            if (p29.type === TouchType.Down) {
                                 this.isOnClick = true;
                             }
-                            if (m2.type === TouchType.Up || m2.type === TouchType.Cancel) {
+                            if (p29.type === TouchType.Up || p29.type === TouchType.Cancel) {
                                 this.isOnClick = false;
-                                if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+                                if (this.fontSize >= this.minFontSize) {
                                     this.dialogController?.close();
                                 }
                             }
                         });
                         Button.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
                     }, Button);
-                    this.observeComponentCreation2((a2, b2) => {
+                    this.observeComponentCreation2((d29, e29) => {
                         If.create();
                         if (this.item.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((i2, j2) => {
+                                this.observeComponentCreation2((l29, m29) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.item.symbolStyle);
@@ -1226,11 +1226,11 @@ class ImageMenuItem extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((c2, d2) => {
+                                this.observeComponentCreation2((f29, g29) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.item.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((g2, h2) => {
+                                            this.observeComponentCreation2((j29, k29) => {
                                                 SymbolGlyph.create(this.item.value);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(ImageMenuItem.imageSize);
@@ -1242,7 +1242,7 @@ class ImageMenuItem extends ViewPU {
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((e2, f2) => {
+                                            this.observeComponentCreation2((h29, i29) => {
                                                 Image.create(this.item.value);
                                                 Image.draggable(false);
                                                 Image.width(ImageMenuItem.imageSize);
@@ -1275,10 +1275,10 @@ ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.focusablePrefix = 'Id-SelectTitleBar-ImageMenuItem-';
 class SelectTitleBarDialog extends ViewPU {
-    constructor(s1, t1, u1, v1 = -1, w1 = undefined, x1) {
-        super(s1, u1, v1, x1);
-        if (typeof w1 === 'function') {
-            this.paramsGenerator_ = w1;
+    constructor(v28, w28, x28, y28 = -1, z28 = undefined, a29) {
+        super(v28, x28, y28, a29);
+        if (typeof z28 === 'function') {
+            this.paramsGenerator_ = z28;
         }
         this.selectTitleDialog = {};
         this.callbackId = undefined;
@@ -1298,60 +1298,60 @@ class SelectTitleBarDialog extends ViewPU {
         };
         this.confirm = () => {
         };
-        this.setInitiallyProvidedValue(t1);
+        this.setInitiallyProvidedValue(w28);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(r1) {
-        if (r1.selectTitleDialog !== undefined) {
-            this.selectTitleDialog = r1.selectTitleDialog;
+    setInitiallyProvidedValue(u28) {
+        if (u28.selectTitleDialog !== undefined) {
+            this.selectTitleDialog = u28.selectTitleDialog;
         }
-        if (r1.callbackId !== undefined) {
-            this.callbackId = r1.callbackId;
+        if (u28.callbackId !== undefined) {
+            this.callbackId = u28.callbackId;
         }
-        if (r1.selectTitleBarDialog !== undefined) {
-            this.selectTitleBarDialog = r1.selectTitleBarDialog;
+        if (u28.selectTitleBarDialog !== undefined) {
+            this.selectTitleBarDialog = u28.selectTitleBarDialog;
         }
-        if (r1.mainWindowStage !== undefined) {
-            this.mainWindowStage = r1.mainWindowStage;
+        if (u28.mainWindowStage !== undefined) {
+            this.mainWindowStage = u28.mainWindowStage;
         }
-        if (r1.controller !== undefined) {
-            this.controller = r1.controller;
+        if (u28.controller !== undefined) {
+            this.controller = u28.controller;
         }
-        if (r1.minFontSize !== undefined) {
-            this.minFontSize = r1.minFontSize;
+        if (u28.minFontSize !== undefined) {
+            this.minFontSize = u28.minFontSize;
         }
-        if (r1.maxFontSize !== undefined) {
-            this.maxFontSize = r1.maxFontSize;
+        if (u28.maxFontSize !== undefined) {
+            this.maxFontSize = u28.maxFontSize;
         }
-        if (r1.screenWidth !== undefined) {
-            this.screenWidth = r1.screenWidth;
+        if (u28.screenWidth !== undefined) {
+            this.screenWidth = u28.screenWidth;
         }
-        if (r1.verticalScreenLines !== undefined) {
-            this.verticalScreenLines = r1.verticalScreenLines;
+        if (u28.verticalScreenLines !== undefined) {
+            this.verticalScreenLines = u28.verticalScreenLines;
         }
-        if (r1.horizontalsScreenLines !== undefined) {
-            this.horizontalsScreenLines = r1.horizontalsScreenLines;
+        if (u28.horizontalsScreenLines !== undefined) {
+            this.horizontalsScreenLines = u28.horizontalsScreenLines;
         }
-        if (r1.fontSize !== undefined) {
-            this.fontSize = r1.fontSize;
+        if (u28.fontSize !== undefined) {
+            this.fontSize = u28.fontSize;
         }
-        if (r1.maxLines !== undefined) {
-            this.maxLines = r1.maxLines;
+        if (u28.maxLines !== undefined) {
+            this.maxLines = u28.maxLines;
         }
-        if (r1.cancel !== undefined) {
-            this.cancel = r1.cancel;
+        if (u28.cancel !== undefined) {
+            this.cancel = u28.cancel;
         }
-        if (r1.confirm !== undefined) {
-            this.confirm = r1.confirm;
+        if (u28.confirm !== undefined) {
+            this.confirm = u28.confirm;
         }
     }
-    updateStateVars(q1) {
+    updateStateVars(t28) {
     }
-    purgeVariableDependenciesOnElmtId(p1) {
-        this.__mainWindow.purgeDependencyOnElmtId(p1);
-        this.__fontSize.purgeDependencyOnElmtId(p1);
-        this.__maxLines.purgeDependencyOnElmtId(p1);
-        this.__windowStandardHeight.purgeDependencyOnElmtId(p1);
+    purgeVariableDependenciesOnElmtId(s28) {
+        this.__mainWindow.purgeDependencyOnElmtId(s28);
+        this.__fontSize.purgeDependencyOnElmtId(s28);
+        this.__maxLines.purgeDependencyOnElmtId(s28);
+        this.__windowStandardHeight.purgeDependencyOnElmtId(s28);
     }
     aboutToBeDeleted() {
         this.__mainWindow.aboutToBeDeleted();
@@ -1361,39 +1361,39 @@ class SelectTitleBarDialog extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    setController(o1) {
-        this.controller = o1;
+    setController(r28) {
+        this.controller = r28;
     }
     get mainWindow() {
         return this.__mainWindow.get();
     }
-    set mainWindow(n1) {
-        this.__mainWindow.set(n1);
+    set mainWindow(q28) {
+        this.__mainWindow.set(q28);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(m1) {
-        this.__fontSize.set(m1);
+    set fontSize(p28) {
+        this.__fontSize.set(p28);
     }
     get maxLines() {
         return this.__maxLines.get();
     }
-    set maxLines(l1) {
-        this.__maxLines.set(l1);
+    set maxLines(o28) {
+        this.__maxLines.set(o28);
     }
     get windowStandardHeight() {
         return this.__windowStandardHeight.get();
     }
-    set windowStandardHeight(k1) {
-        this.__windowStandardHeight.set(k1);
+    set windowStandardHeight(n28) {
+        this.__windowStandardHeight.set(n28);
     }
     initialRender() {
-        this.observeComponentCreation2((g, h) => {
+        this.observeComponentCreation2((j27, k27) => {
             If.create();
             if (this.selectTitleBarDialog) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i1, j1) => {
+                    this.observeComponentCreation2((l28, m28) => {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
@@ -1401,11 +1401,11 @@ class SelectTitleBarDialog extends ViewPU {
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Column);
-                    this.observeComponentCreation2((y, z) => {
+                    this.observeComponentCreation2((b28, c28) => {
                         If.create();
                         if (this.selectTitleDialog.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((g1, h1) => {
+                                this.observeComponentCreation2((j28, k28) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.selectTitleDialog.symbolStyle);
@@ -1422,11 +1422,11 @@ class SelectTitleBarDialog extends ViewPU {
                         }
                         else if (this.selectTitleDialog.value) {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((a1, b1) => {
+                                this.observeComponentCreation2((d28, e28) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.selectTitleDialog.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((e1, f1) => {
+                                            this.observeComponentCreation2((h28, i28) => {
                                                 SymbolGlyph.create(this.selectTitleDialog.value);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(IMAGE_SIZE);
@@ -1441,7 +1441,7 @@ class SelectTitleBarDialog extends ViewPU {
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((c1, d1) => {
+                                            this.observeComponentCreation2((f28, g28) => {
                                                 Image.create(this.selectTitleDialog.value);
                                                 Image.width(IMAGE_SIZE);
                                                 Image.height(IMAGE_SIZE);
@@ -1463,7 +1463,7 @@ class SelectTitleBarDialog extends ViewPU {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((w, x) => {
+                    this.observeComponentCreation2((z27, a28) => {
                         Column.create();
                         Column.width('100%');
                         Column.padding({
@@ -1472,7 +1472,7 @@ class SelectTitleBarDialog extends ViewPU {
                             bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                     }, Column);
-                    this.observeComponentCreation2((u, v) => {
+                    this.observeComponentCreation2((x27, y27) => {
                         Text.create(this.selectTitleBarDialog);
                         Text.fontSize(TEXT_EDITABLE_DIALOG);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1488,7 +1488,7 @@ class SelectTitleBarDialog extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((s, t) => {
+                    this.observeComponentCreation2((v27, w27) => {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
@@ -1497,11 +1497,11 @@ class SelectTitleBarDialog extends ViewPU {
                         Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Column.justifyContent(FlexAlign.Center);
                     }, Column);
-                    this.observeComponentCreation2((i, j) => {
+                    this.observeComponentCreation2((l27, m27) => {
                         If.create();
                         if (this.selectTitleDialog.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((q, r) => {
+                                this.observeComponentCreation2((t27, u27) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.selectTitleDialog.symbolStyle);
@@ -1514,11 +1514,11 @@ class SelectTitleBarDialog extends ViewPU {
                         }
                         else if (this.selectTitleDialog.value) {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((k, l) => {
+                                this.observeComponentCreation2((n27, o27) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.selectTitleDialog.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((o, p) => {
+                                            this.observeComponentCreation2((r27, s27) => {
                                                 SymbolGlyph.create(this.selectTitleDialog.value);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(IMAGE_SIZE);
@@ -1529,7 +1529,7 @@ class SelectTitleBarDialog extends ViewPU {
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((m, n) => {
+                                            this.observeComponentCreation2((p27, q27) => {
                                                 Image.create(this.selectTitleDialog.value);
                                                 Image.width(IMAGE_SIZE);
                                                 Image.height(IMAGE_SIZE);
@@ -1554,11 +1554,11 @@ class SelectTitleBarDialog extends ViewPU {
         If.pop();
     }
     async aboutToAppear() {
-        let d = this.getUIContext().getHostContext();
-        this.mainWindowStage = d.windowStage.getMainWindowSync();
-        let e = this.mainWindowStage.getWindowProperties();
-        let f = e.windowRect;
-        if (px2vp(f.height) > this.screenWidth) {
+        let g27 = this.getUIContext().getHostContext();
+        this.mainWindowStage = g27.windowStage.getMainWindowSync();
+        let h27 = this.mainWindowStage.getWindowProperties();
+        let i27 = h27.windowRect;
+        if (px2vp(i27.height) > this.screenWidth) {
             this.maxLines = this.verticalScreenLines;
         }
         else {
@@ -1570,18 +1570,18 @@ class SelectTitleBarDialog extends ViewPU {
     }
 }
 class Util {
-    static isSymbolResource(b) {
-        if (!Util.isResourceType(b)) {
+    static isSymbolResource(e27) {
+        if (!Util.isResourceType(e27)) {
             return false;
         }
-        let c = b;
-        return c.type == RESOURCE_TYPE_SYMBOL;
+        let f27 = e27;
+        return f27.type == RESOURCE_TYPE_SYMBOL;
     }
-    static isResourceType(a) {
-        if (!a) {
+    static isResourceType(d27) {
+        if (!d27) {
             return false;
         }
-        if (typeof a === 'string' || typeof a === 'undefined') {
+        if (typeof d27 === 'string' || typeof d27 === 'undefined') {
             return false;
         }
         return true;

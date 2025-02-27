@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,6 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class TabsCommonTestNg : public TabsTestNg {
 public:
     AssertionResult IsEqualNextFocusNode(
@@ -449,7 +446,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty005, TestSize.Level1)
      * @tc.steps: step2. swipe to item(index:1)
      * @tc.expected: CurrentIndex is 1
      */
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCurrentIndex(), 1);
 }
 

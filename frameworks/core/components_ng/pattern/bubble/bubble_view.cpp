@@ -981,4 +981,69 @@ bool BubbleView::IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool i
     }
     return true;
 }
+
+PopupInfo GetPopupInfoHelper(
+    const RefPtr<UINode>& customNode, const std::function<PopupInfo(const RefPtr<OverlayManager>&)>& getPopupInfoFunc)
+{
+    PopupInfo popupInfoError;
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, popupInfoError);
+    auto instanceId = context->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+    if (subwindow) {
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = getPopupInfoFunc(overlayManager);
+            if (popupInfo.popupNode) {
+                return popupInfo;
+            }
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = getPopupInfoFunc(overlayManager);
+        if (popupInfo.popupNode) {
+            return popupInfo;
+        }
+    }
+    return popupInfoError;
+}
+
+PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode)
+{
+    return GetPopupInfoHelper(customNode, [customNode](const RefPtr<OverlayManager>& overlayManager) {
+        return overlayManager->GetPopupInfoWithExistContent(customNode);
+    });
+}
+
+PopupInfo BubbleView::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId)
+{
+    return GetPopupInfoHelper(customNode,
+        [targetId](const RefPtr<OverlayManager>& overlayManager) { return overlayManager->GetPopupInfo(targetId); });
+}
+
+RefPtr<OverlayManager> BubbleView::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
+{
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+    if (subwindow) {
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = overlayManager->GetPopupInfo(targetId);
+            if (popupInfo.popupNode) {
+                return overlayManager;
+            }
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = overlayManager->GetPopupInfo(targetId);
+        if (popupInfo.popupNode) {
+            return overlayManager;
+        }
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

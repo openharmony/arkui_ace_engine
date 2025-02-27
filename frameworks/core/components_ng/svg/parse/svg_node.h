@@ -181,7 +181,8 @@ protected:
     void OnTransform(RSCanvas& canvas, const Size& viewPort);
     virtual void OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
     virtual void OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
-    virtual void OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
+    virtual void OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+        float useOffsetX, float useOffsetY) {}
     void OnClipPath(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     void OnFilter(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     void OnMask(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
@@ -240,6 +241,7 @@ protected:
     bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
     bool isRootNode_ = false;
     RSCanvas* rsCanvas_ = nullptr;
+    bool isDrawing_ = false; // Indicates if the current node is being drawn in the SVG rendering process.
     SvgLengthScaleRule lengthRule_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgNode);
 };

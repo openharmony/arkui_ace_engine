@@ -72,6 +72,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
+    CheckMousePendingRecognizersState(touchPoint);
     CleanRefereeBeforeTouchTest(touchPoint, needAppend);
     ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
@@ -967,7 +968,7 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
 }
 
 void EventManager::DispatchTouchCancelToRecognizer(
-    RefPtr<TouchEventTarget>& touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items)
+    TouchEventTarget* touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items)
 {
     TouchEvent touchEvent;
     touchEvent.type = TouchType::CANCEL;
@@ -976,7 +977,7 @@ void EventManager::DispatchTouchCancelToRecognizer(
         touchEvent.originalId = item.first;
         touchEvent.id = item.first;
         touchEventTarget->HandleMultiContainerEvent(touchEvent);
-        eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(touchEventTarget)), "",
+        eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(touchEventTarget), "",
             std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
 
         touchTestResults_[item.first].erase(item.second);
@@ -1355,6 +1356,9 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
+    if (event.mockFlushEvent) {
+        return false;
+    }
     const static std::set<MouseAction> validAction = {
         MouseAction::PRESS,
         MouseAction::RELEASE,
@@ -1555,7 +1559,8 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
             currHoverEndNode++;
         }
         if (std::find(lastHoverTestResults_.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
-            if (!event.mockFlushEvent && !hoverResult->HandleHoverEvent(true, event)) {
+            if (!(event.action == MouseAction::WINDOW_LEAVE && event.mockFlushEvent) &&
+                !hoverResult->HandleHoverEvent(true, event)) {
                 lastHoverDispatchLength_ = iterCountCurr;
                 break;
             }
@@ -2144,6 +2149,26 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
     } else {
         return false;
     }
+}
+
+void EventManager::AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer)
+{
+    mousePendingRecognizers_.emplace_back(recognizer);
+}
+
+void EventManager::CheckMousePendingRecognizersState(const TouchEvent& event)
+{
+    if (!mousePendingRecognizers_.empty() && event.sourceType == SourceType::MOUSE) {
+        for (const auto& item : mousePendingRecognizers_) {
+            auto recognizer = item.Upgrade();
+            if (!recognizer || (recognizer->GetRefereeState() != NG::RefereeState::PENDING &&
+                             recognizer->GetRefereeState() != NG::RefereeState::PENDING_BLOCKED)) {
+                continue;
+            }
+            recognizer->CheckPendingRecognizerIsInAttachedNode(event);
+        }
+    }
+    mousePendingRecognizers_.clear();
 }
 
 } // namespace OHOS::Ace

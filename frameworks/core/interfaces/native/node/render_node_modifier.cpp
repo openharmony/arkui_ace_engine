@@ -524,6 +524,10 @@ void SetMarkNodeGroup(ArkUINodeHandle node, ArkUI_Bool isNodeGroup)
     CHECK_NULL_VOID(renderContext);
 
     renderContext->SetMarkNodeGroup(isNodeGroup);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    if (frameNode) {
+        frameNode->SetApplicationRenderGroupMarked(true);
+    }
     renderContext->RequestNextFrame();
 }
 

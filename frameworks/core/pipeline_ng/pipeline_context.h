@@ -36,6 +36,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
@@ -213,7 +214,19 @@ public:
     // Do mouse event actively.
     void FlushMouseEvent();
 
+    void HandleTouchHoverOut(const TouchEvent& point);
+
     void FlushMouseEventVoluntarily();
+
+    void FlushMouseEventForHover();
+
+    void FlushMouseEventInVsync();
+
+    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo) override;
+
+    void SetIsWindowSizeChangeFlag(bool result) override;
+
+    void SetIsTransFlag(bool result);
 
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
@@ -247,6 +260,9 @@ public:
 
     void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
+    
+    void HandleOnDragEventMove(const DragPointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr);
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -411,7 +427,7 @@ public:
     void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
         bool keyboardHeightChanged);
     float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
-        float height, SizeF& rootSize);
+        float height, SizeF& rootSize, bool isInline = false);
     float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
         float height, SizeF rootSize);
 
@@ -897,6 +913,11 @@ public:
         return formGestureMgr_;
     }
 
+    const RefPtr<AvoidInfoManager>& GetAvoidInfoManager() const
+    {
+        return avoidInfoMgr_;
+    }
+
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
     {
         return recycleManager_;
@@ -945,11 +966,13 @@ public:
         localColorMode_ = localColorModeValue;
     }
 
-    ColorMode GetLocalColorMode() const
+    ColorMode GetLocalColorMode() const // ColorMode for WithTheme
     {
         ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
         return colorMode;
     }
+
+    ColorMode GetColorMode() const;
 
     void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
     {
@@ -1105,6 +1128,30 @@ public:
     void AddPendingDeleteCustomNode(const RefPtr<CustomNode>& node);
     void FlushPendingDeleteCustomNode();
 
+    void HandleSpecialContainerNode();
+
+    void AddPositionZNode(int32_t nodeId)
+    {
+        positionZNodes_.insert(nodeId);
+    }
+
+    void DeletePositionZNode(int32_t nodeId)
+    {
+        auto it = positionZNodes_.find(nodeId);
+        if (it != positionZNodes_.end()) {
+            positionZNodes_.erase(it);
+        }
+    }
+
+    std::set<int32_t> GetPositionZNodes()
+    {
+        return positionZNodes_;
+    }
+
+    void ClearPositionZNodes()
+    {
+        positionZNodes_.clear();
+    }
     bool IsWindowSizeDragging() const
     {
         return isWindowSizeDragging_;
@@ -1123,6 +1170,8 @@ protected:
     void StartWindowMaximizeAnimation(
         int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -1279,6 +1328,9 @@ private:
 
     int32_t curFocusNodeId_ = -1;
 
+    bool isTransFlag_ = false;
+    bool isWindowSizeChangeFlag = false;
+    SourceType lastSourceType_ = SourceType::NONE;
     bool preIsHalfFoldHoverStatus_ = false;
     bool isHoverModeChanged_ = false;
 
@@ -1356,6 +1408,8 @@ private:
     std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
 
+    std::set<int32_t> positionZNodes_;
+
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
 
@@ -1378,12 +1432,14 @@ private:
 
     int32_t preNodeId_ = -1;
 
+    RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
+    ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;

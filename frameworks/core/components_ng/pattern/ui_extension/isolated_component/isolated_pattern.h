@@ -66,6 +66,7 @@ public:
 
 private:
     void InitializeRender(void* runtime);
+    bool CheckConstraint();
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void DispatchFocusActiveEvent(bool isFocusActive) override;

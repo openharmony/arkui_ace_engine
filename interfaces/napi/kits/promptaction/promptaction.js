@@ -89,6 +89,36 @@ const closeCustomDialog = function closeCustomDialog(content) {
     return __prompt__.closeCustomDialog(content);
 };
 
+const LevelOrder = class LevelOrder {
+    constructor() {};
+
+    static clamp(order) {
+        let levelOrder = new LevelOrder();
+        __prompt__.LevelOrder.clamp(levelOrder, order);
+        return levelOrder;
+    }
+
+    getOrder() {
+        return __prompt__.LevelOrder.getOrder(this);
+    }
+};
+
+const __getTopOrder__ = function getTopOrder() {
+    let topOrder = __prompt__.LevelOrder.getTopOrder();
+    if (typeof topOrder === 'undefined') {
+        return undefined;
+    }
+    return LevelOrder.clamp(topOrder);
+};
+
+const __getBottomOrder__ = function getBottomOrder() {
+    let bottomOrder = __prompt__.LevelOrder.getBottomOrder();
+    if (typeof bottomOrder === 'undefined') {
+        return undefined;
+    }
+    return LevelOrder.clamp(bottomOrder);
+};
+
 let LevelMode;
 (function (LevelMode) {
     LevelMode[LevelMode.OVERLAY = 0] = 'OVERLAY';
@@ -115,6 +145,9 @@ export default {
     closeCustomDialog,
     showActionMenu,
     ToastShowMode: __prompt__.ToastShowMode,
+    LevelOrder,
+    __getTopOrder__,
+    __getBottomOrder__,
     LevelMode,
     ImmersiveMode
 };

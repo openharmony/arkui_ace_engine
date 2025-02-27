@@ -735,7 +735,7 @@ void MenuPattern::HideStackMenu() const
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
-                TaskExecutor::TaskType::UI, "HideStackMenu", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "HideStackMenu");
     });
     auto menuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
     if (menuPattern) {
@@ -941,13 +941,13 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
 
 bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
     auto host = GetHost();
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);

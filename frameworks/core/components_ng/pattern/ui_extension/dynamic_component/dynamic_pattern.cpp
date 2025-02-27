@@ -35,6 +35,8 @@ constexpr char PARAM_NAME_INTERNAL_ERROR[] = "internalError";
 constexpr char PARAM_MSG_INTERNAL_ERROR[] = "Internal error";
 constexpr char PARAM_NAME_PARAM_ERROR[] = "paramError";
 constexpr char PARAM_MSG_PARAM_ERROR[] = "Param error";
+constexpr char PARAM_NAME_NOT_SUPPORT_UI_CONTENT_TYPE[] = "notSupportUIContentType";
+constexpr char PARAM_MSG_NOT_SUPPORT_UI_CONTENT_TYPE[] = "Not support uIContent type";
 const char ENABLE_DEBUG_DC_KEY[] = "persist.ace.debug.dc.enabled";
 
 bool IsDebugDCEnabled()
@@ -101,6 +103,10 @@ void DynamicPattern::HandleErrorCallback(DCResultCode resultCode)
             FireOnErrorCallbackOnUI(
                 resultCode, PARAM_NAME_PARAM_ERROR, PARAM_MSG_PARAM_ERROR);
             break;
+        case DCResultCode::DC_NOT_SUPPORT_UI_CONTENT_TYPE:
+            FireOnErrorCallbackOnUI(
+                resultCode, PARAM_NAME_NOT_SUPPORT_UI_CONTENT_TYPE, PARAM_MSG_NOT_SUPPORT_UI_CONTENT_TYPE);
+            break;
         default:
             PLATFORM_LOGI("HandleErrorCallback code: %{public}d is invalid.", resultCode);
     }
@@ -114,6 +120,18 @@ DCResultCode DynamicPattern::CheckConstraint()
     if (!container) {
         PLATFORM_LOGE("container is null.");
         return DCResultCode::DC_INTERNAL_ERROR;
+    }
+
+    UIContentType uIContentType = container->GetUIContentType();
+    static std::set<UIContentType> dcNotSupportUIContentType = {
+        UIContentType::ISOLATED_COMPONENT,
+        UIContentType::DYNAMIC_COMPONENT
+    };
+
+    if (dcNotSupportUIContentType.find(uIContentType) != dcNotSupportUIContentType.end()) {
+        PLATFORM_LOGE("Not support dc in uIContentType: %{public}d.",
+            static_cast<int32_t>(uIContentType));
+        return DCResultCode::DC_NOT_SUPPORT_UI_CONTENT_TYPE;
     }
 
     if (container->IsScenceBoardWindow()) {
@@ -252,18 +270,18 @@ bool DynamicPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     auto& node = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(node, false);
     auto size = node->GetContentSize();
-    float density = 1.0f;
-    int32_t orientation = 0;
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
-        orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
-    }
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
+    float density = pipeline->GetDensity();
+    int32_t orientation = 0;
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (container) {
+        orientation = static_cast<int32_t>(container->GetOrientation());
+    }
+
     auto animationOption = pipeline->GetSyncAnimationOption();
     auto parentGlobalOffset = dirty->GetParentGlobalOffsetWithSafeArea(true, true) +
         dirty->GetFrameRectWithSafeArea(true).GetOffset();
@@ -323,7 +341,7 @@ void DynamicPattern::OnDetachContext(PipelineContext *context)
 {
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
-    PLATFORM_LOGI("OnAttachContext instanceId: %{public}d.", instanceId);
+    PLATFORM_LOGI("OnDetachContext instanceId: %{public}d.", instanceId);
     UnRegisterPipelineEvent(instanceId);
 }
 
@@ -414,7 +432,7 @@ void DynamicPattern::InitializeAccessibility()
         accessibilityChildTreeCallback_->OnRegister(
             realHostWindowId, accessibilityManager->GetTreeId());
     }
-    PLATFORM_LOGI("SecurityUIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+    PLATFORM_LOGI("DynamicComponent: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
         accessibilityId, realHostWindowId);
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
 }
@@ -475,5 +493,36 @@ void DynamicPattern::ResetAccessibilityChildTreeCallback()
         accessibilityChildTreeCallback_->GetAccessibilityId());
     accessibilityChildTreeCallback_.reset();
     accessibilityChildTreeCallback_ = nullptr;
+}
+
+void DynamicPattern::OnVisibleChange(bool visible)
+{
+    PLATFORM_LOGI("The component is changing from '%{public}s' to '%{public}s'.",
+        isVisible_ ? "visible" : "invisible", visible ? "visible" : "invisible");
+    isVisible_ = visible;
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    if (isVisible_) {
+        dynamicComponentRenderer_->NotifyForeground();
+    } else {
+        dynamicComponentRenderer_->NotifyBackground();
+    }
+}
+
+void DynamicPattern::OnWindowShow()
+{
+    PLATFORM_LOGI("The window is being shown and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    if (isVisible_) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->NotifyForeground();
+    }
+}
+
+void DynamicPattern::OnWindowHide()
+{
+    PLATFORM_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    if (isVisible_) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->NotifyBackground();
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -311,6 +311,9 @@ void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 
 double RotationRecognizer::ComputeAngle()
 {
+    if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS) {
+        return 0.0;
+    }
     auto sId = activeFingers_.begin();
     auto fId = sId++;
 
@@ -388,7 +391,8 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
 
 void RotationRecognizer::CheckCallbackState()
 {
-    if (callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) {
+    if ((callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) &&
+        currentFingers_ == 0) {
         SendCallbackMsg(onActionEnd_);
     }
 }

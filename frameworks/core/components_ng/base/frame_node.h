@@ -376,7 +376,7 @@ public:
 
     bool HasVirtualNodeAccessibilityProperty() override
     {
-        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNodePtr()) {
+        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNode()) {
             return true;
         }
         return false;
@@ -500,7 +500,9 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    RectF GetTransformRectRelativeToWindow() const;
+    int32_t GetTransformRotateRelativeToWindow(bool excludeSelf = false);
+
+    RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
@@ -574,12 +576,7 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
-    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
-    {
-        std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
-        ndkColorModeUpdateCallback_ = callback;
-        colorMode_ = SystemProperties::GetColorMode();
-    }
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback);
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
     {
@@ -1128,6 +1125,22 @@ public:
         return changeInfoFlag_;
     }
 
+    void SetDeleteRsNode(bool isDelete) {
+        isDeleteRsNode_ = isDelete;
+    }
+ 
+    bool GetIsDelete() const {
+        return isDeleteRsNode_;
+    }
+
+    void SetPositionZ(bool hasPositionZ) {
+        hasPositionZ_ = hasPositionZ;
+    }
+ 
+    bool HasPositionZ() const {
+        return hasPositionZ_;
+    }
+
     void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
 
     void ClearChangeInfoFlag()
@@ -1339,6 +1352,7 @@ private:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
+    void DumpKeyboardShortcutInfo();
     bool CheckAutoSave() override;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1506,6 +1520,8 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
+    bool isDeleteRsNode_ = false;
+    bool hasPositionZ_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

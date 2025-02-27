@@ -1016,8 +1016,8 @@ ArkUINativeModuleValue TextAreaBridge::SetKeyboardAppearance(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsNumber()) {
         uint32_t keyboardAppearance = secondArg->Uint32Value(vm);
-        if (keyboardAppearance >= static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) &&
-            keyboardAppearance <= static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        if (keyboardAppearance >= static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) &&
+            keyboardAppearance <= static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
             GetArkUINodeModifiers()->getTextAreaModifier()->
                 setTextAreaKeyboardAppearance(nativeNode, keyboardAppearance); // when input is valid
             return panda::JSValueRef::Undefined(vm);
@@ -1903,10 +1903,17 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runt
         SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
         SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
     } else {
-        ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
-        ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
-        ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
-        ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
+            ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
+            ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
+            ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
+        } else {
+            ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_0);
+            ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
+            ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_2);
+            ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_3);
+        }
     }
 
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderWidth(nativeNode, values, units, size);

@@ -22,7 +22,6 @@
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_provider.h"
 #include "core/accessibility/accessibility_utils.h"
-#include "core/pipeline/base/base_composed_component.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -32,9 +31,30 @@ class AccessibilityElementOperator;
 
 namespace OHOS::Ace::NG {
 class WebPattern;
+class FrameNode;
+class UIExtensionManager;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
+
+constexpr int32_t ZERO_ANGLE = 0;
+constexpr int32_t QUARTER_ANGLE = 90;
+constexpr int32_t HALFG_ANGLE = 180;
+constexpr int32_t THREE_QUARTER_ANGLE = 270;
+constexpr int32_t FULL_ANGLE = 360;
+
+struct RotateTransform {
+    int32_t rotateDegree = 0;  // final rotate degree of parent interface
+    int32_t centerX = 0;       // center X of parent interface relative to real window
+    int32_t centerY = 0;       // center Y of parent interface relative to real window
+    int32_t innerCenterX = 0;  // relative center X of parent interface relative without transform
+    int32_t innerCenterY = 0;  // relative center Y of parent interface relative without transform
+
+    RotateTransform(int32_t degree = 0, int32_t x = 0, int32_t y = 0, int32_t innerX = 0, int32_t innerY = 0)
+        : rotateDegree(degree), centerX(x), centerY(y), innerCenterX(innerX), innerCenterY(innerY) {}
+};
+
+class ComposedElement;
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
@@ -79,9 +99,7 @@ struct AccessibilityParentRectInfo {
     int32_t top = 0;
     float scaleX = 1.0f;       // scale of parent interface
     float scaleY = 1.0f;       // scale of parent interface
-    int32_t centerX = 0;       // center X of parent interface relative to real window
-    int32_t centerY = 0;       // center Y scale of parent interface relative to real window
-    int32_t rotateDegree = 0;  // final rotate degree of parent interface
+    RotateTransform rotateTransform;
     bool isChanged = false;    // only for uiextension, true means uec transfered translate params to uiextension
 };
 
@@ -95,6 +113,7 @@ struct AccessibilityWindowInfo {
     int32_t innerWindowId = -1;
     float_t scaleX = 1.0f;
     float_t scaleY = 1.0f;
+    RotateTransform rotateTransform;
 };
 
 enum class AccessibilityCallbackEventId : uint32_t {
@@ -202,6 +221,7 @@ public:
     virtual bool IsVisibleChangeNodeExists(NodeId nodeId) = 0;
     virtual void UpdateEventTarget(NodeId id, BaseEventInfo& info) = 0;
     virtual void SetWindowPos(int32_t left, int32_t top, int32_t windowId) = 0;
+    virtual Rect GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node) { return {}; }
 #ifdef WINDOW_SCENE_SUPPORTED
     virtual void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
@@ -258,8 +278,10 @@ public:
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
 
-    virtual void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) {};
+    virtual void AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node) {};
+    virtual void AddFrameNodeToDefaultFocusList(const RefPtr<NG::FrameNode>& node, bool isFocus) {};
 
+    virtual void RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager) {};
     virtual void UpdateFrameNodeState(int32_t nodeId) {};
 
     virtual void UpdatePageMode(const std::string& pageMode) {};
@@ -319,7 +341,7 @@ public:
 
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
 
-    virtual AccessibilityWorkMode GetAccessibilityWorkMode()
+    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
     {
         return AccessibilityWorkMode();
     }
@@ -333,6 +355,106 @@ private:
     int64_t uiExtensionId_ = 0;
 };
 
+class AccessibilityRect {
+private:
+    float x_;
+    float y_;
+    float width_;
+    float height_;
+
+    void calculateNewCenter(float cx, float cy, float rectCx, float rectCy,
+        int angle, float& newCx, float& newCy)
+    {
+        switch (angle) {
+            case QUARTER_ANGLE:
+                newCx = cx - (rectCy - cy);
+                newCy = cy + (rectCx - cx);
+                break;
+            case HALFG_ANGLE:
+                newCx = 2 * cx - rectCx;
+                newCy = 2 * cy - rectCy;
+                break;
+            case THREE_QUARTER_ANGLE:
+                newCx = cx + (rectCy - cy);
+                newCy = cy - (rectCx - cx);
+                break;
+        }
+    }
+public:
+    AccessibilityRect(float x = 0.0f, float y = 0.0f, float width = 0.0f, float height = 0.0f)
+        : x_(x), y_(y), width_(width), height_(height) {}
+    float GetX() const
+    {
+        return x_;
+    }
+
+    float GetY() const
+    {
+        return y_;
+    }
+
+    float GetWidth() const
+    {
+        return width_;
+    }
+
+    float GetHeight() const
+    {
+        return height_;
+    }
+
+    void SetPoistion(float x, float y)
+    {
+        x_ = x;
+        y_ = y;
+    }
+
+    void SetSize(float width, float height)
+    {
+        width_ = width;
+        height_ = height;
+    }
+
+    void Rotate(float rotateCenterX, float rotateCenterY, int angle)
+    {
+        if (angle > FULL_ANGLE) {
+            angle %= FULL_ANGLE;
+        }
+        if (angle == ZERO_ANGLE) {
+            return;
+        }
+        const float rectCenterX = x_ + width_ * 0.5f;
+        const float rectCenterY = y_ + height_ * 0.5f;
+        float newCenterX;
+        float newCenterY;
+        calculateNewCenter(rotateCenterX, rotateCenterY, rectCenterX, rectCenterY, angle, newCenterX, newCenterY);
+        float newWidth = width_;
+        float newHeight = height_;
+        if (angle == QUARTER_ANGLE || angle == THREE_QUARTER_ANGLE) {
+            newWidth = height_;
+            newHeight = width_;
+        }
+        x_ = newCenterX - newWidth * 0.5f;
+        y_ = newCenterY - newHeight * 0.5f;
+        width_ = newWidth;
+        height_ = newHeight;
+    }
+
+    void Rotate(int angle)
+    {
+        const float centerX = x_ + width_ * 0.5f;
+        const float centerY = y_ + height_ * 0.5f;
+        Rotate(centerX, centerY, angle);
+    }
+
+    void ApplyTransformation(const RotateTransform& rotateTransform, const float& scaleX, const float& scaleY)
+    {
+        x_ = (x_ - rotateTransform.innerCenterX) * scaleX + rotateTransform.centerX;
+        y_ = (y_ - rotateTransform.innerCenterY) * scaleY + rotateTransform.centerY;
+        width_ *= scaleX;
+        height_ *= scaleY;
+    }
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_MANAGER_H

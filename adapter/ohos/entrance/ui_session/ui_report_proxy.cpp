@@ -120,7 +120,7 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t pa
 
 void UiReportProxy::OnComponentChange(const std::string& key, const std::string& value)
 {
-    if (UiSessionManager::GetInstance().GetComponentChangeEventRegistered()) {
+    if (UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         auto result = InspectorJsonUtil::Create(true);
         result->Put(key.c_str(), value.c_str());
         ReportComponentChangeEvent(result->ToString());

@@ -31,7 +31,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr float SCALE_NUMBER = 0.95f;
 constexpr float TOUCH_DRAG_PIXELMAP_SCALE = 1.05f;
 constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
@@ -77,9 +76,7 @@ void DragControllerFuncWrapper::CreatePreviewNode(RefPtr<FrameNode>& imageNode, 
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetSyncLoad(true);
 
-    float defaultPixelMapScale =
-        asyncCtxData.dragPointerEvent.sourceType == SOURCE_TYPE_MOUSE ? 1.0f : NG::DEFALUT_DRAG_PPIXELMAP_SCALE;
-    UpdatePreviewPositionAndScale(imageNode, frameOffset, defaultPixelMapScale);
+    UpdatePreviewPositionAndScale(imageNode, frameOffset, 1.0f);
     UpdatePreviewAttr(imageNode, asyncCtxData.dragPreviewOption);
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
@@ -339,6 +336,7 @@ RefPtr<FrameNode> DragControllerFuncWrapper::CreateGatherNode(std::vector<Gather
     geometryNode->SetFrameOffset({0.0f, 0.0f});
     gatherNodeChildrenInfo.clear();
     int iterationCount = GATHER_COUNT;
+    auto frameOffset = GetOriginNodeOffset(data, asyncCtxData);
     for (auto it = asyncCtxData.pixelMapList.begin(); it != asyncCtxData.pixelMapList.end() && iterationCount > 0;
          ++it) {
         CHECK_NULL_RETURN(*it, nullptr);
@@ -346,6 +344,9 @@ RefPtr<FrameNode> DragControllerFuncWrapper::CreateGatherNode(std::vector<Gather
         CHECK_NULL_RETURN(refPixelMap, nullptr);
         auto imageNode = DragAnimationHelper::CreateImageNode(refPixelMap);
         CHECK_NULL_RETURN(imageNode, nullptr);
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_RETURN(imageContext, nullptr);
+        imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(frameOffset.GetX()), Dimension(frameOffset.GetY())));
         auto width = refPixelMap->GetWidth();
         auto height = refPixelMap->GetHeight();
         auto offset = DragDropFuncWrapper::GetPaintRectCenter(data.imageNode) - OffsetF(width / 2.0f, height / 2.0f);
@@ -460,8 +461,8 @@ void DragControllerFuncWrapper::TransDragWindowToDragFwk(int32_t containerId)
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     dragDropManager->SetDragFwkShow(true);
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId >= MIN_SUBCONTAINER_ID ?
-        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId, SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subwindow);
     auto overlayManager = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

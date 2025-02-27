@@ -234,7 +234,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         return nullptr;
     }
 
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmapFormat format = GetBitmapFormat();
     RSBitmap tempCache;
     tempCache.Build(dirtyWidth, dirtyHeight, format);
     int32_t size = dirtyWidth * dirtyHeight;

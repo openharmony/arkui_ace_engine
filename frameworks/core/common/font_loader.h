@@ -45,6 +45,10 @@ public:
 
     void SetOnLoadedNG(const WeakPtr<NG::UINode>& node, const std::function<void()>& callback);
     void RemoveCallbackNG(const WeakPtr<NG::UINode>& node);
+    bool GetIsLoader() const
+    {
+        return isLoaded_;
+    }
 
 protected:
     std::string familyName_;

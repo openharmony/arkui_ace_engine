@@ -100,6 +100,8 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetCachedItemsPosition(cachedItemPosition_);
     layoutAlgorithm->SetCachedIndex(forwardCachedIndex_, backwardCachedIndex_);
     layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
+    layoutAlgorithm->SetPrevTotalItemCount(itemTotalCount_);
+    layoutAlgorithm->SetPrevTotalMainSize(mainSize_);
     if (childrenSize_ && ListChildrenSizeExist()) {
         if (!posMap_) {
             posMap_ = MakeRefPtr<ListPositionMap>();
@@ -139,11 +141,13 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     auto layoutAlgorithm = DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
+    isStackFromEnd_ = layoutAlgorithm->GetStackFromEnd();
     auto cacheParam = layoutAlgorithm->GetCacheParam();
     if (cacheParam) {
-        forwardCachedIndex_ = cacheParam.value().forwardCachedIndex;
-        backwardCachedIndex_ = cacheParam.value().backwardCachedIndex;
-        adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
+        forwardCachedIndex_ = isStackFromEnd_ ? itemTotalCount_ - cacheParam.value().backwardCachedIndex - 1 :
+                                                cacheParam.value().forwardCachedIndex;
+        backwardCachedIndex_ = isStackFromEnd_ ? itemTotalCount_ - cacheParam.value().forwardCachedIndex - 1 :
+                                                 cacheParam.value().backwardCachedIndex;
         layoutAlgorithm->SetCacheParam(std::nullopt);
     }
     if (lanes_ != layoutAlgorithm->GetLanes()) {
@@ -609,6 +613,10 @@ CachedIndexInfo ListItemGroupPattern::UpdateCachedIndex(
         res.backwardCachedCount = (startIndex - backwardCachedIndex_ + lanes - 1) / lanes;
         res.backwardCacheMax = (startIndex + lanes - 1) / lanes;
     }
+    if (isStackFromEnd_) {
+        std::swap(res.forwardCachedCount, res.backwardCachedCount);
+        std::swap(res.forwardCacheMax, res.backwardCacheMax);
+    }
     return res;
 }
 
@@ -704,10 +712,15 @@ bool ListItemGroupPattern::FirstItemFullVisible(const RefPtr<FrameNode>& listNod
     return GreatNotEqual(mainPos, listPadding);
 }
 
-bool ListItemGroupPattern::CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex)
+bool ListItemGroupPattern::CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex)
 {
-    if (count == 0 || (count > 0 && index > startIndex) ||
-        (count < 0 && index >= startIndex)) {
+    if (count == 0) {
+        return false;
+    }
+    if (((count > 0 && index > startIndex) || (count < 0 && index >= startIndex)) && !isStackFromEnd_) {
+        return false;
+    }
+    if (((count > 0 && index < endIndex) || (count < 0 && index <= endIndex)) && isStackFromEnd_) {
         return false;
     }
 
@@ -733,11 +746,12 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
     }
     index -= itemStartIndex_;
     int32_t startIndex = itemPosition_.begin()->first;
-    if (!CheckDataChangeOutOfStart(index, count, startIndex)) {
+    int32_t endIndex = itemPosition_.rbegin()->first;
+    if (!CheckDataChangeOutOfStart(index, count, startIndex, endIndex)) {
         return;
     }
 
-    count = std::max(count, index - startIndex);
+    count = !isStackFromEnd_ ? std::max(count, index - startIndex) : - std::max(count, endIndex - index);
     int32_t mod = 0;
     if (count < 0 && lanes_ > 1) {
         mod = -count % lanes_;

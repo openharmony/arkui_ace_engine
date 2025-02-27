@@ -33,7 +33,7 @@ bool PlatformContainerHandler::GetAccessibilityParentRect(HandlerReply& reply)
             CHECK_NULL_VOID(hostPattern);
             auto hostNode = hostPattern->GetHost();
             CHECK_NULL_VOID(hostNode);
-            auto rect = hostNode->GetTransformRectRelativeToWindow();
+            auto rect = hostNode->GetTransformRectRelativeToWindow(true);
             VectorF finalScale = hostNode->GetTransformScaleRelativeToWindow();
             AccessibilityParentRectInfo parentRectInfo;
             parentRectInfo.left = static_cast<int32_t>(rect.Left());

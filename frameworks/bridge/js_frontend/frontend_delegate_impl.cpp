@@ -105,8 +105,7 @@ void FrontendDelegateImpl::ParseManifest()
                 delegate->pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
                 delegate->manifestParser_->GetAppInfo()->ParseI18nJsonInfo();
             };
-            delegate->taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, "ArkUIParseI18nJsonInfo",
-                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            delegate->taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, "ArkUIParseI18nJsonInfo");
         }
     });
 }
@@ -162,8 +161,7 @@ void FrontendDelegateImpl::ChangeLocale(const std::string& language, const std::
 {
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale");
 }
 
 void FrontendDelegateImpl::GetI18nData(std::unique_ptr<JsonValue>& json)
@@ -257,14 +255,13 @@ void FrontendDelegateImpl::OnJsCallback(const std::string& callbackId, const std
                 delegate->jsCallback_(callbackId, args);
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIHandleJsCallback", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIHandleJsCallback");
 }
 
 void FrontendDelegateImpl::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
     taskExecutor_->PostTask([dispatcherCallback = dispatcherCallback_, dispatcher] { dispatcherCallback(dispatcher); },
-        TaskExecutor::TaskType::JS, "ArkUISetJsMessageDispatcher",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUISetJsMessageDispatcher");
 }
 
 void FrontendDelegateImpl::TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data)
@@ -281,8 +278,7 @@ void FrontendDelegateImpl::TransferComponentResponseData(int32_t callbackId, int
                 context->GetMessageBridge()->HandleCallback(callbackId, std::move(data));
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITransferComponentResponseData",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUITransferComponentResponseData");
 }
 
 void FrontendDelegateImpl::TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
@@ -295,8 +291,7 @@ void FrontendDelegateImpl::TransferJsResponseData(int32_t callbackId, int32_t co
                 groupJsBridge->TriggerModuleJsCallback(callbackId, code, std::move(data));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData");
 }
 
 #if defined(PREVIEW)
@@ -312,8 +307,7 @@ void FrontendDelegateImpl::TransferJsResponseDataPreview(
                 groupJsBridge->TriggerModuleJsCallbackPreview(callbackId, code, responseData);
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData");
 }
 #endif
 
@@ -328,8 +322,7 @@ void FrontendDelegateImpl::TransferJsPluginGetError(
                 groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, errorCode, std::move(errorMessage));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUITransferJsPluginGetError",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUITransferJsPluginGetError");
 }
 
 void FrontendDelegateImpl::TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
@@ -342,8 +335,7 @@ void FrontendDelegateImpl::TransferJsEventData(int32_t callbackId, int32_t code,
                 groupJsBridge->TriggerEventJsCallback(callbackId, code, std::move(data));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUITransferJsEventData",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUITransferJsEventData");
 }
 
 void FrontendDelegateImpl::LoadPluginJsCode(std::string&& jsCode) const
@@ -356,7 +348,7 @@ void FrontendDelegateImpl::LoadPluginJsCode(std::string&& jsCode) const
                 groupJsBridge->LoadPluginJsCode(std::move(jsCode));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsCode", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsCode");
 }
 
 void FrontendDelegateImpl::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
@@ -369,8 +361,7 @@ void FrontendDelegateImpl::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, s
                 groupJsBridge->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsByteCode",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsByteCode");
 }
 
 bool FrontendDelegateImpl::OnPageBackPress()
@@ -498,8 +489,7 @@ void FrontendDelegateImpl::CallPopPage()
                     context->ShowDialog(dialogProperties, isRightToLeft);
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUIShowDialogBeforePopPage",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::UI, "ArkUIShowDialogBeforePopPage");
     } else {
         PopPage();
     }
@@ -882,14 +872,14 @@ void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
         TaskExecutor::TaskType::UI, "ArkUIAddPageUpdateTask");
 }
 
-void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priorityType)
+void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name, priorityType);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
-void FrontendDelegateImpl::PostUITask(std::function<void()>&& task, const std::string& name, PriorityType priority)
+void FrontendDelegateImpl::PostUITask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, name, priority);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 const std::string& FrontendDelegateImpl::GetAppID() const
@@ -966,7 +956,7 @@ void FrontendDelegateImpl::ShowToast(const NG::ToastInfo& toastInfo, std::functi
             ToastComponent::GetInstance().Show(weak.Upgrade(), updatedToastInfo.message, updatedToastInfo.duration,
                 updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
-        TaskExecutor::TaskType::UI, "ArkUIShowToast", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIShowToast");
 }
 
 Rect FrontendDelegateImpl::GetBoundingRectData(NodeId nodeId)
@@ -1006,7 +996,7 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
             successEventMarker, [callback, taskExecutor = taskExecutor_](int32_t successType) {
                 taskExecutor->PostTask([callback, successType]() { callback(0, successType); },
-                    TaskExecutor::TaskType::JS, "ArkUIShowDialogSuccessCallback", PriorityType::VIP);
+                    TaskExecutor::TaskType::JS, "ArkUIShowDialogSuccessCallback");
             });
         callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
     }
@@ -1015,10 +1005,7 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
                 taskExecutor->PostTask(
-                    [callback]() { callback(1, 0); },
-                    TaskExecutor::TaskType::JS,
-                    "ArkUIShowDialogCancelCallback",
-                    PriorityType::VIP);
+                    [callback]() { callback(1, 0); }, TaskExecutor::TaskType::JS, "ArkUIShowDialogCancelCallback");
             });
         callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     }
@@ -1027,7 +1014,7 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             completeEventMarker, [callback, taskExecutor = taskExecutor_] {
                 taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_COMPLETE, 0); },
-                    TaskExecutor::TaskType::JS, "ArkUIShowDialogCompleteCallback", PriorityType::VIP);
+                    TaskExecutor::TaskType::JS, "ArkUIShowDialogCompleteCallback");
             });
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
@@ -1046,7 +1033,13 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
                 context->ShowDialog(dialogProperties, isRightToLeft);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIShowDialog", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIShowDialog");
+}
+
+void FrontendDelegateImpl::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
+{
+    ShowDialog(dialogAttr.title, dialogAttr.message, buttons, dialogAttr.autoCancel, std::move(callback), callbacks);
 }
 
 void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
@@ -1070,7 +1063,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
                         callback(0, successType);
                     }
                 },
-                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuSuccess", PriorityType::VIP);
+                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuSuccess");
         });
     callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
 
@@ -1078,7 +1071,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
     BackEndEventManager<void()>::GetInstance().BindBackendEvent(
         cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(1, 0); },
-                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuCancel", PriorityType::VIP);
+                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuCancel");
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
 
@@ -1102,7 +1095,13 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
                 context->ShowDialog(dialogProperties, isRightToLeft);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIShowActionMenu", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIShowActionMenu");
+}
+
+void FrontendDelegateImpl::ShowActionMenu(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback)
+{
+    ShowActionMenu(dialogAttr.title, buttons, std::move(callback));
 }
 
 void FrontendDelegateImpl::EnableAlertBeforeBackPage(
@@ -1291,10 +1290,9 @@ UIContentErrorCode FrontendDelegateImpl::LoadPage(
                         page->GetDomDocument()->HandlePageLoadFinish();
                     }
                 },
-                TaskExecutor::TaskType::UI, "ArkUIPageLoadFinish",
-                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+                TaskExecutor::TaskType::UI, "ArkUIPageLoadFinish");
         },
-        TaskExecutor::TaskType::JS, "ArkUILoadJsPage", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUILoadJsPage");
 
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -2075,8 +2073,7 @@ void FrontendDelegateImpl::PushJsCallbackToRenderNode(NodeId id, double ratio,
                     task(visible, ratio);
                 }
             },
-            TaskExecutor::TaskType::JS, "ArkUIJsVisibleCallback",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::JS, "ArkUIJsVisibleCallback");
     };
     auto uiPushTask = [id, ratio, visibleCallback,
                           pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get())]() {
@@ -2084,8 +2081,7 @@ void FrontendDelegateImpl::PushJsCallbackToRenderNode(NodeId id, double ratio,
             pipeline->PushVisibleCallback(id, ratio, visibleCallback);
         }
     };
-    taskExecutor_->PostTask(uiPushTask, TaskExecutor::TaskType::UI, "ArkUIPushVisibleCallback",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    taskExecutor_->PostTask(uiPushTask, TaskExecutor::TaskType::UI, "ArkUIPushVisibleCallback");
 }
 
 void FrontendDelegateImpl::CallNativeHandler(const std::string& event, const std::string& params)

@@ -39,7 +39,7 @@ declare class WeakRef<T extends Object> {
   }
   
   // function type of partial update function
-  type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+  type UpdateFunc = (elmtId: number, isFirstRender: boolean, param?: Object) => void;
   type UIClassObject = { prototype: Object, pop?: () => void };
   
   // UpdateFuncRecord: misc framework-internal info related to updating of a UINode C++ object 

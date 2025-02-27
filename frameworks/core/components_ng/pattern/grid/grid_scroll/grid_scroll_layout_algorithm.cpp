@@ -322,8 +322,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     if (!info_.hasMultiLineItem_) {
         if (!showCached || !info_.reachEnd_) {
-            cacheStart = cacheEnd =
-                cacheCount * crossCount_; // only use counting method when last line not completely filled
+            auto cache = CalculateCachedCount(layoutWrapper, cacheCount);
+            cacheStart = cache.first;
+            cacheEnd = cache.second; // only use counting method when last line not completely filled
         }
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
     }

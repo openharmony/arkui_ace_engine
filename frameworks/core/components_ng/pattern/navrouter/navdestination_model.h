@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 
 namespace OHOS::Ace {
-class NavDestinationModel {
+class ACE_FORCE_EXPORT NavDestinationModel {
 public:
     static NavDestinationModel* GetInstance();
     virtual ~NavDestinationModel() = default;
@@ -83,6 +83,7 @@ public:
     virtual void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) {}
     virtual void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) {}
+    virtual void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

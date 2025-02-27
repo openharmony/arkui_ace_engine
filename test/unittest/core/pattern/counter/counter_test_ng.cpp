@@ -28,6 +28,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 
@@ -66,6 +67,8 @@ void CounterTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
     auto counterTheme = CounterTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Return(CounterThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants)));
 }
 
 void CounterTestNg::TearDownTestSuite()

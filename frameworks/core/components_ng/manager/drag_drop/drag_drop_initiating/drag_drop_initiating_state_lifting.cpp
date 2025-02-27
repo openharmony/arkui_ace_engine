@@ -22,6 +22,8 @@
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -112,9 +114,32 @@ void DragDropInitiatingStateLifting::HandleSequenceOnActionCancel(const GestureE
 void DragDropInitiatingStateLifting::HandleTouchEvent(const TouchEvent& touchEvent)
 {
     if (touchEvent.type == TouchType::MOVE) {
-        auto point = Point(touchEvent.x, touchEvent.y);
+        auto point = Point(touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY);
         DoDragDampingAnimation(point, touchEvent.id);
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->SetDragMoveLastPoint(point);
     }
+}
+
+void DragDropInitiatingStateLifting::HandlePanOnActionEnd(const GestureEvent& info)
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
+    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (dragDropManager->IsAboutToPreview()) {
+        dragDropManager->ResetDragging();
+    }
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    dragDropManager->SetIsDisableDefaultDropAnimation(true);
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
 void DragDropInitiatingStateLifting::HandleReStartDrag(const GestureEvent& info)
@@ -426,6 +451,15 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
         ResetNodeInMultiDrag();
         return;
     }
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->GetTextDraggable()) {
+        if (gestureHub->GetIsTextDraggable()) {
+            SetTextAnimation();
+            SetEventColumn();
+        }
+        return;
+    }
     DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -441,5 +475,56 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
     }
     SetEventColumn();
     pipeline->FlushSyncGeometryNodeTasks();
+}
+
+void OHOS::Ace::NG::DragDropInitiatingStateLifting::SetTextAnimation()
+{
+    TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent start set textAnimation.");
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto pattern = frameNode->GetPattern<TextDragBase>();
+    auto textBase = frameNode->GetPattern<TextBase>();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(textBase);
+    if (!textBase->BetweenSelectedPosition(params.touchOffset)) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Position is between selected position, stop set text animation.");
+        return;
+    }
+    auto isHandlesShow = pattern->IsHandlesShow();
+    auto dragNode = pattern->MoveDragNode();
+    CHECK_NULL_VOID(dragNode);
+    dragNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
+    // create columnNode
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    columnNode->AddChild(dragNode);
+    auto columnRenderContext = columnNode->GetRenderContext();
+    if (columnRenderContext) {
+        columnRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
+    }
+    // mount to rootNode
+    manager->MountPixelMapToRootNode(columnNode);
+    auto textDragPattern = dragNode->GetPattern<TextDragPattern>();
+    CHECK_NULL_VOID(textDragPattern);
+    auto modifier = textDragPattern->GetOverlayModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->UpdateHandlesShowFlag(isHandlesShow);
+    auto renderContext = dragNode->GetRenderContext();
+    if (renderContext) {
+        params.preScaledPixelMap = renderContext->GetThumbnailPixelMap();
+    }
+    modifier->StartFloatingAnimate();
+    pattern->OnDragNodeFloating();
+    pattern->CloseHandleAndSelect();
+    TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
 }
 } // namespace OHOS::Ace::NG

@@ -281,6 +281,24 @@ public:
         return options_;
     }
 
+    std::vector<RefPtr<FrameNode>>& GetEmbeddedMenuItems()
+    {
+        return embeddedMenuItems_;
+    }
+
+    void AddEmbeddedMenuItem(const RefPtr<FrameNode>& menuItem)
+    {
+        embeddedMenuItems_.emplace_back(menuItem);
+    }
+
+    void RemoveEmbeddedMenuItem(const RefPtr<FrameNode>& menuItem)
+    {
+        auto iter = std::find(embeddedMenuItems_.begin(), embeddedMenuItems_.end(), menuItem);
+        if (iter != embeddedMenuItems_.end()) {
+            embeddedMenuItems_.erase(iter);
+        }
+    }
+
     void RemoveParentHoverStyle();
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
@@ -745,6 +763,7 @@ private:
     bool expandDisplay_ = false;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
+    std::vector<RefPtr<FrameNode>> embeddedMenuItems_;
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     Rect menuWindowRect_;

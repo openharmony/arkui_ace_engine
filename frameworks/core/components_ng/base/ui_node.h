@@ -94,6 +94,8 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
+    void MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
+    void MountToParentBefore(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;
@@ -268,7 +270,7 @@ public:
 
     void SetHostPageIdByParent(int32_t id)
     {
-        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG) {
+        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG || tag_ == V2::STAGE_ETS_TAG) {
             return;
         }
         hostPageId_ = id;
@@ -812,7 +814,12 @@ public:
     ColorMode GetLocalColorMode() const;
 
     // Used to mark freeze and block dirty mark.
-    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
+    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false, bool isUserFreeze = false);
+
+    void SetUserFreeze(bool isUserFreeze);
+
+    bool IsUserFreeze();
+
     bool IsFreeze() const
     {
         return isFreeze_;
@@ -830,7 +837,7 @@ public:
 
     bool IsReusableNode() const
     {
-        return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_;
+        return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_ || isArkTsRenderNode_;
     }
 
     virtual RefPtr<UINode> GetCurrentPageRootNode()
@@ -849,6 +856,9 @@ public:
     void setIsMoving(bool isMoving)
     {
         isMoving_ = isMoving;
+        for (auto& child : children_) {
+            child->setIsMoving(isMoving);
+        }
     }
 
     bool isCrossLanguageAttributeSetting() const
@@ -880,6 +890,19 @@ public:
     {
         return apiVersion_ >= static_cast<int32_t>(version);
     }
+
+    bool IsArkTsRenderNode() const
+    {
+        return isArkTsRenderNode_;
+    }
+
+    void SetIsArkTsRenderNode(bool isArkTsRenderNode)
+    {
+        isArkTsRenderNode_ = isArkTsRenderNode;
+    }
+
+    void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -990,6 +1013,7 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isArkTsRenderNode_ = false;
     bool isTraversing_ = false;
     bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
@@ -1030,6 +1054,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;
     bool isCrossLanguageAttributeSetting_ = false;
+    std::optional<bool> userFreeze_;
 };
 
 } // namespace OHOS::Ace::NG

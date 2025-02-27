@@ -1239,7 +1239,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level
     layoutProperty_->UpdateLoop(false);
     pattern_->currentIndex_ = 0;
     dragVelocity = 500.0f;
-    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 0);
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
 
     pattern_->currentIndex_ = 3;
     dragVelocity = -500.0f;

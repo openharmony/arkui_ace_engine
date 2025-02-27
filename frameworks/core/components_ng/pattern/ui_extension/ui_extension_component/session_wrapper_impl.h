@@ -42,6 +42,7 @@ public:
     bool IsSessionValid() override;
     int32_t GetSessionId() const override;
     const std::shared_ptr<AAFwk::Want> GetWant() override;
+    void UpdateInstanceId(int32_t instanceId);
 
     // Synchronous interface for event notify
     bool NotifyFocusEventSync(bool isFocus) override;
@@ -103,9 +104,9 @@ public:
     uint32_t GetReasonDump() const override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     int32_t GetInstanceIdFromHost() const;
-    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) override;
-    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
+    bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) override;
 
     void NotifyHostWindowMode(int32_t mode) override;
@@ -113,6 +114,18 @@ public:
 private:
     int32_t GetFrameNodeId() const;
     void InitAllCallback();
+    void InitForegroundCallback();
+    void InitBackgroundCallback();
+    void InitDestructionCallback();
+    void InitTransferAbilityResultFunc();
+    void InitTransferExtensionDataFunc();
+    void InitNotifyRemoteReadyFunc();
+    void InitNotifySyncOnFunc();
+    void InitNotifyAsyncOnFunc();
+    void InitNotifyBindModalFunc();
+    void InitNotifyGetAvoidAreaByTypeFunc();
+    void InitNotifyExtensionEventFunc();
+    void InitGetStatusBarHeightFunc();
     void UpdateSessionConfig();
     RefPtr<SystemWindowScene> GetWindowScene();
     int32_t GetWindowSceneId();
@@ -122,6 +135,7 @@ private:
     bool RegisterDataConsumer();
     void PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data);
     void PostBusinessDataConsumeSyncReply(uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr);
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -140,6 +154,7 @@ private:
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> destructionCallback_;
     std::weak_ptr<Rosen::RSTransaction> transaction_;
+    std::shared_ptr<AAFwk::Want> customWant_;
     OHOS::Rosen::SubSystemId subSystemId_ = OHOS::Rosen::SubSystemId::ARKUI_UIEXT;
 };
 } // namespace OHOS::Ace::NG

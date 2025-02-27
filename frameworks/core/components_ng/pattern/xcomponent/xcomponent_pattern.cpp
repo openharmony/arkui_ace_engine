@@ -317,11 +317,13 @@ void XComponentPattern::OnAttachToMainTree()
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
-    if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
-        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: %{public}s(%{public}" PRIu64 ")",
-            GetId().c_str(), displaySync_->GetId());
-        displaySync_->AddToPipelineOnContainer();
-        needRecoverDisplaySync_ = false;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
+            TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "
+                "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+            displaySync_->AddToPipelineOnContainer();
+            needRecoverDisplaySync_ = false;
+        }
     }
 }
 
@@ -333,11 +335,13 @@ void XComponentPattern::OnDetachFromMainTree()
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
     }
-    if (displaySync_ && displaySync_->IsOnPipeline()) {
-        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: %{public}s(%{public}" PRIu64 ")",
-            GetId().c_str(), displaySync_->GetId());
-        displaySync_->DelFromPipelineOnContainer();
-        needRecoverDisplaySync_ = true;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (displaySync_ && displaySync_->IsOnPipeline()) {
+            TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: "
+                "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+            displaySync_->DelFromPipelineOnContainer();
+            needRecoverDisplaySync_ = true;
+        }
     }
 }
 

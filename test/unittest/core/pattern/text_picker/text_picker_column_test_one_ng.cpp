@@ -946,7 +946,7 @@ HWTEST_F(TextPickerColumnTestOneNg, HandleDragEnd001, TestSize.Level1)
     columnPattern->overscroller_.overScroll_ = 100.0f;
     auto tstToss = columnPattern->GetToss();
     tstToss->timeEnd_ = 100.0f;
-    auto tstWeak = AceType::WeakClaim(tstToss.GetRawPtr());
+    auto tstWeak = AceType::WeakClaim(Referenced::RawPtr(tstToss));
     auto tstRef = tstWeak.Upgrade();
     auto tstColumn = AceType::DynamicCast<TextPickerColumnPattern>(tstRef->column_.Upgrade());
     EXPECT_TRUE(tstColumn != nullptr);

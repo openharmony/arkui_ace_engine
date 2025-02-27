@@ -169,6 +169,7 @@ build_component_ng("pattern_ng") {
     "image/image_overlay_modifier.cpp",
     "image/image_paint_method.cpp",
     "image/image_pattern.cpp",
+    "image_animator/controlled_animator.cpp",
     "image_animator/image_animator_model_ng.cpp",
     "image_animator/image_animator_pattern.cpp",
     "indexer/arc_indexer_content_modifier.cpp",

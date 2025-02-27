@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/marquee_modifier.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 

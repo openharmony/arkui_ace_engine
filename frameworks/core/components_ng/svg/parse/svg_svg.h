@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_SVG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_SVG_H
 
+#include "frameworks/core/components_ng/svg/effect/svg_colorfilter_effect.h"
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_group.h"
 
@@ -28,12 +29,12 @@ public:
     SvgSvg();
     ~SvgSvg() override = default;
     static RefPtr<SvgNode> Create();
+    void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override;
 
     RSRecordingPath AsPath(const Size& viewPort) const override;
     RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
 
     Size GetSize() const;
-
     Rect GetViewBox() const;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
     void AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort) override;
@@ -42,6 +43,7 @@ public:
     void AdjustContentAreaSvgSizeInvalid(RSCanvas& canvas, const Size& viewPort, const Size& svgSize,
         const Rect& viewBox);
     SvgPreserveAspectRatio GetPreserveAspectRatio() const;
+    void OnImageColorFilter(RSCanvas& canvas, const ImageColorFilter& imageColorFilter);
 
 private:
     SvgAttributes svgAttr_;

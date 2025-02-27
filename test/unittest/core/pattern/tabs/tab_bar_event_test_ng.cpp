@@ -14,7 +14,6 @@
  */
 
 #include "tabs_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 
@@ -117,6 +116,7 @@ void TabBarEventTestNg::DragEnd(float velocityDelta)
     dragInfo_.SetGlobalLocation(dragInfo_.GetGlobalLocation());
     dragInfo_.SetLocalLocation(dragInfo_.GetLocalLocation());
     scrollable->HandleTouchUp();
+    scrollable->lastMainDelta_ = 0.0;
     scrollable->HandleDragEnd(dragInfo_);
     scrollable->isDragging_ = false;
     FlushUITasks();
@@ -529,7 +529,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarPattern_->swiperController_->SetRemoveSwiperEventCallback(nullptr);
+    swiperController_->SetRemoveSwiperEventCallback(nullptr);
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
     /**
@@ -539,7 +539,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
     int32_t index = 1;
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->HandleTouchDown(index);
-        tabBarPattern_->swiperController_->SetRemoveSwiperEventCallback([]() {});
+        swiperController_->SetRemoveSwiperEventCallback([]() {});
     }
     EXPECT_TRUE(tabBarPattern_);
 }
@@ -555,7 +555,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarPattern_->swiperController_->SetAddSwiperEventCallback(nullptr);
+    swiperController_->SetAddSwiperEventCallback(nullptr);
     tabBarPattern_->SetTouching(false);
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
@@ -566,7 +566,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
     int32_t index = 1;
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->HandleTouchUp(index);
-        tabBarPattern_->swiperController_->SetAddSwiperEventCallback([]() {});
+        swiperController_->SetAddSwiperEventCallback([]() {});
     }
     EXPECT_TRUE(tabBarPattern_);
 }
@@ -586,7 +586,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
 
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     int32_t index = 1;
-    tabBarPattern_->swiperController_->SetAddSwiperEventCallback(nullptr);
+    swiperController_->SetAddSwiperEventCallback(nullptr);
     tabBarPattern_->SetTouching(true);
     IndicatorStyle indicatorStyle1;
     IndicatorStyle indicatorStyle2;
@@ -602,18 +602,18 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
      */
     tabBarPattern_->hoverIndex_.emplace(1);
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 1);
-    tabBarPattern_->touchingIndex_.emplace(1);
-    EXPECT_EQ(tabBarPattern_->touchingIndex_.value(), 1);
+    tabBarPattern_->touchingIndex_.insert(1);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(1) != tabBarPattern_->touchingIndex_.end());
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
                 tabBarPattern_->HandleTouchUp(index);
                 tabBarPattern_->SetTouching(true);
-                tabBarPattern_->swiperController_->SetAddSwiperEventCallback([]() {});
+                swiperController_->SetAddSwiperEventCallback([]() {});
                 tabBarPattern_->hoverIndex_.reset();
                 EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
             }
-            tabBarPattern_->touchingIndex_.emplace(0);
+            tabBarPattern_->touchingIndex_.insert(0);
         }
         tabBarPattern_->hoverIndex_.emplace(1);
     }
@@ -645,13 +645,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
      * @tc.steps: steps2. HandleTouchEvent
      * @tc.expected: steps2. Check the number of tabBarNode_ TotalChildCount
      */
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->HandleTouchEvent(touchLocationInfo);
+        tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
         tabBarPattern_->tabBarType_.clear();
         tabBarNode_->RemoveChildAtIndex(1);
     }
@@ -794,7 +791,6 @@ HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, firstItemPoint);
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, firstItemPoint);
     LongPress(firstItemPoint);
     EXPECT_NE(tabBarPattern_->dialogNode_, nullptr);
 
@@ -826,7 +822,9 @@ HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
      * @tc.steps: step5. Release press
      * @tc.expected: Hide dialog
      */
-    HandleTouchEvent(TouchType::UP, outOfTabBarPoint);
+    GestureEvent info;
+    info.SetLocalLocation(outOfTabBarPoint);
+    tabBarPattern_->dragEvent_->GetActionEndEventFunc()(info);
     EXPECT_EQ(tabBarPattern_->dialogNode_, nullptr);
     pipeline->fontScale_ = 1.f;
 }
@@ -1082,6 +1080,8 @@ HWTEST_F(TabBarEventTestNg, HandleTouchEvent004, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    auto tabBarItem = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    EXPECT_EQ(tabBarItem->GetTag(), "Column");
     /**
      * @tc.steps: step1. call callback method in InitTouch and hadlemouse events with tabBarType_ second is true
      */
@@ -1090,10 +1090,8 @@ HWTEST_F(TabBarEventTestNg, HandleTouchEvent004, TestSize.Level1)
     touchLocationInfo.SetLocalLocation(Offset(200.0, 30.0));
     touchLocationInfo.SetTouchType(TouchType::DOWN);
     info.AddTouchLocationInfo(std::move(touchLocationInfo));
-    auto eventHub = tabBarNode_->GetOrCreateGestureEventHub();
-    auto actuator = eventHub->touchEventActuator_;
-    auto events = actuator->touchEvents_;
-    events.front()->callback_(info);
+    auto eventHub = tabBarItem->GetOrCreateGestureEventHub();
+    (*eventHub->touchEventActuator_->touchEvents_.front())(info);
     tabBarPattern_->tabBarType_ = { { 0, TabBarParamType::NORMAL }, { 1, TabBarParamType::CUSTOM_BUILDER } };
     tabBarPattern_->HandleHoverEvent(true);
     MouseInfo mouseInfo;
@@ -1101,7 +1099,7 @@ HWTEST_F(TabBarEventTestNg, HandleTouchEvent004, TestSize.Level1)
     mouseInfo.SetLocalLocation(Offset(200.0, 30.0));
     tabBarPattern_->HandleMouseEvent(mouseInfo);
     tabBarPattern_->isTouchingSwiper_ = true;
-    EXPECT_EQ(tabBarPattern_->touchingIndex_.value(), 1);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(1) != tabBarPattern_->touchingIndex_.end());
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value_or(0), 0);
     EXPECT_FALSE(tabBarPattern_->isHover_);
     swiperController_->surfaceChangeCallback_();
@@ -1162,7 +1160,7 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest001, TestSize.Level1)
      * @tc.steps: step3. Swipe to page 1, then call onGetNextFocusNodeFunc_ use FocusReason::FOCUS_TRAVEL
      * @tc.expected: expect The function is run ok.
      */
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
     auto childFocusHub1 = childNode1->GetOrCreateFocusHub();
     nextFocusHub = tabBarFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB);
@@ -1558,9 +1556,12 @@ HWTEST_F(TabBarEventTestNg, HandleDragOverScroll003, TestSize.Level1)
      * @tc.expected: Would not over the edge
      */
     // scroll to right edge
+    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
+    scrollable->InitAxisAnimator();
     DragStart(Offset(), InputEventType::AXIS);
     float scrollableDistance = 10.0f;
     DragUpdate(-scrollableDistance);
+    MockAnimationManager::GetInstance().Tick();
     EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
 
     float dragDelta = 1.0f;

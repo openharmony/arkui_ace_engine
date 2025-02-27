@@ -1701,6 +1701,22 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
+    auto blurStyleValue = paramObject->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleValue->IsObject()) {
+        if (!textPickerDialog.blurStyleOption.has_value()) {
+            textPickerDialog.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, textPickerDialog.blurStyleOption.value());
+    }
+
+    auto effectOptionValue = paramObject->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!textPickerDialog.effectOption.has_value()) {
+            textPickerDialog.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOptionValue, textPickerDialog.effectOption.value());
+    }
+
     auto buttonInfos = ParseButtonStyles(paramObject);
 
     TextPickerDialogEvent textPickerDialogEvent { nullptr, nullptr, nullptr, nullptr };

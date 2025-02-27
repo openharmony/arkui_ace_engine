@@ -954,7 +954,7 @@ HWTEST_F(MenuItemPatternTestOneNg, FindTouchedEmbeddedMenuItem001, TestSize.Leve
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
 
-    OffsetF position;
+    PointF position;
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
     menuItemPattern->isExpanded_ = true;
     menuItemPattern->embeddedMenu_ = wrapperNode;

@@ -16,6 +16,7 @@
 #include "core/components/rating/render_rating.h"
 
 #include "core/components/rating/rating_component.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

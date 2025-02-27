@@ -386,35 +386,6 @@ HWTEST_F(NavigationManagerTestNg, StorageNavigationRecoveryInfo004, TestSize.Lev
 }
 
 /**
- * @tc.name: OnContainerModalButtonsRectChange001
- * @tc.desc: Branch: if (pair.second) = false
- *           Branch: if (pair.second) = true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationManagerTestNg, OnContainerModalButtonsRectChange001, TestSize.Level1)
-{
-    NavigationManagerTestNg::SetUpTestSuite();
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto pipelineContext = navigationGroupNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationManager = pipelineContext->GetNavigationManager();
-    float buttonWidth = 0.0f;
-    navigationManager->buttonsRectChangeListeners_[0] = nullptr;
-    navigationManager->buttonsRectChangeListeners_[1] = [&buttonWidth]() {
-        buttonWidth = 100.0f;
-    };
-
-    navigationManager->OnContainerModalButtonsRectChange();
-    EXPECT_EQ(buttonWidth, 100.0f);
-    NavigationManagerTestNg::TearDownTestSuite();
-}
-
-/**
  * @tc.name: NavigationMapsTest001
  * @tc.desc: Test AddNavigation/RemoveNavigation/FindNavigationInTargetParent
  * @tc.type: FUNC

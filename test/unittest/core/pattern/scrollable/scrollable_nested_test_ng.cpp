@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -672,6 +672,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.expected: parent and child reach bottom, parent over scroll
      */
     MockAnimationManager::GetInstance().SetTicks(2);
+    listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 1000);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -688,7 +689,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.steps: step4. TickByVelocity
      * @tc.expected: Scroll spring animate back to top, remain velocity start list fling animation.
      */
-    MockPipelineContext::GetCurrent()->SetVsyncTime(scrollScrollable->lastVsyncTime_ + 50 * MS);
+    MockPipelineContext::GetCurrent()->SetVsyncTime(scrollScrollable->lastVsyncTime_ + 30 * MS);
     MockAnimationManager::GetInstance().TickByVelocity(-60);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -699,7 +700,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.steps: step5. Tick
      * @tc.expected: start list fling animation.
      */
-    float distance = 1200 / (0.6 * -FRICTION_SCALE);
+    float distance = 2000 / (SLOW_FRICTION * -FRICTION_SCALE);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
@@ -772,7 +773,8 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
      * @tc.expected: start fling animation
      */
     MockAnimationManager::GetInstance().SetTicks(3);
-    DragEnd(listScrollable, -252);
+    listScrollable->lastMainDelta_ = 0.0;
+    DragEnd(listScrollable, -420);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
@@ -785,13 +787,13 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
-    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -60);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -50);
     MockPipelineContext::GetCurrent()->SetVsyncTime(scrollPattern->nestedScrollTimestamp_ + 50 * MS);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
-    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -110);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -90);
 
     /**
      * @tc.steps: step4. Scroll touch down
@@ -807,7 +809,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
-    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -110);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -90);
 }
 
 /**
@@ -1083,6 +1085,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
     MockPipelineContext::GetCurrent()->onShow_ = true;
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
+    listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 0);
     FlushLayoutTask(rootNode);
     FlushLayoutTask(listNode);

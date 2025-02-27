@@ -41,6 +41,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -221,6 +224,7 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 {
     BaseSpan::UpdateTextBackgroundFromParent(style);
     spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->MarkDirty();
 }
 
 void SpanNode::DumpInfo()
@@ -375,6 +379,29 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     return -1;
 }
 
+bool SpanItem::UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle)
+{
+    auto symbolType = symbolSpanStyle.GetSymbolType();
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = symbolSpanStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        if (fontFamilies.empty()) {
+            return false;
+        }
+        symbolSpanStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        symbolSpanStyle.SetFontFamilies(fontFamilies);
+    }
+    return true;
+}
+
 void SpanItem::UpdateSymbolSpanParagraph(
     const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder, bool isDragging)
 {
@@ -398,7 +425,9 @@ void SpanItem::UpdateSymbolSpanParagraph(
         if (!symbolEffectSwitch_ || isDragging) {
             symbolSpanStyle.SetEffectStrategy(0);
         }
-        symbolSpanStyle.SetFontFamilies({"HM Symbol"});
+        if (!UpdateSymbolSpanFontFamily(symbolSpanStyle)) {
+            return;
+        }
         builder->PushStyle(symbolSpanStyle);
     }
     textStyle_ = symbolSpanStyle;

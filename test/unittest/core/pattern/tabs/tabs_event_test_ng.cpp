@@ -22,20 +22,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
-class TabsEventTestNg : public TabsTestNg {
-public:
-    AssertionResult VerifyBackgroundColor(int32_t itemIndex, Color expectColor)
-    {
-        Color actualColor = GetChildFrameNode(tabBarNode_, itemIndex)->GetRenderContext()->GetBackgroundColor().value();
-        if (NearEqual(actualColor, expectColor)) {
-            return AssertionSuccess();
-        }
-        return AssertionFailure() << "Actual: " << actualColor.ToString() << " Expected: " << expectColor.ToString();
-    }
-};
+class TabsEventTestNg : public TabsTestNg {};
 
 /**
  * @tc.name: TabsController001
@@ -50,40 +37,40 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step2. SwipeTo second tabContent
      * @tc.expected: Show second tabContent
      */
-    SwipeToWithoutAnimation(1);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    ChangeIndex(1);
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step3. SwipeTo same tabContent
      * @tc.expected: Show second tabContent
      */
-    SwipeToWithoutAnimation(1);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    ChangeIndex(1);
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step4. SwipeTo index that greater than maxIndex
      * @tc.expected: Show first tabContent
      */
-    SwipeToWithoutAnimation(TABCONTENT_NUMBER);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    ChangeIndex(TABCONTENT_NUMBER);
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step5. SwipeTo index that less than zero
      * @tc.expected: Show first tabContent
      */
-    SwipeToWithoutAnimation(-1);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    ChangeIndex(-1);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
  * @tc.name: OnTabBarClick001
- * @tc.desc: Test Tabs event
+ * @tc.desc: Test click tabBar item
  * @tc.type: FUNC
  */
 HWTEST_F(TabsEventTestNg, OnTabBarClick001, TestSize.Level1)
@@ -101,8 +88,18 @@ HWTEST_F(TabsEventTestNg, OnTabBarClick001, TestSize.Level1)
     model.SetOnTabBarClick(event);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
+
+    // click second tabBarItem
+    HandleClick(1);
     EXPECT_EQ(currentIndex, 1);
+
+    // click first tabBarItem
+    HandleClick(0);
+    EXPECT_EQ(currentIndex, 0);
+
+    // click first tabBarItem again
+    HandleClick(0);
+    EXPECT_EQ(currentIndex, 0);
 }
 
 /**
@@ -125,8 +122,8 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange001, TestSize.Level1)
     model.SetOnContentWillChange(event);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    HandleClick(1); // click second tabBarItem
+    EXPECT_TRUE(CurrentIndex(1));
     EXPECT_TRUE(isTrigger);
 }
 
@@ -150,8 +147,8 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange002, TestSize.Level1)
     model.SetOnContentWillChange(event);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    HandleClick(1); // click second tabBarItem
+    EXPECT_TRUE(CurrentIndex(0));
     EXPECT_TRUE(isTrigger);
 }
 
@@ -200,11 +197,11 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd001, TestSize.Level1)
     model.SetOnAnimationEnd(endEvent);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    HandleClick(1); // click second tabBarItem
+    EXPECT_TRUE(CurrentIndex(1));
     EXPECT_TRUE(isStartTrigger);
     EXPECT_TRUE(isEndTrigger);
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
 }
 
 /**
@@ -216,7 +213,7 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Swap event
-     * @tc.expected: event was swaped
+     * @tc.expected: event was swapped
      */
     bool isStartTrigger = false;
     auto startEvent = [&isStartTrigger](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
@@ -238,8 +235,8 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd002, TestSize.Level1)
     CreateTabsDone(model);
     pattern_->SetAnimationStartEvent(std::move(startEvent2));
     pattern_->SetAnimationEndEvent(std::move(endEvent2));
-    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    HandleClick(1); // click second tabBarItem
+    EXPECT_TRUE(CurrentIndex(1));
     EXPECT_FALSE(isStartTrigger);
     EXPECT_FALSE(isEndTrigger);
     EXPECT_TRUE(isStartTrigger2);
@@ -266,7 +263,7 @@ HWTEST_F(TabsEventTestNg, HandleClick001, TestSize.Level1)
     tabBarPattern_->HandleClick(info.GetSourceDevice(), 1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushUITasks();
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
 }
 
 /**
@@ -282,7 +279,7 @@ HWTEST_F(TabsEventTestNg, HandleClick002, TestSize.Level1)
      */
     TabsModelNG model = CreateTabs();
     CreateTabsDone(model);
-    HandleClick(Offset(200.f, 30.f), 1);
+    HandleClick(1);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -300,8 +297,8 @@ HWTEST_F(TabsEventTestNg, HandleClick003, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(1);
     CreateTabsDone(model);
-    HandleClick(Offset(200.f, 30.f), 1);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    HandleClick(1);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -323,8 +320,8 @@ HWTEST_F(TabsEventTestNg, HandleClick004, TestSize.Level1)
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     scrollable->GetSpringProperty();
     scrollable->state_ = Scrollable::AnimationState::SPRING;
-    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    HandleClick(1); // click second tabBarItem
+    EXPECT_TRUE(CurrentIndex(1));
     EXPECT_TRUE(scrollable->IsSpringStopped());
 }
 
@@ -343,9 +340,8 @@ HWTEST_F(TabsEventTestNg, HandleClick005, TestSize.Level1)
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabsDone(model);
 
-    HandleClick(Offset(400.f, 30.f), 1); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
-    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(), 1);
+    HandleClick(1); // click second tabBarItem
+    EXPECT_TRUE(CurrentIndex(1));
 }
 
 /**
@@ -482,8 +478,7 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch004, TestSize.Level1)
     const float inTabBarItemY = 30.f;
     HandleMouseEvent(MouseAction::MOVE, Offset(-1.f, inTabBarItemY));
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, Offset(-1.f, inTabBarItemY));
-    EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.empty());
 
     /**
      * @tc.steps: step2. Hover and Touch down tabBarItem(index:0)
@@ -491,15 +486,15 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch004, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, Offset(180.f, inTabBarItemY));
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, Offset(180.f, inTabBarItemY));
-    EXPECT_EQ(tabBarPattern_->touchingIndex_, 0);
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(0) != tabBarPattern_->touchingIndex_.end());
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
     /**
      * @tc.steps: step3. Touch up tabBarItem(index:0)
      * @tc.expected: touchingIndex_ is 0, BackgroundColor change to hover color
      */
-    HandleTouchEvent(TouchType::UP, Offset(180.f, inTabBarItemY));
+    tabBarPattern_->HandleTouchEvent(TouchType::UP, 0);
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::RED));
 }
 
@@ -524,12 +519,12 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch005, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, Offset(100.f, 30.f));
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, Offset(100.f, 30.f));
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
     HandleMouseEvent(MouseAction::MOVE, Offset(200.f, 30.f));
     HandleHoverEvent(true);
-    EXPECT_EQ(tabBarPattern_->touchingIndex_, 0);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(0) != tabBarPattern_->touchingIndex_.end());
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 1);
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
@@ -537,8 +532,8 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch005, TestSize.Level1)
      * @tc.steps: step3. Touch up tabBarItem(index:1)
      * @tc.expected: tabBarItem(index:1) BackgroundColor is hover color
      */
-    HandleTouchEvent(TouchType::UP, Offset(200.f, 30.f));
-    EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
+    tabBarPattern_->HandleTouchEvent(TouchType::UP, 0);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.empty());
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 1);
     EXPECT_TRUE(VerifyBackgroundColor(0, Color::TRANSPARENT));
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::RED));
@@ -565,7 +560,7 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch006, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, Offset(200.f, 30.f));
     HandleHoverEvent(true);
-    HandleTouchEvent(TouchType::DOWN, Offset(200.f, 30.f));
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 1);
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::GREEN));
 
     /**
@@ -574,7 +569,7 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch006, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::WINDOW_LEAVE, Offset(200.f, 100.f));
     HandleHoverEvent(false);
-    EXPECT_EQ(tabBarPattern_->touchingIndex_, 1);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(1) != tabBarPattern_->touchingIndex_.end());
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 
@@ -583,15 +578,15 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch006, TestSize.Level1)
      */
     HandleMouseEvent(MouseAction::MOVE, Offset(TABS_WIDTH + 1.f, 1.f));
     HandleHoverEvent(false);
-    EXPECT_EQ(tabBarPattern_->touchingIndex_, 1);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.find(1) != tabBarPattern_->touchingIndex_.end());
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 
     /**
      * @tc.steps: step6. Touch cancel
      */
-    HandleTouchEvent(TouchType::CANCEL, Offset(TABS_WIDTH + 1.f, 1.f));
-    EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
+    tabBarPattern_->HandleTouchEvent(TouchType::CANCEL, 1);
+    EXPECT_TRUE(tabBarPattern_->touchingIndex_.empty());
     EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 }
 
@@ -760,18 +755,14 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest003, TestSize.Level1)
      * @tc.steps: step4. SwipeTo 1.
      * @tc.expected: isShow = 0b0010
      */
-    swiperController_->SwipeTo(1);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushUITasks();
+    ChangeIndex(1);
     EXPECT_EQ(isShow, 2);
 
     /**
      * @tc.steps: step6. SwipeTo 3.
      * @tc.expected: isShow = 0b1000
      */
-    swiperController_->SwipeTo(3);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushUITasks();
+    ChangeIndex(3);
     EXPECT_EQ(isShow, 8);
 }
 
@@ -815,9 +806,7 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest004, TestSize.Level1)
      * @tc.expected: The middle tabcontents does not trigger OnWillShow.
                     isShow = 0b1001
      */
-    swiperController_->SwipeTo(3);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushUITasks();
+    ChangeIndex(3);
     EXPECT_EQ(isShow, 9);
 }
 
@@ -856,19 +845,15 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
      * @tc.steps: step3. SwipeTo 2.
      * @tc.expected: isShowCount and isHideCount equal to 1.
      */
-    swiperController_->SwipeTo(2);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushUITasks();
+    ChangeIndex(2);
     EXPECT_EQ(isShowCount, 2);
     EXPECT_EQ(isHideCount, 1);
 
     /**
-     * @tc.steps: step4. SwipeToWithoutAnimation 3.
+     * @tc.steps: step4. ChangeIndex 3.
      * @tc.expected: isShowCount and isHideCount equal to 2.
      */
-    swiperController_->SwipeToWithoutAnimation(3);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushUITasks();
+    ChangeIndex(3);
     EXPECT_EQ(isShowCount, 3);
     EXPECT_EQ(isHideCount, 2);
 }
@@ -889,12 +874,9 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
      * @tc.steps: steps2. HandleTouchEvent
      * @tc.expected: steps2. Check the number of tabBarNode_ TotalChildCount
      */
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
-    tabBarPattern_->HandleTouchEvent(touchLocationInfo);
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
     EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
 }
 
@@ -914,12 +896,9 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent002, TestSize.Level1)
      * @tc.steps: steps2. HandleTouchEvent
      * @tc.expected: steps2. Check the number of tabBarNode_ TotalChildCount
      */
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
-    tabBarPattern_->HandleTouchEvent(touchLocationInfo);
+    tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
     EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
 }
 
@@ -970,16 +949,16 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitTurnPageRateEvent001, TestSize.Level1
     tabBarPattern_->InitTurnPageRateEvent();
     int32_t testswipingIndex = 1;
     float testturnPageRate = 1.0f;
-    tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    swiperController_->GetTurnPageRateCallback()(testswipingIndex, testturnPageRate);
     AnimationCallbackInfo info;
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern_->axis_ = Axis::HORIZONTAL;
     tabBarPattern_->isTouchingSwiper_ = true;
-    tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    swiperController_->GetTurnPageRateCallback()(testswipingIndex, testturnPageRate);
     tabBarPattern_->turnPageRate_ = 1.0f;
-    tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    swiperController_->GetTurnPageRateCallback()(testswipingIndex, testturnPageRate);
     tabBarPattern_->turnPageRate_ = 0.5f;
-    tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    swiperController_->GetTurnPageRateCallback()(testswipingIndex, testturnPageRate);
     EXPECT_TRUE(tabBarPattern_);
 }
 
@@ -1003,18 +982,18 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1
     tabBarPattern_->InitTurnPageRateEvent();
     int32_t testswipingIndex = 1;
     float testturnPageRate = 1.0f;
-    tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    swiperController_->GetTurnPageRateCallback()(testswipingIndex, testturnPageRate);
     AnimationCallbackInfo info;
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern_->axis_ = Axis::HORIZONTAL;
     tabBarPattern_->isTouchingSwiper_ = true;
-    tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    swiperController_->GetTurnPageRateCallback()(testswipingIndex, testturnPageRate);
     tabBarPattern_->axis_ = Axis::VERTICAL;
     tabBarPattern_->isTouchingSwiper_ = false;
-    tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    swiperController_->GetTurnPageRateCallback()(testswipingIndex, testturnPageRate);
     tabBarPattern_->axis_ = Axis::VERTICAL;
     tabBarPattern_->isTouchingSwiper_ = true;
-    tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    swiperController_->GetTurnPageRateCallback()(testswipingIndex, testturnPageRate);
     tabBarPattern_->turnPageRate_ = 2.0f;
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern_->turnPageRate_ = 1.0f;
@@ -1084,7 +1063,7 @@ HWTEST_F(TabsEventTestNg, SetOnIndexChangeEvent001, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
-    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
+    HandleClick(1); // click second tabBarItem
     EXPECT_EQ(currentIndex, 1);
 }
 
@@ -1109,7 +1088,7 @@ HWTEST_F(TabsEventTestNg, SetOnIndexChangeEvent002, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_EQ(currentIndex, 1);
 
     /**
@@ -1122,7 +1101,7 @@ HWTEST_F(TabsEventTestNg, SetOnIndexChangeEvent002, TestSize.Level1)
         currentIndex2 = tabInfo->GetIndex();
     };
     pattern_->SetOnIndexChangeEvent(std::move(event2));
-    SwipeToWithoutAnimation(2);
+    ChangeIndex(2);
     EXPECT_EQ(currentIndex, 1);
     EXPECT_EQ(currentIndex2, 2);
 }
@@ -1152,7 +1131,7 @@ HWTEST_F(TabsEventTestNg, SetOnIndexChangeEvent003, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->IsMaskAnimationExecuted());
 
-    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
+    HandleClick(1); // click second tabBarItem
     EXPECT_EQ(currentIndex, 0);
 }
 
@@ -1177,10 +1156,10 @@ HWTEST_F(TabsEventTestNg, SetOnChangeEvent001, TestSize.Level1)
      * @tc.steps: step1. Change swiper index
      * @tc.expected: Event was triggered
      */
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_EQ(currentIndex, 1);
 
-    SwipeToWithoutAnimation(3);
+    ChangeIndex(3);
     EXPECT_EQ(currentIndex, 3);
 }
 
@@ -1211,7 +1190,7 @@ HWTEST_F(TabsEventTestNg, SetOnChangeEvent002, TestSize.Level1)
         currentIndex2 = tabInfo->GetIndex();
     };
     pattern_->SetOnChangeEvent(std::move(event2));
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_EQ(currentIndex, 0);
     EXPECT_EQ(currentIndex2, 1);
 }
@@ -1241,10 +1220,10 @@ HWTEST_F(TabsEventTestNg, SetOnChangeEvent003, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->IsMaskAnimationExecuted());
 
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_EQ(currentIndex, 0);
 
-    SwipeToWithoutAnimation(3);
+    ChangeIndex(3);
     EXPECT_EQ(currentIndex, 0);
 }
 
@@ -1272,8 +1251,7 @@ HWTEST_F(TabsEventTestNg, ObserverTestNg001, TestSize.Level1)
     };
     UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(func);
 
-    swiperController_->SwipeTo(1);
-    FlushUITasks();
+    ChangeIndex(1);
     UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(nullptr);
 }
 
@@ -1298,10 +1276,10 @@ HWTEST_F(TabsEventTestNg, SetOnUnselectedEvent001, TestSize.Level1)
      * @tc.steps: step1. Change swiper index
      * @tc.expected: Event was triggered
      */
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_EQ(currentIndex, 0);
 
-    SwipeToWithoutAnimation(3);
+    ChangeIndex(3);
     EXPECT_EQ(currentIndex, 1);
 }
 
@@ -1332,10 +1310,10 @@ HWTEST_F(TabsEventTestNg, SetOnUnselectedEvent002, TestSize.Level1)
         currentIndex2 = tabInfo->GetIndex();
     };
     pattern_->SetOnUnselectedEvent(std::move(event2));
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_EQ(currentIndex, 0);
     EXPECT_EQ(currentIndex2, 0);
-    SwipeToWithoutAnimation(3);
+    ChangeIndex(3);
     EXPECT_EQ(currentIndex2, 1);
 }
 
@@ -1360,14 +1338,14 @@ HWTEST_F(TabsEventTestNg, SetOnSelectedEvent001, TestSize.Level1)
      * @tc.steps: step1. Change swiper index to 1
      * @tc.expected: currentIndex is 1
      */
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_EQ(currentIndex, 1);
 
     /**
      * @tc.steps: step2. Change swiper index to 3
      * @tc.expected: currentIndex is 3
      */
-    SwipeToWithoutAnimation(3);
+    ChangeIndex(3);
     EXPECT_EQ(currentIndex, 3);
 }
 

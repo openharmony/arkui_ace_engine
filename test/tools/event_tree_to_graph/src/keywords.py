@@ -88,6 +88,7 @@ touch_point_keyword = {
     "type": KeyValueSample("type: TouchDown,"),
     "timestamp": KeyValueSample("timestamp: 2017-08-25 15:00:22.244"),
     "isInjected": KeyValueSample("isInjected: 0"),
+    "downFingerIds": KeyValueSample("downFingerIds: 0"),
 }
 
 #   nodeId: 0, parentId: -1, tag: root, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00,

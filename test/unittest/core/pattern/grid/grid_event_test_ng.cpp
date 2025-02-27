@@ -16,6 +16,8 @@
 #include "grid_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+
 namespace OHOS::Ace::NG {
 class GridEventTestNg : public GridTestNg {
 public:
@@ -278,5 +280,30 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll006, TestSize.Level1)
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     DragAction(frameNode_, Offset(), -10.0f, -DRAG_VELOCITY);
     EXPECT_TRUE(Position(-600.0f));
+}
+
+/**
+ * @tc.name: HandleBoxSelectDragStart
+ * @tc.desc: Handle drag start for box select
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, HandleBoxSelectDragStart, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetRawGlobalLocation(Offset(50, 50));
+    info.SetOffsetX(5);
+    info.SetOffsetY(10);
+    pattern_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->canMultiSelect_);
+    EXPECT_FALSE(pattern_->IsItemSelected(50, 50));
+    pattern_->HandleDragEnd();
+
+    GetChildPattern<GridItemPattern>(frameNode_, 0)->SetSelected(true);
+    EXPECT_TRUE(pattern_->IsItemSelected(50, 50));
 }
 } // namespace OHOS::Ace::NG

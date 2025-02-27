@@ -14,6 +14,8 @@
  */
 #include "image_base.h"
 
+#include "base/image/image_defines.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -395,7 +397,7 @@ HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
     imagePattern->animator_->AttachScheduler(pipeline);
     SystemProperties::debugEnabled_ = true;
     imagePattern->animator_->status_ = OHOS::Ace::Animator::Status::PAUSED;
-    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATION;
     imagePattern->OnVisibleAreaChange(true, 1.0f);
     EXPECT_EQ(imagePattern->animator_->status_, OHOS::Ace::Animator::Status::RUNNING);
 }
@@ -510,7 +512,7 @@ HWTEST_F(ImagePatternTestNg, OnAreaChangedInner001, TestSize.Level1)
     imagePattern->OnAreaChangedInner();
     imagePattern->selectOverlay_->Close();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -1114,7 +1116,7 @@ HWTEST_F(ImagePatternTestNg, ImageSetExternalDecodeFormat001, TestSize.Level1)
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ImagePattern>();
-    
+
     /**
      * @tc.cases: case1. default.
      */
@@ -1268,13 +1270,13 @@ HWTEST_F(ImagePatternTestNg, ImageHandleCopyTest001, TestSize.Level1)
 
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->HandleCopy();
-    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
 
     /**
      * @tc.steps: step5. HandleCopy again.
      */
     imagePattern->HandleCopy();
-    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
 }
 
 /**

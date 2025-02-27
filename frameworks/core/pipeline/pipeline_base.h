@@ -46,6 +46,7 @@
 #include "core/common/window_animation_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -131,6 +132,8 @@ public:
      * Get density of current pipeline if valid, or return density of default display
      */
     static double GetCurrentDensity();
+
+    static ColorMode GetCurrentColorMode();
 
     virtual void SetupRootElement() = 0;
 
@@ -689,6 +692,14 @@ public:
         themeManager_ = std::move(theme);
     }
 
+    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter) {
+        std::unique_lock<std::shared_mutex> lock(themeMtx_);
+        CHECK_NULL_VOID(themeManager_);
+        auto themeConstants = themeManager_->GetThemeConstants();
+        CHECK_NULL_VOID(themeConstants);
+        themeConstants->UpdateResourceAdapter(adapter);
+    }
+
     template<typename T>
     RefPtr<T> GetTheme() const
     {
@@ -782,6 +793,11 @@ public:
     bool IsFormRender() const
     {
         return isFormRender_;
+    }
+
+    bool IsFormRenderExceptDynamicComponent() const
+    {
+        return isFormRender_ && !isDynamicRender_;
     }
 
     void SetIsDynamicRender(bool isDynamicRender)
@@ -1092,11 +1108,12 @@ public:
     }
     virtual void NotifyMemoryLevel(int32_t level) {}
 
-    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
+    virtual void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
     {
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
+    virtual void SetIsWindowSizeChangeFlag(bool result) {}
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -1519,6 +1536,8 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
+    
+    bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;

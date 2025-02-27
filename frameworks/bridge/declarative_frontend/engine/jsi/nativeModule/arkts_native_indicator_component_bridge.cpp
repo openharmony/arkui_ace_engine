@@ -48,6 +48,7 @@ constexpr int32_t DOT_INDICATOR_TOP = 10;
 constexpr int32_t DOT_INDICATOR_RIGHT = 11;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 12;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 13;
+constexpr int32_t DOT_INDICATOR_SPACE = 14;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
 
 std::string GetDimensionUnitString(DimensionUnit unit)
@@ -92,6 +93,19 @@ std::string GetIntStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& js
     return result;
 }
 
+std::string ParseSpace(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    std::string result = "-";
+    if (jsValue->IsUndefined()) {
+        return result;
+    }
+    CalcDimension calc;
+    bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, calc);
+    calc = (parseOK && !(calc < 0.0_vp) && calc.Unit() != DimensionUnit::PERCENT) ?
+        calc : 8.0_vp;
+    return calc.ToString();
+}
+
 std::string GetDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
 {
     Local<JSValueRef> itemWidthArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_WIDTH);
@@ -105,6 +119,7 @@ std::string GetDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
     Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_TOP);
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_RIGHT);
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_BOTTOM);
+    Local<JSValueRef> spaceArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_SPACE);
     CalcDimension calc;
 
     std::string itemWidth = ArkTSUtils::ParseJsDimension(vm, itemWidthArg, calc, DimensionUnit::VP, false)
@@ -133,11 +148,12 @@ std::string GetDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
     std::string top = GetStringByValueRef(vm, topArg);
     std::string right = GetStringByValueRef(vm, rightArg);
     std::string bottom = GetStringByValueRef(vm, bottomArg);
+    std::string space = ParseSpace(vm, spaceArg);
     Local<JSValueRef> maxDisplayCountArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_MAX_DISPLAY_COUNT);
     auto maxDisplayCount = GetIntStringByValueRef(vm, maxDisplayCountArg);
     std::string indicatorStr = itemWidth + "|" + itemHeight + "|" + selectedItemWidth + "|" + selectedItemHeight + "|" +
                                mask + "|" + colorStr + "|" + selectedColor + "|" + left + "|" + top + "|" + right +
-                               "|" + bottom + "|" + maxDisplayCount;
+                               "|" + bottom + "|" + maxDisplayCount + "|" + space;
     return indicatorStr;
 }
 

@@ -240,6 +240,16 @@ public:
         return isTouchEventsPassThrough_;
     }
 
+    void SetReusedNodeSkipMeasure(bool reusedNodeSkipMeasure)
+    {
+        reusedNodeSkipMeasure_= reusedNodeSkipMeasure;
+    }
+
+    bool IsReusedNodeSkipMeasure() const
+    {
+        return reusedNodeSkipMeasure_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -272,6 +282,7 @@ protected:
     int32_t missionId_ = -1;
     mutable std::shared_mutex eventsPassThroughMutex_;
     bool isTouchEventsPassThrough_ = false;
+    bool reusedNodeSkipMeasure_ = false;
 };
 
 } // namespace OHOS::Ace

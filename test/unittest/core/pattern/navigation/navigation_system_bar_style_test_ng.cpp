@@ -21,6 +21,7 @@
 #define protected public
 #define private public
 #include "test/mock/base/mock_task_executor.h"
+#include "bridge/declarative_frontend/ng/entry_page_info.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"

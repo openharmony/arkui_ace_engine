@@ -569,12 +569,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
-    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
-    bool isHdrDecoderNeed = false;
-    if (renderProp && renderProp->HasDynamicMode()) {
-        isHdrDecoderNeed = true;
-        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
-    }
+    bool isHdrDecoderNeed = renderProp && renderProp->HasDynamicMode();
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
@@ -1523,11 +1518,11 @@ void ImagePattern::DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutPr
     DumpLog::GetInstance().AddDesc(
         std::string("SrcType: ").append(std::to_string(static_cast<int32_t>(src.GetSrcType()))));
     DumpLog::GetInstance().AddDesc(
-        std::string("AbilityName: ").append(std::to_string(static_cast<int32_t>(SystemProperties::GetColorMode()))));
+        std::string("AbilityName: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
     DumpLog::GetInstance().AddDesc(std::string("BundleName: ").append(src.GetBundleName()));
     DumpLog::GetInstance().AddDesc(std::string("ModuleName: ").append(src.GetModuleName()));
     DumpLog::GetInstance().AddDesc(
-        std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(SystemProperties::GetColorMode()))));
+        std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
     DumpLog::GetInstance().AddDesc(
         std::string("LocalColorMode: ").append(std::to_string(static_cast<int32_t>(src.GetLocalColorMode()))));
 }
@@ -2263,7 +2258,11 @@ bool ImagePattern::IsFormRender()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->IsFormRender();
+
+    auto container = Container::Current();
+    bool isDynamicComponent = container && container->IsDynamicRender() &&
+                              container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    return pipeline->IsFormRender() && !isDynamicComponent;
 }
 
 void ImagePattern::UpdateFormDurationByRemainder()

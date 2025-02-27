@@ -874,7 +874,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -932,7 +932,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -984,7 +984,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
     MouseEvent mouseEvent = GetMouseEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -1681,7 +1681,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
 }
 
-void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine)
+void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine, const shared_ptr<JsValue> globalPtr)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
@@ -1700,7 +1700,7 @@ void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
-    JsBindWorkerViews(globalObj, nativeEngine);
+    JsBindWorkerViews(globalObj, runtime, nativeEngine, globalPtr);
 }
 
 } // namespace OHOS::Ace::Framework

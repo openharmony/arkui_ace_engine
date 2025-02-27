@@ -234,12 +234,16 @@ void UiReportStub::UnregisterComponentChangeEventCallback()
 
 void UiReportStub::SendCurrentLanguage(const std::string& data)
 {
-    getWebViewCurrentLanguageCallback_(data);
+    if (getWebViewCurrentLanguageCallback_) {
+        getWebViewCurrentLanguageCallback_(data);
+    }
 }
 
 void UiReportStub::SendWebText(int32_t nodeId, std::string res)
 {
-    getTranslateTextCallback_(nodeId, res);
+    if (getTranslateTextCallback_) {
+        getTranslateTextCallback_(nodeId, res);
+    }
 }
 
 void UiReportStub::RegisterGetShowingImageCallback(
@@ -250,7 +254,9 @@ void UiReportStub::RegisterGetShowingImageCallback(
 
 void UiReportStub::SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
 {
-    getShowingImageCallback_(maps);
+    if (getShowingImageCallback_) {
+        getShowingImageCallback_(maps);
+    }
 }
 
 void UiReportStub::ClearAshmem(sptr<Ashmem>& optMem)

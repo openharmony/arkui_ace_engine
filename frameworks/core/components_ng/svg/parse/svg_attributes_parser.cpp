@@ -23,12 +23,16 @@ const char LINEJOIN_BEVEL[] = "bevel";
 const char LINEJOIN_ROUND[] = "round";
 const std::regex COLOR_WITH_ALPHA(
     R"(rgba?\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\,(\d+\.?\d*)\))", std::regex::icase);
-const std::regex COLOR_WITH_RGBA_MAGIC("#[0-9A-Fa-f]{8}");
+const std::regex COLOR_WITH_RGBA_MAGIC("#[0-9A-Fa-f]{7,8}");
+const std::regex COLOR_FORMAT_FOUR_HEX("#[0-9A-Fa-f]{4}");
 constexpr int32_t RADIX_HEX = 16;
-constexpr int32_t BASIC_COLOR_SPAN = 6;
+constexpr int32_t THREE_BYTE_BITS = 24;
 constexpr int32_t TWO_BYTE_BITS = 16;
+constexpr int32_t TWELVE_BITS = 12;
 constexpr int32_t ONE_BYTE_BITS = 8;
+constexpr int32_t FOUR_BITS = 4;
 constexpr uint32_t RGBA_SUB_MATCH_SIZE = 5;
+constexpr int32_t HEX_COLOR_LEN_SEVEN = 7;
 constexpr double MAX_ALPHA = 1.0;
 constexpr Dimension TRANSFORM_ORIGIN_DEFAULT = 0.5_pct;
 constexpr size_t TRANSFORM_ORIGIN_PARA_AMOUNT1 = 1;
@@ -238,17 +242,24 @@ std::optional<Color> SvgAttributesParser::GetSpecialColor(const std::string& val
 bool SvgAttributesParser::ParseRGBAMagicColor(const std::string& value, Color& color)
 {
     std::smatch matches;
+    // #RGBA--->RRGGBBAA
+    if (std::regex_match(value, matches, COLOR_FORMAT_FOUR_HEX)) {
+        auto colorStr = value.substr(1);
+        color = GetColorFrom4HexString(colorStr);
+        return true;
+    }
+
     if (!std::regex_match(value, matches, COLOR_WITH_RGBA_MAGIC)) {
         return false;
     }
-    std::string baseColorStr = value.substr(1, BASIC_COLOR_SPAN);
-    auto baseColorValue = std::strtoul(baseColorStr.c_str(), nullptr, RADIX_HEX);
-    std::string baseAlphaStr = value.substr(BASIC_COLOR_SPAN + 1);
-    auto alpha = std::strtoul(baseAlphaStr.c_str(), nullptr, RADIX_HEX);
-    auto red = (baseColorValue >> TWO_BYTE_BITS) & 0xff;
-    auto green = (baseColorValue >> ONE_BYTE_BITS) & 0xff;
-    auto blue = baseColorValue & 0xff;
-    color = Color::FromARGB(alpha, red, green, blue);
+    std::string colorStr = value.substr(1);
+    // #00ffaad--->default black
+    if (colorStr.length() == HEX_COLOR_LEN_SEVEN) {
+        color = Color::BLACK;
+        return true;
+    }
+    // #00ffaadd
+    color = GetColorFromHexString(colorStr);
     return true;
 }
 
@@ -524,5 +535,30 @@ void SvgAttributesParser::ComputeScale(const Size& viewBox, const Size& viewPort
             break;
     }
     scaleY = scaleX;
+}
+
+Color SvgAttributesParser::GetColorFromHexString(const std::string& value)
+{
+    auto colorInt32 = std::strtoul(value.c_str(), nullptr, RADIX_HEX);
+    auto red = (colorInt32 >> THREE_BYTE_BITS) & 0xff;
+    auto green = (colorInt32 >> TWO_BYTE_BITS) & 0xff;
+    auto blue = (colorInt32 >> ONE_BYTE_BITS) & 0xff;
+    auto alpha = colorInt32 & 0xff;
+    return Color::FromARGB(alpha, red, green, blue);
+}
+
+Color SvgAttributesParser::GetColorFrom4HexString(const std::string& value)
+{
+    // value is rgba, convert to rrggbbaa color
+    auto colorInt32 = std::strtoul(value.c_str(), nullptr, RADIX_HEX);
+    auto red = (colorInt32 >> TWELVE_BITS) & 0xf;
+    red += red << FOUR_BITS;
+    auto green = (colorInt32 >> ONE_BYTE_BITS) & 0xf;
+    green += green << FOUR_BITS;
+    auto blue = (colorInt32 >> FOUR_BITS) & 0xf;
+    blue += blue << FOUR_BITS;
+    auto alpha = colorInt32 & 0xf;
+    alpha += alpha << FOUR_BITS;
+    return Color::FromARGB(alpha, red, green, blue);
 }
 } // namespace OHOS::Ace::NG

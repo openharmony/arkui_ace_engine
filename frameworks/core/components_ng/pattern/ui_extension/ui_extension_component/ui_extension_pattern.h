@@ -28,6 +28,7 @@
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 #include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
@@ -96,6 +97,7 @@ public:
         bool isAsyncModalBinding = false, SessionType sessionType = SessionType::UI_EXTENSION_ABILITY);
     ~UIExtensionPattern() override;
 
+    void Initialize();
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
@@ -117,6 +119,10 @@ public:
     void RegisterWindowSceneVisibleChangeCallback(const RefPtr<Pattern>& windowScenePattern);
     void UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId);
     void OnWindowSceneVisibleChange(bool visible);
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -222,9 +228,9 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
     int32_t GetInstanceIdFromHost() const;
-    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply,
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
-    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type,
+    bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
     void OnUIExtBusinessReceiveReply(
         UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
@@ -245,9 +251,18 @@ public:
     void NotifyHostWindowMode(Rosen::WindowMode mode);
     void NotifyHostWindowMode();
 
-    void TransferAccessibilityRectInfo();
+    void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
-    void UpdateWMSUIExtProperty(UIContentBusinessCode code, AAFwk::Want data, RSSubsystemId subSystemId);
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
+
+    const ContainerModalAvoidInfo& GetAvoidInfo() const
+    {
+        return avoidInfo_;
+    }
+    void SetAvoidInfo(const ContainerModalAvoidInfo& info)
+    {
+        avoidInfo_ = info;
+    }
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -303,6 +318,17 @@ private:
     void DispatchFocusState(bool focusState);
     void DispatchDisplayArea(bool isForce = false);
     void LogoutModalUIExtension();
+    bool IsMoving();
+    void UnRegisterEvent(int32_t instanceId);
+    void UnRegisterPipelineEvent(int32_t instanceId);
+    void UnRegisterPipelineEvent(
+        const RefPtr<PipelineContext>& pipeline, FrameNode* frameNode);
+    void UnRegisterUIExtensionManagerEvent(int32_t instanceId);
+    void RegisterEvent(int32_t instanceId);
+    void RegisterPipelineEvent(int32_t instanceId);
+    void RegisterPipelineEvent(const RefPtr<PipelineContext>& pipeline);
+    void RegisterUIExtensionManagerEvent(int32_t instanceId);
+    void UpdateSessionInstanceId(int32_t instanceId);
 
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode(PlaceholderType type);
@@ -338,6 +364,7 @@ private:
     void InitBusinessDataHandleCallback();
     void RegisterEventProxyFlagCallback();
 
+    void RegisterGetAvoidInfoCallback();
     void RegisterReplyPageModeCallback();
     void UpdateFrameNodeState();
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
@@ -374,6 +401,7 @@ private:
     bool isTransferringCaller_ = false;
     bool isVisible_ = true;
     bool isModal_ = false;
+    bool hasInitialize_ = false;
     bool isAsyncModalBinding_ = false;
     PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
     bool isFoldStatusChanged_ = false;
@@ -384,6 +412,7 @@ private:
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
     bool isKeyAsync_ = false;
+    bool hasDetachContext_ = false;
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;
@@ -410,6 +439,8 @@ private:
 
     bool isWindowModeFollowHost_ = false;
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
+
+    ContainerModalAvoidInfo avoidInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

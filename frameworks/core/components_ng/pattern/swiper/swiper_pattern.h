@@ -47,18 +47,22 @@
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
-namespace {
 enum class GestureStatus {
     INIT = 0,
     START,
     END,
 };
-} // namespace
 
 enum class PageFlipMode {
     CONTINUOUS = 0,
     SINGLE,
 };
+
+using SwiperHoverFlag = uint32_t;
+constexpr SwiperHoverFlag HOVER_NONE = 0;
+constexpr SwiperHoverFlag HOVER_SWIPER = 1;
+constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
+constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
 
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -145,10 +149,7 @@ public:
         return currentFirstIndex_;
     }
 
-    int32_t GetCurrentIndex()
-    {
-        return GetLoopIndex(currentIndex_);
-    }
+    int32_t GetCurrentIndex(bool original = false);
 
     float GetTurnPageRate() const
     {
@@ -325,6 +326,15 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
+    
+    void ResetIndicatorParameters()
+    {
+        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+            swiperParameters_ = nullptr;
+        } else {
+            swiperDigitalParameters_ = nullptr;
+        }
+    }
 
     virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
 
@@ -488,7 +498,11 @@ public:
     virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const { return nullptr; }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
-    void ArrowHover(bool hoverFlag);
+    void ArrowHover(bool isHover, SwiperHoverFlag flag);
+    bool IsHoverNone()
+    {
+        return hoverFlag_ == HOVER_NONE;
+    }
     virtual bool IsLoop() const;
     bool IsEnabled() const;
     void OnWindowShow() override;
@@ -796,6 +810,7 @@ protected:
 
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     int32_t currentIndex_ = 0;
+    std::optional<int32_t> fastCurrentIndex_;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
     std::optional<int32_t> targetIndex_;
@@ -891,7 +906,7 @@ private:
     // ArcSwiper will implement this interface in order to reset the background color of parent node.
     virtual void ResetParentNodeColor() {};
     // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
-    virtual void PlayScrollAnimation(float offset) {};
+    virtual void PlayScrollAnimation(float currentDelta, float currentIndexOffset) {};
     virtual void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
@@ -918,7 +933,7 @@ private:
     void FireContentDidScrollEvent();
     void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
     void HandleSwiperCustomAnimation(float offset);
-    void CalculateAndUpdateItemInfo(float offset);
+    void CalculateAndUpdateItemInfo(float offset = 0.0f);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
     void UpdateTabBarAnimationDuration(int32_t index);
 
@@ -1199,6 +1214,11 @@ private:
 
     void CheckAndReportEvent();
 
+    void UpdateItemsLatestSwitched();
+    void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
+    void PostIdleTaskToCleanTabContent();
+    std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1374,7 +1394,12 @@ private:
     bool stopWhenTouched_ = true;
     WeakPtr<NG::UINode> indicatorNode_;
     bool isBindIndicator_ = false;
+
+    SwiperHoverFlag hoverFlag_ = HOVER_NONE;
     GestureStatus gestureStatus_ = GestureStatus::INIT;
+
+    std::list<int32_t> itemsLatestSwitched_;
+    std::set<int32_t> itemsNeedClean_;
 };
 } // namespace OHOS::Ace::NG
 

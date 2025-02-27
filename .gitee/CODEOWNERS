@@ -969,6 +969,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_vide
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_web_bridge.cpp @arkwebinarkuireview
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_web_bridge.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.cpp @arkuilayout
@@ -1226,6 +1228,8 @@ frameworks/bridge/declarative_frontend/jsview/js_repeat.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_repeat.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.cpp @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_richeditor.cpp @zhuweifeng94
 frameworks/bridge/declarative_frontend/jsview/js_richeditor.h @zhuweifeng94
 frameworks/bridge/declarative_frontend/jsview/js_richtext.cpp @arkwebinarkuireview
@@ -1319,6 +1323,8 @@ frameworks/bridge/declarative_frontend/jsview/js_video_controller.cpp @arkuilayo
 frameworks/bridge/declarative_frontend/jsview/js_video_controller.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_video.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_video.h @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/js_view_abstract_bridge.cpp @arkuievent
+frameworks/bridge/declarative_frontend/jsview/js_view_abstract_bridge.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h @arkuievent
@@ -1920,6 +1926,7 @@ frameworks/core/components/common/properties/animatable_path.h @arkuiframework
 frameworks/core/components/common/properties/animation_option.h @arkuiframework
 frameworks/core/components/common/properties/blend_mode.h @arkuiframework
 frameworks/core/components/common/properties/blur_parameter.h @arkuiframework
+frameworks/core/components/common/properties/blur_style_option.h @arkuievent
 frameworks/core/components/common/properties/border.cpp @arkuilayout
 frameworks/core/components/common/properties/border_edge.cpp @arkuilayout
 frameworks/core/components/common/properties/border_edge.h @arkuilayout
@@ -2343,6 +2350,7 @@ frameworks/core/components_ng/export_texture_info/export_texture_info.h @arkuila
 frameworks/core/components_ng/gestures/ @arkuievent
 frameworks/core/components_ng/image_provider/ @arkui_image
 frameworks/core/components_ng/layout/ @arkuilayout
+frameworks/core/components_ng/manager/avoid_info/ @arkui_superman
 frameworks/core/components_ng/manager/BUILD.gn @arkui_architecture
 frameworks/core/components_ng/manager/display_sync/ @arkuiframework
 frameworks/core/components_ng/manager/drag_drop/ @arkuievent
@@ -2899,6 +2907,8 @@ frameworks/core/interfaces/native/node/view_model.cpp @arkuiframework
 frameworks/core/interfaces/native/node/view_model.h @arkuiframework
 frameworks/core/interfaces/native/node/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
+frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/node/web_modifier.h @arkwebinarkuireview
 interfaces/native/BUILD.gn @arkui_architecture
 interfaces/native/drag_and_drop.h @arkuievent
 interfaces/native/drawable_descriptor.h @arkui_image
@@ -3071,6 +3081,7 @@ test/unittest/core/image_provider/ @arkui_image
 test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent
+test/unittest/core/manager/avoid_info_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/pattern/animator/ @arkui_superman

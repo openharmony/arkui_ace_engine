@@ -19,7 +19,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float CENTER_BEZIER_CURVE_MASS = 0.0f;
 constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 0.2f;
@@ -524,7 +523,7 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const
     auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, true);
     auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, false);
 
-    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    float itemSpacePx = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx());
     // calc new point current position
     animationStartCenterX_[maxDisplayCount_] =
         animationStartCenterX_[0] - animationStartIndicatorWidth_[0] - itemSpacePx;
@@ -570,7 +569,7 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
     auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, true);
     auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, false);
 
-    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    float itemSpacePx = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx());
     // calc new point current position
     animationStartCenterX_[maxDisplayCount_] = animationStartCenterX_[maxDisplayCount_ - 1] +
                                                animationStartIndicatorWidth_[maxDisplayCount_ - 1] + itemSpacePx;
@@ -893,7 +892,7 @@ std::pair<LinearVector<float>, std::pair<float, float>> OverlengthDotIndicatorMo
 
     LinearVector<float> indicatorCenterX(maxDisplayCount_ + 1);
     std::pair<float, float> longPointCenterX;
-    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    float itemSpacePx = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx());
     auto leftFirstRadius = unselectedIndicatorRadius * SMALLEST_POINT_RATIO;
     auto leftSecondRadius = unselectedIndicatorRadius * SECOND_SMALLEST_POINT_RATIO;
     auto rightFirstRadius = unselectedIndicatorRadius * SMALLEST_POINT_RATIO;

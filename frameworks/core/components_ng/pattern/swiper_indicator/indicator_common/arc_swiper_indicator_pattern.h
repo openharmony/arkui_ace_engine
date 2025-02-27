@@ -31,6 +31,8 @@ public:
     bool SetArcIndicatorHotRegion(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     PointF GetCenterPointF() override;
     float GetAngleWithPoint(const PointF& conter, const PointF& point) override;
+    float GetEndAngle(const PointF& conter, const PointF& point, float startAngle) override;
+    void UpadateStartAngle() override;
     void InitAccessibilityFocusEvent() override;
     void SetAccessibilityFocusd(bool isAccessibilityFocusd)
     {
@@ -40,7 +42,13 @@ public:
 private:
     bool CalculateArcIndicatorHotRegion(const RectF& frameRect, const OffsetF& contentOffset);
     float ConvertAngleWithArcDirection(SwiperArcDirection arcDirection, const float& angle);
+    bool CheckPointLocation(const PointF& conter, const PointF& point, bool isLeft);
     bool isAccessibilityFocusd_ = false;
+    int32_t dragCycle_ = 0;
+    bool isLeft_ = false;
+    bool isUpageStartAngle_ = false;
+    bool isUpdateCycle_ = false;
+    float oldEndAngle_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_INDICATOR_ARC_SWIPER_INDICATOR_PATTERN_H

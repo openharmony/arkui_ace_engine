@@ -16,9 +16,19 @@
 #include "core/event/touch_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/common/ace_application_info.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace {
+void TouchPoint::CovertId()
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        sourceTool == SourceTool::PEN) {
+        originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+        id = id + originalId;
+    }
+}
+
 TouchEvent& TouchEvent::SetId(int32_t id)
 {
     this->id = id;
@@ -281,6 +291,7 @@ void TouchEvent::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void TouchEvent::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    CHECK_NULL_VOID(json);
     id = json->GetInt("id");
     x = json->GetDouble("x");
     y = json->GetDouble("y");

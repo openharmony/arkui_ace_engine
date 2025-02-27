@@ -21,12 +21,13 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
-    EXPAND = 0,
-    NOT_EXPAND,
+    NOT_EXPAND = 0,
+    EXPAND,
     LAZY_EXPAND,
 };
 
@@ -451,8 +452,7 @@ ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGF("GetAttachedNodeHandleById doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("GetAttachedNodeHandleById doesn't run on UI thread");
     }
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
     CHECK_NULL_RETURN(node, nullptr);
@@ -844,8 +844,7 @@ ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
     auto context = frameNode->GetAttachedContext();
     CHECK_NULL_RETURN(context, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     if (!context->CheckThreadSafe()) {
-        LOGF("GetWindowInfoByNode doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("GetWindowInfoByNode doesn't run on UI thread");
     }
     auto window = context->GetWindow();
     CHECK_NULL_RETURN(window, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
@@ -873,8 +872,7 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     }
     auto pipeline = moveNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGF("MoveNodeTo doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("MoveNodeTo doesn't run on UI thread");
     }
     auto oldParent = moveNode->GetParent();
     moveNode->setIsMoving(true);

@@ -1209,5 +1209,6 @@ group("interfaces_unittest") {
     ":ui_input_event_test",
     ":viewport_config_test",
     ":xcomponent_controller_test",
+    "ace_kit:ace_kit_test",
   ]
 }

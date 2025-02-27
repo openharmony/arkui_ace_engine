@@ -20,9 +20,12 @@
 #include "base/json/json_util.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
-
 namespace OHOS::Ace {
+const std::set<std::string> UiTranslateManagerImpl::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene",
+    "root", "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> node)
 {
     auto frameNode = node.Upgrade();
@@ -51,19 +54,24 @@ void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
         auto result = JsonUtil::Create();
         result->Put("nodeId", nodeId);
         result->Put("currentLanguage", currentLanguage.c_str());
-        UiSessionManager::GetInstance().SendCurrentLanguage(result->ToString());
+        UiSessionManager::GetInstance()->SendCurrentLanguage(result->ToString());
     }
 }
 
 void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isContinued)
 {
+    if (listenerMap_.empty()) {
+        UiSessionManager::GetInstance()->SendWebTextToAI(-1, "empty");
+    } else {
+        UiSessionManager::GetInstance()->SendWebTextToAI(-1, "non-empty");
+    }
     for (auto listener : listenerMap_) {
         auto frameNode = listener.second.Upgrade();
         if (!frameNode) {
             continue;
         }
         int32_t nodeId = frameNode->GetId();
-        auto cb = [nodeId](std::string res) { UiSessionManager::GetInstance().SendWebTextToAI(nodeId, res); };
+        auto cb = [nodeId](std::string res) { UiSessionManager::GetInstance()->SendWebTextToAI(nodeId, res); };
         auto pattern = frameNode->GetPattern<NG::WebPattern>();
         if (!pattern) {
             continue;
@@ -121,7 +129,7 @@ void UiTranslateManagerImpl::ClearMap()
 
 void UiTranslateManagerImpl::SendPixelMap()
 {
-    UiSessionManager::GetInstance().SendPixelMap(pixelMap_);
+    UiSessionManager::GetInstance()->SendPixelMap(pixelMap_);
 }
 
 void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
@@ -133,7 +141,13 @@ void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelM
 
 void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 {
-    TravelFindPixelMap(pageNode);
+    RefPtr<NG::FrameNode> result;
+    FindTopNavDestination(pageNode, result);
+    if (result != nullptr) {
+        TravelFindPixelMap(result);
+    } else {
+        TravelFindPixelMap(pageNode);
+    }
     SendPixelMap();
 }
 
@@ -142,14 +156,33 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
     for (const auto& item : currentNode->GetChildren()) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
         if (node) {
-            if (node->GetTag() == V2::IMAGE_ETS_TAG) {
+            if (layoutTags_.find(node->GetTag()) != layoutTags_.end() && !node->IsActive()) {
+                continue;
+            }
+            auto property = node->GetLayoutProperty();
+            if (node->GetTag() == V2::IMAGE_ETS_TAG && property &&
+                (static_cast<int32_t>(property->GetVisibility().value_or(VisibleType::VISIBLE)) == 0) &&
+                node->IsActive()) {
                 auto imagePattern = node->GetPattern<NG::ImagePattern>();
                 CHECK_NULL_VOID(imagePattern);
                 imagePattern->AddPixelMapToUiManager();
             }
         }
-
         TravelFindPixelMap(item);
+    }
+}
+
+void UiTranslateManagerImpl::FindTopNavDestination(RefPtr<NG::UINode> currentNode, RefPtr<NG::FrameNode>& result)
+{
+    for (const auto& item : currentNode->GetChildren()) {
+        auto node = AceType::DynamicCast<NG::FrameNode>(item);
+        if (node && node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(node);
+            CHECK_NULL_VOID(navigationGroupNode);
+            result = navigationGroupNode->GetTopDestination();
+            return;
+        }
+        FindTopNavDestination(item, result);
     }
 }
 } // namespace OHOS::Ace

@@ -28,8 +28,10 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
@@ -41,6 +43,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SHEET_DETENTS_TWO = 2;
 constexpr int32_t SHEET_DETENTS_THREE = 3;
+constexpr Dimension WINDOW_RADIUS = 16.0_vp;
 } // namespace
 RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
     RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle)
@@ -366,6 +369,46 @@ void SheetView::SetTitleColumnMinSize(RefPtr<LayoutProperty> layoutProperty, con
                 std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
         }
     }
+}
+
+RefPtr<FrameNode> SheetView::CreateSheetMaskShowInSubwindow(const RefPtr<FrameNode>& sheetPageNode,
+    const RefPtr<FrameNode>& sheetWrapperNode, const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    if (!container->IsSubContainer()) {
+        return nullptr;
+    }
+    // create and mount sheetWrapperNode
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
+    auto maskNode = FrameNode::CreateFrameNode("SheetMask", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetMaskPattern>(targetNode->GetId(), targetNode->GetTag()));
+    CHECK_NULL_RETURN(maskNode, nullptr);
+    if (sheetWrapperPattern->ShowInUEC()) {
+        auto maskRenderContext = maskNode->GetRenderContext();
+        CHECK_NULL_RETURN(maskRenderContext, nullptr);
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(WINDOW_RADIUS);
+        maskRenderContext->UpdateBorderRadius(borderRadius);
+        maskNode->MountToParent(sheetWrapperNode);
+    } else {
+        auto subwindowId = sheetWrapperPattern->GetSubWindowId();
+        auto mainWindowId = SubwindowManager::GetInstance()->GetParentContainerId(subwindowId);
+        auto mainWindowContext = PipelineContext::GetContextByContainerId(mainWindowId);
+        CHECK_NULL_RETURN(mainWindowContext, nullptr);
+        auto overlayManager = mainWindowContext->GetOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, nullptr);
+        auto mainWindowRoot = overlayManager->GetRootNode().Upgrade();
+        CHECK_NULL_RETURN(mainWindowRoot, nullptr);
+        overlayManager->MountToParentWithService(mainWindowRoot, maskNode);
+        mainWindowRoot->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet page node");
+    sheetPageNode->MountToParent(sheetWrapperNode);
+    sheetWrapperPattern->SetSheetMaskNode(maskNode);
+    sheetWrapperPattern->SetSheetPageNode(sheetPageNode);
+    return maskNode;
 }
 
 RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)

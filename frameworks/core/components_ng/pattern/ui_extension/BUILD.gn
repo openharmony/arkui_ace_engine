@@ -26,6 +26,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "platform_container_handler.cpp",
     "platform_event_proxy.cpp",
     "platform_pattern.cpp",
+    "platform_utils.cpp",
     "security_ui_extension_component/security_session_wrapper_impl.cpp",
     "security_ui_extension_component/security_ui_extension_pattern.cpp",
     "security_ui_extension_component/security_ui_extension_proxy.cpp",

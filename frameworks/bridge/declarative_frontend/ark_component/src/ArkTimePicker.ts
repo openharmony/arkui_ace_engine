@@ -47,7 +47,9 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     return this;
   }
   onChange(callback: (value: TimePickerResult) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys,TimepickerOnChangeModifier.identity,
+      TimepickerOnChangeModifier,callback);
+    return this;
   }
   dateTimeOptions(value: DateTimeOptions): this {
     modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity,
@@ -239,6 +241,20 @@ class TimepickerEnableCascadeModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TimepickerOnChangeModifier extends ModifierWithKey<(value:TimePickerResult)=> void>
+{
+  constructor(value: (value: TimePickerResult) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timePickerOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerOnChange(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerOnChange(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 globalThis.TimePicker.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

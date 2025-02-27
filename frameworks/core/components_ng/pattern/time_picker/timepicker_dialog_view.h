@@ -109,10 +109,10 @@ private:
         const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateCancelButtonTextLayoutProperty(
         const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
-    static bool switchFlag_;
-    static Dimension selectedTextStyleFont_;
-    static Dimension normalTextStyleFont_;
-    static Dimension disappearTextStyleFont_;
+    static thread_local bool switchFlag_;
+    static thread_local Dimension selectedTextStyleFont_;
+    static thread_local Dimension normalTextStyleFont_;
+    static thread_local Dimension disappearTextStyleFont_;
 };
 } // namespace OHOS::Ace::NG
 

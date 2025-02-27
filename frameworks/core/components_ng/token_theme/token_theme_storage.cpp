@@ -91,7 +91,7 @@ const RefPtr<TokenTheme>& TokenThemeStorage::GetDefaultTheme()
 
 ColorMode TokenThemeStorage::CheckLocalAndSystemColorMode()
 {
-    auto sysColorMode = SystemProperties::GetColorMode();
+    auto sysColorMode = Container::CurrentColorMode();
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, sysColorMode);
     auto colorMode = pipelineContext->GetLocalColorMode();

@@ -60,7 +60,9 @@ public:
         progressModifier_->SetIsRightToLeft(isRightToLeft_);
         progressModifier_->SetVisible(visibilityProp_);
         progressModifier_->SetUseContentModifier(UseContentModifier());
-        if (progressLayoutProperty->GetType() == ProgressType::RING && progressLayoutProperty->GetPaddingProperty()) {
+        if ((progressLayoutProperty->GetType() == ProgressType::RING ||
+                progressLayoutProperty->GetType() == ProgressType::SCALE) &&
+                progressLayoutProperty->GetPaddingProperty()) {
             const auto& padding = progressLayoutProperty->GetPaddingProperty();
             auto leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension();
             progressModifier_->SetRingProgressLeftPadding(leftPadding);

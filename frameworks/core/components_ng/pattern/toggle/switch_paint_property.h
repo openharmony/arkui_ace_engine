@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 
 struct SwitchPaintParagraph {
@@ -32,19 +33,26 @@ struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UnselectedColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBorderRadius, Dimension);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    void ToJsonValue(
+        std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode> host) const
     {
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {
             return;
         }
-        json->PutExtAttr("selectedColor", propSelectedColor.value_or(Color()).ColorToString().c_str(), filter);
-        json->PutExtAttr("switchPointColor",
-            propSwitchPointColor.value_or(Color()).ColorToString().c_str(), filter);
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+        int32_t themeScopeId = 0;
+        if (host) {
+            themeScopeId = host->GetThemeScopeId();
+        }
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto switchTheme = pipeline->GetTheme<SwitchTheme>(themeScopeId);
         CHECK_NULL_VOID(switchTheme);
+        auto selectedColor = switchTheme->GetActiveColor();
+        auto switchPointColor = switchTheme->GetPointColor();
+        json->PutExtAttr("selectedColor", propSelectedColor.value_or(selectedColor).ColorToString().c_str(), filter);
+        json->PutExtAttr("switchPointColor",
+            propSwitchPointColor.value_or(switchPointColor).ColorToString().c_str(), filter);
         auto defaultHeight = (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2);
         auto defaultPointRadius = defaultHeight / 2 - 2.0_vp; // Get the default radius of the point.
         if (propPointRadius.has_value()) {
@@ -93,7 +101,12 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        ACE_PROPERTY_TO_JSON_VALUE(propSwitchPaintParagraph_, SwitchPaintParagraph);
+        if (propSwitchPaintParagraph_) {
+            propSwitchPaintParagraph_->ToJsonValue(json, filter, GetHost());
+        } else {
+            SwitchPaintParagraph switchPaintParagraph;
+            switchPaintParagraph.ToJsonValue(json, filter, GetHost());
+        }
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {
             return;

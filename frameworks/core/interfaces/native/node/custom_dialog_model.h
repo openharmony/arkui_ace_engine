@@ -43,6 +43,15 @@ struct _ArkUIDialog {
     ArkUI_Int32 levelMode;
     ArkUI_Int32 levelUniqueId;
     ArkUI_Int32 immersiveMode;
+    ArkUI_Float64 levelOrder;
+    void* onWillAppearData;
+    void* onDidAppearData;
+    void* onWillDisappearData;
+    void* onDidDisappearData;
+    void (*onWillAppear)(void*);
+    void (*onDidAppear)(void*);
+    void (*onWillDisappear)(void*);
+    void (*onDidDisappear)(void*);
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -71,6 +80,11 @@ ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, A
 ArkUI_Int32 SetLevelMode(ArkUIDialogHandle handle, ArkUI_Int32 mode);
 ArkUI_Int32 SetLevelUniqueId(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);
 ArkUI_Int32 SetImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode);
+ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder);
+ArkUI_Int32 RegisterOnWillAppearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
+ArkUI_Int32 RegisterOnDidAppearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
+ArkUI_Int32 RegisterOnWillDisappearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
+ArkUI_Int32 RegisterOnDidDisappearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif

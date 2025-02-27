@@ -1148,4 +1148,13 @@ void NavDestinationModelNG::SetCustomTransition(NG::NavDestinationTransitionDele
     CHECK_NULL_VOID(node);
     node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
 }
+
+void NavDestinationModelNG::SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNewParam(std::move(onNewParamCallback));
+}
 } // namespace OHOS::Ace::NG

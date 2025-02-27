@@ -389,4 +389,43 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest009, TestSize.Level1)
     EXPECT_EQ(params.size(), 0);
 #endif
 }
+
+/**
+ * @tc.name: DynamicPatternTest010
+ * @tc.desc: Test DynamicPattern OnVisibleChange/OnWindowShow/OnWindowHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest010, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+    IsolatedInfo curDynamicInfo;
+    void* runtime = nullptr;
+    auto pattern = AceType::MakeRefPtr<DynamicPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
+    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    ASSERT_NE(dynamicPattern, nullptr);
+    EXPECT_TRUE(dynamicPattern->isVisible_);
+
+    /**
+     * @tc.steps: step2. test OnVisibleChange(false)
+     */
+    dynamicPattern->OnVisibleChange(false);
+    EXPECT_FALSE(dynamicPattern->isVisible_);
+    dynamicPattern->OnWindowShow();
+    dynamicPattern->OnWindowHide();
+
+    /**
+     * @tc.steps: step3. test OnVisibleChange(true)
+     */
+    dynamicPattern->OnVisibleChange(true);
+    EXPECT_TRUE(dynamicPattern->isVisible_);
+    dynamicPattern->OnWindowShow();
+    dynamicPattern->OnWindowHide();
+#endif
+}
 } // namespace OHOS::Ace::NG

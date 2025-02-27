@@ -184,14 +184,15 @@ RefPtr<ResourceObject> GetResourceObject(const NativeResourceObject& obj)
         }
         resObjParamsList.push_back(resObjParams);
     }
-    auto resourceObject =
-        AceType::MakeRefPtr<ResourceObject>(obj.id, obj.type, resObjParamsList, obj.bundleName, obj.moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        obj.id, obj.type, resObjParamsList, obj.bundleName, obj.moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
 RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const NativeResourceObject& obj)
 {
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(obj.bundleName, obj.moduleName);
+    auto resourceObject =
+        AceType::MakeRefPtr<ResourceObject>(obj.bundleName, obj.moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -219,7 +220,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper()
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
         if (!resourceAdapter) {
             return nullptr;
         }

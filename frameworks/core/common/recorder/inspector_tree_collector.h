@@ -23,26 +23,20 @@
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
 namespace OHOS::Ace::Recorder {
-using GetInspectorTree = std::function<void()>;
-
-class InspectorTreeCollector final {
+class InspectorTreeCollector final : public std::enable_shared_from_this<InspectorTreeCollector> {
 public:
-    static InspectorTreeCollector& Get();
-    void GetTree(GetInspectorTree&& getTreeFunc, OnInspectorTreeResult&& callback);
+    InspectorTreeCollector(OnInspectorTreeResult&& callback);
+    ~InspectorTreeCollector() = default;
     void IncreaseTaskNum();
     void DecreaseTaskNum();
     std::unique_ptr<JsonValue>& GetJson();
 
 private:
-    InspectorTreeCollector() {};
-    ~InspectorTreeCollector() = default;
     void UpdateTaskNum(int32_t num);
 
     std::unique_ptr<JsonValue> root_;
     int32_t taskNum_ = 0;
-    std::list<OnInspectorTreeResult> onResultFuncList_;
-
-    ACE_DISALLOW_COPY_AND_MOVE(InspectorTreeCollector);
+    OnInspectorTreeResult onResultFunc_;
 };
 } // namespace OHOS::Ace::Recorder
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_INSPRCTOR_TREE_COLLECTOR_H

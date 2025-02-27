@@ -53,6 +53,7 @@ const char ROOT_ETS_TAG[] = "root";
 const char STAGE_ETS_TAG[] = "stage";
 // overlay view
 const char OVERLAY_ETS_TAG[] = "overlay";
+const char ORDER_OVERLAY_ETS_TAG[] = "OrderOverlay";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)

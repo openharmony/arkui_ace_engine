@@ -137,7 +137,8 @@ public:
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     bool CheckFormBundleForbidden(const std::string& bundleName);
     void NotifyFormDump(const std::vector<std::string>& params, std::vector<std::string>& info);
-    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId);
+    bool IsFormBundleExempt(int64_t formId);
+    bool IsFormBundleProtected(const std::string &bundleName, int64_t formId);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);

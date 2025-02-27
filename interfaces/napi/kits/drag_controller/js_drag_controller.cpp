@@ -908,9 +908,7 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     auto dragNodePipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_RETURN(dragNodePipeline, false);
     auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
-    float defaultPixelMapScale =
-        asyncCtx->dragPointerEvent.sourceType == SOURCE_TYPE_MOUSE ? 1.0f : NG::DEFALUT_DRAG_PPIXELMAP_SCALE;
-    auto scale = asyncCtx->windowScale * defaultPixelMapScale;
+    auto scale = asyncCtx->windowScale;
     CHECK_NULL_RETURN(pixelMap, false);
     RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     CHECK_NULL_RETURN(refPixelMap, false);
@@ -918,7 +916,7 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     if (badgeNumber.has_value()) {
         asyncCtx->badgeNumber = badgeNumber.value();
     }
-    data = { false, asyncCtx->badgeNumber, defaultPixelMapScale, false,
+    data = { false, asyncCtx->badgeNumber, 1.0f, false,
         NG::OffsetF(), NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(asyncCtx->instanceId), refPixelMap };
     NG::DragControllerFuncWrapper::ResetContextMenuDragPosition(asyncCtx->instanceId);
     if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {

@@ -46,6 +46,17 @@ using namespace std;
 namespace OHOS::Ace::Framework {
 constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 
+namespace {
+bool IsTouchExplorationEnabled(const RefPtr<NG::PipelineContext>& context)
+{
+    CHECK_NULL_RETURN(context, true);
+    auto jsAccessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_RETURN(jsAccessibilityManager, true);
+    auto accessibilityWorkMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
+    return accessibilityWorkMode.isTouchExplorationEnabled;
+}
+} // namespace
+
 bool AccessibilityHoverManagerForThirdNG::GetElementInfoForThird(
     int64_t elementId,
     AccessibilityElementInfo& info,
@@ -283,6 +294,11 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
     const RefPtr<NG::PipelineContext>& context,
     bool isNeedClear)
 {
+    if (!isNeedClear && !IsTouchExplorationEnabled(context)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "third Accessibility focus or update focus but is not in touch mode");
+        return true;
+    }
+
     CHECK_NULL_RETURN(hostNode, false);
     RefPtr<NG::RenderContext> renderContext = nullptr;
     renderContext = hostNode->GetRenderContext();
@@ -300,6 +316,14 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
     auto right = rectInScreen.GetLeftTopYScreenPostion();
     auto width = rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion();
     auto height = rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion();
+    if ((width == 0) && (height == 0)) {
+        renderContext->UpdateAccessibilityFocus(false);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "third act Accessibility element Id %{public}" PRId64 "Focus clear by null rect",
+            nodeInfo.GetAccessibilityId());
+        return true;
+    }
+
     NG::RectT<int32_t> rectInt { static_cast<int32_t>(left), static_cast<int32_t>(right),
         static_cast<int32_t>(width), static_cast<int32_t>(height) };
     

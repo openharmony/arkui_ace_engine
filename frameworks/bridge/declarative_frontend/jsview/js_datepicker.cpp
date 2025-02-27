@@ -278,6 +278,28 @@ void ParseDatePickerHoverMode(PickerDialogInfo& pickerDialog, const JSRef<JSObje
         }
     }
 }
+
+void ParseDatePickerBlurStyleOption(PickerDialogInfo& pickerDialog, const JSRef<JSObject>& paramObject)
+{
+    auto blurStyleValue = paramObject->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleValue->IsObject()) {
+        if (!pickerDialog.blurStyleOption.has_value()) {
+            pickerDialog.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, pickerDialog.blurStyleOption.value());
+    }
+}
+
+void ParseDatePickerEffectOption(PickerDialogInfo& pickerDialog, const JSRef<JSObject>& paramObject)
+{
+    auto effectOptionValue = paramObject->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!pickerDialog.effectOption.has_value()) {
+            pickerDialog.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOptionValue, pickerDialog.effectOption.value());
+    }
+}
 } // namespace
 
 void JSDatePicker::JSBind(BindingTarget globalObj)
@@ -690,18 +712,20 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         mode = paramObj->GetProperty("mode");
     }
     ParseStartEndDate(startDate, endDate);
+
+    PickerDate parseSelectedDate = PickerDate::Current();
     if (selectedDate->IsObject()) {
         JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selectedDate);
         JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
-        PickerDate parseSelectedDate;
         if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
             ParseSelectedDateTimeObject(info, selectedDateObj, true);
             parseSelectedDate = ParseDate(selectedDateObj->GetProperty("value"));
         } else {
             parseSelectedDate = ParseDate(selectedDate);
         }
-        DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
+    DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
+
     ParseDatePickerMode(mode);
     SetDefaultAttributes();
 }
@@ -1166,6 +1190,8 @@ void JSDatePickerDialog::UpdatePickerDialogInfo(const JSRef<JSObject>& paramObje
     }
 
     ParseDatePickerHoverMode(pickerDialog, paramObject);
+    ParseDatePickerBlurStyleOption(pickerDialog, paramObject);
+    ParseDatePickerEffectOption(pickerDialog, paramObject);
 }
 
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)
@@ -1905,6 +1931,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     }
 
     ParseDatePickerHoverMode(pickerDialog, paramObject);
+    ParseDatePickerBlurStyleOption(pickerDialog, paramObject);
+    ParseDatePickerEffectOption(pickerDialog, paramObject);
 
     auto buttonInfos = ParseButtonStyles(paramObject);
 
@@ -2022,6 +2050,14 @@ PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal, PickerTime
         return pickerTime;
     }
     auto timeObj = JSRef<JSObject>::Cast(timeVal);
+    auto yearFuncJsVal = timeObj->GetProperty("getFullYear");
+    if (yearFuncJsVal->IsFunction()) {
+        auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+        JSRef<JSVal> year = yearFunc->Call(timeObj);
+        if (year->IsNumber() && LessOrEqual(year->ToNumber<int32_t>(), 0)) {
+            return pickerTime;
+        }
+    }
     auto hourFuncJsVal = timeObj->GetProperty("getHours");
     auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
     auto secondFuncJsVal = timeObj->GetProperty("getSeconds");

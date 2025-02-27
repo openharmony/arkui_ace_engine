@@ -62,7 +62,19 @@ class RatingStarStyleModifier extends ModifierWithKey<ArkStarStyle> {
       this.stageValue?.foregroundUri !== this.value?.foregroundUri || this.stageValue?.secondaryUri !== this.value?.secondaryUri;
   }
 }
-
+class RatingOnChangeModifier extends ModifierWithKey<(value: number) => void> {
+  constructor(value: (value: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ratingOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().rating.resetOnChange(node);
+    } else {
+      getUINativeModule().rating.setOnChange(node, this.value);
+    }
+  }
+}
 class RatingContentModifier extends ModifierWithKey<ContentModifier<RatingConfiguration>> {
   constructor(value: ContentModifier<RatingConfiguration>) {
     super(value);
@@ -118,7 +130,8 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     return this;
   }
   onChange(callback: (value: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RatingOnChangeModifier.identity, RatingOnChangeModifier, callback);
+    return this;
   }
   contentModifier(value: ContentModifier<RatingConfiguration>): this {
     modifierWithKey(this._modifiersWithKeys, RatingContentModifier.identity, RatingContentModifier, value);

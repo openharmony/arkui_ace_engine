@@ -710,7 +710,7 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
         para.label = label;
         return para;
     }
-    int32_t optionIndex = 0;
+    uint32_t optionIndex = 0;
     if (hasLabel) {
         para.parseSuccess = ParseJsString(info[0], label);
         if (para.parseSuccess) {

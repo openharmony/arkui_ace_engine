@@ -409,10 +409,16 @@ void SvgNode::InitStyle(const SvgBaseAttribute& attr)
 
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
+    if (isDrawing_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "The current node is already in the process of being drawn in the SVG rendering flow.");
+        return;
+    }
     if (!OnCanvas(canvas)) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Draw failed(Reason: Canvas is null).");
         return;
     }
+    isDrawing_ = true;
     // mask and filter create extra layers, need to record initial layer count
     auto count = rsCanvas_->GetSaveCount();
     rsCanvas_->Save();
@@ -434,13 +440,20 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     OnDraw(canvas, viewPort, color);
     OnDrawTraversed(canvas, viewPort, color);
     rsCanvas_->RestoreToCount(count);
+    isDrawing_ = false; // end the drawing process.
 }
 
 void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
 {
     // mask and filter create extra layers, need to record initial layer count
     auto count = canvas.GetSaveCount();
+    if (isDrawing_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "The current node is already in the process of being drawn in the SVG rendering flow.");
+        return;
+    }
     canvas.Save();
+    isDrawing_ = true;
     auto rsBounds = AsPath(lengthRule).GetBounds();
     Rect boundingRect(rsBounds.GetLeft(), rsBounds.GetTop(), rsBounds.GetWidth(), rsBounds.GetHeight());
     SvgCoordinateSystemContext svgCoordinateSystemContext(boundingRect, GetSvgContainerRect());
@@ -468,6 +481,7 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     OnDraw(canvas, lengthRule);
     OnDrawTraversed(canvas, lengthRule);
     canvas.RestoreToCount(count);
+    isDrawing_ = false;
 }
 
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -560,7 +574,7 @@ void SvgNode::OnFilter(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCo
     if (!AceType::InstanceOf<SvgFilter>(refFilter)) {
         return;
     }
-    refFilter->OnFilterEffect(canvas, svgCoordinateSystemContext);
+    refFilter->OnFilterEffect(canvas, svgCoordinateSystemContext, useOffsetX_, useOffsetY_);
 }
 
 void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)

@@ -326,7 +326,7 @@ void SecurityUIExtensionPattern::OnUeaAccessibilityEventAsync()
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    TransferAccessibilityRectInfo(); // first connect need info UEC rect info
+    TransferAccessibilityRectInfo(true); // first connect need info UEC rect info
     if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
         UIEXT_LOGI("security uec need notify register accessibility again %{public}d, %{public}d.",
             accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
@@ -422,7 +422,7 @@ public:
         CHECK_NULL_RETURN(pattern, false);
         if (state) {
             // first time turn on Accessibility, add TransferAccessibilityRectInfo
-            pattern->TransferAccessibilityRectInfo();
+            pattern->TransferAccessibilityRectInfo(true);
         }
         return true;
     }
@@ -454,6 +454,7 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
         [weak = WeakClaim(this)](int32_t, int32_t) {
             auto pattern = weak.Upgrade();
             if (pattern) {
+                pattern->TransferAccessibilityRectInfo();
                 pattern->DispatchDisplayArea(true);
             }
         });
@@ -969,19 +970,19 @@ int32_t SecurityUIExtensionPattern::GetInstanceIdFromHost() const
 }
 
 bool SecurityUIExtensionPattern::SendBusinessDataSyncReply(
-    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
     UIEXT_LOGI("SecurityUIExtension SendBusinessDataSyncReply businessCode=%{public}u.", code);
-    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply, subSystemId);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, data, reply, subSystemId);
 }
 
 bool SecurityUIExtensionPattern::SendBusinessData(
-    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
     UIEXT_LOGI("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
-    return sessionWrapper_->SendBusinessData(code, std::move(data), type, subSystemId);
+    return sessionWrapper_->SendBusinessData(code, data, type, subSystemId);
 }
 
 void SecurityUIExtensionPattern::OnUIExtBusinessReceiveReply(
@@ -1039,9 +1040,6 @@ void SecurityUIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag
     if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeTransformChange(flag))) {
         return;
     }
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        return;
-    }
     TransferAccessibilityRectInfo();
 }
 
@@ -1051,7 +1049,7 @@ AccessibilityParentRectInfo SecurityUIExtensionPattern::GetAccessibilityRectInfo
     AccessibilityParentRectInfo rectInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, rectInfo);
-    auto rect = host->GetTransformRectRelativeToWindow();
+    auto rect = host->GetTransformRectRelativeToWindow(true);
     VectorF finalScale = host->GetTransformScaleRelativeToWindow();
     
     rectInfo.left = static_cast<int32_t>(rect.Left());
@@ -1063,37 +1061,70 @@ AccessibilityParentRectInfo SecurityUIExtensionPattern::GetAccessibilityRectInfo
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
             auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            rectInfo.left =
-                rectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
-            rectInfo.top = rectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
+            auto rectFinal = accessibilityManager->GetFinalRealRectInfo(host);
+            rectInfo.left = static_cast<int32_t>(rectFinal.Left());
+            rectInfo.top = static_cast<int32_t>(rectFinal.Top());
+            RotateTransform rotateData;
+            RotateTransform windowRotateData = windowInfo.rotateTransform;
+            rotateData.rotateDegree = host->GetTransformRotateRelativeToWindow();
+            AccessibilityRect rotateRect(rectFinal.Left(), rectFinal.Top(),
+                rectFinal.Width(), rectFinal.Height());
+            if (windowRotateData.rotateDegree) {
+                rotateRect.Rotate(windowRotateData.innerCenterX, windowRotateData.innerCenterY,
+                    windowRotateData.rotateDegree);
+                rotateRect.ApplyTransformation(windowRotateData, windowInfo.scaleX, windowInfo.scaleY);
+                rotateData.rotateDegree += windowRotateData.rotateDegree;
+            } else {
+                RotateTransform roateDataTemp(0, windowInfo.left, windowInfo.top, 0, 0);
+                rotateRect.ApplyTransformation(roateDataTemp, windowInfo.scaleX, windowInfo.scaleY);
+            }
+            rectInfo.left = rotateRect.GetX();
+            rectInfo.top = rotateRect.GetY();
             rectInfo.scaleX *= windowInfo.scaleX;
             rectInfo.scaleY *= windowInfo.scaleY;
+            if (rotateData.rotateDegree) {
+                rotateData.centerX = static_cast<int32_t>(rotateRect.GetWidth()) * 0.5f + rotateRect.GetX();
+                rotateData.centerY = static_cast<int32_t>(rotateRect.GetHeight()) * 0.5f + rotateRect.GetY();
+                auto renderContext = host->GetRenderContext();
+                CHECK_NULL_RETURN(renderContext, rectInfo);
+                auto rectOrigin = renderContext->GetPaintRectWithoutTransform();
+                rotateData.innerCenterX = rectOrigin.Width() * 0.5f;
+                rotateData.innerCenterY = rectOrigin.Height() * 0.5f;
+            }
         }
     }
     return rectInfo;
 }
 
 // Once enter this function, must calculate and transfer data to provider
-void SecurityUIExtensionPattern::TransferAccessibilityRectInfo()
+void SecurityUIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
 {
+    if (!(isForce || AceApplicationInfo::GetInstance().IsAccessibilityEnabled())) {
+        return;
+    }
     auto parentRectInfo = GetAccessibilityRectInfo();
     AAFwk::Want data;
     data.SetParam("left", parentRectInfo.left);
     data.SetParam("top", parentRectInfo.top);
     data.SetParam("scaleX", parentRectInfo.scaleX);
     data.SetParam("scaleY", parentRectInfo.scaleY);
+    data.SetParam("centerX", parentRectInfo.rotateTransform.centerX);
+    data.SetParam("centerY", parentRectInfo.rotateTransform.centerY);
+    data.SetParam("innerCenterX", parentRectInfo.rotateTransform.innerCenterX);
+    data.SetParam("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
+    data.SetParam("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
     UIEXT_LOGI("SecUEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
         parentRectInfo.scaleX, parentRectInfo.scaleY);
-    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, std::move(data), BusinessDataSendType::ASYNC);
+    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
 }
 
 void SecurityUIExtensionPattern::UpdateWMSUIExtProperty(
-    UIContentBusinessCode code, AAFwk::Want data, RSSubsystemId subSystemId)
+    UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId)
 {
     if (state_ != AbilityState::FOREGROUND) {
         UIEXT_LOGI("SecUEC UpdateWMSUIExtProperty state=%{public}s.", ToString(state_));
         return;
     }
-    SendBusinessData(code, std::move(data), BusinessDataSendType::ASYNC, subSystemId);
+    SendBusinessData(code, data, BusinessDataSendType::ASYNC, subSystemId);
 }
 } // namespace OHOS::Ace::NG

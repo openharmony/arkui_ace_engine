@@ -26,6 +26,7 @@ build_component_ng("render_ng") {
     "adapter/path_painter.cpp",
     "adapter/pixelmap_image.cpp",
     "adapter/render_surface_impl.cpp",
+    "adapter/rich_editor_paragraph.cpp",
     "adapter/sk_painter.cpp",
     "adapter/skia_color_filter.cpp",
     "adapter/skia_decoration_painter.cpp",

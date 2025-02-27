@@ -148,8 +148,7 @@ void DialogLayoutAlgorithm::ResizeDialogSubwindow(
 {
     if (expandDisplay && isShowInSubWindow && isShowInFloatingWindow) {
         auto currentId = Container::CurrentId();
-        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId >= MIN_SUBCONTAINER_ID ?
-            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId);
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subWindow);
         subWindow->ResizeDialogSubwindow();
     }
@@ -579,9 +578,9 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
         dialogProp->GetShowInSubWindowValue(false)) {
-        auto currentId = Container::CurrentIdSafely();
-        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId >= MIN_SUBCONTAINER_ID ?
-            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId);
+        auto pipeline = frameNode->GetContextRefPtr();
+        auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentIdSafely();
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subWindow);
         auto subOverlayManager = subWindow->GetOverlayManager();
         CHECK_NULL_VOID(subOverlayManager);
@@ -604,16 +603,17 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void DialogLayoutAlgorithm::ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto currentId = Container::CurrentId();
-    if (dialogProp->GetShowInSubWindowValue(false)) {
-        if (!container->IsSubContainer()) {
-            subWindowId_ = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
-        } else {
-            subWindowId_ = currentId;
-        }
+    CHECK_NULL_VOID(dialogProp);
+    if (!dialogProp->GetShowInSubWindowValue(false)) {
+        return;
     }
+
+    subWindowId_ = Container::CurrentId();
+    auto dialogNode = dialogProp->GetHost();
+    CHECK_NULL_VOID(dialogNode);
+    auto pipeline = dialogNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    subWindowId_ = pipeline->GetInstanceId();
 }
 
 void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child)
@@ -669,7 +669,7 @@ void DialogLayoutAlgorithm::SetSubWindowHotarea(
         }
     }
     rects.emplace_back(rect);
-    SubwindowManager::GetInstance()->SetHotAreas(rects, frameNodeId, subWindowId_);
+    SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_DIALOG, frameNodeId, subWindowId_);
 }
 
 bool DialogLayoutAlgorithm::IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize)
@@ -949,6 +949,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea(const RefPtr<FrameNode>& frameNode)
             foldCreaseRect = foldCreaseRects.front();
         }
     }
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "safeAreaInsets: %{public}s", safeAreaInsets_.ToString().c_str());
 }
 
 void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip)

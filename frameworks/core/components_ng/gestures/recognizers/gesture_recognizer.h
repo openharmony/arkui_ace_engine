@@ -419,6 +419,8 @@ public:
 
     bool IsNeedResetRecognizerState();
 
+    void CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event);
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {

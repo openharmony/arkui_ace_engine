@@ -216,7 +216,6 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
         runArgs.deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, runArgs.deviceConfig.density,
         runArgs.isRound);
     SystemProperties::InitDeviceType(runArgs.deviceConfig.deviceType);
-    SystemProperties::SetColorMode(runArgs.deviceConfig.colorMode);
     InitializeAppInfo();
     if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
         if (runArgs_.formsEnabled) {
@@ -241,6 +240,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     SetConfigChanges(runArgs.configChanges);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
+    container->SetColorMode(runArgs.deviceConfig.colorMode);
     container->SetContainerSdkPath(runArgs.containerSdkPath);
     container->SetInstallationFree(installationFree_);
     container->SetLabelId(labelId_);
@@ -248,7 +248,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDeviceOrientation());
     config.SetDensity(SystemProperties::GetResolution());
-    config.SetColorMode(SystemProperties::GetColorMode());
+    config.SetColorMode(container->GetColorMode());
     config.SetFontRatio(runArgs.deviceConfig.fontRatio);
     container->SetResourceConfiguration(config);
     container->SetBundleName(bundleName_);

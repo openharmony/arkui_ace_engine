@@ -178,7 +178,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle());
-    tabBarPattern->AddTabBarItemClickEvent(columnNode);
+    tabBarPattern->AddTabBarItemClickAndTouchEvent(columnNode);
     tabBarPattern->AddTabBarItemCallBack(columnNode);
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
