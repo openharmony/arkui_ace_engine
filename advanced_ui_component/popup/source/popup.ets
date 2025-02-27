@@ -18,7 +18,7 @@ import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node'
 import componentUtils from '@ohos.arkui.componentUtils';
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { SymbolGlyphModifier, Configuration } from '@kit.ArkUI';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -711,6 +711,7 @@ export struct PopupComponent {
               .fontSize(this.getTitleFontSize())
               .fontColor(this.getTitleFontColor())
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
+              .textAlign(Configuration.getLocale().dir === 'rtl' ? TextAlign.End : TextAlign.Start)
             if (this.showClose || this.showClose === void (0)) {
               Button() {
                 SymbolGlyph()
