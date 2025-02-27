@@ -46,7 +46,7 @@ namespace OHOS::Ace::NG {
 std::optional<double> FloatToDouble(const std::optional<float>& src)
 {
     return src ? std::optional(static_cast<double>(src.value())) : std::nullopt;
-}
+};
 }
 
 namespace OHOS::Ace::NG::Converter {
@@ -2093,4 +2093,17 @@ std::pair<Dimension, Dimension> Convert(const Ark_Position& src)
     auto y = Converter::OptConvert<Dimension>(src.y);
     return std::make_pair(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
 }
+
+template<>
+PathShapeOptions Convert(const Ark_PathShapeOptions& value)
+{
+    return {.commands = Converter::OptConvert<std::string>(value.commands)};
+};
+
+template<>
+PathShapePosition Convert(const Ark_Position& value)
+{
+    return {.x = Converter::OptConvert<Dimension>(value.x),
+        .y = Converter::OptConvert<Dimension>(value.y)};
+};
 } // namespace OHOS::Ace::NG::Converter

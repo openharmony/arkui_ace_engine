@@ -19,26 +19,20 @@
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG {
-struct PathShapeOptions {
-    std::optional<std::string> commands;
-};
-struct PathShapePosition {
-    std::optional<InteropLength> x;
-    std::optional<InteropLength> y;   
-};
-namespace Converter {
-    template<>
-    PathShapeOptions Convert(const Ark_PathShapeOptions& value)
-    {
-        return {.commands = Converter::OptConvert<std::string>(value.commands)};
-    };
-    template<>
-    PathShapePosition Convert(const Ark_Position& value)
-    {
-        return {.x = Converter::OptConvert<InteropLength>(value.x),
-            .y = Converter::OptConvert<InteropLength>(value.y)};
-    };
-}
+
+// namespace Converter {
+//     template<>
+//     PathShapeOptions Convert(const Ark_PathShapeOptions& value)
+//     {
+//         return {.commands = Converter::OptConvert<std::string>(value.commands)};
+//     };
+//     template<>
+//     PathShapePosition Convert(const Ark_Position& value)
+//     {
+//         return {.x = Converter::OptConvert<InteropLength>(value.x),
+//             .y = Converter::OptConvert<InteropLength>(value.y)};
+//     };
+// }
 }
 
 struct PathShapePeer {
@@ -94,13 +88,13 @@ struct PathShapePeer {
             position_ = {};
         }
     private:
-        std::string commands_;
-        OHOS::Ace::NG::PathShapePosition offset_;
+        std::string commands_ = "";
+        OHOS::Ace::NG::PathShapePosition offset_ = {};
         OHOS::Ace::Color fill_;
-        OHOS::Ace::NG::PathShapePosition position_;
+        OHOS::Ace::NG::PathShapePosition position_ = {};
 };
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     using PathShapePeerImpl = ::PathShapePeer;
 } // namespace OHOS::Ace::NG::GeneratedModifier
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_2D_ACCESSOR_PEER_IMPL_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_SHAPE_PEER_H

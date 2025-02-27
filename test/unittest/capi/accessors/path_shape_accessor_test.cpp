@@ -13,81 +13,158 @@
  * limitations under the License.
  */
 
- #include <gmock/gmock.h>
+ #include "gmock/gmock.h"
 
  #include "accessor_test_base.h"
- #include "core/interfaces/native/implementation/path_shape_peer.h"
+ #include "accessor_test_utils.h"
+ #include "node_api.h"
  #include "core/interfaces/native/utility/reverse_converter.h"
- #include "core/interfaces/native/utility/converter.h"
+ #include "core/interfaces/native/utility/validators.h"
  
- namespace OHOS::Ace::NG {
+ #include "test/mock/core/common/mock_theme_manager.h"
+ #include "test/mock/core/common/mock_theme_style.h"
+ #include "core/interfaces/native/implementation/path_shape_peer.h"
+// #include "test/unittest/capi/modifiers/generated/type_helpers.h"
+
  
- using namespace testing;
- using namespace testing::ext;
- 
- namespace {
-//  std::vector<double> NUMBER_TEST_PLAN = {
-//      100, 10.25, 2.35, 5.42, 12.34, 56.73
-//  };
- 
-//  class MockCanvasPath : public CanvasPath2D {
-//  public:
-//      MockCanvasPath() = default;
-//      ~MockCanvasPath() override = default;
-//      MOCK_METHOD(void, AddPath, (const RefPtr<CanvasPath2D>&));
-//      MOCK_METHOD(void, SetTransform, (double, double, double, double, double, double));
-//  };
- } // namespace
- 
- class PathShapeAccessorTest
-     : public AccessorTestBase<GENERATED_ArkUIPathShapeAccessor,
-         &GENERATED_ArkUIAccessors::getPathShapeAccessor, PathShapePeer> {
- public:
-     void SetUp(void) override
-     {
-         AccessorTestBase::SetUp();
-        //  mockPath_ = new MockCanvasPath();
-        //  mockPathKeeper_ = AceType::Claim(mockPath_);
-        //  ASSERT_NE(mockPathKeeper_, nullptr);
-        //  peer_->path = mockPathKeeper_;
-        //  ASSERT_NE(mockPath_, nullptr);
-     }
- 
-     void TearDown() override
-     {
-         AccessorTestBaseParent::TearDown();
-         mockPathKeeper_ = nullptr;
-         mockPath_ = nullptr;
-     }
-     MockCanvasPath* mockPath_ = nullptr;
-     RefPtr<MockCanvasPath> mockPathKeeper_ = nullptr;
- };
- 
- /**
-  * @tc.name: addPathTest
-  * @tc.desc:
-  * @tc.type: FUNC
-  */
- HWTEST_F(PathShapeAccessorTest, addPathTest, TestSize.Level1)
- {
-     ASSERT_NE(accessor_->addPath, nullptr);
-     auto peerPathImpl = Referenced::MakeRefPtr<PathShapePeer>();
-     auto arkPath = Referenced::RawPtr(peerPathImpl);
-     peerPathImpl->path = AceType::MakeRefPtr<MockCanvasPath>();
-     auto peerMatrix = new Matrix2DPeer();
-     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peerMatrix);
-     peerMatrix->transform.scaleX = NUMBER_TEST_PLAN[0];
-     peerMatrix->transform.scaleY = NUMBER_TEST_PLAN[1];
-     peerMatrix->transform.skewX = NUMBER_TEST_PLAN[2];
-     peerMatrix->transform.skewY = NUMBER_TEST_PLAN[3];
-     peerMatrix->transform.translateX = NUMBER_TEST_PLAN[4];
-     peerMatrix->transform.translateY = NUMBER_TEST_PLAN[5];
-     auto tr = peerMatrix->transform;
-     EXPECT_CALL(*mockPath_, AddPath(peerPathImpl->path)).Times(3);
-     EXPECT_CALL(*mockPath_, SetTransform(tr.scaleX, tr.skewX, tr.skewY, tr.scaleY, tr.translateX, tr.translateY))
-         .Times(3);
-     accessor_->addPath(peer_, arkPath, &optMatrix);
-     accessor_->addPath(peer_, arkPath, &optMatrix);
-     accessor_->addPath(peer_, arkPath, &optMatrix);
- }
- } // namespace OHOS::Ace::NG
+namespace OHOS::Ace::NG {
+
+using namespace testing;
+using namespace testing::ext;
+
+namespace Converter {
+   template<>
+   void AssignArkValue(Ark_PathShapeOptions& dst, const PathShapeOptions& src, ConvContext *ctx)
+   {
+      auto commands = Converter::ArkValue<Opt_String>(src.commands.value_or(""), ctx);
+      dst.commands = commands;
+   }
+}
+
+class PathShapeAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIPathShapeAccessor,
+   &GENERATED_ArkUIAccessors::getPathShapeAccessor, PathShapePeer> {
+public:
+   void *CreatePeerInstance() override
+   {
+      PathShapeOptions pathShapeOptions{};
+      auto options = Converter::ArkValue<Opt_PathShapeOptions>(pathShapeOptions);
+      return accessor_->ctor(&options);
+   }
+};
+
+/**
+ * @tc.name: offsetAndPositionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathShapeAccessorTest, offsetAndPositionTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->offset, nullptr);
+    ASSERT_NE(accessor_->position, nullptr);
+    
+    using OffsetTestStep = std::pair<int32_t, int32_t>;
+    static const std::vector<OffsetTestStep> OFFSET_TEST_PLAN = {{2, 4}, {6, 8}, {10, 12}};
+    Opt_Length optX, optY;
+    Ark_Position arkPosition{};
+    PathShapePosition peerOffset, peerPosition;
+
+    for (const auto &[x, y]: OFFSET_TEST_PLAN) {
+      optX = Converter::ArkValue<Opt_Length>(x);
+      optY = Converter::ArkValue<Opt_Length>(y);
+      arkPosition = {optX, optY};
+
+      accessor_->offset(peer_, &arkPosition);
+      peerOffset = peer_->GetOffset();
+      EXPECT_EQ(peerOffset.x.value(), Dimension(x));
+      EXPECT_EQ(peerOffset.y.value(), Dimension(y));
+
+      accessor_->position(peer_, &arkPosition);
+      peerPosition = peer_->GetPosition();
+      EXPECT_EQ(peerPosition.x.value(), Dimension(x));
+      EXPECT_EQ(peerPosition.y.value(), Dimension(y));
+    }
+}
+
+/**
+ * @tc.name: fillTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathShapeAccessorTest, fillTest, TestSize.Level1)
+{
+   ASSERT_NE(accessor_->fill, nullptr);
+   
+   using FillTestStep = std::pair<Ark_ResourceColor, Color>;
+   static const std::vector<FillTestStep> FILL_TEST_PLAN = {
+      // Ark_Color
+      {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_RED),
+         Converter::OptConvert<Color>(Ark_Color::ARK_COLOR_RED).value_or(Color())},
+      {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN),
+         Converter::OptConvert<Color>(Ark_Color::ARK_COLOR_GREEN).value_or(Color())},
+      {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_BLUE),
+         Converter::OptConvert<Color>(Ark_Color::ARK_COLOR_BLUE).value_or(Color())},
+      // Ark_Number
+      {Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Number>(0x11223344)),
+         Color(0x11223344)},
+      {Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Number>(0xAABBCCDD)),
+         Color(0xAABBCCDD)},
+      // Ark_String
+      {Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("#11223344")),
+         Color(0x11223344)},
+      {Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("#AABBCCDD")),
+         Color(0xAABBCCDD)},
+      // Ark_Resource in next test
+   };
+   Color peerColor;
+    
+   for (const auto &[inputColor, expectedColor]: FILL_TEST_PLAN) {
+      accessor_->fill(peer_, &inputColor);
+      peerColor = peer_->GetFill();
+      EXPECT_EQ(peerColor.GetValue(), expectedColor.GetValue());
+   }
+}
+
+/**
+ * @tc.name: fillFromResourceTest
+ * @tc.desc: Color from Resource
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathShapeAccessorTest, fillFromResourceTest, TestSize.Level1)
+{
+   ASSERT_NE(accessor_->fill, nullptr);
+   const auto RES_NAME_ID = NamedResourceId { "fill.color.com", Converter::ResourceType::COLOR };
+   const auto EXPECTED_COLOR = Color(0xAABBCCDD);
+
+   auto arkResource = CreateResource(RES_NAME_ID);
+   auto arkResourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(arkResource);
+   AddResource(RES_NAME_ID, EXPECTED_COLOR);
+   
+   accessor_->fill(peer_, &arkResourceColor);
+   auto peerColor = peer_->GetFill();
+
+   EXPECT_EQ(peerColor.GetValue(), EXPECTED_COLOR.GetValue());
+}
+
+/**
+ * @tc.name: commandsTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathShapeAccessorTest, commandsTest, TestSize.Level1)
+{
+   ASSERT_NE(accessor_->commands, nullptr);
+   
+   using CommandsTestStep = std::pair<Ark_String, std::string>;
+   static const std::vector<CommandsTestStep> COMMANDS_TEST_PLAN = {
+      {Converter::ArkValue<Ark_String>("command1"), "command1"},
+      {Converter::ArkValue<Ark_String>("command1, command2"), "command1, command2"},
+   };
+   std::string peerCommands;
+
+   for (const auto &[arkInput, expected]: COMMANDS_TEST_PLAN) {
+     accessor_->commands(peer_, &arkInput);
+     peerCommands = peer_->GetCommands();
+     EXPECT_EQ(peerCommands, expected);
+   }
+}
+} // namespace OHOS::Ace::NG

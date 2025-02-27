@@ -91,6 +91,14 @@ using PickerRangeType = std::variant<
     std::pair<bool, std::vector<NG::RangeContent>>,
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>;
 
+struct PathShapeOptions {
+    std::optional<std::string> commands;
+};
+struct PathShapePosition {
+    std::optional<Dimension> x;
+    std::optional<Dimension> y;   
+};
+
 namespace Converter {
     constexpr double PERCENT_100 = 100.0;
 
@@ -557,6 +565,8 @@ namespace Converter {
     template<> DimensionOffset Convert(const Ark_ActionSheetOffset& src);
     template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
+    template<> PathShapeOptions Convert(const Ark_PathShapeOptions& value);
+    template<> PathShapePosition Convert(const Ark_Position& value);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
