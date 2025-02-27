@@ -1289,6 +1289,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest031, TestSize.Level1)
      * @tc.steps: step3. call onKeyEvent when isEnableShortcutKey_ is true and code&action is right
      * @tc.expected: response as expected
      */
+    videoPattern->isPrepared_ = true;
     KeyEvent keyEvent1 { KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN };
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)),
         Seek((VIDEO_CURRENT_TIME - 1) * MILLISECONDS_TO_SECONDS, _))
