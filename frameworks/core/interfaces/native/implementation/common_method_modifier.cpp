@@ -2542,6 +2542,7 @@ void OnHoverImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (!value) {
         ViewAbstract::DisableOnHover(frameNode);
+        return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onHover = [arkCallback = CallbackHelper(*value), node = weakNode](bool isHover, HoverInfo& hoverInfo) {
@@ -2557,9 +2558,9 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     if (!value) {
         ViewAbstract::DisableOnAccessibilityHover(frameNode);
+        return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onAccessibilityHover = [arkCallback = CallbackHelper(*value), node = weakNode](
