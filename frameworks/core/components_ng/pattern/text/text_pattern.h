@@ -58,6 +58,10 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t MAX_SIZE_OF_LOG = 2000;
+}
+
 class InspectorFilter;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
@@ -707,10 +711,15 @@ public:
         paintInfo_ = area + paintOffset.ToString();
     }
 
-    void DumpRecord(const std::string& record)
+    void DumpRecord(const std::string& record, bool stateChange = false)
     {
-        frameRecord_ = record;
+        if (stateChange || frameRecord_.length() > MAX_SIZE_OF_LOG) {
+            frameRecord_.clear();
+        }
+        frameRecord_.append("[" + record + "]");
     }
+
+    void LogForFormRender(const std::string& logTag);
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {

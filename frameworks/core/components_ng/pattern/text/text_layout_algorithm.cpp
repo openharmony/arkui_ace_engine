@@ -139,6 +139,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     bool needRemain = false;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
+    auto logTag = "MeasureContent";
+    pattern->DumpRecord(logTag);
+    pattern->LogForFormRender(logTag);
     ACE_SCOPED_TRACE(
         "TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d]", host->GetId(), needReCreateParagraph_);
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
@@ -326,6 +329,9 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    auto logTag = "CreateParagraph";
+    pattern->DumpRecord(logTag);
+    pattern->LogForFormRender(logTag);
     pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);
@@ -652,11 +658,6 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
 bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto pattern = host->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    pattern->DumpRecord("TextLayout BuildParagraph id:" + std::to_string(host->GetId()));
     if (!textStyle.GetAdaptTextSize() ||
         (!spans_.empty() && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN))) {
         if (!CreateParagraphAndLayout(textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint,
