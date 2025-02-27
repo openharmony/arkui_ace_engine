@@ -40,6 +40,7 @@ void ValidateByRange(std::optional<float>& opt, const float& left, const float& 
 void ValidateNonNegative(std::optional<CalcDimension>& opt);
 void ValidateNonPercent(std::optional<CalcDimension>& opt);
 void ValidateNonEmpty(std::optional<CalcDimension>& opt);
+void ValidateNonEmpty(std::optional<std::string>& opt);
 template<class T> void ValidateNonEmpty(std::optional<T>& opt)
 {
     if (opt.has_value() && opt.value().empty()) {

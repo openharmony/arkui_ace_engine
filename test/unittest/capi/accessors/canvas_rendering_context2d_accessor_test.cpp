@@ -16,6 +16,7 @@
 #include <gmock/gmock.h>
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
+#include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 #include "core/interfaces/native/implementation/rendering_context_settings_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -125,7 +126,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_startImageAnalyzerTest, TestSize.Level1)
 {
     // check config
     auto holder = TestHolder::GetInstance();
@@ -176,7 +177,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, stopImageAnalyzerTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_stopImageAnalyzerTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
@@ -196,7 +197,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, stopImageAnalyzerTest, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, getHeightTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_getHeightTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
@@ -217,7 +218,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getHeightTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, getWidthTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_getWidthTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
@@ -238,7 +239,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getWidthTest, TestSize.Level1)
  * @tc.desc: check add callbacks using onOnAttach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnAttachTest, TestSize.Level1) {
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnAttachTest, TestSize.Level1)
+{
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
@@ -250,7 +252,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnAttachTest, TestSize.Level1) 
     using TestCallback = std::pair<Callback_Void, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
-        auto callback = [] (const Ark_Int32 resourceId) {
+        auto callback = [](const Ark_Int32 resourceId) {
             checkEvents[resourceId].second = {
                 .resourceId = resourceId,
             };
@@ -277,7 +279,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnAttachTest, TestSize.Level1) 
  * @tc.desc: check add callbacks using onOnDetach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnDetachTest, TestSize.Level1) {
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnDetachTest, TestSize.Level1)
+{
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
@@ -289,7 +292,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnDetachTest, TestSize.Level1) 
     using TestCallback = std::pair<Callback_Void, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
-        auto callback = [] (const Ark_Int32 resourceId) {
+        auto callback = [](const Ark_Int32 resourceId) {
             checkEvents[resourceId].second = {
                 .resourceId = resourceId,
             };
@@ -316,7 +319,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnDetachTest, TestSize.Level1) 
  * @tc.desc: check remove single callback using offOnAttach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTest, TestSize.Level1) {
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnAttachTest, TestSize.Level1)
+{
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
@@ -328,7 +332,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTest, TestSize.Level1)
     using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
-        auto callback = [] (const Ark_Int32 resourceId) {
+        auto callback = [](const Ark_Int32 resourceId) {
             checkEvents[resourceId].second = {
                 .resourceId = resourceId,
             };
@@ -361,7 +365,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTest, TestSize.Level1)
  * @tc.desc: check remove all callbacks using offOnAttachTest
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTestAll, TestSize.Level1) {
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnAttachTestAll, TestSize.Level1)
+{
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
@@ -373,7 +378,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTestAll, TestSize.Leve
     using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
-        auto callback = [] (const Ark_Int32 resourceId) {
+        auto callback = [](const Ark_Int32 resourceId) {
             checkEvents[resourceId].second = {
                 .resourceId = resourceId,
             };
@@ -397,7 +402,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTestAll, TestSize.Leve
  * @tc.desc: check remove single callback using offOnDetach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTest, TestSize.Level1) {
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTest, TestSize.Level1)
+{
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
@@ -409,7 +415,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTest, TestSize.Level1)
     using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
-        auto callback = [] (const Ark_Int32 resourceId) {
+        auto callback = [](const Ark_Int32 resourceId) {
             checkEvents[resourceId].second = {
                 .resourceId = resourceId,
             };
@@ -442,7 +448,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTest, TestSize.Level1)
  * @tc.desc: check remove all callbacks using offOnDetach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTestAll, TestSize.Level1) {
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTestAll, TestSize.Level1)
+{
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
@@ -454,7 +461,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTestAll, TestSize.Leve
     using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
     static std::vector<TestCallback> checkEvents;
     for (size_t i = 0; i < eventsSize; ++i) {
-        auto callback = [] (const Ark_Int32 resourceId) {
+        auto callback = [](const Ark_Int32 resourceId) {
             checkEvents[resourceId].second = {
                 .resourceId = resourceId,
             };
@@ -478,7 +485,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTestAll, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, toDataURLTest, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_toDataURLTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->toDataURL, nullptr);

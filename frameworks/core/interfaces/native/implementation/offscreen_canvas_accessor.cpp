@@ -15,17 +15,38 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "offscreen_canvas_peer.h"
+#include "offscreen_canvas_rendering_context2d_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor();
+const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor();
+
 namespace OffscreenCanvasAccessor {
+const auto EMPTY_STRING = "";
+const Ark_String ARK_EMPTY_STRING = Converter::ArkValue<Ark_String>(EMPTY_STRING, Converter::FC);
+const double ERROR_VALUE = -1;
+const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(ERROR_VALUE);
+
 void DestroyPeerImpl(Ark_OffscreenCanvas peer)
 {
+    if (peer) {
+        peer->RemoveOptions();
+        delete peer;
+    }
 }
 Ark_OffscreenCanvas CtorImpl(const Ark_Number* width,
                              const Ark_Number* height)
 {
-    return {};
+    CHECK_NULL_RETURN(width, nullptr);
+    CHECK_NULL_RETURN(height, nullptr);
+    auto cw = static_cast<double>(Converter::Convert<float>(*width));
+    auto ch = static_cast<double>(Converter::Convert<float>(*height));
+    auto peer = new OffscreenCanvasPeer();
+    peer->SetOptions(cw, ch);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,28 +54,49 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvas peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto bitmap = reinterpret_cast<ImageBitmapPeer*>(GetImageBitmapAccessor()->ctor(&ARK_EMPTY_STRING));
+    return peer->TransferToImageBitmap(bitmap);
 }
 Ark_OffscreenCanvasRenderingContext2D GetContext2dImpl(Ark_OffscreenCanvas peer,
                                                        const Opt_RenderingContextSettings* options)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(options, nullptr);
+    auto width = Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetWidth()));
+    auto height = Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetHeight()));
+    auto offscreenContext = reinterpret_cast<OffscreenCanvasRenderingContext2DPeer*>(
+        GetOffscreenCanvasRenderingContext2DAccessor()->ctor(&width, &height, options));
+    auto offscreenSettings = Converter::OptConvert<RenderingContextSettingsPeer*>(*options).value_or(nullptr);
+    return peer->GetContext2D(offscreenContext, offscreenSettings);
 }
 Ark_Number GetHeightImpl(Ark_OffscreenCanvas peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
+    double height = peer->OnGetHeight(ERROR_VALUE);
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(height));
 }
 void SetHeightImpl(Ark_OffscreenCanvas peer,
                    const Ark_Number* height)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(height);
+    auto ch = static_cast<double>(Converter::Convert<float>(*height));
+    peer->OnSetHeight(ch);
 }
 Ark_Number GetWidthImpl(Ark_OffscreenCanvas peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
+    double width = peer->OnGetWidth(ERROR_VALUE);
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(width));
 }
 void SetWidthImpl(Ark_OffscreenCanvas peer,
                   const Ark_Number* width)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(width);
+    auto cw = static_cast<double>(Converter::Convert<float>(*width));
+    peer->OnSetWidth(cw);
 }
 } // OffscreenCanvasAccessor
 const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()

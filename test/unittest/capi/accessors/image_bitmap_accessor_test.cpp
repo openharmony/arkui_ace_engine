@@ -90,7 +90,7 @@ public:
  */
 HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
 {
-    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
+    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
     bool result = false;
     auto clouseFunc = [&result]() {
@@ -111,7 +111,7 @@ HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
  */
 HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
 {
-    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
+    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
     ASSERT_NE(peer_, nullptr);
     peer_->SetHeight(DEFAULT_INT_VALUE);
@@ -129,7 +129,7 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
  */
 HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
 {
-    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
+    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
     ASSERT_NE(peer_, nullptr);
     peer_->SetWidth(DEFAULT_INT_VALUE);

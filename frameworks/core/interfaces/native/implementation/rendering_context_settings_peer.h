@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-#pragma once
-
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_RENDERING_CONTEXT_SETTINGS_PEER_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_RENDERING_CONTEXT_SETTINGS_PEER_H
 #include <optional>
 
 struct RenderingContextSettingsPeer {
-    std::optional<bool> antialias;
-
     static RenderingContextSettingsPeer *Create(const std::optional<bool>& antialias)
     {
         return new RenderingContextSettingsPeer{antialias};
     }
-
     static void Destroy(RenderingContextSettingsPeer *peer)
     {
         delete peer;
     }
+
+    std::optional<bool> antialias = std::nullopt;
+    std::optional<OHOS::Ace::CanvasUnit> unit = std::nullopt;
 };
+#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_RENDERING_CONTEXT_SETTINGS_PEER_H
