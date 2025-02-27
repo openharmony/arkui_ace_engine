@@ -1293,6 +1293,7 @@ HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction003, TestSize.Level1)
     /**
      * @tc.step: step6. test OnMenuItemAction again
      */
+    
     selectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
     auto selectOverlayInfo = selectOverlay->GetSelectOverlayInfo();
     auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
