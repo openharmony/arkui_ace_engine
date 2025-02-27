@@ -2959,6 +2959,16 @@ void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value)
     ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 
+void FfiOHOSAceFrameworkViewAbstractHitTestBehavior(int32_t hitTestMode)
+{
+    ViewAbstractModel::GetInstance()->SetHitTestMode(static_cast<NG::HitTestMode>(hitTestMode));
+}
+
+void FFiOHOSAceFrameworkViewAbstractHoverEffect(int32_t hoverEffectValue)
+{
+    ViewAbstractModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(hoverEffectValue));
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
     const char* source, CBorderImageOption option)
 {
