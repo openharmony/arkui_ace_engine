@@ -1452,12 +1452,14 @@ class ArkDragPreviewOptions {
   numberBadge: boolean | number | undefined;
   isMultiSelectionEnabled: boolean | undefined;
   defaultAnimationBeforeLifting: boolean | undefined;
+  isLiftingDisabled: boolean | undefined;
 
   constructor() {
     this.mode = undefined;
     this.numberBadge = undefined;
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
+    this.isLiftingDisabled = undefined;
   }
 
   isEqual(another: ArkDragPreviewOptions): boolean {
@@ -1465,19 +1467,31 @@ class ArkDragPreviewOptions {
       this.mode === another.mode &&
       this.numberBadge === another.numberBadge &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
-      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
+      this.isLiftingDisabled === another.isLiftingDisabled
     );
   }
 }
 
 class ArkDragPreview {
   inspetorId: string;
+  onlyForLifting: boolean | undefined;
+  pixelMap: PixelMap | undefined;
+  extraInfo: string;
   constructor() {
     this.inspetorId = undefined;
+    this.onlyForLifting = undefined;
+    this.pixelMap = undefined;
+    this.extraInfo = undefined;
   }
 
   isEqual(another: ArkDragPreview): boolean {
-    return this.inspetorId === another.inspetorId;
+    return (
+      this.inspetorId === another.inspetorId &&
+      this.onlyForLifting === another.onlyForLifting && 
+      this.pixelMap === another.pixelMap &&
+      this.extraInfo === another.extraInfo
+    );
   }
 }
 

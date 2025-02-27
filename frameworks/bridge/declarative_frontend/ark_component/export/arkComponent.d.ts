@@ -179,7 +179,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;
     draggable(value: boolean): this;
-    dragPreview(value: CustomBuilder | DragItemInfo | string): this;
+    dragPreview(preview: CustomBuilder | DragItemInfo | string): this;
     overlay(value: string | CustomBuilder, options?: {
         align?: Alignment;
         offset?: {

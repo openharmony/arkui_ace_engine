@@ -5165,19 +5165,16 @@ ArkUINativeModuleValue CommonBridge::ResetForegroundBrightness(ArkUIRuntimeCallI
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+void ParseDragPreViewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValueRef>& valueObj,
+    ArkUIDragPreViewOptions& preViewOptions, int32_t* modeIntArray)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> mode = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> numberBadge = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> isMultiSelectionEnabled = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> defaultAnimationBeforeLifting = runtimeCallInfo->GetCallArgRef(NUM_4);
- 
-    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, nullptr, false, true, false};
-    int32_t* modeIntArray = nullptr;
+    CHECK_NULL_VOID(vm);
+    if (!valueObj->IsObject(vm)) {
+        return;
+    }
+    auto obj = valueObj->ToObject(vm);
+    auto mode = obj->Get(vm, "mode");
     if (mode->IsNumber()) {
         preViewOptions.isModeArray = false;
         preViewOptions.mode = mode->Int32Value(vm);
@@ -5196,7 +5193,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         preViewOptions.modeArray = modeIntArray;
         preViewOptions.modeArrayLength = static_cast<ArkUI_Int32>(arrLength);
     }
-
+    auto numberBadge = obj->Get(vm, "numberBadge");
     if (numberBadge->IsBoolean()) {
         preViewOptions.isBadgeNumber = false;
         preViewOptions.isShowBadge = numberBadge->ToBoolean(vm)->Value();
@@ -5204,14 +5201,46 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         preViewOptions.isBadgeNumber = true;
         preViewOptions.badgeNumber = numberBadge->Int32Value(vm);
     }
+}
 
-    struct ArkUIDragInteractionOptions interactionOptions = { false, false };
+void ParseDragInteractionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValueRef>& valueObj,
+    ArkUIDragInteractionOptions& interactionOptions)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    if (!valueObj->IsObject(vm)) {
+        return;
+    }
+    auto obj = valueObj->ToObject(vm);
+
+    Local<JSValueRef> isMultiSelectionEnabled = obj->Get(vm, "isMultiSelectionEnabled");
     if (isMultiSelectionEnabled->IsBoolean()) {
         interactionOptions.isMultiSelectionEnabled = isMultiSelectionEnabled->ToBoolean(vm)->Value();
     }
+    Local<JSValueRef> defaultAnimationBeforeLifting = obj->Get(vm, "defaultAnimationBeforeLifting");
     if (defaultAnimationBeforeLifting->IsBoolean()) {
         interactionOptions.defaultAnimationBeforeLifting = defaultAnimationBeforeLifting->ToBoolean(vm)->Value();
     }
+    Local<JSValueRef> isLiftingDisabled = obj->Get(vm, "isLiftingDisabled");
+    if (isLiftingDisabled->IsBoolean()) {
+        interactionOptions.isLiftingDisabled = isLiftingDisabled->ToBoolean(vm)->Value();
+    }
+}
+
+ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+
+    Local<JSValueRef> valueObj = runtimeCallInfo->GetCallArgRef(NUM_1);
+    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, nullptr, false, true, false};
+    struct ArkUIDragInteractionOptions interactionOptions = { false, false, false };
+    int32_t* modeIntArray = nullptr;
+    ParseDragPreViewOptions(runtimeCallInfo, valueObj, preViewOptions, modeIntArray);
+    ParseDragInteractionOptions(runtimeCallInfo, valueObj, interactionOptions);
+
     GetArkUINodeModifiers()->getCommonModifier()->setDragPreviewOptions(
         nativeNode, preViewOptions, interactionOptions);
     delete[] modeIntArray;
@@ -5234,17 +5263,39 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> inspectorId = runtimeCallInfo->GetCallArgRef(NUM_1);
-
+    Local<JSValueRef> valueObj = runtimeCallInfo->GetCallArgRef(NUM_1);
     struct ArkUIDragPreview dragPreview = { "" };
     std::string stringValue;
-    if (inspectorId->IsString(vm)) {
-        stringValue = inspectorId->ToString(vm)->ToString(vm);
-        dragPreview.inspectorId = stringValue.c_str();
+    std::string extraInfoValue;
+    RefPtr<PixelMap> pixmap = nullptr;
+    if (valueObj->IsObject(vm)) {
+        auto obj = valueObj->ToObject(vm);
+        auto inspectorId = obj->Get(vm, "inspetorId");
+        if (inspectorId->IsString(vm)) {
+            stringValue = inspectorId->ToString(vm)->ToString(vm);
+            dragPreview.inspectorId = stringValue.c_str();
+        }
+        auto onlyForLifting = obj->Get(vm, "onlyForLifting");
+        if (onlyForLifting->IsBoolean()) {
+            dragPreview.onlyForLifting = onlyForLifting->ToBoolean(vm)->Value();
+        }
+        auto extraInfo = obj->Get(vm, "extraInfo");
+        if (extraInfo->IsString(vm)) {
+            extraInfoValue = extraInfo->ToString(vm)->ToString(vm);
+            dragPreview.extraInfo = extraInfoValue.c_str();
+        }
+        auto pixelMap = obj->Get(vm, "pixelMap");
+        if (!pixelMap->IsUndefined()) {
+#if defined(PIXEL_MAP_SUPPORTED)
+            pixmap = ArkTSUtils::CreatePixelMapFromNapiValue(vm, pixelMap);
+#endif
+            if (pixmap) {
+                auto pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
+                dragPreview.pixelMap = &pixelMapSharedPtr;
+            }
+        }
     }
-
-    GetArkUINodeModifiers()->getCommonModifier()->setDragPreview(
-        nativeNode, dragPreview);
+    GetArkUINodeModifiers()->getCommonModifier()->setDragPreview(nativeNode, dragPreview);
     return panda::JSValueRef::Undefined(vm);
 }
 

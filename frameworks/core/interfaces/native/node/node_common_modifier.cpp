@@ -3634,6 +3634,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     option.isNumber = dragPreviewOptions.isBadgeNumber;
     option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
+    option.isLiftingDisabled = dragInteractionOptions.isLiftingDisabled;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3641,8 +3642,7 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, true, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(frameNode, NG::DragPreviewOption());
 }
 
 void SetDisableDataPrefetch(ArkUINodeHandle node, ArkUI_Bool value)
@@ -6110,6 +6110,13 @@ void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
     CHECK_NULL_VOID(frameNode);
     NG::DragDropInfo dragPreviewInfo;
     dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    dragPreviewInfo.onlyForLifting = dragPreview.onlyForLifting;
+    if (dragPreview.extraInfo) {
+        dragPreviewInfo.extraInfo = dragPreview.extraInfo;
+    }
+    if (dragPreview.pixelMap) {
+        dragPreviewInfo.pixelMap = PixelMap::CreatePixelMap(dragPreview.pixelMap);
+    }
     ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
 }
 
