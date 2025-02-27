@@ -32,6 +32,18 @@ using namespace testing;
 using namespace testing::ext;
 using namespace AccessorTestFixtures;
 
+namespace {
+const double EPSILON = 0.001;
+
+const std::vector<std::pair<DimensionUnit, Ark_LengthUnit>> unitTestPlan = {
+    { DimensionUnit::PX, ARK_LENGTH_UNIT_PX },
+    { DimensionUnit::VP, ARK_LENGTH_UNIT_VP },
+    { DimensionUnit::FP, ARK_LENGTH_UNIT_FP },
+    { DimensionUnit::PERCENT, ARK_LENGTH_UNIT_PERCENT },
+    { DimensionUnit::LPX, ARK_LENGTH_UNIT_LPX },
+};
+}
+
 class LengthMetricsAccessorTest
     : public AccessorTestBase<GENERATED_ArkUILengthMetricsAccessor,
         &GENERATED_ArkUIAccessors::getLengthMetricsAccessor, LengthMetricsPeer> {
@@ -92,6 +104,48 @@ HWTEST_F(LengthMetricsAccessorTest, ResourceTest, TestSize.Level1)
         EXPECT_EQ(pointerStr->value.ToString(), expectPointer->ToString())  <<
              "Input value is: " << str_id << ", method: resource";
         accessor_->destroyPeer(pointerStr);
+    }
+}
+
+/**
+ * @tc.name: GetUnitTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LengthMetricsAccessorTest, GetUnitTest, TestSize.Level1)
+{
+    for (auto& [value, expected] : unitTestPlan) {
+        peer_->value.SetUnit(value);
+        Ark_LengthUnit result = accessor_->getUnit(peer_);
+        ASSERT_EQ(result, expected);
+    }
+}
+
+/**
+ * @tc.name: SetUnitTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LengthMetricsAccessorTest, SetUnitTest, TestSize.Level1)
+{
+    for (auto& [expected, value] : unitTestPlan) {
+        accessor_->setUnit(peer_, value);
+        DimensionUnit result = peer_->value.Unit();
+        ASSERT_EQ(result, expected);
+    }
+}
+
+/**
+ * @tc.name: SetValueTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LengthMetricsAccessorTest, SetValueTest, TestSize.Level1)
+{
+    for (auto& [input, expected, value] : testFixtureNumberFloatAnythingValidValues) {
+        accessor_->setValue(peer_, &value);
+        double result = peer_->value.Value();
+        EXPECT_NEAR(result, expected, EPSILON);
     }
 }
 } // namespace OHOS::Ace::NG

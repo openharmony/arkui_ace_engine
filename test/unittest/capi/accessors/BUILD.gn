@@ -63,7 +63,7 @@ ace_unittest("capi_all_accessors_test") {
     "js_result_accessor_test.cpp",
     "key_event_accessor_test.cpp",
     "layout_manager_accessor_test.cpp",
-    "length_mertics_accessor_test.cpp",
+    "length_metrics_accessor_test.cpp",
     "linear_gradient_accessor_test.cpp",
     "list_scroller_accessor_test.cpp",
     "matrix2d_accessor_test.cpp",
