@@ -226,6 +226,20 @@ void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
     }
 }
 
+void AssignArkValue(Ark_LengthUnit& dst, const DimensionUnit& src)
+{
+    switch (src) {
+        case DimensionUnit::PX: dst = ARK_LENGTH_UNIT_PX; break;
+        case DimensionUnit::VP: dst = ARK_LENGTH_UNIT_VP; break;
+        case DimensionUnit::FP: dst = ARK_LENGTH_UNIT_FP; break;
+        case DimensionUnit::PERCENT: dst = ARK_LENGTH_UNIT_PERCENT; break;
+        case DimensionUnit::LPX: dst = ARK_LENGTH_UNIT_LPX; break;
+        default:
+            LOGE("Unexpected enum value in DimensionUnit: %{public}d", src);
+            dst = static_cast<Ark_LengthUnit>(-1);
+    }
+}
+
 void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src)
 {
     switch (src) {
