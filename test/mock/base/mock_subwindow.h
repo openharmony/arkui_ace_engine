@@ -49,6 +49,9 @@ public:
     MOCK_METHOD4(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo,
                                   const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss));
     MOCK_METHOD1(HidePopupNG, void(int32_t targetId));
+    MOCK_METHOD4(ShowTipsNG, void(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+                                 int32_t appearingTimeWithContinuousOperation));
+    MOCK_METHOD2(HideTipsNG, void(int32_t targetId, int32_t disappearingTime));
     MOCK_METHOD0(ClearPopupNG, void());
     MOCK_METHOD2(GetPopupInfoNG, void(int32_t targetId, NG::PopupInfo& popupInfo));
     MOCK_METHOD1(CancelPopup, bool(const std::string& id));

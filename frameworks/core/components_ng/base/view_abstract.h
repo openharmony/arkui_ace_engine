@@ -47,6 +47,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/property/overlay_property.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
 
@@ -373,6 +374,11 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static void BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
+    static void HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
+        PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId);
+    static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
+        PopupInfo& tipsInfo, bool showInSubWindow);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
     static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);

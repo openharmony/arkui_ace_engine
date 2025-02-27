@@ -1439,6 +1439,23 @@ void ViewAbstractModelImpl::BindPopup(const RefPtr<PopupParam>& param, const Ref
     }
 }
 
+void ViewAbstractModelImpl::BindTips(const RefPtr<PopupParam>& param)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto tipsComponent = ViewStackProcessor::GetInstance()->GetPopupComponent(true);
+    CHECK_NULL_VOID(tipsComponent);
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    param->SetTargetMargin(boxComponent->GetMargin());
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    param->SetTargetId(inspector->GetId());
+
+    tipsComponent->SetPopupParam(param);
+    tipsComponent->SetMessage(param->GetMessage());
+    tipsComponent->SetPlacementOnTop(param->GetPlacement() == Placement::TOP);
+}
+
 RefPtr<SelectTheme> GetSelectTheme()
 {
     auto container = Container::Current();

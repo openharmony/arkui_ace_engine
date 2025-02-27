@@ -642,6 +642,8 @@ OverlayManager::~OverlayManager()
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "OverlayManager destroyed");
     popupMap_.clear();
+    tipsInfoList_.clear();
+    tipsEnterAndLeaveInfoMap_.clear();
 }
 
 void OverlayManager::UpdateContextMenuDisappearPosition(
@@ -1675,6 +1677,187 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     } else {
         MountPopup(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
     }
+}
+
+void OverlayManager::ShowTips(
+    int32_t targetId, const PopupInfo& popupInfo, int32_t appearingTime, int32_t appearingTimeWithContinuousOperation)
+{
+    UpdateTipsEnterAndLeaveInfoBool(targetId);
+
+    auto duration = appearingTime;
+    if (tipsInfoList_.empty()) {
+        duration = appearingTime;
+    } else {
+        UpdatePreviousDisappearingTime(targetId);
+        duration = appearingTimeWithContinuousOperation;
+    }
+
+    auto tipsId = targetId;
+    UpdateTipsEnterAndLeaveInfo(tipsId);
+    auto times = GetTipsEnterAndLeaveInfo(tipsId);
+    auto showTipsTask = [weak = WeakClaim(this), tipsId, popupInfo, id = Container::CurrentId(), times]() {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(id);
+        auto isExecuteTask = overlayManager->GetBoolFromTipsEnterAndLeaveInfo(tipsId, times);
+        if (!isExecuteTask) {
+            overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
+            return;
+        }
+        overlayManager->UpdateTipsInfo(tipsId, popupInfo);
+        overlayManager->ShowPopup(tipsId, popupInfo);
+        overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
+    };
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(showTipsTask, TaskExecutor::TaskType::UI, duration, "ArkUIOverlayContinuousPopToast");
+}
+
+void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int32_t disappearingTime)
+{
+    auto duration = disappearingTime;
+    UpdateTipsEnterAndLeaveInfoBool(targetId);
+    auto tipsId = targetId;
+    UpdateTipsEnterAndLeaveInfo(tipsId);
+    auto times = GetTipsEnterAndLeaveInfo(tipsId);
+    auto hideTipsTask = [weak = WeakClaim(this), tipsId, popupInfo, id = Container::CurrentId(), times]() {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(id);
+        auto isExecuteTask = overlayManager->GetBoolFromTipsEnterAndLeaveInfo(tipsId, times);
+        if (!isExecuteTask) {
+            overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
+            return;
+        }
+        overlayManager->EraseTipsInfo(tipsId);
+        overlayManager->HidePopup(tipsId, popupInfo);
+        overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
+    };
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(hideTipsTask, TaskExecutor::TaskType::UI, duration, "ArkUIOverlayContinuousPopToast");
+}
+
+bool OverlayManager::GetBoolFromTipsEnterAndLeaveInfo(int32_t tipsId, int32_t times)
+{
+    auto it = tipsEnterAndLeaveInfoMap_.find(tipsId);
+    if (it != tipsEnterAndLeaveInfoMap_.end()) {
+        for (const auto& p : it->second) {
+            if (p.first == times) {
+                return p.second;
+            }
+        }
+    }
+    return false;
+}
+
+int32_t OverlayManager::GetTipsEnterAndLeaveInfo(int32_t targetId)
+{
+    auto it = tipsEnterAndLeaveInfoMap_.find(targetId);
+    if (it != tipsEnterAndLeaveInfoMap_.end() && !it->second.empty()) {
+        return it->second.back().first;
+    }
+    return -1;
+}
+
+void OverlayManager::UpdateTipsEnterAndLeaveInfo(int32_t targetId)
+{
+    auto it = tipsEnterAndLeaveInfoMap_.find(targetId);
+    if (it == tipsEnterAndLeaveInfoMap_.end()) {
+        tipsEnterAndLeaveInfoMap_[targetId] = { { 1, true } };
+    } else {
+        auto& pairList = it->second;
+        if (!pairList.empty()) {
+            auto lastPair = pairList.back();
+            pairList.push_back({ lastPair.first + 1, true });
+        } else {
+            pairList.push_back({ 1, true });
+        }
+    }
+}
+
+void OverlayManager::UpdateTipsEnterAndLeaveInfoBool(int32_t targetId)
+{
+    auto it = tipsEnterAndLeaveInfoMap_.find(targetId);
+    if (it != tipsEnterAndLeaveInfoMap_.end()) {
+        auto& pairList = it->second;
+        if (!pairList.empty()) {
+            auto& lastPair = pairList.back();
+            if (lastPair.second == true) {
+                lastPair.second = false;
+            }
+        }
+    }
+}
+
+void OverlayManager::EraseTipsEnterAndLeaveInfo(int32_t targetId, int32_t times)
+{
+    auto it = tipsEnterAndLeaveInfoMap_.find(targetId);
+    if (it != tipsEnterAndLeaveInfoMap_.end()) {
+        auto& list = it->second;
+        for (auto listIt = list.begin(); listIt != list.end(); ++listIt) {
+            if (listIt->first == times) {
+                list.erase(listIt);
+                break;
+            }
+        }
+        if (list.empty()) {
+            tipsEnterAndLeaveInfoMap_.erase(it);
+        }
+    }
+}
+
+void OverlayManager::UpdatePreviousDisappearingTime(int32_t targetId)
+{
+    auto previousTargetId = tipsInfoList_.back().first;
+    if (previousTargetId != targetId) {
+        auto previousTipsInfo = GetTipsInfo(previousTargetId);
+        auto previousDisappearingTime = previousTipsInfo.disappearingTimeWithContinuousOperation;
+        UpdateTipsEnterAndLeaveInfoBool(previousTargetId);
+        HideTips(previousTargetId, previousTipsInfo, previousDisappearingTime);
+    }
+}
+
+void OverlayManager::UpdateTipsInfo(int32_t targetId, const PopupInfo& popupInfo)
+{
+    auto it = tipsInfoList_.begin();
+    while (it != tipsInfoList_.end()) {
+        if (it->first == targetId) {
+            it = tipsInfoList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    tipsInfoList_.emplace_back(targetId, popupInfo);
+}
+
+void OverlayManager::EraseTipsInfo(int32_t targetId)
+{
+    auto it = tipsInfoList_.begin();
+    while (it != tipsInfoList_.end()) {
+        if (it->first == targetId) {
+            it = tipsInfoList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+PopupInfo OverlayManager::GetTipsInfo(int32_t targetId)
+{
+    auto it = tipsInfoList_.begin();
+    while (it != tipsInfoList_.end()) {
+        if (it->first == targetId) {
+            return it->second;
+        } else {
+            ++it;
+        }
+    }
+    return {};
 }
 
 bool OverlayManager::UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo)

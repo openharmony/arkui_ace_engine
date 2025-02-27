@@ -101,6 +101,46 @@ public:
         return placement_;
     }
 
+    void SetAppearingTime(int32_t appearingTime)
+    {
+        appearingTime_ = appearingTime;
+    }
+
+    int32_t GetAppearingTime() const
+    {
+        return appearingTime_;
+    }
+
+    void SetDisappearingTime(int32_t disappearingTime)
+    {
+        disappearingTime_ = disappearingTime;
+    }
+
+    int32_t GetDisappearingTime() const
+    {
+        return disappearingTime_;
+    }
+
+    void SetAppearingTimeWithContinuousOperation(int32_t appearingTimeWithContinuousOperation)
+    {
+        appearingTimeWithContinuousOperation_ = appearingTimeWithContinuousOperation;
+    }
+
+    int32_t GetAppearingTimeWithContinuousOperation() const
+    {
+        return appearingTimeWithContinuousOperation_;
+    }
+
+    void SetDisappearingTimeWithContinuousOperation(int32_t disappearingTimeWithContinuousOperation)
+    {
+        disappearingTimeWithContinuousOperation_ = disappearingTimeWithContinuousOperation;
+    }
+
+    int32_t GetDisappearingTimeWithContinuousOperation() const
+    {
+        return disappearingTimeWithContinuousOperation_;
+    }
+
     const Color& GetMaskColor() const
     {
         return maskColor_;
@@ -535,6 +575,16 @@ public:
         isPartialUpdate_ = isPartialUpdate;
     }
 
+    void SetTipsFlag(bool isTips)
+    {
+        isTips_ = isTips;
+    }
+
+    bool IsTips() const
+    {
+        return isTips_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -552,6 +602,11 @@ private:
     bool isCaretMode_ = true;
     bool enableHoverMode_ = false;
     bool followTransformOfTarget_ = false;
+    bool isTips_ = false;
+    int32_t appearingTime_ = 700;
+    int32_t disappearingTime_ = 300;
+    int32_t appearingTimeWithContinuousOperation_ = 300;
+    int32_t disappearingTimeWithContinuousOperation_ = 0;
     std::optional<bool> isPartialUpdate_;
     Color maskColor_;
     Color backgroundColor_;

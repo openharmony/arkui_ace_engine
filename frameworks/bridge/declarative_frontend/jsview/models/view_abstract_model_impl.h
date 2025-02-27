@@ -273,6 +273,7 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    void BindTips(const RefPtr<PopupParam>& param) override;
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
     {
         return 0;
