@@ -17,6 +17,7 @@
 #include "accessor_test_base.h"
 #include "accessor_test_utils.h"
 #include "node_api.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -57,6 +58,8 @@ HWTEST_F(PathShapeAccessorTest, offsetAndPositionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->offset, nullptr);
     ASSERT_NE(accessor_->position, nullptr);
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(peer_->shape, nullptr);
 
     using OffsetTestStep = std::pair<int32_t, int32_t>;
     static const std::vector<OffsetTestStep> OFFSET_TEST_PLAN = {{2, 4}, {6, 8}, {10, 12}};
@@ -70,12 +73,12 @@ HWTEST_F(PathShapeAccessorTest, offsetAndPositionTest, TestSize.Level1)
         arkPosition = {optX, optY};
 
         accessor_->offset(peer_, &arkPosition);
-        peerOffset = peer_->GetOffset();
+        peerOffset = peer_->shape->GetOffset();
         EXPECT_EQ(peerOffset.GetX(), Dimension(x));
         EXPECT_EQ(peerOffset.GetY(), Dimension(y));
 
         accessor_->position(peer_, &arkPosition);
-        peerPosition = peer_->GetPosition();
+        peerPosition = peer_->shape->GetPosition();
         EXPECT_EQ(peerPosition.GetX(), Dimension(x));
         EXPECT_EQ(peerPosition.GetY(), Dimension(y));
     }
@@ -89,6 +92,8 @@ HWTEST_F(PathShapeAccessorTest, offsetAndPositionTest, TestSize.Level1)
 HWTEST_F(PathShapeAccessorTest, fillTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fill, nullptr);
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(peer_->shape, nullptr);
 
     using FillTestStep = std::pair<Ark_ResourceColor, Color>;
     static const std::vector<FillTestStep> FILL_TEST_PLAN = {
@@ -115,7 +120,7 @@ HWTEST_F(PathShapeAccessorTest, fillTest, TestSize.Level1)
 
     for (const auto &[inputColor, expectedColor]: FILL_TEST_PLAN) {
         accessor_->fill(peer_, &inputColor);
-        peerColor = peer_->GetFill();
+        peerColor = peer_->shape->GetColor();
         EXPECT_EQ(peerColor.GetValue(), expectedColor.GetValue());
     }
 }
@@ -128,6 +133,8 @@ HWTEST_F(PathShapeAccessorTest, fillTest, TestSize.Level1)
 HWTEST_F(PathShapeAccessorTest, fillFromResourceTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fill, nullptr);
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(peer_->shape, nullptr);
     const auto RES_NAME_ID = NamedResourceId { "fill.color.com", Converter::ResourceType::COLOR };
     const auto EXPECTED_COLOR = Color(0xAABBCCDD);
 
@@ -136,7 +143,7 @@ HWTEST_F(PathShapeAccessorTest, fillFromResourceTest, TestSize.Level1)
     AddResource(RES_NAME_ID, EXPECTED_COLOR);
 
     accessor_->fill(peer_, &arkResourceColor);
-    auto peerColor = peer_->GetFill();
+    auto peerColor = peer_->shape->GetColor();
 
     EXPECT_EQ(peerColor.GetValue(), EXPECTED_COLOR.GetValue());
 }
@@ -149,6 +156,8 @@ HWTEST_F(PathShapeAccessorTest, fillFromResourceTest, TestSize.Level1)
 HWTEST_F(PathShapeAccessorTest, commandsTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->commands, nullptr);
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(peer_->shape, nullptr);
 
     using CommandsTestStep = std::pair<Ark_String, std::string>;
     static const std::vector<CommandsTestStep> COMMANDS_TEST_PLAN = {
@@ -159,7 +168,7 @@ HWTEST_F(PathShapeAccessorTest, commandsTest, TestSize.Level1)
 
     for (const auto &[arkInput, expected]: COMMANDS_TEST_PLAN) {
         accessor_->commands(peer_, &arkInput);
-        peerCommands = peer_->GetCommands();
+        peerCommands = peer_->shape->GetValue();
         EXPECT_EQ(peerCommands, expected);
     }
 }

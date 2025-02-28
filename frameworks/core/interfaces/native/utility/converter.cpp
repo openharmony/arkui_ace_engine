@@ -2101,12 +2101,4 @@ PathShapeOptions Convert(const Ark_PathShapeOptions& value)
         .commands = Converter::OptConvert<std::string>(value.commands),
     };
 };
-
-template<>
-DimensionOffset Convert(const Ark_Position& src)
-{
-    auto deltaX = Converter::OptConvert<Dimension>(src.x).value_or(Dimension());
-    auto deltaY = Converter::OptConvert<Dimension>(src.y).value_or(Dimension());
-    return DimensionOffset(deltaX, deltaY);
-};
 } // namespace OHOS::Ace::NG::Converter
