@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
     }
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
     CHECK_NULL_RETURN(progressTheme, std::nullopt);
 
     float defaultHeight = contentConstraint.percentReference.Height();
