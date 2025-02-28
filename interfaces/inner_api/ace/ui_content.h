@@ -101,7 +101,7 @@ public:
     /**
      * @param runtime any VM runtime (distinguished in implementation based on information in @c context)
      */
-    static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, void* runtime);
+    static std::unique_ptr<UIContent> CreateWithAnyRuntime(OHOS::AbilityRuntime::Context* context, void* runtime);
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
     static void ShowDumpHelp(std::vector<std::string>& info);
     static UIContent* GetUIContent(int32_t instanceId);

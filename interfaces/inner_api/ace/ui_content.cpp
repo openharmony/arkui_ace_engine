@@ -97,10 +97,10 @@ UIContent* CreateUIContent(void* ability)
 
 std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime)
 {
-    return UIContent::Create(context, reinterpret_cast<void*>(runtime));
+    return UIContent::CreateWithAnyRuntime(context, reinterpret_cast<void*>(runtime));
 }
 
-std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context, void* runtime)
+std::unique_ptr<UIContent> UIContent::CreateWithAnyRuntime(OHOS::AbilityRuntime::Context* context, void* runtime)
 {
     std::unique_ptr<UIContent> content;
     content.reset(CreateUIContent(reinterpret_cast<void*>(context), runtime));
