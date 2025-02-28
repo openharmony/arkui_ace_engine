@@ -3457,8 +3457,10 @@ void ClipShapeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetClipShape(frameNode, convValue);
+    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value);
+    if (convValue.has_value() && convValue.value()) {
+        ViewAbstract::SetClipShape(convValue.value());
+    }
 }
 void Mask0Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
@@ -3485,8 +3487,10 @@ void MaskShapeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMaskShape(frameNode, convValue);
+    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value);
+    if (convValue.has_value() && convValue.value()) {
+        ViewAbstract::SetMask(convValue.value());
+    }
 }
 void KeyImpl(Ark_NativePointer node,
              const Ark_String* value)
