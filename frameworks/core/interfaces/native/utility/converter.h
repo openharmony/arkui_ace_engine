@@ -91,10 +91,6 @@ using PickerRangeType = std::variant<
     std::pair<bool, std::vector<NG::RangeContent>>,
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>;
 
-struct PathShapeOptions {
-    std::optional<std::string> commands;
-};
-
 namespace Converter {
     constexpr double PERCENT_100 = 100.0;
 
