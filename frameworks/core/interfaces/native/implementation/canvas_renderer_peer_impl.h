@@ -150,6 +150,8 @@ public:
     void SetTextDirection(const Ace::TextDirection& direction);
     void SetTextAlign(const TextAlign& align);
     void SetTextBaseline(const TextBaseline& baseline);
+    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas) {}
+    void SetInstanceId(int32_t instanceId) {}
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
