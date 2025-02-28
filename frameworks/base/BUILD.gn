@@ -65,6 +65,7 @@ template("ace_base_source_set") {
       "log/ace_trace.cpp",
       "log/ace_tracker.cpp",
       "log/dump_log.cpp",
+      "log/dump_recorder.cpp",
       "log/jank_frame_report.cpp",
       "memory/memory_monitor.cpp",
       "mousestyle/mouse_style.cpp",

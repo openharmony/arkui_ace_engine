@@ -205,6 +205,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     virtual void DumpTree(int32_t depth, bool hasJson = false);
+    void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
@@ -722,6 +723,11 @@ public:
         return instanceId_;
     }
 
+    static std::set<std::string> GetLayoutTags()
+    {
+        return layoutTags_;
+    }
+
     virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
     {
         for (const auto& child : GetChildren()) {
@@ -1016,6 +1022,7 @@ private:
     bool isArkTsRenderNode_ = false;
     bool isTraversing_ = false;
     bool isAllowUseParentTheme_ = true;
+    const static std::set<std::string> layoutTags_;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
