@@ -7202,7 +7202,8 @@ void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
         return;
     }
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
-    auto position = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
+    auto position = paragraphs_.GetIndex(textOffset);
+    IF_TRUE(isAPI16Plus && (GetTextContentLength() == 0), position = 0);
     UpdateSelector(textSelector_.baseOffset, position);
     if (!isFirstMouseSelect_) {
         AdjustCursorPosition(position);
