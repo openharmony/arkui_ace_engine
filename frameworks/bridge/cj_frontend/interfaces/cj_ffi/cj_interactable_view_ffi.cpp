@@ -326,7 +326,7 @@ void FfiOHOSAceFrameworkInteractableViewOnSizeChange(void (*callback)(CJSizeOpti
 
 void FfiOHOSAceFrameworkInteractableViewOnDetach(void (*callback)())
 {
-    ViewAbstractModel::GetInstance()->SetOnDetach(CJLambda::Create(callback))
+    ViewAbstractModel::GetInstance()->SetOnDetach(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkInteractableViewOnVisibleAreaChange(
