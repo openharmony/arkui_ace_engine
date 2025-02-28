@@ -49,6 +49,22 @@ struct NativeCustomDialogControllerOptions {
     bool showInSubWindow;
     NativeOptionUInt32 backgroundColor;
     NativeLength cornerRadius;
+};
+
+struct NativeCustomDialogControllerOptionsV2 {
+    void(*cancel)();
+    bool autoCancel;
+    int32_t alignment;
+    NativeOffset offset;
+    bool customStyle;
+    NativeOptionInt32 gridCount;
+    uint32_t maskColor;
+    NativeRectangle maskRect;
+    NativeOptionAnimateParam openAnimation;
+    NativeOptionAnimateParam closeAnimation;
+    bool showInSubWindow;
+    NativeOptionUInt32 backgroundColor;
+    NativeLength cornerRadius;
     NativeOptionBool isModal;
     NativeOptionCallback1Param onWillDismiss;
     NativeOptionLength borderWidth;
@@ -61,6 +77,7 @@ struct NativeCustomDialogControllerOptions {
 };
 
 CJ_EXPORT int64_t FfiOHOSAceFrameworkCustomDialogControllerCtor(NativeCustomDialogControllerOptions options);
+CJ_EXPORT int64_t FfiOHOSAceFrameworkCustomDialogControllerCtorV2(NativeCustomDialogControllerOptionsV2 options);
 CJ_EXPORT void FfiOHOSAceFrameworkCustomDialogControllerBindView(int64_t controllerId, int64_t nativeViewId);
 CJ_EXPORT void FfiOHOSAceFrameworkCustomDialogControllerSetBuilder(int64_t controllerId, void(*builder)());
 CJ_EXPORT void FfiOHOSAceFrameworkCustomDialogControllerOpen(int64_t id);
@@ -73,6 +90,7 @@ class ACE_EXPORT NativeCustomDialogController : public OHOS::FFI::FFIData, publi
     DECLARE_ACE_TYPE(NativeCustomDialogController, AceType)
 public:
     NativeCustomDialogController(NativeCustomDialogControllerOptions options);
+    NativeCustomDialogController(NativeCustomDialogControllerOptionsV2 options);
 
     void SetView(NativeView* view)
     {
