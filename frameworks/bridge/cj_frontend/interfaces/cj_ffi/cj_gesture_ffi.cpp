@@ -164,6 +164,7 @@ void FormatGestureType(CJBaseGestureEvent& cjEvent, const std::shared_ptr<BaseGe
         switch (type) {
             case GestureTypeName::LONG_PRESS_GESTURE: {
                 auto* longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(info.get());
+                CHECK_NULL_VOID(longPressGestureEvent);
                 cjEvent.repeat = longPressGestureEvent->GetRepeat();
                 break;
             }
