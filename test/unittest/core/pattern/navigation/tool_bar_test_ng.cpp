@@ -373,7 +373,9 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest003, TestSize.Level1)
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
     opt.bgOptions.color = std::make_optional(FRONT_COLOR);
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     navToolbarPattern->SetToolbarOptions(std::move(opt));
 }
 
@@ -390,7 +392,9 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest004, TestSize.Level1)
     auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     navToolbarPattern->SetToolbarOptions(std::move(opt));
 }
 

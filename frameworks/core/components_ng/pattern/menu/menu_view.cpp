@@ -1004,6 +1004,62 @@ Alignment ConvertTxtTextAlign(bool IsRightToLeft, TextAlign textAlign)
     }
     return convertValue;
 }
+
+void SetBackgroundBlurStyle(const RefPtr<FrameNode>& host, const BlurStyleOption& bgBlurStyle)
+{
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(host->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(host->GetId());
+    }
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        if (renderContext->GetBackgroundEffect().has_value()) {
+            renderContext->UpdateBackgroundEffect(std::nullopt);
+        }
+        renderContext->UpdateBackBlurStyle(bgBlurStyle);
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+    }
+}
+
+void SetBackgroundEffect(const RefPtr<FrameNode>& host, const EffectOption &effectOption)
+{
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(host->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(host->GetId());
+    }
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+        if (renderContext->GetBackBlurStyle().has_value()) {
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+        }
+        renderContext->UpdateBackgroundEffect(effectOption);
+    }
+}
+
+void UpdateMenuBackgroundStyleOption(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    if (menuParam.backgroundBlurStyleOption.has_value()) {
+        BlurStyleOption backgroundBlurStyleOption = menuParam.backgroundBlurStyleOption.value();
+        SetBackgroundBlurStyle(menuNode, backgroundBlurStyleOption);
+    }
+    if (menuParam.backgroundEffectOption.has_value()) {
+        EffectOption backgroundEffectOption = menuParam.backgroundEffectOption.value();
+        SetBackgroundEffect(menuNode, backgroundEffectOption);
+    }
+}
 } // namespace
 
 void MenuView::CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode)
@@ -1466,12 +1522,13 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             }
             menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
         }
+        UpdateMenuBackgroundStyleOption(menuNode, menuParam);
     } else {
-        UpdateMenuBackgroundColor(menuNode, menuParam);
+        UpdateMenuBackgroundStyleSub(menuNode, menuParam);
     }
 }
 
-void MenuView::UpdateMenuBackgroundColor(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+void MenuView::UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     auto menuNodeRenderContext = menuNode->GetRenderContext();
     auto pipeLineContext = menuNode->GetContextWithCheck();
@@ -1480,6 +1537,7 @@ void MenuView::UpdateMenuBackgroundColor(const RefPtr<FrameNode>& menuNode, cons
     CHECK_NULL_VOID(selectTheme);
     menuNodeRenderContext->UpdateBackgroundColor(
         menuParam.backgroundColor.value_or(selectTheme->GetBackgroundColor()));
+    UpdateMenuBackgroundStyleOption(menuNode, menuParam);
 }
 
 void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)

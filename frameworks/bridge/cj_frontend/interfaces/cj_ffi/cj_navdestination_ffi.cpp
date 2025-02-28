@@ -162,8 +162,10 @@ void ParseTitlebarOptions(CJNavigationTitleOptions options)
     NG::NavigationTitlebarOptions titlebarOptions;
     titlebarOptions.bgOptions.color.reset();
     titlebarOptions.bgOptions.color = Color(options.backgroundColor);
-    titlebarOptions.bgOptions.blurStyle.reset();
-    titlebarOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.backgroundBlurStyle);
+    titlebarOptions.bgOptions.blurStyleOption.reset();
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = static_cast<BlurStyle>(options.backgroundBlurStyle);
+    titlebarOptions.bgOptions.blurStyleOption = blurStyleOption;
     titlebarOptions.brOptions.paddingStart.reset();
     titlebarOptions.brOptions.paddingStart = CalcDimension(options.paddingStart,
         static_cast<DimensionUnit>(options.paddingStartUnit));
