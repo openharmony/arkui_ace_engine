@@ -1390,6 +1390,14 @@ Dimension Convert(const Ark_LengthMetrics& src)
 }
 
 template<>
+DimensionOffset Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    return DimensionOffset(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
+}
+
+template<>
 DimensionRect Convert(const Ark_Rectangle &src)
 {
     DimensionRect dst;
