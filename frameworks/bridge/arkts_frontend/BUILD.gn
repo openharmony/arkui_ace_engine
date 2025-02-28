@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_source_set("arkts_frontend") {
