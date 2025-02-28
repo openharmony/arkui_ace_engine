@@ -1156,13 +1156,14 @@ HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack002, TestSize.Level1)
     auto buttonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
     ASSERT_NE(buttonNode, nullptr);
     auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    auto leftArrowGestureHub = leftArrowNode_->GetOrCreateGestureEventHub();
     /**
      * @tc.steps: step1 trigger click event.
      */
     ChangeIndex(2);
     GestureEvent info;
     info.SetSourceDevice(SourceType::KEYBOARD);
-    auto actuatorClick = arrowGestureHub->clickEventActuator_;
+    auto actuatorClick = leftArrowGestureHub->clickEventActuator_;
     auto eventsClick = actuatorClick->clickEvents_;
     ASSERT_FALSE(eventsClick.empty());
     auto event = eventsClick.front();
