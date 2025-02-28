@@ -253,7 +253,11 @@ void WebSelectOverlay::UpdateTouchHandleForOverlay(bool fromOverlay)
         CheckHandles(firstHandleInfo, insertHandle_);
         firstHandleInfo.needLayout = true;
         webSelectInfo_.firstHandle = firstHandleInfo;
-        UpdateFirstHandleOffset();
+        if (SelectOverlayIsOn()) {
+            UpdateFirstHandleOffset();
+        } else {
+            ProcessOverlay({ .animation = true });
+        }
     } else {
         if (selectTemporarilyHidden_ || selectTemporarilyHiddenByScroll_) {
             return;
