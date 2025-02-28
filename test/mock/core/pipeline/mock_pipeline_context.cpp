@@ -796,7 +796,7 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
         safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
         return;
     }
-    safeAreaManager_->UpdateNavArea(navSafeArea);
+    safeAreaManager_->UpdateNavSafeArea(navSafeArea);
 }
 
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()

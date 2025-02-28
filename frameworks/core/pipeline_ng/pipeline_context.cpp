@@ -1846,7 +1846,7 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
         return;
     }
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateNavArea(navSafeArea)) {
+    if (safeAreaManager_->UpdateNavSafeArea(navSafeArea)) {
         AnimateOnSafeAreaUpdate();
     }
 }
