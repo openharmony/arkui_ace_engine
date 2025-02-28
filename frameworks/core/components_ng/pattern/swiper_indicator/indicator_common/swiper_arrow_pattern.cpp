@@ -426,7 +426,7 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
             arrowGestureHub->AddClickEvent(arrowClickListener_);
         }
     }
-    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     if (accessibilityProperty) {
         accessibilityProperty->SetAccessibilityLevel(
             visible ? AccessibilityProperty::Level::AUTO : AccessibilityProperty::Level::NO_STR);
