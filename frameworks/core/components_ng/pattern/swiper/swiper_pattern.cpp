@@ -6104,7 +6104,7 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
 
 void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex)
 {
-    if (!currentProxyInAnimation_ && customAnimationToIndex_.value_or(toIndex) != toIndex) {
+    if (customAnimationToIndex_.value_or(toIndex) != toIndex) {
         TAG_LOGW(AceLogTag::ACE_SWIPER,
             "Swiper TriggerCustomContentTransitionEvent, fromIndex:%{public}d, toIndex:%{public}d", fromIndex, toIndex);
         needUnmountIndexs_.insert(toIndex);
