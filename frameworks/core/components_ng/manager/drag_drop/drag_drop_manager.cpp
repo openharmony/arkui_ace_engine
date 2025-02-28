@@ -963,6 +963,7 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
     DragPointerEvent dragPointerEvent;
     DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
     if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Reset dragging status, stop drag. pointerId: %{public}d", touchPoint.id);
         SetIsDisableDefaultDropAnimation(true);
         OnDragEnd(dragPointerEvent, "");
     }
