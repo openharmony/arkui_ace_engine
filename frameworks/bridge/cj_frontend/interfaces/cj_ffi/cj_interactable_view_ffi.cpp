@@ -320,7 +320,7 @@ void FfiOHOSAceFrameworkInteractableViewOnSizeChange(void (*callback)(CJSizeOpti
         cjSizeOptions.height = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
 
         onSizeChange(lastCJSizeOptions,cjSizeOptions);
-    }
+    };
     ViewAbstractModel::GetInstance()->SetOnSizeChanged(std::move(onSizeChangeFunc));
 }
 
