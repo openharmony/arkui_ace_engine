@@ -1557,7 +1557,6 @@ public:
     {
         isFilterChanged_ = isFilterChanged;
     }
-    float GetFontSizePx();
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;

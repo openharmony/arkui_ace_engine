@@ -5555,15 +5555,6 @@ bool TextFieldPattern::CursorMoveEnd()
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
-float TextFieldPattern::GetFontSizePx()
-{
-    auto theme = GetTheme();
-    CHECK_NULL_RETURN(theme, 0.0f);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, 0.0f);
-    return layoutProperty->GetFontSizeValue(theme->GetFontSize()).ConvertToPx();
-}
-
 bool TextFieldPattern::CursorMoveUpOperation()
 {
     if (!IsTextArea() && !IsSelected()) {
@@ -5571,14 +5562,8 @@ bool TextFieldPattern::CursorMoveUpOperation()
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
-    float fontSize = GetFontSizePx();
-    float lineHeight = 0.0f;
-    if (fontSize > selectController_->GetCaretRect().Height()) {
-        lineHeight = fontSize;
-    } else {
-        // multiply by 0.5f to convert to the grapheme center point of the previous line.
-        lineHeight = PreferredLineHeight() * 0.5f;
-    }
+    // multiply by 0.5f to convert to the grapheme center point of the previous line.
+    float lineHeight = PreferredLineHeight() * 0.5f;
     auto offsetY = selectController_->GetCaretRect().GetY() - lineHeight;
     if (offsetY < textRect_.GetY() && !IsSelected()) {
         return CursorMoveToParagraphBegin();
@@ -5606,14 +5591,8 @@ bool TextFieldPattern::CursorMoveDownOperation()
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
-    float fontSize = GetFontSizePx();
-    float lineHeight = 0.0f;
-    if (fontSize > selectController_->GetCaretRect().Height()) {
-        lineHeight = fontSize;
-    } else {
-        // multiply by 1.5f to convert to the grapheme center point of the next line.
-        lineHeight = PreferredLineHeight() * 1.5f;
-    }
+    // multiply by 1.5f to convert to the grapheme center point of the next line.
+    float lineHeight = PreferredLineHeight() * 1.5f;
     auto offsetY = selectController_->GetCaretRect().GetY() + lineHeight;
     if (offsetY > textRect_.GetY() + textRect_.Height() && !IsSelected()) {
         return CursorMoveToParagraphEnd();
@@ -6151,7 +6130,7 @@ void TextFieldPattern::HandleOnPageUp()
         return;
     }
     auto border = GetBorderWidthProperty();
-    float frameRectHeight = std::max(frameRect_.Height(), GetFontSizePx());
+    float frameRectHeight = std::max(frameRect_.Height(), PreferredLineHeight());
     float maxFrameHeight =
         frameRectHeight - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
     OnScrollCallback(maxFrameHeight, SCROLL_FROM_JUMP);
@@ -6167,7 +6146,7 @@ void TextFieldPattern::HandleOnPageDown()
         return;
     }
     auto border = GetBorderWidthProperty();
-    float frameRectHeight = std::max(frameRect_.Height(), GetFontSizePx());
+    float frameRectHeight = std::max(frameRect_.Height(), PreferredLineHeight());
     float maxFrameHeight =
         frameRectHeight - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
     OnScrollCallback(-maxFrameHeight, SCROLL_FROM_JUMP);

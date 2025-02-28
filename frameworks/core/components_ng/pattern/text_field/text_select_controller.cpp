@@ -433,6 +433,12 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
             auto dy = handleRect.GetY() + handleRect.Height() - contentBottomBoundary;
             textRect.SetTop(textRect.GetY() - dy);
             handleRect.SetTop(handleRect.GetY() - dy);
+        } else if (LessNotEqual(handleRect.GetY() + handleRect.Height(),
+            contentRect_.GetY() + contentRect_.Height()) &&
+            GreatNotEqual(handleRect.Height(), contentRect_.Height())) {
+            auto dy = contentRect_.GetY() - handleRect.GetY();
+            textRect.SetTop(textRect.GetY() + dy);
+            handleRect.SetTop(handleRect.GetY() + dy);
         }
     }
 
