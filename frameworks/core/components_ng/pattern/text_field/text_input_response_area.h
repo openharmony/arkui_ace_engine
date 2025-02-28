@@ -55,6 +55,9 @@ public:
 
     virtual void CreateIconRect(RoundRect& paintRect, bool isFocus) {}
 
+    void SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
+        float hoverRectHeight, bool isFocus);
+
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);

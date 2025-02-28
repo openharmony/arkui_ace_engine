@@ -246,6 +246,10 @@ public:
                 static_cast<bool>(pattern->GetAttr<double>("independent_control_keyboard", 0.0));
             theme->directionKeysMoveFocusOut_ =
                 static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
+            theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_cancel_icon_size", 16.0_vp);
+            }
         }
     };
 
@@ -917,7 +921,7 @@ private:
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
-    Dimension cancelIconSize_ = 16.0_vp;
+    Dimension cancelIconSize_;
     Dimension passwordIconSize_ = 20.0_vp;
     Dimension cancelIconPadding_ = 14.0_vp;
     Dimension passwordIconPadding_ = 10.0_vp;
