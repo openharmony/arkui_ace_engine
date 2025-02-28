@@ -83,6 +83,7 @@ struct MenuParam {
     bool isPreviewContainScale = false;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
+    HapticFeedbackMode hapticFeedbackMode = HapticFeedbackMode::DISABLED;
 };
 
 } // namespace OHOS::Ace::NG
