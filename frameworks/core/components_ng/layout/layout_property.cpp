@@ -389,7 +389,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> LayoutProperty::Ca
         widthString = StringExpression::ConvertDal2Rpn(calcSize.Width()->CalcValue());
     }
     if (calcSize.Height().has_value() && !calcSize.Height()->CalcValue().empty()) {
-        heightString = StringExpression::ConvertDal2Rpn(calcSize.Width()->CalcValue());
+        heightString = StringExpression::ConvertDal2Rpn(calcSize.Height()->CalcValue());
     }
     return std::pair<std::vector<std::string>, std::vector<std::string>>(widthString, heightString);
 }
