@@ -28,6 +28,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
+#include "base/geometry/shape.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/chain_animation.h"
 #include "core/components/common/layout/constants.h"
@@ -58,7 +59,11 @@
 #include "core/image/image_source_info.h"
 
 #include "ace_engine_types.h"
+#include "core/interfaces/native/implementation/circle_shape_peer.h"
+#include "core/interfaces/native/implementation/ellipse_shape_peer.h"
+#include "core/interfaces/native/implementation/path_shape_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/rect_shape_peer.h"
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "converter_union.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -482,6 +487,10 @@ namespace Converter {
     template<> PickerValueType Convert(const Array_String& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
+    template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
+    template<> RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
+    template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
+    template<> RefPtr<BasicShape> Convert(const Ark_RectShape& src);
     template<> RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
