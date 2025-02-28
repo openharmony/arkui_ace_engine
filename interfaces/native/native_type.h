@@ -2313,6 +2313,30 @@ typedef enum {
 } ArkUI_ListItemGroupArea;
 
 /**
+ * @brief Enumerates the keyboard avoidance modes.
+ *
+ * @since 18
+ */
+typedef enum {
+    /** Automatically avoids the soft keyboard and compresses the height when reaching the maximum limit. */
+    ARKUI_KEYBOARD_AVOID_MODE_DEFAULT = 0,
+    /** Does not avoid the keyboard. */
+    ARKUI_KEYBOARD_AVOID_MODE_NONE,
+}ArkUI_KeyboardAvoidMode;
+
+/**
+ * @brief Enumerates the types of display areas for the hover mode.
+ *
+ * @since 18
+ */
+typedef enum {
+    /** Upper half screen. */
+    ARKUI_HOVER_MODE_AREA_TYPE_TOP = 0,
+    /** Lower half screen. */
+    ARKUI_HOVER_MODE_AREA_TYPE_BOTTOM,
+}ArkUI_HoverModeAreaType;
+
+/**
  * @brief defines the enumerated value of the direction of the extended security zone.
  *
  * @since 12

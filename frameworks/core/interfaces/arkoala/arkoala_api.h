@@ -131,11 +131,52 @@ struct ArkUIRect {
     ArkUI_Float32 height;
 };
 
+typedef union {
+    /** Floating-point type. */
+    ArkUI_Float32 f32;
+    /** Signed integer. */
+    ArkUI_Int32 i32;
+    /** Unsigned integer. */
+    ArkUI_Uint32 u32;
+} ArkUINumberValue;
+
+struct ArkUIAttributeItem {
+    /** Numeric array. */
+    const ArkUINumberValue* value;
+    /** Size of the numeric array. */
+    ArkUI_Int32 size;
+    /** String type. */
+    const char* string;
+    /** Object type. */
+    void* object;
+};
+
 struct ArkUICornerRadius {
     ArkUI_Float32 topLeft;
     ArkUI_Float32 topRight;
     ArkUI_Float32 bottomLeft;
     ArkUI_Float32 bottomRight;
+};
+
+struct ArkUIBorderWidth {
+    ArkUI_Float32 top;
+    ArkUI_Float32 right;
+    ArkUI_Float32 bottom;
+    ArkUI_Float32 left;
+};
+
+struct ArkUIBorderColor {
+    ArkUI_Uint32 top;
+    ArkUI_Uint32 right;
+    ArkUI_Uint32 bottom;
+    ArkUI_Uint32 left;
+};
+
+struct ArkUIBorderStyle {
+    ArkUI_Int32 top;
+    ArkUI_Int32 right;
+    ArkUI_Int32 bottom;
+    ArkUI_Int32 left;
 };
 
 typedef struct _ArkUIDialog* ArkUIDialogHandle;
@@ -6032,8 +6073,24 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*registerOnDidAppear)(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
     ArkUI_Int32 (*registerOnWillDisappear)(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
     ArkUI_Int32 (*registerOnDidDisappear)(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
+    ArkUI_Int32 (*setBorderWidth)(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right,
+        ArkUI_Float32 bottom, ArkUI_Float32 left, ArkUI_Int32 unit);
+    ArkUI_Int32 (*setBorderColor)(
+        ArkUIDialogHandle handle, ArkUI_Uint32 top, ArkUI_Uint32 right, ArkUI_Uint32 bottom, ArkUI_Uint32 left);
+    ArkUI_Int32 (*setBorderStyle)(
+        ArkUIDialogHandle handle, ArkUI_Int32 top, ArkUI_Int32 right, ArkUI_Int32 bottom, ArkUI_Int32 left);
+    ArkUI_Int32 (*setWidth)(ArkUIDialogHandle handle, float width, ArkUI_Int32 unit);
+    ArkUI_Int32 (*setHeight)(ArkUIDialogHandle handle, float height, ArkUI_Int32 unit);
+    ArkUI_Int32 (*setShadow)(ArkUIDialogHandle handle, ArkUI_Int32 shadow);
+    ArkUI_Int32 (*setCustomShadow)(ArkUIDialogHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length);
+    ArkUI_Int32 (*setBackgroundBlurStyle)(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle);
+    ArkUI_Int32 (*setKeyboardAvoidMode)(ArkUIDialogHandle handle, ArkUI_Int32 keyboardAvoidMode);
+    ArkUI_Int32 (*enableHoverMode)(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode);
+    ArkUI_Int32 (*setHoverModeArea)(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType);
     ArkUI_Int32 (*openCustomDialog)(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
+    ArkUI_Int32 (*updateCustomDialog)(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
     ArkUI_Int32 (*closeCustomDialog)(ArkUI_Int32 dialogId);
+    ArkUI_Int32 (*setSubwindowMode)(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow);
 };
 
 struct ArkUIBasicNodeAPI {

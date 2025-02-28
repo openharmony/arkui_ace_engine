@@ -3072,19 +3072,19 @@
         "name": "OH_ArkUI_SwiperArrowStyle_Destroy"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_CreateOptions"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_DisposeOptions"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_OpenDialog"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_CloseDialog"
     },
     {
@@ -3098,6 +3098,102 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_CustomDialog_SetImmersiveMode"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_UpdateDialog"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBackgroundColor"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetCornerRadius"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBorderWidth"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBorderColor"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBorderStyle"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetWidth"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetHeight"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetShadow"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetCustomShadow"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBackgroundBlurStyle"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetAlignment"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetModalMode"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetAutoCancel"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetSubwindowMode"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetMask"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetKeyboardAvoidMode"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetHoverModeEnabled"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetHoverModeArea"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnWillDismissCallback"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnWillAppearCallback"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnDidAppearCallback"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnWillDisappearCallback"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback"
     },
     {
         "first_introduced": "16",
