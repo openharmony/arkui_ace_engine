@@ -138,7 +138,8 @@ public:
     VerticalAlign GetVerticalAlign() const;
     void SetImageFit(ImageFit objectFit);
     ImageFit GetObjectFit() const;
-
+    void SetUrlAddress(const std::u16string& urlAddress);
+    const std::u16string& GetUrlAddress() const;
     void SetBorderRadius(const std::string& borderRadius)
     {
         borderRadius_ = borderRadius;
@@ -178,6 +179,7 @@ private:
     int32_t eraseLength_ = 0;
     std::u16string value_;
     std::u16string previewText_;
+    std::u16string urlAddress_;
     std::string fontColor_;
     FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;

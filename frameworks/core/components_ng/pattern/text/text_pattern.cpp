@@ -402,7 +402,7 @@ bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
                 MarkDirtySelf();
                 return false;
             }
-            auto inter = GetStartAndEnd(start);
+            auto inter = GetStartAndEnd(start, item);
             auto rects = GetSelectedRects(inter.first, inter.second);
             overlayMod_->SetSelectedForegroundColorAndRects(rects, color.GetValue());
             MarkDirtySelf();
@@ -415,7 +415,7 @@ bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
     return false;
 }
 
-std::pair<int32_t, int32_t> TextPattern::GetStartAndEnd(int32_t start)
+std::pair<int32_t, int32_t> TextPattern::GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem)
 {
     auto spanBases = styledString_->GetSpans(0, styledString_->GetLength(), SpanType::Url);
     for (const auto& spanBase : spanBases) {

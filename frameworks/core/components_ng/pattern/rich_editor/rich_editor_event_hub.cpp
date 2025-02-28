@@ -339,6 +339,16 @@ ImageFit RichEditorAbstractSpanResult::GetObjectFit() const
     return objectFit_;
 }
 
+void RichEditorAbstractSpanResult::SetUrlAddress(const std::u16string& urlAddress)
+{
+    urlAddress_ = urlAddress;
+}
+
+const std::u16string& RichEditorAbstractSpanResult::GetUrlAddress() const
+{
+    return urlAddress_;
+}
+
 void RichEditorDeleteValue::SetOffset(int32_t offset)
 {
     offset_ = offset;
