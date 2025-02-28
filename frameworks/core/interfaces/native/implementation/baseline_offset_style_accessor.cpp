@@ -13,18 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaselineOffsetStyleAccessor {
 void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
+    delete peer;
 }
 Ark_BaselineOffsetStyle CtorImpl(Ark_LengthMetrics value)
 {
-    return {};
+    CHECK_NULL_RETURN(value, {});
+    auto offset = Converter::Convert<Dimension>(value);
+    auto span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset);
+    return new BaselineOffsetStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +37,10 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Int32 GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->span, {});
+    auto value = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->span->GetBaselineOffset().ConvertToVp()));
+    return value;
 }
 } // BaselineOffsetStyleAccessor
 const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor()
@@ -46,7 +54,4 @@ const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor
     return &BaselineOffsetStyleAccessorImpl;
 }
 
-struct BaselineOffsetStylePeer {
-    virtual ~BaselineOffsetStylePeer() = default;
-};
 }
