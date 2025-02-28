@@ -121,7 +121,7 @@ private:
 
     // Compote position of grid item in cross axis.
     float ComputeItemCrossPosition(int32_t crossStart) const;
-    virtual void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem);
+    virtual void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper);
     // Find next valid cell when current is not valid.
     bool GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
     // Find a valid cell to place grid item and save to grid matrix.
