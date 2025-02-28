@@ -223,14 +223,15 @@ void Scrollable::SetOnActionCancel()
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
-        scroll->HandleDragEnd(info);
+        GestureEvent nullInfo;
+        scroll->HandleDragEnd(nullInfo);
         if (scroll->panActionEndEvents_.empty()) {
             scroll->isDragging_ = false;
             return;
         }
         std::for_each(scroll->panActionEndEvents_.begin(), scroll->panActionEndEvents_.end(),
-            [info](GestureEventFunc& event) {
-                auto gestureInfo = info;
+            [nullInfo](GestureEventFunc& event) {
+                auto gestureInfo = nullInfo;
                 event(gestureInfo);
             });
         scroll->isDragging_ = false;
