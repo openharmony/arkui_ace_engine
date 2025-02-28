@@ -2886,9 +2886,9 @@ void JsAccessibilityManager::RegisterUIExtBusinessConsumeCallback()
         info.top = data.GetIntParam("top", 0);
         info.scaleX = data.GetFloatParam("scaleX", 1.0f);
         info.scaleY = data.GetFloatParam("scaleY", 1.0f);
-        RotateTransform rotateTransform(data.GetFloatParam("rotateDegree", 0), data.GetFloatParam("centerX", 0),
-            data.GetFloatParam("centerY", 0), data.GetFloatParam("innerCenterX", 0),
-            data.GetFloatParam("innerCenterY", 0));
+        RotateTransform rotateTransform(data.GetIntParam("rotateDegree", 0), data.GetIntParam("centerX", 0),
+            data.GetIntParam("centerY", 0), data.GetIntParam("innerCenterX", 0),
+            data.GetIntParam("innerCenterY", 0));
         info.rotateTransform = rotateTransform;
         info.isChanged = true;
         jsAccessibilityManager->UpdateUECAccessibilityParentRectInfo(info);
@@ -7202,6 +7202,7 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
             windowInfo.left = rectInfo.left;
             windowInfo.scaleX = rectInfo.scaleX;
             windowInfo.scaleY = rectInfo.scaleY;
+            windowInfo.rotateTransform = rectInfo.rotateTransform;
             SetReentrantLimit(false);
             return windowInfo;
         }

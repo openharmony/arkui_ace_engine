@@ -2140,6 +2140,7 @@ AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
                 rotateData.innerCenterX = rectOrigin.Width() * 0.5f;
                 rotateData.innerCenterY = rectOrigin.Height() * 0.5f;
             }
+            rectInfo.rotateTransform = rotateData;
         }
     }
     return rectInfo;

@@ -39,7 +39,7 @@ namespace OHOS::Ace {
 
 constexpr int32_t ZERO_ANGLE = 0;
 constexpr int32_t QUARTER_ANGLE = 90;
-constexpr int32_t HALFG_ANGLE = 180;
+constexpr int32_t HALF_ANGLE = 180;
 constexpr int32_t THREE_QUARTER_ANGLE = 270;
 constexpr int32_t FULL_ANGLE = 360;
 
@@ -365,14 +365,15 @@ private:
     void calculateNewCenter(float cx, float cy, float rectCx, float rectCy,
         int angle, float& newCx, float& newCy)
     {
+        int addDouble = 2;
         switch (angle) {
             case QUARTER_ANGLE:
                 newCx = cx - (rectCy - cy);
                 newCy = cy + (rectCx - cx);
                 break;
-            case HALFG_ANGLE:
-                newCx = 2 * cx - rectCx;
-                newCy = 2 * cy - rectCy;
+            case HALF_ANGLE:
+                newCx = addDouble * cx - rectCx;
+                newCy = addDouble * cy - rectCy;
                 break;
             case THREE_QUARTER_ANGLE:
                 newCx = cx + (rectCy - cy);
@@ -403,7 +404,7 @@ public:
         return height_;
     }
 
-    void SetPoistion(float x, float y)
+    void SetPosition(float x, float y)
     {
         x_ = x;
         y_ = y;
