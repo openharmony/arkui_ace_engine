@@ -51,8 +51,7 @@ HWTEST_F(ScaleSymbolEffectAccessorTest, scopeTest, TestSize.Level1)
 {
     auto scope = Converter::ArkValue<Ark_EffectScope>(OHOS::Ace::ScopeType::WHOLE);
     accessor_->setScope(peer_, scope);
-    ASSERT_NE(peer_->effectOptions, nullptr);
-    auto aceScope = peer_->effectOptions->GetScopeType();
+    auto aceScope = peer_->effectOptions.GetScopeType();
     ASSERT_EQ(aceScope, OHOS::Ace::ScopeType::WHOLE);
 
     Ark_EffectScope arkScope = accessor_->getScope(peer_);
@@ -68,8 +67,7 @@ HWTEST_F(ScaleSymbolEffectAccessorTest, directionTest, TestSize.Level1)
 {
     auto scope = Converter::ArkValue<Ark_EffectDirection>(OHOS::Ace::CommonSubType::UP);
     accessor_->setDirection(peer_, scope);
-    ASSERT_NE(peer_->effectOptions, nullptr);
-    auto aceDirection = peer_->effectOptions->GetCommonSubType();
+    auto aceDirection = peer_->effectOptions.GetCommonSubType();
     ASSERT_EQ(aceDirection, OHOS::Ace::CommonSubType::UP);
 
     Ark_EffectDirection arkDirection = accessor_->getDirection(peer_);

@@ -50,8 +50,7 @@ HWTEST_F(ReplaceSymbolEffectAccessorTest, scopeTest, TestSize.Level1)
 {
     auto scope = Converter::ArkValue<Ark_EffectScope>(OHOS::Ace::ScopeType::WHOLE);
     accessor_->setScope(peer_, scope);
-    ASSERT_NE(peer_->effectOptions, nullptr);
-    auto aceScope = peer_->effectOptions->GetScopeType();
+    auto aceScope = peer_->effectOptions.GetScopeType();
     ASSERT_EQ(aceScope, OHOS::Ace::ScopeType::WHOLE);
 
     Ark_EffectScope arkScope = accessor_->getScope(peer_);

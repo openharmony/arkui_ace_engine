@@ -30,7 +30,8 @@ Ark_ReplaceSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
     auto convScore = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(*scope);
     auto peer = new ReplaceSymbolEffectPeer();
-    peer->effectOptions->SetScopeType(convScore.value());
+    peer->effectOptions.SetEffectType(OHOS::Ace::SymbolEffectType::REPLACE);
+    peer->effectOptions.SetScopeType(convScore.value());
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -40,7 +41,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_EffectScope GetScopeImpl(Ark_ReplaceSymbolEffect peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_EffectScope>(ARK_EFFECT_SCOPE_LAYER));
-    auto optValue = peer->effectOptions->GetScopeType();
+    auto optValue = peer->effectOptions.GetScopeType();
     CHECK_NULL_RETURN(optValue, Converter::ArkValue<Ark_EffectScope>(ARK_EFFECT_SCOPE_LAYER));
     return Converter::ArkValue<Ark_EffectScope>(optValue.value());
 }
@@ -50,9 +51,9 @@ void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
     CHECK_NULL_VOID(peer);
     auto scopeConv = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(scope);
     if (scopeConv) {
-        peer->effectOptions->SetScopeType(scopeConv.value());
+        peer->effectOptions.SetScopeType(scopeConv.value());
     } else {
-        peer->effectOptions->SetScopeType(OHOS::Ace::ScopeType::LAYER);
+        peer->effectOptions.SetScopeType(OHOS::Ace::ScopeType::LAYER);
     }
 }
 } // ReplaceSymbolEffectAccessor
