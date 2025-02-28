@@ -1033,6 +1033,7 @@ private:
     void ProcessVisibleAreaCallback();
     void PauseSymbolAnimation();
     void ResumeSymbolAnimation();
+    bool IsLocationInFrameRegion(const Offset& localOffset) const;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
