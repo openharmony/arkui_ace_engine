@@ -27,7 +27,8 @@ void DestroyPeerImpl(Ark_PathShape peer)
 Ark_PathShape CtorImpl(const Opt_PathShapeOptions* options)
 {
     auto optOptions = options ? Converter::OptConvert<PathShapeOptions>(*options) : std::nullopt;
-    return new PathShapePeerImpl(optOptions.value_or(PathShapeOptions{}));
+    auto peer = new PathShapePeerImpl(optOptions.value_or(PathShapeOptions{}));
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -41,7 +42,7 @@ Ark_PathShape OffsetImpl(Ark_PathShape peer,
         peer->ResetOffset();
         return peer;
     }
-    peer->SetOffset(Converter::Convert<PathShapePosition>(*offset));
+    peer->SetOffset(Converter::Convert<DimensionOffset>(*offset));
     return peer;
 }
 Ark_PathShape FillImpl(Ark_PathShape peer,
@@ -68,7 +69,7 @@ Ark_PathShape PositionImpl(Ark_PathShape peer,
         peer->ResetPosition();
         return peer;
     }
-    peer->SetPosition(Converter::Convert<PathShapePosition>(*position));
+    peer->SetPosition(Converter::Convert<DimensionOffset>(*position));
     return peer;
 }
 Ark_PathShape CommandsImpl(Ark_PathShape peer,

@@ -15,83 +15,86 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_SHAPE_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_SHAPE_PEER_H
 
+// #pragma once
+
+#include "arkoala_api_generated.h"
+#include "frameworks/base/memory/ace_type.h"
+#include "frameworks/base/geometry/dimension.h"
+#include "frameworks/base/geometry/dimension_offset.h"
+#include "frameworks/base/geometry/shape.h"
 #include "core/components/common/properties/color.h"
-#include "core/interfaces/native/utility/converter.h"
+// #include "core/interfaces/native/utility/converter.h"
+#include "frameworks/core/interfaces/native/implementation/basic_shape_peer.h"
 
-namespace OHOS::Ace::NG {
+using DimensionOffset = OHOS::Ace::DimensionOffset;
+using PathShapeOptions = OHOS::Ace::NG::PathShapeOptions;
+using Path = OHOS::Ace::Path;
+using BasicShape = OHOS::Ace::BasicShape;
+using Color = OHOS::Ace::Color;
 
-// namespace Converter {
-//     template<>
-//     PathShapeOptions Convert(const Ark_PathShapeOptions& value)
-//     {
-//         return {.commands = Converter::OptConvert<std::string>(value.commands)};
-//     };
-//     template<>
-//     PathShapePosition Convert(const Ark_Position& value)
-//     {
-//         return {.x = Converter::OptConvert<InteropLength>(value.x),
-//             .y = Converter::OptConvert<InteropLength>(value.y)};
-//     };
-// }
-}
-
-struct PathShapePeer {
+struct PathShapePeer : public BasicShapePeer {
     public:
-        PathShapePeer(OHOS::Ace::NG::PathShapeOptions options): commands_(options.commands.value_or("")) {};
-        ~PathShapePeer(){};
-        std::string GetCommands() const
+        PathShapePeer(PathShapeOptions options) 
         {
-            return commands_;
+            shape_ = OHOS::Ace::AceType::MakeRefPtr<Path>();
+            shape_->SetValue(options.commands.value_or(""));
+        };
+        ~PathShapePeer() = default;
+        
+        OHOS::Ace::RefPtr<BasicShape> GetBasicShape() override
+        {
+            return shape_;
         }
-        OHOS::Ace::NG::PathShapePosition GetOffset() const
+        const std::string& GetCommands() const
         {
-            return offset_;
+            return shape_->GetValue();
         }
-        OHOS::Ace::Color GetFill() const
+        void SetCommands(const std::string& commands)
         {
-            return fill_;
-        }
-        OHOS::Ace::NG::PathShapePosition GetPosition() const
-        {
-            return position_;
-        }
-        void SetCommands(std::string commands)
-        {
-            commands_ = commands;
+            shape_->SetValue(commands);
         }
         void ResetCommands()
         {
-            commands_ = "";
+            shape_->SetValue("");
         }
-        void SetOffset(OHOS::Ace::NG::PathShapePosition offset)
+        const DimensionOffset& GetOffset() const
         {
-            offset_ = offset;
+            return shape_->GetOffset();
+        }
+        void SetOffset(const DimensionOffset& offset)
+        {
+            shape_->SetOffset(offset);
         }
         void ResetOffset()
         {
-            offset_ = {};
+            shape_->SetOffset({});
         }
-        void SetFill(OHOS::Ace::Color color)
+        Color GetFill() const
         {
-            fill_ = color;
+            return shape_->GetColor();
+        }
+        void SetFill(const Color& color)
+        {
+            shape_->SetColor(color);
         }
         void ResetFill()
         {
-            fill_ = {};
+            shape_->SetColor({});
         }
-        void SetPosition(OHOS::Ace::NG::PathShapePosition position)
+        const DimensionOffset& GetPosition() const
         {
-            position_ = position;
+            return shape_->GetPosition();
+        }
+        void SetPosition(const DimensionOffset& position)
+        {
+            shape_->SetPosition(position);
         }
         void ResetPosition()
         {
-            position_ = {};
+            shape_->SetPosition({});
         }
     private:
-        std::string commands_ = "";
-        OHOS::Ace::NG::PathShapePosition offset_ = {};
-        OHOS::Ace::Color fill_;
-        OHOS::Ace::NG::PathShapePosition position_ = {};
+        OHOS::Ace::RefPtr<Path> shape_;
 };
 
 namespace OHOS::Ace::NG::GeneratedModifier {

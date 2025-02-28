@@ -2101,9 +2101,10 @@ PathShapeOptions Convert(const Ark_PathShapeOptions& value)
 };
 
 template<>
-PathShapePosition Convert(const Ark_Position& value)
+DimensionOffset Convert(const Ark_Position& src)
 {
-    return {.x = Converter::OptConvert<Dimension>(value.x),
-        .y = Converter::OptConvert<Dimension>(value.y)};
+    auto deltaX = Converter::OptConvert<Dimension>(src.x).value_or(Dimension());
+    auto deltaY = Converter::OptConvert<Dimension>(src.y).value_or(Dimension());
+    return DimensionOffset(deltaX, deltaY);
 };
 } // namespace OHOS::Ace::NG::Converter

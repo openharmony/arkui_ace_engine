@@ -94,10 +94,6 @@ using PickerRangeType = std::variant<
 struct PathShapeOptions {
     std::optional<std::string> commands;
 };
-struct PathShapePosition {
-    std::optional<Dimension> x;
-    std::optional<Dimension> y;   
-};
 
 namespace Converter {
     constexpr double PERCENT_100 = 100.0;
@@ -566,7 +562,7 @@ namespace Converter {
     template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> PathShapeOptions Convert(const Ark_PathShapeOptions& value);
-    template<> PathShapePosition Convert(const Ark_Position& value);
+    template<> DimensionOffset Convert(const Ark_Position& value);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
