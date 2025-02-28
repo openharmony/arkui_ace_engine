@@ -422,7 +422,7 @@ napi_modules = [
         lib_names = [ "composetitlebar" ]
       },
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/dialog/interfaces:dialog"
+        label = "//foundation/arkui/ace_engine/advanced_ui_component:dialog"
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "dialog" ]
