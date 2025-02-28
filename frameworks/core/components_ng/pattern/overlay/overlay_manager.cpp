@@ -842,7 +842,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     }
 }
 
-void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, std::optional<double> levelOrder)
+void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -860,7 +860,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, std
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
     auto onFinish = option.GetOnFinishEvent();
-    bool isNeedFocus = IsNeedChangeFocus(levelOrder);
+    bool isNeedFocus = IsNeedChangeFocus(dialogProps.levelOrder, dialogProps.focusable);
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), onFinish, isNeedFocus] {
             if (onFinish) {
@@ -896,7 +896,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, std
         AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
-void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, std::optional<double> levelOrder)
+void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "open dialog animation");
     CHECK_NULL_VOID(node);
@@ -909,10 +909,10 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, std::opt
         root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
     }
     CHECK_NULL_VOID(root);
-    MountToParentWithService(root, node, levelOrder);
+    MountToParentWithService(root, node, dialogProps.levelOrder);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
-    OpenDialogAnimationInner(node, levelOrder);
+    OpenDialogAnimationInner(node, dialogProps);
 }
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
@@ -971,7 +971,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "close dialog animation");
 }
 
-void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, std::optional<double> levelOrder)
+void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "set dialog transition");
     CHECK_NULL_VOID(node);
@@ -984,7 +984,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, st
 
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
-    bool isNeedFocus = IsNeedChangeFocus(levelOrder);
+    bool isNeedFocus = IsNeedChangeFocus(dialogProps.levelOrder, dialogProps.focusable);
     ctx->SetTransitionInCallback(
         [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), isNeedFocus] {
             auto overlayManager = weak.Upgrade();
@@ -1004,7 +1004,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, st
     }
 
     CHECK_NULL_VOID(root);
-    MountToParentWithService(root, node, levelOrder);
+    MountToParentWithService(root, node, dialogProps.levelOrder);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     node->OnAccessibilityEvent(
@@ -2542,13 +2542,12 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     }
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
     BeforeShowDialog(dialog);
-    auto levelOrder = dialogProps.levelOrder;
     if (dialogProps.transitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, levelOrder);
+        SetDialogTransitionEffect(dialog, dialogProps);
     } else {
-        OpenDialogAnimation(dialog, levelOrder);
+        OpenDialogAnimation(dialog, dialogProps);
     }
-    PutLevelOrder(dialog, levelOrder);
+    PutLevelOrder(dialog, dialogProps.levelOrder);
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
@@ -2573,13 +2572,12 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
     CHECK_NULL_RETURN(dialog, nullptr);
     BeforeShowDialog(dialog);
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
-    auto levelOrder = dialogProps.levelOrder;
     if (dialogProps.transitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, levelOrder);
+        SetDialogTransitionEffect(dialog, dialogProps);
     } else {
-        OpenDialogAnimation(dialog, levelOrder);
+        OpenDialogAnimation(dialog, dialogProps);
     }
-    PutLevelOrder(dialog, levelOrder);
+    PutLevelOrder(dialog, dialogProps.levelOrder);
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
@@ -2703,14 +2701,14 @@ void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
     }
 
     callback(showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId());
-    auto levelOrder = dialogProps.levelOrder;
+
     if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
         dialogProps.maskTransitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, levelOrder);
+        SetDialogTransitionEffect(dialog, dialogProps);
     } else {
-        OpenDialogAnimation(dialog, levelOrder);
+        OpenDialogAnimation(dialog, dialogProps);
     }
-    PutLevelOrder(dialog, levelOrder);
+    PutLevelOrder(dialog, dialogProps.levelOrder);
 
     dialogCount_++;
     CustomDialogRecordEvent(dialogProps);
@@ -2993,8 +2991,12 @@ RefPtr<FrameNode> OverlayManager::GetBottomOrderFirstOverlayNode(std::optional<d
     return DynamicCast<FrameNode>(orderOverlayNode);
 }
 
-bool OverlayManager::IsNeedChangeFocus(std::optional<double> levelOrder)
+bool OverlayManager::IsNeedChangeFocus(std::optional<double> levelOrder, bool focusable)
 {
+    if (!focusable) {
+        return false;
+    }
+
     if (!levelOrder.has_value()) {
         return true;
     }
@@ -3032,7 +3034,11 @@ void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show custom dialog enter");
     BeforeShowDialog(customNode);
-    OpenDialogAnimation(customNode);
+    DialogProperties dialogProps = {
+        .levelOrder = std::nullopt,
+        .focusable = true,
+    };
+    OpenDialogAnimation(customNode, dialogProps);
 }
 
 void RegisterDialogCallback(
@@ -3066,7 +3072,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
         dialogProps, std::move(settingData), buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
-    OpenDialogAnimation(dialogNode);
+    OpenDialogAnimation(dialogNode, dialogProps);
 #endif
 }
 
@@ -3081,7 +3087,7 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
         std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
-    OpenDialogAnimation(dialogNode);
+    OpenDialogAnimation(dialogNode, dialogProps);
 #endif
 }
 
@@ -3096,7 +3102,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
         dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
-    OpenDialogAnimation(dialogNode);
+    OpenDialogAnimation(dialogNode, dialogProps);
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_SHOW);
@@ -3115,7 +3121,7 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
         buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
-    OpenDialogAnimation(dialogNode);
+    OpenDialogAnimation(dialogNode, dialogProps);
 #endif
 }
 

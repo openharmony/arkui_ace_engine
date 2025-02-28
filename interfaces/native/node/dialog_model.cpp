@@ -314,6 +314,18 @@ int32_t RegisterOnDidDisappear(ArkUI_NativeDialogHandle handle, void* userData, 
     int result = impl->getDialogAPI()->registerOnDidDisappear(handle->controller, userData, callback);
     return result;
 }
+
+int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+    }
+    if (!handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setFocusable(handle->controller, focusable);
+}
 } // namespace OHOS::Ace::NG::DialogModel
 
 #ifdef __cplusplus

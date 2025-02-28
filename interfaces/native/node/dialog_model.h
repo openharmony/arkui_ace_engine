@@ -68,6 +68,7 @@ int32_t RegisterOnWillAppear(ArkUI_NativeDialogHandle handle, void* userData, vo
 int32_t RegisterOnDidAppear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
 int32_t RegisterOnWillDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
 int32_t RegisterOnDidDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable);
 } // namespace OHOS::Ace::NG::DialogModel
 
 #endif // ARKUI_NATIVE_NODE_DIALOG_MODEL_H

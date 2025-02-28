@@ -66,6 +66,7 @@ ArkUIDialogHandle CreateDialog()
         .levelUniqueId = ARKUI_DEFAULT_LEVEL_UNIQUEID,
         .immersiveMode = ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE,
         .levelOrder = 0.0f,
+        .focusable = true,
         .onWillAppearData = nullptr,
         .onDidAppearData = nullptr,
         .onWillDisappearData = nullptr,
@@ -244,6 +245,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     if (!dialogProperties.isShowInSubWindow) {
         dialogProperties.levelOrder = std::make_optional(controllerHandler->levelOrder);
     }
+    dialogProperties.focusable = controllerHandler->focusable;
 
     ParseDialogMask(dialogProperties, controllerHandler);
     ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
@@ -457,6 +459,13 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle controllerHandler, ArkUI_Float64 lev
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->levelOrder = levelOrder;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->focusable = focusable;
     return ERROR_CODE_NO_ERROR;
 }
 
