@@ -4695,7 +4695,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .height = std::abs(caretLeftTopPoint.GetY() - caretRightBottomPoint.GetY()) };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)TextInputType::UNSPECIFIED,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
-        .isTextPreviewSupported = isTextPreviewSupported_,
+        .isTextPreviewSupported = isTextPreviewSupported_ && (!isSpanStringMode_ || isAPI16Plus),
         .immersiveMode = static_cast<int32_t>(keyboardAppearance_) };
     auto start = textSelector_.IsValid() ? textSelector_.GetStart() : caretPosition_;
     auto end = textSelector_.IsValid() ? textSelector_.GetEnd() : caretPosition_;
@@ -4922,6 +4922,7 @@ int32_t RichEditorPattern::SetPreviewText(const std::u16string& previewTextValue
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SetPreviewText, range=[%{public}d,%{public}d], isSSMode=%{public}d",
         range.start, range.end, isSpanStringMode_);
+    CHECK_NULL_RETURN(!isSpanStringMode_ || isAPI16Plus, ERROR_BAD_PARAMETERS);
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewText=%{public}s", UtfUtils::Str16ToStr8(previewTextValue).c_str());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ERROR_BAD_PARAMETERS);
@@ -5297,7 +5298,8 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     bool allowImeInput = isIME ? BeforeIMEInsertValue(text) : true;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, needReplacePreviewText=%{public}d",
         allowContentChange, allowImeInput, previewTextRecord_.needReplacePreviewText);
-    CHECK_NULL_VOID((allowContentChange && allowImeInput) || previewTextRecord_.needReplacePreviewText);
+    bool allowPreviewText = previewTextRecord_.needReplacePreviewText || (previewTextRecord_.needReplaceText && !isAPI16Plus);
+    CHECK_NULL_VOID((allowContentChange && allowImeInput) || allowPreviewText);
     ProcessInsertValueMore(text, record, operationType, changeValue, preRecord);
 }
 
