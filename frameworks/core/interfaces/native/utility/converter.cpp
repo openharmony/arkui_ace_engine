@@ -1226,6 +1226,34 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
     }
 }
 
+template<> 
+RefPtr<BasicShape> Convert(const Ark_CircleShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->GetBasicShape();
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_EllipseShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->GetBasicShape();
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_PathShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->GetBasicShape();
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_RectShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->GetBasicShape();
+}
+
 template<>
 RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
 {
