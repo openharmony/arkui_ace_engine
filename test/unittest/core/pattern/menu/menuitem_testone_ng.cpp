@@ -403,10 +403,10 @@ HWTEST_F(MenuItemTestOneNg, CheckNeedMatchParent001, TestSize.Level1)
     /**
      * @tc.steps: step1. build frame node tree
      */
-     RefPtr<FrameNode> outerMenuNode =
+    RefPtr<FrameNode> outerMenuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
             []() {
-                return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "" TYPE);
+                return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
             });
     ASSERT_NE(outerMenuNode, nullptr);
     auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
@@ -425,7 +425,7 @@ HWTEST_F(MenuItemTestOneNg, CheckNeedMatchParent001, TestSize.Level1)
 
     RefPtr<FrameNode> innerMenuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-            []() {return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "" TYPE);});
+            []() {return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE);});
     ASSERT_NE(innerMenuNode, nullptr);
     innerMenuNode->MountToParent(jsViewNode1);
     auto menuItemNode =

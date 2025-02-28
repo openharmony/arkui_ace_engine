@@ -817,7 +817,7 @@ HWTEST_F(MenuItemTestNg, MenuItemEventTest001, TestSize.Level1)
 /**
  * @tc.name: MenuItemPattern#UpdatePasteDisabledOpacity001
  * @tc.desc: Verify UpdatePasteDisabledOpacity.
- * @tc.type: FUNC 
+ * @tc.type: FUNC
  */
 HWTEST_F(MenuItemTestNg, MenuItemPatternUpdatePasteDisabledOpacity001, TestSize.Level1)
 {
