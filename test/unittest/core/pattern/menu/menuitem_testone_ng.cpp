@@ -438,11 +438,11 @@ HWTEST_F(MenuItemTestOneNg, CheckNeedMatchParent001, TestSize.Level1)
 
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
-    menuItemPattern->expandingMode_ = SubMenuExpandingMode.EMBEDDED;
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
 
     auto innerMenuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
     ASSERT_NE(innerMenuPattern, nullptr);
-    innerMenuPattern->IsEmbedded_ = true;
+    innerMenuPattern->isEmbedded_ = true;
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
@@ -464,7 +464,7 @@ HWTEST_F(MenuItemTestOneNg, CheckUserHeight001, TestSize.Level1)
     auto menuItemNode =
         FrameNode::CreateFrameNode(
             V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<MenuItemPaintMethod>()
+            AceType::MakeRefPtr<MenuItemPattern>()
         );
     ASSERT_NE(menuItemNode, nullptr);
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
