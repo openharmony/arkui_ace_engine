@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/ressched/ressched_report.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -2635,12 +2636,14 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         navigationMode_, isNotNeedAnimation);
 #endif
 
+    std::string fromNavDestinationName = "";
+    std::string toNavDestinationName = "";
     if (preDestination) {
         fromPathInfo = preDestination->GetNavDestinationPathInfo();
         auto preDestinationPattern = preDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(preDestinationPattern);
-        auto navDestinationName = preDestinationPattern->GetName();
-        fromPathInfo += ", navDesitinationName: " + navDestinationName;
+        fromNavDestinationName = preDestinationPattern->GetName();
+        fromPathInfo += ", navDesitinationName: " + fromNavDestinationName;
         if ((isPopPage || preDestination->NeedRemoveInPush()) && isNotNeedAnimation) {
             /**
              * when transition without animation, 'pop' and 'push with remove' need to post
@@ -2655,12 +2658,13 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         toPathInfo = topDestination->GetNavDestinationPathInfo();
         auto topDestinationPattern = topDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(topDestinationPattern);
-        auto navDestinationName = topDestinationPattern->GetName();
-        toPathInfo += ", navDesitinationName: " + navDestinationName;
+        toNavDestinationName = topDestinationPattern->GetName();
+        toPathInfo += ", navDesitinationName: " + toNavDestinationName;
     } else {
         toPathInfo = hostNode->GetNavigationPathInfo();
     }
     ACE_SCOPED_TRACE_COMMERCIAL("NavDestination Page from %s to %s", fromPathInfo.c_str(), toPathInfo.c_str());
+    ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation");
 
     // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {

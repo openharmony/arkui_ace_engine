@@ -27,6 +27,7 @@ constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
+constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
@@ -72,6 +73,9 @@ constexpr char KEY_CODE[] = "key_code";
 constexpr char AXIS_OFF[] = "axis_off";
 constexpr char AXIS_NORMAL_UP_SPEED[] = "0.0";
 constexpr char AXIS_EVENT_TYPE[] = "axis_event_type";
+constexpr char FROM_PAGE_INFO[] = "from_page";
+constexpr char TO_PAGE_INFO[] = "to_page";
+constexpr char TRANSITION_MODE[] = "transition_mode";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -490,6 +494,22 @@ void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)
         default:
             break;
     }
+}
+
+void ResSchedReport::HandlePageTransition(const std::string& fromPage,
+    const std::string& toPage, const std::string& mode)
+{
+    if (fromPage.empty() || toPage.empty()) {
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "rss report page transition empty info:%{public}s, %{public}s",
+            fromPage.c_str(), toPage.c_str());
+        return;
+    }
+    std::unordered_map<std::string, std::string> payload;
+    payload[FROM_PAGE_INFO] = fromPage;
+    payload[TO_PAGE_INFO] = toPage;
+    payload[TRANSITION_MODE] = mode;
+    LoadAceApplicationContext(payload);
+    ResSchedDataReport(RES_TYPE_PAGE_TRANSITION, 0, payload);
 }
 
 ResSchedReportScope::ResSchedReportScope(const std::string& name,

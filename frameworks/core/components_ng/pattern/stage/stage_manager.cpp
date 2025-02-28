@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/ime/input_method_manager.h"
+#include "base/ressched/ressched_report.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
@@ -613,6 +614,7 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     CHECK_NULL_VOID(destPageInfo);
     auto destFullPath = destPageInfo->GetFullPath();
 
+    ResSchedReport::GetInstance().HandlePageTransition(GetPagePath(srcPage), destPageInfo->GetPagePath(), "Rounter");
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
@@ -736,4 +738,15 @@ std::vector<std::string> StageManager::GetTopPagePaths() const
     }
     return paths;
 }
+
+std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
+{
+    CHECK_NULL_RETURN(pageNode, "");
+    auto pattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    auto info = pattern->GetPageInfo();
+    CHECK_NULL_RETURN(info, "");
+    return info->GetPagePath();
+}
+
 } // namespace OHOS::Ace::NG

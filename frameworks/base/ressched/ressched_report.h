@@ -66,6 +66,7 @@ public:
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
+    void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode);
 
 private:
     ResSchedReport() {}
