@@ -30,25 +30,11 @@ public:
     ImageAnalyzerControllerPeer() = default;
     ~ImageAnalyzerControllerPeer() override = default;
 
-    std::vector<OHOS::Ace::ImageAnalyzerType> TriggerGetImageAnalyzerSupportTypes()
+    std::vector<OHOS::Ace::ImageAnalyzerType> GetImageAnalyzerSupportTypes()
     {
-        return types_;
+        LOGE("ARKOALA ImageAnalyzerControllerPeer::TriggerGetImageAnalyzerSupportTypes ImageAnalayzerController"
+            " and ImageAIOptions are not implemented in Ace_Engine.");
+        return std::vector<OHOS::Ace::ImageAnalyzerType>(0);
     }
-    void SetInstanceId(int32_t instanceId)
-    {
-        instanceId_ = instanceId;
-    }
-
-    int32_t GetInstanceId()
-    {
-        return instanceId_;
-    }
-
-private:
-    std::vector<OHOS::Ace::ImageAnalyzerType> types_ = {
-        OHOS::Ace::ImageAnalyzerType::SUBJECT,
-        OHOS::Ace::ImageAnalyzerType::TEXT
-    };
-    int32_t instanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
 };
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_IMAGE_ANALYZER_CONTROLLER_PEER_IMPL_H
