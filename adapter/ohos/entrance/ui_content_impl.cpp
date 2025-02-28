@@ -3349,6 +3349,12 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
     }
 }
 
+bool UIContentImpl::IfNeedTouchOutsideListener(const std::string& windowName)
+{
+    return !StringUtils::StartWith(windowName, SUBWINDOW_TOAST_PREFIX) ||
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+}
+
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
@@ -3438,7 +3444,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
-    if (!StringUtils::StartWith(window_->GetWindowName(), SUBWINDOW_TOAST_PREFIX)) {
+    if (IfNeedTouchOutsideListener(window_->GetWindowName())) {
         touchOutsideListener_ = new TouchOutsideListener(instanceId_);
         window_->RegisterTouchOutsideListener(touchOutsideListener_);
     }
