@@ -175,6 +175,12 @@ class DragController {
         JSViewAbstract.setDragEventStrictReportingEnabled(enable);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    cancelDataLoading(key) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.cancelDataLoading(key);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
@@ -190,12 +196,6 @@ class UIObserver {
     off(...args) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_observer.off(...args);
-        __JSScopeUtil__.restoreInstanceId();
-    }
-
-    cancelDataLoading(key) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        JSViewAbstract.cancelDataLoading(key);
         __JSScopeUtil__.restoreInstanceId();
     }
 }
