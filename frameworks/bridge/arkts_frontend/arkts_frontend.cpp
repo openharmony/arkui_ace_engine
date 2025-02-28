@@ -15,7 +15,7 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 
 #include "interfaces/inner_api/ace/constants.h"
-#include "static_core/plugins/ets/runtime/napi/ets_napi.h"
+#include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace {

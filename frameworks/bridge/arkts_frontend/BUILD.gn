@@ -17,7 +17,6 @@ ohos_source_set("arkts_frontend") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   configs = [ "$ace_root:ace_config" ]
-  include_dirs = [ ark_runtime_path ]
 
   sources = [ "arkts_frontend.cpp" ]
   external_deps = [ "hilog:libhilog" ]
