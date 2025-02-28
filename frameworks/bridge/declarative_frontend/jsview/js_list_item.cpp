@@ -342,6 +342,10 @@ void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
     if (!info[0]->IsFunction()) {
         return;
     }
