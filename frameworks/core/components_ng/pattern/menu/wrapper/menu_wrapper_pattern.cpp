@@ -383,7 +383,8 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
 
                     auto subMenuFrameNode = DynamicCast<FrameNode>(subMenuNode);
                     CHECK_NULL_VOID(subMenuFrameNode);
-                    auto accessibilityProperty = subMenuFrameNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+                    auto accessibilityProperty =
+                        subMenuFrameNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
                     CHECK_NULL_VOID(accessibilityProperty);
                     accessibilityProperty->SetAccessibilityIsShow(false);
                     subMenuFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
