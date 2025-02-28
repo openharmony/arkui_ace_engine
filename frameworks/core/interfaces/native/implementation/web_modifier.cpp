@@ -18,6 +18,7 @@
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
 #endif // WEB_SUPPORTED
 #include "core/interfaces/native/utility/converter.h"
@@ -211,8 +212,17 @@ void SetWebOptionsImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(peerImplPtr);
             WebModelNG::SetWebController(frameNode, peerImplPtr->GetController());
         },
-        [](const auto& value) {
-            LOGE("WebInterfaceModifier::SetWebOptionsImpl WebviewController option is not supported");
+        [frameNode](const Ark_WebviewController& controller) {
+            WebviewControllerPeer* peerImplPtr = controller;
+            CHECK_NULL_VOID(peerImplPtr);
+            auto setWebIdCallback = [peerImplPtr](int32_t webId) {
+                peerImplPtr->nwebId = webId;
+            };
+            WebModelNG::SetWebIdCallback(frameNode, std::move(setWebIdCallback));
+            auto setHapPathCallback = [peerImplPtr](const std::string& hapPath) {
+                peerImplPtr->hapPath = hapPath;
+            };
+            WebModelNG::SetHapPathCallback(frameNode, std::move(setHapPathCallback));
         },
         []() {}
     );

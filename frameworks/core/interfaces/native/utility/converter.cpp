@@ -975,6 +975,15 @@ Header Convert(const Ark_Header& src)
 }
 
 template<>
+Header Convert(const Ark_WebHeader& src)
+{
+    Header header;
+    header.headerKey = Converter::Convert<std::string>(src.headerKey);
+    header.headerValue = Converter::Convert<std::string>(src.headerValue);
+    return header;
+}
+
+template<>
 std::map<std::string, std::string> Convert(const Map_String_String& src)
 {
     Array_String arkKeys {

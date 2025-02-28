@@ -470,6 +470,7 @@ namespace Converter {
     template<> Gradient Convert(const Ark_LinearGradient_common& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> Header Convert(const Ark_Header& src);
+    template<> Header Convert(const Ark_WebHeader& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
