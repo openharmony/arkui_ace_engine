@@ -2408,7 +2408,7 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
         if (!menuItemPattern) {
             continue;
         }
-        menuItemPattern->HideEmbedded();
+        menuItemPattern->HideEmbedded(false);
     }
     uint32_t minChildrenSize = 1;
     if (menuWrapperNode->GetChildren().size() > minChildrenSize) {

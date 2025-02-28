@@ -281,7 +281,7 @@ public:
     {
         return embeddedMenu_;
     }
-    void HideEmbedded();
+    void HideEmbedded(bool isNeedAnimation = true);
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
     void SetBgColor(const Color& color);
@@ -463,7 +463,7 @@ private:
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();
     void OnExpandChanged(const RefPtr<FrameNode>& expandableNode);
-    void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
+    void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode, bool isNeedAnimation = true);
     void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
     void SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode);
     void UpdatePreviewPosition(SizeF oldMenuSize, SizeF menuSize);
