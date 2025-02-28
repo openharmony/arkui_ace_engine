@@ -361,7 +361,7 @@ int32_t OH_NativeXComponent_RegisterKeyEventCallbackWithResult(
 int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* userData,
     void (*callback)(ArkUI_NodeHandle node, ArkUI_XComponent_ImageAnalyzerState statusCode, void* userData))
 {
-    if (node == nullptr || (node->type != ARKUI_NODE_XCOMPONENT
+    if ((!OHOS::Ace::NodeModel::IsValidArkUINode(node)) || (node->type != ARKUI_NODE_XCOMPONENT
         && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE) || callback == nullptr) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -373,7 +373,7 @@ int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* user
 
 int32_t OH_ArkUI_XComponent_StopImageAnalyzer(ArkUI_NodeHandle node)
 {
-    if (node == nullptr || (node->type != ARKUI_NODE_XCOMPONENT
+    if ((!OHOS::Ace::NodeModel::IsValidArkUINode(node)) || (node->type != ARKUI_NODE_XCOMPONENT
         && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }

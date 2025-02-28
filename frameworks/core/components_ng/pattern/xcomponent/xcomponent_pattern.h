@@ -329,6 +329,10 @@ public:
     RenderFit GetSurfaceRenderFit() const;
     bool GetEnableAnalyzer();
     void NativeStartImageAnalyzer(std::function<void(int32_t)>& callback);
+    virtual bool IsBindNative()
+    {
+        return false;
+    }
 
 private:
     void OnAttachToFrameNode() override;
