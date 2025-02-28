@@ -285,4 +285,47 @@ HWTEST_F(ArcListCommonTestNg, EventHub002, TestSize.Level1)
     jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
     EXPECT_EQ(jsonStr, "{\"extraInfo\":\"info\"}");
 }
+
+/**
+ * @tc.name: GetScrollUpdateFriction001
+ * @tc.desc: Test ArcListPattern::GetScrollUpdateFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListCommonTestNg, GetScrollUpdateFriction001, TestSize.Level1)
+{
+    auto model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    pattern_->contentMainSize_ = 50.0;
+    pattern_->GetScrollUpdateFriction(1.0);
+    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
+    auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
+    EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
+    jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
+    EXPECT_EQ(jsonStr, "{\"extraInfo\":\"info\"}");
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: GetScrollUpdateFriction002
+ * @tc.desc: Test ArcListPattern::GetScrollUpdateFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListCommonTestNg, GetScrollUpdateFriction002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    pattern_->contentMainSize_ = 50.0;
+    pattern_->GetScrollUpdateFriction(-1.0);
+    pattern_->StartVibrator(true);
+    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
+    auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
+    EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
+    jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
+    EXPECT_EQ(jsonStr, "{\"extraInfo\":\"info\"}");
+}
+#endif
 } // namespace OHOS::Ace::NG

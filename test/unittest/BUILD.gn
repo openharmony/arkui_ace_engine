@@ -112,6 +112,10 @@ config("ace_unittest_config") {
   if (ace_engine_feature_enable_split_mode) {
     defines += [ "ENABLE_SPLIT_MODE" ]
   }
+
+  if (ace_engine_feature_enable_digital_crown) {
+    defines += [ "SUPPORT_DIGITAL_CROWN" ]
+  }
 }
 
 # ace unittest config ext
@@ -162,6 +166,10 @@ config("ace_unittest_config_ext") {
 
   if (ace_engine_feature_enable_split_mode) {
     defines += [ "ENABLE_SPLIT_MODE" ]
+  }
+
+  if (ace_engine_feature_enable_digital_crown) {
+    defines += [ "SUPPORT_DIGITAL_CROWN" ]
   }
 }
 

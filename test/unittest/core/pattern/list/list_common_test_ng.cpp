@@ -22,6 +22,7 @@
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -1771,4 +1772,149 @@ HWTEST_F(ListCommonTestNg, OnAnimateStop001, TestSize.Level1)
     pattern_->OnAnimateStop();
     EXPECT_FALSE(pattern_->scrollStop_);
 }
+
+/**
+ * @tc.name: CreateFrameNode001
+ * @tc.desc: Test ListItem CreateFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateFrameNode001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(true);
+    auto frameNode = model.CreateFrameNode(0, true);
+    EXPECT_TRUE(frameNode);
+}
+
+/**
+ * @tc.name: CreateFrameNode002
+ * @tc.desc: Test ListItem CreateFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateFrameNode002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    auto frameNode = model.CreateFrameNode(0, false);
+    EXPECT_TRUE(frameNode);
+}
+
+/**
+ * @tc.name: SetHeader001
+ * @tc.desc: Test ListItem SetHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, SetHeader001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    auto headerNode = model.CreateFrameNode(0, false);
+    model.SetHeader(headerNode);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
+ * @tc.name: SetHeader002
+ * @tc.desc: Test ListItem SetHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, SetHeader002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    const char* tag = V2::LIST_ETS_TAG;
+    RefPtr<FrameNode> frameNode =
+        FrameNode::GetOrCreateFrameNode(tag, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
+    model.SetHeader(frameNode);
+    model.ResetListChildrenMainSize();
+    model.ResetListChildrenMainSize(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
+ * @tc.name: SetHeader003
+ * @tc.desc: Test ListItem SetHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, SetHeader003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetHeader(nullptr, nullptr);
+
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    const char* tag = V2::LIST_ETS_TAG;
+    RefPtr<FrameNode> frameNode =
+        FrameNode::GetOrCreateFrameNode(tag, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
+    model.SetHeader(Referenced::RawPtr(frameNode), nullptr);
+
+    auto headerNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    model.SetHeader(Referenced::RawPtr(frameNode), headerNode);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
+ * @tc.name: ResetListChildrenMainSize001
+ * @tc.desc: Test ListItem ResetListChildrenMainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ResetListChildrenMainSize001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+
+    model.ResetListChildrenMainSize(nullptr);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    model.ResetListChildrenMainSize(frameNode);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
+ * @tc.name: UpdateLayoutProperty001
+ * @tc.desc: Test ListLayoutProperty UpdateLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, UpdateLayoutProperty001, TestSize.Level1)
+{
+    CreateList();
+    CreateDone();
+    layoutProperty_->UpdateLayoutProperty(nullptr);
+    layoutProperty_->UpdateLayoutProperty(Referenced::RawPtr(layoutProperty_));
+    EXPECT_EQ(layoutProperty_->defCachedCount_, 1);
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: SetDigitalCrownSensitivity001
+ * @tc.desc: Test ListModelNG SetDigitalCrownSensitivity
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, SetDigitalCrownSensitivity001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CrownSensitivity sensitivity = CrownSensitivity::MEDIUM;
+    model.SetDigitalCrownSensitivity(sensitivity);
+
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    const char* tag = V2::LIST_ETS_TAG;
+    RefPtr<FrameNode> frameNode =
+        FrameNode::GetOrCreateFrameNode(tag, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
+
+    model.SetDigitalCrownSensitivity(frameNode.GetRawPtr(), sensitivity);
+    EXPECT_EQ(model.GetDigitalCrownSensitivity(frameNode.GetRawPtr()), CrownSensitivity::MEDIUM);
+}
+
+/**
+ * @tc.name: SetDigitalCrownSensitivity002
+ * @tc.desc: Test ListModelNG SetDigitalCrownSensitivity
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, SetDigitalCrownSensitivity002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CrownSensitivity sensitivity = CrownSensitivity::MEDIUM;
+    model.SetDigitalCrownSensitivity(nullptr, sensitivity);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    model.SetDigitalCrownSensitivity(frameNode, sensitivity);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+#endif
 } // namespace OHOS::Ace::NG
