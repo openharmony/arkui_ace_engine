@@ -271,15 +271,20 @@ public:
         state_.strokeState.SetFontSize(size);
     }
 
+    void SetMeasureFontSize(const Dimension& size)
+    {
+        measureTextState_.SetFontSize(size);
+    }
+
     void SetLetterSpacing(const Dimension& letterSpacing)
     {
         state_.fillState.SetLetterSpacing(letterSpacing);
         state_.strokeState.SetLetterSpacing(letterSpacing);
     }
 
-    void SetMeasureFontSize(const Dimension& size)
+    void SetMeasureLetterSpacing(const Dimension& letterSpacing)
     {
-        measureTextState_.SetFontSize(size);
+        measureTextState_.SetLetterSpacing(letterSpacing);
     }
 
     void SetFontStyle(OHOS::Ace::FontStyle style)

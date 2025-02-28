@@ -823,6 +823,7 @@ void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
 #else
     paintMethod_->PushTask<SetLetterSpacingOp>(letterSpacing);
 #endif
+    paintMethod_->SetMeasureLetterSpacing(letterSpacing);
 }
 
 void CanvasPattern::UpdateFillColor(const Color& color)
