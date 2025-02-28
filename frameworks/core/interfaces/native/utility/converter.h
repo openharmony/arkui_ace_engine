@@ -521,6 +521,7 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
+    template<> std::vector<uint32_t> Convert(const Ark_Buffer& src);
 
     // NOT_SORTED_SECTION: Changing ordering can lead to build problem!
     template<> Dimension Convert(const Ark_String& src);
