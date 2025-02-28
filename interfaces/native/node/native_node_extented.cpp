@@ -355,7 +355,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
         indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->maxDisplayCount = ArkUI_OptionalInt { 0, 0 };
-        indicator->dimSpace = ArkUI_OptionalFloat { 0, 0.0f };
+        indicator->dimSpace = ArkUI_OptionalFloat { 0, 8.0f };
     } else {
         return nullptr;
     }

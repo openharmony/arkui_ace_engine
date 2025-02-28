@@ -1945,7 +1945,7 @@ class Indicator {
       this.bottomValue = args[0];
       this.setIgnoreSizeValue = false;
     }
-    if (args.length == 2) {
+    if (args.length === 2) {
       this.bottomValue = args[0];
       this.ignoreSizeValue = args[1];
       this.setIgnoreSizeValue = true;
