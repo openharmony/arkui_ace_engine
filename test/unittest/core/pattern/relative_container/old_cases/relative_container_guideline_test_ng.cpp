@@ -42,6 +42,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
+const float ITEM_WIDTH = 100.0f;
+const float GUIDELINE_VALUE = 50.0f;
 
 const std::vector<Dimension> DIMENSIONS = {
     Dimension(50.0, DimensionUnit::VP),
@@ -54,6 +56,13 @@ const std::vector<OffsetF> OFFSETS = {
     OffsetF(-10.0f, 0.0f),
     OffsetF(150.0f, 0.0f),
     OffsetF(-30.0f, 0.0f)
+};
+
+const std::vector<OffsetF> RTLOFFSETS = {
+    OffsetF(CONTAINER_WIDTH - ITEM_WIDTH - 50.0f, 0.0f),
+    OffsetF(CONTAINER_WIDTH - ITEM_WIDTH - (-10.0f), 0.0f),
+    OffsetF(CONTAINER_WIDTH - ITEM_WIDTH - 150.0f, 0.0f),
+    OffsetF(CONTAINER_WIDTH - ITEM_WIDTH - (-30.0f), 0.0f)
 };
 
 const std::string GUIDELINE_ID = "guideline";
@@ -454,4 +463,108 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest008, TestSize.Level1)
         EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetY(), 50);
     }
 }
+
+/**
+ * @tc.name: GuidelineTestRtl001
+ * @tc.desc: Align childNode to the left/middle/right of verticalGuideline, direction::RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl001, TestSize.Level1)
+{
+    std::vector<HorizontalAlign> horizontalAligns = {
+        HorizontalAlign::START,
+        HorizontalAlign::CENTER,
+        HorizontalAlign::END
+    };
+    for (int i = 0; i < 3; i++) {
+        CreateInstance([=](RelativeContainerModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
+            ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
+            ViewAbstract::SetInspectorId(CONTAINER_ID);
+            TextModelNG textModelFirst;
+            textModelFirst.Create("text1");
+            ViewAbstract::SetWidth(CalcLength(ITEM_WIDTH));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+            ViewAbstract::SetInspectorId("text1");
+            std::map<AlignDirection, AlignRule> firstTextAlignRules;
+            RelativeContainerTestUtilsNG::AddAlignRule(
+                GUIDELINE_ID, AlignDirection::START, horizontalAligns[i], firstTextAlignRules);
+            RelativeContainerTestUtilsNG::AddAlignRule(
+                CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, firstTextAlignRules);
+            ViewAbstract::SetAlignRules(firstTextAlignRules);
+            ViewStackProcessor::GetInstance()->Pop();
+
+            GuidelineInfo guidelineInfo1;
+            guidelineInfo1.id = GUIDELINE_ID;
+            guidelineInfo1.direction = LineDirection::VERTICAL;
+            guidelineInfo1.start = Dimension(GUIDELINE_VALUE, DimensionUnit::VP);
+            std::vector<GuidelineInfo> GuidelineInfos = {
+                guidelineInfo1
+            };
+            model.SetGuideline(std::vector<GuidelineInfo> { GuidelineInfos });
+        });
+        auto relativeContainerLayoutProperty = frameNode_->GetLayoutProperty();
+        EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+        relativeContainerLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+        frameNode_->SetActive();
+        frameNode_->SetLayoutDirtyMarked(true);
+        frameNode_->CreateLayoutTask();
+        frameNode_->SetActive(false);
+        EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetX(),
+            CONTAINER_WIDTH - ITEM_WIDTH - GUIDELINE_VALUE);
+    }
+}
+
+/**
+ * @tc.name: GuidelineTestRtl002
+ * @tc.desc: Set an item with Guideline with RelativeContainer and check it, direction::RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl002, TestSize.Level1)
+{
+    /**
+     * set pipeline: api = 11
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetMinPlatformVersion(11);
+    for (int i = 0; i < 4; i++) {
+        CreateInstance([=](RelativeContainerModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
+            ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
+            ViewAbstract::SetInspectorId(CONTAINER_ID);
+            TextModelNG textModelFirst;
+            textModelFirst.Create("text1");
+            ViewAbstract::SetWidth(CalcLength(ITEM_WIDTH));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+            ViewAbstract::SetInspectorId("text1");
+            std::map<AlignDirection, AlignRule> firstTextAlignRules;
+            RelativeContainerTestUtilsNG::AddAlignRule(
+                GUIDELINE_ID, AlignDirection::START, HorizontalAlign::START, firstTextAlignRules);
+            RelativeContainerTestUtilsNG::AddAlignRule(
+                CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, firstTextAlignRules);
+            ViewAbstract::SetAlignRules(firstTextAlignRules);
+            ViewStackProcessor::GetInstance()->Pop();
+
+            GuidelineInfo guidelineInfo1;
+            guidelineInfo1.id = GUIDELINE_ID;
+            guidelineInfo1.direction = LineDirection::VERTICAL;
+            guidelineInfo1.start = DIMENSIONS[i];
+            std::vector<GuidelineInfo> GuidelineInfos = {
+                guidelineInfo1
+            };
+            model.SetGuideline(std::vector<GuidelineInfo> { GuidelineInfos });
+        });
+        auto relativeContainerLayoutProperty = frameNode_->GetLayoutProperty();
+        EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+        relativeContainerLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+        frameNode_->SetActive();
+        frameNode_->SetLayoutDirtyMarked(true);
+        frameNode_->CreateLayoutTask();
+        frameNode_->SetActive(false);
+        EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset(), RTLOFFSETS[i]);
+    }
+}
+
 } // namespace OHOS::Ace::NG

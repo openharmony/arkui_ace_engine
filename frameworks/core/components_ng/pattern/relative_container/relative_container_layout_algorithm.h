@@ -37,8 +37,10 @@ class ACE_EXPORT RelativeContainerLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     RelativeContainerLayoutAlgorithm() = default;
-    ~RelativeContainerLayoutAlgorithm() override = default;
-
+    ~RelativeContainerLayoutAlgorithm()
+    {
+        std::lock_guard<std::mutex> lock(relativeContainerMutex_);
+    }
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
@@ -88,6 +90,9 @@ private:
     void CalcBarrier(LayoutWrapper* layoutWrapper);
     bool IsGuideline(const std::string& id);
     bool IsBarrier(const std::string& id);
+    bool IsGuidelineOrBarrier(const std::string& id);
+    std::optional<float> GetOriginMarginLeft(
+        TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
     BarrierRect GetBarrierRectByReferencedIds(const std::vector<std::string>& referencedIds);
     void MeasureBarrier(const std::string& barrierName);
     void CheckNodeInHorizontalChain(std::string& currentNode,
@@ -122,6 +127,7 @@ private:
     float CalcHorizontalOffsetAlignRight(const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth);
     float CalcHorizontalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
+    float CalcAnchorWidth(bool anchorIsContainer, float containerWidth, const std::string& anchor);
     float CalcVerticalOffsetAlignTop(const VerticalAlign& alignRule, float& anchorHeight);
     float CalcVerticalOffsetAlignCenter(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
     float CalcVerticalOffsetAlignBottom(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
@@ -159,6 +165,7 @@ private:
     std::unordered_map<std::string, ChainParam> verticalChains_;
     std::unordered_map<std::string, std::string> horizontalChainNodeMap_;
     std::unordered_map<std::string, std::string> verticalChainNodeMap_;
+    std::mutex relativeContainerMutex_;
     PaddingPropertyF padding_;
     SizeF containerSizeWithoutPaddingBorder_;
 };
