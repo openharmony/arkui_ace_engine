@@ -264,7 +264,7 @@ std::string TextSelectOverlay::GetSelectedText()
     return textPattern->GetSelectedText(start, end);
 }
 
-RectF TextSelectOverlay::GetSelectArea()
+RectF TextSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
 {
     auto pattern = GetPattern<TextPattern>();
     RectF res;
@@ -276,6 +276,13 @@ RectF TextSelectOverlay::GetSelectArea()
         GetSelectAreaFromHandle(res);
         ApplySelectAreaWithKeyboard(res);
         return res;
+    }
+    if (pos == SelectRectsType::LEFT_TOP_POINT) {
+        selectRects.erase(std::next(selectRects.begin()), selectRects.end());
+        selectRects.front().SetSize({0, 0});
+    } else if (pos == SelectRectsType::RIGHT_BOTTOM_POINT) {
+        selectRects.erase(selectRects.begin(), std::prev(selectRects.end()));
+        selectRects.front().SetRect({selectRects.front().Right(), selectRects.front().Bottom()}, {0, 0});
     }
     auto contentRect = pattern->GetTextContentRect();
     auto textRect = pattern->GetTextRect();
@@ -322,6 +329,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     CHECK_NULL_VOID(textPattern);
     menuInfo.showCopyAll = !textPattern->IsSelectAll();
     menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
+    menuInfo.showTranslate = menuInfo.showCopy && textPattern->IsShowTranslate() && IsNeedMenuTranslate();
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
@@ -382,6 +390,9 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
             break;
         case OptionMenuActionId::SELECT_ALL:
             textPattern->HandleOnSelectAll();
+            break;
+        case OptionMenuActionId::TRANSLATE:
+            HandleOnTranslate();
             break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
@@ -557,5 +568,12 @@ std::optional<Color> TextSelectOverlay::GetHandleColor()
     auto layoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     return layoutProperty->GetCursorColor();
+}
+
+bool TextSelectOverlay::AllowTranslate()
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    return !textPattern->GetTextSelector().SelectNothing();
 }
 } // namespace OHOS::Ace::NG

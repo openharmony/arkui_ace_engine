@@ -120,9 +120,11 @@ private:
     void ShowCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowPaste(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void ShowTranslate(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    bool IsShowTranslateOnTargetAPIVersion();
     std::function<void()> GetDefaultOptionCallback();
     std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);
     void GetFlexibleOptionsParams(

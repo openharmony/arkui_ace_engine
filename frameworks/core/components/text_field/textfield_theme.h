@@ -212,6 +212,8 @@ public:
             theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("textfield_writting_is_support", "");
             theme->hasShowedPassword_ = pattern->GetAttr<std::string>("textfield_has_showed_password", "");
             theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
+            auto supportTranslate = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->translateIsSupport_ = StringUtils::StringToInt(supportTranslate);
         }
     };
 
@@ -622,6 +624,11 @@ public:
         return aiWriteAbilityName_;
     }
 
+    bool GetTranslateIsSupport() const
+    {
+        return translateIsSupport_;
+    }
+
     const std::string& GetAIWriteIsSupport() const
     {
         return aiWriteIsSupport_;
@@ -722,6 +729,7 @@ private:
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
+    bool translateIsSupport_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;
 
     // cancelButton

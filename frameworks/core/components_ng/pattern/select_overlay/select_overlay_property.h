@@ -135,7 +135,7 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
 inline constexpr int32_t REQUEST_RECREATE = 1;
 
 enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
-enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, CAMERA_INPUT, AI_WRITE, APPEAR, DISAPPEAR };
+enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, TRANSLATE, CAMERA_INPUT, AI_WRITE, APPEAR, DISAPPEAR };
 enum class CloseReason {
     CLOSE_REASON_NORMAL = 1,
     CLOSE_REASON_HOLD_BY_OTHER,
@@ -170,6 +170,7 @@ struct SelectMenuInfo {
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
+    bool showTranslate = false;
     bool showCameraInput = false;
     bool showAIWrite = false;
     std::optional<OffsetF> menuOffset;
@@ -186,6 +187,7 @@ struct SelectMenuInfo {
             return true;
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
+                 (showTranslate == info.showTranslate) &&
                  (showCut == info.showCut) && (showCameraInput == info.showCameraInput) &&
                  (showAIWrite == info.showAIWrite));
     }
@@ -200,6 +202,7 @@ struct SelectMenuInfo {
         JSON_STRING_PUT_BOOL(jsonValue, showPaste);
         JSON_STRING_PUT_BOOL(jsonValue, showCopyAll);
         JSON_STRING_PUT_BOOL(jsonValue, showCut);
+        JSON_STRING_PUT_BOOL(jsonValue, showTranslate);
         JSON_STRING_PUT_BOOL(jsonValue, showCameraInput);
         return jsonValue->ToString();
     }
@@ -210,6 +213,7 @@ struct SelectMenuCallback {
     std::function<void()> onPaste;
     std::function<void()> onSelectAll;
     std::function<void()> onCut;
+    std::function<void()> onTranslate;
     std::function<void()> onCameraInput;
     std::function<void()> onAIWrite;
 

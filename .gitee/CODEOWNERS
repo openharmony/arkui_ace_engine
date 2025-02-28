@@ -97,9 +97,12 @@ adapter/ohos/osal/background_task_helper_ohos.cpp @arkuiframework
 adapter/ohos/osal/background_task_helper_ohos.h @arkuiframework
 adapter/ohos/osal/BUILD.gn @arkui_architecture
 adapter/ohos/osal/clipboard_impl.cpp @huawei_g_five
-adapter/ohos/osal/data_detector_adapter.cpp @arkui_image
-adapter/ohos/osal/data_detector_loader.cpp @arkui_image
-adapter/ohos/osal/data_detector_mgr.cpp @arkui_image
+adapter/ohos/osal/text_translation_adapter.cpp @huawei_g_five
+adapter/ohos/osal/text_translation_loader.cpp @huawei_g_five
+adapter/ohos/osal/text_translation_mgr.cpp @huawei_g_five
+adapter/ohos/osal/data_detector_adapter.cpp @huawei_g_five
+adapter/ohos/osal/data_detector_loader.cpp @huawei_g_five
+adapter/ohos/osal/data_detector_mgr.cpp @huawei_g_five
 adapter/ohos/osal/download_manager_ohos.cpp @arkui_image
 adapter/ohos/osal/drawing_color_filter_ohos.cpp @arkui_image
 adapter/ohos/osal/drawing_color_filter_ohos.h @arkui_image
@@ -1727,10 +1730,14 @@ frameworks/core/common/ace_view.h @arkuiframework
 frameworks/core/common/agingadapation/aging_adapation_dialog_theme.h @arkuipopupwindow
 frameworks/core/common/agingadapation/aging_adapation_dialog_util.cpp @arkuipopupwindow
 frameworks/core/common/agingadapation/aging_adapation_dialog_util.h @arkuipopupwindow
-frameworks/core/common/ai/data_detector_adapter.h @arkui_image
-frameworks/core/common/ai/data_detector_default.h @arkui_image
-frameworks/core/common/ai/data_detector_loader.h @arkui_image
-frameworks/core/common/ai/data_detector_mgr.h @arkui_image
+frameworks/core/common/ai/text_translation_adapter.h @huawei_g_five
+frameworks/core/common/ai/text_translation_default.h @huawei_g_five
+frameworks/core/common/ai/text_translation_loader.h @huawei_g_five
+frameworks/core/common/ai/text_translation_mgr.h @huawei_g_five
+frameworks/core/common/ai/data_detector_adapter.h @huawei_g_five
+frameworks/core/common/ai/data_detector_default.h @huawei_g_five
+frameworks/core/common/ai/data_detector_loader.h @huawei_g_five
+frameworks/core/common/ai/data_detector_mgr.h @huawei_g_five
 frameworks/core/common/ai/image_analyzer_adapter.h @arkui_image
 frameworks/core/common/ai/image_analyzer_adapter_impl.h @arkui_image
 frameworks/core/common/ai/image_analyzer_default.h @arkui_image
@@ -2888,7 +2895,8 @@ interfaces/native/ui_input_event.h @arkuievent
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkuiframework
 interfaces/inner_api/ace/ace_forward_compatibility.h @arkuiframework
-interfaces/inner_api/ace/ai/data_detector_interface.h
+interfaces/inner_api/ace/ai/text_translation_interface.h @huawei_g_five
+interfaces/inner_api/ace/ai/data_detector_interface.h @huawei_g_five
 interfaces/inner_api/ace/ai/image_analyzer.h
 interfaces/inner_api/ace/ai/image_analyzer_interface.h
 interfaces/inner_api/ace/arkui_log.h @arkuiframework

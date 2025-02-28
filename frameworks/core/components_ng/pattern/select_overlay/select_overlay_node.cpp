@@ -75,8 +75,8 @@ constexpr int32_t OPTION_INDEX_CUT = 0;
 constexpr int32_t OPTION_INDEX_COPY = 1;
 constexpr int32_t OPTION_INDEX_PASTE = 2;
 constexpr int32_t OPTION_INDEX_COPY_ALL = 3;
-constexpr int32_t OPTION_INDEX_SHARE = 4;
-constexpr int32_t OPTION_INDEX_TRANSLATE = 5;
+constexpr int32_t OPTION_INDEX_TRANSLATE = 4;
+constexpr int32_t OPTION_INDEX_SHARE = 5;
 constexpr int32_t OPTION_INDEX_SEARCH = 6;
 constexpr int32_t OPTION_INDEX_CAMERA_INPUT = 7;
 constexpr int32_t OPTION_INDEX_AI_WRITE = 8;
@@ -95,6 +95,7 @@ const std::string OH_DEFAULT_CUT = "OH_DEFAULT_CUT";
 const std::string OH_DEFAULT_COPY = "OH_DEFAULT_COPY";
 const std::string OH_DEFAULT_PASTE = "OH_DEFAULT_PASTE";
 const std::string OH_DEFAULT_SELECT_ALL = "OH_DEFAULT_SELECT_ALL";
+const std::string OH_DEFAULT_TRANSLATE = "OH_DEFAULT_TRANSLATE";
 const std::string OH_DEFAULT_CAMERA_INPUT = "OH_DEFAULT_CAMERA_INPUT";
 const std::string OH_DEFAULT_AI_WRITE = "OH_DEFAULT_AI_WRITE";
 const std::string OH_DEFAULT_COLLABORATION_SERVICE = "OH_DEFAULT_COLLABORATION_SERVICE";
@@ -104,6 +105,7 @@ const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>
     { OH_DEFAULT_COPY, [](const SelectMenuInfo& info){ return info.showCopy; } },
     { OH_DEFAULT_SELECT_ALL, [](const SelectMenuInfo& info){ return info.showCopyAll; } },
     { OH_DEFAULT_PASTE, [](const SelectMenuInfo& info){ return info.showPaste; } },
+    { OH_DEFAULT_TRANSLATE, [](const SelectMenuInfo& info){ return info.showTranslate; } },
     { OH_DEFAULT_AI_WRITE, [](const SelectMenuInfo& info){ return info.showAIWrite; } }
 };
 
@@ -558,6 +560,10 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
         theme->GetPasteLabelInfo(), info->menuInfo.showPaste);
     params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll,
         theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE),
+            info->menuCallback.onTranslate, "", info->menuInfo.showTranslate);
+    }
     return params;
 }
 
@@ -566,6 +572,7 @@ std::unordered_map<std::string, std::function<void()>> GetSystemCallback(const s
     std::unordered_map<std::string, std::function<void()>> systemCallback = {
         { OH_DEFAULT_CUT, info->menuCallback.onCut }, { OH_DEFAULT_COPY, info->menuCallback.onCopy },
         { OH_DEFAULT_SELECT_ALL, info->menuCallback.onSelectAll }, { OH_DEFAULT_PASTE, info->menuCallback.onPaste },
+        { OH_DEFAULT_TRANSLATE, info->menuCallback.onTranslate },
         { OH_DEFAULT_CAMERA_INPUT, info->menuCallback.onCameraInput },
         { OH_DEFAULT_AI_WRITE, info->menuCallback.onAIWrite }
     };
@@ -594,6 +601,9 @@ std::string GetSystemIconPath(const std::string& id, const std::string& iconPath
     if (id == OH_DEFAULT_SELECT_ALL) {
         return iconTheme->GetIconPath(InternalResource::ResourceId::IC_SELECT_ALL_SVG);
     }
+    if (id == OH_DEFAULT_TRANSLATE) {
+        return iconTheme->GetIconPath(InternalResource::ResourceId::IC_TRANSLATE_SVG);
+    }
     if (id == OH_DEFAULT_CAMERA_INPUT) {
         return iconTheme->GetIconPath(InternalResource::ResourceId::IC_TAKEPHOTO_SVG);
     }
@@ -620,6 +630,9 @@ std::string GetItemContent(const std::string& id, const std::string& content)
     }
     if (id == OH_DEFAULT_PASTE) {
         return Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE);
+    }
+    if (id == OH_DEFAULT_TRANSLATE) {
+        return Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE);
     }
     if (id == OH_DEFAULT_AI_WRITE) {
         return textOverlayTheme->GetAIWrite();
@@ -1439,15 +1452,15 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
         params.emplace_back(
             Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), iconPath, info->menuCallback.onSelectAll);
     }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TRANSLATE_SVG) : "";
+        params.emplace_back(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), iconPath, info->menuCallback.onTranslate);
+    }
     if (!isShowInDefaultMenu_[OPTION_INDEX_SHARE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SHARE_SVG) : "";
         params.emplace_back(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), iconPath, defaultOptionCallback);
-    }
-    if (!isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE]) {
-        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TRANSLATE_SVG) : "";
-        params.emplace_back(
-            Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), iconPath, defaultOptionCallback);
     }
     GetFlexibleOptionsParams(info, params);
     return params;
@@ -1755,6 +1768,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     ShowCopy(maxWidth, allocatedSize, info);
     ShowPaste(maxWidth, allocatedSize, info);
     ShowCopyAll(maxWidth, allocatedSize, info);
+    ShowTranslate(maxWidth, allocatedSize, info);
     ShowShare(maxWidth, allocatedSize, info);
     ShowCamera(maxWidth, allocatedSize, info);
     ShowAIWrite(maxWidth, allocatedSize, info);
@@ -1853,6 +1867,31 @@ void SelectOverlayNode::ShowCopyAll(float maxWidth, float& allocatedSize, std::s
     }
 }
 
+void SelectOverlayNode::ShowTranslate(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+{
+    if (!IsShowTranslateOnTargetAPIVersion()) {
+        isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
+        return;
+    }
+    if (info->menuInfo.showTranslate) {
+        CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
+        float buttonWidth = 0.0f;
+        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE),
+            info->menuCallback.onTranslate, GetId(), buttonWidth);
+        CHECK_NULL_VOID(button);
+        if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
+        } else {
+            button.Reset();
+            isDefaultBtnOverMaxWidth_ = true;
+        }
+    } else {
+        isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
+    }
+}
+
 void SelectOverlayNode::ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
 {
     if (info->menuInfo.showAIWrite) {
@@ -1898,18 +1937,6 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
             isDefaultBtnOverMaxWidth_ = true;
         }
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
-        auto buttonTranslase = BuildButton(
-            Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), nullptr, GetId(), buttonWidth, false);
-        CHECK_NULL_VOID(buttonTranslase);
-        if (maxWidth - allocatedSize >= buttonWidth) {
-            buttonTranslase->MountToParent(selectMenuInner_);
-            allocatedSize += buttonWidth;
-            isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
-        } else {
-            buttonTranslase.Reset();
-            isDefaultBtnOverMaxWidth_ = true;
-        }
-        CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         auto buttonSearch = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), nullptr, GetId(), buttonWidth, false);
         CHECK_NULL_VOID(buttonSearch);
@@ -1923,7 +1950,6 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
         }
     } else {
         isShowInDefaultMenu_[OPTION_INDEX_SHARE] = true;
-        isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
         isShowInDefaultMenu_[OPTION_INDEX_SEARCH] = true;
     }
 }
@@ -1951,6 +1977,15 @@ void SelectOverlayNode::ShowCamera(float maxWidth, float& allocatedSize, std::sh
     } else {
         isShowInDefaultMenu_[OPTION_INDEX_CAMERA_INPUT] = true;
     }
+}
+
+bool SelectOverlayNode::IsShowTranslateOnTargetAPIVersion()
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        return false;
+    }
+    return true;
 }
 
 void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth)
@@ -2058,6 +2093,12 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     if (info->menuInfo.showCopyAll || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, BUTTON_COPY_ALL);
         systemItemParams.emplace_back(param);
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (info->menuInfo.showTranslate || info->isUsingMouse) {
+            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_TRANSLATE, BUTTON_TRANSLATE);
+            systemItemParams.emplace_back(param);
+        }
     }
 
     auto pipeline = PipelineContext::GetCurrentContextSafely();

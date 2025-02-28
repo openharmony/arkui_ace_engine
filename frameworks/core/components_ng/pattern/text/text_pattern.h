@@ -565,6 +565,7 @@ public:
     void HandleOnCopy();
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
+    bool IsShowTranslate();
     void SetTextSelectableMode(TextSelectableMode value);
 
     OffsetF GetTextPaintOffset() const override

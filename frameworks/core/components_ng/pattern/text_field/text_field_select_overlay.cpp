@@ -285,6 +285,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
+    menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
 }
 
@@ -309,7 +310,7 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
     }
 }
 
-RectF TextFieldSelectOverlay::GetSelectArea()
+RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, {});
@@ -323,6 +324,13 @@ RectF TextFieldSelectOverlay::GetSelectArea()
     } else {
         auto contentRect = pattern->GetContentRect();
         auto textRect = pattern->GetTextRect();
+        if (pos == SelectRectsType::LEFT_TOP_POINT) {
+            selectRects.erase(std::next(selectRects.begin()), selectRects.end());
+            selectRects.front().SetSize({0, 0});
+        } else if (pos == SelectRectsType::RIGHT_BOTTOM_POINT) {
+            selectRects.erase(selectRects.begin(), std::prev(selectRects.end()));
+            selectRects.front().SetRect({selectRects.front().Right(), selectRects.front().Bottom()}, {0, 0});
+        }
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     }
     auto globalContentRect = GetVisibleContentRect();
@@ -361,6 +369,9 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             return;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
+            return;
+        case OptionMenuActionId::TRANSLATE:
+            HandleOnTranslate();
             return;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
@@ -604,5 +615,12 @@ bool TextFieldSelectOverlay::IsStopBackPress() const
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, true);
     return pattern->IsStopBackPress();
+}
+
+bool TextFieldSelectOverlay::AllowTranslate()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->AllowCopy();
 }
 } // namespace OHOS::Ace::NG
