@@ -3458,7 +3458,7 @@ void ClipShapeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value);
-    if(convValue.has_value() && convValue.value()) {
+    if (convValue.has_value() && convValue.value()) {
         ViewAbstract::SetClipShape(convValue.value());
     }
 }
@@ -3488,7 +3488,7 @@ void MaskShapeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value);
-    if(convValue.has_value() && convValue.value()) {
+    if (convValue.has_value() && convValue.value()) {
         ViewAbstract::SetMask(convValue.value());
     }
 }

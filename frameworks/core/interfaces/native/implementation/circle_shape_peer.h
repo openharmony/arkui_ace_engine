@@ -16,13 +16,8 @@
 #pragma once
 
 #include "arkoala_api_generated.h"
-#include "frameworks/core/interfaces/native/implementation/basic_shape_peer.h"
+#include "base/geometry/shape.h"
 
-struct CircleShapePeer : public BasicShapePeer {
-    ~CircleShapePeer() override = default;
-    OHOS::Ace::RefPtr<OHOS::Ace::BasicShape> GetBasicShape() override
-    {
-        return shape;
-    }
+struct CircleShapePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::Circle> shape;
 };

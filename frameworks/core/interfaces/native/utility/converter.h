@@ -28,6 +28,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
+#include "base/geometry/shape.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/chain_animation.h"
 #include "core/components/common/layout/constants.h"

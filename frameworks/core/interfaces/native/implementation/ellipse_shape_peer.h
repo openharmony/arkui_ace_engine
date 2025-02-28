@@ -16,13 +16,7 @@
 #pragma once
 
 #include "arkoala_api_generated.h"
-#include "frameworks/core/interfaces/native/implementation/basic_shape_peer.h"
-
-struct EllipseShapePeer : public BasicShapePeer {
-    ~EllipseShapePeer() override = default;
-    OHOS::Ace::RefPtr<OHOS::Ace::BasicShape> GetBasicShape() override
-    {
-        return shape;
-    }
+#include "base/geometry/shape.h"
+struct EllipseShapePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::Ellipse> shape;
 };
