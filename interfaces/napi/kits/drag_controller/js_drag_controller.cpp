@@ -1787,6 +1787,9 @@ void HandleStopDragCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, co
         asyncCtx->dragState = DragState::REJECT;
     }
     if (needPostStopDrag) {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ResetDragging();
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         auto windowId = container->GetWindowId();
