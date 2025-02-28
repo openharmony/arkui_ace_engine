@@ -536,6 +536,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
                 pattern->InitializeBubble();
             }
             pattern->PaintFocusState();
+            pattern->UpdateStepPointsAccessibilityVirtualNodeSelected();
         };
         gestureHub->SetUserOnClick(clickHandle);
         pointAccessibilityNodeEventVec_[index] = clickHandle;
