@@ -1720,25 +1720,20 @@ bool JSCanvasRenderer::IsValidLetterSpacing(const std::string& letterSpacing)
 // letterSpacing: string | LengthMetrics
 void JSCanvasRenderer::JsSetLetterSpacing(const JSCallbackInfo& info)
 {
+    CalcDimension letterSpacingCal = Dimension(0.0);
     std::string letterSpacingStr;
     if (info.GetStringArg(0, letterSpacingStr) && IsValidLetterSpacing(letterSpacingStr)) {
         if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
-            renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
-            return;
+            letterSpacingCal = GetDimensionValue(letterSpacingStr);
+        } else {
+            letterSpacingCal = Dimension(StringToDouble(letterSpacingStr) * GetDensity());
         }
-        renderingContext2DModel_->SetLetterSpacing(Dimension(StringToDouble(letterSpacingStr) * GetDensity()));
-        return;
-    }
-    
-    CalcDimension letterSpacingCal;
-    if (info[0]->IsObject() && JSViewAbstract::ParseLengthMetricsToDimension(info[0], letterSpacingCal)) {
+    } else if (info[0]->IsObject() && JSViewAbstract::ParseLengthMetricsToDimension(info[0], letterSpacingCal)) {
         if (letterSpacingCal.Unit() != DimensionUnit::PX && letterSpacingCal.Unit() != DimensionUnit::VP) {
             letterSpacingCal.Reset();
         }
-        renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
-        return;
     }
-
-    renderingContext2DModel_->SetLetterSpacing(Dimension(0.0));
+    paintState_.SetLetterSpacing(letterSpacingCal);
+    renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
 }
 } // namespace OHOS::Ace::Framework
