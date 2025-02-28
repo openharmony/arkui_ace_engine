@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -30,6 +31,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -113,6 +115,7 @@ void MenuItemTestNg::SetUp()
 {
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockContainer::SetUp();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
@@ -128,6 +131,7 @@ void MenuItemTestNg::TearDown()
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+    MockContainer::TearDown();
 }
 
 void MenuItemTestNg::InitMenuItemTestNg()
@@ -312,6 +316,58 @@ HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithm001, TestSize.Level1)
         CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), CalcLength(MENU_ITEM_SIZE_HEIGHT)));
     algorithm->Measure(AceType::RawPtr(menuItemNode));
     EXPECT_TRUE(props->calcLayoutConstraint_->selfIdealSize.has_value());
+}
+
+/**
+ * @tc.name: MenuItemLayoutAlgorithm002
+ * @tc.desc: Test MenuItemLayoutAlgorithm Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithm002, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(16);
+
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::CONTEXT_MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto leftNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    auto rightNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    menuItemNode->AddChild(leftNode);
+    menuItemNode->AddChild(rightNode);
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto algorithm = AceType::DynamicCast<MenuItemLayoutAlgorithm>(menuItemPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(algorithm, nullptr);
+    auto props = menuItemNode->GetLayoutProperty();
+    ASSERT_NE(props, nullptr);
+    SizeF value(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT);
+    props->UpdateMarginSelfIdealSize(value);
+    props->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step2. execute Measure
+     * @tc.expected: prop is set as expected
+     */
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    algorithm->Layout(AceType::RawPtr(menuItemNode));
+
+    props->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), CalcLength(MENU_ITEM_SIZE_HEIGHT)));
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    EXPECT_TRUE(props->calcLayoutConstraint_->selfIdealSize.has_value());
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -756,5 +812,54 @@ HWTEST_F(MenuItemTestNg, MenuItemEventTest001, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     menuitem.SetOnChange(frameNode, [](bool onChange) {});
     EXPECT_NE(eventHub->onChange_, nullptr);
+}
+
+/**
+ * @tc.name: MenuItemPattern#UpdatePasteDisabledOpacity001
+ * @tc.desc: Verify UpdatePasteDisabledOpacity.
+ * @tc.type: FUNC 
+ */
+HWTEST_F(MenuItemTestNg, MenuItemPatternUpdatePasteDisabledOpacity001, TestSize.Level1)
+{
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    menuItemModelInstance.Create(itemOption);
+    menuItemModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    auto option = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, id, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
+    ASSERT_NE(option, nullptr);
+
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextOverlayTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MenuView::CreatePasteButton(false, option, row, []() {});
+    auto optionFirstChild = option->GetChildAtIndex(0);
+    ASSERT_NE(optionFirstChild, nullptr);
+    auto pasteButtonChildren = optionFirstChild->GetChildren();
+    auto pasteButton = AceType::DynamicCast<FrameNode>(pasteButtonChildren.front());
+    ASSERT_NE(pasteButton, nullptr);
+
+    itemPattern->SetPasteButton(pasteButton);
+    itemPattern->UpdatePasteDisabledOpacity(0.9f);
+
+    auto renderContext = pasteButton->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetOpacityValue(1.0), 0.9f);
 }
 } // namespace OHOS::Ace::NG
