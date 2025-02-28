@@ -1231,7 +1231,6 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
     eventInfo.SetPageId(node->GetPageId());
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    eventInfo.AddContent(accessibilityProperty->GetGroupText());
     eventInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
@@ -1242,6 +1241,7 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
         AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(elementInfo.GetBelongTreeId(), stackNodeId);
         elementInfo.SetNavDestinationId(stackNodeId);
     }
+    eventInfo.AddContent(elementInfo.GetContent());
     eventInfo.SetElementInfo(elementInfo);
 }
 #ifdef WEB_SUPPORTED
@@ -3256,7 +3256,6 @@ void JsAccessibilityManager::FillEventInfoWithNode(
     eventInfo.SetPageId(node->GetPageId());
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    eventInfo.AddContent(accessibilityProperty->GetGroupText());
     eventInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
@@ -3268,6 +3267,7 @@ void JsAccessibilityManager::FillEventInfoWithNode(
     GenerateCommonProperty(context, commonProperty, mainContext, node);
     UpdateAccessibilityElementInfo(node, commonProperty, elementInfo, context);
     elementInfo.SetWindowId(eventInfo.GetWindowId());
+    eventInfo.AddContent(elementInfo.GetContent());
     eventInfo.SetElementInfo(elementInfo);
 }
 
