@@ -67,6 +67,7 @@ ohos_shared_library("ace_ndk") {
     "native_styled_string_descriptor.cpp",
     "node/animate_impl.cpp",
     "node/dialog_model.cpp",
+    "node/dialog_option.cpp",
     "node/drawable_descriptor.cpp",
     "node/event_converter.cpp",
     "node/frame_information.cpp",
