@@ -195,6 +195,11 @@ struct CJArea {
     CJPosition* globalPosition;
 };
 
+struct CJSizeOptions {
+    double width;
+    double height;
+};
+
 struct CJEventTarget {
     CJArea* area;
 };
