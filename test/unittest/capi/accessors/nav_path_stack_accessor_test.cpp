@@ -46,35 +46,20 @@ public:
         node = nullptr;
     }
 
-    template<typename Theme>
-    static void SetupTheme()
-    {
-        auto theme = typename Theme::Builder().Build(themeConstants_);
-        EXPECT_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillRepeatedly(testing::Return(theme));
-    }
-
     static void SetUpTestCase()
     {
         AccessorTestBase::SetUpTestCase();
 
-        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
-        themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-        EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(testing::Return(themeConstants_));
-        SetupTheme<NavigationBarTheme>();
+        AccessorTestBase::SetupTheme<NavigationBarTheme>();
         themeConstants_->LoadTheme(0);
-        MockThemeStyle::GetInstance()->SetAttributes({});
         auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
         MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
     }
 
     static void TearDownTestCase()
     {
+        AccessorTestBase::TearDownTestCase();
         MockPipelineContext::GetCurrent()->SetTaskExecutor(nullptr);
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        themeManager_ = nullptr;
-        themeConstants_ = nullptr;
     }
 
     virtual void SetUp(void)
