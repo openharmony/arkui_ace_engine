@@ -588,24 +588,24 @@ class SubscribableDateHandler extends SubscribableHandler {
     let ret = super.get(target, property);
 
     if (typeof ret === 'function') {
+      const self = this;
       if (this.dateSetFunctions.has(property)) {
-        const self = this;
         return function () {
           // execute original function with given arguments
           let result = ret.apply(this, arguments);
           self.notifyObjectPropertyHasChanged(property.toString(), this);
-
-          if (this.enableV2Compatible_) {
+          // enableV2Compatibility handling to fire Date change
+          if (self.enableV2Compatible_) {
             ObserveV2.getObserve().fireChange(target, ObjectProxyHandler.OB_DATE);
           }
 
           return result;
           // bind 'this' to target inside the function
         }.bind(target)
+      } else if (self.enableV2Compatible_) {
+        ObserveV2.getObserve().addRefV2Compatibility(target, ObjectProxyHandler.OB_DATE);
       }
       return ret.bind(target);
-    } else if (this.enableV2Compatible_) {
-      ObserveV2.getObserve().addRefV2Compatibility(target, ObjectProxyHandler.OB_DATE);
     }
     return ret;
   }
