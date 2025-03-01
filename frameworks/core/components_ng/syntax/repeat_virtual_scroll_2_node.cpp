@@ -412,7 +412,7 @@ void RepeatVirtualScroll2Node::RequestContainerReLayout(IndexType fromRepeatItem
 void RepeatVirtualScroll2Node::NotifyContainerLayoutChange(int32_t index, int32_t count,
     NG::UINode::NotificationType notificationType)
 {
-    TAG_LOGE(AceLogTag::ACE_REPEAT,
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
         "NotifyContainerLayoutChange triggered by Repeat rerender: nodeId: %{public}d "
         "index: %{public}d, count: %{public}d notificationType: %{public}d",
         static_cast<int32_t>(GetId()), index, count, static_cast<int32_t>(notificationType));

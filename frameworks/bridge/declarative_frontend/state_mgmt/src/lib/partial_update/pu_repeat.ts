@@ -90,7 +90,7 @@ class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     }
 
     public hasBindingToIndex(): boolean {
-        return this[ObserveV2.SYMBOL_REFS]?.['index']?.size > 0;
+        return this[ObserveV2.SYMBOL_REFS]?.index?.size > 0;
     }
 }
 
@@ -212,12 +212,12 @@ class __Repeat<T> implements RepeatAPI<T> {
             this.config.totalCount = options?.totalCount;
             this.config.totalCountSpecified = true;
         }
-        // available since API 16
+        // available since API 18
         if (options?.onTotalCount) {
             this.config.totalCount = options.onTotalCount;
             this.config.totalCountSpecified = true;
         }
-        if (options?.onTotalCount && options?.totalCount != undefined) {
+        if (options?.onTotalCount && options?.totalCount !== undefined) {
             stateMgmtConsole.error(`Error: Both totalCount and onTotalCount() are defined`);
         }
 

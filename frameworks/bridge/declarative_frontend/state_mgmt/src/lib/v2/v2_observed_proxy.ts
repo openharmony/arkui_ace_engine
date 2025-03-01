@@ -128,7 +128,7 @@ class ArrayProxyHandler {
     // or undefined if none
     private static tryFastRelayout(target: Array<unknown>, key: string, args?: Array<unknown>): Set<number> | undefined {
         if (target[__RepeatVirtualScroll2Impl.REF_META] === undefined) {
-            return;
+            return undefined;
         }
 
         const elmtIdSet = new Set<number>();
