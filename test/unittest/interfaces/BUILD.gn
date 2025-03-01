@@ -1146,10 +1146,7 @@ ohos_unittest("js_drawable_descriptor_test") {
 ohos_unittest("xcomponent_controller_test") {
   module_out_path = interface_test_output_path
 
-  sources = [
-    "$ace_root/interfaces/inner_api/xcomponent_controller/xcomponent_controller.cpp",
-    "xcomponent_controller_test.cpp",
-  ]
+  sources = [ "xcomponent_controller_test.cpp" ]
 
   configs = [
     "$ace_root/test/unittest:ace_unittest_config",
@@ -1163,6 +1160,7 @@ ohos_unittest("xcomponent_controller_test") {
     "$ace_root/interfaces/native/node",
     "$ace_root",
     "$ace_root/interfaces/inner_api/xcomponent_controller",
+    "$ace_root/interfaces/inner_api/ace/",
   ]
 
   deps = [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
