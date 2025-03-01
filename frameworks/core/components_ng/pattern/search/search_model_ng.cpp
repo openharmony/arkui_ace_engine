@@ -1162,7 +1162,7 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateFontSize(searchTheme->GetButtonFontSize());
+    textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     cancelButtonLayoutProperty->UpdateType(ButtonType::CIRCLE);
     cancelButtonLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());

@@ -33,9 +33,8 @@ namespace {
 constexpr float MAX_FONT_SCALE = 2.0f;
 constexpr Dimension ICON_MAX_SIZE = 40.0_vp;
 constexpr Dimension DEFAULT_ICON_HOT_ZONE = 40.0_vp;
-constexpr Dimension ICON_CONTAINER_HOVER_PADDING = 4.0_vp;
-constexpr Dimension ICON_UNDERLINE_CONTAINER_HOVER_PADDING = 8.0_vp;
 constexpr Dimension ICON_FOCUS_PADDING = 2.0_vp;
+constexpr Dimension DEFAULT_HOVER_SIZE = 32.0_vp;
 constexpr int HALF_SPACE = 2;
 constexpr int DOUBLE_PADDING = 2;
 } // namespace
@@ -128,6 +127,40 @@ RefPtr<FrameNode> TextInputResponseArea::CreateResponseAreaImageNode(const Image
     imageLayoutProperty->UpdateImageFit(imageFit);
     imageLayoutProperty->UpdateUserDefinedIdealSize(userDefinedIdealSize);
     return imageNode;
+}
+
+void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
+    float hoverRectHeight, bool isFocus)
+{
+    auto textFieldPattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(stackNode);
+    auto stackGeometryNode = stackNode->GetGeometryNode();
+    CHECK_NULL_VOID(stackGeometryNode);
+    auto stackRect = stackGeometryNode->GetFrameRect();
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageGeometryNode = imageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(imageGeometryNode);
+    auto imageRect = imageGeometryNode->GetFrameRect();
+    if (isFocus) {
+        hoverRectHeight = hoverRectHeight - ICON_FOCUS_PADDING.ConvertToPx();
+    }
+
+    rect = RectF(stackRect.GetX() - (hoverRectHeight - iconSize) / HALF_SPACE, stackRect.GetY() +
+        (stackRect.Height() - hoverRectHeight) / HALF_SPACE, hoverRectHeight, hoverRectHeight);
+    auto iconHoverPadding = (hoverRectHeight - iconSize) / HALF_SPACE;
+    auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding,
+            stackRect.GetY() - stackHoverPadding, hoverRectHeight, hoverRectHeight);
+    } else {
+        rect = RectF(stackRect.GetX() - (hoverRectHeight - iconSize) / HALF_SPACE, stackRect.GetY() -
+            stackHoverPadding, hoverRectHeight, hoverRectHeight);
+    }
 }
 // TextInputResponseArea end
 
@@ -246,24 +279,23 @@ void PasswordResponseArea::AddIconHotZoneRect()
 void PasswordResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
 {
     CHECK_NULL_VOID(stackNode_);
-    auto stackGeometryNode = stackNode_->GetGeometryNode();
-    CHECK_NULL_VOID(stackGeometryNode);
-    auto stackRect = stackGeometryNode->GetFrameRect();
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode_->GetFirstChild());
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageGeometryNode = imageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(imageGeometryNode);
+    auto imageRect = imageGeometryNode->GetFrameRect();
     auto textInputNode = stackNode_->GetParentFrameNode();
     CHECK_NULL_VOID(textInputNode);
     auto textInputRect = textInputNode->GetGeometryNode()->GetFrameRect();
-    auto iconSize = stackRect.Height();
-    auto defaultRectHeight = textInputRect.Height() - DOUBLE_PADDING * ICON_CONTAINER_HOVER_PADDING.ConvertToPx();
+    auto iconSize = imageRect.Height();
+    auto defaultRectHeight = DEFAULT_HOVER_SIZE.ConvertToPx();
     auto rectHeight = iconSize > defaultRectHeight ? iconSize : defaultRectHeight;
     auto hoverRectHeight = rectHeight > textInputRect.Height() ? textInputRect.Height() : rectHeight;
+    auto maxHoverRectHeight = iconSize + DOUBLE_PADDING * GetIconRightOffset();
+    hoverRectHeight = hoverRectHeight > maxHoverRectHeight ? maxHoverRectHeight : hoverRectHeight;
     passwordHoverSize_ = hoverRectHeight;
     RectF rect;
-    if (isFocus) {
-        hoverRectHeight = hoverRectHeight - ICON_FOCUS_PADDING.ConvertToPx();
-    }
-
-    rect = RectF(stackRect.GetX() - (hoverRectHeight - iconSize) / HALF_SPACE, stackRect.GetY() +
-        (stackRect.Height() - hoverRectHeight) / HALF_SPACE, hoverRectHeight, hoverRectHeight);
+    SetHoverRect(stackNode_, rect, iconSize, hoverRectHeight, isFocus);
     paintRect.SetRect(rect);
 }
 
@@ -760,39 +792,7 @@ void CleanNodeResponseArea::AddIconHotZoneRect()
     stackGestureHub->SetResponseRegion(responseRegion);
 }
 
-void CleanNodeResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
-{
-    CHECK_NULL_VOID(cleanNode_);
-    auto pattern = hostPattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto stackGeometryNode = cleanNode_->GetGeometryNode();
-    CHECK_NULL_VOID(stackGeometryNode);
-    auto stackRect = stackGeometryNode->GetFrameRect();
-    auto textInputNode = cleanNode_->GetParentFrameNode();
-    CHECK_NULL_VOID(textInputNode);
-    auto textInputRect = textInputNode->GetGeometryNode()->GetFrameRect();
-    auto iconSize = GetIconSize();
-    auto defaultRectHeight = textInputRect.Height() - DOUBLE_PADDING * ICON_CONTAINER_HOVER_PADDING.ConvertToPx();
-    if (textFieldLayoutProperty->GetShowUnderlineValue(false)) {
-        defaultRectHeight = textInputRect.Height() - DOUBLE_PADDING *
-            ICON_UNDERLINE_CONTAINER_HOVER_PADDING.ConvertToPx();
-    }
-    auto rectHeight = iconSize > defaultRectHeight ? iconSize : defaultRectHeight;
-    auto hoverRectHeight = rectHeight > textInputRect.Height() ? textInputRect.Height() : rectHeight;
-    cancelHoverSize_ = hoverRectHeight;
-    RectF rect;
-    if (isFocus) {
-        hoverRectHeight = hoverRectHeight - ICON_FOCUS_PADDING.ConvertToPx();
-    }
-
-    rect = RectF(stackRect.GetX() - (hoverRectHeight - iconSize) / HALF_SPACE,
-        stackRect.GetY() + (stackRect.Height() - hoverRectHeight) / HALF_SPACE, hoverRectHeight, hoverRectHeight);
-    paintRect.SetRect(rect);
-}
-
-float GetCancelButtonPadding(const RefPtr<TextFieldTheme> textFieldTheme)
+float GetCancelButtonPadding(const RefPtr<TextFieldTheme>& textFieldTheme)
 {
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = textFieldTheme->GetPadding();
@@ -801,6 +801,32 @@ float GetCancelButtonPadding(const RefPtr<TextFieldTheme> textFieldTheme)
         return static_cast<float>(cancelButtonPadding.ConvertToPx());
     }
     return static_cast<float>(themePadding.Left().ConvertToPx());
+}
+
+void CleanNodeResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
+{
+    CHECK_NULL_VOID(cleanNode_);
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textInputNode = cleanNode_->GetParentFrameNode();
+    CHECK_NULL_VOID(textInputNode);
+    auto textInputRect = textInputNode->GetGeometryNode()->GetFrameRect();
+    auto iconSize = GetIconSize();
+    auto defaultRectHeight = DEFAULT_HOVER_SIZE.ConvertToPx();
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    auto rectHeight = iconSize > defaultRectHeight ? iconSize : defaultRectHeight;
+    auto hoverRectHeight = rectHeight > textInputRect.Height() ? textInputRect.Height() : rectHeight;
+    auto maxHoverRectHeight = iconSize + DOUBLE_PADDING * GetCancelButtonPadding(theme);
+    hoverRectHeight = hoverRectHeight > maxHoverRectHeight ? maxHoverRectHeight : hoverRectHeight;
+    cancelHoverSize_ = hoverRectHeight;
+    RectF rect;
+    SetHoverRect(cleanNode_, rect, iconSize, hoverRectHeight, isFocus);
+    paintRect.SetRect(rect);
 }
 
 bool CleanNodeResponseArea::IsShowClean() const
