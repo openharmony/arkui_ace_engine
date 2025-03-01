@@ -24,6 +24,7 @@
 #include "include/core/SkImage.h"
 
 #include "base/image/image_source.h"
+#include "base/thread/cancelable_callback.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
@@ -33,6 +34,10 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
+
+namespace OHOS::Ace {
+class Animator;
+}
 
 namespace OHOS::Ace::NG {
 class AnimatedImage : public virtual CanvasImage {
