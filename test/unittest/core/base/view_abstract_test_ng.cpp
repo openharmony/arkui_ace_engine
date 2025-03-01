@@ -1799,7 +1799,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenu, TestSize.Level1)
     targetNodePipelineContext->SetThemeManager(themeManager);
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
 }
@@ -1838,7 +1838,7 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu, TestSize.Level1)
     targetNodePipelineContext->SetThemeManager(themeManager);
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     /**
      * @tc.expected: Return expected results.
      */
@@ -1887,7 +1887,7 @@ HWTEST_F(ViewAbstractTestNg, CloseMenu, TestSize.Level1)
     targetNodePipelineContext->SetThemeManager(themeManager);
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     /**
      * @tc.expected: Return expected results.
      */

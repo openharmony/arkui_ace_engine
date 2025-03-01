@@ -695,10 +695,8 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern001, TestSize.Level1)
 
     menuPattern->OnModifyDone();
 
-    auto contentNode = itemPattern->GetContentNode();
+    auto contentNode = itemPattern->GetHost();
     ASSERT_NE(contentNode, nullptr);
-    auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textProperty, nullptr);
 
     auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
     auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);

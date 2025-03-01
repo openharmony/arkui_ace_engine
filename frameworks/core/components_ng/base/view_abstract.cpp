@@ -2363,7 +2363,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     menuPattern->SetCustomNode(node);
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
-    auto theme = pipelineContext->GetTheme<SelectTheme>();
+    auto theme = pipelineContext->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
     CHECK_NULL_RETURN(theme, ERROR_CODE_INTERNAL_ERROR);
     auto expandDisplay = theme->GetExpandDisplay();
     menuWrapperPattern->SetIsOpenMenu(true);
@@ -2462,7 +2462,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
 
@@ -2492,7 +2492,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     auto pipelineContext = targetNode->GetContext();

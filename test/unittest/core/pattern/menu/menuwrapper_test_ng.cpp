@@ -128,6 +128,13 @@ void MenuWrapperTestNg::SetUp()
         }
         return AceType::MakeRefPtr<SelectTheme>();
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([menuTheme_](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == MenuTheme::TypeId()) {
+                return menuTheme_;
+            }
+            return AceType::MakeRefPtr<SelectTheme>();
+        });
 }
 
 void MenuWrapperTestNg::TearDown()
@@ -1433,7 +1440,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg031, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     theme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
     wrapperPattern->menuStatus_ = MenuStatus::HIDE;
@@ -1483,7 +1490,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg032, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     theme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
     wrapperPattern->menuStatus_ = MenuStatus::HIDE;
@@ -1535,7 +1542,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg033, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     theme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
     wrapperPattern->menuStatus_ = MenuStatus::HIDE;
@@ -1586,7 +1593,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg034, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     theme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
     wrapperPattern->menuStatus_ = MenuStatus::HIDE;
@@ -1639,7 +1646,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg035, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     theme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
     wrapperPattern->menuStatus_ = MenuStatus::HIDE;
@@ -1692,7 +1699,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg036, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     theme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
     wrapperPattern->menuStatus_ = MenuStatus::HIDE;

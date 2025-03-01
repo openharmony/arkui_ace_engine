@@ -52,6 +52,7 @@ public:
         if (auto colors = theme.Colors(); colors) {
             SetFontColor(colors->FontPrimary());
             SetButtonBackgroundColor(colors->CompBackgroundTertiary());
+            SetLabelColor(colors->FontPrimary());
         }
     }
 
