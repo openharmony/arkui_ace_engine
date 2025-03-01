@@ -16,9 +16,21 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
+void XComponentModelNG::Create(XComponentType type)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%sNative][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
+        [type]() { return AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::DECLARATIVE_NODE); });
+    stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
+}
+
 void XComponentModelNG::Create(const std::optional<std::string>& id, XComponentType type,
     const std::optional<std::string>& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
@@ -308,12 +320,12 @@ XComponentType XComponentModelNG::GetType(FrameNode* frameNode)
     return layoutProperty->GetXComponentTypeValue(XComponentType::SURFACE);
 }
 
+// For CAPI XComponent
 RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
     const std::optional<std::string>& libraryname)
 {
-    std::shared_ptr<InnerXComponentController> controller = nullptr;
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, controller));
+    auto pattern = AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::CNODE);
+    auto frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId, pattern);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     if (layoutProperty) {
         layoutProperty->UpdateXComponentType(type);
@@ -328,8 +340,14 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     auto libraryName = params->libraryName;
     auto controller = params->controller;
 
-    auto frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
-        AceType::MakeRefPtr<XComponentPattern>(id, type, libraryName, controller, 0.0, 0.0, true));
+    RefPtr<FrameNode> frameNode;
+    if (id.empty() && controller == nullptr && (type == XComponentType::SURFACE || type == XComponentType::TEXTURE)) {
+        frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
+            AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::TYPE_NODE));
+    } else {
+        frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
+            AceType::MakeRefPtr<XComponentPattern>(id, type, libraryName, controller, 0.0, 0.0, true));
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     if (layoutProperty) {
         layoutProperty->UpdateXComponentType(type);

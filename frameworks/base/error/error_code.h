@@ -98,6 +98,9 @@ constexpr int32_t ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE = 103305;
 // toast error code
 constexpr int32_t ERROR_CODE_TOAST_NOT_FOUND = 103401;
 
+// XComponent error code
+constexpr int32_t ERROR_CODE_XCOMPONENT_STATE_INVALID = 103501;
+
 // BindSheet error code
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_ERROR = 120001;
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST = 120002;

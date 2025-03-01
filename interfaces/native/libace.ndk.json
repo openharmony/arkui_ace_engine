@@ -3098,5 +3098,69 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_CustomDialog_SetImmersiveMode"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceHolder_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceHolder_Dispose"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceHolder_SetUserData"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceHolder_GetUserData"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceCallback_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceCallback_Dispose"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceCallback_SetSurfaceCreatedEvent"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceCallback_SetSurfaceChangedEvent"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceCallback_SetSurfaceDestroyedEvent"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceHolder_AddSurfaceCallback"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_SurfaceHolder_RemoveSurfaceCallback"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_GetNativeWindow"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_SetAutoInitialize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_Initialize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_Finalize"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_IsInitialized"
     }
 ]

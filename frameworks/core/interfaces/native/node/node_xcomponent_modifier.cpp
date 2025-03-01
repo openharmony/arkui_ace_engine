@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
@@ -140,6 +141,9 @@ void* GetNativeXComponent(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto xcPattern = frameNode->GetPattern<XComponentPattern>();
     CHECK_NULL_RETURN(xcPattern, nullptr);
+    if (xcPattern->HasGotSurfaceHolder()) {
+        return nullptr;
+    }
     auto pair = xcPattern->GetNativeXComponent();
     return reinterpret_cast<void*>(pair.second.lock().get());
 }
@@ -327,13 +331,94 @@ void StopImageAnalyzer(ArkUINodeHandle node)
     xcPattern->StopImageAnalyzer();
 }
 
-bool GetXComponentIsBindNative(ArkUINodeHandle node)
+void* CreateSurfaceHolder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, nullptr);
+    if (xcPattern->IsCreateSurfaceHolderForbidden()) {
+        return nullptr;
+    }
+    OH_ArkUI_SurfaceHolder* surfaceHolder = xcPattern->GetSurfaceHolder();
+    if (surfaceHolder == nullptr) {
+        surfaceHolder = new OH_ArkUI_SurfaceHolder();
+        xcPattern->SetSurfaceHolder(surfaceHolder);
+    }
+    return reinterpret_cast<void*>(surfaceHolder);
+}
+
+void Dispose(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetSurfaceHolder(nullptr);
+}
+
+ArkUI_Int32 SetAutoInitialize(ArkUINodeHandle node, ArkUI_Bool autoInitialize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    auto nodeType = xcPattern->GetXComponentNodeType();
+    if (nodeType != XComponentNodeType::TYPE_NODE && nodeType != XComponentNodeType::CNODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return xcPattern->SetAutoInitialize(autoInitialize);
+}
+
+ArkUI_Int32 Initialize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    auto nodeType = xcPattern->GetXComponentNodeType();
+    if (nodeType != XComponentNodeType::TYPE_NODE && nodeType != XComponentNodeType::CNODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return xcPattern->Initialize();
+}
+
+ArkUI_Int32 IsInitialized(ArkUINodeHandle node, ArkUI_Bool* isInitialized)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    auto nodeType = xcPattern->GetXComponentNodeType();
+    if (nodeType != XComponentNodeType::TYPE_NODE && nodeType != XComponentNodeType::CNODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    bool value;
+    auto res = xcPattern->IsInitialized(value);
+    *isInitialized = static_cast<ArkUI_Bool>(value);
+    return res;
+}
+
+ArkUI_Int32 Finalize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    auto nodeType = xcPattern->GetXComponentNodeType();
+    if (nodeType != XComponentNodeType::TYPE_NODE && nodeType != XComponentNodeType::CNODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return xcPattern->Finalize();
+}
+
+ArkUI_Bool GetXComponentIsBindNative(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
     auto xcPattern = frameNode->GetPattern<XComponentPattern>();
     CHECK_NULL_RETURN(xcPattern, false);
-    return xcPattern->IsBindNative();
+    return static_cast<ArkUI_Bool>(xcPattern->IsBindNative());
 }
 } // namespace
 
@@ -374,6 +459,12 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .getXComponentEnableAnalyzer = GetXComponentEnableAnalyzer,
         .startImageAnalyzer = StartImageAnalyzer,
         .stopImageAnalyzer = StopImageAnalyzer,
+        .createSurfaceHolder = CreateSurfaceHolder,
+        .dispose = Dispose,
+        .setAutoInitialize = SetAutoInitialize,
+        .initialize = Initialize,
+        .isInitialized = IsInitialized,
+        .finalize = Finalize,
         .getXComponentIsBindNative = GetXComponentIsBindNative,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
