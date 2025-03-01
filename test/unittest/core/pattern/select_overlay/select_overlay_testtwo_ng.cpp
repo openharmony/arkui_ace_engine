@@ -81,6 +81,7 @@ protected:
 void SelectOverlayTestTwoNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
     // set SelectTheme to themeManager before using themeManager to get SelectTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -91,6 +92,7 @@ void SelectOverlayTestTwoNg::SetUpTestCase()
 void SelectOverlayTestTwoNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 std::vector<MenuOptionsParam> SelectOverlayTestTwoNg::GetMenuOptionItems()
