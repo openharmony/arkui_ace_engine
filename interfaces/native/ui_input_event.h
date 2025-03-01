@@ -64,12 +64,6 @@ typedef enum {
     ARKUI_UIINPUTEVENT_TYPE_TOUCH = 1,
     ARKUI_UIINPUTEVENT_TYPE_AXIS = 2,
     ARKUI_UIINPUTEVENT_TYPE_MOUSE = 3,
-    /**
-     * @brief key event.
-     *
-     * @since 16
-     */
-    ARKUI_UIINPUTEVENT_TYPE_KEY = 4,
 } ArkUI_UIInputEvent_Type;
 
 /**
