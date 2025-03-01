@@ -1220,6 +1220,8 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg030, TestSize.Level1)
     DialogProperties props;
     auto dialog = DialogView::CreateDialogNode(props, nullptr);
     ASSERT_NE(dialog, nullptr);
+    auto extraMaskNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    extraMaskNode->MountToParent(dialog);
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
     auto dialogContext = dialog->GetRenderContext();
@@ -1229,17 +1231,19 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg030, TestSize.Level1)
     ASSERT_NE(dialogLayoutAlgorithm, nullptr);
     RefPtr<DialogLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
-
-    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, false);
-    EXPECT_FALSE(dialogContext->GetClipShape().value());
-
-    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, true);
-    EXPECT_TRUE(dialogContext->GetClipShape().value());
-
+    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(FULL_SCREEN_WIDTH / 2, FULL_SCREEN_HEIGHT / 2));
     layoutAlgorithm->expandDisplay_ = true;
-    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, true);
-    EXPECT_TRUE(dialogContext->GetClipShape().value());
+    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog);
+    NG::BorderRadiusPropertyT<Dimension> borderRadius;
+    borderRadius.SetRadius(Dimension(16.0, OHOS::Ace::DimensionUnit::VP));
+    auto maskNode = AceType::DynamicCast<FrameNode>(dialog->GetChildAtIndex(1));
+    EXPECT_EQ(maskNode->GetRenderContext()->GetBorderRadius().value(), borderRadius);
+
+    layoutAlgorithm->expandDisplay_ = false;
+    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog);
+    auto maskNodeProp = maskNode->GetLayoutProperty();
+    EXPECT_EQ(maskNodeProp->GetCalcLayoutConstraint()->selfIdealSize.value(),
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
 }
 
 /**
