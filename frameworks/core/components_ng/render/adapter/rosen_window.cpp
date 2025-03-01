@@ -88,20 +88,16 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
         },
         id);
+}
+
+void RosenWindow::Init()
+{
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
         self->RequestFrame();
     });
-}
-
-void RosenWindow::Init()
-{
-    CHECK_NULL_VOID(rsWindow_);
-    auto surfaceNode = rsWindow_->GetSurfaceNode();
-    if (rsUIDirector_ && surfaceNode) {
-        rsUIDirector_->SetRSSurfaceNode(surfaceNode);
-    }
 }
 
 void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
