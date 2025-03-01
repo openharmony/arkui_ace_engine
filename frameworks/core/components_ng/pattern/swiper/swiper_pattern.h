@@ -752,7 +752,7 @@ public:
     bool NeedFastAnimation() const;
     bool IsInFastAnimation() const;
 
-    float CalcCurrentTurnPageRate() const;
+    float CalcCurrentTurnPageRate(bool isTouchBottom = false) const;
     int32_t GetFirstIndexInVisibleArea() const;
     float CalculateGroupTurnPageRate(float additionalOffset);
 
@@ -1096,7 +1096,7 @@ private:
     void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
-    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
+    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset, bool isTouchBottom = false) const;
 
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);

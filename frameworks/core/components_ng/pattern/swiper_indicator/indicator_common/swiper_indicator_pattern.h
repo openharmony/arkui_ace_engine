@@ -121,7 +121,7 @@ public:
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
         auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
             swiperLayoutProperty->GetSwipeByGroup().value_or(false) ?
-            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate();
+            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate(true);
         paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
         paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
         mouseClickIndex_ = std::nullopt;
