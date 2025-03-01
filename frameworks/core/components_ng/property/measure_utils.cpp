@@ -15,6 +15,9 @@
 
 #include "core/components_ng/property/measure_utils.h"
 
+#include "core/common/ace_application_info.h"
+#include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 const static int32_t PLATFORM_VERSION_TEN = 10;

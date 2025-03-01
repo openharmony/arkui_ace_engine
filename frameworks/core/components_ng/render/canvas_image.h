@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/matrix4.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
@@ -26,7 +27,6 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/drawing_forward.h"
 

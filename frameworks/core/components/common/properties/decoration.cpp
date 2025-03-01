@@ -15,6 +15,7 @@
 
 #include "core/components/common/properties/decoration.h"
 
+#include "core/pipeline/pipeline_context.h"
 namespace OHOS::Ace {
 
 void Decoration::SetContextAndCallback(
@@ -63,6 +64,14 @@ void Gradient::AddColor(const GradientColor& color)
 void Gradient::ClearColors()
 {
     colors_.clear();
+}
+
+void BackgroundImage::SetSrc(const std::string& src, const RefPtr<ThemeConstants>& themeConstants)
+{
+    // If match the regex, src with the outer "url()" removed is returned.
+    // Otherwise return a copy of src directly.
+    auto imgSrc = std::regex_replace(src, std::regex(R"(^url\(\s*['"]?\s*([^()]+?)\s*['"]?\s*\)$)"), "$1");
+    src_ = ThemeUtils::ProcessImageSource(imgSrc, themeConstants);
 }
 
 void BackgroundImageSize::SetSizeTypeX(BackgroundImageSizeType type)
@@ -585,6 +594,13 @@ void BrightnessOption::ToJsonValue(
         return;
     }
     json->PutExtAttr(key.c_str(), GetJsonObject(), filter);
+}
+
+void BackgroundImagePosition::SetContextAndCallback(
+    const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+{
+    valueX_.SetContextAndCallback(context, callback);
+    valueY_.SetContextAndCallback(context, callback);
 }
 
 } // namespace OHOS::Ace
