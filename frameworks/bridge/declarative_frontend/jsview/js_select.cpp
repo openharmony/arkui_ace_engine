@@ -919,7 +919,7 @@ void JSSelect::SetDividerStyle(const JSCallbackInfo& info)
             divider.endMargin = value;
         }
         if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-            divider.color = Color::TRANSPARENT;
+            divider.color = defaultColor;
         }
         auto modeVal = obj->GetProperty("mode");
         if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {

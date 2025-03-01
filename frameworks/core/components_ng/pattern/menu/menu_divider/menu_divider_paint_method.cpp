@@ -51,7 +51,12 @@ void MenuDividerPaintMethod::UpdateModfierParams(PaintWrapper* paintWrapper)
     } else {
         dividerModifier_->SetStrokeWidth(themeStrokeWidth_);
     }
-    dividerModifier_->SetDividerColor(paintProperty->GetDividerColorValue(themeDividerColor_));
+    auto dividerColor = paintProperty->GetDividerColorValue(themeDividerColor_);
+    if (!isOption_ && dividerColor == Color::FOREGROUND) {
+        dividerModifier_->SetDividerColor(themeDividerColor_);
+    } else {
+        dividerModifier_->SetDividerColor(dividerColor);
+    }
     dividerModifier_->SetDefaultShow(defaultShowDivider_);
     auto selected = paintProperty->GetTopSelectedValue(false) || paintProperty->GetBottomSelectedValue(false);
     auto hover = paintProperty->GetTopHoverValue(false) || paintProperty->GetBottomHoverValue(false);
