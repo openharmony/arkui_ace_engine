@@ -77,10 +77,13 @@ constexpr float DISPLAY_CONTROL_RATIO_FAST = 1.35f;
 constexpr float CROWN_SENSITIVITY_LOW = 0.8f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
+constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.00025f;
 
 constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
 constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
+#else
+constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 #endif
 } // namespace
 
@@ -1106,8 +1109,7 @@ void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSna
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     auto minimumAmplitudeRatio = DEFAULT_MINIMUM_AMPLITUDE_PX / std::abs(scrollSnapDelta);
-    if (LessNotEqualCustomPrecision(minimumAmplitudeRatio,
-        ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO)) {
+    if (LessNotEqualCustomPrecision(minimumAmplitudeRatio, RESPONSIVE_SPRING_AMPLITUDE_RATIO)) {
         curve->UpdateMinimumAmplitudeRatio(minimumAmplitudeRatio);
     }
     option.SetCurve(curve);
