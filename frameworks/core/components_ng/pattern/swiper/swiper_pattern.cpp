@@ -6551,14 +6551,20 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
     return;
 }
 
-std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float additionalOffset) const
+std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float additionalOffset, bool isTouchBottom) const
 {
     float currentTurnPageRate = FLT_MAX;
     auto firstIndex = currentFirstIndex_;
     auto itemMainSize = CalculateVisibleSize();
+    auto itemSpace = GetItemSpace();
     for (auto iter = itemPosition_.rbegin(); iter != itemPosition_.rend(); iter++) {
         auto startPos = itemMainSize - iter->second.endPos;
         auto endPos = itemMainSize - iter->second.startPos;
+        if (isTouchBottom && Positive(itemSpace)) {
+            startPos += itemSpace;
+            endPos += itemSpace;
+        }
+
         if (LessNotEqual((startPos + additionalOffset), 0) && LessNotEqual((endPos + additionalOffset), 0)) {
             continue;
         }
@@ -6578,10 +6584,10 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float addition
     return std::make_pair(currentTurnPageRate, firstIndex);
 }
 
-float SwiperPattern::CalcCurrentTurnPageRate() const
+float SwiperPattern::CalcCurrentTurnPageRate(bool isTouchBottom) const
 {
     if (IsHorizontalAndRightToLeft()) {
-        return CalcCurrentPageStatusOnRTL(0.0f).first;
+        return CalcCurrentPageStatusOnRTL(0.0f, isTouchBottom).first;
     }
 
     return CalcCurrentPageStatus(0.0f).first;
