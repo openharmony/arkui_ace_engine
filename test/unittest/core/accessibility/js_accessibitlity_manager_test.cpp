@@ -1181,4 +1181,47 @@ HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.L
         }
     }
 }
+
+/**
+ * @tc.name: JsAccessibilityManager024
+ * @tc.desc: RegisterGetParentRectHandler
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager024, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    /**
+    * @tc.steps: step2. test RegisterGetParentRectHandler
+    */
+    jsAccessibilityManager->uecRectInfo_.isChanged = false;
+    jsAccessibilityManager->RegisterGetParentRectHandler();
+    EXPECT_NE(jsAccessibilityManager->getParentRectHandlerNew_, nullptr);
+}
+
+/**
+* @tc.name: JsAccessibilityManager025
+* @tc.desc: GetFinalRealRectInfo
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager025, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        "frameNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. test GetFinalRealRectInfo
+     */
+    auto rectInfo = jsAccessibilityManager->GetFinalRealRectInfo(frameNode);
+    EXPECT_EQ(rectInfo.Left(), 0);
+    EXPECT_EQ(rectInfo.Top(), 0);
+}
 } // namespace OHOS::Ace::NG
