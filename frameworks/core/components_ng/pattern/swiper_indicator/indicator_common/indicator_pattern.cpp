@@ -332,6 +332,7 @@ bool IndicatorPattern::GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& f
 void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
 {
     if (!IsLoop() || IsHover() || IsPressed()) {
+        singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
         if (index >= RealTotalCount()) {
             SetCurrentIndexInSingleMode(RealTotalCount() - 1);
             return;
@@ -352,7 +353,7 @@ void IndicatorPattern::ShowPrevious()
     }
 
     singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+    if (IsHorizontalAndRightToLeft()) {
         singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
         if (IsLoop() && GetCurrentIndex() == 0) {
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
@@ -374,7 +375,7 @@ void IndicatorPattern::ShowNext()
         return SwiperIndicatorPattern::ShowNext();
     }
     singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+    if (IsHorizontalAndRightToLeft()) {
         singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
         if (IsLoop() && GetCurrentIndex() == (RealTotalCount() - 1)) {
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
@@ -407,6 +408,10 @@ void IndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
         }
     } else {
         singleGestureState_ = GestureState::GESTURE_STATE_INIT;
+    }
+    auto dotIndicatorModifier = GetDotIndicatorModifier();
+    if (dotIndicatorModifier) {
+        dotIndicatorModifier->StopAnimation();
     }
     OnIndexChangeInSingleMode(index);
 }
