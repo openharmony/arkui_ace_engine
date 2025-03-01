@@ -49,16 +49,6 @@ namespace  {
     const auto ATTRIBUTE_FULL_HEIGHT_DEFAULT_VALUE = "0.00px";
     const auto ATTRIBUTE_CUSTOM_HEIGHT_NAME = "customHeight";
     const auto ATTRIBUTE_CUSTOM_HEIGHT_DEFAULT_VALUE = "0.00px";
-
-struct EventsTracker {
-    static inline GENERATED_ArkUIPanelEventsReceiver panelEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getPanelEventsReceiver = [] () -> const GENERATED_ArkUIPanelEventsReceiver* {
-            return &panelEventReceiver;
-        }
-    };
-}; // EventsTracker
 } // namespace
 
 class PanelModifierTest : public ModifierTestBase<
@@ -69,9 +59,6 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
-        // setup the test event handler
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -704,18 +691,6 @@ HWTEST_F(PanelModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
         Ark_PanelMode mode;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::panelEventReceiver.onChange = [](Ark_Int32 nodeId,
-        const Ark_Number width,
-        const Ark_Number height,
-        const Ark_PanelMode mode)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .width = Converter::Convert<Ark_Int32>(width),
-            .height = Converter::Convert<Ark_Int32>(height),
-            .mode = Converter::Convert<Ark_PanelMode>(mode)
-        };
-    };
 
     ASSERT_NE(modifier_->setOnChange, nullptr);
 
@@ -747,13 +722,6 @@ HWTEST_F(PanelModifierTest, DISABLED_setOnHeightChangeTest, TestSize.Level1)
         int32_t index;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::panelEventReceiver.onHeightChange = [](Ark_Int32 nodeId, const Ark_Number index)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .index = Converter::Convert<Ark_Int32>(index)
-        };
-    };
 
     ASSERT_NE(modifier_->setOnHeightChange, nullptr);
 

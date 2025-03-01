@@ -32,16 +32,6 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace  {
-struct EventsTracker {
-    static inline GENERATED_ArkUITextPickerEventsReceiver textPickerEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getTextPickerEventsReceiver = []() -> const GENERATED_ArkUITextPickerEventsReceiver* {
-            return &textPickerEventReceiver;
-        }
-    };
-}; // EventsTracker
-
 // callback data
 const int32_t CONTEXT_ID = 123;
 const int32_t INVOKE_POS_0 = 0;
@@ -391,8 +381,6 @@ class TextPickerModifierTest : public ModifierTestBase<GENERATED_ArkUITextPicker
         AddResource(RES_PIC_1_ID, "pic1");
         AddResource(RES_PIC_2_ID, "pic2");
         AddResource(RES_PIC_3_ID, "pic3");
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

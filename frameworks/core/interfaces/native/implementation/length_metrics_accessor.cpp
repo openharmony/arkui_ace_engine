@@ -38,6 +38,22 @@ Ark_LengthMetrics PxImpl(const Ark_Number* value)
 {
     return LengthMetricsPeer::Create(Dimension(Converter::Convert<float>(*value)));
 }
+Ark_LengthMetrics VpImpl(const Ark_Number* value)
+{
+    return {};
+}
+Ark_LengthMetrics FpImpl(const Ark_Number* value)
+{
+    return {};
+}
+Ark_LengthMetrics PercentImpl(const Ark_Number* value)
+{
+    return {};
+}
+Ark_LengthMetrics LpxImpl(const Ark_Number* value)
+{
+    return {};
+}
 Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
 {
     return LengthMetricsPeer::Create(Converter::OptConvert<Dimension>(*value).value_or(Dimension()));
@@ -78,6 +94,10 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor()
         LengthMetricsAccessor::CtorImpl,
         LengthMetricsAccessor::GetFinalizerImpl,
         LengthMetricsAccessor::PxImpl,
+        LengthMetricsAccessor::VpImpl,
+        LengthMetricsAccessor::FpImpl,
+        LengthMetricsAccessor::PercentImpl,
+        LengthMetricsAccessor::LpxImpl,
         LengthMetricsAccessor::ResourceImpl,
         LengthMetricsAccessor::GetUnitImpl,
         LengthMetricsAccessor::SetUnitImpl,
