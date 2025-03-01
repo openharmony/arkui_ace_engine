@@ -56,9 +56,14 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     CHECK_NULL_VOID(layoutWrapper);
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
     float safeAreaTop = safeAreaInsets.top_.Length();
-    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
-    CHECK_NULL_VOID(toastTheme);
-    safeAreaTop += toastTheme->GetTop().ConvertToPx();
+    auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+    Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        CHECK_NULL_VOID(toastTheme);
+        safeAreaTop += toastTheme->GetTop().ConvertToPx();
+    }
     const auto& safeArea = toastProps->GetSafeAreaInsets();
     limitPos_ = Dimension(GreatNotEqual(safeAreaTop, 0) ? safeAreaTop : LIMIT_SPACING.ConvertToPx());
     // Default Toast need to avoid keyboard, but the Top mode doesn't need.
