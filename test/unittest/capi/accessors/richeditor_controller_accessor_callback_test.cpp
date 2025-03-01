@@ -137,8 +137,8 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClic
         auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
-            .offsetX = accessor->getX(peer),
-            .offsetY = accessor->getY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getY(peer)),
         };
         accessor->destroyPeer(peer);
     };
@@ -179,8 +179,8 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLong
         auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
-            .offsetX = accessor->getOffsetX(peer),
-            .offsetY = accessor->getOffsetY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getOffsetX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getOffsetY(peer)),
         };
         accessor->destroyPeer(peer);
     };
@@ -222,8 +222,8 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
         auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
-            .offsetX = accessor->getX(peer),
-            .offsetY = accessor->getY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getY(peer)),
         };
         accessor->destroyPeer(peer);
     };
@@ -264,8 +264,8 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongP
         auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
-            .offsetX = accessor->getOffsetX(peer),
-            .offsetY = accessor->getOffsetY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getOffsetX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getOffsetY(peer)),
         };
         accessor->destroyPeer(peer);
     };

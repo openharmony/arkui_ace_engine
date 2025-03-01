@@ -34,11 +34,11 @@ Ark_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }
-Ark_Int32 GetFontSizeImpl(Ark_TextStyle_styled_string peer)
+Ark_Number GetFontSizeImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }
-Ark_Int32 GetFontWeightImpl(Ark_TextStyle_styled_string peer)
+Ark_Number GetFontWeightImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }

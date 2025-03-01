@@ -112,8 +112,8 @@ HWTEST_F(ChildrenMainSizeTest, CtorTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChildDefaultSize, nullptr);
 
-    auto retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+    auto retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE);
 }
 
 /**
@@ -323,16 +323,16 @@ HWTEST_F(ChildrenMainSizeTest, GetChildDefaultSizeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChildDefaultSize, nullptr);
 
-    auto retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+    auto retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE);
 
     auto ptr = peer_->GetHandler();
     if (ptr) {
         ptr->UpdateDefaultSize(CHILDREN_DEFAULT_SIZE * 2);
     }
 
-    retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE * 2);
+    retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE * 2);
 }
 
 /**
@@ -346,13 +346,13 @@ HWTEST_F(ChildrenMainSizeTest, SetChildDefaultSizeTest, TestSize.Level1)
     // valid value
     auto defSize = Converter::ArkValue<Ark_Number>(CHILDREN_DEFAULT_SIZE);
     accessor_->setChildDefaultSize(peer_, &defSize);
-    auto retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+    auto retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE);
 
     // invalid value
     defSize = Converter::ArkValue<Ark_Number>(-CHILDREN_DEFAULT_SIZE);
     accessor_->setChildDefaultSize(peer_, &defSize);
-    retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+    retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE);
 }
 } // namespace OHOS::Ace::NG

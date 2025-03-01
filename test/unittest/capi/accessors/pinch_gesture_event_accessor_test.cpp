@@ -52,7 +52,7 @@ HWTEST_F(PinchGestureEventAccessorTest, GetScaleTest, TestSize.Level1)
         PinchGestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetScale(value);
-        Ark_Int32 arkRes = accessor_->getScale(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getScale(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetScale";
     }
@@ -85,7 +85,7 @@ HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterXTest, TestSize.Level1)
         PinchGestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetPinchCenter(Offset(value, 0.));
-        Ark_Int32 arkRes = accessor_->getPinchCenterX(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getPinchCenterX(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetPinchCenterX";
     }
@@ -118,7 +118,7 @@ HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterYTest, TestSize.Level1)
         PinchGestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetPinchCenter(Offset(0., value));
-        Ark_Int32 arkRes = accessor_->getPinchCenterY(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getPinchCenterY(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetPinchCenterY";
     }

@@ -108,6 +108,7 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
         LazyForEachOpsAccessor::SetCurrentIndexImpl,
         LazyForEachOpsAccessor::PrepareImpl,
+        LazyForEachOpsAccessor::NotifyChangeImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }

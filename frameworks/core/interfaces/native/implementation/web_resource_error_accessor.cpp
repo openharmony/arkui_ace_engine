@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -42,10 +43,11 @@ Ark_String GetErrorInfoImpl(Ark_WebResourceError peer)
     LOGE("WebResourceErrorAccessor::GetErrorInfoImpl - return value need to be supported");
     return {};
 }
-Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
+Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    return static_cast<Ark_Int32>(peer->handler->GetCode());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetCode());
 }
 } // WebResourceErrorAccessor
 const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()

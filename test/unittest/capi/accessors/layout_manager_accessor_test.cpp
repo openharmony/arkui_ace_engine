@@ -51,9 +51,9 @@ HWTEST_F(LayoutManagerAccessorTest, getLineCountTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_, nullptr);
     ASSERT_NE(peer_, nullptr);
-    auto value = accessor_->getLineCount(peer_);
+    auto value = Converter::Convert<int32_t>(accessor_->getLineCount(peer_));
     ASSERT_EQ(value, 0);
-    value = accessor_->getLineCount(nullptr);
+    value = Converter::Convert<int32_t>(accessor_->getLineCount(nullptr));
     ASSERT_EQ(value, 0);
 }
 

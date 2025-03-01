@@ -56,7 +56,7 @@ HWTEST_F(PanGestureEventAccessorTest, GetOffsetXTest, TestSize.Level1)
         PanGestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetOffsetX(value);
-        Ark_Int32 arkRes = accessor_->getOffsetX(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getOffsetX(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetOffsetX";
     }
@@ -89,7 +89,7 @@ HWTEST_F(PanGestureEventAccessorTest, GetOffsetYTest, TestSize.Level1)
         PanGestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetOffsetY(value);
-        Ark_Int32 arkRes = accessor_->getOffsetY(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getOffsetY(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetOffsetY";
     }
@@ -124,7 +124,7 @@ HWTEST_F(PanGestureEventAccessorTest, GetVelocityXTest, TestSize.Level1)
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(value, velocityY);
         event->SetVelocity(Velocity(offsetPerSec));
-        Ark_Int32 arkRes = accessor_->getVelocityX(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getVelocityX(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetVelocityX";
     }
@@ -159,7 +159,7 @@ HWTEST_F(PanGestureEventAccessorTest, GetVelocityYTest, TestSize.Level1)
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(velocityX, value);
         event->SetVelocity(Velocity(offsetPerSec));
-        Ark_Int32 arkRes = accessor_->getVelocityY(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getVelocityY(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetVelocityY";
     }
@@ -193,7 +193,7 @@ HWTEST_F(PanGestureEventAccessorTest, GetVelocityTest, TestSize.Level1)
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(velocityX, velocityY);
         event->SetVelocity(Velocity(offsetPerSec));
-        Ark_Int32 arkRes = accessor_->getVelocity(peer_);
+        auto arkRes = Converter::Convert<float>(accessor_->getVelocity(peer_));
         EXPECT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetVelocity";
     }

@@ -299,12 +299,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 AddTextSpanImpl(Ark_RichEditorController peer,
-                          const Ark_String* value,
-                          const Opt_RichEditorTextSpanOptions* options)
+Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
+                           const Ark_String* value,
+                           const Opt_RichEditorTextSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     int32_t result = 0;
     std::optional<TextSpanOptions> locOptions;
     if (options) {
@@ -316,14 +316,14 @@ Ark_Int32 AddTextSpanImpl(Ark_RichEditorController peer,
     if (locOptions) {
         result = peerImpl->AddTextSpanImpl(locOptions.value());
     }
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
-Ark_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
-                           const Ark_Union_PixelMap_ResourceStr* value,
-                           const Opt_RichEditorImageSpanOptions* options)
+Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
+                            const Ark_Union_PixelMap_ResourceStr* value,
+                            const Opt_RichEditorImageSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     int32_t result = 0;
     std::optional<ImageSpanOptions> locOptions;
     if (options) {
@@ -342,14 +342,14 @@ Ark_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
     if (locOptions) {
         result = peerImpl->AddImageSpanImpl(locOptions.value());
     }
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
-Ark_Int32 AddBuilderSpanImpl(Ark_RichEditorController peer,
-                             const CustomNodeBuilder* value,
-                             const Opt_RichEditorBuilderSpanOptions* options)
+Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
+                              const CustomNodeBuilder* value,
+                              const Opt_RichEditorBuilderSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     int32_t result = 0;
     std::optional<SpanOptionBase> locOptions;
     if (options) {
@@ -370,14 +370,14 @@ Ark_Int32 AddBuilderSpanImpl(Ark_RichEditorController peer,
             }
         }
     }
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
-Ark_Int32 AddSymbolSpanImpl(Ark_RichEditorController peer,
-                            const Ark_Resource* value,
-                            const Opt_RichEditorSymbolSpanOptions* options)
+Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
+                             const Ark_Resource* value,
+                             const Opt_RichEditorSymbolSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     int32_t result = 0;
     std::optional<SymbolSpanOptions> locOptions;
     if (options && value) {
@@ -390,7 +390,7 @@ Ark_Int32 AddSymbolSpanImpl(Ark_RichEditorController peer,
     if (locOptions) {
         result = peerImpl->AddSymbolSpanImpl(locOptions.value());
     }
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
 void UpdateSpanStyleImpl(Ark_RichEditorController peer,
                          const Ark_Type_RichEditorController_updateSpanStyle_value* value)

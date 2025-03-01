@@ -259,8 +259,8 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick0Test, TestSize.Level1)
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .resourceId = resourceId,
-            .offsetX = accessor->getWindowX(peer),
-            .offsetY = accessor->getWindowY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
         };
         accessor->destroyPeer(peer);
     };
@@ -306,8 +306,8 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .resourceId = resourceId,
-            .offsetX = accessor->getWindowX(peer),
-            .offsetY = accessor->getWindowY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
         };
         accessor->destroyPeer(peer);
     };

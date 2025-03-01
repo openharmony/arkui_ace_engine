@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetLineHeightImpl(Ark_LineHeightStyle peer)
+Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
 {
     return {};
 }

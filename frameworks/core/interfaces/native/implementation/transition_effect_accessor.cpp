@@ -172,6 +172,22 @@ Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
     lastEffect->handler->SetNext(nextPeer->handler);
     return peer;
 }
+Ark_TransitionEffect GetIDENTITYImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetOPACITYImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetSLIDEImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetSLIDE_SWITCHImpl()
+{
+    return {};
+}
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
 {
@@ -187,6 +203,10 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
         TransitionEffectAccessor::AsymmetricImpl,
         TransitionEffectAccessor::AnimationImpl,
         TransitionEffectAccessor::CombineImpl,
+        TransitionEffectAccessor::GetIDENTITYImpl,
+        TransitionEffectAccessor::GetOPACITYImpl,
+        TransitionEffectAccessor::GetSLIDEImpl,
+        TransitionEffectAccessor::GetSLIDE_SWITCHImpl,
     };
     return &TransitionEffectAccessorImpl;
 }

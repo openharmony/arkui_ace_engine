@@ -938,7 +938,7 @@ void ResetImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerResetImpl();
 }
-Ark_Int32 GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
+Ark_Number GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetGlobalAlphaImpl there is no implementation in controller "
         "for getter method of GlobalAlpha.");
@@ -1063,16 +1063,16 @@ void SetLineCapImpl(Ark_CanvasRenderer peer,
     auto capStr = Converter::Convert<std::string>(*lineCap);
     peerImpl->SetLineCap(capStr);
 }
-Ark_Int32 GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
+Ark_Number GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
 
     double offset = peerImpl->TriggerGetLineDashOffsetImpl();
     LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl return type Ark_Int32 "
          "should be replaced with a valid Ark_Number for LineDashParam offset double type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(offset));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(offset));
 }
 void SetLineDashOffsetImpl(Ark_CanvasRenderer peer,
                            const Ark_Number* lineDashOffset)
@@ -1103,7 +1103,7 @@ void SetLineJoinImpl(Ark_CanvasRenderer peer,
     auto joinStr = Converter::Convert<std::string>(*lineJoin);
     peerImpl->SetLineJoin(joinStr);
 }
-Ark_Int32 GetLineWidthImpl(Ark_CanvasRenderer peer)
+Ark_Number GetLineWidthImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetLineWidthImpl there is no implementation in controller "
         "for getter method of LinewWidth.");
@@ -1120,7 +1120,7 @@ void SetLineWidthImpl(Ark_CanvasRenderer peer,
     auto width = static_cast<double>(Converter::Convert<float>(*lineWidth));
     peerImpl->TriggerSetLineWidthImpl(width);
 }
-Ark_Int32 GetMiterLimitImpl(Ark_CanvasRenderer peer)
+Ark_Number GetMiterLimitImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetMiterLimitImpl there is no implementation in controller "
         "for getter method of MiterLimit.");
@@ -1137,7 +1137,7 @@ void SetMiterLimitImpl(Ark_CanvasRenderer peer,
     auto limit = static_cast<double>(Converter::Convert<float>(*miterLimit));
     peerImpl->TriggerSetMiterLimitImpl(limit);
 }
-Ark_Int32 GetShadowBlurImpl(Ark_CanvasRenderer peer)
+Ark_Number GetShadowBlurImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowBlurImpl there is no implementation in controller "
         "for getter method of ShadowBlur.");
@@ -1171,7 +1171,7 @@ void SetShadowColorImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(opt);
     peerImpl->TriggerSetShadowColorImpl(*opt);
 }
-Ark_Int32 GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
+Ark_Number GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetXImpl there is no implementation in controller "
         "for getter method of ShadowOffsetXImpl.");
@@ -1188,7 +1188,7 @@ void SetShadowOffsetXImpl(Ark_CanvasRenderer peer,
     auto offsetX = static_cast<double>(Converter::Convert<float>(*shadowOffsetX));
     peerImpl->TriggerSetShadowOffsetXImpl(offsetX);
 }
-Ark_Int32 GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
+Ark_Number GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetYImpl there is no implementation in controller "
         "for getter method of ShadowOffsetYImpl.");

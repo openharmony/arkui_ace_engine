@@ -40,7 +40,7 @@ Ark_OffscreenCanvasRenderingContext2D GetContext2dImpl(Ark_OffscreenCanvas peer,
 {
     return {};
 }
-Ark_Int32 GetHeightImpl(Ark_OffscreenCanvas peer)
+Ark_Number GetHeightImpl(Ark_OffscreenCanvas peer)
 {
     return {};
 }
@@ -48,7 +48,7 @@ void SetHeightImpl(Ark_OffscreenCanvas peer,
                    const Ark_Number* height)
 {
 }
-Ark_Int32 GetWidthImpl(Ark_OffscreenCanvas peer)
+Ark_Number GetWidthImpl(Ark_OffscreenCanvas peer)
 {
     return {};
 }

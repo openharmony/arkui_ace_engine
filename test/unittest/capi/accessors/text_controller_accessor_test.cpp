@@ -140,7 +140,7 @@ HWTEST_F(TextControllerAccessorTest, getLayoutManagerTest, TestSize.Level1)
     auto layoutManagerAccessor = GeneratedModifier::GetLayoutManagerAccessor();
     ASSERT_NE(layoutManagerAccessor, nullptr);
     auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(manager);
-    EXPECT_EQ(layoutManagerAccessor->getLineCount(layoutManagerPeer), expectedLineCount);
+    EXPECT_EQ(Converter::Convert<int32_t>(layoutManagerAccessor->getLineCount(layoutManagerPeer)), expectedLineCount);
     layoutManagerAccessor->destroyPeer(layoutManagerPeer); // Destroy LayoutManager peer
 }
 

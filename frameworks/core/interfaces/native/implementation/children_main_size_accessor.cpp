@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/children_main_size_peer.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -89,14 +90,13 @@ void UpdateImpl(Ark_VMContext vmContext,
     auto array = std::vector<float>{convChildSize >= 0 ? convChildSize : DEFAULT_SIZE};
     handler->ChangeData(convIndex, 1, array);
 }
-Ark_Int32 GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
+Ark_Number GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
 {
-    // should return Ark_Float32 or Ark_Number with a float value
-    CHECK_NULL_RETURN(peer, -1);
+    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    CHECK_NULL_RETURN(peer, errValue);
     auto handler = peer->GetHandler();
-    CHECK_NULL_RETURN(handler, -1);
-
-    return handler->GetChildSize(-1);
+    CHECK_NULL_RETURN(handler, errValue);
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(handler->GetChildSize(-1)));
 }
 void SetChildDefaultSizeImpl(Ark_ChildrenMainSize peer,
                              const Ark_Number* childDefaultSize)

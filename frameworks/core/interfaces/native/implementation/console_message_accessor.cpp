@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -66,10 +67,11 @@ Ark_String GetSourceIdImpl(Ark_ConsoleMessage peer)
     LOGE("ConsoleMessageAccessor::GetSourceIdImpl - return value need to be supported");
     return {};
 }
-Ark_Int32 GetLineNumberImpl(Ark_ConsoleMessage peer)
+Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webConsoleLog, 0);
-    return static_cast<Ark_Int32>(peer->webConsoleLog->GetLineNumber());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->webConsoleLog->GetLineNumber());
 }
 Ark_MessageLevel GetMessageLevelImpl(Ark_ConsoleMessage peer)
 {

@@ -188,13 +188,13 @@ void DisposeImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(currentUINodeRef);
 }
-Ark_Int32 GetOpacityImpl(Ark_FrameNode peer)
+Ark_Number GetOpacityImpl(Ark_FrameNode peer)
 {
-    CHECK_NULL_RETURN(peer && peer->node, 1.0f);
+    const auto errValue = Converter::ArkValue<Ark_Number>(1);
+    CHECK_NULL_RETURN(peer && peer->node, errValue);
     LOGE("ARKOALA FrameNodeAccessor::GetOpacityImpl is not implemented.");
     auto opacity = ViewAbstract::GetOpacity(peer->node.GetRawPtr());
-    // should return Ark_Float32 or Ark_Number with a float value
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(opacity));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(opacity));
 }
 Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {

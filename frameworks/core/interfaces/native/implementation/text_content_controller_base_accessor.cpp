@@ -46,10 +46,11 @@ Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
     auto rect = peer->controller_->GetTextContentRect();
     return Converter::ArkValue<Ark_RectResult>(rect);
 }
-Ark_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
+Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {
-    CHECK_NULL_RETURN(peer && peer->controller_, 0);
-    return Converter::ArkValue<Ark_Int32>(peer->controller_->GetTextContentLinesNum());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->controller_, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->controller_->GetTextContentLinesNum());
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()

@@ -481,6 +481,7 @@ Ark_StyledString SubStyledStringImpl(Ark_VMContext vmContext,
     return StyledStringPeer::Create(spanString);
 }
 void FromHtmlImpl(Ark_VMContext vmContext,
+                  Ark_AsyncWorkerPtr asyncWorker,
                   const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
@@ -512,6 +513,7 @@ Ark_Buffer MarshallingImpl(Ark_StyledString styledString)
     return {};
 }
 void UnmarshallingImpl(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
                        const Ark_Buffer* buffer,
                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
@@ -536,11 +538,12 @@ void UnmarshallingImpl(Ark_VMContext vmContext,
 
     callback(peer, errorsStr);
 }
-Ark_Int32 GetLengthImpl(Ark_StyledString peer)
+Ark_Number GetLengthImpl(Ark_StyledString peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->spanString, 0);
-    return Converter::ArkValue<Ark_Int32>(peer->spanString->GetLength());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->spanString, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->spanString->GetLength());
 }
 } // StyledStringAccessor
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()

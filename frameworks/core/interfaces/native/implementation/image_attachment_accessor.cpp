@@ -30,6 +30,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
+{
+    return {};
+}
 Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
     return {};
@@ -45,6 +49,7 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
         ImageAttachmentAccessor::DestroyPeerImpl,
         ImageAttachmentAccessor::CtorImpl,
         ImageAttachmentAccessor::GetFinalizerImpl,
+        ImageAttachmentAccessor::GetValueImpl,
         ImageAttachmentAccessor::GetVerticalAlignImpl,
         ImageAttachmentAccessor::GetObjectFitImpl,
     };

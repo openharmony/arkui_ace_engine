@@ -118,7 +118,7 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
     ASSERT_NE(accessor_->getHeight, nullptr);
     auto custValue = Converter::ArkValue<Ark_Int32>(DEFAULT_INT_VALUE);
 
-    Ark_Int32 result = accessor_->getHeight(peer_);
+    auto result = Converter::Convert<int32_t>(accessor_->getHeight(peer_));
     EXPECT_EQ(result, custValue);
 }
 
@@ -136,7 +136,7 @@ HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
     ASSERT_NE(accessor_->getHeight, nullptr);
     auto custValue = Converter::ArkValue<Ark_Int32>(DEFAULT_INT_VALUE);
 
-    Ark_Int32 result = accessor_->getWidth(peer_);
+    auto result = Converter::Convert<int32_t>(accessor_->getWidth(peer_));
     EXPECT_EQ(result, custValue);
 }
 
@@ -161,7 +161,7 @@ HWTEST_F(ImageBitmapAccessorTest, getHeightImpl_NullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getHeight, nullptr);
 
-    auto result = accessor_->getHeight(nullptr);
+    auto result = Converter::Convert<int32_t>(accessor_->getHeight(nullptr));
     EXPECT_EQ(result, DEFAULT_HEIGHT_VALUE);
 }
 
@@ -174,7 +174,7 @@ HWTEST_F(ImageBitmapAccessorTest, getWidthImpl_NullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getWidth, nullptr);
 
-    auto result = accessor_->getWidth(nullptr);
+    auto result = Converter::Convert<int32_t>(accessor_->getWidth(nullptr));
     EXPECT_EQ(result, DEFAULT_WIDTH_VALUE);
 }
 } // namespace OHOS::Ace::NG

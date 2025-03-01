@@ -49,7 +49,7 @@ public:
 HWTEST_F(WebResourceErrorAccessorTest, getErrorCodeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getErrorCode, nullptr);
-    EXPECT_EQ(g_code, accessor_->getErrorCode(peer_));
+    EXPECT_EQ(g_code, Converter::Convert<int32_t>(accessor_->getErrorCode(peer_)));
 }
 
 /**
