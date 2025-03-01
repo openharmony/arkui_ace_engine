@@ -1356,9 +1356,6 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
-    if (event.mockFlushEvent) {
-        return false;
-    }
     const static std::set<MouseAction> validAction = {
         MouseAction::PRESS,
         MouseAction::RELEASE,

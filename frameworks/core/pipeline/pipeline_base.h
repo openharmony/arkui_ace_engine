@@ -1113,7 +1113,7 @@ public:
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
-    virtual void SetIsWindowSizeChangeFlag(bool result) {}
+    virtual void SetWindowSizeChangeReason(WindowSizeChangeReason reason) {}
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
