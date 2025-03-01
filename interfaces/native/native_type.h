@@ -2273,6 +2273,11 @@ typedef enum {
      * @since 16
      */
     ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED = 190004,
+    /**
+     * @error The XComponent is in invalid state.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_XCOMPONENT_STATE_INVALID = 103501,
 } ArkUI_ErrorCode;
 
 /**

@@ -5501,7 +5501,13 @@ struct ArkUIXComponentModifier {
     void (*startImageAnalyzer)(ArkUINodeHandle node, void* arkuiNode, void* userData,
         XComponentAnalyzerCallback callback);
     void (*stopImageAnalyzer)(ArkUINodeHandle node);
-    bool (*getXComponentIsBindNative)(ArkUINodeHandle node);
+    void* (*createSurfaceHolder)(ArkUINodeHandle node);
+    void (*dispose)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setAutoInitialize)(ArkUINodeHandle node, ArkUI_Bool autoInitialize);
+    ArkUI_Int32 (*initialize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*isInitialized)(ArkUINodeHandle node, ArkUI_Bool* isInitialized);
+    ArkUI_Int32 (*finalize)(ArkUINodeHandle node);
+    ArkUI_Bool (*getXComponentIsBindNative)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {
