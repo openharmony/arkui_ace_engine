@@ -20,6 +20,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -430,8 +431,11 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
         return nullptr;
     }
 
-    if (!AceType::InstanceOf<NG::FrameNode>(node)) {
+    if (!AceType::InstanceOf<NG::FrameNode>(node) || AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
         auto parent = node->GetParent();
+        if (parent && parent->GetTag() == V2::RECYCLE_VIEW_ETS_TAG) {
+            parent = node->GetParent();
+        }
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;
         } else {
