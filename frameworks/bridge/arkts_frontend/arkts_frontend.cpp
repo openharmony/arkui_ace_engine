@@ -118,4 +118,18 @@ void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     pipeline_ = DynamicCast<NG::PipelineContext>(context);
 }
+
+void* ArktsFrontend::GetShared(int32_t id)
+{
+    int32_t currentInstance = id;
+    if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
+        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+    }
+    auto it = storageMap_.find(currentInstance);
+    if (it == storageMap_.end()) {
+        LOGW("LocalStorage with ID %{public}d not found!", currentInstance);
+        return nullptr;
+    }
+    return it->second;
+}
 } // namespace OHOS::Ace
