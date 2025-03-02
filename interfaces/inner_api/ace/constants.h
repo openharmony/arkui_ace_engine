@@ -51,6 +51,11 @@ enum class UIContentType {
     DYNAMIC_COMPONENT,     // dynamicComponent
     MODAL_UI_EXTENSION = 10,    // modal ui extension
 };
+
+enum class VMType {
+    NORMAL = 0,
+    ARK_NATIVE,
+};
 } // namespace OHOS::Ace
 
 #endif // INTERFACES_INNER_API_ACE_CONSTANTS_H

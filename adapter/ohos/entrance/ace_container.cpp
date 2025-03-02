@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
+#include <ani.h>
+
 #include "auto_fill_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "scene_board_judgement.h"
@@ -290,6 +292,14 @@ void ParseLanguage(ConfigurationChange& configurationChange, const std::string& 
     if (!language.empty() || !script.empty() || !region.empty()) {
         configurationChange.languageUpdate = true;
         AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+    }
+}
+
+void ReleaseStorageReference(void* sharedRuntime, void* storage)
+{
+    if (sharedRuntime && storage) {
+        auto* env = reinterpret_cast<ani_env*>(sharedRuntime);
+        env->GlobalReference_Delete(reinterpret_cast<ani_object>(storage));
     }
 }
 } // namespace
@@ -2258,6 +2268,27 @@ void AceContainer::SetLocalStorage(
             }
         },
         TaskExecutor::TaskType::JS, "ArkUISetLocalStorage");
+}
+
+void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
+{
+    ContainerScope scope(instanceId_);
+    taskExecutor_->PostSyncTask([frontend = WeakPtr<Frontend>(frontend_), storage,
+                                    contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context),
+                                    id = instanceId_, sharedRuntime = sharedRuntime_] {
+        auto sp = frontend.Upgrade();
+        auto contextRef = contextWeak.lock();
+        if (!sp || !contextRef) {
+            ReleaseStorageReference(sharedRuntime, storage);
+            return;
+        }
+        auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(sp);
+        if (!arktsFrontend) {
+            ReleaseStorageReference(sharedRuntime, storage);
+            return;
+        }
+        arktsFrontend->RegisterLocalStorage(id, storage);
+    }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
 }
 
 void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
