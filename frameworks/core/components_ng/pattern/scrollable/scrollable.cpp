@@ -1109,7 +1109,9 @@ void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSna
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     auto minimumAmplitudeRatio = DEFAULT_MINIMUM_AMPLITUDE_PX / std::abs(scrollSnapDelta);
-    if (LessNotEqualCustomPrecision(minimumAmplitudeRatio, RESPONSIVE_SPRING_AMPLITUDE_RATIO)) {
+    minimumAmplitudeRatio = std::min(minimumAmplitudeRatio, RESPONSIVE_SPRING_AMPLITUDE_RATIO);
+    if (LessNotEqualCustomPrecision(minimumAmplitudeRatio,
+        ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO)) {
         curve->UpdateMinimumAmplitudeRatio(minimumAmplitudeRatio);
     }
     option.SetCurve(curve);
