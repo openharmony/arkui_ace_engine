@@ -375,10 +375,8 @@ bool SecurityComponentHandler::CheckLinearGradientBlur(const RefPtr<FrameNode>& 
     CHECK_NULL_RETURN(parentRender, false);
     auto linearGradientBlurPara = parentRender->GetLinearGradientBlur();
     CHECK_NULL_RETURN(linearGradientBlurPara, false);
-    if (!isBlured) {
-        isBlured = true;
-        blurRadius = linearGradientBlurPara->blurRadius_.ConvertToPx();
-    }
+    isBlured = true;
+    blurRadius = linearGradientBlurPara->blurRadius_.ConvertToPx();
     float ratio = GetLinearGradientBlurRatio(linearGradientBlurPara->fractionStops_);
     if (NearEqual(ratio, 1.0)) {
         return false;
