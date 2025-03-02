@@ -721,7 +721,7 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
             } else {
                 PaintVerticalCapsuleForApiNine(canvas, offset_->Get(), contentSize);
             }
-        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             if (contentSize.Width() >= contentSize.Height()) {
                 PaintCapsule(canvas, offset_->Get(), contentSize, contentSize.Height() / INT32_TWO);
             } else {
