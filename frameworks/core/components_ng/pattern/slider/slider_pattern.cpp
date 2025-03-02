@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
 #include "base/geometry/ng/point_t.h"
@@ -200,19 +200,20 @@ void SliderPattern::InitAccessibilityHoverEvent()
     });
 
     accessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
-        if (focus) {
-            auto slider = weak.Upgrade();
-            CHECK_NULL_VOID(slider);
-            slider->HandleSliderOnAccessibilityFocusCallback();
-        }
+        auto slider = weak.Upgrade();
+        CHECK_NULL_VOID(slider);
+        slider->HandleSliderOnAccessibilityFocusCallback(focus);
     });
 }
 
-void SliderPattern::HandleSliderOnAccessibilityFocusCallback()
+void SliderPattern::HandleSliderOnAccessibilityFocusCallback(bool focus)
 {
+    auto accessibilityLevel = focus ? AccessibilityProperty::Level::NO_STR : AccessibilityProperty::Level::YES_STR;
     for (const auto& pointNode : pointAccessibilityNodeVec_) {
-        pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
-            AccessibilityProperty::Level::NO_STR);
+        auto accessibilityProperty = pointNode->GetAccessibilityProperty<AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+        }
     }
 }
 
@@ -448,20 +449,20 @@ void SliderPattern::SetStepPointAccessibilityVirtualNode(
     pointAccessibilityProperty->SetAccessibilityText(txt);
 
     pointAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
-        if (focus) {
-            auto slider = weak.Upgrade();
-            CHECK_NULL_VOID(slider);
-            slider->HandleTextOnAccessibilityFocusCallback();
-        }
+        auto slider = weak.Upgrade();
+        CHECK_NULL_VOID(slider);
+        slider->HandleTextOnAccessibilityFocusCallback(focus);
     });
 }
 
-void SliderPattern::HandleTextOnAccessibilityFocusCallback()
+void SliderPattern::HandleTextOnAccessibilityFocusCallback(bool focus)
 {
+    auto accessibilityLevel = focus ? AccessibilityProperty::Level::NO_STR : AccessibilityProperty::Level::YES_STR;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1181,7 +1182,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     if (direction_ == GetDirection() && panEvent_) return;
     direction_ = GetDirection();
-   
+
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
     }
