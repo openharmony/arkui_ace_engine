@@ -440,15 +440,10 @@ public:
         return { end->first, end->second.mainPos + end->second.mainSize };
     }
 
-    void OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos, const float offset, const float contentSize,
-        bool isStackFromEnd = false)
+    void OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos, const float offset, const float contentSize)
     {
         if (NearZero(offset) || GreatOrEqual(contentSize, totalHeight_)) {
             return;
-        }
-        if (isStackFromEnd) {
-            beginIndex = totalItemCount_ - beginIndex - 1;
-            beginPos = contentSize - beginPos;
         }
         float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(beginIndex) : 0.0f;
         if (Positive(offset)) {
@@ -471,10 +466,6 @@ public:
                 rowInfo = GetRowEndIndexAndHeight(beginIndex);
                 chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(beginIndex) : 0.0f;
             }
-        }
-        if (isStackFromEnd) {
-            beginIndex = totalItemCount_ - beginIndex - 1;
-            beginPos = contentSize - beginPos;
         }
     }
 
