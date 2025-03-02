@@ -1939,7 +1939,8 @@ ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo*
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(secondArg->IsNumber(), defaultReturnValue);
     auto state = secondArg->ToNumber(vm)->Value();
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
+    const int32_t thirdArgIndex = 2;
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(thirdArgIndex);
     CHECK_NULL_RETURN(thirdArg->IsFunction(vm), defaultReturnValue);
     auto obj = thirdArg->ToObject(vm);
     auto containerId = Container::CurrentIdSafely();
