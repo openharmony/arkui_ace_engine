@@ -902,6 +902,9 @@ void JSViewPartialUpdate::RenderJSExecutionForPrebuild(int64_t deadline, bool& i
 
 void JSViewPartialUpdate::SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline)
 {
+    if (!jsViewFunction_) {
+        return;
+    }
     prebuildPhase_ = prebuildPhase;
     if (jsViewFunction_->ExecuteSetPrebuildPhase(prebuildPhase)) {
         NG::ViewStackProcessor::GetInstance()->SetIsPrebuilding(
