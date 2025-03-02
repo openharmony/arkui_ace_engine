@@ -148,4 +148,425 @@ HWTEST_F(TextAreaTestTwo, CreateDisplayText003, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(lastPlatformVersion);
 }
 
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility001
+ * @tc.desc: Test is textarea, UpdateSelectionAndHandleVisibility while longress at diffent paragraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateSelectionAndHandleVisibility001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetDraggable(true); });
+
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*localParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    pattern_->HandleOnSelectAll();
+    GestureEvent info;
+    info.localLocation_ = Offset(5, 5);
+    pattern_->HandleLongPress(info);
+
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    pattern_->releaseInDrop_ = false;
+    EXPECT_TRUE(eventHub_->HasOnDragMove());
+    eventHub_->FireOnDragMove(event, "");
+
+    if (eventHub_->HasDefaultOnDragStart()) {
+        (eventHub_->GetDefaultOnDragStart())(event, "");
+    }
+    if (eventHub_->HasOnDragEnd()) {
+        (eventHub_->GetOnDragEnd())(event);
+    }
+
+    FlushLayoutTask(frameNode_);
+    localParagraph = nullptr;
+    EXPECT_TRUE(pattern_->showSelect_);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility002
+ * @tc.desc: Test is textarea, UpdateSelectionAndHandleVisibility while longress at diffent paragraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateSelectionAndHandleVisibility002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetDraggable(true); });
+
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*localParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    pattern_->HandleOnSelectAll();
+    GestureEvent info;
+    info.localLocation_ = Offset(5, 5);
+    pattern_->HandleLongPress(info);
+
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    pattern_->releaseInDrop_ = true;
+    EXPECT_TRUE(eventHub_->HasOnDragMove());
+    eventHub_->FireOnDragMove(event, "");
+
+    if (eventHub_->HasDefaultOnDragStart()) {
+        (eventHub_->GetDefaultOnDragStart())(event, "");
+    }
+    if (eventHub_->HasOnDragEnd()) {
+        (eventHub_->GetOnDragEnd())(event);
+    }
+
+    FlushLayoutTask(frameNode_);
+    localParagraph = nullptr;
+    EXPECT_TRUE(pattern_->showSelect_);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility003
+ * @tc.desc: Test is textarea, UpdateSelectionAndHandleVisibility while longress at diffent paragraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateSelectionAndHandleVisibility003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetDraggable(true); });
+
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*localParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    pattern_->HandleOnSelectAll();
+    GestureEvent info;
+    info.localLocation_ = Offset(5, 5);
+    pattern_->HandleLongPress(info);
+
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    event->sourceTool_ = SourceTool::MOUSE;
+    pattern_->releaseInDrop_ = true;
+    EXPECT_TRUE(eventHub_->HasOnDragMove());
+    eventHub_->FireOnDragMove(event, "");
+
+    if (eventHub_->HasDefaultOnDragStart()) {
+        (eventHub_->GetDefaultOnDragStart())(event, "");
+    }
+    if (eventHub_->HasOnDragEnd()) {
+        (eventHub_->GetOnDragEnd())(event);
+    }
+
+    FlushLayoutTask(frameNode_);
+    localParagraph = nullptr;
+    EXPECT_TRUE(pattern_->showSelect_);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility004
+ * @tc.desc: Test is textarea, UpdateSelectionAndHandleVisibility while longress at diffent paragraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateSelectionAndHandleVisibility004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetDraggable(true); });
+
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*localParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    pattern_->HandleOnSelectAll();
+    GestureEvent info;
+    info.localLocation_ = Offset(5, 5);
+    pattern_->HandleLongPress(info);
+
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    event->sourceTool_ = SourceTool::UNKNOWN;
+    pattern_->releaseInDrop_ = true;
+    EXPECT_TRUE(eventHub_->HasOnDragMove());
+    eventHub_->FireOnDragMove(event, "");
+
+    if (eventHub_->HasDefaultOnDragStart()) {
+        (eventHub_->GetDefaultOnDragStart())(event, "");
+    }
+    if (eventHub_->HasOnDragEnd()) {
+        (eventHub_->GetOnDragEnd())(event);
+    }
+
+    FlushLayoutTask(frameNode_);
+    localParagraph = nullptr;
+    EXPECT_TRUE(pattern_->showSelect_);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility005
+ * @tc.desc: Test is textarea, UpdateSelectionAndHandleVisibility while longress at diffent paragraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateSelectionAndHandleVisibility005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetDraggable(true); });
+
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 4, 4), RectF(5, 5, 20, 20) };
+    EXPECT_CALL(*localParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    pattern_->HandleOnSelectAll();
+    GestureEvent info;
+    info.localLocation_ = Offset(6, 6);
+    pattern_->HandleLongPress(info);
+
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    event->sourceTool_ = SourceTool::UNKNOWN;
+    pattern_->releaseInDrop_ = true;
+    EXPECT_TRUE(eventHub_->HasOnDragMove());
+    eventHub_->FireOnDragMove(event, "");
+
+    if (eventHub_->HasDefaultOnDragStart()) {
+        (eventHub_->GetDefaultOnDragStart())(event, "");
+    }
+    if (eventHub_->HasOnDragEnd()) {
+        (eventHub_->GetOnDragEnd())(event);
+    }
+
+    FlushLayoutTask(frameNode_);
+    localParagraph = nullptr;
+    EXPECT_TRUE(pattern_->showSelect_);
+}
+
+/**
+ * @tc.name: HandleLongPress001
+ * @tc.desc: Test is textarea, HandleLongPress() while longress at diffent paragraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, HandleLongPress001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetDraggable(true);
+        model.SetType(TextInputType::UNSPECIFIED);
+        model.SetDraggable(true);
+    });
+
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*localParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    pattern_->HandleOnSelectAll();
+    GestureEvent info;
+    info.localLocation_ = Offset(5, 5);
+    pattern_->HandleLongPress(info);
+
+    EXPECT_FALSE(pattern_->isLongPress_);
+}
+
+/**
+ * @tc.name: HandleLongPress002
+ * @tc.desc: Test is textarea, HandleLongPress() while longress at diffent paragraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, HandleLongPress002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetDraggable(true);
+        model.SetType(TextInputType::UNSPECIFIED);
+        model.SetShowUnderline(true);
+        model.SetDraggable(true);
+    });
+
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*localParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    pattern_->HandleOnSelectAll();
+    GestureEvent info;
+    info.localLocation_ = Offset(5, 5);
+    pattern_->HandleLongPress(info);
+
+    EXPECT_FALSE(pattern_->isLongPress_);
+}
+
+/**
+ * @tc.name: HandleLongPress003
+ * @tc.desc: Test is textarea, HandleLongPress() while longress with two finger
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, HandleLongPress003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetDraggable(true);
+        model.SetType(TextInputType::UNSPECIFIED);
+        model.SetShowUnderline(true);
+        model.SetDraggable(true);
+    });
+
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*localParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    pattern_->HandleOnSelectAll();
+    GestureEvent info;
+    info.localLocation_ = Offset(5, 5);
+    pattern_->longPressFingerNum_ = 2;
+    pattern_->HandleLongPress(info);
+
+    EXPECT_FALSE(pattern_->isLongPress_);
+}
+
+/**
+ * @tc.name: OnKeyEvent001
+ * @tc.desc: Test is textarea, OnKeyEvent(KEY_ENTER), case KEY_ENTER & HasFocus & independentControlKeyboard_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, OnKeyEvent001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    KeyEvent keyE;
+    keyE.code = KeyCode::KEY_ENTER;
+    pattern_->independentControlKeyboard_ = true;
+    EXPECT_TRUE(pattern_->OnKeyEvent(keyE));
+
+    // no focus
+    auto focushHub = pattern_->GetFocusHub();
+    focushHub->currentFocus_ = false;
+    pattern_->HandleBlurEvent();
+    FlushLayoutTask(frameNode_);
+
+    // GetFocus() & independentControlKeyboard_
+    pattern_->independentControlKeyboard_ = false;
+    EXPECT_FALSE(pattern_->OnKeyEvent(keyE));
+}
+
+/**
+ * @tc.name: OnKeyEvent002
+ * @tc.desc: Test is textarea, OnKeyEvent(KEY_DPAD_LEFT), case directionKeysMoveFocusOut_ & IsMoveFocusOutFromLeft
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, OnKeyEvent002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    KeyEvent keyE;
+    keyE.code = KeyCode::KEY_DPAD_LEFT;
+    HandleInfoNG caretInfo;
+    caretInfo.index = 0;
+
+    // !directionKeysMoveFocusOut_
+    pattern_->directionKeysMoveFocusOut_ = false;
+    EXPECT_FALSE(pattern_->OnKeyEvent(keyE));
+
+    // directionKeysMoveFocusOut_ & IsMoveFocusOutFromLeft()
+    pattern_->directionKeysMoveFocusOut_ = true;
+    pattern_->selectController_->caretInfo_ = caretInfo;
+    EXPECT_FALSE(pattern_->OnKeyEvent(keyE));
+    caretInfo.index = 1;
+    pattern_->selectController_->caretInfo_ = caretInfo;
+    EXPECT_FALSE(pattern_->OnKeyEvent(keyE));
+}
+
+/**
+ * @tc.name: OnKeyEvent003
+ * @tc.desc: Test is textarea, OnKeyEvent(KEY_DPAD_RIGHT), case directionKeysMoveFocusOut_ & IsMoveFocusOutFromRight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, OnKeyEvent003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    KeyEvent keyE;
+    keyE.code = KeyCode::KEY_DPAD_RIGHT;
+    HandleInfoNG caretInfo;
+    caretInfo.index = 26;
+
+    // directionKeysMoveFocusOut_ & IsMoveFocusOutFromRight()
+    pattern_->directionKeysMoveFocusOut_ = true;
+    pattern_->selectController_->caretInfo_ = caretInfo;
+    EXPECT_FALSE(pattern_->OnKeyEvent(keyE));
+}
+
+/**
+ * @tc.name: HandleTouchMove001
+ * @tc.desc: Test is textarea, HandleTouchMove(), case isTouchCaret && isMoveCaret = (true,true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, HandleTouchMove001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    TouchEventInfo info("type");
+    TouchLocationInfo location(1);
+    Offset pos;
+    pos.deltaX_ = 10.0;
+    pos.deltaY_ = 10.0;
+    location.SetLocalLocation(pos);
+    info.touches_.emplace_back(location);
+    auto offset = info.GetTouches().front().GetLocalLocation();
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    manager->selectOverlayHolder_ = holder;
+    pattern_->selectOverlay_->OnBind(manager);
+    Ace::NG::SelectOverlayInfo soi;
+    soi.enableHandleLevel = true;
+    manager->CreateSelectOverlay(soi, true);
+
+    pattern_->moveCaretState_.isMoveCaret = false;
+    pattern_->moveCaretState_.touchDownOffset = Offset(0, 0);
+    pattern_->HandleTouchMove(location);
+    EXPECT_TRUE(pattern_->selectOverlay_->SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: HandleTouchMove002
+ * @tc.desc: Test is textarea, HandleTouchMove(), case isTouchCaret && isMoveCaret = (true,false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, HandleTouchMove002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    TouchEventInfo info("type");
+    TouchLocationInfo location(1);
+    Offset pos;
+    pos.deltaX_ = 10.0;
+    pos.deltaY_ = 10.0;
+    location.SetLocalLocation(pos);
+    info.touches_.emplace_back(location);
+    auto offset = info.GetTouches().front().GetLocalLocation();
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    manager->selectOverlayHolder_ = holder;
+    pattern_->selectOverlay_->OnBind(manager);
+    Ace::NG::SelectOverlayInfo soi;
+    soi.enableHandleLevel = true;
+    manager->CreateSelectOverlay(soi, true);
+
+    pattern_->moveCaretState_.isMoveCaret = true;
+    pattern_->moveCaretState_.touchDownOffset = Offset(0, 0);
+    pattern_->HandleTouchMove(location);
+    EXPECT_TRUE(pattern_->selectOverlay_->SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: HandleTouchMove002
+ * @tc.desc: Test is textarea, HandleTouchMove(), case SelectOverlayIsOn = (false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, HandleTouchMove003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    TouchEventInfo info("type");
+    TouchLocationInfo location(1);
+    Offset pos;
+    pos.deltaX_ = 10.0;
+    pos.deltaY_ = 10.0;
+    location.SetLocalLocation(pos);
+    info.touches_.emplace_back(location);
+    auto offset = info.GetTouches().front().GetLocalLocation();
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    manager->selectOverlayHolder_ = holder;
+    pattern_->selectOverlay_->OnBind(manager);
+    Ace::NG::SelectOverlayInfo soi;
+    soi.enableHandleLevel = true;
+    manager->CreateSelectOverlay(soi, true);
+
+    pattern_->moveCaretState_.isMoveCaret = false;
+    pattern_->moveCaretState_.touchDownOffset = Offset(0, 0);
+    pattern_->HandleTouchMove(location);
+    EXPECT_TRUE(pattern_->selectOverlay_->SelectOverlayIsOn());
+}
+
 } // namespace OHOS::Ace::NG
