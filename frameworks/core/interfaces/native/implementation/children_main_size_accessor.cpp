@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/children_main_size_peer.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -23,11 +24,11 @@ namespace ChildrenMainSizeAccessor {
 
 constexpr float DEFAULT_SIZE = -1.0f;
 
-void DestroyPeerImpl(ChildrenMainSizePeer* peer)
+void DestroyPeerImpl(Ark_ChildrenMainSize peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Ark_Number* childDefaultSize)
+Ark_ChildrenMainSize CtorImpl(const Ark_Number* childDefaultSize)
 {
     CHECK_NULL_RETURN(childDefaultSize, nullptr);
     float size = Converter::Convert<float>(*childDefaultSize);
@@ -37,7 +38,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SpliceImpl(ChildrenMainSizePeer* peer,
+void SpliceImpl(Ark_VMContext vmContext,
+                Ark_ChildrenMainSize peer,
                 const Ark_Number* start,
                 const Opt_Number* deleteCount,
                 const Opt_Array_Number* childrenSize)
@@ -68,7 +70,8 @@ void SpliceImpl(ChildrenMainSizePeer* peer,
 
     handler->ChangeData(convStart, delCount, floatArray);
 }
-void UpdateImpl(ChildrenMainSizePeer* peer,
+void UpdateImpl(Ark_VMContext vmContext,
+                Ark_ChildrenMainSize peer,
                 const Ark_Number* index,
                 const Ark_Number* childSize)
 {
@@ -87,16 +90,15 @@ void UpdateImpl(ChildrenMainSizePeer* peer,
     auto array = std::vector<float>{convChildSize >= 0 ? convChildSize : DEFAULT_SIZE};
     handler->ChangeData(convIndex, 1, array);
 }
-Ark_Int32 GetChildDefaultSizeImpl(ChildrenMainSizePeer* peer)
+Ark_Number GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
 {
-    // should return Ark_Float32 or Ark_Number with a float value
-    CHECK_NULL_RETURN(peer, -1);
+    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    CHECK_NULL_RETURN(peer, errValue);
     auto handler = peer->GetHandler();
-    CHECK_NULL_RETURN(handler, -1);
-
-    return handler->GetChildSize(-1);
+    CHECK_NULL_RETURN(handler, errValue);
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(handler->GetChildSize(-1)));
 }
-void SetChildDefaultSizeImpl(ChildrenMainSizePeer* peer,
+void SetChildDefaultSizeImpl(Ark_ChildrenMainSize peer,
                              const Ark_Number* childDefaultSize)
 {
     CHECK_NULL_VOID(peer && childDefaultSize);

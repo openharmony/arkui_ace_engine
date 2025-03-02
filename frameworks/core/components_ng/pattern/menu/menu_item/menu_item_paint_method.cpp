@@ -37,7 +37,7 @@ CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* pai
             if (!needDivider || press || hover) {
                 return;
             }
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
             auto selectTheme = pipeline->GetTheme<SelectTheme>();
             auto horInterval = Dimension(0.0f, DimensionUnit::PX);

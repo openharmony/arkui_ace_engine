@@ -251,7 +251,7 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag,
     setVertical_ = { Placement::TOP, Placement::TOP_LEFT, Placement::TOP_RIGHT,
         Placement::BOTTOM, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -273,7 +273,7 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(layoutWrapper);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -301,7 +301,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -568,7 +568,7 @@ void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -586,7 +586,7 @@ void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -737,7 +737,7 @@ void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern
     if (!CheckChildConstraintCondition(menuPattern)) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -1545,7 +1545,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             LayoutArrow(layoutWrapper);
         }
         geometryNode->SetFrameOffset(menuPositionWithArrow);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
         CHECK_NULL_VOID(menuTheme);
@@ -1640,7 +1640,7 @@ BorderRadiusProperty MenuLayoutAlgorithm::GetMenuRadius(const LayoutWrapper* lay
 {
     Dimension defaultDimension(0);
     BorderRadiusProperty radius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, radius);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, radius);
@@ -1674,7 +1674,7 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
     CHECK_NULL_RETURN(paintProperty, false);
     propNeedArrow_ = paintProperty->GetEnableArrow().value_or(false);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto selectThemePtr = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectThemePtr, false);

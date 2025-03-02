@@ -15,15 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PinchGestureEventAccessor {
-void DestroyPeerImpl(PinchGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_PinchGestureEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_PinchGestureEvent CtorImpl()
 {
     return new PinchGestureEventPeer();
 }
@@ -31,29 +32,77 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetScaleImpl(PinchGestureEventPeer* peer)
+Ark_Number GetScaleImpl(Ark_PinchGestureEvent peer)
 {
-    return 0;
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    PinchGestureEvent* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+    LOGW("ARKOALA PinchGestureEventAccessor::GetScaleImpl returns Ark_Int32, "
+        "but should return Ark_Number.");
+    double value = event->GetScale();
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetScaleImpl(PinchGestureEventPeer* peer,
+void SetScaleImpl(Ark_PinchGestureEvent peer,
                   const Ark_Number* scale)
 {
+    CHECK_NULL_VOID(peer);
+    PinchGestureEvent* event = peer->GetEventInfo();
+    CHECK_NULL_VOID(event);
+    CHECK_NULL_VOID(scale);
+
+    auto convValue = Converter::Convert<float>(*scale);
+    event->SetScale(convValue);
 }
-Ark_Int32 GetPinchCenterXImpl(PinchGestureEventPeer* peer)
+Ark_Number GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
 {
-    return 0;
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    PinchGestureEvent* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+    LOGW("ARKOALA PinchGestureEventAccessor::GetPinchCenterXImpl returns Ark_Int32, "
+        "but should return Ark_Number.");
+    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetX());
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetPinchCenterXImpl(PinchGestureEventPeer* peer,
+void SetPinchCenterXImpl(Ark_PinchGestureEvent peer,
                          const Ark_Number* pinchCenterX)
 {
+    CHECK_NULL_VOID(peer);
+    PinchGestureEvent* event = peer->GetEventInfo();
+    CHECK_NULL_VOID(event);
+    CHECK_NULL_VOID(pinchCenterX);
+
+    auto convValue = Converter::Convert<float>(*pinchCenterX);
+    Offset pinchCenter;
+    pinchCenter.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
+    pinchCenter.SetY(event->GetPinchCenter().GetY());
+    event->SetPinchCenter(pinchCenter);
 }
-Ark_Int32 GetPinchCenterYImpl(PinchGestureEventPeer* peer)
+Ark_Number GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
 {
-    return 0;
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    PinchGestureEvent* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+    LOGW("ARKOALA PinchGestureEventAccessor::GetPinchCenterYImpl returns Ark_Int32, "
+        "but should return Ark_Number.");
+    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetY());
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetPinchCenterYImpl(PinchGestureEventPeer* peer,
+void SetPinchCenterYImpl(Ark_PinchGestureEvent peer,
                          const Ark_Number* pinchCenterY)
 {
+    CHECK_NULL_VOID(peer);
+    PinchGestureEvent* event = peer->GetEventInfo();
+    CHECK_NULL_VOID(event);
+    CHECK_NULL_VOID(pinchCenterY);
+
+    auto convValue = Converter::Convert<float>(*pinchCenterY);
+    Offset pinchCenter;
+    pinchCenter.SetX(event->GetPinchCenter().GetX());
+    pinchCenter.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
+    event->SetPinchCenter(pinchCenter);
 }
 } // PinchGestureEventAccessor
 const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()

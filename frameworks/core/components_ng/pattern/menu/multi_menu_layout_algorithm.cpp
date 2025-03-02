@@ -83,7 +83,7 @@ void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<
 
     // only 2in1 device has restrictions on the menu width in API13
     CHECK_NULL_VOID(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -108,7 +108,7 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);

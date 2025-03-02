@@ -53,7 +53,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    sheetStyle_ = layoutProperty->GetSheetStyleValue();
+    sheetStyle_ = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
         TAG_LOGE(AceLogTag::ACE_SHEET, "fail to measure sheet due to layoutConstraint is nullptr");

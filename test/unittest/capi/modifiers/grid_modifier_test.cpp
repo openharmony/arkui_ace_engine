@@ -28,6 +28,7 @@
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -231,9 +232,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
     auto pattern = frameNode->GetPattern<GridPattern>();
     EXPECT_NE(pattern, nullptr);
 
-    Ark_Scroller arkScroller;
-    arkScroller.ptr = peerImplPtr;
-    Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(arkScroller);
+    Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(peerImplPtr);
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
 
@@ -267,8 +266,6 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Lev
     auto pattern = frameNode->GetPattern<GridPattern>();
     EXPECT_NE(pattern, nullptr);
 
-    Ark_Scroller arkScroller;
-    arkScroller.ptr = peerImplPtr;
     Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
@@ -285,6 +282,105 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Lev
         fullAPI_->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
     finalyzer(peerImplPtr);
+}
+
+/**
+ * @tc.name: setGridOptionsGetSizeByIndex
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModifierTest, setGridOptionsGetSizeByIndex, TestSize.Level1)
+{
+    static const int32_t expectedResId = 123;
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        int32_t info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number parameter,
+        const Callback_Tuple_Number_Number_Void continuation) {
+        int32_t info = Converter::Convert<int32_t>(parameter);
+
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = info,
+        };
+        Ark_Tuple_Number_Number arkRes;
+        arkRes.value0 = ArkValue<Ark_Number>(1);
+        arkRes.value1 = ArkValue<Ark_Number>(1);
+        CallbackHelper(continuation).Invoke(arkRes);
+    };
+    auto func = Converter::ArkValue<Callback_Number_Tuple_Number_Number>(nullptr, inputCallback, expectedResId);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Tuple_Number_Number>(func);
+
+    Opt_Scroller inputValue0;
+    Ark_GridLayoutOptions layoutOptions;
+    Opt_GridLayoutOptions inputValue1;
+    layoutOptions.onGetIrregularSizeByIndex = optFunc;
+    inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
+    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+
+    auto property = frameNode->GetLayoutProperty<GridLayoutProperty>();
+    auto options = property->GetLayoutOptions();
+    auto getSizeByIndex = options->getSizeByIndex;
+    getSizeByIndex(123);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
+}
+
+/**
+ * @tc.name: setGridOptionsGetRectByIndex
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModifierTest, setGridOptionsGetRectByIndex, TestSize.Level1)
+{
+    static const int32_t expectedResId = 123;
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        int32_t info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number parameter,
+        const Callback_Tuple_Number_Number_Number_Number_Void continuation) {
+        int32_t info = Converter::Convert<int32_t>(parameter);
+
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = info,
+        };
+        Ark_Tuple_Number_Number_Number_Number arkRes;
+        arkRes.value0 = ArkValue<Ark_Number>(-1);
+        arkRes.value1 = ArkValue<Ark_Number>(1);
+        arkRes.value0 = ArkValue<Ark_Number>(-1);
+        arkRes.value1 = ArkValue<Ark_Number>(1);
+        CallbackHelper(continuation).Invoke(arkRes);
+    };
+    auto func = Converter::ArkValue<Callback_Number_Tuple_Number_Number_Number_Number>
+                                                    (nullptr, inputCallback, expectedResId);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Tuple_Number_Number_Number_Number>(func);
+    Opt_Scroller inputValue0;
+    Ark_GridLayoutOptions layoutOptions;
+    Opt_GridLayoutOptions inputValue1;
+    layoutOptions.onGetRectByIndex = optFunc;
+
+    inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
+    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+
+    auto property = frameNode->GetLayoutProperty<GridLayoutProperty>();
+    auto options = property->GetLayoutOptions();
+    auto getRectByIndex = options->getRectByIndex;
+    getRectByIndex(123);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
 }
 
 /*

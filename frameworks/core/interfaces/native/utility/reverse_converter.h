@@ -91,6 +91,7 @@ namespace OHOS::Ace::NG::Converter {
     public:
         Ark_String Store(const std::string_view& src);
         void *Allocate(std::size_t size);
+        void Clear();
         template<typename T>
         T AllocateArray(std::size_t size)
         {
@@ -102,6 +103,9 @@ namespace OHOS::Ace::NG::Converter {
     private:
         std::vector<std::unique_ptr<std::byte[]>> storage_;
     };
+
+    inline ConvContext g_frameContext;
+    constexpr auto FC = &g_frameContext;
 
     // Basic types
     inline void AssignArkValue(Ark_Boolean& dst, const bool& src)
@@ -135,6 +139,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // SORTED_SECTION
+    void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src);
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
@@ -151,7 +156,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
+    void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src);
     void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info);
+    void AssignArkValue(Ark_DragResult& dst, const DragRet& src);
     void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
@@ -164,10 +171,13 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
+    void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
+    void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx);
+    void AssignArkValue(Ark_KeyEvent& dst, const OHOS::Ace::KeyEventInfo& src);
     void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
@@ -177,6 +187,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Length& dst, const int& src);
     void AssignArkValue(Ark_Length& dst, const std::string& src);
     void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src);
+    void AssignArkValue(Ark_LengthUnit& dst, const DimensionUnit& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src);
@@ -199,10 +210,15 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Number& dst, const long long& src);
     void AssignArkValue(Ark_Number& dst, const long& src);
     void AssignArkValue(Ark_Number& dst, const uint32_t& src);
+    void AssignArkValue(Ark_OffsetResult& dst, const Offset& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
+    void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
+    void AssignArkValue(Ark_Position& dst, const OffsetF& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src);
+    void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src);
     void AssignArkValue(Ark_RectResult& dst, const RectF& src);
+    void AssignArkValue(Ark_Rectangle& dst, const Rect& src);
     void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
@@ -210,6 +226,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
     void AssignArkValue(Ark_ResourceColor& dst, const std::string& src);
+    void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src);
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
     void AssignArkValue(Ark_RichEditorDeleteValue& dst, const RichEditorDeleteValue& src);
@@ -301,12 +318,12 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // Array with context
-    template<typename To, typename From>
-    void AssignArkValue(To& dst, const std::vector<From>& src, ConvContext *ctx)
+    template<typename To, typename Cont>
+    std::enable_if_t<IsArray<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
         using Val = std::remove_pointer_t<decltype(dst.array)>;
         dst = ctx->AllocateArray<To>(src.size());
-        std::transform(src.begin(), src.end(), dst.array, [ctx](const From& src) {
+        std::transform(src.begin(), src.end(), dst.array, [ctx](const typename Cont::value_type& src) {
             return ArkValue<Val>(src, ctx);
         });
     }
@@ -526,10 +543,10 @@ namespace OHOS::Ace::NG::Converter {
         using Val = std::remove_pointer_t<decltype(T().array)>;
         std::vector<Val> data_;
     public:
-        template<typename P>
-        explicit ArkArrayHolder(const std::vector<P>& data)
+        template<typename C>
+        explicit ArkArrayHolder(const C& data)
         {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
+            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const typename C::value_type& src) {
                 if constexpr (std::is_void_v<U>) {
                     return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
                 } else {
@@ -537,28 +554,7 @@ namespace OHOS::Ace::NG::Converter {
                 }
             });
         }
-        template<std::size_t N, typename P>
-        explicit ArkArrayHolder(const std::array<P, N>& data)
-        {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
-                if constexpr (std::is_void_v<U>) {
-                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-                } else {
-                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
-                }
-            });
-        }
-        template<typename P>
-        ArkArrayHolder(const P *data, std::size_t size)
-        {
-            std::transform(data, data + size, std::back_inserter(data_), [](const P& src) {
-                if constexpr (std::is_void_v<U>) {
-                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-                } else {
-                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
-                }
-            });
-        }
+
         template<typename P>
         explicit ArkArrayHolder(std::initializer_list<P> data)
         {
@@ -570,8 +566,6 @@ namespace OHOS::Ace::NG::Converter {
                 }
             });
         }
-        template<typename P>
-        explicit ArkArrayHolder(const std::list<P>& data) {}
 
         T ArkValue() &
         {
@@ -645,9 +639,7 @@ namespace OHOS::Ace::NG::Converter {
 
         Ark_Type ArkValue() const
         {
-            return {
-                .ptr = peer_
-            };
+            return peer_;
         }
 
     private:

@@ -17,10 +17,10 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/ace_events.h"
+#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
-
 
 namespace OHOS::Ace::NG {
 
@@ -55,48 +55,14 @@ namespace BaseEventAccessor {
 
 namespace {
 const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
-const Ark_Int32 DefaultValueInt32 = Converter::ArkValue<Ark_Int32>(0);
-
-bool CheckKeysPressed(const std::vector<std::string>& keysStrs, const std::vector<KeyCode>& keysCodes)
-{
-    auto intersects = [](const std::vector<KeyCode>& lv, const std::vector<KeyCode>& rv) -> bool {
-        bool found = false;
-        for (const auto& key : lv) {
-            auto it = std::find(rv.begin(), rv.end(), key);
-            if (it != rv.end()) {
-                found = true;
-                break;
-            }
-        }
-        return found;
-    };
-    std::unordered_map<std::string, std::vector<KeyCode>> validKeyCodes = {
-        { "ctrl", { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT } },
-        { "shift", { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT } },
-        { "alt", { KeyCode::KEY_ALT_LEFT, KeyCode::KEY_ALT_RIGHT } },
-        { "fn", { KeyCode::KEY_FN } }
-    };
-    for (const auto& str : keysStrs) {
-        std::string code;
-        std::transform(str.begin(), str.end(), std::back_inserter(code),
-            [](const char& c) { return std::tolower(c); });
-        auto it = validKeyCodes.find(code);
-        if (it == validKeyCodes.end()) {
-            return false;
-        }
-        if (!intersects(keysCodes, it->second)) {
-            return false;
-        }
-    }
-    return true;
-}
+const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
 }  // namespace
 
-void DestroyPeerImpl(BaseEventPeer* peer)
+void DestroyPeerImpl(Ark_BaseEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_BaseEvent CtorImpl()
 {
     return new BaseEventPeerImpl();
 }
@@ -104,31 +70,32 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetModifierKeyStateImpl(BaseEventPeer* peer,
+Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
+                                    Ark_BaseEvent peer,
                                     const Array_String* keys)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueBoolean);
     CHECK_NULL_RETURN(keys, DefaultValueBoolean);
     auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(CheckKeysPressed(keysStr, eventKeys));
+    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
-void SetTargetImpl(BaseEventPeer* peer,
+void SetTargetImpl(Ark_BaseEvent peer,
                    const Ark_EventTarget* target)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(target);
     peer->GetBaseInfo()->SetTarget(Converter::Convert<EventTarget>(*target));
 }
-Ark_Int32 GetTimestampImpl(BaseEventPeer* peer)
+Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
     LOGE("BaseEventAccessor.GetTimestampImpl returns Ark_Int32");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(tstamp));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(tstamp));
 }
-void SetTimestampImpl(BaseEventPeer* peer,
+void SetTimestampImpl(Ark_BaseEvent peer,
                       const Ark_Number* timestamp)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
@@ -139,11 +106,13 @@ void SetTimestampImpl(BaseEventPeer* peer,
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
     peer->GetBaseInfo()->SetTimeStamp(time_point);
 }
-Ark_NativePointer GetSourceImpl(BaseEventPeer* peer)
+Ark_SourceType GetSourceImpl(Ark_BaseEvent peer)
 {
-    return nullptr;
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), static_cast<Ark_SourceType>(-1));
+    auto value = peer->GetBaseInfo()->GetSourceDevice();
+    return Converter::ArkValue<Ark_SourceType>(value);
 }
-void SetSourceImpl(BaseEventPeer* peer,
+void SetSourceImpl(Ark_BaseEvent peer,
                    Ark_SourceType source)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
@@ -152,69 +121,71 @@ void SetSourceImpl(BaseEventPeer* peer,
         peer->GetBaseInfo()->SetSourceDevice(*value);
     }
 }
-Ark_Int32 GetAxisHorizontalImpl(BaseEventPeer* peer)
+Ark_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
     LOGE("BaseEventAccessor.GetAxisHorizontalImpl does nothing");
-    return 0;
+    return {};
 }
-void SetAxisHorizontalImpl(BaseEventPeer* peer,
+void SetAxisHorizontalImpl(Ark_BaseEvent peer,
                            const Ark_Number* axisHorizontal)
 {
     LOGE("BaseEventAccessor.SetAxisHorizontalImpl does nothing");
 }
-Ark_Int32 GetAxisVerticalImpl(BaseEventPeer* peer)
+Ark_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
     LOGE("BaseEventAccessor.GetAxisVerticalImpl does nothing");
-    return 0;
+    return {};
 }
-void SetAxisVerticalImpl(BaseEventPeer* peer,
+void SetAxisVerticalImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisVertical)
 {
     LOGE("BaseEventAccessor.SetAxisVerticalImpl does nothing");
 }
-Ark_Int32 GetPressureImpl(BaseEventPeer* peer)
+Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->GetBaseInfo()->GetForce()));
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetBaseInfo()->GetForce()));
 }
-void SetPressureImpl(BaseEventPeer* peer,
+void SetPressureImpl(Ark_BaseEvent peer,
                      const Ark_Number* pressure)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(pressure);
     peer->GetBaseInfo()->SetForce(Converter::Convert<float>(*pressure));
 }
-Ark_Int32 GetTiltXImpl(BaseEventPeer* peer)
+Ark_Number GetTiltXImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
     auto value = peer->GetBaseInfo()->GetTiltX();
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value.value_or(0)));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value.value_or(0)));
 }
-void SetTiltXImpl(BaseEventPeer* peer,
+void SetTiltXImpl(Ark_BaseEvent peer,
                   const Ark_Number* tiltX)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(tiltX);
     peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(*tiltX));
 }
-Ark_Int32 GetTiltYImpl(BaseEventPeer* peer)
+Ark_Number GetTiltYImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
     auto value = peer->GetBaseInfo()->GetTiltY();
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value.value_or(0)));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value.value_or(0)));
 }
-void SetTiltYImpl(BaseEventPeer* peer,
+void SetTiltYImpl(Ark_BaseEvent peer,
                   const Ark_Number* tiltY)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(tiltY);
     peer->GetBaseInfo()->SetTiltY(Converter::Convert<float>(*tiltY));
 }
-Ark_NativePointer GetSourceToolImpl(BaseEventPeer* peer)
+Ark_SourceTool GetSourceToolImpl(Ark_BaseEvent peer)
 {
-    return nullptr;
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), static_cast<Ark_SourceTool>(-1));
+    auto value = peer->GetBaseInfo()->GetSourceTool();
+    return Converter::ArkValue<Ark_SourceTool>(value);
 }
-void SetSourceToolImpl(BaseEventPeer* peer,
+void SetSourceToolImpl(Ark_BaseEvent peer,
                        Ark_SourceTool sourceTool)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
@@ -223,12 +194,12 @@ void SetSourceToolImpl(BaseEventPeer* peer,
         peer->GetBaseInfo()->SetSourceTool(*value);
     }
 }
-Ark_Int32 GetDeviceIdImpl(BaseEventPeer* peer)
+Ark_Number GetDeviceIdImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueInt32);
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->GetBaseInfo()->GetDeviceId()));
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetBaseInfo()->GetDeviceId()));
 }
-void SetDeviceIdImpl(BaseEventPeer* peer,
+void SetDeviceIdImpl(Ark_BaseEvent peer,
                      const Ark_Number* deviceId)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());

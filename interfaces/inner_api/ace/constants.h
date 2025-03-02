@@ -48,6 +48,11 @@ enum class UIContentType {
     UI_EXTENSION,              // ui extension
     SECURITY_UI_EXTENSION,     // security ui extension
 };
+
+enum class VMType {
+    NORMAL = 0,
+    ARK_NATIVE,
+};
 } // namespace OHOS::Ace
 
 #endif // INTERFACES_INNER_API_ACE_CONSTANTS_H

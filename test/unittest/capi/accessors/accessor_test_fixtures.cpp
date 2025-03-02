@@ -33,6 +33,34 @@ const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32W
     { "INT32_MAX", ArkValue<Ark_Int32>(INT32_MAX), INT32_MAX },
 };
 
+const std::vector<std::tuple<std::string, Ark_Number, int32_t>> testFixtureNumberInt32Values = {
+    { "0", ArkValue<Ark_Number>(0), 0 },
+    { "INT32_MIN", ArkValue<Ark_Number>(INT32_MIN), INT32_MIN },
+    { "32", ArkValue<Ark_Number>(32), 32 },
+    { "-1", ArkValue<Ark_Number>(-1), -1 },
+    { "INT32_MAX", ArkValue<Ark_Number>(INT32_MAX), INT32_MAX },
+};
+
+const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberDoubleRoundValues = {
+    { "5.0", Converter::ArkValue<Ark_Number>(5), 5.0 },
+    { "2.4", Converter::ArkValue<Ark_Number>(2.4), 2.0 },
+    { "1.0", Converter::ArkValue<Ark_Number>(1), 1.0 },
+    { "0.0", Converter::ArkValue<Ark_Number>(0), 0.0 },
+    { "-1.0", Converter::ArkValue<Ark_Number>(-1), -1.0 },
+    { "-2.4", Converter::ArkValue<Ark_Number>(-2.4), -2.0 },
+    { "-5.0", Converter::ArkValue<Ark_Number>(-5), -5.0 },
+};
+
+const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberDoubleValues = {
+    { "5.0", Converter::ArkValue<Ark_Number>(5), 5.0 },
+    { "2.4", Converter::ArkValue<Ark_Number>(2.4), 2.4 },
+    { "1.0", Converter::ArkValue<Ark_Number>(1), 1.0 },
+    { "0.0", Converter::ArkValue<Ark_Number>(0), 0.0 },
+    { "-1.0", Converter::ArkValue<Ark_Number>(-1), -1.0 },
+    { "-2.4", Converter::ArkValue<Ark_Number>(-2.4), -2.4 },
+    { "-5.0", Converter::ArkValue<Ark_Number>(-5), -5.0 },
+};
+
 const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberValues = {
     { "1.24", ArkValue<Ark_Number>(1.24), 1.24 },
     { "0", ArkValue<Ark_Number>(0), 0 },
@@ -66,5 +94,105 @@ const std::vector<std::tuple<std::string, double, double, Ark_Int32>> testFixtur
     { "[-30., 0.]", 30., 0., ArkValue<Ark_Int32>(15) },
     { "[0., 40.]", 0., 40., ArkValue<Ark_Int32>(20) },
     { "[0., 0.]", 0., 0., ArkValue<Ark_Int32>(0) },
+};
+
+const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureNumberFloatAnythingValidValues = {
+    { "100", 100, ArkValue<Ark_Number>(100) },
+    { "0", 0, ArkValue<Ark_Number>(0) },
+    { "-100", -100, ArkValue<Ark_Number>(-100) },
+    { "12.34", 12.34, ArkValue<Ark_Number>(12.34) },
+    { "-56.73", -56.73, ArkValue<Ark_Number>(-56.73) },
+};
+
+const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureVelocityValues = {
+    { "100", 100, ArkValue<Ark_Number>(std::sqrt((100 * 100) + (100 * 100))) },
+    { "0", 0, ArkValue<Ark_Number>(0) },
+    { "-100", -100, ArkValue<Ark_Number>(std::sqrt((100 * 100) + (100 * 100))) },
+    { "12.34", 12.34, ArkValue<Ark_Number>(std::sqrt((12.34 * 12.34) + (12.34 * 12.34))) },
+    { "-56.73", -56.34, ArkValue<Ark_Number>(std::sqrt((56.34 * 56.34) + (56.34 * 56.34))) },
+};
+
+const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
+    testFixtureEnumDragBehaviorValues = {
+    { "ARK_DRAG_BEHAVIOR_MOVE", ARK_DRAG_BEHAVIOR_MOVE, OHOS::Ace::DragBehavior::MOVE },
+    { "ARK_DRAG_BEHAVIOR_COPY", ARK_DRAG_BEHAVIOR_COPY, OHOS::Ace::DragBehavior::COPY },
+    { "-1", static_cast<Ark_DragBehavior>(OHOS::Ace::DragBehavior::UNKNOWN), OHOS::Ace::DragBehavior::COPY },
+};
+
+const std::vector<std::tuple<std::string, OHOS::Ace::DragBehavior, Ark_DragBehavior>>
+    testFixtureEnumArkDragBehaviorValues = {
+    { "ARK_DRAG_BEHAVIOR_COPY", OHOS::Ace::DragBehavior::COPY, ARK_DRAG_BEHAVIOR_COPY },
+    { "ARK_DRAG_BEHAVIOR_MOVE", OHOS::Ace::DragBehavior::MOVE, ARK_DRAG_BEHAVIOR_MOVE },
+    { "-1", OHOS::Ace::DragBehavior::UNKNOWN, static_cast<Ark_DragBehavior>(OHOS::Ace::DragBehavior::UNKNOWN) },
+};
+
+const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues = {
+    { "1.24", ArkValue<Ark_Number>(1.24f), "1.24px" },
+    { "0", ArkValue<Ark_Number>(0), "0.00px" },
+    { "100", ArkValue<Ark_Number>(100), "100.00px" },
+    { "-20.65", ArkValue<Ark_Number>(-20.65), "-20.65px" },
+};
+
+const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable = {
+    { DIMENSIONS_RES_NON_NEG_0_ID, DIMENSIONS_RES_NON_NEG_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_NEG_1_ID, DIMENSIONS_RES_NON_NEG_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_NEG_2_ID, DIMENSIONS_RES_NON_NEG_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_NEG_3_ID, DIMENSIONS_RES_NON_NEG_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_NEG_4_ID, DIMENSIONS_RES_NON_NEG_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_NEG_5_ID, DIMENSIONS_RES_NON_NEG_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_NEG_6_ID, DIMENSIONS_RES_NON_NEG_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_NEG_7_ID, DIMENSIONS_RES_NON_NEG_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_NEG_8_ID, DIMENSIONS_RES_NON_NEG_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_NEG_9_ID, DIMENSIONS_RES_NON_NEG_9_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_NEG_10_ID, DIMENSIONS_RES_NON_NEG_10_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_11_ID, DIMENSIONS_RES_NON_NEG_11_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_12_ID, DIMENSIONS_RES_NON_NEG_12_STR, -123._px },
+    { DIMENSIONS_RES_NON_NEG_13_ID, DIMENSIONS_RES_NON_NEG_13_STR, -0.2_pct },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_0_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_1_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_2_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_3_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_4_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_5_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_6_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_7_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_8_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_9_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_9_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_10_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, -123._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, -0.2_pct },
+    { DIMENSIONS_RES_NON_PCT_0_ID, DIMENSIONS_RES_NON_PCT_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_PCT_1_ID, DIMENSIONS_RES_NON_PCT_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_PCT_2_ID, DIMENSIONS_RES_NON_PCT_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_PCT_3_ID, DIMENSIONS_RES_NON_PCT_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_PCT_4_ID, DIMENSIONS_RES_NON_PCT_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_PCT_5_ID, DIMENSIONS_RES_NON_PCT_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_PCT_6_ID, DIMENSIONS_RES_NON_PCT_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_PCT_7_ID, DIMENSIONS_RES_NON_PCT_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_PCT_8_ID, DIMENSIONS_RES_NON_PCT_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_PCT_9_ID, DIMENSIONS_RES_NON_PCT_9_STR, -123._vp },
+    { DIMENSIONS_RES_NON_PCT_10_ID, DIMENSIONS_RES_NON_PCT_10_STR, -123._fp },
+    { DIMENSIONS_RES_NON_PCT_11_ID, DIMENSIONS_RES_NON_PCT_11_STR, -123._px },
+    { DIMENSIONS_RES_NON_PCT_12_ID, DIMENSIONS_RES_NON_PCT_12_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_PCT_13_ID, DIMENSIONS_RES_NON_PCT_13_STR, -0.2_pct },
+};
+
+const std::vector<std::tuple<std::string, Dimension, Ark_Length>> testFixtureLengthAnyValidValues = {
+    { "123.0_vp", 123.0_vp, Converter::ArkValue<Ark_Length>(123.0_vp) },
+    { "0.0_vp", 0.0_vp, Converter::ArkValue<Ark_Length>(0.0_vp) },
+    { "1.23_vp", 1.23_vp, Converter::ArkValue<Ark_Length>(1.23_vp) },
+    { "123.0_fp", 123.0_fp, Converter::ArkValue<Ark_Length>(123.0_fp) },
+    { "0.0_fp", 0.0_fp, Converter::ArkValue<Ark_Length>(0.0_fp) },
+    { "1.23_fp", 1.23_fp, Converter::ArkValue<Ark_Length>(1.23_fp) },
+    { "123.0_px", 123.0_px, Converter::ArkValue<Ark_Length>(123.0_px) },
+    { "0.0_px", 0.0_px, Converter::ArkValue<Ark_Length>(0.0_px) },
+    { "1.23_px", 1.23_px, Converter::ArkValue<Ark_Length>(1.23_px) },
+    { "-2.3_vp", -2.3_vp, Converter::ArkValue<Ark_Length>(-2.3_vp) },
+    { "-4.5_fp", -4.5_fp, Converter::ArkValue<Ark_Length>(-4.5_fp) },
+    { "-5.6_px", -5.6_px, Converter::ArkValue<Ark_Length>(-5.6_px) },
+    { "0.5_pct", 0.5_pct, Converter::ArkValue<Ark_Length>(0.5_pct) },
+    { "0.0_pct", 0.0_pct, Converter::ArkValue<Ark_Length>(0.0_pct) },
+    { "-0.8_pct", -0.8_pct, Converter::ArkValue<Ark_Length>(-0.8_pct) },
 };
 } // namespace OHOS::Ace::NG::AccessorTestFixtures

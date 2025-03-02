@@ -90,6 +90,16 @@ public:
     MOCK_METHOD(int, GetMediaType, (), (const));
     MOCK_METHOD(int, GetInputFieldType, (), (const));
     MOCK_METHOD(std::string, GetSelectionText, (), (const));
+
+    void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const
+    {
+        width = mockPreviewWidth;
+        height = mockPreviewHeight;
+    }
+
+public:
+    int32_t mockPreviewWidth = -1;
+    int32_t mockPreviewHeight = -1;
 };
 
 class MockContextMenuResult : public ContextMenuResult {

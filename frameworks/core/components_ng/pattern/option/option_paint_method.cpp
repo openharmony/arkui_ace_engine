@@ -38,6 +38,10 @@ void PaintCustomDivider(SizeF optionSize, float horInterval, float iconHorInterv
     CHECK_NULL_VOID(paintWrapper);
     auto props = AceType::DynamicCast<OptionPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(props);
+    if (!props->HasDivider()) {
+        LOGE("Default divider is not set to the OptionPaintProperty");
+        return;
+    }
     auto dividerWidth = static_cast<float>(props->GetDividerValue().strokeWidth.ConvertToPx());
     auto startMargin = static_cast<float>(props->GetDividerValue().startMargin.ConvertToPx());
     auto endMargin = static_cast<float>(props->GetDividerValue().endMargin.ConvertToPx());
@@ -80,7 +84,7 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     if (!needDivider || press || hover) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);

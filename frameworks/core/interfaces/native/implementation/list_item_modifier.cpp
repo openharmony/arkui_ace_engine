@@ -53,7 +53,7 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
 
     Converter::VisitUnion(arg,
         [isStartArea, frameNode, node](const CustomNodeBuilder& value) {
-            auto customNode = CallbackHelper(value, frameNode).BuildSync(node);
+            auto customNode = CallbackHelper(value).BuildSync(node);
             CHECK_NULL_VOID(customNode);
             ListItemModelNG::SetDeleteArea(
                 frameNode, customNode.GetRawPtr(), nullptr, nullptr, nullptr, nullptr,
@@ -63,7 +63,7 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
             RefPtr<UINode> customNode;
             if (builder) {
-                customNode = CallbackHelper(builder.value(), frameNode).BuildSync(node);
+                customNode = CallbackHelper(builder.value()).BuildSync(node);
             }
 
             OnDeleteEvent onActionCallback;
@@ -225,8 +225,8 @@ void OnSelectImpl(Ark_NativePointer node,
     };
     ListItemModelNG::SetSelectCallback(frameNode, onSelect);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -251,7 +251,7 @@ const GENERATED_ArkUIListItemModifier* GetListItemModifier()
         ListItemAttributeModifier::SelectedImpl,
         ListItemAttributeModifier::SwipeActionImpl,
         ListItemAttributeModifier::OnSelectImpl,
-        ListItemAttributeModifier::__onChangeEvent_selectedImpl,
+        ListItemAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIListItemModifierImpl;
 }

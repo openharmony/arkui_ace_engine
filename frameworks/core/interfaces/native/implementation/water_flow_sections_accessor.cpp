@@ -59,13 +59,11 @@ std::vector<WaterFlowSections::Section> Convert(const Array_SectionOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowSectionsAccessor {
-static void DestroyPeerImpl(WaterFlowSectionsPeer *peerImpl)
+void DestroyPeerImpl(Ark_WaterFlowSections peer)
 {
-    if (peerImpl) {
-        delete peerImpl;
-    }
+    delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_WaterFlowSections CtorImpl()
 {
     return new WaterFlowSectionsPeer();
 }
@@ -73,7 +71,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer,
+Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
                        const Ark_Number* start,
                        const Opt_Number* deleteCount,
                        const Opt_Array_SectionOptions* sections)
@@ -92,7 +90,7 @@ Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer,
         return false;
     }
 }
-Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer,
+Ark_Boolean PushImpl(Ark_WaterFlowSections peer,
                      const Ark_SectionOptions* section)
 {
     CHECK_NULL_RETURN(peer, false);
@@ -104,7 +102,7 @@ Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer,
     peer->GetController()->ChangeData(start, 0, sections);
     return true;
 }
-Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer,
+Ark_Boolean UpdateImpl(Ark_WaterFlowSections peer,
                        const Ark_Number* sectionIndex,
                        const Ark_SectionOptions* section)
 {
@@ -116,18 +114,21 @@ Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer,
     peer->GetController()->ChangeData(Converter::Convert<int32_t>(*sectionIndex), 0, sections);
     return true;
 }
-void ValuesImpl(WaterFlowSectionsPeer* peer)
+Array_SectionOptions ValuesImpl(Ark_WaterFlowSections peer)
 {
     LOGE("ARKOALA WaterFlowSectionAccessor.ValuesImpl -> Incorrect return value, "
          "should be Array<SectionOptions>");
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->GetController());
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->GetController(), {});
+    return {};
 }
-Ark_Int32 LengthImpl(WaterFlowSectionsPeer* peer)
+Ark_Number LengthImpl(Ark_WaterFlowSections peer)
 {
-    CHECK_NULL_RETURN(peer, false);
-    CHECK_NULL_RETURN(peer->GetController(), false);
-    return peer->GetController()->GetSectionInfo().size();
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->GetController(), errValue);
+    auto res = peer->GetController()->GetSectionInfo().size();
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(res));
 }
 } // WaterFlowSectionsAccessor
 const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor()

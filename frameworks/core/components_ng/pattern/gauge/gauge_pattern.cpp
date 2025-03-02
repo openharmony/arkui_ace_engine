@@ -178,7 +178,7 @@ void GaugePattern::InitLimitValueText(int32_t valueTextId, bool isMin)
     std::ostringstream out;
     out << std::setiosflags(std::ios::fixed) << std::setprecision(0) << limitValue;
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<GaugeTheme>();
 
@@ -220,6 +220,9 @@ Color GaugePattern::GetMaxValueColor(const RefPtr<GaugePaintProperty>& gaugePain
 {
     Color color(Color::BLACK);
     CHECK_NULL_RETURN(gaugePaintProperty, color);
+    if (!gaugePaintProperty->HasGradientColors()) {
+        return color;
+    }
     switch (gaugePaintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
         case GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT: {
             color = gaugePaintProperty->GetGradientColorsValue().rbegin()->rbegin()->first;

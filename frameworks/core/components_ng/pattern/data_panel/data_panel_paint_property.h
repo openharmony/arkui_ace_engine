@@ -94,7 +94,7 @@ public:
         if (propEffect_.has_value()) {
             closeEffect = !propEffect_.value();
         }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<DataPanelTheme>();
         json->PutExtAttr("max", std::to_string(propMax_.value_or(100)).c_str(), filter);
@@ -120,7 +120,7 @@ public:
         if (propValueColors_.has_value()) {
             valueColors = propValueColors_.value();
         } else {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
+            auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<DataPanelTheme>();
             auto colors = theme->GetColorsArray();
@@ -153,7 +153,7 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<DataPanelTheme>();
         DataPanelShadow trackShadow;

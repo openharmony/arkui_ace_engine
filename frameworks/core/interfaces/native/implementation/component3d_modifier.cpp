@@ -83,7 +83,6 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
             },
             [](const Ark_Scene& value) {
 #if defined(KIT_3D_ENABLE)
-                auto sceneStub = Converter::Convert<std::string>(value.__SceneStub);
                 LOGE("Component3DInterfaceModifier::SetComponent3DOptionsImpl scene attribute is stub.");
 #endif
             },

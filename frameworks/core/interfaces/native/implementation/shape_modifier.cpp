@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
@@ -58,22 +59,24 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ShapeModifier
 namespace ShapeInterfaceModifier {
 void SetShapeOptions0Impl(Ark_NativePointer node,
-                          const Ark_PixelMap* value)
+                          Ark_PixelMap value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ShapeModelNG::SetSetShapeOptions0(frameNode, convValue);
-    LOGE("ARKOALA ShapeModifier.SetShapeOptions -> Method is not implemented.");
+    ViewAbstract::SetFocusable(frameNode, true);
+    RefPtr<PixelMap> pixelMap;
+#if !defined(PREVIEW) && defined(PIXEL_MAP_SUPPORTED)
+    pixelMap = Converter::Convert<RefPtr<PixelMap>>(value);
+#endif
+    ShapeModelNG::InitBox(frameNode, pixelMap);
 }
 void SetShapeOptions1Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //ShapeModelNG::SetSetShapeOptions1(frameNode, convValue);
+    ViewAbstract::SetFocusable(frameNode, true);
+    ShapeModelNG::InitBox(frameNode, nullptr);
 }
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {

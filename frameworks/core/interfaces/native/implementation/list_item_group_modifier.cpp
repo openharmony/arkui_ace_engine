@@ -51,14 +51,14 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     ListItemGroupModelNG::SetStyle(frameNode, style);
     auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
     if (header.has_value()) {
-        auto builder = [callback = CallbackHelper(header.value(), frameNode), node]() -> RefPtr<UINode> {
+        auto builder = [callback = CallbackHelper(header.value()), node]() -> RefPtr<UINode> {
             return callback.BuildSync(node);
         };
         ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
     if (footer.has_value()) {
-        auto builder = [callback = CallbackHelper(footer.value(), frameNode), node]() -> RefPtr<UINode> {
+        auto builder = [callback = CallbackHelper(footer.value()), node]() -> RefPtr<UINode> {
             return callback.BuildSync(node);
         };
         ListItemGroupModelNG::SetFooter(frameNode, std::move(builder));
@@ -76,13 +76,12 @@ void DividerImpl(Ark_NativePointer node,
     ListItemGroupModelNG::SetDivider(frameNode, divider);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
-                          const Ark_ChildrenMainSize* value)
+                          Ark_ChildrenMainSize value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto peer = reinterpret_cast<ChildrenMainSizePeer *>(value->ptr);
-    CHECK_NULL_VOID(peer);
+    auto peer = value;
     RefPtr<ListChildrenMainSize> handler = ListItemGroupModelNG::GetOrCreateListChildrenMainSize(frameNode);
     peer->SetHandler(handler);
 }

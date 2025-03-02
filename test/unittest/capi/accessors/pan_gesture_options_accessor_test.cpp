@@ -71,6 +71,21 @@ HWTEST_F(PanGestureOptionsAccessorTest, setDirectionTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: getDirectionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanGestureOptionsAccessorTest, getDirectionTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getDirection, nullptr);
+
+    for (auto& [actual, expected] : SET_DIRECTION_TEST_PLAN) {
+        peer_->handler->SetDirection(actual);
+        EXPECT_EQ(accessor_->getDirection(peer_), expected);
+    }
+}
+
 typedef std::pair<double, Ark_Number> SetDistanceTestStep;
 const std::vector<SetDistanceTestStep> SET_DISTANCE_TEST_PLAN = {
     { 0, Converter::ArkValue<Ark_Number>(0) },

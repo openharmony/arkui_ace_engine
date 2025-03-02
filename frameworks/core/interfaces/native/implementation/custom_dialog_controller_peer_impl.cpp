@@ -51,7 +51,7 @@ void CustomDialogControllerPeerImpl::SetBuilder(CustomNodeBuilder builder, Ark_N
 {
     CHECK_NULL_VOID(node);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
-    builder_ = [callback = CallbackHelper(builder, frameNode), frameNode]() -> RefPtr<UINode> {
+    builder_ = [callback = CallbackHelper(builder), frameNode]() -> RefPtr<UINode> {
         auto refNode = AceType::Claim(frameNode);
         CHECK_NULL_RETURN(refNode, nullptr);
         auto pipelineContext = PipelineContext::GetCurrentContext();

@@ -942,6 +942,53 @@ void AceContainer::AttachView(
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
 #else
+void AceContainer::InitThemeManagerTask()
+{
+    // Only init global resource here, construct theme in UI thread
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo_);
+        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    }
+
+    pipelineContext_->SetThemeManager(themeManager);
+    // Init resource, load theme map.
+    if (!SystemProperties::GetResourceDecoupling()) {
+        themeManager->InitResource(resourceInfo_);
+    }
+    themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
+    auto themeTask = [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
+        themeManager->ParseSystemTheme();
+        themeManager->SetColorScheme(colorScheme);
+        themeManager->LoadCustomTheme(assetManager);
+        // get background color from theme
+        aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
+    };
+    if (GetSettings().usePlatformAsUIThread) {
+        themeTask();
+    } else {
+        taskExecutor_->PostTask(themeTask, TaskExecutor::TaskType::UI, "ArkUISetBackgroundColor");
+    }
+}
+
+void AceContainer::InitEnvCallbackTask(UIEnvCallback callback)
+{
+    if (!useNewPipeline_) {
+        auto envCallbackTask = [context = pipelineContext_, callback]() {
+            CHECK_NULL_VOID(callback);
+            callback(AceType::DynamicCast<PipelineContext>(context));
+        };
+        if (GetSettings().usePlatformAsUIThread) {
+            envCallbackTask();
+        } else {
+            taskExecutor_->PostTask(envCallbackTask, TaskExecutor::TaskType::UI, "ArkUIEnvCallback");
+        }
+    }
+}
+
 void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width,
     int32_t height, UIEnvCallback callback)
 {
@@ -1009,34 +1056,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
     }
 
     ThemeConstants::InitDeviceType();
-    // Only init global resource here, construct theme in UI thread
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto resourceAdapter = ResourceAdapter::Create();
-        resourceAdapter->Init(resourceInfo_);
-        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
-        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
-    }
-
-    pipelineContext_->SetThemeManager(themeManager);
-    // Init resource, load theme map.
-    if (!SystemProperties::GetResourceDecoupling()) {
-        themeManager->InitResource(resourceInfo_);
-    }
-    themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
-    auto themeTask = [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
-        themeManager->ParseSystemTheme();
-        themeManager->SetColorScheme(colorScheme);
-        themeManager->LoadCustomTheme(assetManager);
-        // get background color from theme
-        aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
-    };
-    if (GetSettings().usePlatformAsUIThread) {
-        themeTask();
-    } else {
-        taskExecutor_->PostTask(themeTask, TaskExecutor::TaskType::UI, "ArkUISetBackgroundColor");
-    }
+    InitThemeManagerTask();
+    InitEnvCallbackTask(callback);
 
     auto setupRootElementTask = [context = pipelineContext_]() { context->SetupRootElement(); };
     if (GetSettings().usePlatformAsUIThread) {

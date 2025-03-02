@@ -116,14 +116,12 @@ public:
         }
     }
 
-    Ark_NativePointer GetSelectionImpl()
+    SelectionInfo GetSelectionImpl()
     {
-        Ark_NativePointer ret = nullptr;
         if (auto controller = handler_.Upgrade(); controller) {
-            selectionSpanInfo_ = controller->GetSelectionSpansInfo();
-            ret = reinterpret_cast<Ark_NativePointer>(&selectionSpanInfo_);
+            return controller->GetSelectionSpansInfo();
         }
-        return ret;
+        return {};
     }
 
     std::vector<ParagraphInfo> GetParagraphsImpl(const RangeOptions& options)
@@ -162,7 +160,8 @@ public:
 
 private:
     Ace::WeakPtr<RichEditorController> handler_;
-    SelectionInfo selectionSpanInfo_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct RichEditorControllerPeer : public OHOS::Ace::NG::GeneratedModifier::RichEditorControllerPeerImpl {};
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_RICHEDITOR_CONTROLLER_PEER_IMPL_H

@@ -286,7 +286,7 @@ void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& ta
 {
     CHECK_NULL_VOID(task);
     ContainerScope scope(patternInstanceId_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -297,7 +297,7 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, 
 {
     CHECK_NULL_VOID(task);
     ContainerScope scope(patternInstanceId_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

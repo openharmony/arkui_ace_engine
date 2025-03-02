@@ -44,16 +44,6 @@ namespace  {
     const auto ATTRIBUTE_SELECTABLE_DEFAULT_VALUE = "true";
     const auto ATTRIBUTE_SELECTED_NAME = "selected";
     const auto ATTRIBUTE_SELECTED_DEFAULT_VALUE = "false";
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUIGridItemEventsReceiver gridItemEventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getGridItemEventsReceiver = [] () -> const GENERATED_ArkUIGridItemEventsReceiver* {
-                return &gridItemEventReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class GridItemModifierTest : public ModifierTestBase<GENERATED_ArkUIGridItemModifier,
@@ -64,8 +54,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<GridItemTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -459,7 +447,6 @@ HWTEST_F(GridItemModifierTest, setSelectedTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
 {
-    Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
 
@@ -468,15 +455,17 @@ HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
         bool isSelected;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridItemEventReceiver.onSelect = [](Ark_Int32 nodeId, const Ark_Boolean isSelected)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .isSelected = Converter::ArkValue<Ark_Boolean>(isSelected)
-        };
+    Callback_Boolean_Void onSelect = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Boolean isSelected) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .isSelected = Converter::Convert<bool>(isSelected)
+            };
+        }
     };
 
-    modifier_->setOnSelect(node_, &func);
+    modifier_->setOnSelect(node_, &onSelect);
 
     // check true value
     EXPECT_EQ(checkEvent.has_value(), false);
@@ -519,7 +508,7 @@ HWTEST_F(GridItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+    modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireSelectChangeEvent(true);

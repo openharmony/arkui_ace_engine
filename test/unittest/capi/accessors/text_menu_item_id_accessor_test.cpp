@@ -56,9 +56,8 @@ HWTEST_F(TextMenuItemIdAccessorTest, createTest, TestSize.Level1)
 HWTEST_F(TextMenuItemIdAccessorTest, compareTest, TestSize.Level1)
 {
     EXPECT_EQ(peer_->id, std::nullopt);
-    const Ark_TextMenuItemId obj { .ptr = peer_ };
-    auto peer = static_cast<TextMenuItemIdPeer *>(accessor_->ctor());
-    auto result = Converter::Convert<bool>(accessor_->equals(peer, &obj));
+    auto peer = accessor_->ctor();
+    auto result = Converter::Convert<bool>(accessor_->equals(peer, peer_));
     EXPECT_FALSE(result);
     finalyzer_(peer);
 
@@ -72,9 +71,9 @@ HWTEST_F(TextMenuItemIdAccessorTest, compareTest, TestSize.Level1)
     for (auto [value1, value2, expected] : validValues) {
         auto arkString = Converter::ArkValue<Ark_String>(value1);
         auto arkValue = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(arkString);
-        peer = reinterpret_cast<TextMenuItemIdPeer*>(accessor_->of(&arkValue));
+        peer = accessor_->of(&arkValue);
         peer_->id = value2;
-        result = Converter::Convert<bool>(accessor_->equals(peer, &obj));
+        result = Converter::Convert<bool>(accessor_->equals(peer, peer_));
         EXPECT_EQ(result, expected);
         finalyzer_(peer);
     }

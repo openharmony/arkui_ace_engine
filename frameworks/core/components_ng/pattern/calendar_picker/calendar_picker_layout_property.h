@@ -50,7 +50,7 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
         CHECK_NULL_VOID(calendarTheme);

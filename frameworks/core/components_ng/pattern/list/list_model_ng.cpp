@@ -259,8 +259,14 @@ void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 
 int32_t ListModelNG::GetSticky(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetStickyStyleValue());
+    int32_t value = static_cast<int32_t>(V2::StickyStyle::NONE);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    if (layoutProperty->HasStickyStyle()) {
+        value = static_cast<int32_t>(layoutProperty->GetStickyStyleValue());
+    }
+    return value;
 }
 
 void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
@@ -296,6 +302,7 @@ int32_t ListModelNG::GetScrollEnabled(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, 0);
     int32_t value = true;
     auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0);
     if (layoutProperty->GetScrollEnabled()) {
         value = layoutProperty->GetScrollEnabledValue();
     }
@@ -571,8 +578,8 @@ void ListModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_
     const std::optional<bool>& alwaysEnabled)
 {
     ScrollableModelNG::SetEdgeEffect(frameNode,
-        static_cast<EdgeEffect>(edgeEffect.value_or(GetEdgeEffect(frameNode))),
-        alwaysEnabled.value_or(GetEdgeEffectAlways(frameNode)));
+        edgeEffect ? std::optional(static_cast<EdgeEffect>(*edgeEffect)) : std::nullopt,
+        alwaysEnabled);
 }
 
 int32_t ListModelNG::GetListDirection(FrameNode* frameNode)
@@ -763,9 +770,14 @@ void ListModelNG::SetListItemAlign(FrameNode* frameNode, const std::optional<V2:
 
 float ListModelNG::GetListSpace(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto value = frameNode->GetLayoutProperty<ListLayoutProperty>()->GetSpaceValue();
-    return value.ConvertToVp();
+    auto value = 0.0f;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    if (layoutProperty->HasSpace()) {
+        value = layoutProperty->GetSpaceValue().ConvertToVp();
+    }
+    return value;
 }
 
 void ListModelNG::SetListSpace(FrameNode* frameNode, const std::optional<Dimension>& space)

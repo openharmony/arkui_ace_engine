@@ -24,13 +24,13 @@ struct CalendarPickerDialogPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarPickerDialogAccessor {
-void DestroyPeerImpl(CalendarPickerDialogPeer* peer)
+void DestroyPeerImpl(Ark_CalendarPickerDialog peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_CalendarPickerDialog CtorImpl()
 {
     return new CalendarPickerDialogPeer();
 }

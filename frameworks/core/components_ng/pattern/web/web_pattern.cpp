@@ -761,7 +761,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     OnQuickMenuDismissed();
 
     auto id = frameNode->GetId();
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
@@ -3686,7 +3686,7 @@ void WebPattern::CheckHandles(SelectHandleInfo& handleInfo,
     const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle)
 {
     CHECK_NULL_VOID(handle);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     int y = static_cast<int32_t>(handle->GetY() / pipeline->GetDipScale());
     int edgeHeight = static_cast<int32_t>(handle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
@@ -4251,7 +4251,7 @@ RectF WebPattern::ComputeClippedSelectionBounds(
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
     bool& isNewAvoid)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, RectF());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RectF());

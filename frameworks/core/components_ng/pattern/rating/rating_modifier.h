@@ -168,7 +168,7 @@ public:
             return;
         }
         state_ = state;
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto ratingTheme = pipeline->GetTheme<RatingTheme>();
         CHECK_NULL_VOID(ratingTheme);

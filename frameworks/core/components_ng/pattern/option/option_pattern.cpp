@@ -52,7 +52,7 @@ void OptionPattern::UpdatePasteDisabledOpacity(const double& disabledColorAlpha)
 void OptionPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     textTheme_ = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme_);
@@ -101,7 +101,7 @@ void OptionPattern::UpdateIconSrc()
     if (icon_ == nullptr || iconSrc_.empty()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -278,7 +278,7 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(props);
     auto touchType = info.GetTouches().front().GetTouchType();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     // enter press status
@@ -517,7 +517,7 @@ std::string OptionPattern::GetText()
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, std::string());
-    return textProps->GetContentValue();
+    return textProps->GetContentValue(std::string());
 }
 
 void OptionPattern::UpdateText(const std::string& content)

@@ -76,13 +76,13 @@ struct UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace RichEditorBaseControllerAccessor {
-void DestroyPeerImpl(RichEditorBaseControllerPeer* peer)
+void DestroyPeerImpl(Ark_RichEditorBaseController peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorBaseController CtorImpl()
 {
     return new RichEditorBaseControllerPeer();
 }
@@ -90,13 +90,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetCaretOffsetImpl(RichEditorBaseControllerPeer* peer)
+Ark_Number GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto result = peer->GetCaretOffset();
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
-Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer,
+Ark_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
                                const Ark_Number* offset)
 {
     CHECK_NULL_RETURN(peer, false);
@@ -105,18 +105,18 @@ Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer,
     bool result = peer->SetCaretOffset(caretOffset);
     return Converter::ArkValue<Ark_Boolean>(result);
 }
-void CloseSelectionMenuImpl(RichEditorBaseControllerPeer* peer)
+void CloseSelectionMenuImpl(Ark_RichEditorBaseController peer)
 {
     CHECK_NULL_VOID(peer);
     peer->CloseSelectionMenu();
 }
-Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer)
+Ark_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     LOGW("RichEditorBaseControllerAccessor:: GetTypingStyleImpl is not implemented");
-    return nullptr;
+    return {};
 }
-void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer,
+void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
                         const Ark_RichEditorTextStyle* value)
 {
     CHECK_NULL_VOID(peer);
@@ -125,7 +125,7 @@ void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer,
     auto typingStyle = Converter::OptConvert<struct UpdateSpanStyle>(*value);
     peer->SetTypingStyle(typingStyle, textStyle);
 }
-void SetSelectionImpl(RichEditorBaseControllerPeer* peer,
+void SetSelectionImpl(Ark_RichEditorBaseController peer,
                       const Ark_Number* selectionStart,
                       const Ark_Number* selectionEnd,
                       const Opt_SelectionOptions* options)
@@ -139,32 +139,32 @@ void SetSelectionImpl(RichEditorBaseControllerPeer* peer,
     auto optOptions = Converter::OptConvert<SelectionOptions>(*options);
     peer->SetSelection(start, end, optOptions, start < end);
 }
-Ark_Boolean IsEditingImpl(RichEditorBaseControllerPeer* peer)
+Ark_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
 {
     CHECK_NULL_RETURN(peer, false);
     bool result = peer->IsEditing();
     return Converter::ArkValue<Ark_Boolean>(result);
 }
-void StopEditingImpl(RichEditorBaseControllerPeer* peer)
+void StopEditingImpl(Ark_RichEditorBaseController peer)
 {
     CHECK_NULL_VOID(peer);
     peer->StopEditing();
 }
-Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->ctor());
-    CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
+    CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), {});
+    auto layoutManagerPeer = GetLayoutManagerAccessor()->ctor();
+    CHECK_NULL_RETURN(layoutManagerPeer, {});
     layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
     return layoutManagerPeer;
 }
-Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
+Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
 {
     LOGW("RichEditorBaseControllerAccessor:: GetPreviewTextImpl is not implemented");
     // fix a return value
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     peer->GetPreviewText();
-    return nullptr;
+    return {};
 }
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()

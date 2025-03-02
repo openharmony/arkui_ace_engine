@@ -79,6 +79,8 @@ struct Section {
      */
     void PruneBack(float end);
 
+    void ClearItems();
+
     bool IsEmpty() const
     {
         return std::all_of(lanes.begin(), lanes.end(), [](const Lane& lane) { return lane.items_.empty(); });

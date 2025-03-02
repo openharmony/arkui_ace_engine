@@ -15,15 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeGestureEventAccessor {
-void DestroyPeerImpl(SwipeGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_SwipeGestureEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_SwipeGestureEvent CtorImpl()
 {
     return new SwipeGestureEventPeer();
 }
@@ -31,21 +32,46 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetAngleImpl(SwipeGestureEventPeer* peer)
+Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
 {
-    return 0;
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    const auto& angle = info->GetAngle();
+    LOGE("Arkoala method SwipeGestureEventAccessor.GetAngleImpl return int32_t value");
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(angle));
 }
-void SetAngleImpl(SwipeGestureEventPeer* peer,
+void SetAngleImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* angle)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(angle);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetAngle(Converter::Convert<float>(*angle));
 }
-Ark_Int32 GetSpeedImpl(SwipeGestureEventPeer* peer)
+Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
 {
-    return 0;
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    auto event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+
+    double value = event->GetSpeed();
+    LOGE("Arkoala method SwipeGestureEventAccessor.GetSpeedImpl return int32_t value");
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetSpeedImpl(SwipeGestureEventPeer* peer,
+void SetSpeedImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* speed)
 {
+    CHECK_NULL_VOID(peer);
+    auto event = peer->GetEventInfo();
+    CHECK_NULL_VOID(event);
+    CHECK_NULL_VOID(speed);
+
+    auto convValue = Converter::Convert<float>(*speed);
+    event->SetSpeed(convValue);
 }
 } // SwipeGestureEventAccessor
 const GENERATED_ArkUISwipeGestureEventAccessor* GetSwipeGestureEventAccessor()

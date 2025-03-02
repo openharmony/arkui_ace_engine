@@ -21,10 +21,10 @@ struct IndicatorComponentControllerPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IndicatorComponentControllerAccessor {
-void DestroyPeerImpl(IndicatorComponentControllerPeer* peer)
+void DestroyPeerImpl(Ark_IndicatorComponentController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_IndicatorComponentController CtorImpl()
 {
     return nullptr;
 }
@@ -32,13 +32,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ShowNextImpl(IndicatorComponentControllerPeer* peer)
+void ShowNextImpl(Ark_IndicatorComponentController peer)
 {
 }
-void ShowPreviousImpl(IndicatorComponentControllerPeer* peer)
+void ShowPreviousImpl(Ark_IndicatorComponentController peer)
 {
 }
-void ChangeIndexImpl(IndicatorComponentControllerPeer* peer,
+void ChangeIndexImpl(Ark_IndicatorComponentController peer,
                      const Ark_Number* index,
                      const Opt_Boolean* useAnimation)
 {

@@ -23,11 +23,11 @@ struct EventEmulatorPeer {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventEmulatorAccessor {
-void DestroyPeerImpl(EventEmulatorPeer* peer)
+void DestroyPeerImpl(Ark_EventEmulator peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_EventEmulator CtorImpl()
 {
     return new EventEmulatorPeer();
 }
@@ -36,7 +36,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void EmitClickEventImpl(Ark_NativePointer node,
-                        const Ark_ClickEvent* event)
+                        Ark_ClickEvent event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -23,6 +23,7 @@
 #include "core/components/slider/slider_theme.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -88,16 +89,9 @@ const auto ATTRIBUTE_SLIDE_RANGE_FROM_NAME = "from";
 const auto ATTRIBUTE_SLIDE_RANGE_FROM_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_SLIDE_RANGE_TO_NAME = "to";
 const auto ATTRIBUTE_SLIDE_RANGE_TO_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TRACK_COLOR_GRADIENT_COLOR_NAME = "color";
+const auto ATTRIBUTE_TRACK_COLOR_GRADIENT_OFFSET_NAME = "offset";
 
-struct EventsTracker {
-    static inline GENERATED_ArkUISliderEventsReceiver sliderEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getSliderEventsReceiver = [] () -> const GENERATED_ArkUISliderEventsReceiver* {
-            return &sliderEventReceiver;
-        }
-    };
-}; // EventsTracker
 } // namespace
 
 namespace Fixtures {
@@ -249,7 +243,6 @@ public:
             AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
             AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
         }
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -1053,13 +1046,143 @@ HWTEST_F(SliderModifierTest, setTrackColorTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setTrackColorTestValidValues
+ * @tc.name: setTrackColorResourceColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestValidValues, TestSize.Level1)
 {
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    Ark_ResourceColor initValueTrackColor;
+
+    // Initial setup
+    initValueTrackColor =
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+
+    auto checkValue = [this, &initValueTrackColor](
+                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+        Ark_ResourceColor inputValueTrackColor = initValueTrackColor;
+        inputValueTrackColor = value;
+
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+
+        modifier_->setTrackColor(node_, &colorGradientUnion);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setTrackColor, attribute: blockColor";
+    };
+
+    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
+            std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+    }
+}
+
+/*
+ * @tc.name: setTrackColorResourceColorTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestInvalidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueTrackColor;
+
+    // Initial setup
+    initValueTrackColor =
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+
+    auto checkValue = [this, &initValueTrackColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueTrackColor = initValueTrackColor;
+
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+
+        modifier_->setTrackColor(node_, &colorGradientUnion);
+        inputValueTrackColor = value;
+        colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+        modifier_->setTrackColor(node_, &colorGradientUnion);
+
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setTrackColor, attribute: blockColor";
+    };
+
+    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
+    }
+    // Check invalid union
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setTrackColorLinearGradientTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setTrackColorLinearGradientTestValidValues, TestSize.Level1)
+{
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
+        std::make_pair(Color::RED, Dimension(0.5f)),
+        std::make_pair(Color::BLUE, Dimension(1.0f)),
+    };
+
+    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    auto colorGradientUnion =
+        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+
+    modifier_->setTrackColor(node_, &colorGradientUnion);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
+    auto gradientJsonArray = JsonUtil::ParseJsonString(resultStr);
+
+    ASSERT_EQ(gradientJsonArray->GetArraySize(), colorStopValues.size());
+    for (int i = 0; i < gradientJsonArray->GetArraySize(); i++) {
+        auto itemJson = gradientJsonArray->GetArrayItem(i);
+        auto colorValue = GetAttrValue<std::string>(itemJson, ATTRIBUTE_TRACK_COLOR_GRADIENT_COLOR_NAME);
+        auto offsetValue = GetAttrValue<std::string>(itemJson, ATTRIBUTE_TRACK_COLOR_GRADIENT_OFFSET_NAME);
+        EXPECT_EQ(colorValue, std::get<0>(colorStopValues.at(i)).value().ToString());
+        EXPECT_EQ(offsetValue, std::to_string(std::get<1>(colorStopValues.at(i)).Value()));
+    }
+}
+
+/*
+ * @tc.name: setTrackColorLinearGradientTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setTrackColorLinearGradientTestInvalidValues, TestSize.Level1)
+{
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
+        std::make_pair(std::nullopt, Dimension(0.5f)),
+        std::make_pair(Color::BLUE, Dimension(1.0f)),
+    };
+
+    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    auto colorGradientUnion =
+        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+
+    modifier_->setTrackColor(node_, &colorGradientUnion);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE);
 }
 
 /*
@@ -2036,8 +2159,7 @@ HWTEST_F(SliderModifierTest, setBlockStyleTestValidValues, TestSize.Level1)
     initValueBlockStyle.type = Converter::ArkValue<Ark_SliderBlockType>(
         std::get<1>(Fixtures::testFixtureEnumSliderBlockTypeValidValuesSlider[0]));
     initValueBlockStyle.image = Converter::ArkValue<Opt_ResourceStr>();
-    initValueBlockStyle.shape =
-        Converter::ArkValue<Opt_Type_SliderBlockStyle_shape>();
+    initValueBlockStyle.shape = Converter::ArkValue<Opt_String>();
 
     auto checkValue = [this, &initValueBlockStyle](const std::string& input, const Ark_SliderBlockType& value,
         const std::string& expectedStr) {
@@ -2430,9 +2552,10 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
  */
 HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Callback_Number_SliderChangeMode_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -2440,16 +2563,18 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
         std::optional<int32_t> mode;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::sliderEventReceiver.onChange = [](Ark_Int32 nodeId, Ark_Number value, Ark_SliderChangeMode mode)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .value = Converter::Convert<float>(value),
-            .mode = EnumToInt(Converter::OptConvert<SliderModel::SliderChangeMode>(mode)),
-        };
+    Callback_Number_SliderChangeMode_Void onChangeCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Number value, Ark_SliderChangeMode mode) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .value = Converter::Convert<float>(value),
+                .mode = EnumToInt(Converter::OptConvert<SliderModel::SliderChangeMode>(mode)),
+            };
+        }
     };
 
-    modifier_->setOnChange(node_, &func);
+    modifier_->setOnChange(node_, &onChangeCallback);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(10, 0);
     EXPECT_EQ(checkEvent.has_value(), true);
@@ -2471,6 +2596,7 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(SliderModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
@@ -2479,27 +2605,27 @@ HWTEST_F(SliderModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
         float value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
-        checkEvent = {
-            .nodeId = resourceId,
-            .value = Converter::Convert<float>(parameter)
-        };
+    Callback_Number_Void arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Number value) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .value = Converter::Convert<float>(value)
+            };
+        }
     };
 
-    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
-
-    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+    modifier_->set_onChangeEvent_value(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(55.4f, 0);
     ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->value, 55.4f, FLT_EPSILON);
     eventHub->FireChangeEvent(10.2f, 3);
     ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->value, 10.2f, FLT_EPSILON);
 }
 } // namespace OHOS::Ace::NG

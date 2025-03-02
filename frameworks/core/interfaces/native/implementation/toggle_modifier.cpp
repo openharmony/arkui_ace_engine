@@ -61,7 +61,7 @@ namespace ToggleModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::CHECKBOX, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::SWITCH, false);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -88,9 +88,9 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](bool isOn) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const bool isOn) {
         auto arkValue = Converter::ArkValue<Ark_Boolean>(isOn);
-        GetFullAPI()->getEventsAPI()->getToggleEventsReceiver()->onChange(frameNode->GetId(), arkValue);
+        arkCallback.Invoke(arkValue);
     };
     ToggleModelNG::OnChange(frameNode, std::move(onChange));
 }
@@ -138,8 +138,8 @@ void SwitchStyleImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(convValue.trackBorderRadius);
     ToggleModelNG::SetTrackBorderRadius(frameNode, convValue.trackBorderRadius);
 }
-void __onChangeEvent_isOnImpl(Ark_NativePointer node,
-                              const Callback_Boolean_Void* callback)
+void _onChangeEvent_isOnImpl(Ark_NativePointer node,
+                             const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -162,7 +162,7 @@ const GENERATED_ArkUIToggleModifier* GetToggleModifier()
         ToggleAttributeModifier::SelectedColorImpl,
         ToggleAttributeModifier::SwitchPointColorImpl,
         ToggleAttributeModifier::SwitchStyleImpl,
-        ToggleAttributeModifier::__onChangeEvent_isOnImpl,
+        ToggleAttributeModifier::_onChangeEvent_isOnImpl,
     };
     return &ArkUIToggleModifierImpl;
 }

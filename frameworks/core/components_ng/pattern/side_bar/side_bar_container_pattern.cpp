@@ -438,7 +438,7 @@ void SideBarContainerPattern::CreateAndMountNodes()
         auto renderContext = sideBarFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (!renderContext->HasBackgroundColor()) {
-            auto context = PipelineBase::GetCurrentContext();
+            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             auto sideBarTheme = context->GetTheme<SideBarTheme>();
             CHECK_NULL_VOID(sideBarTheme);
@@ -461,7 +461,7 @@ void SideBarContainerPattern::CreateAndMountNodes()
 
 void SideBarContainerPattern::UpdateDividerShadow() const
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto sidebarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sidebarTheme);
@@ -542,7 +542,7 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
     CHECK_NULL_VOID(dividerLayoutProperty);
     dividerLayoutProperty->UpdateVertical(true);
     dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
@@ -558,7 +558,7 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
 
 void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode)
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
@@ -879,7 +879,7 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
     CHECK_NULL_VOID(imageLayoutProperty);
     std::optional<ImageSourceInfo> imgSourceInfo = std::nullopt;
 
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);

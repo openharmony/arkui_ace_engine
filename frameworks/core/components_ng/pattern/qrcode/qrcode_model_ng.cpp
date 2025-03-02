@@ -34,7 +34,7 @@ void QRCodeModelNG::Create(const std::string& value)
         V2::QRCODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<QRCodePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_VOID(qrCodeTheme);

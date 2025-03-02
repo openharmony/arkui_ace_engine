@@ -52,8 +52,8 @@ public:
             (*callback_.resource.hold)(callback_.resource.resourceId);
         }
     }
-    CallbackHelper(const CallbackType &callback, const FrameNode* frameNode = nullptr)
-        : CallbackHelper<CallbackType>(callback, GetVMContext(frameNode)) {}
+    CallbackHelper(const CallbackType &callback)
+        : CallbackHelper<CallbackType>(callback, GetVMContext()) {}
     ~CallbackHelper()
     {
         if (callback_.resource.release) {
@@ -122,19 +122,23 @@ public:
             callback_.resource.resourceId == other.callback_.resource.resourceId;
     }
 
-    static Ark_VMContext GetVMContext(const FrameNode *frameNode)
+    static Ark_VMContext GetVMContext()
     {
-        if (frameNode) {
-            if (auto pipeline = frameNode->GetContext(); pipeline) {
-                auto rootPtr = reinterpret_cast<Ark_NodeHandle>(pipeline->GetRootElement().GetRawPtr());
-                if (auto companionNode = GeneratedApiImpl::GetCompanion(rootPtr); companionNode) {
-                    return companionNode->GetVMContext();
-                }
-            }
-        }
-        return nullptr;
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto rootNode = pipeline->GetRootElement();
+        CHECK_NULL_RETURN(rootNode, nullptr);
+        auto rootPtr = reinterpret_cast<Ark_NodeHandle>(rootNode.GetRawPtr());
+        CHECK_NULL_RETURN(rootPtr, nullptr);
+        auto companionNode = GeneratedApiImpl::GetCompanion(rootPtr);
+        CHECK_NULL_RETURN(companionNode, nullptr);
+        return companionNode->GetVMContext();
     }
 
+    const CallbackType GetCallback()
+    {
+        return callback_;
+    }
 protected:
     CallbackType callback_  = {
         .resource = {.hold = nullptr, .release = nullptr},

@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -118,7 +119,7 @@ void OnClickImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](GestureEvent& info) {
+    auto onClick = [arkCallback = CallbackHelper(*value)](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
 #ifdef SECURITY_COMPONENT_ENABLE
         auto secEventValue = info.GetSecCompHandleEvent();
@@ -132,11 +133,10 @@ void OnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         Ark_LocationButtonOnClickResult arkResult = Converter::ArkValue<Ark_LocationButtonOnClickResult>(res);
-        GetFullAPI()->getEventsAPI()->getLocationButtonEventsReceiver()->onClick(frameNode->GetId(),
-            event.ArkValue(), arkResult);
+        arkCallback.Invoke(event.ArkValue(), arkResult);
     };
 
-    ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
 } // LocationButtonAttributeModifier
 const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier()

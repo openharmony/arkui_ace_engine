@@ -52,6 +52,11 @@ Ark_String ConvContext::Store(const std::string_view& src)
     return result;
 }
 
+void ConvContext::Clear()
+{
+    storage_.clear();
+}
+
 void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
 {
     const auto& localOffset = src.GetTarget().area.GetOffset();
@@ -71,15 +76,14 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::
     const auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(
         GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
     peer->SetEventInfo(src);
-    dst.ptr = peer;
+    dst = peer;
 }
 
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
-    const auto peer = reinterpret_cast<DragEventPeer*>(
-        GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor());
+    const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
     peer->dragInfo = info;
-    dragEvent.ptr = peer;
+    dragEvent = peer;
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
@@ -97,7 +101,7 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
-    dst.ptr = LengthMetricsPeer::Create(src);
+    dst = LengthMetricsPeer::Create(src);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -124,16 +128,6 @@ void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
 {
     dst.alwaysEnabled = src;
-}
-
-void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
-{
-    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<StyledStringPeer&>(src));
-}
-
-void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src)
-{
-    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<TextAreaControllerPeer&>(src));
 }
 
 void AssignArkValue(Ark_Length& dst, const double& src)
@@ -290,6 +284,54 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
         case ARK_LENGTH_UNIT_LPX: du = DimensionUnit::LPX; break;
         default: du = DimensionUnit::INVALID;
     }
-    return { LengthMetricsPeer::Create(Dimension(value, du)) };
+    return LengthMetricsPeer::Create(Dimension(value, du));
+}
+
+void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx)
+{
+    dst.id = ArkValue<Ark_Number>(-1);
+    dst.params = ArkValue<Opt_Array_String>();
+    if (auto name = std::get_if<std::string>(&src); name) {
+        CHECK_NULL_VOID(ctx);
+        std::vector<std::string> vecName { *name };
+        auto arkName = Converter::ArkValue<Array_String>(vecName, ctx);
+        dst.params = Converter::ArkValue<Opt_Array_String>(arkName, ctx);
+    } else if (auto id = std::get_if<int32_t>(&src); id) {
+        dst.id = ArkValue<Ark_Number>(*id);
+    }
+    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
+}
+
+void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx)
+{
+    dst.supportAvoidance = Converter::ArkValue<Opt_Boolean>(src.supportAvoidance);
+}
+
+void AssignArkValue(Ark_OffsetResult& dst, const Offset& src)
+{
+    dst.xOffset = ArkValue<Ark_Number>(src.GetX());
+    dst.yOffset = ArkValue<Ark_Number>(src.GetY());
+}
+
+void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.Left());
+    dst.y = ArkValue<Ark_Number>(src.Top());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
+
+void AssignArkValue(Ark_RectResult& dst, const RectF& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.GetX());
+    dst.y = ArkValue<Ark_Number>(src.GetY());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
+
+void AssignArkValue(Ark_Position& dst, const OffsetF& src)
+{
+    dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
+    dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
 }
 } // namespace OHOS::Ace::NG::Converter

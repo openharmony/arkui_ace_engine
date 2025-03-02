@@ -499,7 +499,7 @@ void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameN
         buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
     }
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);

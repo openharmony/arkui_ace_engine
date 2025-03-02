@@ -20,13 +20,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClientAuthenticationHandlerAccessor {
-void DestroyPeerImpl(ClientAuthenticationHandlerPeer* peer)
+void DestroyPeerImpl(Ark_ClientAuthenticationHandler peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_ClientAuthenticationHandler CtorImpl()
 {
     return new ClientAuthenticationHandlerPeer();
 }
@@ -34,7 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void Confirm0Impl(ClientAuthenticationHandlerPeer* peer,
+void Confirm0Impl(Ark_ClientAuthenticationHandler peer,
                   const Ark_String* priKeyFile,
                   const Ark_String* certChainFile)
 {
@@ -45,7 +45,7 @@ void Confirm0Impl(ClientAuthenticationHandlerPeer* peer,
     std::string certChainFileStr = Converter::Convert<std::string>(*certChainFile);
     peer->handler->HandleConfirm(priKeyFileStr, certChainFileStr);
 }
-void Confirm1Impl(ClientAuthenticationHandlerPeer* peer,
+void Confirm1Impl(Ark_ClientAuthenticationHandler peer,
                   const Ark_String* authUri)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -54,12 +54,12 @@ void Confirm1Impl(ClientAuthenticationHandlerPeer* peer,
     std::string certChainFileStr;
     peer->handler->HandleConfirm(priKeyFileStr, certChainFileStr);
 }
-void CancelImpl(ClientAuthenticationHandlerPeer* peer)
+void CancelImpl(Ark_ClientAuthenticationHandler peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->HandleCancel();
 }
-void IgnoreImpl(ClientAuthenticationHandlerPeer* peer)
+void IgnoreImpl(Ark_ClientAuthenticationHandler peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->HandleIgnore();

@@ -93,6 +93,11 @@ void GridPattern::BeforeCreateLayoutWrapper()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     info_.childrenCount_ = host->GetTotalChildCount();
+    if (info_.jumpIndex_ != EMPTY_JUMP_INDEX) {
+        RequestJump(info_.jumpIndex_, info_.scrollAlign_, GetExtraOffset().value_or(0.0f));
+    } else if (targetIndex_) {
+        RequestFillToTarget(*targetIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
+    }
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -403,10 +408,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
-        auto userOffset = FireOnWillScroll(-offset);
-        info_.currentOffset_ -= userOffset;
-
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        UpdateOffsetHelper(offset);
 
         if (GreatNotEqual(info_.currentOffset_, GetMainContentSize() - itemsHeight)) {
             info_.offsetEnd_ = false;
@@ -419,21 +421,29 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
             offset *= friction;
         }
-        auto userOffset = FireOnWillScroll(-offset);
-        info_.currentOffset_ -= userOffset;
-
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        UpdateOffsetHelper(offset);
 
         if (LessNotEqual(info_.currentOffset_, 0.0)) {
             info_.reachStart_ = false;
         }
         return true;
     }
+    UpdateOffsetHelper(offset);
+    return true;
+}
+
+void GridPattern::UpdateOffsetHelper(float offset)
+{
     auto userOffset = FireOnWillScroll(-offset);
     info_.currentOffset_ -= userOffset;
-    UpdateOffset(-userOffset);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    return true;
+    if (UpdateOffset(-userOffset) && InRegion(-GetMainContentSize(), 0.0f, userOffset)) {
+        // grid legacy layout would reset offset when items above are not found. skip layout to avoid that.
+        return;
+    }
+    auto host = GetHost();
+    if (host) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -482,10 +492,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
 
-    if (!isInitialized_)  {
-        JumpToItem(gridLayoutInfo.startIndex_); // notify 2.0 adapter after first layout
-    }
-    UpdateLayoutRange(info_.axis_, gridLayoutInfo.startIndex_);
+    UpdateLayoutRange(info_.axis_, !isInitialized_);
+    RequestReset(info_.jumpForRecompose_);
+    info_.jumpForRecompose_ = EMPTY_JUMP_INDEX;
     isInitialized_ = true;
     if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {
         CheckGridItemRange(DynamicCast<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)->GetItemAdapterRange());
@@ -1933,7 +1942,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
     StopAnimate();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    int32_t totalChildCount = host->TotalChildCount();
+    int32_t totalChildCount = host->GetTotalChildCount();
     if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
         if (extraOffset.has_value()) {
             info_.extraOffset_ = -extraOffset.value();

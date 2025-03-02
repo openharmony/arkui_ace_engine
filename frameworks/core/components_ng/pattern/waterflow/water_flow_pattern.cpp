@@ -18,7 +18,6 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/layout/section/staggered_fill_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
@@ -72,8 +71,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     delta = -FireOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
-    UpdateOffset(delta);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (!UpdateOffset(delta)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     return true;
 };
 
@@ -322,10 +322,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
     CheckScrollable();
-    if (!isInitialized_) {
-        JumpToItem(0);
-    }
-    UpdateLayoutRange(layoutInfo_->axis_, -1);
+    UpdateLayoutRange(layoutInfo_->axis_, !isInitialized_);
 
     isInitialized_ = true;
 
@@ -840,10 +837,5 @@ void WaterFlowPattern::DumpInfoAddSections()
         index++;
     }
     DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
-}
-
-RefPtr<FillAlgorithm> WaterFlowPattern::CreateFillAlgorithm()
-{
-    return MakeRefPtr<StaggeredFillAlgorithm>(GetLayoutProperty<LayoutProperty>());
 }
 } // namespace OHOS::Ace::NG

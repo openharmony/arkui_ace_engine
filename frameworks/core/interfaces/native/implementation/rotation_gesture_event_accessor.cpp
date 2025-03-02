@@ -19,11 +19,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureEventAccessor {
-void DestroyPeerImpl(RotationGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_RotationGestureEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_RotationGestureEvent CtorImpl()
 {
     return new RotationGestureEventPeer;
 }
@@ -31,11 +31,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetAngleImpl(RotationGestureEventPeer* peer)
+Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetAngleImpl(RotationGestureEventPeer* peer,
+void SetAngleImpl(Ark_RotationGestureEvent peer,
                   const Ark_Number* angle)
 {
 }

@@ -57,13 +57,13 @@ const DimensionOffset DEFAULT_OFFSET_TOP = DimensionOffset(0.0_vp, 40.0_vp);
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ActionSheetAccessor {
-void DestroyPeerImpl(ActionSheetPeer* peer)
+void DestroyPeerImpl(Ark_ActionSheet peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_ActionSheet CtorImpl()
 {
     return new ActionSheetPeer();
 }

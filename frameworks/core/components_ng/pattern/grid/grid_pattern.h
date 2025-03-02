@@ -53,7 +53,7 @@ struct GridItemAdapter {
 };
 
 class ACE_EXPORT GridPattern : public ScrollablePattern, public LazyContainer {
-    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
+    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern, LazyContainer);
 
 public:
     GridPattern() = default;
@@ -314,6 +314,8 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+
+    void UpdateOffsetHelper(float offset);
 
     void ClearMultiSelect() override;
     bool IsItemSelected(const GestureEvent& info) override;

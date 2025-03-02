@@ -17,7 +17,7 @@
 
 #include "base/geometry/dimension.h"
 
-struct LengthMetricsPeer {
+struct LengthMetricsPeer final {
     OHOS::Ace::Dimension value;
 
     static LengthMetricsPeer *Create(const OHOS::Ace::Dimension& src)

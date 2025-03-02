@@ -43,7 +43,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type);
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
@@ -145,7 +145,7 @@ void ProgressModelNG::SetBorderColor(const Color& value)
     CHECK_NULL_VOID(frameNode);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    auto progressType = progressPaintProperty->GetProgressTypeValue();
+    auto progressType = progressPaintProperty->GetProgressTypeValue(ProgressType::LINEAR);
     if (progressType == ProgressType::CAPSULE) {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value);
     }
@@ -263,7 +263,7 @@ void ProgressModelNG::SetItalicFontStyle(const Ace::FontStyle& value)
 
 void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -714,7 +714,7 @@ void ProgressModelNG::ProgressInitialize(
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type, frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;

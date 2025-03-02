@@ -536,7 +536,7 @@ void SelectModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension
     if (value) {
         pattern->SetSpace(value.value());
     } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto selectTheme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);

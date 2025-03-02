@@ -1113,7 +1113,7 @@ float TimePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, Time
 
 void TimePickerColumnPattern::SetOptionShiftDistance()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);

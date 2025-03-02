@@ -131,6 +131,15 @@ void Section::PruneFront(float start)
     }
 }
 
+void Section::ClearItems()
+{
+    for (auto& lane : lanes) {
+        lane.items_.clear();
+        lane.startPos = 0.0f;
+        lane.endPos = 0.0f;
+    }
+}
+
 Lane& Section::GetLane(int32_t item)
 {
     auto it = idxToLane.find(item);

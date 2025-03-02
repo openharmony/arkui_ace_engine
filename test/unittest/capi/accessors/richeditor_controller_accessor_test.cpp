@@ -12,14 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <gmock/gmock.h>
+
 #include "richeditor_accessor_test.h"
-#include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
-#include "accessor_test_base.h"
-#include "accessor_test_utils.h"
+
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "gmock/gmock.h"
+
+#include "accessor_test_base.h"
+#include "accessor_test_utils.h"
 
 namespace OHOS::Ace {
 bool operator==(const TextSpanOptions& lhs, const TextSpanOptions& rhs)
@@ -246,6 +251,7 @@ public:
 
     MockRichEditorController *mockRichEditorController_ = nullptr;
     RefPtr<MockRichEditorController> mockRichEditorControllerKeeper_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /**
@@ -451,13 +457,11 @@ HWTEST_F(RichEditorControllerAccessorTest, getSelectionTest, TestSize.Level1)
 HWTEST_F(RichEditorControllerAccessorTest, fromStyledStringTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fromStyledString, nullptr);
-    Ark_Materialized inValue;
-    inValue.ptr = new SpanString(TEST_VALUE);
-    auto* rawSpanStringBasePtr = reinterpret_cast<SpanStringBase*>(inValue.ptr);
-    RefPtr<SpanStringBase> updateSpanStyle;
-    updateSpanStyle = rawSpanStringBasePtr;
+    RefPtr<SpanStringBase> updateSpanStyle = Referenced::MakeRefPtr<SpanString>(TEST_VALUE);
+    Ark_StyledString inValue = StyledStringPeer::Create(updateSpanStyle);
     EXPECT_CALL(*mockRichEditorController_, FromStyledString(updateSpanStyle)).Times(1);
-    accessor_->fromStyledString(peer_, &inValue);
+    accessor_->fromStyledString(vmContext_, peer_, inValue);
+    StyledStringPeer::Destroy(inValue);
 }
 
 /**
@@ -473,6 +477,6 @@ HWTEST_F(RichEditorControllerAccessorTest, toStyledStringTest, TestSize.Level1)
     options.end = TEST_END;
     auto value = Converter::ArkValue<Ark_RichEditorRange>(options);
     EXPECT_CALL(*mockRichEditorController_, ToStyledString(TEST_START, TEST_END)).Times(1);
-    accessor_->toStyledString(peer_, &value);
+    accessor_->toStyledString(vmContext_, peer_, &value);
 }
 } // namespace OHOS::Ace::NG

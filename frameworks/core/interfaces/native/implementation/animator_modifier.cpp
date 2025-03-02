@@ -22,7 +22,7 @@ namespace AnimatorModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // AnimatorModifier
 namespace AnimatorInterfaceModifier {
@@ -101,12 +101,12 @@ void PlayModeImpl(Ark_NativePointer node,
     //AnimatorModelNG::SetPlayMode(frameNode, convValue);
 }
 void MotionImpl(Ark_NativePointer node,
-                const Ark_Union_SpringMotion_FrictionMotion_ScrollMotion* value)
+                Ark_SpringMotion value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //AnimatorModelNG::SetMotion(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,

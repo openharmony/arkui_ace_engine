@@ -42,7 +42,7 @@ void RenderContext::RequestNextFrame() const
         auto node = GetHost();
         CHECK_NULL_VOID(node);
         if (node->GetInspectorId().has_value()) {
-            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(node));
         }

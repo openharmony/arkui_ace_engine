@@ -35,11 +35,11 @@ RefPtr<SpanBase> Convert(const Ark_SpanStyle& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MutableStyledStringAccessor {
-void DestroyPeerImpl(MutableStyledStringPeer* peer)
+void DestroyPeerImpl(Ark_MutableStyledString peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_MutableStyledString CtorImpl()
 {
     return new MutableStyledStringPeer();
 }
@@ -47,7 +47,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ReplaceStringImpl(MutableStyledStringPeer* peer,
+void ReplaceStringImpl(Ark_VMContext vmContext,
+                       Ark_MutableStyledString peer,
                        const Ark_Number* start,
                        const Ark_Number* length,
                        const Ark_String* other)
@@ -66,7 +67,8 @@ void ReplaceStringImpl(MutableStyledStringPeer* peer,
             convStart, convLength);
     }
 }
-void InsertStringImpl(MutableStyledStringPeer* peer,
+void InsertStringImpl(Ark_VMContext vmContext,
+                      Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_String* other)
 {
@@ -84,7 +86,8 @@ void InsertStringImpl(MutableStyledStringPeer* peer,
             convStart, strLength);
     }
 }
-void RemoveStringImpl(MutableStyledStringPeer* peer,
+void RemoveStringImpl(Ark_VMContext vmContext,
+                      Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_Number* length)
 {
@@ -101,7 +104,8 @@ void RemoveStringImpl(MutableStyledStringPeer* peer,
             convStart, convLength);
     }
 }
-void ReplaceStyleImpl(MutableStyledStringPeer* peer,
+void ReplaceStyleImpl(Ark_VMContext vmContext,
+                      Ark_MutableStyledString peer,
                       const Ark_SpanStyle* spanStyle)
 {
     CHECK_NULL_VOID(peer && spanStyle);
@@ -119,7 +123,8 @@ void ReplaceStyleImpl(MutableStyledStringPeer* peer,
             convStart, convLength);
     }
 }
-void SetStyleImpl(MutableStyledStringPeer* peer,
+void SetStyleImpl(Ark_VMContext vmContext,
+                  Ark_MutableStyledString peer,
                   const Ark_SpanStyle* spanStyle)
 {
     CHECK_NULL_VOID(peer && spanStyle);
@@ -142,7 +147,8 @@ void SetStyleImpl(MutableStyledStringPeer* peer,
             convStart, convLength);
     }
 }
-void RemoveStyleImpl(MutableStyledStringPeer* peer,
+void RemoveStyleImpl(Ark_VMContext vmContext,
+                     Ark_MutableStyledString peer,
                      const Ark_Number* start,
                      const Ark_Number* length,
                      Ark_StyledStringKey styledKey)
@@ -157,7 +163,8 @@ void RemoveStyleImpl(MutableStyledStringPeer* peer,
     CHECK_NULL_VOID(type);
     mutableString->RemoveSpan(convStart, convLength, type.value());
 }
-void RemoveStylesImpl(MutableStyledStringPeer* peer,
+void RemoveStylesImpl(Ark_VMContext vmContext,
+                      Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_Number* length)
 {
@@ -169,22 +176,23 @@ void RemoveStylesImpl(MutableStyledStringPeer* peer,
     CHECK_NULL_VOID(mutableString->CheckRange(convStart, convLength));
     mutableString->RemoveSpans(convStart, convLength);
 }
-void ClearStylesImpl(MutableStyledStringPeer* peer)
+void ClearStylesImpl(Ark_MutableStyledString peer)
 {
     CHECK_NULL_VOID(peer);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
     mutableString->ClearAllSpans();
 }
-void ReplaceStyledStringImpl(MutableStyledStringPeer* peer,
+void ReplaceStyledStringImpl(Ark_VMContext vmContext,
+                             Ark_MutableStyledString peer,
                              const Ark_Number* start,
                              const Ark_Number* length,
-                             const Ark_StyledString* other)
+                             Ark_StyledString other)
 {
-    CHECK_NULL_VOID(peer && start && length && other && other->ptr);
+    CHECK_NULL_VOID(peer && start && length && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    auto otherString = reinterpret_cast<MutableStyledStringPeer*>(other->ptr)->GetMutableString();
+    auto otherString = other->GetMutableString();
     CHECK_NULL_VOID(otherString);
     const auto convStart = Converter::Convert<int32_t>(*start);
     const auto convLength = Converter::Convert<int32_t>(*length);
@@ -196,17 +204,18 @@ void ReplaceStyledStringImpl(MutableStyledStringPeer* peer,
             convStart, convLength);
     }
 }
-void InsertStyledStringImpl(MutableStyledStringPeer* peer,
+void InsertStyledStringImpl(Ark_VMContext vmContext,
+                            Ark_MutableStyledString peer,
                             const Ark_Number* start,
-                            const Ark_StyledString* other)
+                            Ark_StyledString other)
 {
-    CHECK_NULL_VOID(peer && start && other && other->ptr);
+    CHECK_NULL_VOID(peer && start && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
     auto strLength = mutableString->GetLength();
     const auto convStart = Converter::Convert<int32_t>(*start);
     if (convStart >= 0 && convStart <= strLength) {
-        auto otherString = reinterpret_cast<MutableStyledStringPeer*>(other->ptr)->GetMutableString();
+        auto otherString = other->GetMutableString();
         CHECK_NULL_VOID(otherString);
         mutableString->InsertSpanString(convStart, otherString);
     } else {
@@ -215,13 +224,13 @@ void InsertStyledStringImpl(MutableStyledStringPeer* peer,
             convStart, strLength);
     }
 }
-void AppendStyledStringImpl(MutableStyledStringPeer* peer,
-                            const Ark_StyledString* other)
+void AppendStyledStringImpl(Ark_MutableStyledString peer,
+                            Ark_StyledString other)
 {
-    CHECK_NULL_VOID(peer && other && other->ptr);
+    CHECK_NULL_VOID(peer && other);
     auto mutableString = peer->GetMutableString();
     CHECK_NULL_VOID(mutableString);
-    auto otherString = reinterpret_cast<MutableStyledStringPeer*>(other->ptr)->GetMutableString();
+    auto otherString = other->GetMutableString();
     CHECK_NULL_VOID(otherString);
     mutableString->AppendSpanString(otherString);
 }

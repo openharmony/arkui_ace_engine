@@ -36,7 +36,7 @@ if [[ ! -d $IDLIZE_PATH ]]; then
     GENERATOR=${GENERATOR_ARG:=npx --yes @idlizer/arkgen@$IDLIZE_VER --dts2peer}
 else
     # Use the below to run generator from your idlize workspace
-    GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/lib/index.js --dts2peer}
+    GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/arkgen/lib/index.js --dts2peer}
 fi
 
 API_VER=${API_VER:=99}

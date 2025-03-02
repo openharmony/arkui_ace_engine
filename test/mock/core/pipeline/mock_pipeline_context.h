@@ -61,6 +61,7 @@ protected:
     bool isDeclarative_ = false;
     double dipScale_ = 1.0;
     RefPtr<TaskExecutor> taskExecutor_;
+    std::list<std::function<void()>> animationClosuresList_;
 };
 } // namespace OHOS::Ace::NG
 

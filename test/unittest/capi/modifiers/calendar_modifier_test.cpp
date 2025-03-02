@@ -235,9 +235,8 @@ HWTEST_F(CalendarModifierTest, setCalendarOptionsControllerTest, TestSize.Level1
     const auto mockController = Referenced::MakeRefPtr<MockCalendarController>();
     CalendarControllerPeer mockControllerPeer { .controller = mockController };
     auto calendarOptions2 = calendarOptions;
-    calendarOptions2.controller = Converter::ArkValue<Opt_CalendarController, Ark_CalendarController>({
-        .ptr = reinterpret_cast<Ark_NativePointer>(&mockControllerPeer)
-    });
+    calendarOptions2.controller =
+        Converter::ArkValue<Opt_CalendarController, Ark_CalendarController>(&mockControllerPeer);
 
     EXPECT_CALL(*mockController, SetCalendarPattern(_)).Times(1);
     modifier_->setCalendarOptions(node_, &calendarOptions2);

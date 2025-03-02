@@ -239,6 +239,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckRestartSpring(sizeDiminished);
 
     DrivenRender(dirty);
+    UpdateLayoutRange(GetAxis(), !isInitialized_);
 
     SetScrollSource(SCROLL_FROM_NONE);
     isInitialized_ = true;
@@ -654,11 +655,13 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
+        RequestJump(*jumpIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
         jumpIndex_.reset();
     }
     if (targetIndex_) {
         listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
+        RequestFillToTarget(*targetIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
     }
     if (jumpIndexInGroup_) {
         listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
@@ -902,6 +905,13 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(bool useCurrentDelta) const
     return offset;
 }
 
+void ListPattern::UpdateOffsetHelper(float lastDelta)
+{
+    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+    currentDelta_ = lastDelta + userOffset;
+    UpdateOffset(-userOffset);
+}
+
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
@@ -922,8 +932,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         MarkDirtyNodeSelf();
     }
     if (itemPosition_.empty() || !IsOutOfBoundary() || !isScrollable_) {
-        auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-        currentDelta_ = lastDelta + userOffset;
+        UpdateOffsetHelper(lastDelta);
         return true;
     }
 
@@ -936,8 +945,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         currentDelta_ = currentDelta_ * friction;
     }
 
-    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-    currentDelta_ = lastDelta + userOffset;
+    UpdateOffsetHelper(lastDelta);
     return true;
 }
 
@@ -2716,6 +2724,7 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
+    RequestReset(startIndex);
 }
 
 void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)

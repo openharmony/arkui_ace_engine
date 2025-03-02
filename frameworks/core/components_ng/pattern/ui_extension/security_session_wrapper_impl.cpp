@@ -458,7 +458,7 @@ void SecuritySessionWrapperImpl::NotifyCreate() {}
 void SecuritySessionWrapperImpl::NotifyForeground()
 {
     CHECK_NULL_VOID(session_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
@@ -590,7 +590,7 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
 {
     CHECK_NULL_VOID(session_);
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
@@ -647,7 +647,7 @@ bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
     if (keyboardHeight > 0) {
         ContainerScope scope(instanceId_);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, false);
         auto curWindow = pipeline->GetCurrentWindowRect();
         int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), .0);

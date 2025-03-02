@@ -25,7 +25,7 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(sliderContentModifier_);
     auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sliderTheme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(sliderTheme);
@@ -94,7 +94,7 @@ void SliderPaintMethod::UpdateBorderRadius(RefPtr<SliderPaintProperty>& paintPro
 void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(sliderTipModifier_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);

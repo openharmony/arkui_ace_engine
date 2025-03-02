@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 struct TabsOptions {
     std::optional<BarPosition> barPosOpt;
     std::optional<int32_t> indexOpt;
-    std::optional<GeneratedModifier::TabsControllerPeerImpl *> controllerOpt;
+    std::optional<Ark_TabsController> controllerOpt;
 };
 }
 
@@ -103,7 +103,7 @@ TabsOptions Convert(const Ark_TabsOptions& src)
     return {
         .barPosOpt = OptConvert<BarPosition>(src.barPosition),
         .indexOpt = OptConvert<int32_t>(src.index),
-        .controllerOpt = OptConvert<GeneratedModifier::TabsControllerPeerImpl *>(src.controller),
+        .controllerOpt = OptConvert<Ark_TabsController>(src.controller),
     };
 }
 
@@ -397,7 +397,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(internalController);
     peerImplPtr->AddTargetController(internalController);
 
-    auto onCustomAnimation = [callback = CallbackHelper(*value, frameNode), peerImplPtr](
+    auto onCustomAnimation = [callback = CallbackHelper(*value), peerImplPtr](
         int32_t from, int32_t to) -> TabContentAnimatedTransition {
         peerImplPtr->SetFrom(from);
         peerImplPtr->SetTo(to);
@@ -449,7 +449,7 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto callback = [callback = CallbackHelper(*value, frameNode)](
+    auto callback = [callback = CallbackHelper(*value)](
         int32_t currentIndex, int32_t comingIndex) -> bool {
         Ark_Number arkCurrentIndex = Converter::ArkValue<Ark_Number>(currentIndex);
         Ark_Number arkComingIndex = Converter::ArkValue<Ark_Number>(comingIndex);
@@ -472,8 +472,8 @@ void BarModeScrollableImpl(Ark_NativePointer node,
         BarMode1Impl(node, ARK_BAR_MODE_SCROLLABLE, nullptr);
     }
 }
-void __onChangeEvent_indexImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_indexImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -519,7 +519,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::BarBackgroundEffectImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
         TabsAttributeModifier::BarModeScrollableImpl,
-        TabsAttributeModifier::__onChangeEvent_indexImpl,
+        TabsAttributeModifier::_onChangeEvent_indexImpl,
     };
     return &ArkUITabsModifierImpl;
 }

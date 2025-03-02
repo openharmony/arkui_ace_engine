@@ -282,7 +282,7 @@ struct MeasureProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         // this may affect XTS, check later.
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         if (context && context->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN)) {
 #if !defined(PREVIEW)
             /* no fixed attr below */

@@ -50,6 +50,10 @@ using namespace testing::ext;
 using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
+namespace GeneratedModifier {
+    const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
+    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
+}
 
 class MockGestureEventResult : public GestureEventResult {
     DECLARE_ACE_TYPE(MockGestureEventResult, GestureEventResult);
@@ -304,7 +308,7 @@ HWTEST_F(WebModifierTest2, onOverrideUrlLoadingTest, TestSize.Level1)
         const Ark_WebResourceRequest parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.ptr)
+            .peer = parameter,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -467,7 +471,7 @@ HWTEST_F(WebModifierTest2, onInterceptKeyboardAttachTest, TestSize.Level1)
         const Ark_WebKeyboardCallbackInfo parameter, const Callback_WebKeyboardOptions_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<WebKeyboardControllerPeer*>(parameter.controller.ptr),
+            .peer = parameter.controller,
             .attributes = Converter::Convert<std::map<std::string, std::string>>(parameter.attributes)
         };
         CallbackHelper(continuation).Invoke(Ark_WebKeyboardOptions {
@@ -495,6 +499,53 @@ HWTEST_F(WebModifierTest2, onInterceptKeyboardAttachTest, TestSize.Level1)
     result = event(std::make_shared<InterceptKeyboardEvent>(customKeyboardHandler, attributes));
     EXPECT_TRUE(result.isSystemKeyboard_);
     delete checkEvent->peer;
+}
+
+/*
+ * @tc.name: setOnInterceptKeyEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest2, setOnInterceptKeyEventTest, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setOnInterceptKeyEvent, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    struct CheckEvent {
+        int32_t resourceId;
+        KeyCode code = KeyCode::KEY_UNKNOWN;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
+        auto peer = parameter;
+        ASSERT_NE(peer, nullptr);
+        auto info = peer->GetEventInfo();
+        auto accessor = GeneratedModifier::GetKeyEventAccessor();
+        checkEvent = {
+            .resourceId = resourceId,
+            .code = info->GetKeyCode()
+        };
+        accessor->destroyPeer(peer);
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+    };
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, contextId);
+    modifier_->setOnInterceptKeyEvent(node_, &arkCallback);
+
+    auto callback = webEventHub->GetOnPreKeyEvent();
+    ASSERT_NE(callback, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_FN;
+    auto eventInfo = KeyEventInfo(keyEvent);
+    EXPECT_FALSE(checkEvent.has_value());
+    auto result = callback(eventInfo);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(checkEvent->code, keyEvent.code);
+#endif
 }
 
 /*
@@ -584,11 +635,12 @@ HWTEST_F(WebModifierTest2, onNativeEmbedLifecycleChangeTest, TestSize.Level1)
  */
 HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
 {
+    static const std::string expectedType = "xxx";
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);
     std::string embedId = "embed_id";
-    TouchEventInfo touchEventInfo("touchEvent");
+    TouchEventInfo touchEventInfo(expectedType);
     auto param = AceType::MakeRefPtr<MockGestureEventResult>();
 
     struct CheckEvent {
@@ -598,6 +650,16 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativeEmbedTouchInfo data) {
+        auto touchEventOpt = Converter::OptConvert<Ark_TouchEvent>(data.touchEvent);
+        ASSERT_TRUE(touchEventOpt.has_value());
+        auto eventPtr = touchEventOpt.value();
+        ASSERT_NE(eventPtr, nullptr);
+        auto peer = reinterpret_cast<TouchEventPeer*>(eventPtr);
+        ASSERT_NE(peer, nullptr);
+        auto touchEventInfo = peer->GetEventInfo();
+        ASSERT_NE(touchEventInfo, nullptr);
+        EXPECT_EQ(touchEventInfo->GetType(), expectedType);
+        GeneratedModifier::GetTouchEventAccessor()->destroyPeer(peer);
         checkEvent = {
             .resourceId = resourceId,
             .embedId = Converter::OptConvert<std::string>(data.embedId),

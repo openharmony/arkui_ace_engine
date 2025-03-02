@@ -52,7 +52,7 @@ void SetTextAreaOptionsImpl(Ark_NativePointer node,
         text = Converter::OptConvert<std::string>(textAreaOptions.value().text);
         auto controller = Converter::OptConvert<Ark_TextAreaController>(textAreaOptions.value().controller);
         if (controller.has_value()) {
-            peerPtr = reinterpret_cast<TextAreaControllerPeer*>(controller.value().ptr);
+            peerPtr = controller.value();
         }
     }
 
@@ -443,12 +443,12 @@ void LetterSpacingImpl(Ark_NativePointer node,
     TextFieldModelNG::SetLetterSpacing(frameNode, spacing);
 }
 void LineSpacingImpl(Ark_NativePointer node,
-                     const Ark_LengthMetrics* value)
+                     Ark_LengthMetrics value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto lineSpacing = Converter::OptConvert<Dimension>(*value);
+    auto lineSpacing = Converter::OptConvert<Dimension>(value);
     Validator::ValidateNonNegative(lineSpacing);
     TextFieldModelNG::SetLineSpacing(frameNode, lineSpacing);
 }
@@ -498,7 +498,7 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
+    auto onWillInsert = [callback = CallbackHelper(*value)](const InsertValueInfo& value) -> bool {
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
@@ -530,7 +530,7 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
+    auto onWillDelete = [callback = CallbackHelper(*value)](const DeleteValueInfo& value) -> bool {
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
@@ -559,12 +559,12 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextAreaModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGE("ARKOALA TextAreaAttributeModifier.EditMenuOptionsImpl -> Method is not implemented.");
 }
@@ -639,13 +639,13 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     auto keyboardOptions = options ? Converter::OptConvert<Ark_KeyboardOptions>(*options) : std::nullopt;
     bool supportAvoidance = keyboardOptions &&
         Converter::OptConvert<bool>(keyboardOptions.value().supportAvoidance).value_or(false);
-    auto uiNode = CallbackHelper(*value, frameNode).BuildSync(node);
+    auto uiNode = CallbackHelper(*value).BuildSync(node);
     auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode);
     TextFieldModelNG::SetCustomKeyboard(
         frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
 }
-void __onChangeEvent_textImpl(Ark_NativePointer node,
-                              const Callback_ResourceStr_Void* callback)
+void _onChangeEvent_textImpl(Ark_NativePointer node,
+                             const Callback_ResourceStr_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -716,7 +716,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::InputFilterImpl,
         TextAreaAttributeModifier::ShowCounterImpl,
         TextAreaAttributeModifier::CustomKeyboardImpl,
-        TextAreaAttributeModifier::__onChangeEvent_textImpl,
+        TextAreaAttributeModifier::_onChangeEvent_textImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

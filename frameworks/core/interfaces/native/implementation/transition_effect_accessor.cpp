@@ -29,15 +29,16 @@ const auto OPACITY_TOKEN = "opacity";
 const auto MOVE_TOKEN = "move";
 const auto ASYMMETRIC_TOKEN = "asymmetric";
 
-void DestroyPeerImpl(TransitionEffectPeer* peer)
+void DestroyPeerImpl(Ark_TransitionEffect peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Ark_String* type,
-                           const Ark_TransitionEffects* effect)
+Ark_TransitionEffect CtorImpl(const Ark_String* type,
+                              const Ark_TransitionEffects* effect)
 {
+    CHECK_NULL_RETURN(type && effect, nullptr);
     auto valueText = Converter::Convert<std::string>(*type);
     TransitionEffectPeer* peer = new TransitionEffectPeer();
     auto emptyDimension = Dimension();
@@ -46,7 +47,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto y = Converter::OptConvert<CalcDimension>(effect->translate.y.value);
         auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
         TranslateOptions translate(x.value_or(emptyDimension), y.value_or(emptyDimension), z.value_or(emptyDimension));
-        peer->handler = new ChainedTranslateEffect(translate);
+        peer->handler = AceType::MakeRefPtr<ChainedTranslateEffect>(translate);
     } else if (valueText == ROTATE_TOKEN) {
         auto x = Converter::Convert<float>(effect->rotate.x.value);
         auto y = Converter::Convert<float>(effect->rotate.y.value);
@@ -54,13 +55,13 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto centerX = Converter::OptConvert<CalcDimension>(effect->rotate.centerX.value);
         auto centerY = Converter::OptConvert<CalcDimension>(effect->rotate.centerY.value);
         auto centerZ = Converter::OptConvert<CalcDimension>(effect->rotate.centerZ.value);
-        auto perspective = Converter::Convert<float>(effect->rotate.centerZ.value);
+        auto perspective = Converter::Convert<float>(effect->rotate.perspective.value);
         auto angle = Converter::OptConvert<float>(effect->rotate.angle);
         RotateOptions rotate(x, y, z, angle.value_or(0),
             centerX.value_or(emptyDimension),
             centerY.value_or(emptyDimension),
             centerZ.value_or(emptyDimension), perspective);
-        peer->handler = new ChainedRotateEffect(rotate);
+        peer->handler = AceType::MakeRefPtr<ChainedRotateEffect>(rotate);
     } else if (valueText == SCALE_TOKEN) {
         auto x = Converter::Convert<float>(effect->scale.x.value);
         auto y = Converter::Convert<float>(effect->scale.y.value);
@@ -68,22 +69,20 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto centerX = Converter::OptConvert<CalcDimension>(effect->scale.centerX.value);
         auto centerY = Converter::OptConvert<CalcDimension>(effect->scale.centerY.value);
         ScaleOptions scale(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
-        peer->handler = new ChainedScaleEffect(scale);
+        peer->handler = AceType::MakeRefPtr<ChainedScaleEffect>(scale);
     } else if (valueText == OPACITY_TOKEN) {
         auto opacity = Converter::Convert<float>(effect->opacity);
-        peer->handler = new ChainedOpacityEffect(opacity);
+        peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
     } else if (valueText == MOVE_TOKEN) {
         auto move = Converter::OptConvert<TransitionEdge>(effect->move);
-        peer->handler = new ChainedMoveEffect(move.value_or(TransitionEdge::TOP));
+        peer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(move.value_or(TransitionEdge::TOP));
     } else if (valueText == ASYMMETRIC_TOKEN) {
         CHECK_NULL_RETURN(effect, nullptr);
-        CHECK_NULL_RETURN(effect->asymmetric.appear.ptr, nullptr);
-        auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
+        auto app = effect->asymmetric.appear;
         CHECK_NULL_RETURN(app, nullptr);
-        CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);
-        auto disapp = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.disappear.ptr);
+        auto disapp = effect->asymmetric.disappear;
         CHECK_NULL_RETURN(disapp, nullptr);
-        peer->handler = new ChainedAsymmetricEffect(app->handler, disapp->handler);
+        peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(app->handler, disapp->handler);
     }
     return peer;
 }
@@ -91,7 +90,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
+Ark_TransitionEffect TranslateImpl(const Ark_TranslateOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(TRANSLATE_TOKEN);
@@ -100,7 +99,7 @@ Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
+Ark_TransitionEffect RotateImpl(const Ark_RotateOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(ROTATE_TOKEN);
@@ -109,7 +108,7 @@ Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
+Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(SCALE_TOKEN);
@@ -118,7 +117,7 @@ Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
+Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
 {
     CHECK_NULL_RETURN(alpha, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN);
@@ -127,7 +126,7 @@ Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
+Ark_TransitionEffect MoveImpl(Ark_TransitionEdge edge)
 {
     Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
     Ark_TransitionEffects effects {
@@ -135,34 +134,59 @@ Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
-                                 const Ark_TransitionEffect* disappear)
+Ark_TransitionEffect AsymmetricImpl(Ark_TransitionEffect appear,
+                                    Ark_TransitionEffect disappear)
 {
     CHECK_NULL_RETURN(appear, nullptr);
     CHECK_NULL_RETURN(disappear, nullptr);
 
     Ark_String type = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN);
     Ark_Literal_TransitionEffect_appear_disappear asymm;
-    asymm.appear = *appear;
-    asymm.disappear = *disappear;
+    asymm.appear = appear;
+    asymm.disappear = disappear;
     Ark_TransitionEffects effects {
         .asymmetric = asymm
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
-                                const Ark_AnimateParam* value)
+Ark_TransitionEffect AnimationImpl(Ark_TransitionEffect peer,
+                                   const Ark_AnimateParam* value)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    LOGE("TransitionEffectAccessor::AnimationImpl Return value must be TransitionEffect here.");
-    return nullptr;
+    CHECK_NULL_RETURN(value, nullptr);
+    AnimationOption option = Converter::Convert<AnimationOption>(*value);
+    auto refOpt = std::make_shared<AnimationOption>(option);
+    peer->handler->SetAnimationOption(refOpt);
+    return peer;
 }
-Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
-                              const Ark_TransitionEffect* transitionEffect)
+Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
+                                 Ark_TransitionEffect transitionEffect)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    LOGE("ransitionEffectAccessor::CombineImpl Return value must be TransitionEffect here.");
-    return nullptr;
+    CHECK_NULL_RETURN(transitionEffect, peer);
+    auto lastEffect = peer;
+    while (lastEffect->handler->GetNext() != nullptr) {
+        lastEffect->handler = lastEffect->handler->GetNext();
+    }
+    const auto nextPeer = transitionEffect;
+    lastEffect->handler->SetNext(nextPeer->handler);
+    return peer;
+}
+Ark_TransitionEffect GetIDENTITYImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetOPACITYImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetSLIDEImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetSLIDE_SWITCHImpl()
+{
+    return {};
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
@@ -179,6 +203,10 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
         TransitionEffectAccessor::AsymmetricImpl,
         TransitionEffectAccessor::AnimationImpl,
         TransitionEffectAccessor::CombineImpl,
+        TransitionEffectAccessor::GetIDENTITYImpl,
+        TransitionEffectAccessor::GetOPACITYImpl,
+        TransitionEffectAccessor::GetSLIDEImpl,
+        TransitionEffectAccessor::GetSLIDE_SWITCHImpl,
     };
     return &TransitionEffectAccessorImpl;
 }

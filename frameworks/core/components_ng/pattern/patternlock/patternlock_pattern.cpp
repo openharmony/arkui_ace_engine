@@ -290,7 +290,7 @@ bool PatternLockPattern::GetHandleCircleRadius(float& handleCircleRadius)
     CHECK_NULL_RETURN(host, false);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     float sideLength = host->GetGeometryNode()->GetContentSize().Width();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_RETURN(patternLockTheme, false);
@@ -588,7 +588,7 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
@@ -851,7 +851,7 @@ OffsetF PatternLockPattern::GetTouchOffsetToNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = host->GetPositionToWindowWithTransform();

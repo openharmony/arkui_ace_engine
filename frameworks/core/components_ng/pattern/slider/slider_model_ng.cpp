@@ -138,7 +138,7 @@ void SliderModelNG::SetThickness(const Dimension& value)
         CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
@@ -182,7 +182,7 @@ void SliderModelNG::SetBlockSize(const Dimension& width, const Dimension& height
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     SizeT<Dimension> blockSize;
     auto theme = pipeline->GetTheme<SliderTheme>();
@@ -452,9 +452,15 @@ void SliderModelNG::SetBlockColor(FrameNode* frameNode, const std::optional<Colo
         ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, frameNode);
     }
 }
-void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
+
+void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode,
+    const std::optional<Gradient>& value, bool isResourceColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, frameNode);
+    }
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
 

@@ -312,7 +312,7 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
         return cacheImage->imagePtr;
     }
 
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetDrawingImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
@@ -563,7 +563,7 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
 {
 #ifndef ACE_UNITTEST
     ContainerScope scope(canvasImage.instanceId);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     auto image = std::make_shared<RSImage>();
     if (canvasImage.imageData != nullptr) {
         auto imageData = *(canvasImage.imageData);

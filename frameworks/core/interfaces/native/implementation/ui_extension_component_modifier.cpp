@@ -82,7 +82,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
-    return nullptr;
+    return {};
 #endif //WINDOW_SCENE_SUPPORTED
 }
 } // UIExtensionComponentModifier
@@ -133,7 +133,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(peer);
             auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
             uiExtensionProxyPeerPtr->SetProxy(proxy);
-            arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
+            arkCallback.Invoke(peer);
         };
     UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED
@@ -203,7 +203,7 @@ void OnReleaseImpl(Ark_NativePointer node,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_CustomObject* value)
+                 const ErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

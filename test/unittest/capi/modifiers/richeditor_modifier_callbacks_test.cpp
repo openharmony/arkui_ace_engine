@@ -75,6 +75,7 @@ constexpr int32_t TEST_RANGE_START = 6;
 constexpr int32_t TEST_RANGE_END = 7;
 constexpr int32_t TEST_RANGE_START_TWO = 8;
 constexpr int32_t TEST_RANGE_END_TWO = 9;
+Ark_EnterKeyType g_EventTestKey{};
 class RichEditorModifierCallbacksTest : public ModifierTestBase<GENERATED_ArkUIRichEditorModifier,
     &GENERATED_ArkUINodeModifiers::getRichEditorModifier, GENERATED_ARKUI_RICH_EDITOR> {
 public:
@@ -248,7 +249,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, AboutToIMEInputTest, TestSize.Level1)
  * @tc.desc: setOnIMEInputComplete test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnIMEInputCompleteTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
@@ -472,34 +473,47 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
  * @tc.desc: setOnSubmit test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSubmitTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
 {
+    static const int expectedResId = 123;
+    static const std::string testValue("string text");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    struct CheckEvent {
-        int32_t resourceId;
-        std::optional<TextInputAction> enterKeyType;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto testCallback = [](const Ark_Int32 resourceId, Ark_EnterKeyType enterKey, const Ark_SubmitEvent event) {
-        checkEvent = {
-            .resourceId = Converter::Convert<int32_t>(resourceId),
-            .enterKeyType = Converter::OptConvert<TextInputAction>(enterKey),
-        };
-        // implement CallbackHelper and ArkValue for Ark_SubmitEvent
-        auto deletePtr = reinterpret_cast<SubmitEventPeer*>(event.ptr);
-        GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(deletePtr);
-    };
-    auto arkCallback = Converter::ArkValue<SubmitCallback>(testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    modifier_->setOnSubmit(node_, &arkCallback);
-    EXPECT_FALSE(checkEvent);
-    NG::TextFieldCommonEvent event;
-    EXPECT_FALSE(event.IsPreventDefault());
-    eventHub->FireOnSubmit(static_cast<int32_t>(TextInputAction::GO), event);
-    ASSERT_TRUE(checkEvent);
-    EXPECT_TRUE(event.IsPreventDefault());
-    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+
+    auto onSubmitFunc = [](Ark_Int32 resourceId, Ark_EnterKeyType enterKeyType, const Ark_SubmitEvent event) {
+        auto peer = event;
+        ASSERT_NE(peer, nullptr);
+        auto submitEventInfo = peer->GetEventInfo();
+        ASSERT_NE(submitEventInfo, nullptr);
+        EXPECT_EQ(submitEventInfo->GetText(), testValue);
+        GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
+        EXPECT_EQ(resourceId, expectedResId);
+        g_EventTestKey = enterKeyType;
+    };
+
+    auto func = Converter::ArkValue<SubmitCallback>(onSubmitFunc, expectedResId);
+    modifier_->setOnSubmit(node_, &func);
+    TextFieldCommonEvent event;
+    event.SetText(testValue);
+    eventHub->FireOnSubmit(111, event);
+    EXPECT_EQ(g_EventTestKey, -1);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
+    EXPECT_EQ(g_EventTestKey, 5);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_GO, event);
+    EXPECT_EQ(g_EventTestKey, 2);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEARCH, event);
+    EXPECT_EQ(g_EventTestKey, 3);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEND, event);
+    EXPECT_EQ(g_EventTestKey, 4);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
+    EXPECT_EQ(g_EventTestKey, 5);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_DONE, event);
+    EXPECT_EQ(g_EventTestKey, 6);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_PREVIOUS, event);
+    EXPECT_EQ(g_EventTestKey, 7);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEW_LINE, event);
+    EXPECT_EQ(g_EventTestKey, 8);
 }
 
 /**
@@ -599,7 +613,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnDidChangeTest, TestSize.Level1)
  * @tc.desc: setOnCopy test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCopyTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -610,7 +624,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCopyTest, TestSize.Level1)
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        // implement CallbackHelper and ArkValue for Ark_SubmitEvent
+        auto arkCallback = Converter::OptConvert<Callback_Void>(parameter.preventDefault);
+        if (arkCallback) {
+            auto helper = CallbackHelper(*arkCallback);
+            helper.Invoke();
+        }
     };
     auto arkCallback = Converter::ArkValue<Callback_CopyEvent_Void>(nullptr, testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
@@ -630,7 +648,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCopyTest, TestSize.Level1)
  * @tc.desc: setOnCut test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCutTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -641,7 +659,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnCutTest, TestSize.Level1)
         checkEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        // implement CallbackHelper and ArkValue for Ark_SubmitEvent
+        auto arkCallback = Converter::OptConvert<Callback_Void>(parameter.preventDefault);
+        if (arkCallback) {
+            auto helper = CallbackHelper(*arkCallback);
+            helper.Invoke();
+        }
     };
     auto arkCallback = Converter::ArkValue<Callback_CutEvent_Void>(nullptr, testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();

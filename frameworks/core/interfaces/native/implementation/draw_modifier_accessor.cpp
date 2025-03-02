@@ -20,14 +20,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawModifierAccessor {
-void DestroyPeerImpl(DrawModifierPeer* peer)
+void DestroyPeerImpl(Ark_DrawModifier peer)
 {
     CHECK_NULL_VOID(peer);
     peer->frameNode = nullptr;
     peer->drawModifier = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_DrawModifier CtorImpl()
 {
     auto peer = new DrawModifierPeer();
     peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
@@ -37,22 +37,22 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DrawBehindImpl(DrawModifierPeer* peer,
+void DrawBehindImpl(Ark_DrawModifier peer,
                     const Ark_DrawContext* drawContext)
 {
     LOGE("DrawModifierAccessor::DrawBehindImpl - is not implemented");
 }
-void DrawContentImpl(DrawModifierPeer* peer,
+void DrawContentImpl(Ark_DrawModifier peer,
                      const Ark_DrawContext* drawContext)
 {
     LOGE("DrawModifierAccessor::DrawContentImpl - is not implemented");
 }
-void DrawFrontImpl(DrawModifierPeer* peer,
+void DrawFrontImpl(Ark_DrawModifier peer,
                    const Ark_DrawContext* drawContext)
 {
     LOGE("DrawModifierAccessor::DrawFrontImpl - is not implemented");
 }
-void InvalidateImpl(DrawModifierPeer* peer)
+void InvalidateImpl(Ark_DrawModifier peer)
 {
     CHECK_NULL_VOID(peer);
     auto frameNode = peer->frameNode.Upgrade();

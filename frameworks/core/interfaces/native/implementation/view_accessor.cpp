@@ -21,10 +21,10 @@ struct ViewPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ViewAccessor {
-void DestroyPeerImpl(ViewPeer* peer)
+void DestroyPeerImpl(Ark_View peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_View CtorImpl()
 {
     return nullptr;
 }
@@ -32,9 +32,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CreateImpl(ViewPeer* peer,
-                const Ark_CustomObject* value)
+Ark_CustomObject CreateImpl(Ark_View peer,
+                            const Ark_CustomObject* value)
 {
+    return {};
 }
 } // ViewAccessor
 const GENERATED_ArkUIViewAccessor* GetViewAccessor()

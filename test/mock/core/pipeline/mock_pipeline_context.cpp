@@ -496,7 +496,18 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
-void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
+{
+    animationClosuresList_.emplace_back(std::move(animation));
+}
+
+void PipelineContext::FlushAnimationClosure()
+{
+    decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
+    for (const auto& animation : temp) {
+        animation();
+    }
+}
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}
 
@@ -979,7 +990,12 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
-void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type)
+{
+    if (PipelineBase::taskExecutor_ != nullptr) {
+        PipelineBase::taskExecutor_->PostTask(task, type, name);
+    }
+}
 
 void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
 {}
@@ -1114,6 +1130,11 @@ bool NG::PipelineContext::GetContainerCustomTitleVisible()
 bool NG::PipelineContext::GetContainerControlButtonVisible() 
 {
     return false;
+}
+
+void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
+{
+    vsyncListener_ = std::move(vsync);
 }
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,

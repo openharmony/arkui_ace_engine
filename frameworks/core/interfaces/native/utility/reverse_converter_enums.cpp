@@ -226,6 +226,20 @@ void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
     }
 }
 
+void AssignArkValue(Ark_LengthUnit& dst, const DimensionUnit& src)
+{
+    switch (src) {
+        case DimensionUnit::PX: dst = ARK_LENGTH_UNIT_PX; break;
+        case DimensionUnit::VP: dst = ARK_LENGTH_UNIT_VP; break;
+        case DimensionUnit::FP: dst = ARK_LENGTH_UNIT_FP; break;
+        case DimensionUnit::PERCENT: dst = ARK_LENGTH_UNIT_PERCENT; break;
+        case DimensionUnit::LPX: dst = ARK_LENGTH_UNIT_LPX; break;
+        default:
+            LOGE("Unexpected enum value in DimensionUnit: %{public}d", src);
+            dst = static_cast<Ark_LengthUnit>(-1);
+    }
+}
+
 void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src)
 {
     switch (src) {
@@ -366,7 +380,38 @@ void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src
     dst.scrollForward = ArkValue<Ark_NestedScrollMode>(src.forward);
     dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
 }
-
+void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src)
+{
+    switch (src.type) {
+        case PanDirection::NONE:
+            dst = Ark_PanDirection::ARK_PAN_DIRECTION_NONE;
+            break;
+        case PanDirection::LEFT:
+            dst = Ark_PanDirection::ARK_PAN_DIRECTION_LEFT;
+            break;
+        case PanDirection::RIGHT:
+            dst = Ark_PanDirection::ARK_PAN_DIRECTION_RIGHT;
+            break;
+        case PanDirection::HORIZONTAL:
+            dst = Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL;
+            break;
+        case PanDirection::UP:
+            dst = Ark_PanDirection::ARK_PAN_DIRECTION_UP;
+            break;
+        case PanDirection::DOWN:
+            dst = Ark_PanDirection::ARK_PAN_DIRECTION_DOWN;
+            break;
+        case PanDirection::VERTICAL:
+            dst = Ark_PanDirection::ARK_PAN_DIRECTION_VERTICAL;
+            break;
+        case PanDirection::ALL:
+            dst = Ark_PanDirection::ARK_PAN_DIRECTION_ALL;
+            break;
+        default:
+            dst = static_cast<Ark_PanDirection>(-1);
+            LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
+    }
+}
 void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
 {
     switch (src) {
@@ -723,6 +768,18 @@ void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src)
         case MenuPolicy::HIDE: dst = ARK_MENU_POLICY_HIDE; break;
         case MenuPolicy::SHOW: dst = ARK_MENU_POLICY_SHOW; break;
         default: dst = static_cast<Ark_MenuPolicy>(-1);
+    }
+}
+
+void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
+{
+    switch (src) {
+        case DragBehavior::COPY: dst = ARK_DRAG_BEHAVIOR_COPY; break;
+        case DragBehavior::MOVE: dst = ARK_DRAG_BEHAVIOR_MOVE; break;
+        default:
+            dst = static_cast<Ark_DragBehavior>(DragBehavior::UNKNOWN);
+            LOGE("Unexpected enum value in DragBehavior: %{public}d", src);
+            break;
     }
 }
 } // namespace OHOS::Ace::NG::Converter

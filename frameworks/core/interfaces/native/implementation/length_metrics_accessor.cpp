@@ -15,17 +15,18 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 #include "length_metrics_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LengthMetricsAccessor {
-void DestroyPeerImpl(LengthMetricsPeer* peer)
+void DestroyPeerImpl(Ark_LengthMetrics peer)
 {
     LengthMetricsPeer::Destroy(peer);
 }
-Ark_NativePointer CtorImpl()
+Ark_LengthMetrics CtorImpl()
 {
     return LengthMetricsPeer::Create({});
 }
@@ -33,29 +34,41 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer PxImpl(const Ark_Number* value)
+Ark_LengthMetrics PxImpl(const Ark_Number* value)
 {
-    return nullptr;
+    return LengthMetricsPeer::Create(Dimension(Converter::Convert<float>(*value)));
 }
-Ark_NativePointer ResourceImpl(const Ark_Resource* value)
+Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
 {
-    return nullptr;
+    return LengthMetricsPeer::Create(Converter::OptConvert<Dimension>(*value).value_or(Dimension()));
 }
-Ark_NativePointer GetUnitImpl(LengthMetricsPeer* peer)
+Ark_LengthUnit GetUnitImpl(Ark_LengthMetrics peer)
 {
-    return nullptr;
+    CHECK_NULL_RETURN(peer, static_cast<Ark_LengthUnit>(-1));
+    DimensionUnit unit = peer->value.Unit();
+    return Converter::ArkValue<Ark_LengthUnit>(unit);
 }
-void SetUnitImpl(LengthMetricsPeer* peer,
+void SetUnitImpl(Ark_LengthMetrics peer,
                  Ark_LengthUnit unit)
 {
+    CHECK_NULL_VOID(peer);
+    auto convValue = Converter::OptConvert<DimensionUnit>(unit);
+    peer->value.SetUnit(convValue.value_or(DimensionUnit::VP));
 }
-Ark_Int32 GetValueImpl(LengthMetricsPeer* peer)
+Ark_Number GetValueImpl(Ark_LengthMetrics peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
+    auto value = static_cast<int32_t>(peer->value.Value());
+    LOGE("LengthMetricsAccessor::GetValueImpl wrong return type");
+    return Converter::ArkValue<Ark_Number>(value);
 }
-void SetValueImpl(LengthMetricsPeer* peer,
+void SetValueImpl(Ark_LengthMetrics peer,
                   const Ark_Number* value)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<float>(*value);
+    peer->value.SetValue(convValue);
 }
 } // LengthMetricsAccessor
 const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor()
@@ -73,8 +86,4 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor()
     };
     return &LengthMetricsAccessorImpl;
 }
-
-struct LengthMetricsPeer {
-    virtual ~LengthMetricsPeer() = default;
-};
 }

@@ -18,13 +18,16 @@
 #include "generated/test_fixtures.h"
 
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -47,6 +50,7 @@ const std::string COLOR_TRANSPARENT = "#00000000";
 const auto COLOR_NAME = NamedResourceId("color_name", Converter::ResourceType::COLOR);
 const auto COLOR_ID = IntResourceId(1234, Converter::ResourceType::COLOR);
 const auto WRONG_COLOR_NAME = NamedResourceId("color_name", Converter::ResourceType::STRING);
+const auto ATTRIBUTE_CUSTOM_KEYBOARD_AVOIDANCE_DEFAULT_VALUE = false;
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
@@ -284,6 +288,7 @@ const auto EMPTY_TEXT("");
 bool g_isEditChangeTest(true);
 std::string g_EventTestString("");
 std::string g_EventErrorTestString("");
+Ark_EnterKeyType g_EventTestKey{};
 int32_t g_EventTestOffset(0);
 int32_t g_startValue(0);
 int32_t g_endValue(0);
@@ -355,6 +360,10 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
         }
 };
 } // namespace
+
+namespace GeneratedModifier {
+    const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
+}
 
 class TextAreaModifierTest : public ModifierTestBase<GENERATED_ArkUITextAreaModifier,
                                  &GENERATED_ArkUINodeModifiers::getTextAreaModifier, GENERATED_ARKUI_TEXT_AREA> {
@@ -624,11 +633,11 @@ HWTEST_F(TextAreaModifierTest, setOnEditChangeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnSubmitTest
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnSubmit.
+ * @tc.name: setOnSubmit0Test
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnSubmit0.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setOnSubmit0Test, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto func = Converter::ArkValue<Callback_EnterKeyType_Void>(recv.onSubmit0, CONTEXT_ID);
@@ -655,6 +664,56 @@ HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestString, "7");
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEW_LINE, event);
     EXPECT_EQ(g_EventTestString, "8");
+}
+
+/**
+ * @tc.name: setOnSubmit1Test
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnSubmit1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
+{
+    static const int expectedResId = 123;
+    static const std::string testValue("string text");
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onSubmitFunc = [](Ark_Int32 resourceId, const Ark_EnterKeyType enterKeyType, const Opt_SubmitEvent event) {
+        auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
+        ASSERT_TRUE(eventValue);
+        auto peer = eventValue.value();
+        ASSERT_NE(peer, nullptr);
+        auto submitEventInfo = peer->GetEventInfo();
+        ASSERT_NE(submitEventInfo, nullptr);
+        EXPECT_EQ(submitEventInfo->GetText(), testValue);
+        GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
+        EXPECT_EQ(resourceId, expectedResId);
+        g_EventTestKey = enterKeyType;
+    };
+    
+    auto func = Converter::ArkValue<TextAreaSubmitCallback>(onSubmitFunc, expectedResId);
+    modifier_->setOnSubmit1(node_, &func);
+    TextFieldCommonEvent event;
+    event.SetText(testValue);
+    eventHub->FireOnSubmit(111, event);
+    EXPECT_EQ(g_EventTestKey, -1);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
+    EXPECT_EQ(g_EventTestKey, 5);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_GO, event);
+    EXPECT_EQ(g_EventTestKey, 2);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEARCH, event);
+    EXPECT_EQ(g_EventTestKey, 3);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEND, event);
+    EXPECT_EQ(g_EventTestKey, 4);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
+    EXPECT_EQ(g_EventTestKey, 5);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_DONE, event);
+    EXPECT_EQ(g_EventTestKey, 6);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_PREVIOUS, event);
+    EXPECT_EQ(g_EventTestKey, 7);
+    eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEW_LINE, event);
+    EXPECT_EQ(g_EventTestKey, 8);
 }
 
 /**
@@ -1642,7 +1701,7 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     Ark_TextAreaOptions options;
     options.text = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE);
     options.placeholder = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_PLACEHOLDER_VALUE);
-    options.controller = Converter::ArkValue<Opt_TextAreaController>(peer);
+    options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
     auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
     modifier_->setTextAreaOptions(node_, &optionsDef);
 
@@ -1680,7 +1739,7 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
         inputValue = value;
         options.text = inputValue;
         options.placeholder = inputValue;
-        options.controller = Converter::ArkValue<Opt_TextAreaController>(peer);
+        options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
         auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
         modifier_->setTextAreaOptions(node_, &optionsDef);
 
@@ -1811,6 +1870,56 @@ HWTEST_F(TextAreaModifierTest, setTextOverflowTestTextOverflowValidValues, TestS
 }
 
 /*
+ * @tc.name: setCustomKeyboardDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setCustomKeyboardDefaultValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetCustomKeyboardOption(), ATTRIBUTE_CUSTOM_KEYBOARD_AVOIDANCE_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setCustomKeyboardValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    static auto expectedCustomNode = CreateNode();
+    ASSERT_NE(expectedCustomNode, nullptr);
+    static const FrameNode* expectedParentNode = frameNode;
+    static FrameNode* actualParentNode = nullptr;
+    static const CustomNodeBuilder customBuilder = {
+        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            actualParentNode = reinterpret_cast<FrameNode*>(parentNode);
+            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+        }
+    };
+    Ark_KeyboardOptions keyboardOptions = { .supportAvoidance = Converter::ArkValue<Opt_Boolean>(true) };
+    auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+
+    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_EQ(actualParentNode, expectedParentNode);
+    ASSERT_TRUE(pattern->GetCustomKeyboardOption());
+
+    keyboardOptions = { .supportAvoidance = Converter::ArkValue<Opt_Boolean>(false) };
+    optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
+    ASSERT_EQ(actualParentNode, expectedParentNode);
+    ASSERT_FALSE(pattern->GetCustomKeyboardOption());
+}
+
+/*
  * @tc.name: setOnChangeEventTextImpl
  * @tc.desc:
  * @tc.type: FUNC
@@ -1837,7 +1946,7 @@ HWTEST_F(TextAreaModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
 
     Callback_ResourceStr_Void arkCallback = Converter::ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_text(node_, &arkCallback);
+    modifier_->set_onChangeEvent_text(node_, &arkCallback);
 
     PreviewText previewText {.offset = -1, .value = ""};
     ASSERT_EQ(checkEvent.has_value(), false);

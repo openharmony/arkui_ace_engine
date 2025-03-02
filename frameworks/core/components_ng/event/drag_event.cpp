@@ -1846,7 +1846,7 @@ void DragEventActuator::CopyDragEvent(const RefPtr<DragEventActuator>& dragEvent
 
 void DragEventActuator::FlushSyncGeometryNodeTasks()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushSyncGeometryNodeTasks();
 }

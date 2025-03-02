@@ -37,7 +37,7 @@ constexpr int32_t DEFAULT_INDICATOR_ANIMATION_DURATION = 150;
 
 RadioModifier::RadioModifier()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
 
@@ -80,7 +80,7 @@ RadioModifier::RadioModifier()
 
 void RadioModifier::InitializeParam()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     shadowWidth_ = radioTheme->GetShadowWidth().ConvertToPx();
@@ -159,7 +159,7 @@ void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
             if (uiStatus) {
                 uiStatus->Set(static_cast<int32_t>(isCheck ? UIStatus::SELECTED : UIStatus::UNSELECTED));
             }
-            auto context = PipelineBase::GetCurrentContext();
+            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             if (context) {
                 context->RequestFrame();
             }
@@ -296,7 +296,7 @@ void RadioModifier::PaintUnselectedIndicator(
     pen.SetWidth(borderWidth_);
     brush.SetAntiAlias(true);
     auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);

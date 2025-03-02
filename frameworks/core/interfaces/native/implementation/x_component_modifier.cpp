@@ -56,7 +56,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
-    return nullptr;
+    return {};
 #endif //XCOMPONENT_SUPPORTED
 }
 } // XComponentModifier
@@ -81,7 +81,7 @@ void SetXComponentOptions0Impl(Ark_NativePointer node,
     auto controllerOpt = Converter::OptConvert<Ark_XComponentController>(value->controller);
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     if (controller) {
-        auto peerPtr = reinterpret_cast<XComponentControllerPeer*>(controllerOpt.value().ptr);
+        auto peerPtr = controllerOpt.value();
         controller = peerPtr->controller;
     }
     XComponentModelNG::SetXComponentController(frameNode, controller);
@@ -107,7 +107,7 @@ void SetXComponentOptions1Impl(Ark_NativePointer node,
     auto controllerOpt = Converter::OptConvert<Ark_XComponentController>(value->controller);
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     if (controller) {
-        auto peerPtr = reinterpret_cast<XComponentControllerPeer*>(controllerOpt.value().ptr);
+        auto peerPtr = controllerOpt.value();
         controller = peerPtr->controller;
     }
     XComponentModelNG::SetXComponentController(frameNode, controller);
@@ -130,7 +130,7 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
     LOGE("XComponentInterfaceModifier::SetXComponentOptions2Impl - Ark_ImageAIOptions is not supported");
     XComponentModelNG::SetImageAIOptions(frameNode, nullptr);
 
-    auto peerPtr = reinterpret_cast<XComponentControllerPeer*>(options->controller.ptr);
+    auto peerPtr = options->controller;
     XComponentModelNG::SetXComponentController(frameNode, peerPtr->controller);
 #endif // XCOMPONENT_SUPPORTED
 }

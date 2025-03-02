@@ -1233,7 +1233,7 @@ void VideoPattern::OnColorConfigurationUpdate()
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_VOID(videoTheme);
@@ -1269,7 +1269,7 @@ bool VideoPattern::NeedLift() const
 RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
 {
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -1315,7 +1315,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
 
 RefPtr<FrameNode> VideoPattern::CreateSlider()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -1359,7 +1359,7 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
 
 RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);

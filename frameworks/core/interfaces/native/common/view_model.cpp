@@ -781,7 +781,7 @@ void* createLocationButtonNode(ArkUI_Int32 nodeId)
 
 void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    return createImageNode(nodeId);
 }
 
 void* createMenuNode(ArkUI_Int32 nodeId)

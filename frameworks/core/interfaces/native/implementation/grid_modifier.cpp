@@ -58,6 +58,23 @@ inline void AssignCast(std::optional<GridItemAlignment>& dst, const Ark_GridItem
         default: LOGE("Unexpected enum value in Ark_GridItemAlignment: %{public}d", src);
     }
 }
+
+template<>
+inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_Tuple_Number_Number& src)
+{
+    dst->rows = Converter::Convert<int32_t>(src.value0);
+    dst->columns = Converter::Convert<int32_t>(src.value1);
+}
+
+template<>
+inline void AssignCast(std::optional<GridItemRect>& dst, const Ark_Tuple_Number_Number_Number_Number& src)
+{
+    dst->rowStart = Converter::Convert<int32_t>(src.value0);
+    dst->rowSpan = Converter::Convert<int32_t>(src.value1);
+    dst->columnStart = Converter::Convert<int32_t>(src.value2);
+    dst->columnSpan = Converter::Convert<int32_t>(src.value3);
+}
+
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -86,27 +103,41 @@ void SetGridOptionsImpl(Ark_NativePointer node,
         if (regularSizeOpt) {
             options.regularSize = regularSizeOpt.value();
         }
-        std::optional<std::set<int32_t>> irregularIndexes =
-            Converter::OptConvert<std::set<int32_t>>(layoutOptionsOpt.value());
-        if (irregularIndexes) {
-            options.irregularIndexes = irregularIndexes.value();
+        std::optional<std::set<int32_t>> irrIndex = Converter::OptConvert<std::set<int32_t>>(layoutOptionsOpt.value());
+        if (irrIndex) {
+            options.irregularIndexes = irrIndex.value();
         }
-        // onGetIrregularSizeByIndex and onGetRectByIndex was not implemented
-        // because GENERATED_ArkUIGridEventsReceiver doesn`t support these interfaces
-        LOGE("ARKOALA onGetIrregularSizeByIndex callback need to be supported");
-        LOGE("ARKOALA onGetRectByIndex callback need to be supported");
+        auto onGetIrregularSizeByIndex = Converter::OptConvert<::Callback_Number_Tuple_Number_Number>
+                                    (layoutOptionsOpt.value().onGetIrregularSizeByIndex);
+        if (onGetIrregularSizeByIndex) {
+            auto modelCallback = [callback = CallbackHelper(*onGetIrregularSizeByIndex)]
+                                            (int32_t value) -> GridItemSize {
+                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
+                auto resultOpt = callback.InvokeWithOptConvertResult
+                                    <GridItemSize, Ark_Tuple_Number_Number, Callback_Tuple_Number_Number_Void>(param);
+                return resultOpt.value_or(GridItemSize());
+            };
+            options.getSizeByIndex = modelCallback;
+        }
+        auto onGetRectByIndex = Converter::OptConvert<::Callback_Number_Tuple_Number_Number_Number_Number>
+                                    (layoutOptionsOpt.value().onGetRectByIndex);
+        if (onGetRectByIndex) {
+            auto modelCallback = [callback = CallbackHelper(*onGetRectByIndex)](int32_t value) -> GridItemRect {
+                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
+                auto resOpt = callback.InvokeWithOptConvertResult<GridItemRect, Ark_Tuple_Number_Number_Number_Number,
+                                     Callback_Tuple_Number_Number_Number_Number_Void>(param);
+                return resOpt.value_or(GridItemRect());
+            };
+            options.getRectByIndex = modelCallback;
+        }
         GridModelNG::SetLayoutOptions(frameNode, options);
     }
-
-    // Scroller
     CHECK_NULL_VOID(scroller);
     RefPtr<ScrollControllerBase> positionController = GridModelNG::GetOrCreateController(frameNode);
     RefPtr<ScrollProxy> scrollBarProxy = GridModelNG::GetOrCreateScrollBarProxy(frameNode);
-
-     // obtain the external SwiperController peer
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*scroller);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
     CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = reinterpret_cast<ScrollerPeer *>(*abstPeerPtrOpt);
+    auto peerImplPtr = *abstPeerPtrOpt;
     CHECK_NULL_VOID(peerImplPtr);
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);
@@ -177,7 +208,7 @@ void OnScrollBarUpdateImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onScrollBarUpdate =
-        [callback = CallbackHelper(*value, frameNode)](int32_t index, const Dimension& offset) -> ResType {
+        [callback = CallbackHelper(*value)](int32_t index, const Dimension& offset) -> ResType {
         auto arkIndex = ArkValue<Ark_Number>(index);
         auto arkOffset = ArkValue<Ark_Number>(offset);
         auto arkResult = callback.InvokeWithObtainResult<Ark_ComputedBarAttribute, Callback_ComputedBarAttribute_Void>(
@@ -275,14 +306,14 @@ void OnItemDragStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragStart = [callback = CallbackHelper(*value, frameNode), frameNode, node](
+    auto onItemDragStart = [callback = CallbackHelper(*value), frameNode, node](
         const ItemDragInfo& dragInfo, int32_t itemIndex
     ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto builder =
             callback.InvokeWithObtainResult<CustomNodeBuilder, Callback_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
-        auto uiNode = CallbackHelper(builder, frameNode).BuildSync(node);
+        auto uiNode = CallbackHelper(builder).BuildSync(node);
         ViewStackProcessor::GetInstance()->Push(uiNode);
     };
     GridModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
@@ -293,10 +324,11 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragEnter = [frameNode](const ItemDragInfo& dragInfo) {
+    auto onItemDragEnter = [arkCallback = CallbackHelper(*value)](
+        const ItemDragInfo& dragInfo
+    ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onItemDragEnter(
-            frameNode->GetId(), arkDragInfo);
+        arkCallback.Invoke(arkDragInfo);
     };
     GridModelNG::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
 }
@@ -306,13 +338,13 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragMove = [frameNode](const ItemDragInfo& dragInfo,
-        int32_t itemIndex, int32_t insertIndex) {
+    auto onItemDragMove = [arkCallback = CallbackHelper(*value)](
+        const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex
+    ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onItemDragMove(
-            frameNode->GetId(), arkDragInfo, arkItemIndex, arkInsertIndex);
+        arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex);
     };
     GridModelNG::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
 }
@@ -322,12 +354,14 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDragLeave = [frameNode](const ItemDragInfo& dragInfo, int32_t itemIndex) {
+    auto onItemDragLeave = [arkCallback = CallbackHelper(*value)](
+        const ItemDragInfo& dragInfo, int32_t itemIndex
+    ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onItemDragLeave(
-            frameNode->GetId(), arkDragInfo, arkItemIndex);
+        arkCallback.Invoke(arkDragInfo, arkItemIndex);
     };
+
     GridModelNG::SetOnItemDragLeave(frameNode, std::move(onItemDragLeave));
 }
 void OnItemDropImpl(Ark_NativePointer node,
@@ -336,14 +370,14 @@ void OnItemDropImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onItemDrop = [frameNode](const ItemDragInfo& dragInfo,
-        int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+    auto onItemDrop = [arkCallback = CallbackHelper(*value), frameNode](
+        const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess
+    ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
         auto arkIsSuccess = Converter::ArkValue<Ark_Boolean>(isSuccess);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onItemDrop(
-            frameNode->GetId(), arkDragInfo, arkItemIndex, arkInsertIndex, arkIsSuccess);
+        arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex, arkIsSuccess);
     };
     GridModelNG::SetOnItemDrop(frameNode, std::move(onItemDrop));
 }
@@ -400,8 +434,8 @@ void OnReachStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onReachStart = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onReachStart(frameNode->GetId());
+    auto onReachStart = [arkCallback = CallbackHelper(*value), frameNode]() {
+        arkCallback.Invoke();
     };
     GridModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
 }
@@ -411,8 +445,8 @@ void OnReachEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onReachEnd = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onReachEnd(frameNode->GetId());
+    auto onReachEnd = [arkCallback = CallbackHelper(*value), frameNode]() {
+        arkCallback.Invoke();
     };
     GridModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
@@ -422,8 +456,8 @@ void OnScrollStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollStart = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onScrollStart(frameNode->GetId());
+    auto onScrollStart = [arkCallback = CallbackHelper(*value), frameNode]() {
+        arkCallback.Invoke();
     };
     GridModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
@@ -433,8 +467,8 @@ void OnScrollStopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollStop = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onScrollStop(frameNode->GetId());
+    auto onScrollStop = [arkCallback = CallbackHelper(*value), frameNode]() {
+        arkCallback.Invoke();
     };
     GridModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
@@ -444,7 +478,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollFrameBegin = [callback = CallbackHelper(*value, frameNode)](
+    auto onScrollFrameBegin = [callback = CallbackHelper(*value)](
             const Dimension& offset, const ScrollState& state
         ) -> ScrollFrameResult {
         auto arkOffset = Converter::ArkValue<Ark_Number>(offset);

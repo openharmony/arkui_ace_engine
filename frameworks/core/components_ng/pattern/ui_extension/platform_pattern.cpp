@@ -192,7 +192,7 @@ void PlatformPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     Platform::CalculatePointerEvent(pointerEvent, host);
     AceExtraInputData::InsertInterpolatePoints(info);
@@ -237,7 +237,7 @@ void PlatformPattern::HandleDragEvent(const PointerEvent& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     Platform::CalculatePointerEvent(pointerEvent, host);
     DispatchPointerEvent(pointerEvent);

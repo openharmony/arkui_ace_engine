@@ -157,14 +157,14 @@ RefPtr<PipelineBase> PipelineBase::GetMainPipelineContext()
         CHECK_NULL_RETURN(parentContainer, nullptr);
         context = parentContainer->GetPipelineContext();
     } else {
-        context = PipelineBase::GetCurrentContext();
+        context = PipelineBase::GetCurrentContextSafelyWithCheck();
     }
     return context;
 }
 
 RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
 {
-    auto pipelineContext = OHOS::Ace::PipelineBase::GetCurrentContext();
+    auto pipelineContext = OHOS::Ace::PipelineBase::GetCurrentContextSafelyWithCheck();
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
         auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());

@@ -22,6 +22,7 @@
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -35,6 +36,10 @@ namespace {
     constexpr int32_t NUM_4 = 4;
     constexpr int32_t STD_TM_START_YEAR = 1900;
     constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+    constexpr double NUM_DOUBLE_0 = 0.;
+    constexpr double NUM_DOUBLE_1 = 1.;
+    constexpr double NUM_DOUBLE_100 = 100.;
+    constexpr int32_t NUM_PERCENT_100 = 100;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -205,6 +210,14 @@ void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& 
     touch.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.y.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+}
+
+void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
+{
+    AssignArkValue(dst.touchObject, src);
+    dst.size = ArkValue<Ark_Number>(src.GetSize());
+    dst.force = ArkValue<Ark_Number>(src.GetForce());
+    dst.timestamp = ArkValue<Ark_Number>(src.GetTimeStamp().time_since_epoch().count());
 }
 
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)
@@ -787,12 +800,6 @@ FontMetaData Convert(const Ark_Font& src)
 }
 
 template<>
-Ark_NativePointer Convert(const Ark_Materialized& src)
-{
-    return src.ptr;
-}
-
-template<>
 ShadowColorStrategy Convert(const Ark_Color& src)
 {
     return ShadowColorStrategy::NONE;
@@ -841,6 +848,60 @@ Font Convert(const Ark_Font& src)
 }
 
 template<>
+Gradient Convert(const Ark_LinearGradient& value)
+{
+    Gradient gradient;
+    LOGE("Conversion for Ark_LinearGradient to Gradient is not yet implemented!");
+    return gradient;
+}
+
+template<>
+void AssignCast (std::optional<Gradient>& dst, const Ark_LinearGradient& src)
+{
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    auto peer = reinterpret_cast<LinearGradientPeer*>(src);
+    auto gradientColors = src->colorStops;
+
+    if (gradientColors.size() == 1) {
+        auto item = gradientColors.front();
+        if (!item.first.has_value()) {
+            return;
+        }
+        GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(item.first.value()));
+        gradientColor.SetDimension(item.second);
+        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
+    } else {
+        for (auto item : gradientColors) {
+            if (!item.first.has_value()) {
+                return;
+            }
+            GradientColor gradientColor;
+            gradientColor.SetLinearColor(LinearColor(item.first.value()));
+            gradientColor.SetDimension(item.second);
+            gradient.AddColor(gradientColor);
+        }
+    }
+    dst = gradient;
+}
+
+template<>
+std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
+{
+    auto color = Converter::OptConvert<Color>(src.color);
+    auto offset = Converter::Convert<Dimension>(src.offset);
+    // normalize the offset in a range [0.0 ... 1.0]
+    if (offset.Unit() == DimensionUnit::PERCENT) {
+        offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_100) / NUM_PERCENT_100);
+    } else {
+        offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_1));
+    }
+    return std::make_pair(color, offset);
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient_common& value)
 {
     NG::Gradient gradient;
@@ -879,7 +940,6 @@ Gradient Convert(const Ark_LinearGradient_common& value)
             gradient.AddColor(gradientColor);
         }
     }
-
     return gradient;
 }
 
@@ -907,6 +967,15 @@ GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
 
 template<>
 Header Convert(const Ark_Header& src)
+{
+    Header header;
+    header.headerKey = Converter::Convert<std::string>(src.headerKey);
+    header.headerValue = Converter::Convert<std::string>(src.headerValue);
+    return header;
+}
+
+template<>
+Header Convert(const Ark_WebHeader& src)
 {
     Header header;
     header.headerKey = Converter::Convert<std::string>(src.headerKey);
@@ -1167,10 +1236,37 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
 }
 
 template<>
+RefPtr<BasicShape> Convert(const Ark_CircleShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->shape;
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_EllipseShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->shape;
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_PathShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->shape;
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_RectShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->shape;
+}
+
+template<>
 RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
 {
-    OHOS::Ace::RefPtr<ChainedTransitionEffect> effect;
-    auto effectPeer = reinterpret_cast<TransitionEffectPeer*>(src.ptr);
+    auto effectPeer = src;
     if (effectPeer) {
         return effectPeer->handler;
     } else {
@@ -1193,8 +1289,7 @@ RefPtr<Curve> Convert(const Ark_Curve& src)
 template<>
 RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
-    auto peer = reinterpret_cast<ICurvePeer*>(src.ptr);
-    return peer ? peer->handler : nullptr;
+    return src ? src->handler : nullptr;
 }
 
 template<>
@@ -1257,8 +1352,7 @@ RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
 template<>
 RefPtr<PixelMap> Convert(const Ark_PixelMap& src)
 {
-    auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(src.ptr);
-    return pixelMapPeer ? pixelMapPeer->pixelMap : nullptr;
+    return src ? src->pixelMap : nullptr;
 }
 
 template<>
@@ -1291,9 +1385,16 @@ Dimension Convert(const Ark_Length& src)
 template<>
 Dimension Convert(const Ark_LengthMetrics& src)
 {
-    auto peer = reinterpret_cast<LengthMetricsPeer *>(src.ptr);
-    CHECK_NULL_RETURN(peer, {});
-    return peer->value;
+    CHECK_NULL_RETURN(src, {});
+    return src->value;
+}
+
+template<>
+DimensionOffset Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    return DimensionOffset(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
 }
 
 template<>
@@ -1983,5 +2084,13 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
         };
     }
     return selectMenuParam;
+}
+
+template<>
+std::pair<Dimension, Dimension> Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    return std::make_pair(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
 }
 } // namespace OHOS::Ace::NG::Converter

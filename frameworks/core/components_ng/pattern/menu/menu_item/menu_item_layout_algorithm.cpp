@@ -24,7 +24,7 @@ constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 3;
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -237,7 +237,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
 void MenuItemLayoutAlgorithm::MeasureLeftRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)
 {
     auto children = row->GetAllChildrenWithBuild();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -384,7 +384,7 @@ float MenuItemLayoutAlgorithm::GetBordersHeight(LayoutWrapper* layoutWrapper)
 float MenuItemLayoutAlgorithm::GetMenuItemVerticalPadding()
 {
     float ret = 0.0f;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, ret);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, ret);

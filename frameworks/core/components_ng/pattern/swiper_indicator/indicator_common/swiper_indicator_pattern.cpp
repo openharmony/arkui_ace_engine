@@ -207,7 +207,7 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
@@ -383,7 +383,7 @@ void SwiperIndicatorPattern::HandleTouchUp()
 
 void SwiperIndicatorPattern::GetMouseClickIndex()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperTheme);
@@ -436,7 +436,7 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(firstTextNode);
     CHECK_NULL_VOID(lastTextNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     firstTextNode->SetInternal();
@@ -503,7 +503,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(firstTextNode);
     CHECK_NULL_VOID(lastTextNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
@@ -763,7 +763,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     CHECK_NULL_RETURN(host, 0.0f);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, 0.0f);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);

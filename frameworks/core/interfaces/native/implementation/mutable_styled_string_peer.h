@@ -15,14 +15,8 @@
 
 #pragma once
 
-#include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/interfaces/native/implementation/styled_string_peer.h"
+#include "styled_string_peer.h"
 
 struct MutableStyledStringPeer : public StyledStringPeer {
     ~MutableStyledStringPeer() override = default;
-    
-    OHOS::Ace::RefPtr<OHOS::Ace::MutableSpanString> GetMutableString()
-    {
-        return OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(spanString);
-    }
 };

@@ -22,12 +22,12 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventTargetInfoAccessor {
-void DestroyPeerImpl(EventTargetInfoPeer* peer)
+void DestroyPeerImpl(Ark_EventTargetInfo peer)
 {
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_NativePointer CtorImpl()
+Ark_EventTargetInfo CtorImpl()
 {
     auto peer = AceType::MakeRefPtr<EventTargetInfoPeer>();
     peer->IncRefCount();
@@ -37,12 +37,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetIdImpl(EventTargetInfoPeer* peer)
+Ark_String GetIdImpl(Ark_EventTargetInfo peer)
 {
-    CHECK_NULL_VOID(peer); // Use CHECK_NULL_VOID_RETURN with an empty string if it is possible.
+    CHECK_NULL_RETURN(peer, {});
     const auto result = Converter::ArkValue<Ark_String>(peer->id); // Return result if it is possible.
     LOGE("EventTargetInfoAccessor: GetIdImpl (blocked) result: %{public}s",
         Converter::Convert<std::string>(result).c_str());
+    return result;
 }
 } // EventTargetInfoAccessor
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()

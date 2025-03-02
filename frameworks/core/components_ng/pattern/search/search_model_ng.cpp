@@ -1384,7 +1384,7 @@ void SearchModelNG::SetPlaceholderColor(FrameNode* frameNode, const std::optiona
     if (color) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, color.value(), textFieldChild);
     } else {
-        auto textFieldTheme = PipelineBase::GetCurrentContext()->GetTheme<TextFieldTheme>();
+        auto textFieldTheme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<TextFieldTheme>();
         Color defaultColor;
         if (textFieldTheme) {
             defaultColor = textFieldTheme->GetPlaceholderColor();

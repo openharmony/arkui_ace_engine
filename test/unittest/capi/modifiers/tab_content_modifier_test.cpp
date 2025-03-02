@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,8 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "arkoala_api_generated.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -89,13 +91,28 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabel, TestSize.Level1)
 }
 
 /*
- * @tc.name: setTabBar0Test
+ * @tc.name: setTabBar0Test_CustomNodeBuilder
  * @tc.desc: check setTabBar0 interface work with CustomBuilder
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentModifierTest, DISABLED_setTabBar0TestCustomBuilder, TestSize.Level1)
+HWTEST_F(TabContentModifierTest, setTabBar0Test_CustomNodeBuilder, TestSize.Level1)
 {
-    // will be implemented when CustomBuilder in the setTabBar0 will be supported
+    ASSERT_NE(modifier_->setTabBar0, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    int callsCount = 0;
+    CustomNodeBuilderTestHelper<TabContentModifierTest> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    auto options = Converter::ArkUnion<Ark_Union_String_Resource_CustomBuilder_TabBarOptions,
+        CustomNodeBuilder>(builder);
+    modifier_->setTabBar0(frameNode, &options);
+
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->GetTabBarParam().ExecuteBuilder();
+
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 }
 
 /*

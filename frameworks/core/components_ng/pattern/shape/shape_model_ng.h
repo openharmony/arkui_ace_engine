@@ -43,6 +43,7 @@ public:
     void SetAntiAlias(bool antiAlias) override;
     void SetWidth() override {}
     void SetHeight() override {}
+    static void InitBox(FrameNode* frameNode, const RefPtr<PixelMap>& pixMap);
     static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments);
     static void SetStrokeMiterLimit(FrameNode* frameNode, const std::optional<double>& miterLimit);
     static void SetFillOpacity(FrameNode* frameNode, const std::optional<double>& fillOpacity);

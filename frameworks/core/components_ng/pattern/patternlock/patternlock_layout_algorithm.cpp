@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> PatternLockLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_RETURN(patternLockTheme, std::nullopt);

@@ -68,6 +68,7 @@ public:
 
     NiceMock<MockChildrenMainSize> *mockChildrenMainSize_ = nullptr;
     RefPtr<NiceMock<MockChildrenMainSize>> mockChildrenMainSizeKeeper_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 static std::vector<std::tuple<int32_t, Ark_Number>> startValues = {
@@ -111,8 +112,8 @@ HWTEST_F(ChildrenMainSizeTest, CtorTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChildDefaultSize, nullptr);
 
-    auto retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+    auto retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE);
 }
 
 /**
@@ -139,7 +140,7 @@ HWTEST_F(ChildrenMainSizeTest, SpliceValidValuesTest, TestSize.Level1)
         start = std::get<0>(value);
         arkStart = std::get<1>(value);
         EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(1);
-        accessor_->splice(peer_, &arkStart, &arkDeleteCount, &optArray);
+        accessor_->splice(vmContext_, peer_, &arkStart, &arkDeleteCount, &optArray);
     }
 }
 
@@ -164,10 +165,10 @@ HWTEST_F(ChildrenMainSizeTest, SpliceStartInvalidValuesTest, TestSize.Level1)
     Opt_Array_Number optArray = ArkValue<Opt_Array_Number>(numberArrayResult);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(0);
-    accessor_->splice(peer_, &arkStart, &arkDeleteCount, &optArray);
+    accessor_->splice(vmContext_, peer_, &arkStart, &arkDeleteCount, &optArray);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(0);
-    accessor_->splice(peer_, nullptr, &arkDeleteCount, &optArray);
+    accessor_->splice(vmContext_, peer_, nullptr, &arkDeleteCount, &optArray);
 }
 
 /**
@@ -191,16 +192,16 @@ HWTEST_F(ChildrenMainSizeTest, SpliceDeleteCountInvalidValuesTest, TestSize.Leve
     Opt_Array_Number optArray = ArkValue<Opt_Array_Number>(numberArrayResult);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(1);
-    accessor_->splice(peer_, &arkStart, &arkDeleteCount, &optArray);
+    accessor_->splice(vmContext_, peer_, &arkStart, &arkDeleteCount, &optArray);
 
     deleteCount = std::get<0>(deleteCountInvalidValues[1]);
     arkDeleteCount = std::get<1>(deleteCountInvalidValues[1]);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(1);
-    accessor_->splice(peer_, &arkStart, &arkDeleteCount, &optArray);
+    accessor_->splice(vmContext_, peer_, &arkStart, &arkDeleteCount, &optArray);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(1);
-    accessor_->splice(peer_, &arkStart, nullptr, &optArray);
+    accessor_->splice(vmContext_, peer_, &arkStart, nullptr, &optArray);
 }
 
 /**
@@ -221,10 +222,10 @@ HWTEST_F(ChildrenMainSizeTest, SpliceChildrenSizeInvalidValuesTest, TestSize.Lev
     Opt_Array_Number optArray = ArkValue<Opt_Array_Number>(Ark_Empty());
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(1);
-    accessor_->splice(peer_, &arkStart, &arkDeleteCount, &optArray);
+    accessor_->splice(vmContext_, peer_, &arkStart, &arkDeleteCount, &optArray);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(1);
-    accessor_->splice(peer_, &arkStart, &arkDeleteCount, nullptr);
+    accessor_->splice(vmContext_, peer_, &arkStart, &arkDeleteCount, nullptr);
 }
 
 /**
@@ -249,7 +250,7 @@ HWTEST_F(ChildrenMainSizeTest, UpdateValidValuesTest, TestSize.Level1)
     Opt_Array_Number optArray = ArkValue<Opt_Array_Number>(numberArrayResult);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(1);
-    accessor_->splice(peer_, &arkStart, &arkDeleteCount, &optArray);
+    accessor_->splice(vmContext_, peer_, &arkStart, &arkDeleteCount, &optArray);
 
     int index = std::get<0>(startValues[0]);
     Ark_Number arkIndex = std::get<1>(startValues[0]);
@@ -258,7 +259,7 @@ HWTEST_F(ChildrenMainSizeTest, UpdateValidValuesTest, TestSize.Level1)
 
     std::vector<float> updateArray{size};
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(index, 1, updateArray)).Times(1);
-    accessor_->update(peer_, &arkIndex, &arkSize);
+    accessor_->update(vmContext_, peer_, &arkIndex, &arkSize);
 }
 
 /**
@@ -283,7 +284,7 @@ HWTEST_F(ChildrenMainSizeTest, UpdateInvalidValuesTest, TestSize.Level1)
     Opt_Array_Number optArray = ArkValue<Opt_Array_Number>(numberArrayResult);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(start, deleteCount, array)).Times(1);
-    accessor_->splice(peer_, &arkStart, &arkDeleteCount, &optArray);
+    accessor_->splice(vmContext_, peer_, &arkStart, &arkDeleteCount, &optArray);
 
     int index = std::get<0>(startValues[0]);
     Ark_Number arkIndex = std::get<1>(startValues[0]);
@@ -292,16 +293,16 @@ HWTEST_F(ChildrenMainSizeTest, UpdateInvalidValuesTest, TestSize.Level1)
     std::vector<float> updateArray{size};
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(index, 1, updateArray)).Times(0);
-    accessor_->update(peer_, nullptr, &arkSize);
+    accessor_->update(vmContext_, peer_, nullptr, &arkSize);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(index, 1, updateArray)).Times(0);
-    accessor_->update(peer_, &arkIndex, nullptr);
+    accessor_->update(vmContext_, peer_, &arkIndex, nullptr);
 
     index = std::get<0>(indexInvalidValues[0]);
     arkIndex = std::get<1>(indexInvalidValues[0]);
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(index, 1, updateArray)).Times(0);
-    accessor_->update(peer_, &arkIndex, &arkSize);
+    accessor_->update(vmContext_, peer_, &arkIndex, &arkSize);
 
     index = std::get<0>(startValues[0]);
     arkIndex = std::get<1>(startValues[0]);
@@ -310,7 +311,7 @@ HWTEST_F(ChildrenMainSizeTest, UpdateInvalidValuesTest, TestSize.Level1)
     updateArray = {size};
 
     EXPECT_CALL(*mockChildrenMainSize_, ChangeData(index, 1, updateArray)).Times(1);
-    accessor_->update(peer_, &arkIndex, &arkSize);
+    accessor_->update(vmContext_, peer_, &arkIndex, &arkSize);
 }
 
 /**
@@ -322,16 +323,16 @@ HWTEST_F(ChildrenMainSizeTest, GetChildDefaultSizeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChildDefaultSize, nullptr);
 
-    auto retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+    auto retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE);
 
     auto ptr = peer_->GetHandler();
     if (ptr) {
         ptr->UpdateDefaultSize(CHILDREN_DEFAULT_SIZE * 2);
     }
 
-    retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE * 2);
+    retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE * 2);
 }
 
 /**
@@ -345,13 +346,13 @@ HWTEST_F(ChildrenMainSizeTest, SetChildDefaultSizeTest, TestSize.Level1)
     // valid value
     auto defSize = Converter::ArkValue<Ark_Number>(CHILDREN_DEFAULT_SIZE);
     accessor_->setChildDefaultSize(peer_, &defSize);
-    auto retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+    auto retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE);
 
     // invalid value
     defSize = Converter::ArkValue<Ark_Number>(-CHILDREN_DEFAULT_SIZE);
     accessor_->setChildDefaultSize(peer_, &defSize);
-    retValue = accessor_->getChildDefaultSize(peer_);
-    EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
+    retValue = Converter::Convert<float>(accessor_->getChildDefaultSize(peer_));
+    EXPECT_FLOAT_EQ(retValue, CHILDREN_DEFAULT_SIZE);
 }
 } // namespace OHOS::Ace::NG

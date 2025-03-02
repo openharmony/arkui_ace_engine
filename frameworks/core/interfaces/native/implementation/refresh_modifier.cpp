@@ -76,7 +76,7 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
     RefPtr<UINode> customNode;
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(value->builder);
     if (arkBuilder) {
-        customNode = CallbackHelper(arkBuilder.value(), frameNode).BuildSync(node);
+        customNode = CallbackHelper(arkBuilder.value()).BuildSync(node);
     }
     if (customNode) {
         RefreshModelNG::SetCustomBuilder(frameNode, customNode);
@@ -153,8 +153,8 @@ void PullDownRatioImpl(Ark_NativePointer node,
     Validator::ClampByRange(convValue, PULLDOWNRATIO_MIN, PULLDOWNRATIO_MAX);
     RefreshModelNG::SetPullDownRatio(frameNode, convValue);
 }
-void __onChangeEvent_refreshingImpl(Ark_NativePointer node,
-                                    const Callback_Boolean_Void* callback)
+void _onChangeEvent_refreshingImpl(Ark_NativePointer node,
+                                   const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -181,7 +181,7 @@ const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
         RefreshAttributeModifier::PullToRefreshImpl,
         RefreshAttributeModifier::OnOffsetChangeImpl,
         RefreshAttributeModifier::PullDownRatioImpl,
-        RefreshAttributeModifier::__onChangeEvent_refreshingImpl,
+        RefreshAttributeModifier::_onChangeEvent_refreshingImpl,
     };
     return &ArkUIRefreshModifierImpl;
 }

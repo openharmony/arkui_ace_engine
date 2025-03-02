@@ -31,7 +31,7 @@ bool JudgeTrackness(Axis direction, float blockDiameter, float trackThickness, f
 
 RefPtr<SliderTheme> GetTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<SliderTheme>();
 }
@@ -136,7 +136,7 @@ void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dim
     CHECK_NULL_VOID(frameNode);
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(sliderLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -194,7 +194,7 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);

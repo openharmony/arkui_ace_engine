@@ -21,13 +21,13 @@
 struct TabContentTransitionProxyPeer : public OHOS::Ace::NG::GeneratedModifier::TabContentTransitionProxyPeerImpl {};
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentTransitionProxyAccessor {
-void DestroyPeerImpl(TabContentTransitionProxyPeer* peer)
+void DestroyPeerImpl(Ark_TabContentTransitionProxy peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_TabContentTransitionProxy CtorImpl()
 {
     return new TabContentTransitionProxyPeer();
 }
@@ -35,18 +35,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void FinishTransitionImpl(TabContentTransitionProxyPeer* peer)
+void FinishTransitionImpl(Ark_TabContentTransitionProxy peer)
 {
     CHECK_NULL_VOID(peer);
     peer->FinishTransition();
 }
-Ark_Int32 GetFromImpl(TabContentTransitionProxyPeer* peer)
+Ark_Number GetFromImpl(Ark_TabContentTransitionProxy peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto idx = peer->GetFrom();
-    return Converter::ArkValue<Ark_Int32>(idx);
+    return Converter::ArkValue<Ark_Number>(idx);
 }
-void SetFromImpl(TabContentTransitionProxyPeer* peer,
+void SetFromImpl(Ark_TabContentTransitionProxy peer,
                  const Ark_Number* from)
 {
     CHECK_NULL_VOID(peer);
@@ -54,13 +54,13 @@ void SetFromImpl(TabContentTransitionProxyPeer* peer,
     int32_t idx = Converter::Convert<int32_t>(*from);
     peer->SetFrom(idx);
 }
-Ark_Int32 GetToImpl(TabContentTransitionProxyPeer* peer)
+Ark_Number GetToImpl(Ark_TabContentTransitionProxy peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto idx = peer->GetTo();
-    return Converter::ArkValue<Ark_Int32>(idx);
+    return Converter::ArkValue<Ark_Number>(idx);
 }
-void SetToImpl(TabContentTransitionProxyPeer* peer,
+void SetToImpl(Ark_TabContentTransitionProxy peer,
                const Ark_Number* to)
 {
     CHECK_NULL_VOID(peer);

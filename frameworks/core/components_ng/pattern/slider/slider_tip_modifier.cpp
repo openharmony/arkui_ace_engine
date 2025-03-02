@@ -344,7 +344,7 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
     auto vertexPair = GetBubbleVertex();
     vertex_ = vertexPair.first;
     auto vertexOffsetFromBlock = vertexPair.second;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto fontScale = pipeline->GetFontScale();
     if (axis_ == Axis::HORIZONTAL) {
@@ -439,7 +439,7 @@ void SliderTipModifier::SetTipFlag(bool flag)
     if (flag) {
         SetBubbleDisplayAnimation();
     } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -451,7 +451,7 @@ void SliderTipModifier::SetTipFlag(bool flag)
                     return;
                 }
                 modifier->SetBubbleDisappearAnimation();
-                auto pipeline = PipelineBase::GetCurrentContext();
+                auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->RequestFrame();
             },
@@ -462,7 +462,7 @@ void SliderTipModifier::SetTipFlag(bool flag)
 
 void SliderTipModifier::BuildParagraph()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto fontStyle = std::make_unique<NG::FontStyle>();
     CHECK_NULL_VOID(fontStyle);
@@ -536,7 +536,7 @@ std::pair<OffsetF, float> SliderTipModifier::GetBubbleVertex()
 
 void SliderTipModifier::UpdateBubbleSize()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -570,7 +570,7 @@ void SliderTipModifier::UpdateBubbleSize()
 bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
 {
     auto contentSize = contentSize_->Get();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_RETURN(theme, false);

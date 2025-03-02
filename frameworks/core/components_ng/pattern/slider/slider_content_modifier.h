@@ -68,7 +68,7 @@ public:
 
     void UpdateThemeColor()
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto sliderTheme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(sliderTheme);

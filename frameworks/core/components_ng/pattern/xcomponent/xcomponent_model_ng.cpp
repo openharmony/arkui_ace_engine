@@ -87,7 +87,7 @@ XComponentType XComponentModelNG::GetTypeImpl(const RefPtr<FrameNode>& frameNode
     CHECK_NULL_RETURN(frameNode, XComponentType::UNKNOWN);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, XComponentType::UNKNOWN);
-    return layoutProperty->GetXComponentTypeValue();
+    return layoutProperty->GetXComponentTypeValue(XComponentType::UNKNOWN);
 }
 
 XComponentType XComponentModelNG::GetType()
@@ -174,7 +174,8 @@ void XComponentModelNG::RegisterOnCreate(const RefPtr<AceType>& node, LoadEvent&
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+    if (!layoutProperty ||
+        layoutProperty->GetXComponentTypeValue(XComponentType::UNKNOWN) == XComponentType::COMPONENT) {
         return;
     }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
@@ -187,7 +188,8 @@ void XComponentModelNG::RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEv
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+    if (!layoutProperty ||
+        layoutProperty->GetXComponentTypeValue(XComponentType::UNKNOWN) == XComponentType::COMPONENT) {
         return;
     }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
@@ -280,7 +282,7 @@ bool XComponentModelNG::IsTexture(FrameNode *frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetXComponentTypeValue() == XComponentType::TEXTURE;
+    return layoutProperty->GetXComponentTypeValue(XComponentType::UNKNOWN) == XComponentType::TEXTURE;
 }
 
 XComponentType XComponentModelNG::GetType(FrameNode* frameNode)

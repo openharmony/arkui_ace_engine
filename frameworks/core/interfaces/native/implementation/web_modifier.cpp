@@ -18,6 +18,7 @@
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
 #endif // WEB_SUPPORTED
 #include "core/interfaces/native/utility/converter.h"
@@ -185,7 +186,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
-    return nullptr;
+    return {};
 #endif // WEB_SUPPORTED
 }
 } // WebModifier
@@ -207,12 +208,21 @@ void SetWebOptionsImpl(Ark_NativePointer node,
     WebModelNG::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
     Converter::VisitUnion(value->controller,
         [frameNode](const Ark_WebController& controller) {
-            auto peerImplPtr = reinterpret_cast<GeneratedModifier::WebControllerPeerImpl *>(controller.ptr);
+            auto peerImplPtr = controller;
             CHECK_NULL_VOID(peerImplPtr);
             WebModelNG::SetWebController(frameNode, peerImplPtr->GetController());
         },
-        [](const auto& value) {
-            LOGE("WebInterfaceModifier::SetWebOptionsImpl WebviewController option is not supported");
+        [frameNode](const Ark_WebviewController& controller) {
+            WebviewControllerPeer* peerImplPtr = controller;
+            CHECK_NULL_VOID(peerImplPtr);
+            auto setWebIdCallback = [peerImplPtr](int32_t webId) {
+                peerImplPtr->nwebId = webId;
+            };
+            WebModelNG::SetWebIdCallback(frameNode, std::move(setWebIdCallback));
+            auto setHapPathCallback = [peerImplPtr](const std::string& hapPath) {
+                peerImplPtr->hapPath = hapPath;
+            };
+            WebModelNG::SetHapPathCallback(frameNode, std::move(setHapPathCallback));
         },
         []() {}
     );
@@ -1699,12 +1709,12 @@ void KeyboardAvoidModeImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //WebModelNG::SetEditMenuOptions(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
@@ -1775,7 +1785,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         auto preview = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().preview);
         if (preview.has_value()) {
-            previewNodeBuilder = [callback = CallbackHelper(preview.value(), frameNode), node]() {
+            previewNodeBuilder = [callback = CallbackHelper(preview.value()), node]() {
                 NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
             };
         }
@@ -1790,7 +1800,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     menuParam.isShow = true;
     WebModelNG::SetNewDragStyle(frameNode, true);
     if (content) {
-        contentNodeBuilder = [callback = CallbackHelper(*content, frameNode), node]() {
+        contentNodeBuilder = [callback = CallbackHelper(*content), node]() {
             NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
         };
     }

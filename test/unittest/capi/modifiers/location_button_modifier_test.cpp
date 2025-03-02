@@ -26,6 +26,10 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace GeneratedModifier {
+    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+}
+
 namespace  {
     const auto ATTRIBUTE_ICON_NAME = "icon";
     const auto ATTRIBUTE_ICON_DEFAULT_VALUE = LocationButtonIconStyle::ICON_NULL;
@@ -35,15 +39,16 @@ namespace  {
     const auto ATTRIBUTE_BUTTON_TYPE_DEFAULT_VALUE = ButtonType::CAPSULE;
 
     const auto DEFAULT_JSON_INT = -1;
+    constexpr double OFFSET_X = 60.4;
+    constexpr double OFFSET_Y = 85.5;
 
-    struct EventsTracker {
-        static inline GENERATED_ArkUILocationButtonEventsReceiver eventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-            .getLocationButtonEventsReceiver = [] () -> const GENERATED_ArkUILocationButtonEventsReceiver* {
-                return &eventReceiver;
-            }
-        };
+    static std::shared_ptr<JsonValue> CreateJson(SecurityComponentHandleResult value)
+    {
+        int32_t res = static_cast<int32_t>(value);
+        auto jsonNode = JsonUtil::Create(true);
+        jsonNode->Put("handleRes", res);
+        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+        return jsonShrd;
     };
 } // namespace
 
@@ -55,8 +60,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<SecurityComponentTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -355,66 +358,72 @@ HWTEST_F(LocationButtonModifierTest, setLocationButtonOptions1TestTextAndIconEmp
     EXPECT_EQ(resultButtonType, static_cast<int32_t>(LocationButtonStyle::DEFAULT_BACKGROUND_TYPE));
 }
 
+struct CheckEvent {
+    int32_t nodeId;
+    Ark_Int32 offsetX = -1;
+    Ark_Int32 offsetY = -1;
+    std::optional<Ark_LocationButtonOnClickResult> result = std::nullopt;
+};
+
 /*
  * @tc.name: setOnClickTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LocationButtonModifierTest, DISABLED_setOnClickTest, TestSize.Level1)
+HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
 {
-    static std::optional<Ark_LocationButtonOnClickResult> checkEvent;
-
-    EventsTracker::eventReceiver.onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event,
-        const Ark_LocationButtonOnClickResult result)
-    {
-        checkEvent = result;
-    };
-
-    modifier_->setOnClick(node_, {});
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto checkCallback = [](
+        const Ark_Int32 resourceId, const Ark_ClickEvent event,
+        const Ark_LocationButtonOnClickResult result) {
+            auto peer = event;
+            ASSERT_NE(peer, nullptr);
+            auto accessor = GeneratedModifier::GetClickEventAccessor();
+            checkEvent = {
+                .nodeId = resourceId,
+                .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+                .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
+                .result = result
+            };
+            accessor->destroyPeer(peer);
+        };
+    const int32_t contextId = 123;
+    auto func = Converter::ArkValue<Callback_ClickEvent_LocationButtonOnClickResult_Void>(checkCallback, contextId);
+
+    modifier_->setOnClick(node_, &func);
+
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
 
-    auto createJson = [](SecurityComponentHandleResult value)
-    {
-        int32_t res = static_cast<int32_t>(value);
-        auto jsonNode = JsonUtil::Create(true);
-        jsonNode->Put("handleRes", res);
-        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
-        return jsonShrd;
+    auto testFunc = [gestureEventHub](SecurityComponentHandleResult input, Ark_LocationButtonOnClickResult expected) {
+        checkEvent.reset();
+        gestureEventHub->ActClick(CreateJson(input));
+        ASSERT_TRUE(checkEvent.has_value() && checkEvent->result.has_value());
+        EXPECT_EQ(checkEvent->result.value(), expected);
+        EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
+        EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
     };
 
 #ifdef SECURITY_COMPONENT_ENABLE
-    checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::CLICK_SUCCESS));
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent.value(), ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS);
+    testFunc(SecurityComponentHandleResult::CLICK_SUCCESS, ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS);
+    testFunc(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
+        ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
 
     checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::CLICK_GRANT_FAILED));
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent.value(), ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
-
-    checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
+    gestureEventHub->ActClick(CreateJson(SecurityComponentHandleResult::DROP_CLICK));
     ASSERT_FALSE(checkEvent.has_value());
 #else
-    checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::CLICK_SUCCESS));
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent.value(), ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
-
-    checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::CLICK_GRANT_FAILED));
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent.value(), ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
-
-    checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent.value(), ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+    testFunc(SecurityComponentHandleResult::CLICK_SUCCESS,
+        ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+    testFunc(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
+        ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+    testFunc(SecurityComponentHandleResult::DROP_CLICK,
+        ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
 #endif
 }
 

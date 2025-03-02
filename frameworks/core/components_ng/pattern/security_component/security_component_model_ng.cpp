@@ -115,7 +115,7 @@ bool SecurityComponentModelNG::InitSecurityComponent(FrameNode* frameNode,
     CHECK_NULL_RETURN(property, false);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_RETURN(pipeline, false);
     pipeline->AddWindowStateChangedCallback(frameNode->GetId());
     return true;

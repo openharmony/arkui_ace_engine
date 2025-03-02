@@ -21,14 +21,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebControllerAccessor {
-void DestroyPeerImpl(WebControllerPeer* peer)
+void DestroyPeerImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_WebController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<WebControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -40,21 +40,21 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void OnInactiveImpl(WebControllerPeer* peer)
+void OnInactiveImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->OnInactive();
 }
-void OnActiveImpl(WebControllerPeer* peer)
+void OnActiveImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->OnActive();
 }
-void ZoomImpl(WebControllerPeer* peer,
+void ZoomImpl(Ark_WebController peer,
               const Ark_Number* factor)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
@@ -63,14 +63,14 @@ void ZoomImpl(WebControllerPeer* peer,
     CHECK_NULL_VOID(factor);
     peerImpl->GetController()->Zoom(Converter::Convert<float>(*factor));
 }
-void ClearHistoryImpl(WebControllerPeer* peer)
+void ClearHistoryImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->ClearHistory();
 }
-void RunJavaScriptImpl(WebControllerPeer* peer,
+void RunJavaScriptImpl(Ark_WebController peer,
                        const Ark_Literal_String_script_Callback_String_Void_callback_* options)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
@@ -88,7 +88,7 @@ void RunJavaScriptImpl(WebControllerPeer* peer,
     }
     peerImpl->GetController()->ExecuteTypeScript(script, std::move(callback));
 }
-void LoadDataImpl(WebControllerPeer* peer,
+void LoadDataImpl(Ark_WebController peer,
                   const Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType* options)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
@@ -102,7 +102,7 @@ void LoadDataImpl(WebControllerPeer* peer,
     std::string historyUrl = Converter::OptConvert<std::string>(options->historyUrl).value_or("");
     peerImpl->GetController()->LoadDataWithBaseUrl(baseUrl, data, mimeType, encoding, historyUrl);
 }
-void LoadUrlImpl(WebControllerPeer* peer,
+void LoadUrlImpl(Ark_WebController peer,
                  const Ark_Literal_Union_String_Resource_url_Array_Header_headers* options)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
@@ -119,21 +119,21 @@ void LoadUrlImpl(WebControllerPeer* peer,
     }
     peerImpl->GetController()->LoadUrl(url, httpHeaders);
 }
-void RefreshImpl(WebControllerPeer* peer)
+void RefreshImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->Refresh();
 }
-void StopImpl(WebControllerPeer* peer)
+void StopImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->StopLoading();
 }
-void RegisterJavaScriptProxyImpl(WebControllerPeer* peer,
+void RegisterJavaScriptProxyImpl(Ark_WebController peer,
                                  const Ark_Literal_Object_object__String_name_Array_String_methodList* options)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
@@ -145,7 +145,7 @@ void RegisterJavaScriptProxyImpl(WebControllerPeer* peer,
     std::vector<std::string> methods = Converter::Convert<std::vector<std::string>>(options->methodList);
     peerImpl->GetController()->AddJavascriptInterface(objName, methods);
 }
-void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer,
+void DeleteJavaScriptRegisterImpl(Ark_WebController peer,
                                   const Ark_String* name)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
@@ -154,37 +154,37 @@ void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer,
     CHECK_NULL_VOID(name);
     peerImpl->GetController()->RemoveJavascriptInterface(Converter::Convert<std::string>(*name), {});
 }
-Ark_NativePointer GetHitTestImpl(WebControllerPeer* peer)
+Ark_HitTestType GetHitTestImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl && peerImpl->GetController(), 0);
+    CHECK_NULL_RETURN(peerImpl && peerImpl->GetController(), {});
     ContainerScope scope(peerImpl->GetInstanceId());
     LOGE("WebControllerAccessor::GetHitTestImpl is not fully implemented");
     peerImpl->GetController()->GetHitTestResult();
-    return nullptr;
+    return {};
 }
-void RequestFocusImpl(WebControllerPeer* peer)
+void RequestFocusImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->RequestFocus();
 }
-Ark_Boolean AccessBackwardImpl(WebControllerPeer* peer)
+Ark_Boolean AccessBackwardImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl && peerImpl->GetController(), Converter::ArkValue<Ark_Boolean>(false));
     ContainerScope scope(peerImpl->GetInstanceId());
     return Converter::ArkValue<Ark_Boolean>(peerImpl->GetController()->AccessBackward());
 }
-Ark_Boolean AccessForwardImpl(WebControllerPeer* peer)
+Ark_Boolean AccessForwardImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl && peerImpl->GetController(), Converter::ArkValue<Ark_Boolean>(false));
     ContainerScope scope(peerImpl->GetInstanceId());
     return Converter::ArkValue<Ark_Boolean>(peerImpl->GetController()->AccessForward());
 }
-Ark_Boolean AccessStepImpl(WebControllerPeer* peer,
+Ark_Boolean AccessStepImpl(Ark_WebController peer,
                            const Ark_Number* step)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
@@ -194,21 +194,21 @@ Ark_Boolean AccessStepImpl(WebControllerPeer* peer,
     return Converter::ArkValue<Ark_Boolean>(
         peerImpl->GetController()->AccessStep(Converter::Convert<int32_t>(*step)));
 }
-void BackwardImpl(WebControllerPeer* peer)
+void BackwardImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->Backward();
 }
-void ForwardImpl(WebControllerPeer* peer)
+void ForwardImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
     ContainerScope scope(peerImpl->GetInstanceId());
     peerImpl->GetController()->Forward();
 }
-Ark_NativePointer GetCookieManagerImpl(WebControllerPeer* peer)
+Ark_WebCookie GetCookieManagerImpl(Ark_WebController peer)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);

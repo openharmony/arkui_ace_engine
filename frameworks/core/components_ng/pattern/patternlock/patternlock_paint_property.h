@@ -65,7 +65,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
         CHECK_NULL_VOID(patternLockTheme);

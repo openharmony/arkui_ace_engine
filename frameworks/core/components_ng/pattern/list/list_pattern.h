@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
 #include <tuple>
+
 #include "core/animation/chain_animation.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
@@ -29,6 +30,7 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -59,8 +61,8 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public ScrollablePattern {
-    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
+class ListPattern : public ScrollablePattern, public LinearLazyContainer {
+    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern, LinearLazyContainer);
 
 public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
@@ -374,7 +376,9 @@ public:
         return canOverScroll;
     }
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
+
 private:
+    void UpdateOffsetHelper(float lastDelta);
 
     bool IsNeedInitClickEventRecorder() const override
     {

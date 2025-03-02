@@ -107,10 +107,9 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const std::string& value) {
-        Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
-        GetFullAPI()->getEventsAPI()->getRatingEventsReceiver()->onChange(
-            frameNode->GetId(), nValue);
+    auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& value) {
+        Ark_Number convValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+        arkCallback.Invoke(convValue);
     };
     RatingModelNG::SetOnChange(frameNode, onChange);
 }
@@ -122,8 +121,8 @@ void ContentModifierImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     LOGE("ARKOALA RatingInterfaceModifier::ContentModifier is not implemented.");
 }
-void __onChangeEvent_ratingImpl(Ark_NativePointer node,
-                                const Callback_Number_Void* callback)
+void _onChangeEvent_ratingImpl(Ark_NativePointer node,
+                               const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -147,7 +146,7 @@ const GENERATED_ArkUIRatingModifier* GetRatingModifier()
         RatingAttributeModifier::StarStyleImpl,
         RatingAttributeModifier::OnChangeImpl,
         RatingAttributeModifier::ContentModifierImpl,
-        RatingAttributeModifier::__onChangeEvent_ratingImpl,
+        RatingAttributeModifier::_onChangeEvent_ratingImpl,
     };
     return &ArkUIRatingModifierImpl;
 }

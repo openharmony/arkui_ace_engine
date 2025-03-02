@@ -44,7 +44,7 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
             MenuItemGroupView::SetHeader(frameNode, valueString);
         },
         [frameNode, node](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value, frameNode), node]() -> RefPtr<UINode> {
+            auto builder = [callback = CallbackHelper(value), node]() -> RefPtr<UINode> {
                 return callback.BuildSync(node);
             };
             MenuItemGroupView::SetHeader(frameNode, std::move(builder));
@@ -57,7 +57,7 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
             MenuItemGroupView::SetFooter(frameNode, valueString);
         },
         [frameNode, node](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value, frameNode), node]() -> RefPtr<UINode> {
+            auto builder = [callback = CallbackHelper(value), node]() -> RefPtr<UINode> {
                 return callback.BuildSync(node);
             };
             MenuItemGroupView::SetFooter(frameNode, std::move(builder));

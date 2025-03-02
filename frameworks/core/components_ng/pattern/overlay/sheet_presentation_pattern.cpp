@@ -76,7 +76,7 @@ void SheetPresentationPattern::OnModifyDone()
         CHECK_NULL_VOID(sheetTheme);
         auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
             && blurStyle != BlurStyle::NO_MATERIAL) {
@@ -144,7 +144,7 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
         CHECK_NULL_RETURN(layoutProperty, 0.0f);
-        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
             IsPhoneInLandScape()) {
             sheetTopSafeArea = 0.0f;
@@ -171,7 +171,7 @@ void SheetPresentationPattern::InitPageHeight()
     }
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
         IsPhoneInLandScape()) {
         sheetTopSafeArea_ = 0.0f;
@@ -282,7 +282,7 @@ void SheetPresentationPattern::CheckBuilderChange()
         CHECK_NULL_VOID(sheetPattern);
         auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (sheetStyle.sheetMode == SheetMode::AUTO) {
             sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -400,7 +400,7 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     auto sheetType = GetSheetType();
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToBounds(true);
@@ -1059,7 +1059,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
     CHECK_NULL_VOID(host);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto showDragIndicator = sheetStyle.showDragBar.value_or(true);
 
     auto titleColumn = DynamicCast<FrameNode>(host->GetFirstChild());
@@ -1106,7 +1106,7 @@ bool SheetPresentationPattern::IsShowCloseIcon()
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
+    return layoutProperty->GetSheetStyleValue(SheetStyle()).showCloseIcon.value_or(true);
 }
 
 RefPtr<FrameNode> SheetPresentationPattern::GetTitleNode()
@@ -1124,7 +1124,7 @@ void SheetPresentationPattern::UpdateTitlePadding()
     CHECK_NULL_VOID(host);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetSheetStyleValue().isTitleBuilder.has_value()) {
+    if (!layoutProperty->HasSheetStyle() || !layoutProperty->GetSheetStyleValue().isTitleBuilder.has_value()) {
         return;
     }
 
@@ -1170,7 +1170,6 @@ void SheetPresentationPattern::UpdateCloseIconStatus()
     CHECK_NULL_VOID(sheetTheme);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto showCloseIcon = IsShowCloseIcon();
     auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
     CHECK_NULL_VOID(sheetCloseIcon);
@@ -1206,7 +1205,7 @@ void SheetPresentationPattern::UpdateSheetTitle()
     CHECK_NULL_VOID(pipeline);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (sheetStyle.sheetTitle.has_value()) {
         auto titleId = GetTitleId();
         auto titleNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(titleId));
@@ -1238,7 +1237,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
     CHECK_NULL_VOID(pipeline);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (pipeline->GetFontScale() != scale_) {
         auto operationNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(operationNode);
@@ -1341,7 +1340,7 @@ void SheetPresentationPattern::UpdateMaskBackgroundColor()
     CHECK_NULL_VOID(sheetTheme);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     sheetMaskColor_ = sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor());
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (sheetStyle.maskColor.has_value()) {
@@ -1393,7 +1392,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             CHECK_NULL_VOID(overlayManager);
             auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            auto sheetStyle = layoutProperty->GetSheetStyleValue();
+            auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
             overlayManager->ComputeSheetOffset(sheetStyle, host);
             if (sheetType_ == SheetType::SHEET_POPUP) {
                 auto renderContext = GetRenderContext();
@@ -1439,7 +1438,7 @@ void SheetPresentationPattern::InitSheetDetents()
     // record input detents
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     IsCustomDetentsChanged(sheetStyle);
     preDetents_.clear();
     sheetDetentHeight_.clear();
@@ -1533,7 +1532,7 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
 
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     TAG_LOGD(AceLogTag::ACE_SHEET, "GetSheetType displayWindowRect info is : %{public}s",
@@ -1578,7 +1577,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
         sheetType = SheetType::SHEET_CENTER;
         auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN) &&
             sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_POPUP) {
             sheetType = SheetType::SHEET_POPUP;
@@ -1598,7 +1597,7 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
 #ifdef PREVIEW
     rootWidth = pipelineContext->GetDisplayWindowRectInfo().Width();
 #endif
@@ -1729,7 +1728,7 @@ RefPtr<RenderContext> SheetPresentationPattern::GetRenderContext()
 
 bool SheetPresentationPattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
@@ -2270,7 +2269,7 @@ void SheetPresentationPattern::FireOnDetentsDidChange(float height)
 {
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (!IsSheetBottomStyle() || NearEqual(preDetentsHeight_, height) ||
         LessOrEqual(sheetStyle.detents.size(), 0)) {
         return;

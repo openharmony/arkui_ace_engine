@@ -93,7 +93,8 @@ public:
     static void SetBlockBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBlockBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBlockColor(FrameNode* frameNode, const std::optional<Color>& value);
-    static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
+    static void SetTrackBackgroundColor(FrameNode* frameNode,
+        const std::optional<Gradient>& value, bool isResourceColor = false);
     static void SetSelectColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetShowSteps(FrameNode* frameNode, bool value);
     static void SetSliderInteractionMode(FrameNode* frameNode, const std::optional<SliderInteraction>& mode);

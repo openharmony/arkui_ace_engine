@@ -87,7 +87,7 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

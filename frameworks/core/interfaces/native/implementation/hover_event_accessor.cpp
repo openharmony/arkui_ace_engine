@@ -14,16 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/hover_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HoverEventAccessor {
-void DestroyPeerImpl(HoverEventPeer* peer)
+void DestroyPeerImpl(Ark_HoverEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_HoverEvent CtorImpl()
 {
     return new HoverEventPeer();
 }
@@ -31,7 +32,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetStopPropagationImpl(HoverEventPeer* peer,
+Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        HoverInfo* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetStopPropagation(true);
+    });
+    return callback;
+}
+void SetStopPropagationImpl(Ark_HoverEvent peer,
                             const Callback_Void* stopPropagation)
 {
 }
@@ -42,6 +53,7 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
         HoverEventAccessor::DestroyPeerImpl,
         HoverEventAccessor::CtorImpl,
         HoverEventAccessor::GetFinalizerImpl,
+        HoverEventAccessor::GetStopPropagationImpl,
         HoverEventAccessor::SetStopPropagationImpl,
     };
     return &HoverEventAccessorImpl;

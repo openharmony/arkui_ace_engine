@@ -126,8 +126,7 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidPixMapValues, TestSi
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
-    Ark_Materialized subvalue { .ptr = &pixelMapPeer };
-    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_PixelMap>(subvalue);
+    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_PixelMap>(&pixelMapPeer);
     modifier_->setImageSpanOptions(node_, &options);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -151,9 +150,7 @@ HWTEST_F(ImageSpanModifierTest, setAltTestValidValues, TestSize.Level1)
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
-    Ark_Materialized subvalue { .ptr = &pixelMapPeer };
-    auto value = Converter::ArkValue<Ark_PixelMap>(subvalue);
-    modifier_->setAlt(node_, &value);
+    modifier_->setAlt(node_, &pixelMapPeer);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

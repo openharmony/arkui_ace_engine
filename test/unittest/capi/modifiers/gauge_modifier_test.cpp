@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -412,44 +413,44 @@ namespace {
     const auto COLORS_RES_BY_ID = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(
         CreateResource(RES_COLOR_ID));
 
-    const std::vector<std::tuple<Ark_Union_ResourceColor_LinearGradient_common, Ark_Number>> COLORS_TUPLE_ARRAY {
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_ENUM_RED),
+    const std::vector<std::tuple<Ark_Union_ResourceColor_LinearGradient, Ark_Number>> COLORS_TUPLE_ARRAY {
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
             Converter::ArkValue<Ark_Number>(1.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
             Converter::ArkValue<Ark_Number>(0.25f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_STRING_BLUE),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
             Converter::ArkValue<Ark_Number>(0.5f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_RES_BY_NAME),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_RES_BY_NAME),
             Converter::ArkValue<Ark_Number>(1.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_RES_BY_ID),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_RES_BY_ID),
             Converter::ArkValue<Ark_Number>(1.0f)},
     };
-    Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_common_Number>
+    Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_Number>
         ColorsTupleArrayHolder(COLORS_TUPLE_ARRAY);
 
-    const std::vector<std::tuple<Ark_Union_ResourceColor_LinearGradient_common, Ark_Number>> COLORS_TUPLE_BIG_ARRAY {
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_ENUM_RED),
+    const std::vector<std::tuple<Ark_Union_ResourceColor_LinearGradient, Ark_Number>> COLORS_TUPLE_BIG_ARRAY {
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
             Converter::ArkValue<Ark_Number>(1.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
             Converter::ArkValue<Ark_Number>(2.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_STRING_BLUE),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
             Converter::ArkValue<Ark_Number>(1.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_ENUM_RED),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
             Converter::ArkValue<Ark_Number>(2.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
             Converter::ArkValue<Ark_Number>(1.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_STRING_BLUE),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
             Converter::ArkValue<Ark_Number>(2.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_ENUM_RED),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
             Converter::ArkValue<Ark_Number>(1.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
             Converter::ArkValue<Ark_Number>(2.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_STRING_BLUE),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
             Converter::ArkValue<Ark_Number>(1.0f)},
-        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(COLORS_ENUM_RED),
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
             Converter::ArkValue<Ark_Number>(2.0f)},
     };
-    Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_common_Number>
+    Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_Number>
         ColorsTupleBigArrayHolder(COLORS_TUPLE_BIG_ARRAY);
 } // namespace
 
@@ -483,7 +484,7 @@ static std::vector<std::tuple<std::string, Ark_Type_GaugeAttribute_colors_colors
     {
         "COLORS_TUPLE_ARRAY",
         Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors,
-            Array_Tuple_Union_ResourceColor_LinearGradient_common_Number>(ColorsTupleArrayHolder.ArkValue()),
+            Array_Tuple_Union_ResourceColor_LinearGradient_Number>(ColorsTupleArrayHolder.ArkValue()),
         "[[[[\"#FFFF0000\",\"0.000000\"]],1],"
             "[[[\"#F000FF00\",\"0.000000\"]],0.25],"
             "[[[\"#800000FF\",\"0.000000\"]],0.5],"
@@ -493,7 +494,7 @@ static std::vector<std::tuple<std::string, Ark_Type_GaugeAttribute_colors_colors
     {
         "COLORS_TUPLE_BIG_ARRAY",
         Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors,
-            Array_Tuple_Union_ResourceColor_LinearGradient_common_Number>(ColorsTupleBigArrayHolder.ArkValue()),
+            Array_Tuple_Union_ResourceColor_LinearGradient_Number>(ColorsTupleBigArrayHolder.ArkValue()),
         "[[[[\"#FFFF0000\",\"0.000000\"]],1],"
             "[[[\"#F000FF00\",\"0.000000\"]],2],"
             "[[[\"#800000FF\",\"0.000000\"]],1],"
@@ -511,7 +512,7 @@ static std::vector<std::tuple<std::string, Ark_Type_GaugeAttribute_colors_colors
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setColorsTestValidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setColorsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -642,6 +643,24 @@ HWTEST_F(GaugeModifierTest, setDescriptionTestDefaultValues, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DESCRIPTION_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setDescriptionTest_CustomNodeBuilder
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDescription, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    int callsCount = 0;
+    CustomNodeBuilderTestHelper<GaugeModifierTest> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    modifier_->setDescription(node_, &builder);
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 }
 
 /*

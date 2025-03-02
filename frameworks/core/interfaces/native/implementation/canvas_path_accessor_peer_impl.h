@@ -15,16 +15,10 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H
 
-#include "base/utils/utils.h"
-#include "core/common/container_consts.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components/common/properties/decoration.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-class CanvasPathPeerImpl : public Referenced {
-public:
-    CanvasPathPeerImpl() = default;
-    ~CanvasPathPeerImpl() override = default;
+struct CanvasPathPeer : public OHOS::Ace::Referenced {
+    OHOS::Ace::RefPtr<OHOS::Ace::CanvasPath2D> path;
     virtual void TriggerArcImpl(double x,
                                 double y,
                                 double radius,
@@ -87,9 +81,9 @@ public:
         CHECK_NULL_VOID(path);
         path->Rect(x, y, w, h);
     }
-
-public:
-    RefPtr<CanvasPath2D> path;
 };
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+    using CanvasPathPeerImpl = ::CanvasPathPeer;
 } // namespace OHOS::Ace::NG::GeneratedModifier
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H

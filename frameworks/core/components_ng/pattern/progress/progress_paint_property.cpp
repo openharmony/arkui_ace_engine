@@ -29,7 +29,7 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         ToJsonValueForCapsule(json, filter);
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
@@ -77,7 +77,7 @@ void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& js
     if (filter.IsFastFilter()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
@@ -116,7 +116,7 @@ std::string ProgressPaintProperty::ToJsonGradientColor() const
     if (propGradientColor_.has_value()) {
         colors = propGradientColor_.value();
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, "");
         auto theme = pipelineContext->GetTheme<ProgressTheme>();
         auto endColor = theme->GetRingProgressEndSideColor();

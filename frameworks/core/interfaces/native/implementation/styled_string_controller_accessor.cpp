@@ -20,11 +20,11 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor();
 namespace StyledStringControllerAccessor {
-void DestroyPeerImpl(StyledStringControllerPeer* peer)
+void DestroyPeerImpl(Ark_StyledStringController peer)
 {
     LOGE("StyledStringControllerAccessor::DestroyPeerImpl is not supported, it's an interface.");
 }
-Ark_NativePointer CtorImpl()
+Ark_StyledStringController CtorImpl()
 {
     LOGE("StyledStringControllerAccessor::CtorImpl is not supported, it's an interface.");
     return nullptr;
@@ -33,13 +33,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetStyledStringImpl(StyledStringControllerPeer* peer,
-                         const Ark_StyledString* styledString)
+void SetStyledStringImpl(Ark_StyledStringController peer,
+                         Ark_StyledString styledString)
 {
     auto peerRE = reinterpret_cast<RichEditorStyledStringControllerPeer*>(peer);
     GetRichEditorStyledStringControllerAccessor()->setStyledString(peerRE, styledString);
 }
-Ark_NativePointer GetStyledStringImpl(StyledStringControllerPeer* peer)
+Ark_MutableStyledString GetStyledStringImpl(Ark_StyledStringController peer)
 {
     auto peerRE = reinterpret_cast<RichEditorStyledStringControllerPeer*>(peer);
     return GetRichEditorStyledStringControllerAccessor()->getStyledString(peerRE);

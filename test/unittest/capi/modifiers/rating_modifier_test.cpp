@@ -76,14 +76,6 @@ namespace  {
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_FOREGROUND_URI_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_NAME = "secondaryUri";
     const auto ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_DEFAULT_VALUE = "";
-    struct EventsTracker {
-        static inline GENERATED_ArkUIRatingEventsReceiver ratingEventReceiver {};
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getRatingEventsReceiver = [] () -> const GENERATED_ArkUIRatingEventsReceiver* {
-                return &ratingEventReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class RatingModifierTest : public ModifierTestBase<GENERATED_ArkUIRatingModifier,
@@ -92,7 +84,6 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -490,23 +481,25 @@ HWTEST_F(RatingModifierTest, setStarStyleTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    Callback_Number_Void func{};
+    EXPECT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    EXPECT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
         float index;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::ratingEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Number index)
-    {
-        checkEvent = {
+    auto onChange = [](Ark_Int32 nodeId, const Ark_Number index) {
+        checkEvent = CheckEvent{
             .nodeId = nodeId,
-            .index = Converter::Convert<float>(index),
+            .index = Converter::Convert<float>(index)
         };
     };
-    modifier_->setOnChange(node_, &func);
+    auto arkCallback = Converter::ArkValue<Callback_Number_Void>(onChange, frameNode->GetId());
+    modifier_->setOnChange(node_, &arkCallback);
     EXPECT_FALSE(checkEvent.has_value());
     eventHub->FireChangeEvent("55.5");
     ASSERT_EQ(checkEvent.has_value(), true);
@@ -555,7 +548,7 @@ HWTEST_F(RatingModifierTest, setOnChangeEventRatingImpl, TestSize.Level1)
 
     Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_rating(node_, &arkCallback);
+    modifier_->set_onChangeEvent_rating(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent("55.5");

@@ -19,6 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -77,6 +78,9 @@ static const float VALID_VAL = 123.4567f;
 static const Opt_Length OPT_LEN_EMPTY = Converter::ArkValue<Opt_Length>(Ark_Empty());
 static const Opt_Length OPT_LEN_VALID = Converter::ArkValue<Opt_Length>(VALID_VAL);
 
+constexpr double OFFSET_X = 60.4;
+constexpr double OFFSET_Y = 85.5;
+
 static const Ark_Rectangle ARK_RECT_EMPTY {
     OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY
 };
@@ -97,6 +101,11 @@ bool operator==(const OHOS::Ace::DimensionRect& lhs, const OHOS::Ace::DimensionR
         lhs.GetOffset() == rhs.GetOffset();
 }
 } // namespace
+
+namespace GeneratedModifier {
+    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+    const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
+}
 
 namespace Converter {
     struct BlurOptions {
@@ -222,6 +231,198 @@ HWTEST_F(CommonMethodModifierTest2, setMouseResponseRegionTest, TestSize.Level1)
     ASSERT_FALSE(gestureEventHub->GetMouseResponseRegion().empty());
     EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().front() == EXPECTED_DIM_RECT_VALID);
     EXPECT_TRUE(gestureEventHub->GetMouseResponseRegion().back() == EXPECTED_DIM_RECT_DEFAULT);
+}
+
+/*
+ * @tc.name: setOnClick0Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnClick0Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnClick0, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = GetGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        Ark_Int32 offsetX = -1;
+        Ark_Int32 offsetY = -1;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
+        auto peer = event;
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetClickEventAccessor();
+        checkEvent = {
+            .resourceId = resourceId,
+            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
+        };
+        accessor->destroyPeer(peer);
+    };
+
+    const int32_t contextId = 123;
+    auto func = Converter::ArkValue<Callback_ClickEvent_Void>(onClick, contextId);
+    modifier_->setOnClick0(node_, &func);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
+    
+    gestureEventHub->ActClick();
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
+    EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
+}
+
+/*
+ * @tc.name: setOnClick1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnClick1, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = GetGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        Ark_Int32 offsetX = -1;
+        Ark_Int32 offsetY = -1;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
+        auto peer = event;
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetClickEventAccessor();
+        checkEvent = {
+            .resourceId = resourceId,
+            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
+        };
+        accessor->destroyPeer(peer);
+    };
+
+    const int32_t contextId = 123;
+    auto distanceThreshold = Converter::ArkValue<Ark_Number>(1.0);
+    auto func = Converter::ArkValue<Callback_ClickEvent_Void>(onClick, contextId);
+    modifier_->setOnClick1(node_, &func, &distanceThreshold);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
+    
+    gestureEventHub->ActClick();
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
+    EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
+}
+
+/*
+ * @tc.name: setOnKeyPreImeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnKeyPreIme, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    struct CheckEvent {
+        int32_t resourceId = -1;
+        KeyCode code = KeyCode::KEY_UNKNOWN;
+    };
+    static const int32_t expectedResId = 123;
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
+        auto peer = parameter;
+        ASSERT_NE(peer, nullptr);
+        auto info = peer->GetEventInfo();
+        auto accessor = GeneratedModifier::GetKeyEventAccessor();
+        checkEvent = {
+            .resourceId = resourceId,
+            .code = info->GetKeyCode()
+        };
+        accessor->destroyPeer(peer);
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+    };
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, expectedResId);
+    modifier_->setOnKeyPreIme(node_, &arkCallback);
+
+    auto callOnKeyPreIme = focusHub->GetOnKeyPreIme();
+    ASSERT_NE(callOnKeyPreIme, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_FN;
+    auto eventInfo = KeyEventInfo(keyEvent);
+    EXPECT_FALSE(checkEvent.has_value());
+    auto result = callOnKeyPreIme(eventInfo);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(checkEvent->code, keyEvent.code);
+}
+
+
+/*
+ * @tc.name: setOnKeyEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOnKeyEventTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    struct CheckEvent {
+        int32_t resourceId = -1;
+        KeyCode code = KeyCode::KEY_UNKNOWN;
+    };
+    static const int32_t expectedResId = 123;
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
+        auto peer = event;
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetKeyEventAccessor();
+        auto info = peer->GetEventInfo();
+        checkEvent = {
+            .resourceId = resourceId,
+            .code = info->GetKeyCode()
+        };
+        accessor->destroyPeer(peer);
+    };
+
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Void>(checkCallback, expectedResId);
+    modifier_->setOnKeyEvent(node_, &arkCallback);
+
+    auto callOnKeyEvent = focusHub->GetOnKeyCallback();
+    ASSERT_NE(callOnKeyEvent, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_FN;
+    auto eventInfo = KeyEventInfo(keyEvent);
+    EXPECT_FALSE(checkEvent.has_value());
+    callOnKeyEvent(eventInfo);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, expectedResId);
+    EXPECT_EQ(checkEvent->code, keyEvent.code);
 }
 
 /*
@@ -654,29 +855,38 @@ HWTEST_F(CommonMethodModifierTest2, setOpacity, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
+    using OneTestStep = std::pair<Ark_Union_ResourceColor_ColoringStrategy, std::string>;
     static const std::string PROP_NAME("foregroundColor");
     const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
     const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-        { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
-        { CreateResourceUnion<Ark_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)), "#FFFFFFFF" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)), "#FF123456" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f)), "#00000000" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_String>("65535")), "#FF00FFFF" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            CreateResourceUnion<Ark_ResourceColor>(RES_NAME)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+            CreateResourceUnion<Ark_ResourceColor>(RES_ID)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ColoringStrategy>(
+            Ark_ColoringStrategy::ARK_COLORING_STRATEGY_INVERT), "#00000001" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ColoringStrategy>(
+            Ark_ColoringStrategy::ARK_COLORING_STRATEGY_AVERAGE), "#00000001" },
+        { ArkUnion<Ark_Union_ResourceColor_ColoringStrategy, Ark_ColoringStrategy>(
+            Ark_ColoringStrategy::ARK_COLORING_STRATEGY_PRIMARY), "#00000001" },
     };
 
     ASSERT_NE(modifier_->setForegroundColor, nullptr);
 
-    for (const auto &[arkResColor, expected]: testPlan) {
-        Ark_Union_ResourceColor_ColoringStrategy value = {
-            .selector = 0,
-            .value0 = arkResColor
-        };
+    for (const auto &[value, expected]: testPlan) {
         modifier_->setForegroundColor(node_, &value);
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);

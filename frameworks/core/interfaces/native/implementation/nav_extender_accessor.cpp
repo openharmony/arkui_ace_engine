@@ -22,13 +22,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavExtenderAccessor {
-void DestroyPeerImpl(NavExtenderPeer* peer)
+void DestroyPeerImpl(Ark_NavExtender peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_NavExtender CtorImpl()
 {
     return new NavExtenderPeer();
 }
@@ -36,10 +36,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetUpdateStackCallbackImpl(const Ark_NavPathStack* peer,
+void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                 const NavExtender_OnUpdateStack* callback)
 {
-    auto stack = reinterpret_cast<NavPathStackPeer *>(peer->ptr);
+    auto stack = peer;
     CHECK_NULL_VOID(stack);
     auto updater = [callback = CallbackHelper(*callback)](const std::string& value) {
         auto stringValue = Converter::ArkValue<Ark_String>(value);

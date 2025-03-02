@@ -728,7 +728,9 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             return;
         }
         MeasureContext context;
-        context.textContent = textLayoutProperty->GetContentValue();
+        if (textLayoutProperty->HasContent()) {
+            context.textContent = textLayoutProperty->GetContentValue();
+        }
         context.fontSize = titleFontSize_;
 #ifdef ENABLE_ROSEN_BACKEND
         minTitleHeight_ = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(context).Height());

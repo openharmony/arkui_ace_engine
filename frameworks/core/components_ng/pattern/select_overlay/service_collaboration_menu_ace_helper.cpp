@@ -536,7 +536,7 @@ void ServiceCollaborationAceCallback::AddMouseEventToEndIcon(const RefPtr<FrameN
         CHECK_NULL_VOID(helper && iconNode);
         auto iconContext = iconNode->GetRenderContext();
         CHECK_NULL_VOID(iconContext);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
@@ -557,7 +557,7 @@ void ServiceCollaborationAceCallback::AddMouseEventToEndIcon(const RefPtr<FrameN
         CHECK_NULL_VOID(helper && iconNode);
         auto iconContext = iconNode->GetRenderContext();
         CHECK_NULL_VOID(iconContext);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         auto touchType = info.GetTouches().front().GetTouchType();

@@ -131,8 +131,8 @@ void CheckboxShapeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode, static_cast<CheckBoxStyle>(value));
 }
-void __onChangeEvent_selectAllImpl(Ark_NativePointer node,
-                                   const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectAllImpl(Ark_NativePointer node,
+                                  const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -159,7 +159,7 @@ const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         CheckboxGroupAttributeModifier::MarkImpl,
         CheckboxGroupAttributeModifier::OnChangeImpl,
         CheckboxGroupAttributeModifier::CheckboxShapeImpl,
-        CheckboxGroupAttributeModifier::__onChangeEvent_selectAllImpl,
+        CheckboxGroupAttributeModifier::_onChangeEvent_selectAllImpl,
     };
     return &ArkUICheckboxGroupModifierImpl;
 }

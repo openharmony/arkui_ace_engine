@@ -232,11 +232,17 @@ void GridRowLayoutAlgorithm::OnBreakPointChange(LayoutWrapper* layoutWrapper, co
         auto hostEventHub = host->GetEventHub<GridRowEventHub>();
         CHECK_NULL_VOID(hostEventHub);
         hostLayoutProperty->UpdateSizeType(sizeType);
-        TAG_LOGD(AceLogTag::ACE_GRIDROW,
-            "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s and breakpoint reference "
-            "%{public}d",
-            host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str(),
-            hostLayoutProperty->GetBreakPointsValue().reference);
+        if (hostLayoutProperty->HasBreakPoints()) {
+            TAG_LOGD(AceLogTag::ACE_GRIDROW,
+                "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s and breakpoint reference "
+                "%{public}d",
+                host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str(),
+                hostLayoutProperty->GetBreakPointsValue().reference);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_GRIDROW,
+                "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s",
+                host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str());
+        }
         hostEventHub->FireChangeEvent(sizeTypeString);
     };
     context->AddAfterLayoutTask(task);
@@ -258,14 +264,26 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto windowManager = context->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     auto mode = windowManager->GetWindowMode();
+    if (!layoutProperty->HasBreakPoints()) {
+        LOGE("Breakpoints default value is not set");
+        return;
+    }
     auto sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(),
-        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContext());
+        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContextSafely());
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         OnBreakPointChange(layoutWrapper, sizeType);
+    }
+    if (!layoutProperty->HasGutter()) {
+        LOGE("Gutter default value is not set");
+        return;
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
     gutterInDouble_ =
         std::make_pair<double, double>(context->NormalizeToPx(gutter.first), context->NormalizeToPx(gutter.second));
+    if (!layoutProperty->HasColumns()) {
+        LOGE("Columns default value is not set");
+        return;
+    }
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, layoutProperty->GetColumnsValue());
     if (columnNum <= 0) {
         columnNum = DEFAULT_COLUMN_NUMBER;
@@ -284,7 +302,7 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto directionVal = layoutProperty->GetDirectionValue();
+    auto directionVal = layoutProperty->GetDirectionValue(V2::GridRowDirection::Row);
     auto width = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto textDirection = layoutProperty->GetLayoutDirection();
     if (textDirection == TextDirection::AUTO) {

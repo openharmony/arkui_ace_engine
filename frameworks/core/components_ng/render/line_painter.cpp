@@ -26,10 +26,10 @@ void LinePainter::DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintP
         return;
     }
     canvas.AttachPen(pen);
-    PointF startPoint_ = PointF(linePaintProperty.GetStartPointValue().first.ConvertToPx(),
-        linePaintProperty.GetStartPointValue().second.ConvertToPx());
-    PointF endPoint_ = PointF(linePaintProperty.GetEndPointValue().first.ConvertToPx(),
-        linePaintProperty.GetEndPointValue().second.ConvertToPx());
+    PointF startPoint_ = PointF(linePaintProperty.GetStartPointValue({0.0_vp, 0.0_vp}).first.ConvertToPx(),
+        linePaintProperty.GetStartPointValue({0.0_vp, 0.0_vp}).second.ConvertToPx());
+    PointF endPoint_ = PointF(linePaintProperty.GetEndPointValue({0.0_vp, 0.0_vp}).first.ConvertToPx(),
+        linePaintProperty.GetEndPointValue({0.0_vp, 0.0_vp}).second.ConvertToPx());
     canvas.DrawLine(ToRSPoint(startPoint_ + offset), ToRSPoint(endPoint_ + offset));
     canvas.DetachPen();
 }

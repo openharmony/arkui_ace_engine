@@ -821,6 +821,9 @@ MenuParam RichEditorPattern::OneStepDragParam::GetMenuParam(const RefPtr<ImageSp
     CHECK_NULL_RETURN(dispSize.IsPositive(), res);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, res);
+    if (!imageLayoutProperty->HasImageSourceInfo()) {
+        return res;
+    }
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
     CHECK_NULL_RETURN(imageSourceInfo.IsPixmap(), res);
     auto pixelMap = imageSourceInfo.GetPixmap();

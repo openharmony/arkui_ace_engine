@@ -1100,7 +1100,7 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
         }
     }
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
@@ -1209,7 +1209,7 @@ const OffsetF SwiperLayoutAlgorithm::CalculateCustomOffset(
     auto right = indicatorLayoutProperty->GetRight();
     auto top = indicatorLayoutProperty->GetTop();
     auto bottom = indicatorLayoutProperty->GetBottom();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, indicatorOffset);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, indicatorOffset);
@@ -1251,7 +1251,7 @@ void SwiperLayoutAlgorithm::MeasureArrow(
     auto arrowGeometryNode = arrowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(arrowGeometryNode);
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
@@ -1302,7 +1302,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
             auto itemCount = swiperPattern->TotalCount();
             auto indicatorNode = indicatorWrapper->GetHostNode();
             CHECK_NULL_VOID(indicatorNode);
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
             CHECK_NULL_VOID(theme);
@@ -1325,7 +1325,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
         }
     }
     auto isLeftArrow = arrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);

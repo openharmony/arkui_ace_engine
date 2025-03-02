@@ -21,11 +21,11 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace TextBaseControllerAccessor {
-void DestroyPeerImpl(TextBaseControllerPeer* peer)
+void DestroyPeerImpl(Ark_TextBaseController peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextBaseController CtorImpl()
 {
     LOGE("TextBaseControllerPeer is an abstract class.");
     return nullptr;
@@ -34,7 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetSelectionImpl(TextBaseControllerPeer* peer,
+void SetSelectionImpl(Ark_TextBaseController peer,
                       const Ark_Number* selectionStart,
                       const Ark_Number* selectionEnd,
                       const Opt_SelectionOptions* options)
@@ -45,12 +45,12 @@ void SetSelectionImpl(TextBaseControllerPeer* peer,
     auto optionsConv = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
     peer->SetSelection(selectionStartConv, selectionEndConv, optionsConv);
 }
-void CloseSelectionMenuImpl(TextBaseControllerPeer* peer)
+void CloseSelectionMenuImpl(Ark_TextBaseController peer)
 {
     CHECK_NULL_VOID(peer);
     peer->CloseSelectionMenu();
 }
-Ark_NativePointer GetLayoutManagerImpl(TextBaseControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
 {
     CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), nullptr);
     auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->ctor());

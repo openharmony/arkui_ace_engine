@@ -49,7 +49,7 @@ public:
                 changeEvent(isOn);
             }
         };
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(task, "ArkUIToggleUpdateChangeEvent", TaskExecutor::TaskType::UI);
 

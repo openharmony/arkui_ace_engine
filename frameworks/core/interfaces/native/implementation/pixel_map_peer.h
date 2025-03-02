@@ -18,10 +18,7 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 
-struct PixelMapPeer {
-    PixelMapPeer() = default;
-    virtual ~PixelMapPeer() = default;
-
+struct PixelMapPeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PIXEL_MAP_ACCESSOR_PEER_IMPL_H

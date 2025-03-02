@@ -300,7 +300,7 @@ public:
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_RETURN(swiperTheme, nullptr);

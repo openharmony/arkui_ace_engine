@@ -1145,7 +1145,7 @@ HWTEST_F(TextModifierTest, setTextOptionsTestValueValidValues, TestSize.Level1)
 
     TextControllerPeer peer;
     Ark_TextOptions textOptions = {
-        .controller = { .ptr = reinterpret_cast<Ark_NativePointer>(&peer) }
+        .controller = &peer,
     };
     auto textOptionsOpt = Converter::ArkValue<Opt_TextOptions>(textOptions);
     modifier_->setTextOptions(node_, &text, &textOptionsOpt);

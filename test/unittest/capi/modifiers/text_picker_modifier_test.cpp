@@ -1937,7 +1937,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected1Impl, TestSize.Level1)
     Callback_Union_Number_Array_Number_Void arkCallback =
         Converter::ArkValue<Callback_Union_Number_Array_Number_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+    modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     std::vector<std::string> value;
     std::vector<double> index;
@@ -1990,7 +1990,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected2Impl, TestSize.Level1)
     Callback_Union_Number_Array_Number_Void arkCallback =
         Converter::ArkValue<Callback_Union_Number_Array_Number_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+    modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     std::vector<std::string> value;
     std::vector<double> index;
@@ -2047,7 +2047,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue1Impl, TestSize.Level1)
     Callback_Union_String_Array_String_Void arkCallback =
         Converter::ArkValue<Callback_Union_String_Array_String_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+    modifier_->set_onChangeEvent_value(node_, &arkCallback);
 
     std::vector<std::string> value;
     std::vector<double> index;
@@ -2100,7 +2100,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue2Impl, TestSize.Level1)
     Callback_Union_String_Array_String_Void arkCallback =
         Converter::ArkValue<Callback_Union_String_Array_String_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+    modifier_->set_onChangeEvent_value(node_, &arkCallback);
 
     std::vector<std::string> value;
     std::vector<double> index;

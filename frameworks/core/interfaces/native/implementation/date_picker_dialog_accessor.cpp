@@ -25,13 +25,13 @@ struct DatePickerDialogPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
-void DestroyPeerImpl(DatePickerDialogPeer* peer)
+void DestroyPeerImpl(Ark_DatePickerDialog peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_DatePickerDialog CtorImpl()
 {
     return new DatePickerDialogPeer();
 }
@@ -73,7 +73,7 @@ void BuildDialogPropertiesCallbacks(const Ark_DatePickerDialogOptions options, D
 DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options)
 {
     DialogProperties dialogProps;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, dialogProps);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, dialogProps);

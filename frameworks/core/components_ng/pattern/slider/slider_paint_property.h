@@ -50,12 +50,12 @@ public:
         Gradient colors;
         if (HasTrackBackgroundColor()) {
             colors = GetTrackBackgroundColor().value();
-            if (GetTrackBackgroundIsResourceColor()) {
+            if (GetTrackBackgroundIsResourceColor() && GetTrackBackgroundIsResourceColor().value() == true) {
                 return colors.GetColors()[0].GetLinearColor().ToColor().ColorToString();
             }
             return GradientToJson(colors);
         }
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, "");
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_RETURN(theme, "");
@@ -114,7 +114,7 @@ public:
             }
             return;
         }
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);

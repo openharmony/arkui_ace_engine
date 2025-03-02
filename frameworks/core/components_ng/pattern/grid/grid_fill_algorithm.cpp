@@ -53,25 +53,35 @@ void GridFillAlgorithm::Init(const SizeF& viewport, Axis axis, int32_t totalCnt)
     range_.offset = info_.currentOffset_;
     range_.endLine = info_.endMainLineIndex_;
     if (range_.startLine == 0) {
-        range_.offset = std::min(range_.offset, 0.0f);
+        range_.offset = std::min(range_.offset, 0.0f); // no overScroll in range estimation
     }
 }
 
 void GridFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     FillNext(viewport, axis, node, index);
+    if (resetRangeOnJump_) {
+        range_.startLine = range_.endLine = info_.GetItemPos(index).second;
+        resetRangeOnJump_ = false;
+    }
 }
 
 void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     filler.FillMatrixOnly(index);
+    if (!node->CheckNeedForceMeasureAndLayout()) {
+        return;
+    }
     const auto pos = info_.GetItemPos(index);
     filler.MeasureItem(params_, node, index, pos.first, pos.second);
 }
 
 void GridFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
+    if (!node->CheckNeedForceMeasureAndLayout()) {
+        return;
+    }
     // matrix is ready
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     const auto pos = info_.GetItemPos(index);

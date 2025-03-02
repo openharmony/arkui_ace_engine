@@ -20,14 +20,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockControllerAccessor {
-void DestroyPeerImpl(TextClockControllerPeer* peer)
+void DestroyPeerImpl(Ark_TextClockController peer)
 {
     if (peer) {
         peer->controller = nullptr;
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_TextClockController CtorImpl()
 {
     return new TextClockControllerPeer();
 }
@@ -35,12 +35,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void StartImpl(TextClockControllerPeer* peer)
+void StartImpl(Ark_TextClockController peer)
 {
     CHECK_NULL_VOID(peer && peer->controller);
     peer->controller->Start();
 }
-void StopImpl(TextClockControllerPeer* peer)
+void StopImpl(Ark_TextClockController peer)
 {
     CHECK_NULL_VOID(peer && peer->controller);
     peer->controller->Stop();

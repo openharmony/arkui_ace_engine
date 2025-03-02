@@ -117,6 +117,8 @@ public:
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback);
     OnControllerAttachedCallback GetOnControllerAttachedCallback();
+    void SetSetWebIdCallback(std::function<void(int32_t)>&& SetIdCallback) {}
+    void SetSetHapPathCallback(std::function<void(const std::string&)>&& callback) {}
 
 private:
     std::string GetMixedModeAsString() const;

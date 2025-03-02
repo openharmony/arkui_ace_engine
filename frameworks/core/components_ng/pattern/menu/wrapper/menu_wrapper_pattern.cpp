@@ -134,7 +134,7 @@ void MenuWrapperPattern::ChangeCurMenuItemBgColor()
     if (!currentTouchItem_) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -345,7 +345,7 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     AnimationOption option;
     option.SetOnFinishEvent(
         [weak = WeakClaim(RawPtr(host)), subMenuWk = WeakClaim(RawPtr(subMenu))] {
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
             auto taskExecutor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
@@ -546,7 +546,7 @@ void MenuWrapperPattern::MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& fr
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -572,7 +572,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -654,7 +654,7 @@ OffsetT<Dimension> MenuWrapperPattern::GetAnimationOffset()
 {
     OffsetT<Dimension> offset;
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, offset);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, offset);

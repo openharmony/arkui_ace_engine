@@ -83,7 +83,7 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetColumnsKind(columnKind);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
@@ -748,7 +748,7 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     if (!executor) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);

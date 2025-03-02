@@ -1321,6 +1321,11 @@ void PipelineContext::FlushBuild()
     FlushBuildFinishCallbacks();
 }
 
+void PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
+{
+    vsyncListener_ = std::move(vsync);
+}
+
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
 {
     animationClosuresList_.emplace_back(std::move(animation));

@@ -602,7 +602,7 @@
             ],
         },
         {
-            "name": "LengthMetricsNonNeg",
+            "name": "LengthMetricsNonNeg_", // Disabled due to generator issues
             "type": "Ark_LengthMetrics",
             "validValues": [
                 ["123.0_vp", "123.00vp"],
@@ -3973,6 +3973,8 @@
                 "setClipContentTestDefaultValues",
                 "setClipContentTestClipContentValidValues",
                 "setClipContentTestClipContentInvalidValues",
+
+                "setFadingEdgeTestValidValues", // LengthMetrics generator issue
             ]
         },
         {
@@ -4590,6 +4592,8 @@
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowShadowOptionsFillValidValues",
                 "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
+
+                "setLineSpacingTestValidValues", // LengthMetrics generator issue
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",

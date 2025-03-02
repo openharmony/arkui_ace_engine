@@ -21,10 +21,10 @@ struct CustomSpanPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomSpanAccessor {
-void DestroyPeerImpl(CustomSpanPeer* peer)
+void DestroyPeerImpl(Ark_CustomSpan peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_CustomSpan CtorImpl()
 {
     return nullptr;
 }
@@ -32,17 +32,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer,
-                                const Ark_CustomSpanMeasureInfo* measureInfo)
+Ark_CustomSpanMetrics OnMeasureImpl(Ark_CustomSpan peer,
+                                    const Ark_CustomSpanMeasureInfo* measureInfo)
 {
-    return nullptr;
+    return {};
 }
-void OnDrawImpl(CustomSpanPeer* peer,
+void OnDrawImpl(Ark_CustomSpan peer,
                 const Ark_DrawContext* context,
                 const Ark_CustomSpanDrawInfo* drawInfo)
 {
 }
-void InvalidateImpl(CustomSpanPeer* peer)
+void InvalidateImpl(Ark_CustomSpan peer)
 {
 }
 } // CustomSpanAccessor

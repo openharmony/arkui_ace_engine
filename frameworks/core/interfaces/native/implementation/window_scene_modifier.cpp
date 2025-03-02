@@ -36,7 +36,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
         return AceType::RawPtr(frameNode);
     }
 #endif
-    return nullptr;
+    return {};
 }
 } // WindowSceneModifier
 namespace WindowSceneInterfaceModifier {

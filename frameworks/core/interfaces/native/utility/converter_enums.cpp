@@ -55,6 +55,18 @@ void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
 }
 
 template<>
+void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src)
+{
+    switch (src) {
+        case ARK_DISMISS_REASON_PRESS_BACK : dst = BindSheetDismissReason::BACK_PRESSED; break;
+        case ARK_DISMISS_REASON_TOUCH_OUTSIDE: dst = BindSheetDismissReason::TOUCH_OUTSIDE; break;
+        case ARK_DISMISS_REASON_CLOSE_BUTTON: dst = BindSheetDismissReason::CLOSE_BUTTON; break;
+        case ARK_DISMISS_REASON_SLIDE_DOWN: dst = BindSheetDismissReason::SLIDE_DOWN; break;
+        default: LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src); break;
+    }
+}
+
+template<>
 void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 {
     switch (src) {
@@ -225,6 +237,16 @@ void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringS
     switch (src) {
         case ARK_COLORING_STRATEGY_INVERT: dst = ForegroundColorStrategy::INVERT; break;
         default: LOGE("Unexpected enum value in Ark_ColoringStrategy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src)
+{
+    switch (src) {
+        case ARK_GESTURE_MASK_NORMAL: dst = GestureMask::Normal; break;
+        case ARK_GESTURE_MASK_IGNORE_INTERNAL: dst = GestureMask::IgnoreInternal; break;
+        default: LOGE("Unexpected enum value in Ark_GestureMask: %{public}d", src);
     }
 }
 
@@ -1030,6 +1052,18 @@ void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderSty
 }
 
 template<>
+void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_AccessibilityHoverType& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_ENTER: dst = AccessibilityHoverAction::HOVER_ENTER; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_MOVE: dst = AccessibilityHoverAction::HOVER_MOVE; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT: dst = AccessibilityHoverAction::HOVER_EXIT; break;
+        case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL: dst = AccessibilityHoverAction::HOVER_CANCEL; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src)
 {
     switch (src) {
@@ -1793,6 +1827,18 @@ void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
         case ARK_HIT_TEST_MODE_NONE: dst = HitTestMode::HTMNONE; break;
         default: {
             LOGE("Unexpected enum value in Ark_HitTestMode: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src)
+{
+    switch (src) {
+        case ARK_DRAG_BEHAVIOR_COPY: dst = DragBehavior::COPY; break;
+        case ARK_DRAG_BEHAVIOR_MOVE: dst = DragBehavior::MOVE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DragBehavior: %{public}d", src);
         }
     }
 }

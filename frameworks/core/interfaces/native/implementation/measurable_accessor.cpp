@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MeasurableAccessor {
-void DestroyPeerImpl(MeasurablePeer* peer)
+void DestroyPeerImpl(Ark_Measurable peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_Measurable CtorImpl()
 {
     return nullptr;
 }
@@ -30,22 +30,22 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer MeasureImpl(MeasurablePeer* peer,
+Ark_MeasureResult MeasureImpl(Ark_Measurable peer,
                               const Ark_ConstraintSizeOptions* constraint)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetMarginImpl(MeasurablePeer* peer)
+Ark_DirectionalEdgesT GetMarginImpl(Ark_Measurable peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetPaddingImpl(MeasurablePeer* peer)
+Ark_DirectionalEdgesT GetPaddingImpl(Ark_Measurable peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetBorderWidthImpl(MeasurablePeer* peer)
+Ark_DirectionalEdgesT GetBorderWidthImpl(Ark_Measurable peer)
 {
-    return nullptr;
+    return {};
 }
 } // MeasurableAccessor
 const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()

@@ -33,6 +33,12 @@ public:
      */
     virtual void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) {}
 
+    /**
+     * @brief Called before the adapter performs a jump
+     *
+     */
+    virtual void MarkJump() = 0;
+
     virtual void FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) = 0;
 
     /**
@@ -45,10 +51,11 @@ public:
      */
     virtual void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) = 0;
 
+    /* for parallel mode */
     virtual bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta)
     {
         return false;
-    } // for parallel mode
+    }
 
     virtual void OnSlidingOffsetUpdate(float delta) = 0;
 
@@ -57,11 +64,6 @@ public:
      * @return true if more items can be filled in the given @c direction
      */
     virtual bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction) = 0;
-
-    virtual bool IsReady() const
-    {
-        return false;
-    }
 
     virtual int32_t GetMarkIndex() = 0;
 

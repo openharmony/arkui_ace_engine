@@ -15,18 +15,19 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_PATTERN_LOCK_CTRL_ACCESSOR_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_PATTERN_LOCK_CTRL_ACCESSOR_PEER_IMPL_H
 
-#include <optional>
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/components_v2/pattern_lock/pattern_lock_controller.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-using PatternLockControllerPeerImpl = struct {
-    RefPtr<V2::PatternLockController> handler;
-    void SetHandler(const RefPtr<V2::PatternLockController>& handlerIn)
+struct PatternLockControllerPeer final {
+    OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLockController> handler;
+
+    void SetHandler(const OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLockController>& handlerIn)
     {
         handler = handlerIn;
     }
 };
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+    using PatternLockControllerPeerImpl = ::PatternLockControllerPeer;
 } // namespace OHOS::Ace::NG::GeneratedModifier
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_PATTERN_LOCK_CTRL_ACCESSOR_PEER_IMPL_H

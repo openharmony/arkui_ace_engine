@@ -118,7 +118,7 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, getCaretOffsetTest, TestSize.Leve
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
 
     EXPECT_CALL(*mockRichEditorController_, GetCaretOffset()).Times(1);
-    Ark_Int32 idx = accessor_->getCaretOffset(peer_);
+    auto idx = Converter::Convert<int32_t>(accessor_->getCaretOffset(peer_));
     ASSERT_EQ(idx, TEST_IDX);
 }
 

@@ -481,7 +481,7 @@ void NavigationTitleUtil::HandleLongPress(
     const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems)
 {
     CHECK_NULL_VOID(menuNode);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
     CHECK_NULL_VOID(dialogTheme);

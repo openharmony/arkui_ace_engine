@@ -1607,7 +1607,7 @@ HWTEST_F(SearchModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
 
     Callback_String_Void arkCallback = Converter::ArkValue<Callback_String_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+    modifier_->set_onChangeEvent_value(node_, &arkCallback);
 
     PreviewText previewText {.offset = -1, .value = ""};
     ASSERT_EQ(checkEvent.has_value(), false);

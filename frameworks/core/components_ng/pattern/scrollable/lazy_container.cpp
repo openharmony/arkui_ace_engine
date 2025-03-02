@@ -15,26 +15,24 @@
 
 #include "lazy_container.h"
 
+#include "core/components_ng/layout/section/staggered_fill_algorithm.h"
+
 namespace OHOS::Ace::NG {
-void LazyContainer::UpdateOffset(float delta)
+bool LazyContainer::UpdateOffset(float delta)
 {
     if (adapter_) {
-        adapter_->UpdateSlidingOffset(delta);
+        return adapter_->UpdateSlidingOffset(delta);
     }
+    return false;
 }
 
-void LazyContainer::UpdateLayoutRange(Axis axis, int32_t markIdx)
+void LazyContainer::UpdateLayoutRange(Axis axis, bool firstLayout)
 {
     if (adapter_) {
-        adapter_->UpdateSize(GetHost()->GetGeometryNode()->GetFrameSize());
-        adapter_->UpdateAxis(axis);
-    }
-}
-
-void LazyContainer::JumpToItem(int32_t index)
-{
-    if (adapter_) {
-        adapter_->UpdateMarkItem(index, true);
+        adapter_->UpdateViewport(GetHost()->GetGeometryNode()->GetFrameSize(), axis);
+        if (firstLayout) {
+            adapter_->PrepareReset(0);
+        }
     }
 }
 
@@ -63,5 +61,32 @@ RefPtr<FrameNode> LazyContainer::GetOrCreateChildByIndex(uint32_t index)
         return adapter_->GetChildByIndex(index);
     }
     return nullptr;
+}
+
+RefPtr<FillAlgorithm> LinearLazyContainer::CreateFillAlgorithm()
+{
+    return MakeRefPtr<StaggeredFillAlgorithm>(GetLayoutProperty<LayoutProperty>());
+}
+
+void LazyContainer::RequestJump(int32_t idx, ScrollAlign align, float extraOffset)
+{
+    if (adapter_) {
+        adapter_->PrepareJump(idx, align, extraOffset);
+    }
+}
+
+void LazyContainer::RequestReset(int32_t idx)
+{
+    if (adapter_ && idx >= 0) {
+        adapter_->PrepareReset(idx);
+    }
+}
+
+bool LazyContainer::RequestFillToTarget(int32_t idx, ScrollAlign align, float extraOffset)
+{
+    if (adapter_) {
+        return adapter_->PrepareLoadToTarget(idx, align, extraOffset);
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

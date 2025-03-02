@@ -47,7 +47,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         host->GetGeometryNode()->Reset();
         return std::nullopt;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return MeasureContentForApiNine(contentConstraint, layoutWrapper);
@@ -97,7 +97,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
 std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContentForApiNine(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -160,7 +160,7 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     CHECK_NULL_RETURN(host, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     Dimension margin = progressTheme->GetTextMargin();

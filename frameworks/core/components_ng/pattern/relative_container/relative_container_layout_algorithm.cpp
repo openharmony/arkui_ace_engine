@@ -389,7 +389,7 @@ void RelativeContainerLayoutAlgorithm::CheckNodeInHorizontalChain(std::string& c
         CHECK_NULL_BREAK(idNodeMap_.find(nextNode) != idNodeMap_.end());
         auto nextNodeWrapper = idNodeMap_[nextNode].layoutWrapper;
         const auto& nextNodeFlexItem = nextNodeWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        if (!nextNodeFlexItem) {
+        if (!nextNodeFlexItem || !nextNodeFlexItem->HasAlignRules()) {
             break;
         }
         AlignRulesItem nextNodeAlignRules = nextNodeFlexItem->GetAlignRulesValue();
@@ -424,7 +424,7 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const ChildMeasureWr
     auto childWrapper = measureParam.layoutWrapper;
     auto childHostNode = childWrapper->GetHostNode();
     const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-    AlignRulesItem currentAlignRules = flexItem->GetAlignRulesValue();
+    AlignRulesItem currentAlignRules = flexItem->GetAlignRulesValue(AlignRulesItem());
     ChainInfo chainInfo = flexItem->GetHorizontalChainStyleValue();
     CHECK_NULL_VOID(chainInfo.direction.has_value());
     CHECK_NULL_VOID(chainInfo.style.has_value());
@@ -479,7 +479,7 @@ void RelativeContainerLayoutAlgorithm::CheckNodeInVerticalChain(std::string& cur
         CHECK_NULL_BREAK(idNodeMap_.find(nextNode) != idNodeMap_.end());
         auto nextNodeWrapper = idNodeMap_[nextNode].layoutWrapper;
         const auto& nextNodeFlexItem = nextNodeWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        if (!nextNodeFlexItem) {
+        if (!nextNodeFlexItem || !nextNodeFlexItem->HasAlignRules()) {
             break;
         }
         AlignRulesItem nextNodeAlignRules = nextNodeFlexItem->GetAlignRulesValue();
@@ -514,7 +514,7 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const ChildMeasureWrap
     auto childWrapper = measureParam.layoutWrapper;
     auto childHostNode = childWrapper->GetHostNode();
     const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-    AlignRulesItem currentAlignRules = flexItem->GetAlignRulesValue();
+    AlignRulesItem currentAlignRules = flexItem->GetAlignRulesValue(AlignRulesItem());
     ChainInfo chainInfo = flexItem->GetVerticalChainStyleValue();
     BiasPair bias(DEFAULT_BIAS, DEFAULT_BIAS);
     float totalChainWeight = DEFAULT_WEIGHT;
@@ -1444,7 +1444,7 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
 void RelativeContainerLayoutAlgorithm::CalcOffsetParam(LayoutWrapper* layoutWrapper, const std::string& nodeName)
 {
     auto childWrapper = idNodeMap_[nodeName].layoutWrapper;
-    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
+    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue(AlignRulesItem());
     float offsetX = 0.0f;
     bool offsetXCalculated = false;
     float offsetY = 0.0f;

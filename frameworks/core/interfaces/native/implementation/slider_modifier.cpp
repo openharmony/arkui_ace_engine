@@ -83,7 +83,7 @@ struct SliderBlockImageInfo {
 struct SliderBlockStyle {
     std::optional<SliderModel::BlockStyleType> type;
     std::optional<ImageSourceInfo> image;
-    std::optional<void*> shape;
+    std::optional<std::string> shape;
 };
 
 template<>
@@ -92,32 +92,8 @@ SliderBlockStyle Convert(const Ark_SliderBlockStyle& src)
     return {
         .type = Converter::OptConvert<SliderModel::BlockStyleType>(src.type),
         .image = Converter::OptConvert<ImageSourceInfo>(src.image),
-        .shape = Converter::OptConvert<void*>(src.shape)
+        .shape = Converter::OptConvert<std::string>(src.shape)
     };
-}
-
-template<>
-void* Convert(const Ark_CircleAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_EllipseAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_PathAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_RectAttribute& src)
-{
-    return src.handle;
 }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -170,13 +146,25 @@ void BlockColorImpl(Ark_NativePointer node,
     SliderModelNG::SetBlockColor(frameNode, convValue);
 }
 void TrackColorImpl(Ark_NativePointer node,
-                    const Ark_Union_ResourceColor_LinearGradient_common* value)
+                    const Ark_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("SliderModifier::TrackColorImpl is not implemented, incorrect LinearGradient passed!");
-    // LinearGradient issue https://gitee.com/nikolay-igotti/idlize/issues/IAW4DU
+
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_ResourceColor& value) {
+            auto colorOpt = Converter::OptConvert<Color>(value);
+            auto gradientOpt = colorOpt.has_value() ?
+                std::optional<Gradient>{SliderModelNG::CreateSolidGradient(colorOpt.value())} : std::nullopt;
+            SliderModelNG::SetTrackBackgroundColor(frameNode, gradientOpt, true);
+        },
+        [frameNode](const Ark_LinearGradient& value) {
+            auto gradientOpt = Converter::OptConvert<Gradient>(value);
+            SliderModelNG::SetTrackBackgroundColor(frameNode, gradientOpt);
+        },
+        []() {}
+    );
 }
 void SelectedColorImpl(Ark_NativePointer node,
                        const Ark_ResourceColor* value)
@@ -229,11 +217,11 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](float value, int32_t mode) {
-        auto arkValue = Converter::ArkValue<Ark_Number>(value);
-        auto arkMode = Converter::ArkValue<Ark_SliderChangeMode>(static_cast<SliderModel::SliderChangeMode>(mode));
-        GetFullAPI()->getEventsAPI()->getSliderEventsReceiver()->onChange(
-            frameNode->GetId(), arkValue, arkMode);
+    auto onChange = [arkCallback = CallbackHelper(*value)](float newValue, int32_t mode) {
+        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(newValue);
+        Ark_SliderChangeMode arkMode = Converter::ArkValue<Ark_SliderChangeMode>(
+            static_cast<SliderModel::SliderChangeMode>(mode));
+        arkCallback.Invoke(arkValue, arkMode);
     };
     SliderModelNG::SetOnChange(frameNode, std::move(onChange));
 }
@@ -369,8 +357,8 @@ void ShowTipsImpl(Ark_NativePointer node,
     auto convContent = content ? Converter::OptConvert<std::string>(*content) : std::nullopt;
     SliderModelNG::SetShowTips(frameNode, convValue, convContent);
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -409,7 +397,7 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::ContentModifierImpl,
         SliderAttributeModifier::SlideRangeImpl,
         SliderAttributeModifier::ShowTipsImpl,
-        SliderAttributeModifier::__onChangeEvent_valueImpl,
+        SliderAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISliderModifierImpl;
 }

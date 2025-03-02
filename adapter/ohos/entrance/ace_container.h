@@ -315,6 +315,8 @@ public:
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
+    void SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
+
     void CheckAndSetFontFamily() override;
 
     void OnFinish()

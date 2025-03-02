@@ -39,20 +39,21 @@ public:
     void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
     void OnSlidingOffsetUpdate(float delta) override;
-    bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta) override; // for parallel mode
-
-    bool IsReady() const override
-    {
-        return true;
-    }
+    /* for parallel mode */
+    bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta) override;
 
     bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
+    void MarkJump() override
+    {
+        resetRangeOnJump_ = true;
+    }
+
     int32_t GetMarkIndex() override
     {
-        return range_.startIdx;
+        return info_.startIndex_;
     }
 
     std::pair<int32_t, int32_t> GetRange() const override
@@ -89,11 +90,13 @@ private:
         int32_t startLine = 0; // first line in viewport
         float offset = 0.0f;   // main-axis offset of the first line in viewport
         int32_t endLine = 0;   // last line in viewport
-        int32_t startIdx = 0;
-        int32_t endIdx = 0;
+        int32_t startIdx = 0;  // only used in range mode
+        int32_t endIdx = 0;    // only used in range mode
     };
     LayoutRange range_;
     GridIrregularFiller::FillParameters params_;
+
+    bool resetRangeOnJump_ = false;
 };
 
 } // namespace OHOS::Ace::NG

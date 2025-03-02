@@ -4316,7 +4316,7 @@ void TextFieldPattern::UltralimitShake()
 
 float TextFieldPattern::MeasureCounterNodeHeight()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, 0.0);
@@ -8088,7 +8088,7 @@ PaddingProperty TextFieldPattern::GetPaddingByUserValue()
     CHECK_NULL_RETURN(theme, padding);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, padding);
-    padding = paintProperty->GetPaddingByUserValue();
+    padding = paintProperty->GetPaddingByUserValue(padding);
     auto themePadding = IsUnderlineMode() ? theme->GetUnderlinePadding() : theme->GetPadding();
     if (!padding.top.has_value()) {
         padding.top = CalcLength(CalcLength(themePadding.Top()).GetDimension());

@@ -917,7 +917,7 @@ HWTEST_F(TimePickerModifierTest, setEnableHapticFeedback, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->set__onChangeEvent_selected, nullptr);
+    ASSERT_NE(modifier_->set_onChangeEvent_selected, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -937,7 +937,7 @@ HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
         .call = onTimeChange
     };
 
-    modifier_->set__onChangeEvent_selected(node_, &func);
+    modifier_->set_onChangeEvent_selected(node_, &func);
 
     for (const auto time : CHANGE_EVENT_TEST_PLAN) {
         DatePickerChangeEvent event(time.ToString(true, true));

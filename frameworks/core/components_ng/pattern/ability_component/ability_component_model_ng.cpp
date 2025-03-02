@@ -27,7 +27,7 @@ void AbilityComponentModelNG::Create(const std::string& bundleName, const std::s
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::ABILITY_COMPONENT_ETS_TAG, nodeId,
         [bundleName, abilityName]() { return AceType::MakeRefPtr<AbilityComponentPattern>(bundleName, abilityName); });
     stack->Push(frameNode);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
 }

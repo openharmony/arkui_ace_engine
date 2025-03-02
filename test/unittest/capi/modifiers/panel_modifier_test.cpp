@@ -793,7 +793,7 @@ HWTEST_F(PanelModifierTest, setOnChangeEventModeImpl, TestSize.Level1)
 
     Callback_PanelMode_Void arkCallback = Converter::ArkValue<Callback_PanelMode_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_mode(node_, &arkCallback);
+    modifier_->set_onChangeEvent_mode(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireSizeChangeEvent(PanelMode::FULL, 100.f, 200.f);

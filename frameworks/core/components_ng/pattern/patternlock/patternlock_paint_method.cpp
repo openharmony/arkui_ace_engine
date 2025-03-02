@@ -64,7 +64,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
 void PatternLockPaintMethod::GetThemeProp()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);

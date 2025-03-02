@@ -70,7 +70,7 @@ HWTEST_F(BaseSpanModifierTest, setBaselineOffsetTestValues, TestSize.Level1)
 
     for (auto&& value: LENGTH_METRICS_ANY_TEST_PLAN) {
         inputBaselineOffset = std::get<0>(value);
-        modifier_->setBaselineOffset(node_, &inputBaselineOffset);
+        modifier_->setBaselineOffset(node_, inputBaselineOffset);
 
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_BASELINE_OFFSET_NAME);

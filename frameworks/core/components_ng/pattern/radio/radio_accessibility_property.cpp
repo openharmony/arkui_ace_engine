@@ -29,7 +29,7 @@ bool RadioAccessibilityProperty::IsChecked() const
     CHECK_NULL_RETURN(frameNode, false);
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_RETURN(frameNode, false);
-    return radioPaintProperty->GetRadioCheckValue();
+    return radioPaintProperty->GetRadioCheckValue(false);
 }
 
 std::string RadioAccessibilityProperty::GetText() const

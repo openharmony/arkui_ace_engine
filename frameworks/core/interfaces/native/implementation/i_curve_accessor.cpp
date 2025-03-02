@@ -15,18 +15,19 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ICurveAccessor {
-void DestroyPeerImpl(ICurvePeer* peer)
+void DestroyPeerImpl(Ark_ICurve peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_ICurve CtorImpl()
 {
     return new ICurvePeer();
 }
@@ -34,11 +35,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 InterpolateImpl(ICurvePeer* peer,
-                          const Ark_Number* fraction)
+Ark_Number InterpolateImpl(Ark_ICurve peer,
+                           const Ark_Number* fraction)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0.0f);
-    CHECK_NULL_RETURN(fraction, 0.0f);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    CHECK_NULL_RETURN(fraction, errValue);
     float time = Converter::Convert<float>(*fraction);
     if (time > 1.0f) {
         time = 1.0f;
@@ -47,7 +49,7 @@ Ark_Int32 InterpolateImpl(ICurvePeer* peer,
         time = 0.0f;
     }
     LOGE("ICurveAccessor::InterpolateImpl - return value can be incorrect");
-    return peer->handler->Move(time);
+    return Converter::ArkValue<Ark_Number>(peer->handler->Move(time));
 }
 } // ICurveAccessor
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()

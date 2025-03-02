@@ -67,7 +67,7 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
         auto arkIndicatorBuilder = Converter::OptConvert<CustomNodeBuilder>(options->value.indicatorBuilder);
         if (arkIndicatorBuilder) {
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto customBuilder = [callback = CallbackHelper(arkIndicatorBuilder.value(), frameNode), node,
+            auto customBuilder = [callback = CallbackHelper(arkIndicatorBuilder.value()), node,
                 weakNode]() {
                 PipelineContext::SetCallBackNode(weakNode);
                 auto uiNode = callback.BuildSync(node);
@@ -158,8 +158,8 @@ void ContentModifierImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CheckboxModelNG::SetContentModifier(frameNode, convValue);
 }
-void __onChangeEvent_selectImpl(Ark_NativePointer node,
-                                const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectImpl(Ark_NativePointer node,
+                               const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -184,7 +184,7 @@ const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
         CheckboxAttributeModifier::MarkImpl,
         CheckboxAttributeModifier::OnChangeImpl,
         CheckboxAttributeModifier::ContentModifierImpl,
-        CheckboxAttributeModifier::__onChangeEvent_selectImpl,
+        CheckboxAttributeModifier::_onChangeEvent_selectImpl,
     };
     return &ArkUICheckboxModifierImpl;
 }

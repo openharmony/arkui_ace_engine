@@ -165,7 +165,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
     int64_t startTime = GetSysTimestamp();
-    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_RETURN(pipeline, false);
     StopPageTransition();
 

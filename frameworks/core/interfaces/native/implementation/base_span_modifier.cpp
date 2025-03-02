@@ -44,12 +44,12 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
     }
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
-                        const Ark_LengthMetrics* value)
+                        Ark_LengthMetrics value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvert<Dimension>(value);
     Validator::ValidateNonPercent(convValue);
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
         SpanModelNG::SetBaselineOffset(frameNode, convValue);

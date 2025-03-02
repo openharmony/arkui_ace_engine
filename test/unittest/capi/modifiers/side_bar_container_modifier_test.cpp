@@ -90,25 +90,6 @@ const Opt_ResourceColor OPT_COLOR_INT = { .tag = ARK_TAG_OBJECT, .value = COLOR_
 const Opt_ResourceColor OPT_COLOR_FLOAT = { .tag = ARK_TAG_OBJECT, .value = COLOR_FLOAT };
 const Opt_ResourceColor OPT_COLOR_STRING = { .tag = ARK_TAG_OBJECT, .value = COLOR_STRING };
 
-static bool g_isCheckedTest = true;
-static auto sideBarOnChange(Ark_Int32 nodeId, const Ark_Boolean isChecked)
-{
-    g_isCheckedTest = !g_isCheckedTest;
-};
-static GENERATED_ArkUISideBarContainerEventsReceiver recv {
-    .onChange = sideBarOnChange
-};
-static const GENERATED_ArkUISideBarContainerEventsReceiver* getSideBarContainerEventsReceiverTest()
-{
-    return &recv;
-};
-static const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-static const GENERATED_ArkUIEventsAPI eventsImpl = {
-    .getSideBarContainerEventsReceiver = getSideBarContainerEventsReceiverTest };
-    return &eventsImpl;
-};
-
 const auto ATTRIBUTE_CONTAINER_TYPE = "type";
 const auto ATTRIBUTE_CONTROL_BUTTON_NAME = "controlButton";
 const auto ATTRIBUTE_SHOW_SIDE_BAR_NAME = "showSideBar";
@@ -155,7 +136,6 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
         SetupTheme<SideBarTheme>();
-        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 
     void checkControlButtonAttr(std::vector<std::tuple<std::string, Opt_Number, std::string>> styleArray,
@@ -419,14 +399,28 @@ HWTEST_F(SideBarContainerModifierTest, setShowControlButtonTestValidValues, Test
 HWTEST_F(SideBarContainerModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Boolean_Void func{};
-    modifier_->setOnChange(node_, &func);
+    struct CheckEvent {
+        int32_t nodeId;
+        bool value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    Callback_Boolean_Void arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Boolean value) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .value = Converter::Convert<bool>(value)
+            };
+        }
+    };
+    modifier_->setOnChange(node_, &arkCallback);
     auto eventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
     eventHub->FireChangeEvent(true);
-    EXPECT_EQ(g_isCheckedTest, false);
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_TRUE(checkEvent->value);
     ASSERT_NE(eventHub, nullptr);
     eventHub->FireChangeEvent(true);
-    EXPECT_EQ(g_isCheckedTest, true);
+    EXPECT_TRUE(checkEvent->value);
 }
 
 /*
@@ -856,7 +850,7 @@ HWTEST_F(SideBarContainerModifierTest, setOnChangeEventSelectImpl, TestSize.Leve
 
     Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_showSideBar(node_, &arkCallback);
+    modifier_->set_onChangeEvent_showSideBar(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(true);

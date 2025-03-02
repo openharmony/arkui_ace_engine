@@ -20,19 +20,43 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/fill_algorithm.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool notify)
+void ScrollWindowAdapter::PrepareReset(int32_t idx)
 {
-    if (index == -1) {
-        index = fillAlgorithm_->GetMarkIndex();
+    markIndex_ = idx;
+    jumpPending_ = std::make_unique<PendingJump>(idx, ScrollAlign::START, 0.0f);
+    fillAlgorithm_->MarkJump();
+    RequestRecompose(idx);
+}
+
+void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extraOffset)
+{
+    if (idx == LAST_ITEM) {
+        idx = totalCount_ - 1;
     }
-    if (markIndex_ == index) {
+    if (idx == markIndex_) {
         return;
     }
-    markIndex_ = index;
-    RequestRecompose();
+    markIndex_ = idx;
+    jumpPending_ = std::make_unique<PendingJump>(idx, align, extraOffset);
+    fillAlgorithm_->MarkJump();
+    RequestRecompose(idx);
+}
+
+bool ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align, float extraOffset)
+{
+    if (target_ && targetIdx == target_->index) {
+        target_.reset(); // prevent loop and good timing to reset target_
+        return true;
+    }
+    target_ = std::make_unique<PendingJump>(targetIdx, align, extraOffset);
+    RequestRecompose(markIndex_);
+    return false;
 }
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
@@ -66,7 +90,6 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 
 FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirection direction)
 {
-    CHECK_NULL_RETURN(fillAlgorithm_->IsReady(), nullptr);
     // check range.
     if (direction == FillDirection::START && (markIndex_ <= 0)) {
         return nullptr;
@@ -94,6 +117,11 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     if (index >= totalCount_ - 1 && direction == FillDirection::END) {
         return nullptr;
     }
+    if (target_) {
+        bool reached = FillToTarget(direction, index);
+        return reached ? nullptr : pendingNode;
+        // keep creating until targetNode is reached
+    }
     if (!filled_.count(index)) {
         // 2: measure the pendingNode
         direction == FillDirection::START ? fillAlgorithm_->FillPrev(size_, axis_, pendingNode, index)
@@ -108,46 +136,119 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     return pendingNode;
 }
 
-void ScrollWindowAdapter::UpdateSlidingOffset(float delta)
+bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
 {
     if (NearZero(delta)) {
-        return;
+        return false;
     }
     fillAlgorithm_->OnSlidingOffsetUpdate(delta);
     if (rangeMode_) {
         bool res = fillAlgorithm_->OnSlidingOffsetUpdate(size_, axis_, delta);
-        if (res && updater_) {
+        if (res) {
             auto range = fillAlgorithm_->GetRange();
-            updater_(range.first, nullptr); // placeholder
+            RequestRecompose(range.first);
         }
-        return;
+        return res;
     }
 
     if (Negative(delta)) {
         if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::END)) {
-            return;
+            return false;
         }
     } else {
         if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::START)) {
-            return;
+            return false;
         }
     }
     LOGD("need to load");
     markIndex_ = fillAlgorithm_->GetMarkIndex();
 
-    RequestRecompose();
+    RequestRecompose(markIndex_);
+    return true;
 }
 
-void ScrollWindowAdapter::RequestRecompose()
+void ScrollWindowAdapter::RequestRecompose(int32_t markIdx) const
 {
-    if (updater_) {
-        // nullptr to mark the first item
-        updater_(markIndex_, nullptr);
+    for (auto&& updater : updaters_) {
+        if (updater) {
+            // nullptr to mark the first item
+            updater(markIdx, nullptr);
+        }
     }
 }
-void ScrollWindowAdapter::Prepare()
+
+void ScrollWindowAdapter::Prepare(uint32_t offset)
 {
+    offset_ = offset;
     filled_.clear();
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
+    if (jumpPending_) {
+        if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
+            scroll->ScrollToIndex(markIndex_, false, jumpPending_->align, jumpPending_->extraOffset);
+        } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
+            swiper->ChangeIndex(markIndex_, false);
+        }
+        jumpPending_.reset();
+    } else if (target_) {
+        if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
+            scroll->ScrollToIndex(target_->index, true, target_->align, target_->extraOffset);
+        } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
+            std::cout << "changeIdx to " << target_->index << "\n";
+            swiper->ChangeIndex(target_->index, true);
+        }
+    }
+}
+
+void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
+{
+    if (size == size_ && axis == axis_) {
+        return;
+    }
+    size_ = size;
+    axis_ = axis;
+
+    if (fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::END)) {
+        markIndex_ = fillAlgorithm_->GetMarkIndex();
+        RequestRecompose(markIndex_);
+    }
+}
+
+FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
+{
+    if (index < offset_) {
+        return container_->GetFrameNodeChildByIndex(index);
+    }
+    if (index >= offset_ + totalCount_) {
+        // LazyForEach generated items are at the back of children list
+        return container_->GetFrameNodeChildByIndex(index - filled_.size()); // filled.size = active item count
+    }
+    FrameNode* node = nullptr;
+    auto iter = indexToNode_.find(index);
+    if (iter != indexToNode_.end()) {
+        node = iter->second.Upgrade().GetRawPtr();
+        if (node == nullptr) {
+            indexToNode_.erase(iter);
+        }
+    }
+    return node;
+}
+
+RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
+{
+    return Claim(GetChildPtrByIndex(index));
+}
+
+bool ScrollWindowAdapter::FillToTarget(FillDirection direction, int32_t curIdx) const
+{
+    if (!target_) {
+        return true;
+    }
+    if (direction == FillDirection::START ? curIdx > target_->index : curIdx < target_->index) {
+        return false;
+    }
+    if (curIdx == target_->index) {
+        return true;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

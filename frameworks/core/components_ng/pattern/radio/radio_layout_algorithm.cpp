@@ -95,7 +95,7 @@ void RadioLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void RadioLayoutAlgorithm::InitializeParam()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);

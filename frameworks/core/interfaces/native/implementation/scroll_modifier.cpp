@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -104,9 +105,9 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
     RefPtr<ScrollControllerBase> positionController = ScrollModelNG::GetOrCreateController(frameNode);
     RefPtr<ScrollProxy> scrollBarProxy = ScrollModelNG::GetOrCreateScrollBarProxy(frameNode);
 
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*scroller);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
     CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = reinterpret_cast<ScrollerPeer *>(*abstPeerPtrOpt);
+    auto peerImplPtr = abstPeerPtrOpt.value();
     CHECK_NULL_VOID(peerImplPtr);
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);
@@ -146,14 +147,12 @@ void OnScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](Dimension xOffset, Dimension yOffset) {
-        auto _xOffset = Converter::ArkValue<Ark_Number>(xOffset);
-        auto _yOffset = Converter::ArkValue<Ark_Number>(yOffset);
-        CHECK_NULL_VOID(GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->onScroll);
-        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
-            onScroll(frameNode->GetId(), _xOffset, _yOffset);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](Dimension xOffset, Dimension yOffset) {
+        auto arkxOffset = Converter::ArkValue<Ark_Number>(xOffset);
+        auto arkyOffset = Converter::ArkValue<Ark_Number>(yOffset);
+        arkCallback.Invoke(arkxOffset, arkyOffset);
     };
-    ScrollModelNG::SetOnScroll(frameNode, onEvent);
+    ScrollModelNG::SetOnScroll(frameNode, std::move(onEvent));
 }
 void OnWillScrollImpl(Ark_NativePointer node,
                       const Opt_ScrollOnWillScrollCallback* value)
@@ -163,7 +162,7 @@ void OnWillScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto callValue = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
     if (callValue.has_value()) {
-        auto call = [arkCallback = CallbackHelper(callValue.value(), frameNode)] (
+        auto call = [arkCallback = CallbackHelper(callValue.value())] (
             const Dimension& xOffset,
             const Dimension& yOffset,
             const ScrollState& scrollState,
@@ -183,16 +182,12 @@ void OnWillScrollImpl(Ark_NativePointer node,
     }
 }
 void OnDidScrollImpl(Ark_NativePointer node,
-                     const Opt_ScrollOnScrollCallback* value)
+                     const ScrollOnScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto callValue = Converter::OptConvert<ScrollOnScrollCallback>(*value);
-    if (!callValue.has_value()) {
-        return;
-    }
-    auto call = [arkCallback = CallbackHelper(callValue.value())](
+    auto call = [arkCallback = CallbackHelper(*value)](
         Dimension xIn, Dimension yIn, ScrollState stateIn) {
             auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
             auto x = Converter::ArkValue<Ark_Number>(xIn);
@@ -219,11 +214,10 @@ void OnScrollStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
-            onScrollStart(frameNode->GetId());
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
-    ScrollModelNG::SetOnScrollStart(frameNode, onEvent);
+    ScrollModelNG::SetOnScrollStart(frameNode, std::move(onEvent));
 }
 void OnScrollEndImpl(Ark_NativePointer node,
                      const Callback_Void* value)
@@ -231,11 +225,10 @@ void OnScrollEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
-            onScrollEnd(frameNode->GetId());
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
-    ScrollModelNG::SetOnScrollEnd(frameNode, onEvent);
+    ScrollModelNG::SetOnScrollEnd(frameNode, std::move(onEvent));
 }
 void OnScrollStopImpl(Ark_NativePointer node,
                       const VoidCallback* value)
@@ -243,11 +236,10 @@ void OnScrollStopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
-            onScrollStop(frameNode->GetId());
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
-    ScrollModelNG::SetOnScrollStop(frameNode, onEvent);
+    ScrollModelNG::SetOnScrollStop(frameNode, std::move(onEvent));
 }
 void ScrollBarImpl(Ark_NativePointer node,
                    Ark_BarState value)
@@ -284,7 +276,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    auto onScrollFrameEvent = [callback = CallbackHelper(*value, frameNode)](
+    auto onScrollFrameEvent = [callback = CallbackHelper(*value)](
         Dimension dimension, ScrollState state) -> ScrollFrameResult {
         ScrollFrameResult result;
         Ark_Number arkValue = Converter::ArkValue<Ark_Number>(dimension);

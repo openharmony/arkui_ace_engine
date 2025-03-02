@@ -14,10 +14,99 @@
  */
 #include "sections_initializer.h"
 
+#include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
+class WaterFlowSectionInitializer : public SectionInitializer {
+public:
+    WaterFlowSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
+        : SectionInitializer(frameSize, axis, totalCnt)
+    {}
+    std::vector<Section> Init(
+        const RefPtr<WaterFlowSections>& sectionData, const RefPtr<WaterFlowLayoutProperty>& props);
+
+private:
+    std::vector<Section> SingleInit(const RefPtr<WaterFlowLayoutProperty>& props);
+};
+
+class ListSectionInitializer : public SectionInitializer {
+public:
+    ListSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
+        : SectionInitializer(frameSize, axis, totalCnt)
+    {}
+    std::vector<Section> Init()
+    {
+        Section res;
+        res.lanes = std::vector<Lane>(1);
+        res.lanes[0].crossLen = frameSize_.CrossSize(axis_);
+        res.minItem = 0;
+        res.maxItem = totalCnt_ - 1;
+        return { res };
+    }
+};
+
+class SwiperSectionInitializer : public SectionInitializer {
+public:
+    SwiperSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
+        : SectionInitializer(frameSize, axis, totalCnt)
+    {}
+    std::vector<Section> Init(const RefPtr<SwiperLayoutProperty>& props)
+    {
+        Section res;
+        res.lanes = std::vector<Lane>(1);
+        res.lanes[0].crossLen = frameSize_.CrossSize(axis_);
+        res.minItem = 0;
+        res.maxItem = totalCnt_ - 1;
+
+        res.mainGap = SwiperUtils::GetItemSpace(props);
+        return { res };
+    }
+};
+
+bool SectionInitializer::Compare(const std::vector<Section>& prev, const std::vector<Section>& cur)
+{
+    if (prev.size() != cur.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < prev.size(); ++i) {
+        if (prev[i].lanes.size() == cur[i].lanes.size() && prev[i].mainGap == cur[i].mainGap &&
+            prev[i].crossGap == cur[i].crossGap && prev[i].margin == cur[i].margin &&
+            prev[i].minItem == cur[i].minItem && prev[i].maxItem == cur[i].maxItem) {
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
+std::vector<Section> SectionInitializer::InitSections(
+    const RefPtr<LayoutProperty>& props, const SizeF& frameSize, Axis axis, int32_t totalCnt)
+{
+    // factory method
+    if (AceType::InstanceOf<WaterFlowLayoutProperty>(props)) {
+        auto pattern = props->GetHost()->GetPattern<WaterFlowPattern>();
+        CHECK_NULL_RETURN(pattern, {});
+        WaterFlowSectionInitializer initializer(frameSize, axis, totalCnt);
+        return initializer.Init(pattern->GetSections(), AceType::DynamicCast<WaterFlowLayoutProperty>(props));
+    }
+    if (AceType::InstanceOf<ListLayoutProperty>(props)) {
+        ListSectionInitializer initializer(frameSize, axis, totalCnt);
+        return initializer.Init();
+    }
+    if (AceType::InstanceOf<SwiperLayoutProperty>(props)) {
+        SwiperSectionInitializer initializer(frameSize, axis, totalCnt);
+        return initializer.Init(AceType::DynamicCast<SwiperLayoutProperty>(props));
+    }
+    return {};
+}
+
 std::vector<Section> WaterFlowSectionInitializer::Init(
     const RefPtr<WaterFlowSections>& sectionData, const RefPtr<WaterFlowLayoutProperty>& props)
 {
@@ -49,22 +138,6 @@ std::vector<Section> WaterFlowSectionInitializer::Init(
         res[i].userDefMainLen = sections[i].onGetItemMainSizeByIndex;
     }
     return res;
-}
-
-bool SectionInitializer::Compare(const std::vector<Section>& prev, const std::vector<Section>& cur)
-{
-    if (prev.size() != cur.size()) {
-        return false;
-    }
-    for (size_t i = 0; i < prev.size(); ++i) {
-        if (prev[i].lanes.size() == cur[i].lanes.size() && prev[i].mainGap == cur[i].mainGap &&
-            prev[i].crossGap == cur[i].crossGap && prev[i].margin == cur[i].margin &&
-            prev[i].minItem == cur[i].minItem && prev[i].maxItem == cur[i].maxItem) {
-            continue;
-        }
-        return false;
-    }
-    return true;
 }
 
 std::vector<Section> WaterFlowSectionInitializer::SingleInit(const RefPtr<WaterFlowLayoutProperty>& props)

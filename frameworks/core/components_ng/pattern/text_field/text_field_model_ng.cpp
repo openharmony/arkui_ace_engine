@@ -1233,7 +1233,7 @@ void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const std::opti
     if (colorOpt) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, colorOpt.value(), frameNode);
     } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -2335,6 +2335,7 @@ void TextFieldModelNG::SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UI
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     RefPtr<UINode> unitNode = builder();
+    CHECK_NULL_VOID(unitNode);
     pattern->SetUnitNode(unitNode);
 }
 

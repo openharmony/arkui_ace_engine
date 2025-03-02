@@ -766,7 +766,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
     Platform::CalculatePointerEvent(newPointerEvent, host);
@@ -901,7 +901,7 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     Platform::CalculatePointerEvent(pointerEvent, host);
     Platform::UpdatePointerAction(pointerEvent, info.action);

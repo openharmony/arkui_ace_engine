@@ -22,13 +22,13 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
 namespace PanRecognizerAccessor {
-void DestroyPeerImpl(PanRecognizerPeer* peer)
+void DestroyPeerImpl(Ark_PanRecognizer peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_PanRecognizer CtorImpl()
 {
     return nullptr;
 }
@@ -36,15 +36,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetPanGestureOptionsImpl(PanRecognizerPeer* peer)
+Ark_PanGestureOptions GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    auto panGestureOptionsPeer = reinterpret_cast<PanGestureOptionsPeer*>(
-        GetPanGestureOptionsAccessor()->ctor(nullptr));
+    auto panGestureOptionsPeer = GetPanGestureOptionsAccessor()->ctor(nullptr);
     auto options = peer->GetOptions();
-    CHECK_NULL_RETURN(options, reinterpret_cast<Ark_NativePointer>(panGestureOptionsPeer));
+    CHECK_NULL_RETURN(options, panGestureOptionsPeer);
     panGestureOptionsPeer->handler = options;
-    return reinterpret_cast<Ark_NativePointer>(panGestureOptionsPeer);
+    return panGestureOptionsPeer;
 }
 } // PanRecognizerAccessor
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()

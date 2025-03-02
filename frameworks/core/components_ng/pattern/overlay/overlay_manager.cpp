@@ -739,7 +739,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
         // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
         auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto currentStyle = layoutProperty->GetSheetStyleValue();
+        auto currentStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (currentStyle.instanceId.has_value()) {
             auto pattern = ContainerNode->GetPattern<SheetPresentationPattern>();
             auto targetNode = FrameNode::GetFrameNode(pattern->GetTargetTag(), pattern->GetTargetId());
@@ -1150,7 +1150,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
         mainPipeline->FlushPipelineImmediately();
     }
     // clear contextMenu then return
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -1287,7 +1287,7 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menuWrapper clear animation enter");
     auto context = menuWrapper->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -4682,7 +4682,7 @@ SheetStyle OverlayManager::UpdateSheetStyle(
 {
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetStyle);
-    auto currentStyle = layoutProperty->GetSheetStyleValue();
+    auto currentStyle = layoutProperty->GetSheetStyleValue(sheetStyle);
     if (isPartialUpdate) {
         currentStyle.PartialUpdate(sheetStyle);
     } else {

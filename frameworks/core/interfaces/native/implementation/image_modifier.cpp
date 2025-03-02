@@ -294,11 +294,11 @@ void OnErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const LoadImageFailEvent& info) {
+    auto onError = [arkCallback = CallbackHelper(*value)](const LoadImageFailEvent& info) {
         auto arkInfo = Converter::ArkValue<Ark_ImageError>(info);
-        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onError(frameNode->GetId(), arkInfo);
+        arkCallback.Invoke(arkInfo);
     };
-    ImageModelNG::SetOnError(frameNode, std::move(onEvent));
+    ImageModelNG::SetOnError(frameNode, std::move(onError));
 }
 void OnFinishImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -306,10 +306,10 @@ void OnFinishImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode]() {
-        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onFinish(frameNode->GetId());
+    auto onFinish = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
     };
-    ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onEvent));
+    ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onFinish));
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean value)

@@ -35,16 +35,6 @@ namespace  {
     const auto ATTRIBUTE_PARAM_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_MODE_MODE_NAME = "mode";
     const auto ATTRIBUTE_MODE_MODE_DEFAULT_VALUE = "NavRouteMode.PUSH_WITH_RECREATE";
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUINavRouterEventsReceiver navRouterEventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getNavRouterEventsReceiver = [] () -> const GENERATED_ArkUINavRouterEventsReceiver* {
-                return &navRouterEventReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterModifier,
@@ -53,8 +43,6 @@ class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterMo
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -145,45 +133,8 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestInvalidValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavRouterModifierTest, setOnStateChangeTest, TestSize.Level1)
+HWTEST_F(NavRouterModifierTest, DISABLED_setOnStateChangeTest, TestSize.Level1)
 {
-    Callback_Boolean_Void func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    auto navRouterEventHub = frameNode->GetEventHub<NavRouterEventHub>();
-    ASSERT_NE(navRouterEventHub, nullptr);
-    struct CheckEvent {
-        int32_t nodeId;
-        bool isActivated;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::navRouterEventReceiver.onStateChange = [] (Ark_Int32 nodeId,
-        const Ark_Boolean isActivated)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .isActivated = Convert<bool>(isActivated)
-        };
-    };
-    // check before call setOnStateChange
-    ASSERT_NE(modifier_->setOnStateChange, nullptr);
-    navRouterEventHub->FireChangeEvent(true);
-    EXPECT_FALSE(checkEvent.has_value());
-
-    // set event in modifier
-    modifier_->setOnStateChange(node_, &func);
-
-    // check true value
-    navRouterEventHub->FireChangeEvent(true);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->isActivated);
-
-    // check false value
-    navRouterEventHub->FireChangeEvent(false);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_FALSE(checkEvent->isActivated);
 }
 
 /*

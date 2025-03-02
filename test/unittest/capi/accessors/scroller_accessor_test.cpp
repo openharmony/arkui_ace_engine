@@ -151,6 +151,7 @@ public:
 
     MockScrollController *mockScrollerController_ = nullptr;
     RefPtr<MockScrollController> mockScrollerControllerKeeper_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /**
@@ -171,12 +172,12 @@ HWTEST_F(ScrollerAccessorTest, flingTest, TestSize.Level1)
     ASSERT_NE(accessor_->fling, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, Fling(validFlingValue1)).Times(1);
-    accessor_->fling(peer_, &arkFlingValid1);
+    accessor_->fling(vmContext_, peer_, &arkFlingValid1);
 
     EXPECT_CALL(*mockScrollerController_, Fling(validFlingValue2)).Times(1);
-    accessor_->fling(peer_, &arkFlingValid2);
-    accessor_->fling(peer_, &arkFlingInvalid);
-    accessor_->fling(peer_, nullptr);
+    accessor_->fling(vmContext_, peer_, &arkFlingValid2);
+    accessor_->fling(vmContext_, peer_, &arkFlingInvalid);
+    accessor_->fling(vmContext_, peer_, nullptr);
 }
 
 /**
@@ -358,7 +359,7 @@ HWTEST_F(ScrollerAccessorTest, scrollByXTest, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5 },
         { Converter::ArkValue<Ark_Length>(0.12_pct), 0 },
         { Converter::ArkValue<Ark_Length>(-0.12_pct), 0 },
-        { RES_ARK_LENGTH, 0 },
+        { RES_ARK_LENGTH, 10 },
     };
 
     Ark_Length arkDy = Converter::ArkValue<Ark_Length>(0);
@@ -399,7 +400,7 @@ HWTEST_F(ScrollerAccessorTest, scrollByYTest, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5 },
         { Converter::ArkValue<Ark_Length>(0.12_pct), 0 },
         { Converter::ArkValue<Ark_Length>(-0.12_pct), 0 },
-        { RES_ARK_LENGTH, 0 },
+        { RES_ARK_LENGTH, 10 },
     };
 
     Ark_Length arkDx = Converter::ArkValue<Ark_Length>(0);
@@ -569,13 +570,13 @@ HWTEST_F(ScrollerAccessorTest, getItemIndexTest, TestSize.Level1)
     ASSERT_NE(accessor_->getItemIndex, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemIndex(x, y)).Times(1).WillOnce(Return(arkIndex));
-    auto result = accessor_->getItemIndex(peer_, &arkX, &arkY);
+    auto result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, &arkX, &arkY));
     EXPECT_EQ(result, arkIndex);
-    result = accessor_->getItemIndex(peer_, nullptr, &arkY);
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, nullptr, &arkY));
     EXPECT_EQ(result, arkIndexInavid);
-    result = accessor_->getItemIndex(peer_, &arkX, nullptr);
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, &arkX, nullptr));
     EXPECT_EQ(result, arkIndexInavid);
-    result = accessor_->getItemIndex(peer_, nullptr, nullptr);
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, nullptr, nullptr));
     EXPECT_EQ(result, arkIndexInavid);
 }
 
@@ -584,15 +585,18 @@ HWTEST_F(ScrollerAccessorTest, getItemIndexTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, DISABLED_currentOffsetTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, currentOffsetTest, TestSize.Level1)
 {
     auto expectedOffset = Offset(1.5, 3.5);
 
     ASSERT_NE(accessor_->currentOffset, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetCurrentOffset()).Times(1).WillOnce(Return(expectedOffset));
-    accessor_->currentOffset(peer_);
-    // wait for return value type change from Ark_NativePointer to another type which is acceptable to "offset" data
+    auto arkOffsetResult = accessor_->currentOffset(peer_);
+    auto x = Converter::Convert<float>(arkOffsetResult.xOffset);
+    auto y = Converter::Convert<float>(arkOffsetResult.yOffset);
+    EXPECT_FLOAT_EQ(x, expectedOffset.GetX());
+    EXPECT_FLOAT_EQ(y, expectedOffset.GetY());
 }
 
 /**
@@ -600,7 +604,7 @@ HWTEST_F(ScrollerAccessorTest, DISABLED_currentOffsetTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, DISABLED_getItemRectTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, getItemRectTest, TestSize.Level1)
 {
     auto expectedRect = Rect(2.5, 4.75, 10.43, 24);
     int32_t index = 5;
@@ -609,8 +613,15 @@ HWTEST_F(ScrollerAccessorTest, DISABLED_getItemRectTest, TestSize.Level1)
     ASSERT_NE(accessor_->getItemRect, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemRect(index)).Times(1).WillOnce(Return(expectedRect));
-    accessor_->getItemRect(peer_, &arkIndex);
-    // wait for return value type change from Ark_NativePointer to another type which is acceptable to "rect" data
+    auto arkRectResult = accessor_->getItemRect(vmContext_, peer_, &arkIndex);
+    auto x = Converter::Convert<float>(arkRectResult.x);
+    auto y = Converter::Convert<float>(arkRectResult.y);
+    auto w = Converter::Convert<float>(arkRectResult.width);
+    auto h = Converter::Convert<float>(arkRectResult.height);
+    EXPECT_FLOAT_EQ(x, expectedRect.Left());
+    EXPECT_FLOAT_EQ(y, expectedRect.Top());
+    EXPECT_FLOAT_EQ(w, expectedRect.Width());
+    EXPECT_FLOAT_EQ(h, expectedRect.Height());
 }
 
 /**
@@ -856,9 +867,7 @@ HWTEST_F(ScrollerAccessorTest, scrollToICurveTest, TestSize.Level1)
 
     ICurvePeer peer;
     peer.handler = Referenced::MakeRefPtr<MockCurve>();
-    Ark_ICurve ICurve;
-    ICurve.ptr = &peer;
-    Ark_Union_Curve_ICurve arkCurve =  Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_ICurve>(ICurve);
+    Ark_Union_Curve_ICurve arkCurve = Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_ICurve>(&peer);
     scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(arkCurve);
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
         scrollAnimationOptions);

@@ -25,7 +25,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -142,7 +142,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
     CHECK_NULL_VOID(wrapper);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -163,7 +163,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto groupHeight = size.Height();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -252,7 +252,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
     auto pattern = host->GetPattern<MenuItemGroupPattern>();
     pattern->UpdateMenuItemIconInfo();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);

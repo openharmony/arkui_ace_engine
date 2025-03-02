@@ -67,7 +67,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         if (listItemStyle_ == V2::ListItemStyle::CARD) {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
+            auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_RETURN(pipelineContext, FocusPattern());
             auto listItemTheme = pipelineContext->GetTheme<ListItemTheme>();
             CHECK_NULL_RETURN(listItemTheme, FocusPattern());

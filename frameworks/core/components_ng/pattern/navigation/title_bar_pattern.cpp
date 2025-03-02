@@ -121,10 +121,12 @@ void SetBackButtonImgAboveVersionTen(const RefPtr<FrameNode>& backButtonNode,
         return;
     }
 
-    ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
-    SetImageSourceInfoFillColor(imageSourceInfo);
-    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    backButtonNode->MarkModifyDone();
+    if (titleBarLayoutProperty->HasImageSource()) {
+        ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+        SetImageSourceInfoFillColor(imageSourceInfo);
+        backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        backButtonNode->MarkModifyDone();
+    }
 }
 
 void SetBackButtonImgBelowVersionTen(const RefPtr<FrameNode>& backButtonNode,
@@ -135,10 +137,13 @@ void SetBackButtonImgBelowVersionTen(const RefPtr<FrameNode>& backButtonNode,
     if (!backButtonNode || !titleBarLayoutProperty || !backButtonImageLayoutProperty) {
         return;
     }
-    ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
-    SetImageSourceInfoFillColor(imageSourceInfo);
-    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    backButtonNode->MarkModifyDone();
+
+    if (titleBarLayoutProperty->HasImageSource()) {
+        ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+        SetImageSourceInfoFillColor(imageSourceInfo);
+        backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        backButtonNode->MarkModifyDone();
+    }
 }
 
 void HandleDefaultIconForNavDestination(
@@ -306,7 +311,6 @@ void UpdateImageBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr
         auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(backButtonImageNode);
-        ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
         backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -1511,8 +1515,10 @@ void TitleBarPattern::HandleLongPress(const RefPtr<FrameNode>& backButtonNode)
     }
     auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageProperty);
-    ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
-    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+    if (imageProperty->HasImageSourceInfo()) {
+        ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+    }
 }
 
 void TitleBarPattern::HandleLongPressActionEnd()

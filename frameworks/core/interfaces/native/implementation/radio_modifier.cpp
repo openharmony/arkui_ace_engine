@@ -63,7 +63,7 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
     }
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(options->indicatorBuilder);
     if (arkBuilder.has_value()) {
-        auto builder = [callback = CallbackHelper(arkBuilder.value(), frameNode), node]() {
+        auto builder = [callback = CallbackHelper(arkBuilder.value()), node]() {
             auto builderNode = callback.BuildSync(node);
             NG::ViewStackProcessor::GetInstance()->Push(builderNode);
         };
@@ -86,8 +86,9 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const bool value) {
-        GetFullAPI()->getEventsAPI()->getRadioEventsReceiver()->onChange(frameNode->GetId(), value);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](const bool param) {
+        auto arkValue = Converter::ArkValue<Ark_Boolean>(param);
+        arkCallback.Invoke(arkValue);
     };
     RadioModelNG::SetOnChange(frameNode, onEvent);
 }
@@ -117,8 +118,8 @@ void ContentModifierImpl(Ark_NativePointer node,
     //RadioModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
 }
-void __onChangeEvent_checkedImpl(Ark_NativePointer node,
-                                 const Callback_Boolean_Void* callback)
+void _onChangeEvent_checkedImpl(Ark_NativePointer node,
+                                const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -140,7 +141,7 @@ const GENERATED_ArkUIRadioModifier* GetRadioModifier()
         RadioAttributeModifier::OnChangeImpl,
         RadioAttributeModifier::RadioStyleImpl,
         RadioAttributeModifier::ContentModifierImpl,
-        RadioAttributeModifier::__onChangeEvent_checkedImpl,
+        RadioAttributeModifier::_onChangeEvent_checkedImpl,
     };
     return &ArkUIRadioModifierImpl;
 }

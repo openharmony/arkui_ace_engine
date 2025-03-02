@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
-void DestroyPeerImpl(TextEditControllerExPeer* peer)
+void DestroyPeerImpl(Ark_TextEditControllerEx peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextEditControllerEx CtorImpl()
 {
     LOGE("TextEditControllerExPeer is an abstract class.");
     return nullptr;
@@ -33,34 +33,34 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean IsEditingImpl(TextEditControllerExPeer* peer)
+Ark_Boolean IsEditingImpl(Ark_TextEditControllerEx peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Boolean>(false));
     return Converter::ArkValue<Ark_Boolean>(peer->IsEditing());
 }
-void StopEditingImpl(TextEditControllerExPeer* peer)
+void StopEditingImpl(Ark_TextEditControllerEx peer)
 {
     CHECK_NULL_VOID(peer);
     peer->StopEditing();
 }
-Ark_Boolean SetCaretOffsetImpl(TextEditControllerExPeer* peer,
+Ark_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
                                const Ark_Number* offset)
 {
     CHECK_NULL_RETURN(peer && offset, Converter::ArkValue<Ark_Boolean>(false));
     auto offsetConv = Converter::Convert<int32_t>(*offset);
     return Converter::ArkValue<Ark_Boolean>(peer->SetCaretOffset(offsetConv));
 }
-Ark_Int32 GetCaretOffsetImpl(TextEditControllerExPeer* peer)
+Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
-    return Converter::ArkValue<Ark_Int32>(peer->GetCaretOffset());
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
+    return Converter::ArkValue<Ark_Number>(peer->GetCaretOffset());
 }
-Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
+Ark_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
 {
     // fix a return value
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, {});
     peer->GetPreviewText();
-    return 0;
+    return {};
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()

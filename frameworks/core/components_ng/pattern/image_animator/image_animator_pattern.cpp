@@ -525,7 +525,7 @@ bool ImageAnimatorPattern::IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode,
 
 bool ImageAnimatorPattern::IsFormRender()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->IsFormRender();
 }

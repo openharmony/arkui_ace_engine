@@ -18,13 +18,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
-void DestroyPeerImpl(ScrollerPeer* peer)
+void DestroyPeerImpl(Ark_Scroller peer)
 {
     if (peer) {
         peer->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_Scroller CtorImpl()
 {
     auto peer = Referenced::MakeRefPtr<ScrollerPeer>();
     peer->IncRefCount();
@@ -34,26 +34,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ScrollToImpl(ScrollerPeer* peer,
+void ScrollToImpl(Ark_Scroller peer,
                   const Ark_ScrollOptions* options)
 {
     CHECK_NULL_VOID(peer);
     peer->TriggerScrollTo(options);
 }
-void ScrollEdgeImpl(ScrollerPeer* peer,
-                    enum Ark_Edge value,
+void ScrollEdgeImpl(Ark_Scroller peer,
+                    Ark_Edge value,
                     const Opt_ScrollEdgeOptions* options)
 {
     CHECK_NULL_VOID(peer);
     peer->TriggerScrollEdge(value, options);
 }
-void FlingImpl(ScrollerPeer* peer,
+void FlingImpl(Ark_VMContext vmContext,
+               Ark_Scroller peer,
                const Ark_Number* velocity)
 {
     CHECK_NULL_VOID(peer);
     peer->TriggerFling(velocity);
 }
-void ScrollPage0Impl(ScrollerPeer* peer,
+void ScrollPage0Impl(Ark_Scroller peer,
                      const Ark_ScrollPageOptions* value)
 {
     CHECK_NULL_VOID(peer);
@@ -61,7 +62,7 @@ void ScrollPage0Impl(ScrollerPeer* peer,
     bool next = Converter::Convert<bool>(value->next);
     peer->TriggerScrollPage0(next);
 }
-void ScrollPage1Impl(ScrollerPeer* peer,
+void ScrollPage1Impl(Ark_Scroller peer,
                      const Ark_Literal_Boolean_next_Axis_direction* value)
 {
     CHECK_NULL_VOID(peer);
@@ -69,12 +70,12 @@ void ScrollPage1Impl(ScrollerPeer* peer,
     bool next = Converter::Convert<bool>(value->next);
     peer->TriggerScrollPage1(next);
 }
-Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
+Ark_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr); // need to fix default value
+    CHECK_NULL_RETURN(peer, {});
     return peer->TriggerCurrentOffset();
 }
-void ScrollToIndexImpl(ScrollerPeer* peer,
+void ScrollToIndexImpl(Ark_Scroller peer,
                        const Ark_Number* value,
                        const Opt_Boolean* smooth,
                        const Opt_ScrollAlign* align,
@@ -83,30 +84,34 @@ void ScrollToIndexImpl(ScrollerPeer* peer,
     CHECK_NULL_VOID(peer);
     peer->TriggerScrollToIndex(value, smooth, align, options);
 }
-void ScrollByImpl(ScrollerPeer* peer,
+void ScrollByImpl(Ark_Scroller peer,
                   const Ark_Length* dx,
                   const Ark_Length* dy)
 {
     CHECK_NULL_VOID(peer);
     peer->TriggerScrollBy(dx, dy);
 }
-Ark_Boolean IsAtEndImpl(ScrollerPeer* peer)
+Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
 {
     CHECK_NULL_RETURN(peer, false); // need to fix default value
     return peer->TriggerIsAtEnd();
 }
-Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer,
-                                  const Ark_Number* index)
+Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
+                               Ark_Scroller peer,
+                               const Ark_Number* index)
 {
-    CHECK_NULL_RETURN(peer, nullptr); // need to fix default value
+    CHECK_NULL_RETURN(peer, {}); // need to fix default value
     return peer->TriggerGetItemRect(index);
 }
-Ark_Int32 GetItemIndexImpl(ScrollerPeer* peer,
-                           const Ark_Number* x,
-                           const Ark_Number* y)
+Ark_Number GetItemIndexImpl(Ark_VMContext vmContext,
+                            Ark_Scroller peer,
+                            const Ark_Number* x,
+                            const Ark_Number* y)
 {
-    CHECK_NULL_RETURN(peer, -1); // need to fix default value
-    return peer->TriggerGetItemIndex(x, y);
+    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    CHECK_NULL_RETURN(peer, errValue); // need to fix default value
+    auto res = peer->TriggerGetItemIndex(x, y);
+    return Converter::ArkValue<Ark_Number>(res);
 }
 } // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()

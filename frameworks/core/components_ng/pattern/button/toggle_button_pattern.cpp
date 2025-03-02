@@ -33,7 +33,7 @@ void ToggleButtonPattern::OnAttachToFrameNode()
 
 void ToggleButtonPattern::InitParameters()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
     CHECK_NULL_VOID(toggleTheme);
@@ -70,11 +70,11 @@ void ToggleButtonPattern::OnModifyDone()
     auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
     CHECK_NULL_VOID(buttonPaintProperty);
     if (!isOn_.has_value()) {
-        isOn_ = buttonPaintProperty->GetIsOnValue();
+        isOn_ = buttonPaintProperty->GetIsOnValue(false);
     }
     bool changed = false;
     if (buttonPaintProperty->HasIsOn()) {
-        bool isOn = buttonPaintProperty->GetIsOnValue();
+        bool isOn = buttonPaintProperty->GetIsOnValue(false);
         changed = isOn ^ isOn_.value();
         isOn_ = isOn;
     }
@@ -392,7 +392,7 @@ void ToggleButtonPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
     CHECK_NULL_VOID(toggleTheme);

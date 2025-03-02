@@ -373,7 +373,7 @@ void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFr
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);

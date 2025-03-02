@@ -14,9 +14,11 @@
  */
 
 #include "common_method_modifier_test.h"
+#include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -61,6 +63,7 @@ namespace Converter {
 namespace GeneratedModifier {
     const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
+    const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor();
 }
 
 class CommonMethodModifierTest9 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
@@ -373,38 +376,35 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
+    static const std::string expectedType = "onHover";
+    static const int expectedResId = 123;
 
     struct CheckEvent {
         int32_t nodeId;
         bool isHover;
-        int32_t pressure;
+        SourceType deviceType;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onHoverFunc = [](const Ark_Int32 resourceId,
-                          const Ark_Boolean isHover,
-                          const Ark_HoverEvent event) {
+    auto onHoverFunc = [](const Ark_Int32 resourceId, const Ark_Boolean isHover, const Ark_HoverEvent event) {
+        ASSERT_NE(event, nullptr);
+        auto peer = event;
+        auto hoverEventInfo = peer->GetEventInfo();
+        ASSERT_NE(hoverEventInfo, nullptr);
+        EXPECT_EQ(hoverEventInfo->GetType(), expectedType);
+        GeneratedModifier::GetHoverEventAccessor()->destroyPeer(peer);
         checkEvent = {
-            .nodeId = resourceId,
-            .isHover = isHover,
-#ifdef WRONG_TYPE
-            .pressure = Converter::Convert<int32_t>(event.pressure)
-#endif
+            .nodeId = resourceId, .isHover = Converter::Convert<bool>(isHover),
+            .deviceType = hoverEventInfo->GetSourceDevice()
         };
     };
 
-    Callback_Boolean_HoverEvent_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onHoverFunc
-    };
+    auto callbackValue =
+        Converter::ArkValue<Callback_Boolean_HoverEvent_Void>(onHoverFunc, expectedResId);
 
-    auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
+    auto test = [this, &callbackValue, eventHub, frameNode](bool isHover, SourceType type) {
         checkEvent = std::nullopt;
-        modifier_->setOnHover(node_, &callBackValue);
+        modifier_->setOnHover(node_, &callbackValue);
         ASSERT_FALSE(checkEvent.has_value());
         auto inputEventHub = eventHub->GetInputEventHub();
         ASSERT_NE(inputEventHub, nullptr);
@@ -416,13 +416,16 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
             auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
             ASSERT_NE(hoverResult, nullptr);
             MouseEvent me;
+            me.sourceType = type;
             hoverResult->HandleHoverEvent(isHover, me);
         }
         ASSERT_TRUE(checkEvent.has_value());
         EXPECT_EQ(checkEvent->isHover, isHover);
+        EXPECT_EQ(checkEvent->nodeId, expectedResId);
+        EXPECT_EQ(checkEvent->deviceType, type);
     };
-    test(true);
-    test(false);
+    test(true, SourceType::MOUSE);
+    test(false, SourceType::TOUCH_PAD);
 }
 
 /*
@@ -445,8 +448,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
 
     auto onAccessibilityHoverFunc = [](const Ark_Int32 resourceId,
                           const Ark_Boolean isHover,
-                          const Ark_AccessibilityHoverEvent event) {
-        auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(event.ptr);
+                          const Ark_AccessibilityHoverEvent peer) {
         auto info = peer ? peer->GetEventInfo() : nullptr;
         ASSERT_NE(info, nullptr);
         checkEvent = { .nodeId = resourceId, .isHover = isHover, .type = info->GetActionType() };
@@ -553,11 +555,10 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
     auto onTouchInterceptFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
                                 const Ark_TouchEvent parameter,
                                 const Callback_HitTestMode_Void continuation) {
-        ASSERT_NE(parameter.ptr, nullptr);
-        auto peer = reinterpret_cast<TouchEventPeer*>(parameter.ptr);
-        auto touchEventInfo = peer->GetEventInfo();
+        ASSERT_NE(parameter, nullptr);
+        auto touchEventInfo = parameter->GetEventInfo();
         EXPECT_EQ(touchEventInfo->GetType(), expectedType);
-        GeneratedModifier::GetTouchEventAccessor()->destroyPeer(peer);
+        GeneratedModifier::GetTouchEventAccessor()->destroyPeer(parameter);
         checkEvent = { .resId = resourceId };
         Ark_HitTestMode retVal = Ark_HitTestMode::ARK_HIT_TEST_MODE_BLOCK;
         CallbackHelper(continuation).Invoke(retVal);
@@ -577,6 +578,50 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
     EXPECT_EQ(retValue, NG::HitTestMode::HTMBLOCK);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent.value().resId, expectedResId);
+}
+
+/*
+ * @tc.name: SetOnTouchTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, SetOnTouchTest, TestSize.Level1)
+{
+    static const int expectedResId = 123;
+    static const std::string expectedType = "xxx";
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int resId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onTouchFunc = [](const Ark_Int32 resourceId, const Ark_TouchEvent parameter) {
+        ASSERT_NE(parameter, nullptr);
+        auto peer = parameter;
+        auto touchEventInfo = peer->GetEventInfo();
+        ASSERT_NE(touchEventInfo, nullptr);
+        EXPECT_EQ(touchEventInfo->GetType(), expectedType);
+        GeneratedModifier::GetTouchEventAccessor()->destroyPeer(peer);
+        checkEvent = { .resId = resourceId };
+    };
+
+    auto callbackValue =
+        Converter::ArkValue<Callback_TouchEvent_Void>(onTouchFunc, expectedResId);
+
+    checkEvent = std::nullopt;
+    modifier_->setOnTouch(node_, &callbackValue);
+    EXPECT_FALSE(checkEvent.has_value());
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto& callback = gestureEventHub->touchEventActuator_->userCallback_;
+    ASSERT_NE(callback, nullptr);
+    TouchEventInfo info(expectedType);
+    auto fire = callback->GetTouchEventCallback();
+    ASSERT_NE(fire, nullptr);
+    fire(info);
 }
 
 /*

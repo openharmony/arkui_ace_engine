@@ -19,13 +19,14 @@
 #include "core/components_ng/pattern/pattern.h"
 namespace OHOS::Ace::NG {
 /**
- * @brief Base class of all components that support lazy load in ArkUI 2.0
+ * @brief Base class of all components that support lazy load in ArkUI 2.0 (Arkoala)
  *
  */
 class LazyContainer : virtual public Pattern {
     DECLARE_ACE_TYPE(LazyContainer, Pattern);
+
 public:
-    int32_t GetTotalChildCount() override
+    int32_t GetTotalChildCount() const override
     {
         return adapter_ ? adapter_->GetTotalCount() : -1;
     }
@@ -41,22 +42,51 @@ protected:
     {
         adapter_.Reset();
     }
-    void JumpToItem(int32_t index);
+
+    bool ArkoalaLazyEnabled() const
+    {
+        return adapter_;
+    }
 
     /**
-     * @brief Pass latest layout range info to adapter.
+     * @brief Pass latest layout viewport to adapter.
      */
-    void UpdateLayoutRange(Axis axis, int32_t markIdx);
+    void UpdateLayoutRange(Axis axis, bool firstLayout);
 
     /**
      * @brief Pass scroll offset to adapter.
+     * @return true if adapter requests a recompose
      */
-    void UpdateOffset(float delta);
+    bool UpdateOffset(float delta);
+
+    void RequestJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+
+    /**
+     * @return false if a recomposition is required first
+     */
+    bool RequestFillToTarget(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
+
+    /**
+     * @brief Should call when layout data needs to be cleared and re-calculated
+     * @param idx first item in viewport after reset
+     */
+    void RequestReset(int32_t idx);
 
 private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;
 
     RefPtr<ScrollWindowAdapter> adapter_;
+};
+
+/**
+ * @brief Lazy container with linear layout (List, Swiper, WaterFlow)
+ *
+ */
+class LinearLazyContainer : public LazyContainer {
+    DECLARE_ACE_TYPE(LinearLazyContainer, LazyContainer);
+
+private:
+    RefPtr<FillAlgorithm> CreateFillAlgorithm() final;
 };
 } // namespace OHOS::Ace::NG
 

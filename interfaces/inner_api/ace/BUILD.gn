@@ -85,7 +85,10 @@ ohos_shared_library("ace_uicontent") {
     "${ace_root}/interfaces/inner_api/ace/ui_event.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_event_func.cpp",
   ]
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "hilog:libhilog",
+    "runtime_core:ani",
+  ]
   if (!use_mingw_win && !use_mac && !use_linux &&
       defined(uicast_configs.uicast_enable) && uicast_configs.uicast_enable) {
     sources +=

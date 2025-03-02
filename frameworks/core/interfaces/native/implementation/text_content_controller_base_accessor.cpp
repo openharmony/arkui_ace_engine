@@ -19,13 +19,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
-void DestroyPeerImpl(TextContentControllerBasePeer* peer)
+void DestroyPeerImpl(Ark_TextContentControllerBase peer)
 {
     CHECK_NULL_VOID(peer);
     peer->controller_ = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextContentControllerBase CtorImpl()
 {
     return new TextContentControllerBasePeer();
 }
@@ -33,24 +33,24 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
+Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
 {
     // fix a return value
-    CHECK_NULL_RETURN(peer && peer->controller_, 0);
+    CHECK_NULL_RETURN(peer && peer->controller_, {});
     peer->controller_->GetCaretPosition();
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
+Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
 {
-    // fix a return value
-    CHECK_NULL_RETURN(peer && peer->controller_, 0);
-    peer->controller_->GetTextContentRect();
-    return nullptr;
+    CHECK_NULL_RETURN(peer && peer->controller_, {});
+    auto rect = peer->controller_->GetTextContentRect();
+    return Converter::ArkValue<Ark_RectResult>(rect);
 }
-Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
+Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {
-    CHECK_NULL_RETURN(peer && peer->controller_, 0);
-    return Converter::ArkValue<Ark_Int32>(peer->controller_->GetTextContentLinesNum());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->controller_, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->controller_->GetTextContentLinesNum());
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()

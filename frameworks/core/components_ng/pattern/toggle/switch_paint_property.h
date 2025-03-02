@@ -41,7 +41,7 @@ struct SwitchPaintParagraph {
         json->PutExtAttr("selectedColor", propSelectedColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("switchPointColor",
             propSwitchPointColor.value_or(Color()).ColorToString().c_str(), filter);
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
         CHECK_NULL_VOID(switchTheme);

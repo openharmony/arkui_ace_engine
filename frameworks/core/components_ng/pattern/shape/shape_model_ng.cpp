@@ -112,6 +112,14 @@ void ShapeModelNG::SetAntiAlias(bool antiAlias)
     ShapeAbstractModelNG().SetAntiAlias(antiAlias);
 }
 
+void ShapeModelNG::InitBox(FrameNode* frameNode, const RefPtr<PixelMap>& pixMap)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        ImageSourceInfo pixelMapInfo(pixMap);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, PixelMapInfo, pixelMapInfo, frameNode);
+    }
+}
+
 void ShapeModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashArray, segments, frameNode);

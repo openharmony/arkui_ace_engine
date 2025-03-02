@@ -43,7 +43,7 @@ std::mutex PatternLockModel::mutex_;
 template<typename T>
 RefPtr<T> GetTheme()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);

@@ -97,7 +97,7 @@ void CloseEffectImpl(Ark_NativePointer node,
     DataPanelModelNG::SetCloseEffect(frameNode, Converter::Convert<bool>(value));
 }
 void ValueColorsImpl(Ark_NativePointer node,
-                     const Array_Union_ResourceColor_LinearGradient_data_panel* value)
+                     const Array_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

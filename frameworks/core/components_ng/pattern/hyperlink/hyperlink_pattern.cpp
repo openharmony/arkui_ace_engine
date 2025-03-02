@@ -97,7 +97,7 @@ void HyperlinkPattern::OnModifyDone()
     auto enabled = hub->IsEnabled();
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
@@ -126,7 +126,7 @@ void HyperlinkPattern::LinkToAddress()
     CHECK_NULL_VOID(host);
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);

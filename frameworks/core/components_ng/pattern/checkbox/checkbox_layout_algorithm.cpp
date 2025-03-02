@@ -107,7 +107,7 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void CheckBoxLayoutAlgorithm::InitializeParam()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);

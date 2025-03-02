@@ -218,7 +218,7 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
                 modifier->dateUpdated_ = false;
                 modifier->StopSweepingAnimation(currentDate);
                 modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
-                auto context = PipelineBase::GetCurrentContext();
+                auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
                 context->RequestFrame();
             }
         });
@@ -285,7 +285,7 @@ void ProgressModifier::StartRingLoadingAnimation()
 
 void ProgressModifier::StartRingLoadingHeadAnimation()
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     bool isFormRender = context->IsFormRender();
     AnimationOption optionHead = AnimationOption();
@@ -307,7 +307,7 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
 
 void ProgressModifier::StartRingLoadingTailAnimation()
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     bool isFormRender = context->IsFormRender();
     AnimationOption optionTail = AnimationOption();
@@ -394,7 +394,7 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
         return;
     }
 
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     bool isFormRender = context->IsFormRender();
     isSweeping_ = true;
@@ -418,7 +418,7 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
                 float currentDate = modifier->sweepingDate_->Get();
                 modifier->StopSweepingAnimation(currentDate);
                 modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
-                auto context = PipelineBase::GetCurrentContext();
+                auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
                 context->RequestFrame();
             }
         });
@@ -465,13 +465,13 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
                     default:
                         return;
                 }
-                auto context = PipelineBase::GetCurrentContext();
+                auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
                 context->RequestFrame();
             } else {
                 modifier->dateUpdated_ = false;
                 float currentDate = modifier->sweepingDate_->Get();
                 modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
-                auto context = PipelineBase::GetCurrentContext();
+                auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
                 context->RequestFrame();
             }
         });
@@ -562,7 +562,7 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
         return;
     }
 
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     bool isFormRender = context->IsFormRender();
     isSweeping_ = true;
@@ -587,7 +587,7 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
                 float currentDate = modifier->sweepingDate_->Get();
                 modifier->StopSweepingAnimation(currentDate);
                 modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
-                auto context = PipelineBase::GetCurrentContext();
+                auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
                 context->RequestFrame();
             }
         });
@@ -931,7 +931,7 @@ std::vector<GradientColor> ProgressModifier::GetRingProgressGradientColors() con
     // Fault protection processing, if gradientColors is empty, set to default colors.
 
     if (gradientColors.empty()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, gradientColors);
         auto theme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_RETURN(theme, gradientColors);
@@ -1696,7 +1696,7 @@ Gradient ProgressModifier::CreateCapsuleGradient() const
 
 bool ProgressModifier::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);

@@ -36,15 +36,11 @@ namespace OHOS::Ace::NG::Converter {
     TextClockOptions Convert(const Ark_TextClockOptions& src)
     {
         TextClockOptions dst;
-        if (src.timeZoneOffset.tag != ARK_TAG_UNDEFINED) {
-            auto value = OptConvert<float>(src.timeZoneOffset.value);
-            // valid hoursWest is within [-14, 12]
-            Validator::ValidateByRange(value, -14.0f, 12.0f);
-            dst.timeZoneOffset = value;
-        }
-        if (src.controller.tag != ARK_TAG_UNDEFINED) {
-            dst.peerController = reinterpret_cast<TextClockControllerPeer*>(src.controller.value.ptr);
-        }
+        auto value = OptConvert<float>(src.timeZoneOffset);
+        // valid hoursWest is within [-14, 12]
+        Validator::ValidateByRange(value, -14.0f, 12.0f);
+        dst.timeZoneOffset = value;
+        dst.peerController = OptConvert<Ark_TextClockController>(src.controller).value_or(nullptr);
         return dst;
     }
 } // namespace OHOS::Ace::NG::Converter

@@ -130,7 +130,7 @@ public:
 
     void SetModifierBoundsRect(const SizeF& size, const OffsetF& offset)
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
         auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();

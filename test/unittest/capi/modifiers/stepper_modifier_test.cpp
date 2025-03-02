@@ -322,7 +322,7 @@ HWTEST_F(StepperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
 
     Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_index(node_, &arkCallback);
+    modifier_->set_onChangeEvent_index(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(0, 1);

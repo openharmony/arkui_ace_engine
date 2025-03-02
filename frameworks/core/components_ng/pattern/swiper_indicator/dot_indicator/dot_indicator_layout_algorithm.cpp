@@ -47,7 +47,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto paintProperty = frameNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);

@@ -21,10 +21,10 @@ struct ContextMenuPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContextMenuAccessor {
-void DestroyPeerImpl(ContextMenuPeer* peer)
+void DestroyPeerImpl(Ark_ContextMenu peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_ContextMenu CtorImpl()
 {
     return nullptr;
 }
