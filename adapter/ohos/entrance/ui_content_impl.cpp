@@ -17,6 +17,8 @@
 
 #include <atomic>
 #include <cinttypes>
+#include <ani.h>
+#include <optional>
 
 #include "ability_context.h"
 #include "ability_info.h"
@@ -31,6 +33,7 @@
 #include "ohos/init_data.h"
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
+#include "ui_content_impl.h"
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
@@ -97,6 +100,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "bridge/arkts_frontend/arkts_frontend.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
 #endif
@@ -251,11 +255,12 @@ private:
     ContentStartAbilityCallback onStartAbility_;
 };
 
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime, int32_t vmType)
 {
     LOGI("CreateUIContent.");
     Recorder::Init();
-    return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
+    return new UIContentImpl(
+        reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime, static_cast<VMType>(vmType));
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateFormContent(void* context, void* runtime, bool isCard)
@@ -719,7 +724,8 @@ private:
     int32_t targetId_ = -1;
 };
 
-UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType)
+    : runtime_(runtime), vmType_(vmType)
 {
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
@@ -785,7 +791,7 @@ void UIContentImpl::DestroyCallback() const
 }
 
 UIContentErrorCode UIContentImpl::InitializeInner(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, bool isNamedRouter)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     if (window && StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
@@ -825,11 +831,24 @@ UIContentErrorCode UIContentImpl::InitializeInner(
 
 void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
     // ArkTSCard need no window
     if (isFormRender_ && !window) {
         LOGI("[%{public}s][%{public}s][%{public}d]: InitializeForm: %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, url.c_str());
-        CommonInitializeForm(window, url, storage);
+        CommonInitializeForm(window, url, storageWrapper);
+        AddWatchSystemParameter();
+    }
+}
+
+void UIContentImpl::PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage)
+{
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    // ArkTSCard need no window
+    if (isFormRender_ && !window) {
+        LOGI("[%{public}s][%{public}s][%{public}d]: InitializeForm: %{public}s", bundleName_.c_str(),
+            moduleName_.c_str(), instanceId_, url.c_str());
+        CommonInitializeForm(window, url, storageWrapper);
         AddWatchSystemParameter();
     }
 }
@@ -849,7 +868,8 @@ void UIContentImpl::RunFormPage()
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
-    auto errorCode = InitializeInner(window, url, storage, false);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    auto errorCode = InitializeInner(window, url, storageWrapper, false);
     AddWatchSystemParameter();
     return errorCode;
 }
@@ -858,7 +878,8 @@ UIContentErrorCode UIContentImpl::Initialize(
     OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
-    errorCode = CommonInitialize(window, "", storage);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    errorCode = CommonInitialize(window, "", storageWrapper);
     CHECK_ERROR_CODE_RETURN(errorCode);
     AddWatchSystemParameter();
     if (content) {
@@ -881,7 +902,8 @@ UIContentErrorCode UIContentImpl::Initialize(
 UIContentErrorCode UIContentImpl::InitializeByName(
     OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
-    auto errorCode = InitializeInner(window, name, storage, true);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    auto errorCode = InitializeInner(window, name, storageWrapper, true);
     AddWatchSystemParameter();
     return errorCode;
 }
@@ -897,7 +919,8 @@ void UIContentImpl::InitializeDynamic(int32_t hostInstanceId, const std::string&
     CHECK_NULL_VOID(env);
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
-    CommonInitializeForm(nullptr, abcPath, nullptr);
+    StorageWrapper storageWrapper { .napiStorage_ = nullptr };
+    CommonInitializeForm(nullptr, abcPath, storageWrapper);
     AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
@@ -929,7 +952,8 @@ void UIContentImpl::Initialize(
             bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
         return;
     }
-    auto errorCode = CommonInitialize(window, url, storage, focusWindowId);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    auto errorCode = CommonInitialize(window, url, storageWrapper, focusWindowId);
     if (errorCode != UIContentErrorCode::NO_ERRORS) {
         return;
     }
@@ -970,13 +994,48 @@ napi_value UIContentImpl::GetUINapiContext()
     return result;
 }
 
+ani_object UIContentImpl::GetUIAniContext()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    ContainerScope scope(instanceId_);
+    ani_object result = nullptr;
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, result);
+    auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
+    CHECK_NULL_RETURN(arktsFrontend, result);
+    return nullptr;
+}
+
 UIContentErrorCode UIContentImpl::Restore(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type)
 {
     LOGI("Restore with contentInfo size: %{public}d, ContentInfotype: %{public}d",
         static_cast<int32_t>(contentInfo.size()), static_cast<int32_t>(type));
     auto errorCode = UIContentErrorCode::NO_ERRORS;
-    errorCode = CommonInitialize(window, contentInfo, storage);
+    StorageWrapper storageWrapper { .napiStorage_ = storage };
+    errorCode = CommonInitialize(window, contentInfo, storageWrapper);
+    CHECK_ERROR_CODE_RETURN(errorCode);
+    RouterRecoverRecord record;
+    std::tie(record, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo, type);
+    startUrl_ = record.url;
+    CHECK_ERROR_CODE_RETURN(errorCode);
+    if (startUrl_.empty()) {
+        LOGW("Restore start url is empty");
+    }
+    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl: %{public}s, isNamedRouter: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str(),
+        (record.isNamedRouter ? "yes" : "no"));
+    return Platform::AceContainer::RunPage(instanceId_, startUrl_, record.params, record.isNamedRouter);
+}
+
+UIContentErrorCode UIContentImpl::Restore(
+    OHOS::Rosen::Window* window, const std::string& contentInfo, ani_object storage, ContentInfoType type)
+{
+    LOGI("Restore with contentInfo size: %{public}d, ContentInfotype: %{public}d",
+        static_cast<int32_t>(contentInfo.size()), static_cast<int32_t>(type));
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    errorCode = CommonInitialize(window, contentInfo, storageWrapper);
     CHECK_ERROR_CODE_RETURN(errorCode);
     RouterRecoverRecord record;
     std::tie(record, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo, type);
@@ -1000,7 +1059,7 @@ std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 
 // ArkTSCard start
 UIContentErrorCode UIContentImpl::CommonInitializeForm(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storageWrapper)
 {
     ACE_FUNCTION_TRACE();
     window_ = window;
@@ -1382,6 +1441,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     }
     if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+        auto storage = storageWrapper.napiStorage_.value();
         if (!storage) {
             container->SetLocalStorage(nullptr, context);
         } else {
@@ -1499,7 +1559,7 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
 }
 
 UIContentErrorCode UIContentImpl::CommonInitialize(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storageWrapper, uint32_t focusWindowId)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     window_ = window;
@@ -1766,9 +1826,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
-    // if (bundleName_ == "com.example.trivial.application") { // TODO: use AbilityContext to distinguish ArktsFrontend
-    //     frontendType = FrontendType::KOALA;
-    // }
+    if (vmType_ == VMType::ARK_NATIVE) {
+        frontendType = FrontendType::ARK_TS;
+    }
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
             std::make_unique<ContentEventCallback>(
@@ -1974,7 +2034,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
-    if (runtime_) {
+    if (runtime_ && storageWrapper.napiStorage_.has_value()) {
+        auto storage = storageWrapper.napiStorage_.value();
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
             container->SetLocalStorage(nullptr, context);
@@ -1983,6 +2044,17 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             napi_ref ref = nullptr;
             napi_create_reference(env, storage, 1, &ref);
             container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
+        }
+    }
+    if (runtime_ && storageWrapper.aniStorage_.has_value()) {
+        auto storage = storageWrapper.aniStorage_.value();
+        if (!storage) {
+            container->SetLocalStorage(nullptr, context);
+        } else {
+            auto* env = reinterpret_cast<ani_env*>(runtime_);
+            ani_ref ref;
+            env->GlobalReference_Create(storage, &ref);
+            container->SetAniLocalStorage(reinterpret_cast<void*>(ref), context);
         }
     }
 
@@ -3974,5 +4046,75 @@ bool UIContentImpl::GetContainerControlButtonVisible()
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     return pipelineContext->GetContainerControlButtonVisible();
+}
+
+UIContentErrorCode UIContentImpl::InitializeWithAniStorage(
+    OHOS::Rosen::Window* window, const std::string& url, ani_object storage)
+{
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    auto errorCode = InitializeInner(window, url, storageWrapper, false);
+    AddWatchSystemParameter();
+    return errorCode;
+}
+
+UIContentErrorCode UIContentImpl::InitializeWithAniStorage(
+    OHOS::Rosen::Window* window, const std::string& url, ani_object storage, uint32_t focusWindowId)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    if (window == nullptr) {
+        LOGE("UIExtensionAbility [%{public}s][%{public}s][%{public}d][%{public}s] initialize ui instance failed, the"
+             "window is invalid",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+        return errorCode;
+    }
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    errorCode = CommonInitialize(window, url, storageWrapper, focusWindowId);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        return errorCode;
+    }
+    AddWatchSystemParameter();
+
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[%{public}s][%{public}s][%{public}d]: StartUIExtension: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+#if !defined(ACE_UNITTEST)
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, errorCode);
+    auto rootNode = pipelineContext->GetRootElement();
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
+#endif
+    return errorCode;
+}
+
+UIContentErrorCode UIContentImpl::InitializeWithAniStorage(
+    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    errorCode = CommonInitialize(window, "", storageWrapper);
+    CHECK_ERROR_CODE_RETURN(errorCode);
+    AddWatchSystemParameter();
+    if (content) {
+        LOGI("Initialize by buffer, size:%{public}zu", content->size());
+        // run page.
+        errorCode = Platform::AceContainer::RunPage(instanceId_, content, "");
+        CHECK_ERROR_CODE_RETURN(errorCode);
+    } else {
+        LOGE("Initialize failed, buffer is null");
+    }
+    return errorCode;
+}
+
+UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
+    OHOS::Rosen::Window* window, const std::string& name, ani_object storage)
+{
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    auto errorCode = InitializeInner(window, name, storageWrapper, true);
+    AddWatchSystemParameter();
+    return errorCode;
 }
 } // namespace OHOS::Ace

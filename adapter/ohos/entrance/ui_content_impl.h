@@ -44,9 +44,14 @@ class AccessibilityElementInfo;
 }
 
 namespace OHOS::Ace {
+struct StorageWrapper {
+    std::optional<napi_value> napiStorage_;
+    std::optional<ani_object> aniStorage_;
+};
+
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
-    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
+    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
@@ -74,8 +79,10 @@ public:
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
     // restore
-    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
-        napi_value storage, ContentInfoType type) override;
+    UIContentErrorCode Restore(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type) override;
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, ani_object storage,
+        ContentInfoType type = ContentInfoType::CONTINUATION) override;
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
@@ -140,6 +147,7 @@ public:
 
     // ArkTS Form
     void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
     void RunFormPage() override;
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
     void UpdateFormData(const std::string& data) override;
@@ -229,6 +237,7 @@ public:
         const std::vector<std::string>& assetBasePaths) override;
 
     napi_value GetUINapiContext() override;
+    ani_object GetUIAniContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
 
     void UpdateResource() override;
@@ -366,13 +375,25 @@ public:
 
     bool GetContainerControlButtonVisible() override;
 
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
+
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& url, ani_object storage, uint32_t focusWindowID) override;
+
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage) override;
+
+    UIContentErrorCode InitializeByNameWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& name, ani_object storage) override;
+
 private:
     UIContentErrorCode InitializeInner(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId = 0);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, uint32_t focusWindowId = 0);
     UIContentErrorCode CommonInitializeForm(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper StorageWrapper);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void ProcessDestructCallbacks();
@@ -439,6 +460,8 @@ private:
 
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
     std::mutex updateDecorVisibleMutex_;
+
+    VMType vmType_ = VMType::NORMAL;
 };
 
 } // namespace OHOS::Ace

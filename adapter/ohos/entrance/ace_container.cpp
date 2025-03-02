@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <regex>
+#include <ani.h>
 
 #include "ability_context.h"
 #include "ability_info.h"
@@ -195,6 +196,14 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         auto nativeEngine = reinterpret_cast<NativeEngine*>(sharedRuntime);
         auto env = reinterpret_cast<napi_env>(nativeEngine);
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
+    }
+}
+
+void ReleaseStorageReference(void* sharedRuntime, void* storage)
+{
+    if (sharedRuntime && storage) {
+        auto* env = reinterpret_cast<ani_env*>(sharedRuntime);
+        env->GlobalReference_Delete(reinterpret_cast<ani_object>(storage));
     }
 }
 } // namespace
@@ -1916,6 +1925,27 @@ void AceContainer::SetLocalStorage(
             }
         },
         TaskExecutor::TaskType::JS, "ArkUISetLocalStorage");
+}
+
+void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
+{
+    ContainerScope scope(instanceId_);
+    taskExecutor_->PostSyncTask([frontend = WeakPtr<Frontend>(frontend_), storage,
+                                    contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context),
+                                    id = instanceId_, sharedRuntime = sharedRuntime_] {
+        auto sp = frontend.Upgrade();
+        auto contextRef = contextWeak.lock();
+        if (!sp || !contextRef) {
+            ReleaseStorageReference(sharedRuntime, storage);
+            return;
+        }
+        auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(sp);
+        if (!arktsFrontend) {
+            ReleaseStorageReference(sharedRuntime, storage);
+            return;
+        }
+        arktsFrontend->RegisterLocalStorage(id, storage);
+    }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
 }
 
 void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,

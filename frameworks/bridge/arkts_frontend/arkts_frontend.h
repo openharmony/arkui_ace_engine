@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_KOALA_FRONTEND_KOALA_FRONTEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_KOALA_FRONTEND_KOALA_FRONTEND_H
 
+#include <unordered_map>
+
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
@@ -178,11 +180,26 @@ public:
     void FlushReload() override {}
     void HotReload() override {}
 
+    void RegisterLocalStorage(int32_t id, void* storage)
+    {
+        storageMap_.emplace(id, storage);
+    }
+
+    void UnRegisterLocalStorage(int32_t id)
+    {
+        storageMap_.erase(id);
+    }
+
+    void* GetShared(int32_t id);
+
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
     ets_env* env_; // ani_env
     bool foregroundFrontend_ = false;
+
+    std::unordered_map<int32_t, void*> storageMap_;
+
     ACE_DISALLOW_COPY_AND_MOVE(ArktsFrontend);
 };
 
