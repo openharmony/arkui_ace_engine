@@ -330,6 +330,8 @@ public:
         continuousSlidingCallback_ = continuousSlidingCallback;
     }
 
+    std::optional<float> GetPredictSnapOffset() const;
+
     void SetHandleScrollCallback(NestableScrollCallback&& func)
     {
         handleScrollCallback_ = std::move(func);
