@@ -83,6 +83,7 @@ adapter/ohos/entrance/ui_event_impl.h @arkuiframework
 adapter/ohos/entrance/ui_session/ @arkuiframework
 adapter/ohos/entrance/utils.cpp @arkuiframework
 adapter/ohos/entrance/utils.h @arkuiframework
+adapter/ohos/entrance/window_free_container.cpp @arkuiframework
 adapter/ohos/entrance/vibrator/vibrator_utils.cpp @arkuiscroll
 adapter/ohos/entrance/window/drag_window_ohos.cpp @arkuievent
 adapter/ohos/entrance/window/drag_window_ohos.h @arkuievent
@@ -179,6 +180,7 @@ adapter/ohos/services/ @arkuiframework
 adapter/ohos/tools/raw_input_injector/ @arkuievent
 
 [Preview adapter]
+adapter/preview/entrance/window_free_container.cpp @arkuiframework
 adapter/preview/ @arkuistatemgmt
 
 [Advanced UI Components]
@@ -3014,6 +3016,7 @@ interfaces/napi/kits/BUILD.gn @arkui_architecture
 interfaces/napi/kits/component_snapshot/ @arkuievent
 interfaces/napi/kits/componentutils/ @arkuievent
 interfaces/napi/kits/configuration/ @arkuiframework
+interfaces/napi/kits/container_utils/ @arkuiframework
 interfaces/napi/kits/device/ @arkuiframework
 interfaces/napi/kits/display_sync/ @arkuiframework
 interfaces/napi/kits/drag_controller/ @arkuievent
