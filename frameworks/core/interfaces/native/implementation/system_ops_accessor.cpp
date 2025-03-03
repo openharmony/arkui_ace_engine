@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SystemOpsAccessor {
+static thread_local std::vector<int32_t> restoreInstanceIds_;
 void DestroyPeerImpl(Ark_SystemOps peer)
 {
 }
@@ -39,6 +40,20 @@ void EndFrameImpl(Ark_NativePointer root)
 {
     Converter::FC->Clear();
 }
+void SyncInstanceIdImpl(Ark_Int32 instanceId)
+{
+    restoreInstanceIds_.emplace_back(Container::CurrentId());
+    ContainerScope::UpdateCurrent(instanceId);
+}
+void RestoreInstanceIdImpl()
+{
+    if (restoreInstanceIds_.empty()) {
+        ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+        return;
+    }
+    ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
+    restoreInstanceIds_.pop_back();
+}
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
@@ -48,6 +63,8 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::GetFinalizerImpl,
         SystemOpsAccessor::StartFrameImpl,
         SystemOpsAccessor::EndFrameImpl,
+        SystemOpsAccessor::SyncInstanceIdImpl,
+        SystemOpsAccessor::RestoreInstanceIdImpl,
     };
     return &SystemOpsAccessorImpl;
 }

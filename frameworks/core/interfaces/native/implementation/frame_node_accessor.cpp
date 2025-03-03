@@ -202,6 +202,12 @@ Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     auto offset = peer->node->GetPositionToWindowWithTransform();
     return Converter::ArkValue<Ark_Position>(offset);
 }
+Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
+{
+    auto valueName = Converter::Convert<std::string>(*name);
+    auto node = NG::Inspector::GetFrameNodeByKey(valueName, true);
+    return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -223,6 +229,7 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::DisposeImpl,
         FrameNodeAccessor::GetOpacityImpl,
         FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
+        FrameNodeAccessor::GetFrameNodeByKeyImpl,
     };
     return &FrameNodeAccessorImpl;
 }

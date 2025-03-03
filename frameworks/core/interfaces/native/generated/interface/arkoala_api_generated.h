@@ -19477,6 +19477,8 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_NativePointer (*StartFrame)();
     void (*EndFrame)(Ark_NativePointer root);
+    void (*syncInstanceId)(Ark_Int32 instanceId);
+    void (*restoreInstanceId)();
 } GENERATED_ArkUISystemOpsAccessor;
 
 typedef struct GENERATED_ArkUIDrawingCanvasAccessor {
@@ -19710,6 +19712,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*dispose)(Ark_FrameNode peer);
     Ark_Number (*getOpacity)(Ark_FrameNode peer);
     Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
+    Ark_FrameNode (*getFrameNodeByKey)(const Ark_String* name);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUIPixelMapAccessor {
