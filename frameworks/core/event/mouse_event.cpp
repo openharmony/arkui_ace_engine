@@ -167,7 +167,7 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetAction(event.action);
     info.SetPullAction(event.pullAction);
     info.SetGlobalLocation(event.GetOffset());
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
         NG::PointF localPoint(event.x, event.y);
         NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
         auto localX = static_cast<float>(localPoint.GetX());

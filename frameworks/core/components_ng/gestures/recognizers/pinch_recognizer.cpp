@@ -528,7 +528,7 @@ RefPtr<GestureSnapshot> PinchRecognizer::Dump() const
 
 bool PinchRecognizer::ProcessAxisAbnormalCondition(const AxisEvent& event)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (NearZero(event.pinchAxisScale) &&
             (!IsCtrlBeingPressed(event) || event.sourceTool == SourceTool::TOUCHPAD)) {
             if (ProcessAxisReject()) {
