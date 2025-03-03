@@ -223,6 +223,11 @@ private:
      */
     void SyncPreload(LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize);
 
+    virtual std::pair<int32_t, int32_t> CalculateCachedCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
+    {
+        return std::make_pair(cachedCount * crossCount_, cachedCount * crossCount_);
+    }
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -242,10 +247,9 @@ private:
      * @param line index of line to measure
      * updates @param mainLength by adding this line's measured height
      * updates @param endIdx with max item index in this line
-     * set @param cacheValid to false if line height has changed.
      * @return false if line isn't recorded.
      */
-    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx, bool& cacheValid);
+    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx);
 
     LayoutWrapper* wrapper_;
     SizeF frameSize_;

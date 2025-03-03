@@ -35,4 +35,13 @@ panda::Local<panda::ObjectRef> JsiObjectTemplate::NewInstance() const
     return panda::ObjectRef::New(runtime->GetEcmaVm());
 }
 
+JSView* JsiObjectTemplate::GetNativeView(const panda::Local<panda::ObjectRef> obj, const EcmaVM* vm)
+{
+    auto jsObj = JSRef<JSObject>::Make(obj);
+    if (jsObj->HasProperty("nativeViewPartialUpdate")) {
+        JSRef<JSObject> nativeViewPartialUpdate = jsObj->GetProperty("nativeViewPartialUpdate");
+        return nativeViewPartialUpdate->Unwrap<JSView>();
+    }
+    return static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+}
 } // namespace OHOS::Ace::Framework

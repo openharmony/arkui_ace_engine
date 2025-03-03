@@ -231,6 +231,13 @@ int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
         optionPosition.SetDuration(HALF_FOLD_HOVER_DURATION);
         optionPosition.SetCurve(motion);
+        auto menuWrapperNode = pattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        if (menuWrapperPattern->GetHoverMode() && pattern->IsSubMenu()) {
+            menuWrapperPattern->HideSubMenu();
+        }
         pipelineContext->FlushUITasks();
         pipelineContext->Animate(optionPosition, motion, [host, pipelineContext]() {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -290,7 +297,13 @@ void MenuPattern::OnModifyDone()
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(host, borderRadius);
     }
-    UpdateMenuBorderAndBackgroundBlur();
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selecTheme);
+    if (selecTheme->GetMenuNeedFocus()) {
+        UpdateMenuBorderAndBackgroundBlur();
+    }
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
@@ -318,7 +331,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    auto contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto contentPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     PaddingProperty padding;
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
@@ -407,7 +420,13 @@ void InnerMenuPattern::OnModifyDone()
     auto uiNode = AceType::DynamicCast<UINode>(host);
     UpdateMenuItemChildren(uiNode);
     SetAccessibilityAction();
-    InitDefaultBorder(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selecTheme);
+    if (selecTheme->GetMenuNeedFocus()) {
+        InitDefaultBorder(host);
+    }
 }
 
 // close menu on touch up
@@ -661,7 +680,7 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
     if (IsSubMenu() && expandingMode == SubMenuExpandingMode::STACK) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        auto hostZone = host->GetPaintRectOffset();
+        auto hostZone = host->GetPaintRectOffset(false, true);
         auto scroll = host->GetFirstChild();
         CHECK_NULL_RETURN(scroll, false);
         auto column = scroll->GetFirstChild();
@@ -678,7 +697,7 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
     } else if (expandingMode == SubMenuExpandingMode::STACK) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        auto hostZone = host->GetPaintRectOffset();
+        auto hostZone = host->GetPaintRectOffset(false, true);
         auto clickAreaZone = host->GetGeometryNode()->GetFrameRect();
         clickAreaZone.SetLeft(hostZone.GetX());
         clickAreaZone.SetTop(hostZone.GetY());
@@ -1021,7 +1040,7 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(theme);
     // apply default padding from theme on inner menu
     PaddingProperty padding;
-    padding.SetEdges(CalcLength(theme->GetOutPadding()));
+    padding.SetEdges(CalcLength(theme->GetMenuPadding()));
     host->GetLayoutProperty()->UpdatePadding(padding);
 
     host->GetRenderContext()->SetClipToBounds(true);
@@ -1156,7 +1175,7 @@ void MenuPattern::ShowPreviewMenuScaleAnimation(
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-    auto menuPosition = host->GetPaintRectOffset();
+    auto menuPosition = host->GetPaintRectOffset(false, true);
     auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
     renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
@@ -1237,7 +1256,7 @@ void MenuPattern::ShowMenuAppearAnimation()
         CHECK_NULL_VOID(renderContext);
         auto offset = GetTransformCenter();
         renderContext->UpdateTransformCenter(DimensionOffset(offset));
-        auto menuPosition = host->GetPaintRectOffset();
+        auto menuPosition = host->GetPaintRectOffset(false, true);
         if (IsSelectOverlayExtensionMenu() && !isExtensionMenuShow_) {
             menuPosition = GetEndOffset();
         }
@@ -1405,7 +1424,7 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, bool isNe
             auto pipeline = host->GetContextWithCheck();
             CHECK_NULL_RETURN(pipeline, menuItemInfo);
             auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL;
-            auto offset = menuItem->GetPaintRectOffset();
+            auto offset = menuItem->GetPaintRectOffset(false, true);
             if (isContainerModal) {
                 offset -= OffsetF(0.0f, static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()));
             }
@@ -1491,7 +1510,7 @@ void MenuPattern::ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuN
     CHECK_NULL_VOID(menuNode);
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, true);
     CHECK_NULL_VOID(subMenuNode);
-    auto subMenuPos = subMenuNode->GetPaintRectOffset();
+    auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
 
     option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
@@ -1585,7 +1604,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     ShowStackMenuAppearAnimation();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto menuPosition = host->GetPaintRectOffset();
+    auto menuPosition = host->GetPaintRectOffset(false, true);
     SetEndOffset(menuPosition);
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
@@ -1598,6 +1617,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(theme, false);
     auto renderContext = dirty->GetHostNode()->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    renderContext->UpdateClipShape(nullptr);
+    renderContext->ResetClipShape();
 
     auto menuProp = DynamicCast<MenuLayoutProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(menuProp, false);
@@ -2205,5 +2226,15 @@ float MenuPattern::GetSelectMenuWidthFromTheme() const
         finalWidth = defaultWidth;
     }
     return finalWidth;
+}
+
+bool MenuPattern::IsSelectOverlayDefaultModeRightClickMenu()
+{
+    CHECK_NULL_RETURN(IsSelectOverlayRightClickMenu(), false);
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    return !menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper();
 }
 } // namespace OHOS::Ace::NG

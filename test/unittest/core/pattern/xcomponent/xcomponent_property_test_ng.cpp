@@ -1908,7 +1908,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest049, TestSize.Level1)
 
     EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
         SetRenderFit(RENDER_FIT)).Times(1).WillOnce(Return()).RetiresOnSaturation();
-    XComponentModelNG::SetRenderFit(frameNode.GetRawPtr(), RENDER_FIT);
+    XComponentModelNG::SetRenderFit(Referenced::RawPtr(frameNode), RENDER_FIT);
 }
 
 /**

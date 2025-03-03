@@ -307,6 +307,7 @@ public:
     void UpdateActiveChildRange(bool forward, int32_t cacheCount, bool show);
     void UpdateActiveChildRange(bool show);
     void SyncItemsToCachedItemPosition();
+    bool IsVisible() const;
     void SetRecache(bool value)
     {
         reCache_ = value;
@@ -314,6 +315,16 @@ public:
     void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
         int32_t backwardCached, ListMainSizeValues listSizeValues);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    RefPtr<UINode> GetHeader() const
+    {
+        return header_.Upgrade();
+    }
+
+    RefPtr<UINode> GetFooter() const
+    {
+        return footer_.Upgrade();
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -324,7 +335,7 @@ private:
     float GetPaddingAndMargin() const;
     float GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const;
     bool FirstItemFullVisible(const RefPtr<FrameNode>& listNode) const;
-    bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex);
+    bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
@@ -367,6 +378,7 @@ private:
     TextDirection layoutDirection_ = TextDirection::LTR;
     float mainSize_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
+    bool isStackFromEnd_ = false;
 };
 } // namespace OHOS::Ace::NG
 

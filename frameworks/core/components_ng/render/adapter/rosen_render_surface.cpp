@@ -191,6 +191,8 @@ void RosenRenderSurface::Disconnect() const
 void RosenRenderSurface::RegisterSurface() const
 {
     CHECK_NULL_VOID(producerSurface_);
+    const std::string usage = GetBufferUsage();
+    producerSurface_->SetBufferName(usage);
     auto* surfaceUtils = SurfaceUtils::GetInstance();
     CHECK_NULL_VOID(surfaceUtils);
     auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);

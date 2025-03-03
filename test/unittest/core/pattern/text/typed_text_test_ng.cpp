@@ -304,7 +304,7 @@ HWTEST_F(TextPatternNg, TextPatternHandleAISpanHoverEvent001, TestSize.Level1)
     RefPtr<MockParagraph> mockParagraph = AIWriteAdapter::MakeRefPtr<MockParagraph>();
     auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
     textPattern.pManager_ = paragraphManager;
-    std::list<ParagraphManager::ParagraphInfo> paragraphs;
+    std::vector<ParagraphManager::ParagraphInfo> paragraphs;
     ParagraphManager::ParagraphInfo paragraphInfo;
     paragraphInfo.start = 5;
     paragraphInfo.end = 15;

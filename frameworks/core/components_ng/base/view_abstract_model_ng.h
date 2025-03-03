@@ -44,7 +44,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
@@ -164,6 +164,11 @@ public:
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override
     {
         ViewAbstract::SetBackgroundImageRepeat(imageRepeat);
+    }
+
+    void SetBackgroundImageSyncMode(bool syncMode) override
+    {
+        ViewAbstract::SetBackgroundImageSyncMode(syncMode);
     }
 
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override
@@ -569,9 +574,9 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
-    void SetLayoutWeight(const LayoutWeightPair& value) override
+    void SetChainWeight(const ChainWeightPair& value) override
     {
-        ViewAbstract::SetLayoutWeight(value);
+        ViewAbstract::SetChainWeight(value);
     }
 
     void SetPixelRound(uint16_t value) override
@@ -1018,9 +1023,19 @@ public:
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     }
 
+    void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) override
+    {
+        ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc));
+    }
+
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override
     {
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
+    }
+
+    void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) override
+    {
+        ViewAbstract::SetOnHoverMove(std::move(onHoverMoveEventFunc));
     }
 
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override
@@ -1155,6 +1170,12 @@ public:
         ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios);
     }
 
+    void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override
+    {
+        ViewAbstract::SetOnVisibleAreaApproximateChange(std::move(onVisibleChange), ratioList, expectedUpdateInterval);
+    }
+
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override
@@ -1224,6 +1245,16 @@ public:
     void SetTabIndex(int32_t index) override
     {
         ViewAbstract::SetTabIndex(index);
+    }
+
+    void SetNextFocus(NG::FocusIntension key, std::string& nextFocus) override
+    {
+        ViewAbstract::SetNextFocus(key, nextFocus);
+    }
+
+    void ResetNextFocus() override
+    {
+        ViewAbstract::ResetNextFocus();
     }
 
     void SetFocusOnTouch(bool isSet) override
@@ -1332,6 +1363,19 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
+    int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
+    {
+        return ViewAbstract::OpenMenu(menuParam, customNode, targetId);
+    }
+    int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::UpdateMenu(menuParam, customNode);
+    }
+    int32_t CloseMenu(const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::CloseMenu(customNode);
+    }
+
     void BindMenuGesture(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
 
@@ -1370,6 +1414,11 @@ public:
     void SheetSpringBack() override;
     static void SheetSpringBackStatic();
 
+    void NotifyDragStartRequest(DragStartRequestStatus dragStatus) override
+    {
+        ViewAbstract::NotifyDragStartRequest(dragStatus);
+    }
+
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityTextHint(const std::string& text) override;
@@ -1383,6 +1432,10 @@ public:
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void ResetOnAccessibilityFocus() override;
+    void SetAccessibilityDefaultFocus() override;
+    void SetAccessibilityUseSamePage(bool isFullSilent) override;
+    void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
+    void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1446,6 +1499,11 @@ public:
         ViewAbstract::DisableOnHover();
     }
 
+    void DisableOnHoverMove() override
+    {
+        ViewAbstract::DisableOnHoverMove();
+    }
+
     void DisableOnAccessibilityHover() override
     {
         ViewAbstract::DisableOnAccessibilityHover();
@@ -1456,6 +1514,11 @@ public:
         ViewAbstract::DisableOnMouse();
     }
 
+    void DisableOnAxisEvent() override
+    {
+        ViewAbstract::DisableOnAxisEvent();
+    }
+    
     void DisableOnAppear() override
     {
         ViewAbstract::DisableOnAppear();
@@ -1542,6 +1605,16 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
+    int32_t CancelDataLoading(const std::string& key) override
+    {
+        return ViewAbstract::CancelDataLoading(key);
+    }
+
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override
+    {
+        return ViewAbstract::SetDisableDataPrefetch(disableDataPrefetch);
+    }
+
     void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
     {
         ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
@@ -1584,6 +1657,10 @@ public:
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
     static void ResetOnAccessibilityFocus(FrameNode* frameNode);
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
+    static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
+    static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
+    static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);
+    static void SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {
@@ -1614,9 +1691,9 @@ public:
     {
         ViewAbstract::SetChainStyle(frameNode, chainInfo);
     }
-    static void SetLayoutWeight(FrameNode* frameNode, const LayoutWeightPair& value)
+    static void SetChainWeight(FrameNode* frameNode, const ChainWeightPair& value)
     {
-        ViewAbstract::SetLayoutWeight(frameNode, value);
+        ViewAbstract::SetChainWeight(frameNode, value);
     }
 
     static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)

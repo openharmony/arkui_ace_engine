@@ -14,12 +14,22 @@
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include <cstdlib>
+#include <vector>
 
+#include "base/error/error_code.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
+enum class ExpandMode : uint32_t {
+    NOT_EXPAND = 0,
+    EXPAND,
+    LAZY_EXPAND,
+};
+
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -124,18 +134,57 @@ ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Bool isExpanded)
                       : frameNode->GetTotalChildCountWithoutExpanded();
 }
 
-ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool isExpanded)
+ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     CHECK_NULL_RETURN(index >= 0, nullptr);
-    if (isExpanded) {
+    auto expandModeResult = static_cast<ExpandMode>(expandMode);
+    if (expandModeResult == ExpandMode::EXPAND) {
         frameNode->GetAllChildrenWithBuild(false);
     }
-    auto child = frameNode->GetFrameNodeChildByIndex(index, false, isExpanded);
+    FrameNode* child = nullptr;
+    if (expandModeResult == ExpandMode::EXPAND || expandModeResult == ExpandMode::NOT_EXPAND) {
+        child = frameNode->GetFrameNodeChildByIndex(index, false, expandModeResult == ExpandMode::EXPAND);
+    } else if (expandModeResult == ExpandMode::LAZY_EXPAND) {
+        child = frameNode->GetFrameNodeChildByIndexWithoutBuild(index);
+        if (child == nullptr) {
+            return GetChild(node, index, static_cast<ArkUI_Uint32>(ExpandMode::EXPAND));
+        }
+    }
     return reinterpret_cast<ArkUINodeHandle>(child);
+}
+
+ArkUI_Int32 GetFirstChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto child = frameNode->GetFrameNodeChildByIndex(0, false, false);
+    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto childRef = Referenced::Claim<FrameNode>(childNode);
+    *index = frameNode->GetFrameNodeIndex(childRef, true);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 GetLastChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    size_t size = static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
+    CHECK_NULL_RETURN(size > 0, ERROR_CODE_PARAM_INVALID);
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, false);
+    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto childRef = Referenced::Claim<FrameNode>(childNode);
+    *index = frameNode->GetFrameNodeIndex(childRef, true);
+    return ERROR_CODE_NO_ERROR;
 }
 
 ArkUINodeHandle GetFirst(ArkUINodeHandle node, ArkUI_Bool isExpanded)
@@ -338,8 +387,13 @@ ArkUI_Bool IsVisible(ArkUINodeHandle node)
     CHECK_NULL_RETURN(currentNode, false);
     auto isVisible = currentNode->IsVisible();
     auto parentNode = currentNode->GetParent();
-    while (isVisible && parentNode && AceType::InstanceOf<FrameNode>(*parentNode)) {
-        isVisible = isVisible && AceType::DynamicCast<FrameNode>(parentNode)->IsVisible();
+    while (isVisible && parentNode) {
+        if (AceType::InstanceOf<FrameNode>(*parentNode)) {
+            isVisible = isVisible && AceType::DynamicCast<FrameNode>(parentNode)->IsVisible();
+        } else if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            break;
+        }
+        
         parentNode = parentNode->GetParent();
     }
     return isVisible;
@@ -389,19 +443,18 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
 
 ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    if (!pipeline || !pipeline->CheckThreadSafe()) {
-        LOGF("GetFrameNodeByKey doesn't run on UI thread");
-        abort();
-    }
     auto node = NG::Inspector::GetFrameNodeByKey(key, true);
-    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
 ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("GetAttachedNodeHandleById doesn't run on UI thread");
+    }
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
+    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
@@ -522,6 +575,35 @@ ArkUI_Int32 ResetLayoutEvent(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, -1);
     ViewAbstract::SetLayoutEvent(frameNode, nullptr);
     return 0;
+}
+
+ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::SCROLL_ETS_TAG,
+    };
+    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), currentNode->GetTag());
+    if (pos == nodeTypeArray.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    currentNode->SetIsCrossLanguageAttributeSetting(attributeSetting);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Bool GetCrossLanguageOptions(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    return currentNode->isCrossLanguageAttributeSetting();
+}
+
+ArkUI_Bool CheckIfCanCrossLanguageAttributeSetting(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    return currentNode -> IsCNode() ? currentNode->isCrossLanguageAttributeSetting() : false;
 }
 
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
@@ -729,10 +811,99 @@ void RemoveNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey)
     frameNode->RemoveNodeDestroyCallback(std::string(callbackKey));
 }
 
+ArkUI_Int32 RequestFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT);
+    return static_cast<ArkUI_Int32>(ViewAbstract::RequestFocus(frameNode));
+}
+
+void ClearFocus(ArkUI_Int32 instanceId)
+{
+    ViewAbstract::ClearFocus(instanceId);
+}
+
+void FocusActivate(ArkUI_Int32 instanceId, bool isActive, bool isAutoInactive)
+{
+    ViewAbstract::FocusActivate(instanceId, isActive, isAutoInactive);
+}
+
+void SetAutoFocusTransfer(ArkUI_Int32 instanceId, bool isAutoFocusTransfer)
+{
+    ViewAbstract::SetAutoFocusTransfer(instanceId, isAutoFocusTransfer);
+}
+
+ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (!frameNode->IsOnMainTree()) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
+    auto context = frameNode->GetAttachedContext();
+    CHECK_NULL_RETURN(context, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    if (!context->CheckThreadSafe()) {
+        LOGF_ABORT("GetWindowInfoByNode doesn't run on UI thread");
+    }
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    std::string windowName = window->GetWindowName();
+    size_t nameSize = windowName.size();
+    *name = new char[nameSize + 1];
+    windowName.copy(*name, nameSize);
+    (*name)[nameSize] = '\0';
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkUI_Int32 index)
+{
+    auto* moveNode = reinterpret_cast<UINode*>(node);
+    auto* toNode = reinterpret_cast<UINode*>(target_parent);
+    CHECK_NULL_RETURN(moveNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(toNode, ERROR_CODE_PARAM_INVALID);
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::STACK_ETS_TAG,
+        OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
+    };
+    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
+    if (pos == nodeTypeArray.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto pipeline = moveNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("MoveNodeTo doesn't run on UI thread");
+    }
+    auto oldParent = moveNode->GetParent();
+    moveNode->setIsMoving(true);
+    if (oldParent) {
+        oldParent->RemoveChild(AceType::Claim(moveNode));
+        oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    int32_t childCount = toNode->TotalChildCount();
+    if (index >= childCount || index < 0) {
+        toNode->AddChild(AceType::Claim(moveNode));
+    } else {
+        auto indexChild = toNode->GetChildAtIndex(index);
+        toNode->AddChildBefore(AceType::Claim(moveNode), indexChild);
+    }
+    toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    moveNode->setIsMoving(false);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto delegate = EngineHelper::GetDelegateByContainer(container);
+    CHECK_NULL_VOID(delegate);
+    delegate->SetKeyProcessingMode(mode);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIFrameNodeModifier modifier = {
         .isModifiable = IsModifiable,
         .createFrameNode = CreateFrameNode,
@@ -743,6 +914,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .clearChildren = ClearChildrenInFrameNode,
         .getChildrenCount = GetChildrenCount,
         .getChild = GetChild,
+        .getFirstChildIndexWithoutExpand = GetFirstChildIndexWithoutExpand,
+        .getLastChildIndexWithoutExpand = GetLastChildIndexWithoutExpand,
         .getFirst = GetFirst,
         .getNextSibling = GetNextSibling,
         .getPreviousSibling = GetPreviousSibling,
@@ -789,25 +962,28 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getCustomPropertyByKey = GetCustomPropertyByKey,
         .addNodeDestroyCallback = AddNodeDestroyCallback,
         .removeNodeDestroyCallback = RemoveNodeDestroyCallback,
+        .getWindowInfoByNode = GetWindowInfoByNode,
         .setDrawCompleteEvent = SetDrawCompleteEvent,
         .resetDrawCompleteEvent = ResetDrawCompleteEvent,
         .setLayoutEvent = SetLayoutEvent,
         .resetLayoutEvent = ResetLayoutEvent,
+        .requestFocus = RequestFocus,
+        .clearFocus = ClearFocus,
+        .focusActivate = FocusActivate,
+        .setAutoFocusTransfer = SetAutoFocusTransfer,
+        .moveNodeTo = MoveNodeTo,
+        .setCrossLanguageOptions = SetCrossLanguageOptions,
+        .getCrossLanguageOptions = GetCrossLanguageOptions,
+        .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
+        .setKeyProcessingMode = SetKeyProcessingMode,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIFrameNodeModifier modifier = {
         .isModifiable = IsModifiable,
         .createFrameNode = CreateFrameNode,
@@ -845,14 +1021,7 @@ const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
         .getLayoutSize = GetLayoutSize,
         .getLayoutPositionWithoutMargin = GetLayoutPositionWithoutMargin,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

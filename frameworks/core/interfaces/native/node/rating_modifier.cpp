@@ -60,6 +60,18 @@ void SetStarStyle(ArkUINodeHandle node,
     }
 }
 
+void SetOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        RatingModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        RatingModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
 void ResetStars(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -89,34 +101,35 @@ void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool ind
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetRatingOptions(frameNode, rating, static_cast<bool>(indicator));
 }
+void ResetOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RatingModelNG::SetOnChange(frameNode, nullptr);
+}
 
 namespace NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIRatingModifier modifier = {
         .setStars = SetStars,
         .setRatingStepSize = SetRatingStepSize,
         .setStarStyle = SetStarStyle,
+        .setOnChange = SetOnChange,
         .resetStars = ResetStars,
         .resetRatingStepSize = ResetRatingStepSize,
         .resetStarStyle = ResetStarStyle,
         .setRatingOptions = SetRatingOptions,
+        .resetOnChange = ResetOnChange,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRatingModifier* GetCJUIRatingModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIRatingModifier modifier = {
         .setStars = SetStars,
         .setRatingStepSize = SetRatingStepSize,
@@ -125,14 +138,7 @@ const CJUIRatingModifier* GetCJUIRatingModifier()
         .resetRatingStepSize = ResetRatingStepSize,
         .resetStarStyle = ResetStarStyle,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

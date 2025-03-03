@@ -23,41 +23,32 @@
  */
 class VariableUtilV2 {
     /**
-       * setReadOnlyAttr - helper function used to update @param
-       * from parent @Component. Not allowed for @param @once .
-       * @param target  - the object, usually the ViewV2
-       * @param attrName - @param variable name
-       * @param newValue - update to new value
-       */
+     * setReadOnlyAttr - helper function used to update @Param
+     * from parent @Component. Not allowed for @Param @Once .
+     * @param target  - the object, usually the ViewV2
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
     public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
       const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-      if (!meta || meta.deco !== '@Param') {
-        const error = `Use initParam(${attrName}) only to init @Param. Internal error!`;
-        stateMgmtConsole.error(error);
-        throw new Error(error);
-      }
-      // prevent update for @param @once
+      VariableUtilV2.checkInvalidUsage(meta, attrName);
       const storeProp = ObserveV2.OB_PREFIX + attrName;
       stateMgmtConsole.propertyAccess(`initParam '@Param ${attrName}' - setting backing store`);
       target[storeProp] = newValue;
       ObserveV2.getObserve().addRef(target, attrName);
     }
 
-      /**
-       * setReadOnlyAttr - helper function used to update @param
-       * from parent @Component. Not allowed for @param @once .
-       * @param target  - the object, usually the ViewV2
-       * @param attrName - @param variable name
-       * @param newValue - update to new value
-       */
+    /**
+     * setReadOnlyAttr - helper function used to update @Param
+     * from parent @Component. Not allowed for @Param @Once .
+     * @param target  - the object, usually the ViewV2
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
     public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
       // prevent update for @param @once
       const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-      if (!meta || meta.deco !== '@Param') {
-        const error = `Use updateParm(${attrName}) only to update @Param. Internal error!`;
-        stateMgmtConsole.error(error);
-        throw new Error(error);
-      }
+      VariableUtilV2.checkInvalidUsage(meta, attrName);
 
       const storeProp = ObserveV2.OB_PREFIX + attrName;
       // @Observed class and @Track attrName
@@ -73,6 +64,26 @@ class VariableUtilV2 {
         target[storeProp] = newValue;
         ObserveV2.getObserve().fireChange(target, attrName);
       }
+    }
+
+    public static checkInvalidUsage(meta: { deco: string }, attrName: string): void {
+      if (!meta || meta.deco !== '@Param') {
+        const error = `Use initParam/updateParm/resetParam(${attrName}) only to init/update/reset @Param. Internal error!`;
+        stateMgmtConsole.error(error);
+        throw new Error(error);
+      }
+    }
+    // only used for reusableV2. called in resetStateVarsOnReuse, including reset @Param @Once variable
+    public static resetParam<Z>(target: object, attrName: string, newValue: Z): void {
+      const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
+      VariableUtilV2.checkInvalidUsage(meta, attrName);
+      const storeProp = ObserveV2.OB_PREFIX + attrName;
+      if (newValue === target[storeProp]) {
+        stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' unchanged. Doing nothing.`);
+        return;
+      }
+      target[storeProp] = newValue;
+      ObserveV2.getObserve().fireChange(target, attrName);
     }
   }
 

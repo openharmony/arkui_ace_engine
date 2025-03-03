@@ -47,6 +47,16 @@ public:
         return backButton_;
     }
 
+    void SetCustomBackButton(const RefPtr<UINode>& button)
+    {
+        customBackButton_ = button;
+    }
+
+    const RefPtr<UINode>& GetCustomBackButton() const
+    {
+        return customBackButton_;
+    }
+
     void SetTitle(const RefPtr<UINode>& title)
     {
         title_ = title;
@@ -111,6 +121,7 @@ public:
 
 private:
     RefPtr<UINode> backButton_;
+    RefPtr<UINode> customBackButton_;
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;

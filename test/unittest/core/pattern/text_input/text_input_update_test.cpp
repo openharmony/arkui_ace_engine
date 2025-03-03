@@ -434,6 +434,34 @@ HWTEST_F(TextInputUpdateTestNg, AddCounterNode001, TestSize.Level1)
     pattern_->AddCounterNode();
     EXPECT_TRUE(pattern_->counterDecorator_);
     pattern_->CleanCounterNode();
+    EXPECT_FALSE(pattern_->counterDecorator_);
+}
+
+/**
+ * @tc.name: MeasureDecorator
+ * @tc.desc: test MeasureDecorator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, MeasureDecorator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected: counterTextNode_ is created
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. call AddCounterNode and MeasureDecorator
+     * @tc.expected: counterTextNode_ is created and align properties is correct
+     */
+    pattern_->AddCounterNode();
+    auto counter = pattern_->GetCounterDecorator();
+    counter->MeasureDecorator(Infinity<float>(), u"9/10", false);
+    EXPECT_TRUE(counter);
+    auto property = frameNode_->GetLayoutProperty();
+    EXPECT_TRUE(property);
+    auto layoutDirection = property->GetLayoutDirection();
+    EXPECT_TRUE(layoutDirection == TextDirection::AUTO);
 }
 
 /**
@@ -953,10 +981,10 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest001, TestSize.Level1)
      * @tc.steps: step2. change text with HandleOnUndoAction
      * @tc.expected: return value is valid
      */
-    SourceAndValueInfo info;
+    InsertCommandInfo info;
     info.insertValue = u"2";
-    info.isIME = true;
-    pattern_->InsertValueOperation(info);
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
     EXPECT_EQ(offset, 0);
     EXPECT_EQ(value, "2");
     EXPECT_EQ(didOffset, 1);
@@ -1045,10 +1073,10 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest003, TestSize.Level1)
      * @tc.steps: step2. change text with HandleOnUndoAction
      * @tc.expected: return value is valid
      */
-    SourceAndValueInfo info;
+    InsertCommandInfo info;
     info.insertValue = u"2";
-    info.isIME = true;
-    pattern_->InsertValueOperation(info);
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
     EXPECT_EQ(offset, 0);
     EXPECT_EQ(value, "2");
     EXPECT_EQ(didOffset, -1);
@@ -1149,5 +1177,302 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest005, TestSize.Level1)
     EXPECT_EQ(didDirection, TextDeleteDirection::FORWARD);
     EXPECT_EQ(didOffset, 1);
     EXPECT_EQ(didValue, "b");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest006
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return true;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+    InsertCommandInfo info;
+    info.insertValue = u"2";
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
+    EXPECT_EQ(changeValueInfo.oldContent, u"");
+    EXPECT_EQ(changeValueInfo.value, u"2");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 0);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 1);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest007
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return true;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+    /**
+     * @tc.steps: step2. change text with DeleteRange
+     * @tc.expected: return value is valid
+     */
+    pattern_->DeleteRange(0, 4);
+    EXPECT_EQ(changeValueInfo.oldContent, u"openharmony");
+    EXPECT_EQ(changeValueInfo.value, u"harmony");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 4);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 0);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest008
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return true;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+    pattern_->HandleSetSelection(0, 4, false);
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+    InsertCommandInfo info;
+    info.insertValue = u"2";
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
+    EXPECT_EQ(changeValueInfo.oldContent, u"openharmony");
+    EXPECT_EQ(changeValueInfo.value, u"2harmony");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 4);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 1);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest009
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return false;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+    InsertCommandInfo info;
+    info.insertValue = u"2";
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
+    EXPECT_EQ(pattern_->GetTextValue().compare("openharmony"), 0);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest010
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return true;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+    /**
+     * @tc.steps: step2. change text with DeleteRange
+     * @tc.expected: return value is valid
+     */
+
+    pattern_->DeleteBackwardOperation(1);
+    EXPECT_EQ(changeValueInfo.oldContent, u"openharmony");
+    EXPECT_EQ(changeValueInfo.value, u"openharmon");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 10);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 10);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 10);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest011
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return false;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+    /**
+     * @tc.steps: step2. change text with DeleteRange
+     * @tc.expected: return value is valid
+     */
+
+    pattern_->DeleteBackwardOperation(1);
+    EXPECT_EQ(pattern_->GetTextValue().compare("openharmony"), 0);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest012
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return true;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+    /**
+     * @tc.steps: step2. change text with DeleteRange
+     * @tc.expected: return value is valid
+     */
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForwardOperation(1);
+    EXPECT_EQ(changeValueInfo.oldContent, u"openharmony");
+    EXPECT_EQ(changeValueInfo.value, u"penharmony");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 1);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 0);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest013
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return false;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+    /**
+     * @tc.steps: step2. change text with DeleteRange
+     * @tc.expected: return value is valid
+     */
+
+    pattern_->SetCaretPosition(0);
+    EXPECT_EQ(pattern_->GetTextValue().compare("openharmony"), 0);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest014
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return false;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+    InsertCommandInfo info;
+    info.insertValue = u"2";
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
+    EXPECT_EQ(pattern_->GetTextValue().compare("openharmony"), 0);
 }
 } // namespace OHOS::Ace::NG

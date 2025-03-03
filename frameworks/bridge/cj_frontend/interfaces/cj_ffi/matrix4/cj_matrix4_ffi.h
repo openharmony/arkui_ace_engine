@@ -18,13 +18,17 @@
 
 #include <cstdint>
 
-#include "base/geometry/matrix4.h"
 #include "ffi_remote_data.h"
+
+#include "base/geometry/matrix4.h"
+#include "base/geometry/ng/point_t.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 
 using VectorFloat32Ptr = void*;
+using VectorInt32Ptr = void*;
+using VectorPoints = std::vector<OHOS::Ace::NG::PointT<int32_t>>;
 
 namespace OHOS::Matrix4 {
 
@@ -77,6 +81,16 @@ struct FfiPoint {
     double y;
 };
 
+struct FfiPolyToPolyOptions {
+    VectorInt32Ptr srcX;
+    VectorInt32Ptr srcY;
+    int32_t srcIndex;
+    VectorInt32Ptr dstX;
+    VectorInt32Ptr dstY;
+    int32_t dstIndex;
+    int32_t pointCount;
+};
+
 CJ_EXPORT int64_t FfiOHOSMatrix4Init(VectorFloat32Ptr array);
 CJ_EXPORT int64_t FfiOHOSMatrix4Identity();
 CJ_EXPORT int64_t FfiOHOSMatrix4Copy(int64_t id);
@@ -86,6 +100,8 @@ CJ_EXPORT void FfiOHOSMatrix4Translate(int64_t id, float x, float y, float z);
 CJ_EXPORT void FfiOHOSMatrix4Scale(int64_t id, FfiScaleParams params);
 CJ_EXPORT void FfiOHOSMatrix4Rotate(int64_t id, FfiRotateParams params);
 CJ_EXPORT FfiPoint FfiOHOSMatrix4TransformPoint(int64_t id, FfiPoint ffiPoint);
+CJ_EXPORT void FfiOHOSMatrix4Skew(int64_t id, float x, float y);
+CJ_EXPORT void FfiOHOSMatrix4SetPolyToPoly(int64_t id, FfiPolyToPolyOptions option);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_MATRIX4_FFI_H

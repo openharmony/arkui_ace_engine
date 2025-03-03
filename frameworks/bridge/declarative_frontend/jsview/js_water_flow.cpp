@@ -17,9 +17,8 @@
 
 #include <cstdint>
 #include <vector>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
@@ -188,6 +187,7 @@ RefPtr<NG::UINode> SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject
 
 void JSWaterFlow::UpdateWaterFlowFooter(NG::FrameNode* frameNode, const JSRef<JSVal>& args)
 {
+    CHECK_NULL_VOID(args->IsObject());
     JSRef<JSObject> footerJsObject = JSRef<JSObject>::Cast(args); // 4 is the index of footerContent
     if (footerJsObject->HasProperty("builderNode_")) {
         RefPtr<NG::UINode> refPtrUINode = SetWaterFlowBuilderNode(footerJsObject);
@@ -434,9 +434,7 @@ void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachStart");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachStart");
             return;
         };
         WaterFlowModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -449,9 +447,7 @@ void JSWaterFlow::ReachEndCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachEnd");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachEnd");
             return;
         };
         WaterFlowModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
@@ -568,9 +564,7 @@ void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(first, last);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollIndex");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollIndex");
             return;
         };
         WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));

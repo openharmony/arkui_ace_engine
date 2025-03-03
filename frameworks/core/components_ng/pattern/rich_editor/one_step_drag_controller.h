@@ -47,6 +47,7 @@ protected:
     Builder menuBuilder = nullptr;
     Builder previewBuilder = nullptr;
     std::function<void(int32_t, int32_t)> onAppear = nullptr;
+    std::function<void(int32_t, int32_t)> onDisappear = nullptr;
     MenuParam menuParam;
     std::queue<WeakPtr<FrameNode>> dirtyFrameNodes;
 };

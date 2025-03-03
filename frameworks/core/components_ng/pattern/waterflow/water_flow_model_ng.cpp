@@ -557,7 +557,7 @@ void WaterFlowModelNG::SetFriction(FrameNode* frameNode, const std::optional<dou
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetFriction(friction.value_or(-1.0));
+    pattern->SetFriction(friction.value_or(-1.0f));
 }
 
 FlexDirection WaterFlowModelNG::GetLayoutDirection(FrameNode* frameNode)

@@ -55,11 +55,42 @@ declare class RepeatVirtualScrollNative {
       onGetKeys4Range: (from: number, toNumber: number) => Array<string>;
       onGetTypes4Range: (from: number, toNumber: number) => Array<string>;
       onSetActiveRange: (from: number, to: number) => void;
-    }
+    },
+    reusable: boolean
   ): void;
   // invalidate caches in C++ side, trigger render if needed
   static updateRenderState(totalCount: number, visibleItemsChanged: boolean): void;
   // drag and drop
   static onMove(handler: (from: number, to: number) => void);
   static setCreateByTemplate(isCreatedByTemplate: boolean): void;
+}
+
+// Repeat.virtualScroll (v2) maps to C++ RepeatVirtualScroll2Node 
+declare class RepeatVirtualScroll2Native {
+  static create(
+    totalCount: number,
+    handlers: {
+      onGetRid4Index: (forIndex: number) => [number, number],
+      onRecycleItems: (fromIndex: number, toIndex: number) => void,
+      onActiveRange: (fromIndex: number, toIndex: number, isLoop: boolean) => void,
+      onPurge: () => void;
+    }
+  ): void;
+
+  // purge node with given Repeat Item Id (Rid)
+  static removeNode(rid: number): void;
+
+  // Drop node with given Repeat Item Id (Rid) from L1 cache
+  static setInvalid(repeatelmtId: number, rid: number): void;
+
+  // invalidate owning Container layout starting from Repeat child index
+  static requestContainerReLayout(repeatElmtId: number, totalCount: number, index: number): void;
+
+  static updateL1Rid4Index(repeatElmtId: number,
+    totalCount: number,
+    invalidateContainerLayoutFromChildIndex: number,
+    l1rid4index: Array<Array<number>>): void;
+
+  // drag and drop
+  static onMove(handler: (from: number, to: number) => void);
 }

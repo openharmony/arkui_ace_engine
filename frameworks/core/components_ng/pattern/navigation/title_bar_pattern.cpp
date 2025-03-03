@@ -20,6 +20,7 @@
 #include "base/i18n/localization.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -203,10 +204,11 @@ void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive
     symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
 }
 
-void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr<FrameNode>& backButtonIconNode,
-    const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
+void UpdateSymbolBackButton(const RefPtr<TitleBarNode>& hostNode, const RefPtr<FrameNode>& backButtonNode,
+    const RefPtr<FrameNode>& backButtonIconNode, const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
-    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(hostNode);
+    auto theme = NavigationGetTheme(hostNode->GetThemeScopeId());
     auto backIconSymbol = titleBarLayoutProperty->GetBackIconSymbol();
     if (backIconSymbol != nullptr) {
         // symbol -> symbol
@@ -331,7 +333,7 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(backButtonIconNode);
     auto parentType = titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR);
     if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        UpdateSymbolBackButton(backButtonNode, backButtonIconNode, titleBarLayoutProperty);
+        UpdateSymbolBackButton(hostNode, backButtonNode, backButtonIconNode, titleBarLayoutProperty);
     } else {
         UpdateImageBackButton(backButtonNode, backButtonIconNode, titleBarLayoutProperty);
     }
@@ -491,6 +493,9 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
     auto titleLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
     std::u16string contentStr;
     if (titleLayoutProperty->HasContent()) {
         contentStr = titleLayoutProperty->GetContentValue(std::u16string());
@@ -498,7 +503,7 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
     titleLayoutProperty->Reset();
     titleLayoutProperty->UpdateContent(contentStr);
 
-    auto theme = NavigationGetTheme();
+    auto theme = NavigationGetTheme(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto titleFontSize = theme->GetTitleFontSizeBig();
     auto maxFontSize = theme->GetTitleFontSizeBig();
@@ -557,6 +562,8 @@ void TitleBarPattern::ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
     CHECK_NULL_VOID(textNode);
     auto titleLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     std::u16string contentStr;
     if (titleLayoutProperty->HasContent()) {
         contentStr = titleLayoutProperty->GetContentValue(std::u16string());
@@ -564,7 +571,7 @@ void TitleBarPattern::ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
     titleLayoutProperty->Reset();
     titleLayoutProperty->UpdateContent(contentStr);
 
-    auto theme = NavigationGetTheme();
+    auto theme = NavigationGetTheme(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto subTitleSize = theme->GetSubTitleFontSize();
     Color color = theme->GetSubTitleColor();
@@ -1280,6 +1287,16 @@ void TitleBarPattern::OnColorConfigurationUpdate()
     backButtonImgNode->MarkModifyDone();
 }
 
+bool TitleBarPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    shouldResetMainTitleProperty_ = true;
+    shouldResetSubTitleProperty_ = true;
+    host->MarkModifyDone();
+    return false;
+}
+
 float TitleBarPattern::CalculateHandledOffsetMinTitle(float offset, float lastCordScrollOffset)
 {
     float offsetHandled = 0.0f;
@@ -1434,6 +1451,8 @@ float TitleBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
 
 void TitleBarPattern::HandleLongPress(const RefPtr<FrameNode>& backButtonNode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto message = accessibilityProperty->GetAccessibilityText();
@@ -1444,15 +1463,14 @@ void TitleBarPattern::HandleLongPress(const RefPtr<FrameNode>& backButtonNode)
     auto backButtonIconNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetFirstChild());
     CHECK_NULL_VOID(backButtonIconNode);
     if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, backButtonIconNode);
+        dialogNode_ =
+            AgingAdapationDialogUtil::ShowLongPressDialog(message, backButtonIconNode);
         return;
     }
     auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageProperty);
-    if (imageProperty->HasImageSourceInfo()) {
-        ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
-    }
+    ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
+    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo, host->GetThemeScopeId());
 }
 
 void TitleBarPattern::HandleLongPressActionEnd()
@@ -1545,6 +1563,8 @@ void TitleBarPattern::InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHu
         CHECK_NULL_VOID(menuNode);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto menuItemNode =
             menuNode->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
         CHECK_NULL_VOID(menuItemNode);
@@ -1552,14 +1572,24 @@ void TitleBarPattern::InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHu
         auto totalCount = menuNode->TotalChildCount();
         auto dialogNode = pattern->GetLargeFontPopUpDialogNode();
         if (dialogNode && index >= 0 && index < totalCount) {
+            auto pipeline = menuNode->GetContextWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+            CHECK_NULL_VOID(buttonTheme);
+            auto buttonPattern = menuItemNode->GetPattern<ButtonPattern>();
+            CHECK_NULL_VOID(buttonPattern);
+            buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
             if (!pattern->GetMoveIndex().has_value()) {
                 pattern->SetMoveIndex(index);
             }
             if (pattern->GetMoveIndex().value() != index) {
+                auto renderContext = menuItemNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateBackgroundColor(buttonTheme->GetClickedColor());
                 pattern->HandleMenuLongPressActionEnd();
                 pattern->SetMoveIndex(index);
-                pattern->SetLargeFontPopUpDialogNode(
-                    NavigationTitleUtil::CreatePopupDialogNode(menuItemNode, menuItems, index));
+                pattern->SetLargeFontPopUpDialogNode(NavigationTitleUtil::CreatePopupDialogNode(
+                    menuItemNode, menuItems, index, host->GetThemeScopeId()));
             }
         }
     };
@@ -1614,7 +1644,8 @@ void TitleBarPattern::HandleMenuLongPress(
     auto menuItemNode = menuNode->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     CHECK_NULL_VOID(menuItemNode);
     auto index = menuNode->GetChildIndex(menuItemNode);
-    auto dialogNode = NavigationTitleUtil::CreatePopupDialogNode(menuItemNode, menuItems, index);
+    auto dialogNode =
+        NavigationTitleUtil::CreatePopupDialogNode(menuItemNode, menuItems, index, hostNode->GetThemeScopeId());
     CHECK_NULL_VOID(dialogNode);
     if (GetLargeFontPopUpDialogNode()) {
         HandleMenuLongPressActionEnd();
@@ -1630,6 +1661,19 @@ void TitleBarPattern::HandleMenuLongPressActionEnd()
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto menuNode = AceType::DynamicCast<FrameNode>(hostNode->GetMenu());
+    CHECK_NULL_VOID(menuNode);
+    if (moveIndex_.has_value()) {
+        auto menuItemNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(moveIndex_.value()));
+        CHECK_NULL_VOID(menuItemNode);
+        auto renderContext = menuItemNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
+        renderContext->ResetBlendBgColor();
+        moveIndex_.reset();
+    }
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseDialog(dialogNode);

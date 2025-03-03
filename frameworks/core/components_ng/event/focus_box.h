@@ -37,6 +37,7 @@ public:
     friend class FocusHub;
 
     void SetStyle(const std::optional<FocusBoxStyle>& style);
+    std::optional<FocusBoxStyle> GetStyle() const;
     bool HasCustomStyle() const;
     static std::unique_ptr<JsonValue> ToJsonValue(const FocusBox& box);
 

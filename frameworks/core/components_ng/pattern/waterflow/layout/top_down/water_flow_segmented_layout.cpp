@@ -461,8 +461,19 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
         if (!item) {
             continue;
         }
-        if (info_->itemInfos_.size() <= static_cast<size_t>(i)) {
+        if (info_->itemInfos_.size() == static_cast<size_t>(i)) {
             info_->RecordItem(i, position, GetMeasuredHeight(item, axis_));
+        }
+        if (info_->itemInfos_.size() < static_cast<size_t>(i)) {
+            TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Fill index %{public}d is out of range, itemInfos_.size() = %{public}zu",
+                i, info_->itemInfos_.size());
+            break;
+        }
+        if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[i].mainSize)) {
+            // refill from [i] if height doesn't match record
+            info_->ClearCacheAfterIndex(i - 1);
+            Fill(i);
+            break;
         }
     }
 }

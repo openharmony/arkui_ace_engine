@@ -64,9 +64,9 @@ def parse_xml(xml_file_path):
             testcase_name = testcase.attrib.get("name")
             failure = testcase.find("failure")
             if failure is not None:
-                failed_info["failed_testcase_name"].append(testsuite_name+"#"+testcase_name)
+                failed_info["failed_testcase_name"].append("{}#{}".format(testsuite_name, testcase_name))
             else:
-                passed_info["passed_testcase_name"].append(testsuite_name+"#"+testcase_name)
+                failed_info["failed_testcase_name"].append("{}#{}".format(testsuite_name, testcase_name))
                 passed_count = passed_count+1
     passed_info["passed_count"] = str(passed_count)
     return failed_info, passed_info
@@ -192,7 +192,7 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--target", nargs='+', type=str, default=None)
-    parser.add_argument("-j", "--process", nargs=1, type=int, default=64)
+    parser.add_argument("-j", "--process", type=int, default=64)
     parser.add_argument("-p", "--path", type=str, default=None)
     parser.add_argument("-o", "--output", type=str, default=None)
     parser.add_argument("-d", "--debug", action='store_true')

@@ -27,6 +27,18 @@ class KeyEvent;
 }
 
 namespace OHOS::Ace {
+enum class ModifierKeyName {
+    /** Ctrl. */
+    ModifierKeyCtrl = 1 << 0,
+    /** Shift. */
+    ModifierKeyShift = 1 << 1,
+    /** Alt. */
+    ModifierKeyAlt = 1 << 2,
+    /** Fn. */
+    ModifierKeyFn = 1 << 3,
+};
+
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status);
 
 enum class KeyCode : int32_t {
     KEY_UNKNOWN = -1,
@@ -563,7 +575,7 @@ struct KeyEvent final : public NonPointerEvent {
     std::string ConvertCodeToString() const;
 
     KeyCode code { KeyCode::KEY_UNKNOWN };
-    const char* key = "";
+    std::string key;
     KeyAction action { KeyAction::UNKNOWN };
     std::vector<KeyCode> pressedCodes;
     // When the key is held down for a long period of time, it will be accumulated once in a while.
@@ -602,7 +614,7 @@ public:
     explicit KeyEventInfo(const KeyEvent& event) : BaseEventInfo("keyEvent")
     {
         keyCode_ = event.code;
-        keyText_ = event.key;
+        keyText_ = event.key.c_str();
         keyType_ = event.action;
         keySource_ = event.sourceType;
         keyIntention_ = event.keyIntention;
@@ -649,6 +661,9 @@ public:
     {
         return unicode_;
     }
+
+    void ParseKeyEvent(KeyEvent& keyEvent);
+
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     const char* keyText_ = "";
@@ -667,6 +682,14 @@ enum class BlurReason : int32_t {
     VIEW_SWITCH = 3,
     CLEAR_FOCUS = 4, // User api clearFocus triggered
     BACK_TO_TABSTOP = 5,
+};
+
+enum class FocusReason : int32_t {
+    DEFAULT = 0,
+    FOCUS_TRAVEL = 1,
+    FOCUS_TOUCH = 2,
+    WINDOW_FOCUS = 3,
+    VIEW_SWITCH = 4,
 };
 
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;

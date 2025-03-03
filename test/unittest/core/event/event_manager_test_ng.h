@@ -60,6 +60,7 @@
 #include "frameworks/core/common/event_manager.h"
 #include "frameworks/core/common/font_manager.h"
 #include "frameworks/core/common/manager_interface.h"
+#include "frameworks/base/ressched/ressched_report.h"
 
 namespace OHOS::Ace::NG {
 namespace {

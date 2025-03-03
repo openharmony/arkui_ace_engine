@@ -67,7 +67,8 @@ int32_t SecurityComponentProbe::GetComponentInfo(int32_t nodeId, std::string& co
                 return;
             }
             Security::SecurityComponent::SecCompType scType;
-            if (!SecurityComponentHandler::InitButtonInfo(compInfoStr, node, scType)) {
+            std::string message;
+            if (!SecurityComponentHandler::InitButtonInfo(compInfoStr, node, scType, message)) {
                 SC_LOG_WARN("node init info failed.");
                 taskRes = -1;
                 return;

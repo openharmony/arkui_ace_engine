@@ -707,6 +707,14 @@ napi_value UIObserverListener::CreateNavDestinationInfoObj(const NG::NavDestinat
     napi_set_named_property(env_, objValue, "index", napiIdx);
     napi_set_named_property(env_, objValue, "param", info.param);
     napi_set_named_property(env_, objValue, "navDestinationId", napiNavDesId);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        napi_value napiMode = nullptr;
+        napi_value napiUniqueId = nullptr;
+        napi_create_int32(env_, static_cast<int32_t>(info.mode), &napiMode);
+        napi_create_int32(env_, static_cast<int32_t>(info.uniqueId), &napiUniqueId);
+        napi_set_named_property(env_, objValue, "mode", napiMode);
+        napi_set_named_property(env_, objValue, "uniqueId", napiUniqueId);
+    }
     return objValue;
 }
 

@@ -313,6 +313,9 @@ public:
     bool IsShowInFreeMultiWindow();
     bool IsShowInFloatingWindow();
 
+    void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
+    RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -325,6 +328,7 @@ private:
     void RegisterHoverModeChangeCallback();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    RectF GetContentRect(const RefPtr<FrameNode>& contentNode);
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -333,6 +337,7 @@ private:
     void HandleFocusEvent();
 
     void PopDialog(int32_t buttonIdx);
+    bool NeedUpdateHostWindowRect();
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
@@ -387,6 +392,8 @@ private:
     void UpdateTextFontScale();
     void UpdateTitleTextFontScale();
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
+    RefPtr<OverlayManager> GetOverlayManager(const RefPtr<FrameNode>& host);
+    void OnAttachToMainTree() override;
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;

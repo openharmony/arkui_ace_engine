@@ -73,13 +73,7 @@ void UITaskScheduler::SetLayoutNodeRect()
         OffsetF offset;
         layoutNode->GetOneDepthVisibleFrameWithOffset(children, offset);
         for (auto& child : children) {
-            auto paintRect = child->GetRenderContext()->GetPaintRectWithoutTransform();
-            auto childGeometryNode = child->GetGeometryNode();
-            if (!childGeometryNode) {
-                continue;
-            }
-            paintRect.SetOffset(childGeometryNode->GetFrameOffset() + offset);
-            child->GetRenderContext()->UpdatePaintRect(paintRect);
+            child->GetRenderContext()->SetExtraOffset(offset);
         }
     }
 }
@@ -119,13 +113,12 @@ void UITaskScheduler::FlushSyncGeometryNodeTasks()
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     if (dirtyLayoutNodes_.empty()) {
         return;
     }
-    if (isLayouting_) {
-        LOGF("you are already in flushing layout!");
-        abort();
+    if (isLayouting_ && SystemProperties::GetLayoutDetectEnabled()) {
+        LOGF_ABORT("you are already in flushing layout!");
     }
 
 #ifdef FFRT_EXISTS
@@ -176,12 +169,14 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     // Priority task creation
     int64_t time = 0;
     for (auto&& pageNodes : dirtyRenderNodes) {
-        ACE_SCOPED_TRACE("FlushRenderTask %zu", pageNodes.second.size());
+        ACE_SCOPED_TRACE_COMMERCIAL("FlushRenderTask %zu", pageNodes.second.size());
         for (auto&& node : pageNodes.second) {
             if (!node) {
                 continue;
             }
             if (node->IsInDestroying()) {
+                // reset RenderDirtyMarked for recycle node
+                node->ResetRenderDirtyMarked(false);
                 continue;
             }
             time = GetSysTimestamp();
@@ -454,5 +449,4 @@ void UITaskScheduler::FlushAfterRenderTask()
         }
     }
 }
-
 } // namespace OHOS::Ace::NG

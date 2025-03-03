@@ -62,6 +62,11 @@ public:
         }
     }
 
+    void OnCollectRemoved() override
+    {
+        shallowBuilder_.Reset();
+    }
+
     bool RenderCustomChild(int64_t deadline) override;
 
     FocusPattern GetFocusPattern() const override

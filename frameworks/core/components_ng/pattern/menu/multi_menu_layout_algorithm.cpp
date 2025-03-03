@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -115,8 +116,7 @@ bool UpdateColumnWidth(const RefPtr<FrameNode>& frameNode, const RefPtr<GridColu
     CHECK_NULL_RETURN(currentId >= MIN_SUBCONTAINER_ID, false);
     auto subwindowManager = SubwindowManager::GetInstance();
     CHECK_NULL_RETURN(subwindowManager, false);
-    auto parentContainerId = subwindowManager->GetParentContainerId(currentId);
-    auto subwindow = subwindowManager->GetSubwindow(parentContainerId);
+    auto subwindow = subwindowManager->GetSubwindowByType(pipeline->GetInstanceId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_RETURN(subwindow, false);
     auto width = subwindow->GetRect().Width();
     CHECK_NULL_RETURN(Positive(width), false);
@@ -173,7 +173,7 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(columnInfo);
         auto columnParent = columnInfo->GetParent();
         CHECK_NULL_VOID(columnParent);
-        if (!UpdateColumnWidth(node, columnInfo)) {
+        if (!UpdateSelectOverlayMenuMinWidth(pattern, columnInfo) && !UpdateColumnWidth(node, columnInfo)) {
             columnParent->BuildColumnWidth();
         }
         auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
@@ -232,7 +232,7 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     OffsetF translate(0.0f, 0.0f);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto outPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     if (!pattern->IsEmbedded()) {
         translate.AddX(padding.left.value_or(outPadding));
         translate.AddY(padding.top.value_or(outPadding));
@@ -374,5 +374,35 @@ LayoutConstraintF MultiMenuLayoutAlgorithm::ResetLayoutConstraintMinWidth(
         childConstraint.minSize.Reset();
     }
     return childConstraint;
+}
+
+bool MultiMenuLayoutAlgorithm::UpdateSelectOverlayMenuMinWidth(
+    const RefPtr<MenuPattern>& pattern, const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(pattern, false);
+    auto mainMenuPattern = pattern->GetMainMenuPattern();
+    CHECK_NULL_RETURN(mainMenuPattern, false);
+    CHECK_NULL_RETURN(mainMenuPattern->IsSelectOverlayRightClickMenu(), false);
+    auto menuWrapper = pattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    CHECK_NULL_RETURN(menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper(), false);
+    auto mainWindowContainerId = menuWrapperPattern->GetContainerId();
+    auto container = Container::GetContainer(mainWindowContainerId);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto mainWindowWidth = displayWindowRect.Width();
+    if (Positive(mainWindowWidth)) {
+        auto parent = columnInfo->GetParent();
+        CHECK_NULL_RETURN(parent, false);
+        parent->BuildColumnWidth(mainWindowWidth);
+        TAG_LOGD(
+            AceLogTag::ACE_MENU, "Update select overlay right click menu min width with main window width constraint.");
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

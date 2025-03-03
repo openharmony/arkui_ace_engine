@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/marquee_option.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/base/linear_vector.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
@@ -63,6 +64,7 @@ public:
     void SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetFontWeight(const FontWeight& value, bool isReset = false);
     void SetTextColor(const Color& value, bool isReset = false);
+    void SetSymbolColor(const std::vector<Color>& value, bool isReset = false);
     void SetTextShadow(const std::vector<Shadow>& value);
     void SetTextDecoration(const TextDecoration& value, bool isReset = false);
     void SetTextDecorationColor(const Color& value, bool isReset = false);
@@ -125,6 +127,8 @@ private:
     void SetDefaultAdaptMaxFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
+    void SetDefaultSymbolColor(const TextStyle& textStyle);
+    LinearVector<LinearColor> Convert2VectorLinearColor(const std::vector<Color>& colorList);
     void SetDefaultTextShadow(const TextStyle& textStyle);
     void AddShadow(const Shadow& shadow);
     void AddDefaultShadow();
@@ -147,6 +151,8 @@ private:
     void ModifyAdaptMaxFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyFontWeightInTextStyle(TextStyle& textStyle);
     void ModifyTextColorInTextStyle(TextStyle& textStyle);
+    void ModifySymbolColorInTextStyle(TextStyle& textStyle);
+    std::vector<Color> Convert2VectorColor(const LinearVector<LinearColor>& colorList);
     void ModifyTextShadowsInTextStyle(TextStyle& textStyle);
     void ModifyDecorationInTextStyle(TextStyle& textStyle);
     void ModifyBaselineOffsetInTextStyle(TextStyle& textStyle);
@@ -157,6 +163,7 @@ private:
     void UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& flag);
     void UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag);
     void UpdateTextColorMeasureFlag(PropertyChangeFlag& flag);
+    void UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag);
     void UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag);
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
@@ -201,6 +208,10 @@ private:
     RefPtr<AnimatablePropertyColor> animatableTextColor_;
     Color lastTextColor_;
     bool onlyTextColorAnimation_ = false;
+
+    std::optional<LinearVector<LinearColor>> symbolColors_;
+    RefPtr<AnimatablePropertyVectorLinearVector> animatableSymbolColor_;
+    LinearVector<LinearColor> lastSymbolColors_;
 
     struct ShadowProp {
         Shadow shadow; // final shadow configuration of the animation

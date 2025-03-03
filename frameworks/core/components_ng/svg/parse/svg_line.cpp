@@ -39,6 +39,27 @@ RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
     return path;
 }
 
+RSRecordingPath SvgLine::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
+        return path_.value();
+    }
+    RSRecordingPath path;
+    auto x1 = GetMeasuredPosition(lineAttr_.x1, lengthRule, SvgLengthType::HORIZONTAL);
+    auto y1 = GetMeasuredPosition(lineAttr_.y1, lengthRule, SvgLengthType::VERTICAL);
+    auto x2 = GetMeasuredPosition(lineAttr_.x2, lengthRule, SvgLengthType::HORIZONTAL);
+    auto y2 = GetMeasuredPosition(lineAttr_.y2, lengthRule, SvgLengthType::VERTICAL);
+
+    path.MoveTo(x1, y1);
+    path.LineTo(x2, y2);
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(path);
+    }
+    return path;
+}
+
 bool SvgLine::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgLineAttribute&)> attrs[] = {

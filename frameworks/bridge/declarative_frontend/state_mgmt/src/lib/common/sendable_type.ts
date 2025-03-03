@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-declare class SendableMap {};
-declare class SendableSet {};
+declare class SendableMap<K, V> {
+    keys(): IterableIterator<K>;
+    values(): IterableIterator<V>;
+};
+declare class SendableSet<T> {
+    values(): IterableIterator<T>;
+};
 declare class SendableArray {};
-
 
 class SendableType {
     public static isArray<T extends object>(o: T): boolean {

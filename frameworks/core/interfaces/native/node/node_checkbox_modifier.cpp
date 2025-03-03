@@ -123,6 +123,18 @@ void SetCheckboxResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values
     CheckBoxModelNG::SetResponseRegion(frameNode, region);
 }
 
+void SetCheckboxOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        CheckBoxModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        CheckBoxModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
 void ResetCheckboxPadding(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -138,6 +150,13 @@ void ResetCheckboxPadding(ArkUINodeHandle node)
 
 void ResetCheckboxResponseRegion(ArkUINodeHandle node) {}
 
+void ResetCheckboxOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelNG::SetOnChange(frameNode, nullptr);
+}
+
 void ResetSelect(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -149,21 +168,14 @@ void ResetSelectedColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
-    CheckBoxModelNG::SetSelectedColor(frameNode, checkBoxTheme->GetActiveColor());
+    CheckBoxModelNG::ResetSelectedColor(frameNode);
 }
 
 void ResetUnSelectedColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
-    CheckBoxModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
+    CheckBoxModelNG::ResetUnSelectedColor(frameNode);
 }
 
 void ResetCheckboxWidth(ArkUINodeHandle node)
@@ -203,7 +215,7 @@ void ResetMark(ArkUINodeHandle node)
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
 
-    CheckBoxModelNG::SetCheckMarkColor(frameNode, checkBoxTheme->GetPointColor());
+    CheckBoxModelNG::ResetCheckMarkColor(frameNode);
     CheckBoxModelNG::SetCheckMarkSize(
         frameNode, Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
@@ -307,91 +319,79 @@ ArkUI_CharPtr GetCheckboxGroup(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUICheckboxModifier *GetCheckboxModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICheckboxModifier modifier = {
-        SetSelect,
-        SetSelectedColor,
-        SetUnSelectedColor,
-        SetCheckboxWidth,
-        SetCheckboxHeight,
-        SetMark,
-        SetCheckboxPadding,
-        SetCheckboxResponseRegion,
-        ResetSelect,
-        ResetSelectedColor,
-        ResetUnSelectedColor,
-        ResetCheckboxWidth,
-        ResetCheckboxHeight,
-        ResetMark,
-        SetCheckboxShape,
-        ResetCheckboxShape,
-        ResetCheckboxPadding,
-        ResetCheckboxResponseRegion,
-        GetSelect,
-        GetSelectedColor,
-        GetUnSelectedColor,
-        GetCheckMarkColor,
-        GetCheckMarkSize,
-        GetCheckMarkWidth,
-        GetCheckboxShape,
-        SetCheckboxName,
-        SetCheckboxGroup,
-        GetCheckboxName,
-        GetCheckboxGroup,
+        .setSelect = SetSelect,
+        .setSelectedColor = SetSelectedColor,
+        .setUnSelectedColor = SetUnSelectedColor,
+        .setCheckboxWidth = SetCheckboxWidth,
+        .setCheckboxHeight = SetCheckboxHeight,
+        .setMark = SetMark,
+        .setCheckboxPadding = SetCheckboxPadding,
+        .setCheckboxResponseRegion = SetCheckboxResponseRegion,
+        .setCheckboxOnChange = SetCheckboxOnChange,
+        .resetSelect = ResetSelect,
+        .resetSelectedColor = ResetSelectedColor,
+        .resetUnSelectedColor = ResetUnSelectedColor,
+        .resetCheckboxWidth = ResetCheckboxWidth,
+        .resetCheckboxHeight = ResetCheckboxHeight,
+        .resetMark = ResetMark,
+        .setCheckboxShape = SetCheckboxShape,
+        .resetCheckboxShape = ResetCheckboxShape,
+        .resetCheckboxPadding = ResetCheckboxPadding,
+        .resetCheckboxResponseRegion = ResetCheckboxResponseRegion,
+        .resetCheckboxOnChange = ResetCheckboxOnChange,
+        .getSelect = GetSelect,
+        .getSelectedColor = GetSelectedColor,
+        .getUnSelectedColor = GetUnSelectedColor,
+        .getCheckMarkColor = GetCheckMarkColor,
+        .getCheckMarkSize = GetCheckMarkSize,
+        .getCheckMarkWidth = GetCheckMarkWidth,
+        .getCheckboxShape = GetCheckboxShape,
+        .setCheckboxName = SetCheckboxName,
+        .setCheckboxGroup = SetCheckboxGroup,
+        .getCheckboxName = GetCheckboxName,
+        .getCheckboxGroup = GetCheckboxGroup,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUICheckboxModifier* GetCJUICheckboxModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUICheckboxModifier modifier = {
-        SetSelect,
-        SetSelectedColor,
-        SetUnSelectedColor,
-        SetCheckboxWidth,
-        SetCheckboxHeight,
-        SetMark,
-        SetCheckboxPadding,
-        SetCheckboxResponseRegion,
-        ResetSelect,
-        ResetSelectedColor,
-        ResetUnSelectedColor,
-        ResetCheckboxWidth,
-        ResetCheckboxHeight,
-        ResetMark,
-        SetCheckboxShape,
-        ResetCheckboxShape,
-        ResetCheckboxPadding,
-        ResetCheckboxResponseRegion,
-        GetSelect,
-        GetSelectedColor,
-        GetUnSelectedColor,
-        GetCheckMarkColor,
-        GetCheckMarkSize,
-        GetCheckMarkWidth,
-        GetCheckboxShape,
-        SetCheckboxName,
-        SetCheckboxGroup,
-        GetCheckboxName,
-        GetCheckboxGroup,
+        .setSelect = SetSelect,
+        .setSelectedColor = SetSelectedColor,
+        .setUnSelectedColor = SetUnSelectedColor,
+        .setCheckboxWidth = SetCheckboxWidth,
+        .setCheckboxHeight = SetCheckboxHeight,
+        .setMark = SetMark,
+        .setCheckboxPadding = SetCheckboxPadding,
+        .setCheckboxResponseRegion = SetCheckboxResponseRegion,
+        .resetSelect = ResetSelect,
+        .resetSelectedColor = ResetSelectedColor,
+        .resetUnSelectedColor = ResetUnSelectedColor,
+        .resetCheckboxWidth = ResetCheckboxWidth,
+        .resetCheckboxHeight = ResetCheckboxHeight,
+        .resetMark = ResetMark,
+        .setCheckboxShape = SetCheckboxShape,
+        .resetCheckboxShape = ResetCheckboxShape,
+        .resetCheckboxPadding = ResetCheckboxPadding,
+        .resetCheckboxResponseRegion = ResetCheckboxResponseRegion,
+        .getSelect = GetSelect,
+        .getSelectedColor = GetSelectedColor,
+        .getUnSelectedColor = GetUnSelectedColor,
+        .getCheckMarkColor = GetCheckMarkColor,
+        .getCheckMarkSize = GetCheckMarkSize,
+        .getCheckMarkWidth = GetCheckMarkWidth,
+        .getCheckboxShape = GetCheckboxShape,
+        .setCheckboxName = SetCheckboxName,
+        .setCheckboxGroup = SetCheckboxGroup,
+        .getCheckboxName = GetCheckboxName,
+        .getCheckboxGroup = GetCheckboxGroup,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

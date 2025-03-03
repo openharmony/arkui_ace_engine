@@ -91,8 +91,9 @@ private:
      * @brief Performs the layout of the children based on the main offset.
      * @param mainOffset The main offset of the layout.
      * @param cacheLine number of lines of cache items to layout
+     * @return number of cached items laid out in front and back
      */
-    void LayoutChildren(float mainOffset, int32_t cacheLine);
+    std::pair<int32_t, int32_t> LayoutChildren(float mainOffset, int32_t cacheLine);
 
     /**
      * @brief Update variables in GridLayoutInfo at the end of Layout.

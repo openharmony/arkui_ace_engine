@@ -114,6 +114,46 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HyperlinkPatternTest001
+ * @tc.desc: Test HyperlinkPattern InitInputEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
+    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+
+    hyperlinkPattern->InitInputEvent(inputHub);
+    auto onHoverEvent = hyperlinkPattern->onHoverEvent_->onHoverCallback_;
+    auto onMouseEvent = hyperlinkPattern->onMouseEvent_->onMouseCallback_;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
+    onHoverEvent(true);
+    EXPECT_EQ(mouseStyleManager->mouseStyleNodeId_.value(), frameNode->GetId());
+
+    onHoverEvent(false);
+    EXPECT_FALSE(mouseStyleManager->mouseStyleNodeId_.has_value());
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    RectF paintRect = { 0.0f, 0.0f, 1.0f, 1.0f };
+    renderContext->UpdatePaintRect(paintRect);
+
+    MouseInfo mouseInfo;
+    onMouseEvent(mouseInfo);
+    EXPECT_FALSE(mouseStyleManager->mouseStyleNodeId_.has_value());
+}
+
+/**
  * @tc.name: HyperlinkModelNGTest001
  * @tc.desc: Test HyperlinkModelNG SetDraggable.
  * @tc.type: FUNC
@@ -142,11 +182,18 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest003, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     HyperlinkModelNG hyperlinkModelNG;
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+
     hyperlinkModelNG.SetDraggable(true);
+    EXPECT_TRUE(frameNode->draggable_);
+
     hyperlinkModelNG.SetDraggable(false);
+    EXPECT_FALSE(frameNode->draggable_);
+
     hyperlinkModelNG.SetDraggable(frameNode, false);
-    frameNode->draggable_ = false;
+    EXPECT_FALSE(frameNode->draggable_);
+
     hyperlinkModelNG.SetDraggable(frameNode, true);
+    EXPECT_TRUE(frameNode->draggable_);
 }
 
 /**
@@ -400,40 +447,6 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetColor001
- * @tc.desc: Test SetColor.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, SetColor001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(LayoutProperty, nullptr);
-    HyperlinkModelNG hyperlinkModelNG;
-    hyperlinkModelNG.SetResponseRegion(true);
-    hyperlinkModelNG.SetColor(Color::BLACK);
-    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::BLACK);
-}
-
-/**
- * @tc.name: SetColor002
- * @tc.desc: Test SetColor.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, SetColor002, TestSize.Level1)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    HyperlinkModelNG hyperlinkModelNG;
-    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(LayoutProperty, nullptr);
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    hyperlinkModelNG.SetColor(frameNode, Color::RED);
-    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::RED);
-}
-
-/**
  * @tc.name: EnableDrag001
  * @tc.desc: Test EnableDrag().
  * @tc.type: FUNC
@@ -543,4 +556,36 @@ HWTEST_F(HyperlinkTestNg, PreventDefault002, TestSize.Level1)
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }
 
+/**
+ * @tc.name: SetColor001
+ * @tc.desc: Test SetColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, SetColor001, TestSize.Level1)
+{
+    HyperlinkModelNG hyperlinkModelNG;
+    hyperlinkModelNG.SetResponseRegion(true);
+    hyperlinkModelNG.SetColor(Color::BLACK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(LayoutProperty, nullptr);
+    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::BLACK);
+}
+
+/**
+ * @tc.name: SetColor002
+ * @tc.desc: Test SetColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, SetColor002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    HyperlinkModelNG hyperlinkModelNG;
+    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(LayoutProperty, nullptr);
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    hyperlinkModelNG.SetColor(frameNode, Color::RED);
+    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::RED);
+}
 } // namespace OHOS::Ace::NG

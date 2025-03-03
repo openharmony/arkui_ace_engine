@@ -81,11 +81,15 @@ private:
         int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show) override;
     int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount,
         int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show) override;
-    static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
+    int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
     static int32_t GetLazyForEachIndex(const RefPtr<FrameNode>& host);
     void MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,
         int32_t index, float& pos, bool forward);
     void MeasureItem(const RefPtr<LayoutWrapper>& itemWrapper, int32_t index, bool forward);
+    void SetLaneIdx4Divider(int32_t idx)
+    {
+        laneIdx4Divider_ = idx;
+    }
 
     int32_t lanes_ = 1;
     std::optional<float> minLaneLength_;

@@ -138,6 +138,11 @@ config("ace_unittest_config") {
   if (ace_engine_feature_enable_split_mode) {
     defines += [ "ENABLE_SPLIT_MODE" ]
   }
+
+  if (capi_asan) {
+    cflags_cc += [ "-fsanitize=address" ]
+    ldflags += [ "-fsanitize=address" ]
+  }
 }
 
 # ace unittest config ext
@@ -265,6 +270,7 @@ ohos_source_set("ace_components_event") {
   sources = [
     "$ace_root/frameworks/core/components/theme/blur_style_theme.cpp",
     "$ace_root/frameworks/core/components_ng/event/click_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/drag_drop_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/drag_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/event/focus_box.cpp",
@@ -284,6 +290,7 @@ ohos_source_set("ace_components_event") {
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_view.cpp",
     "$ace_root/frameworks/core/event/axis_event.cpp",
+    "$ace_root/frameworks/core/event/event_info_convertor.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/event/touch_event.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
@@ -330,6 +337,7 @@ ohos_source_set("ace_components_layout") {
   part_name = ace_engine_part
   sources = [
     "$ace_root/frameworks/core/components_ng/layout/box_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
@@ -365,11 +373,21 @@ ohos_source_set("ace_components_manager") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/frameworks/core/components_ng/manager/avoid_info/avoid_info_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_func_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_global_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_handler.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_base.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_idle.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_lifting.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_moving.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_press.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_ready.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/utils/drag_animation_helper.cpp",
@@ -568,6 +586,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/animatable_color.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
@@ -594,6 +613,8 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
     "$ace_root/frameworks/core/text/text_emoji_processor.cpp",
+    "$ace_root/interfaces/inner_api/ace_kit/src/properties/property.cpp",
+    "$ace_root/interfaces/inner_api/ace_kit/src/view/frame_node_impl.cpp",
     "$ace_root/test/mock/core/common/mock_icon_theme.cpp",
   ]
 
@@ -618,10 +639,13 @@ ohos_source_set("ace_components_mock") {
   testonly = true
   defines = [ "ENHANCED_ANIMATION" ]
   sources = [
+    "$ace_root/test/mock/adapter/mock_dynamic_module_helper.cpp",
     "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
+    "$ace_root/test/mock/adapter/mock_system_bar_style_ohos.cpp",
+    "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
@@ -649,6 +673,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
     "$ace_root/test/mock/core/common/mock_ace_engine_ext.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_translate_manager.cpp",
     "$ace_root/test/mock/core/common/mock_ai_write_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_clipboard.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
@@ -666,18 +691,24 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
     "$ace_root/test/mock/core/common/mock_stylus_detector_default.cpp",
     "$ace_root/test/mock/core/common/mock_stylus_detector_mgr.cpp",
+    "$ace_root/test/mock/core/common/mock_text_share_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_text_translation_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_text_translation_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/common/mock_xcollieInterface.cpp",
+    "$ace_root/test/mock/core/event/mock_statusbar_event_proxy.cpp",
     "$ace_root/test/mock/core/event/mock_time_event_proxy.cpp",
     "$ace_root/test/mock/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
     "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
+    "$ace_root/test/mock/core/pattern/mock_app_bar_utils.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
     "$ace_root/test/mock/core/pattern/mock_container_modal_utils.cpp",
+    "$ace_root/test/mock/core/pattern/mock_controlled_animator.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animated_image.cpp",
@@ -695,6 +726,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
+    "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",
     "$ace_root/test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.cpp",
     "$ace_root/test/unittest/core/pattern/test_ng.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
@@ -787,6 +819,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_app_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_param.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
@@ -989,6 +1022,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/dialog_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/group_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp",
@@ -1189,6 +1223,9 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/arc_swiper_indicator_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/indicator_accessibility.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.cpp",

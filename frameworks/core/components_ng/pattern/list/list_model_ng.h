@@ -57,6 +57,7 @@ public:
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
     void SetMaintainVisibleContentPosition(bool enabled) override;
+    void SetStackFromEnd(bool enabled) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -103,6 +104,7 @@ public:
     static float GetListFriction(FrameNode* frameNode);
     static void SetListFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled);
+    static bool GetListMaintainVisibleContentPosition(FrameNode* frameNode);
     static void SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,
         const std::optional<NestedScrollMode>& backward);
@@ -113,22 +115,30 @@ public:
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetListScrollBarColor(FrameNode* frameNode, const std::string& value);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
-    static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength,
-        const Dimension& laneMaxLength);
+    static int32_t GetLanes(FrameNode* frameNode);
+    static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
+    static float GetLaneMinLength(FrameNode* frameNode);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
+    static float GetLaneMaxLength(FrameNode* frameNode);
     static void SetLaneGutter(FrameNode* frameNode, const std::optional<Dimension>& laneGutter);
+    static float GetLaneGutter(FrameNode* frameNode);
     static int32_t GetListItemAlign(FrameNode* frameNode);
     static void SetListItemAlign(FrameNode* frameNode, const std::optional<V2::ListItemAlign>& listItemAlign);
     static float GetListSpace(FrameNode* frameNode);
     static void SetListSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
     static void SetScrollSnapAlign(FrameNode* frameNode, const std::optional<ScrollSnapAlign>& scrollSnapAlign);
+    static int32_t GetScrollSnapAlign(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
+    static float GetContentStartOffset(FrameNode* frameNode);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
+    static float GetContentEndOffset(FrameNode* frameNode);
     static void SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static void SetListStackFromEnd(FrameNode* frameNode, bool enabled);
+    static bool GetListStackFromEnd(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
@@ -144,7 +154,8 @@ public:
     static CrownSensitivity GetDigitalCrownSensitivity(FrameNode* frameNode);
 #endif
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
-    static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
+    static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment,
+        std::optional<float> extraOffset = std::nullopt);
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
@@ -165,6 +176,8 @@ public:
     static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
         FrameNode* frameNode, const std::optional<float>& defaultSize);
     static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
+    static void ScrollToItemInGroup(
+        FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);

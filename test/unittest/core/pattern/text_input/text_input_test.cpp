@@ -180,6 +180,7 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
      * @tc.steps: step3. test clean node clicked
      */
     cleanNodeResponseArea->OnCleanNodeClicked();
+    pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->GetTextValue(), "");
 }
 
@@ -1900,7 +1901,7 @@ HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
      * @tc.steps: step4. escape when select all value
      */
     pattern_->HandleOnSelectAll(true);
-    EXPECT_TRUE(pattern_->HandleOnEscape());
+    EXPECT_FALSE(pattern_->HandleOnEscape());
 }
 
 /**
@@ -2414,5 +2415,47 @@ HWTEST_F(TextFieldUXTest, TextFadeoutStateTest002, TestSize.Level1)
     paintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_FALSE(pattern_->GetParagraph()->GetTextWidth() > paintWrapper->GetContentSize().Width());
     EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+}
+
+/**
+ * @tc.name: TextInputMinFontScale001
+ * @tc.desc: test TextInput minFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputMinFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set minFontScale 1.0
+     * @tc.expected: minFontScale is 1.0
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMinFontScale(1.0);
+    });
+
+    /**
+     * @tc.step: step2. test minFontScale
+     */
+    EXPECT_EQ(layoutProperty_->GetMinFontScale(), 1.0);
+}
+
+/**
+ * @tc.name: TextInputMaxFontScale001
+ * @tc.desc: test TextInput maxFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputMaxFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set maxFontScale 2.0
+     * @tc.expected: maxFontScale is 2.0
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxFontScale(2.0);
+    });
+
+    /**
+     * @tc.step: step2. test maxFontScale
+     */
+    EXPECT_EQ(layoutProperty_->GetMaxFontScale(), 2.0);
 }
 } // namespace OHOS::Ace::NG

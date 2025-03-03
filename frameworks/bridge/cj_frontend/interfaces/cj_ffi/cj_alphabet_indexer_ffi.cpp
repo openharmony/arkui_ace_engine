@@ -14,9 +14,10 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_alphabet_indexer_ffi.h"
-#include "bridge/common/utils/utils.h"
 
 #include "cj_lambda.h"
+
+#include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 
 using namespace OHOS::Ace;
@@ -91,8 +92,9 @@ void FfiOHOSAceFrameworkAlphabetIndexerSelectedFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
     std::optional<Dimension> fontSize = Dimension(size, DimensionUnit(unit));
-    std::optional<FontWeight> fontWeight = FontWeight::REGULAR;
-    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string>{family};
+    std::string weightVal = weight;
+    std::optional<FontWeight> fontWeight = ConvertStrToFontWeight(weightVal);
+    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string> { family };
     std::optional<FontStyle> fontStyle = static_cast<FontStyle>(style);
     IndexerModel::GetInstance()->SetSelectedFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
@@ -100,17 +102,19 @@ void FfiOHOSAceFrameworkAlphabetIndexerPopupFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
     std::optional<Dimension> fontSize = Dimension(size, DimensionUnit(unit));
-    std::optional<FontWeight> fontWeight = FontWeight::REGULAR;
-    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string>{family};
+    std::string weightVal = weight;
+    std::optional<FontWeight> fontWeight = ConvertStrToFontWeight(weightVal);
+    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string> { family };
     std::optional<FontStyle> fontStyle = static_cast<FontStyle>(style);
     IndexerModel::GetInstance()->SetPopupFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
-void FfiOHOSAceFrameworkAlphabetIndexerFont(double size, int32_t unit, const char* weight,
-                                            const char* family, int32_t style)
+void FfiOHOSAceFrameworkAlphabetIndexerFont(
+    double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
     std::optional<Dimension> fontSize = Dimension(size, DimensionUnit(unit));
-    std::optional<FontWeight> fontWeight = FontWeight::REGULAR;
-    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string>{family};
+    std::string weightVal = weight;
+    std::optional<FontWeight> fontWeight = ConvertStrToFontWeight(weightVal);
+    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string> { family };
     std::optional<FontStyle> fontStyle = static_cast<FontStyle>(style);
     IndexerModel::GetInstance()->SetFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
@@ -139,6 +143,11 @@ void FfiOHOSAceFrameworkAlphabetIndexerPopupPosition(double x, double y)
 {
     IndexerModel::GetInstance()->SetPopupPositionX(Dimension(x));
     IndexerModel::GetInstance()->SetPopupPositionY(Dimension(y));
+}
+void FfiOHOSAceFrameworkAlphabetIndexerPopupPositionWithUnit(double x, int32_t xUnit, double y, int32_t yUnit)
+{
+    IndexerModel::GetInstance()->SetPopupPositionX(Dimension(x, static_cast<DimensionUnit>(xUnit)));
+    IndexerModel::GetInstance()->SetPopupPositionY(Dimension(y, static_cast<DimensionUnit>(yUnit)));
 }
 void FfiOHOSAceFrameworkAlphabetIndexerOnSelected(void (*callback)(int32_t idx))
 {

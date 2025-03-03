@@ -368,7 +368,6 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-#ifdef SUPPORT_DIGITAL_CROWN
     auto&& crownEventCallback = [weak, id = instanceId_](
         const CrownEvent& event, const std::function<void()>& ignoreMark) {
         ContainerScope scope(id);
@@ -385,7 +384,6 @@ void AceContainer::InitializeCallback()
         return true;
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
-#endif
 
     auto&& rotationEventCallback = [weak, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -908,12 +906,13 @@ void AceContainer::AttachView(
         }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
-            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
+            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_,
+                pipelineContext = pipelineContext_]() {
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(colorScheme);
                 themeManager->LoadCustomTheme(assetManager);
                 // get background color from theme
-                aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
+                pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
             },
             TaskExecutor::TaskType::UI, "ArkUISetBackgroundColor");
     }
@@ -1033,12 +1032,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
         }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
-            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
+            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_,
+                pipelineContext = pipelineContext_]() {
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(colorScheme);
                 themeManager->LoadCustomTheme(assetManager);
                 // get background color from theme
-                aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
+                pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
             },
             TaskExecutor::TaskType::UI, "ArkUISetBackgroundColor");
     }

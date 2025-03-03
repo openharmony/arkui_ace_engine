@@ -429,7 +429,7 @@ public:
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
     void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
-    void OnScrollStartRecursive(std::vector<float> positions);
+    void OnScrollStartRecursive(float position);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     void GetParentAxis();
@@ -496,11 +496,13 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
 
     bool IsFocus() const
     {
@@ -547,7 +549,11 @@ public:
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
     void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void OnShowAutofillPopupV2(const float offsetX, const float offsetY, const float height, const float width,
+        const std::vector<std::string>& menu_items);
     void OnHideAutofillPopup();
+    RefPtr<FrameNode> CreateDataListFrameNode(const OffsetF& offfset, const float height, const float width);
+    void RemoveDataListNode();
     void UpdateTouchHandleForOverlay(bool fromOverlay = false);
     bool IsSelectOverlayDragging()
     {
@@ -602,6 +608,9 @@ public:
     void UpdateJavaScriptOnDocumentEndByOrder();
     void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder);
+    void UpdateJavaScriptOnHeadReadyByOrder();
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(const TouchEvent& touchEvent,
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
@@ -610,6 +619,7 @@ public:
     void UpdateImagePreviewParam();
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
+    void OnScrollStart(const float x, const float y);
     void SetLayoutMode(WebLayoutMode mode);
     WebLayoutMode GetLayoutMode() const
     {
@@ -761,6 +771,10 @@ public:
 
     bool GetAccessibilityVisible(int64_t accessibilityId);
 
+    void OnWebMediaAVSessionEnabledUpdate(bool enable);
+
+    std::string GetCurrentLanguage() override;
+
 private:
     friend class WebContextSelectOverlay;
 
@@ -776,6 +790,7 @@ private:
     bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard = false);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
+    bool UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double keyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
@@ -847,10 +862,11 @@ private:
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     void WindowDrag(int32_t width, int32_t height);
-    void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
+    void OnOptimizeParserBudgetEnabledUpdate(bool value);
+    void OnEnableFollowSystemFontWeightUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
@@ -874,6 +890,7 @@ private:
     void SetFakeDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
+    void HandleTouchEvent(const TouchEventInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
     void WebSendMouseEvent(const MouseInfo& info, int32_t clickNum);
     bool HandleDoubleClickEvent(const MouseInfo& info);
@@ -906,6 +923,7 @@ private:
     void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
+    void ResetDragStateValue();
     void InitTouchEventListener();
     void UninitTouchEventListener();
     void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
@@ -1020,6 +1038,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
+    double GetNewOriginScale(double originScale) const;
     void UpdateSlideOffset();
     void ClearKeyEventByKeyCode(int32_t keyCode);
     void SetRotation(uint32_t rotation);
@@ -1153,7 +1172,6 @@ private:
     bool isMemoryLevelEnable_ = true;
     OffsetF fitContentOffset_;
     bool isFirstFlingScrollVelocity_ = true;
-    bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool isEmbedModeEnabled_ = false;
@@ -1170,8 +1188,10 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItems> onHeadReadyScriptItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
@@ -1195,6 +1215,7 @@ private:
     int32_t zoomErrorCount_ = 0;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
     bool overlayCreating_ = false;
+    bool awaitingOnTextSelected_ = false;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;
@@ -1233,6 +1254,12 @@ private:
     float touchPointX = 0;
     float touchPointY = 0;
     bool isUsingCustomKeyboardAvoid_ = false;
+    int64_t lastHeight_ = 0L;
+    int64_t lastWidth_ = 0L;
+    bool dragWindowFlag_ = false;
+    bool isSetMouseDragMonitorState = false;
+
+    std::optional<int32_t> dataListNodeId_ = std::nullopt;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

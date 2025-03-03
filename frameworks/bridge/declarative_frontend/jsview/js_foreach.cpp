@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_foreach_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_model.h"
 
 
 namespace OHOS::Ace {
@@ -93,6 +94,9 @@ void JSForEach::Create(const JSCallbackInfo& info)
 
 void JSForEach::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSForEach][pop]", &JSForEach::Pop);
+    }
     ForEachModel::GetInstance()->Pop();
 }
 

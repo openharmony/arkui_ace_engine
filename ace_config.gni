@@ -115,11 +115,14 @@ crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
 c_utils_header_path = "//commonlibrary/c_utils/base/include"
+ace_graphic_surface = "//foundation/graphic/graphic_surface"
 
 # arkui-x
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
 ark_toolchain_path = "//arkcompiler/toolchain"
+ace_drag = "//base/msdp/device_status"
+acd_input = "//foundation/multimodalinput/input"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"

@@ -22,6 +22,8 @@
 #include <set>
 #include <string>
 
+#include "base/log/event_report.h"
+#include "base/utils/device_config.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -95,7 +97,7 @@ class OneStepDragController;
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
-enum class AutoScrollEvent { HANDLE, DRAG, MOUSE, NONE };
+enum class AutoScrollEvent { HANDLE, DRAG, MOUSE, NONE, CARET };
 enum class EdgeDetectionStrategy { OUT_BOUNDARY, IN_BOUNDARY, DISABLE };
 struct AutoScrollParam {
     AutoScrollEvent autoScrollEvent = AutoScrollEvent::NONE;
@@ -130,6 +132,29 @@ struct CaretOffsetInfo {
     float caretHeightLine = 0.0f;
 };
 enum class PositionType { DEFAULT, PARAGRAPH_START, PARAGRAPH_END, LINE_START, LINE_END };
+struct SysScale {
+    double dipScale = 1.0;
+    double logicScale = 1.0;
+    double fontScale = 1.0;
+    double fontWeightScale = 1.0;
+    bool operator==(const SysScale& rhs) const
+    {
+        return NearEqual(dipScale, rhs.dipScale)
+            && NearEqual(logicScale, rhs.logicScale)
+            && NearEqual(fontScale, rhs.fontScale)
+            && NearEqual(fontWeightScale, rhs.fontWeightScale);
+    }
+    bool operator!=(const SysScale& rhs) const
+    {
+        return !operator==(rhs);
+    }
+    std::string ToString()
+    {
+        std::stringstream ss;
+        ss << dipScale << ", " << logicScale << ", " << fontScale << ", " << fontWeightScale;
+        return ss.str();
+    }
+};
 
 class RichEditorPattern
     : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher {
@@ -159,6 +184,7 @@ public:
         PreviewRange replacedRange;
         bool isSpanSplit = false;
         bool needUpdateCaret = true;
+        bool previewTextExiting = false;
 
         std::string ToString() const
         {
@@ -169,6 +195,7 @@ public:
             JSON_STRING_PUT_INT(jsonValue, endOffset);
             JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
             JSON_STRING_PUT_BOOL(jsonValue, needUpdateCaret);
+            JSON_STRING_PUT_BOOL(jsonValue, previewTextExiting);
 
             return jsonValue->ToString();
         }
@@ -183,6 +210,7 @@ public:
             needReplaceText = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
             isSpanSplit = false;
+            previewTextExiting = false;
         }
 
         bool IsValid() const
@@ -226,11 +254,18 @@ public:
             originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
         }
 
-        void UpdateByTouchMove(const Offset& offset, double distance)
+        void UpdateByTouchMove(const Offset& offset, double distance, const RectF& boundaryRect)
         {
             isFloatingCaretVisible = true;
             touchMoveOffset = offset;
-            isOriginCaretVisible = GreatNotEqual(distance, showFloatingCaretDistance.ConvertToPx());
+            bool isCaretAtBoundaryLeft = LessOrEqual(touchMoveOffset->GetX(), boundaryRect.Left());
+            bool isCaretAtBoundaryRight = GreatOrEqual(touchMoveOffset->GetX(), boundaryRect.Right());
+            if (!isCaretAtBoundaryLeft && !isCaretAtBoundaryRight) {
+                isOriginCaretVisible = GreatNotEqual(distance, showFloatingCaretDistance.ConvertToPx());
+            } else {
+                touchMoveOffset->SetX(isCaretAtBoundaryLeft ? boundaryRect.Left() : boundaryRect.Right());
+                isOriginCaretVisible = true;
+            }
         }
     };
 
@@ -282,6 +317,10 @@ public:
         property->UpdatePreviewTextStyle(style);
     }
 
+    int32_t CheckPreviewTextValidate(const std::string& previewTextValue, const PreviewRange range) override;
+
+    int32_t CheckPreviewTextValidate(const std::u16string& previewTextValue, const PreviewRange range) override;
+
     const Color& GetPreviewTextDecorationColor() const;
 
     bool IsPreviewTextInputting()
@@ -326,7 +365,24 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_);
+        HandleSysScaleChanged();
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_, &paragraphCache_);
+    }
+
+    void HandleSysScaleChanged()
+    {
+        auto ctx = GetContext();
+        if (!ctx) {
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "context is nullptr, handle scale failed");
+            return;
+        }
+        SysScale sysScale{ ctx->GetDipScale(), ctx->GetLogicScale(), ctx->GetFontScale(), ctx->GetFontWeightScale() };
+        if (sysScale != lastSysScale_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "sys scale changed, %{public}s -> %{public}s",
+                lastSysScale_.ToString().c_str(), sysScale.ToString().c_str());
+            lastSysScale_ = sysScale;
+            paragraphCache_.Clear();
+        }
     }
 
     FocusPattern GetFocusPattern() const override
@@ -376,6 +432,26 @@ public:
     {
         return maxLength_.value_or(INT_MAX);
     }
+    
+    void SetMaxLines(int32_t maxLines)
+    {
+        maxLines_ = maxLines;
+    }
+
+    int32_t GetMaxLines()
+    {
+        return maxLines_;
+    }
+
+    void SetMaxLinesHeight(float maxLinesHeight)
+    {
+        maxLinesHeight_ = maxLinesHeight;
+    }
+
+    float GetMaxLinesHeight()
+    {
+        return maxLinesHeight_;
+    }
 
     void UpdateSpanPosition()
     {
@@ -408,6 +484,8 @@ public:
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
+    void InsertValueInStyledStringMore(RefPtr<SpanString> insertStyledString, int32_t changeStart, int32_t changeLength,
+        std::u16string& insertValue, bool needReplaceInTextPreview);
     void InsertValueInStyledString(const std::u16string& insertValue, bool calledByImf = false);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
         const std::u16string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
@@ -437,6 +515,7 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     bool IsIMEOperation(OperationType operationType);
+    void InsertValue(const std::string& insertValue, bool isIME = false) override;
     void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
     void InsertValueByOperationType(const std::u16string& insertValue,
         OperationType operationType = OperationType::DEFAULT);
@@ -464,6 +543,7 @@ public:
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
     WindowMode GetWindowMode();
+    bool GetIsMidScene();
     void NotifyKeyboardClosedByUser() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
@@ -496,8 +576,9 @@ public:
     bool CursorMoveRight();
     bool CursorMoveUp();
     bool CursorMoveDown();
-    bool CursorMoveLeftWord();
-    bool CursorMoveRightWord();
+    void CursorMoveToNextWord(CaretMoveIntent direction);
+    int32_t GetLeftWordIndex();
+    int32_t GetRightWordIndex();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
@@ -523,6 +604,8 @@ public:
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
+    void DeleteBackwardWord();
+    void DeleteForwardWord();
     int32_t GetLeftWordPosition(int32_t caretPosition);
     int32_t GetRightWordPosition(int32_t caretPosition);
     int32_t GetParagraphBeginPosition(int32_t caretPosition);
@@ -607,6 +690,7 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
+    void HandleOnShare();
     void HandleDraggableFlag(bool isTouchSelectArea);
     void SetIsTextDraggable(bool isTextDraggable = true) override;
     bool JudgeContentDraggable();
@@ -620,7 +704,6 @@ public:
     void RemoveEmptySpanNodes();
     void RemoveEmptySpans();
     RefPtr<GestureEventHub> GetGestureEventHub();
-    float GetSelectedMaxWidth();
     void OnWindowHide() override;
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
     RefPtr<SpanString> ToStyledString(int32_t start, int32_t end);
@@ -628,7 +711,7 @@ public:
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
     void DeleteToMaxLength(std::optional<int32_t> length);
-    std::u16string DeleteContentRichEditor(int32_t length);
+    void DeleteContent(int32_t length);
 
     void ResetIsMousePressed()
     {
@@ -656,7 +739,7 @@ public:
         return caretSpanIndex_;
     }
 
-    std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const override
+    std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const override
     {
         return paragraphs_.GetParagraphs();
     }
@@ -682,13 +765,17 @@ public:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void CreateDragNode();
+    float GetMaxSelectedWidth();
+    void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
+        bool hasDragBackgroundColor);
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void ResetSelection();
     bool BetweenSelection(const Offset& globalOffset);
     bool InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+        WindowSizeChangeReason type) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
@@ -727,7 +814,7 @@ public:
         customKeyboardBuilder_ = keyboardBuilder;
     }
     void BindSelectionMenu(TextResponseType type, TextSpanType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+        const SelectMenuParam& menuParam);
     void ClearSelectionMenu()
     {
         selectionMenuMap_.clear();
@@ -735,11 +822,14 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void RichEditorErrorReport(RichEditorInfo& info);
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnCommonColorChange();
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
@@ -821,6 +911,7 @@ public:
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowTranslate();
     bool IsShowSearch();
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
@@ -920,6 +1011,7 @@ public:
     void UpdateSelector(int32_t start, int32_t end);
     void UpdateSelectionType(const SelectionInfo& textSelectInfo);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+    SpanItemType GetSpanType(int32_t index);
 
     void DumpAdvanceInfo() override {}
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override  {}
@@ -936,11 +1028,6 @@ public:
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
-    }
-
-    bool IsMoveCaretAnywhere() const
-    {
-        return isMoveCaretAnywhere_;
     }
 
     void PreferredParagraph();
@@ -972,7 +1059,10 @@ public:
 
     bool InsertOrDeleteSpace(int32_t index) override;
 
-    void DeleteRange(int32_t start, int32_t end) override;
+    void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
+    void HandleOnPageUp() override;
+    void HandleOnPageDown() override;
+    void HandlePageScroll(bool isPageUp);
 
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
@@ -1013,7 +1103,7 @@ public:
         isTriggerAvoidOnCaretAvoidMode_ = true;
     }
 
-    void TriggerAvoidOnCaretChangeImmediately()
+    void TriggerAvoidOnCaretChangeNextFrame()
     {
         ForceTriggerAvoidOnCaretChange(true);
         isTriggerAvoidOnCaretAvoidMode_ = false;
@@ -1051,18 +1141,65 @@ public:
     }
     HoverInfo CreateHoverInfo(const MouseInfo& info);
     std::pair<int32_t, int32_t> GetSpanRangeByLocalOffset(Offset localOffset);
+    void SetStopBackPress(bool isStopBackPress)
+    {
+        isStopBackPress_ = isStopBackPress;
+    }
 
-protected:
-    bool CanStartAITask() override;
+    bool IsStopBackPress() const override
+    {
+        return isStopBackPress_;
+    }
+
+    void SetKeyboardAppearance(KeyboardAppearance value)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
+        keyboardAppearance_ = value;
+    }
+
+    KeyboardAppearance GetKeyboardAppearance() const
+    {
+        return keyboardAppearance_;
+    }
+
+    bool IsDragging() const override
+    {
+        return status_ == Status::DRAGGING || status_ == Status::FLOATING;
+    }
+
+    const RefPtr<SpanItem> GetSpanItemByPosition(int32_t position)
+    {
+        CHECK_NULL_RETURN(position >= 0, nullptr);
+        auto it = GetSpanIter(position);
+        CHECK_NULL_RETURN(it != spans_.end(), nullptr);
+        return *it;
+    }
+
+    ColorMode GetColorMode()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(!host, host->GetLocalColorMode());
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, ColorMode::COLOR_MODE_UNDEFINED);
+        return context->GetLocalColorMode();
+    }
+
+    ColorMode GetDisplayColorMode()
+    {
+        auto colorMode = GetColorMode();
+        return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? SystemProperties::GetColorMode() : colorMode;
+    }
 
     template<typename T>
     RefPtr<T> GetTheme()
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
-        return pipelineContext->GetTheme<T>();
+        return pipelineContext->GetTheme<T>(GetThemeScopeId());
     }
 
+protected:
+    bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
@@ -1084,6 +1221,7 @@ private:
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void OnFocusNodeChange(FocusReason focusReason) override;
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
@@ -1147,10 +1285,14 @@ private:
     void HandleTouchUp();
     void StartFloatingCaretLand();
     void ResetTouchAndMoveCaretState();
+    void ResetTouchSelectState();
     void HandleTouchUpAfterLongPress();
+    void HandleTouchCancelAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
+    void OnMoveCaretStart(int32_t fingerId);
     void UpdateCaretByTouchMove(const Offset& offset);
     void SetCaretTouchMoveOffset(const Offset& localOffset);
+    RectF GetCaretBoundaryRect();
     Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -1212,10 +1354,11 @@ private:
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     void OnHover(bool isHover);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
-    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
+    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
+        SourceType sourceType = SourceType::NONE);
     void UpdateCaretInfoToController();
 #if defined(ENABLE_STANDARD_INPUT)
-    bool EnableStandardInput(bool needShowSoftKeyboard);
+    bool EnableStandardInput(bool needShowSoftKeyboard, SourceType sourceType = SourceType::NONE);
     std::optional<MiscServices::TextConfig> GetMiscTextConfig();
 #else
     bool UnableStandardInput(bool isFocusViewChanged);
@@ -1317,7 +1460,8 @@ private:
     RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
 
-    RectF GetSelectArea();
+    void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
+    RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
@@ -1335,8 +1479,6 @@ private:
     void SetAccessibilityEditAction();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
-    void MoveCaretAnywhere(const Offset& touchOffset);
-    void ShowCaretNoTwinkling(const Offset& textOffset);
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
@@ -1354,6 +1496,8 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
+    int32_t CalculateTruncationLength(const std::u16string& insertValue, int32_t start);
+    bool ProcessTextTruncationOperation(std::u16string& text, bool calledByImf);
     void ProcessInsertValueMore(const std::u16string& text, OperationRecord record, OperationType operationType,
         RichEditorChangeValue changeValue, PreviewTextRecord preRecord);
     void ProcessInsertValue(const std::u16string& insertValue, OperationType operationType = OperationType::DEFAULT,
@@ -1364,6 +1508,7 @@ private:
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
     bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
+    bool AdjustIndexSkipSpace(int32_t& currentPosition, const MoveDirection direction);
     void RequestKeyboardToEdit();
     void HandleTasksOnLayoutSwap()
     {
@@ -1396,7 +1541,9 @@ private:
     bool UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
     void SetMagnifierLocalOffset(Offset localOffset);
+    void SetMagnifierOffsetWithAnimation(Offset offset);
     void UpdateSelectionAndHandleVisibility();
+    void SetIsEnableSubWindowMenu();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1410,7 +1557,6 @@ private:
     bool isFirstMouseSelect_ = true;
     bool leftMousePress_ = false;
     bool isLongPress_ = false;
-    bool isDragging_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;
@@ -1441,11 +1587,13 @@ private:
     std::u16string pasteStr_;
 
     // still in progress
-    ParagraphManager paragraphs_;
+    RichEditorParagraphManager paragraphs_;
     RefPtr<Paragraph> presetParagraph_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
     std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
+    RefPtr<ImageSpanItem> lastHoverSpanItem_ = nullptr;
+    HoverInfo lastHoverInfo_;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -1485,6 +1633,7 @@ private:
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
     FloatingCaretState floatingCaretState_;
+    std::shared_ptr<AnimationUtils::Animation> magnifierAnimation_;
     // Recorded when touch down or mouse left button press.
     OffsetF globalOffsetOnMoveStart_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
@@ -1505,8 +1654,9 @@ private:
     bool isTextPreviewSupported_ = true;
     OffsetF movingHandleOffset_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
-    bool isMoveCaretAnywhere_ = false;
     std::vector<TimeStamp> clickInfo_;
+    int32_t selectingFingerId_ = -1;
+    bool isTouchSelecting_ = false;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
     bool needMoveCaretToContentRect_ = false;
@@ -1514,6 +1664,8 @@ private:
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
+    float maxLinesHeight_ = FLT_MAX;
+    int32_t maxLines_ = INT32_MAX;
     std::unordered_map<std::u16string, RefPtr<SpanItem>> placeholderSpansMap_;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
@@ -1523,6 +1675,11 @@ private:
     std::unique_ptr<OneStepDragController> oneStepDragController_;
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
+    bool isStopBackPress_ = true;
+    bool blockKbInFloatingWindow_ = false;
+    KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
+    SysScale lastSysScale_;
 };
 } // namespace OHOS::Ace::NG
 

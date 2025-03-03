@@ -27,10 +27,16 @@
 
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
+enum PrebuildPhase {
+  None = 0,
+  BuildPrebuildCmd = 1,
+  ExecutePrebuildCmd = 2,
+  PrebuildDone = 3,
+}
 
 // NativeView
 // implemented in C++  for release
-abstract class PUV2ViewBase extends NativeViewPartialUpdate {
+abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   // List of inactive components used for Dfx
   protected static readonly inactiveComponents_: Set<string> = new Set<string>();
@@ -53,6 +59,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   
   // Set of elmtIds that need re-render
   protected dirtDescendantElementIds_: Set<number> = new Set<number>();
+
+  // Set of elmtIds retaken by IF that need re-render
+  protected dirtRetakenElementIds_: Set<number> = new Set<number>();
 
   // Map elmtId -> Repeat instance in this ViewPU
   protected elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
@@ -79,6 +88,10 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // the key is the elementId of the Component/Element that's the result of this function
   protected updateFuncByElmtId = new UpdateFuncsByElmtId();
 
+  protected static prebuildFuncQueues: Map<number, Array<PrebuildFunc>> = new Map();
+
+  protected static propertyChangedFuncQueues: Map<number, Array<PrebuildFunc>> = new Map();
+
   protected extraInfo_: ExtraInfo = undefined;
 
   // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
@@ -87,10 +100,20 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
+  protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
+  protected isPrebuilding_: boolean = false;
+  protected static prebuildingElmtId_: number = -1;
+
   protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined
+
+  static readonly doRecycle: boolean = true;
+  static readonly doReuse: boolean = false;
+
+  private nativeViewPartialUpdate: NativeViewPartialUpdate;
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super();
+    this.nativeViewPartialUpdate = new NativeViewPartialUpdate(this);
     // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
     // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU/V2 object by given elmtId
@@ -114,6 +137,101 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
+  public static create(view: NativeViewPartialUpdate): void {
+    return NativeViewPartialUpdate.create(view);
+  }
+  
+  static createRecycle(componentCall: object, isRecycling: boolean, reuseId: string, callback: () => void): void {
+    return NativeViewPartialUpdate.createRecycle(componentCall, isRecycling, reuseId, callback);
+  }
+ 
+  public markNeedUpdate(): void {
+    return this.nativeViewPartialUpdate.markNeedUpdate();
+  }
+ 
+  public syncInstanceId(): void {
+    return this.nativeViewPartialUpdate.syncInstanceId();
+  }
+ 
+  public restoreInstanceId(): void {
+    return this.nativeViewPartialUpdate.restoreInstanceId();
+  }
+ 
+  public getInstanceId(): number {
+    return this.nativeViewPartialUpdate.getInstanceId();
+  }
+ 
+  public markStatic(): void {
+    return this.nativeViewPartialUpdate.markStatic();
+  }
+ 
+  public finishUpdateFunc(elmtId: number): void {
+    return this.nativeViewPartialUpdate.finishUpdateFunc(elmtId);
+  }
+ 
+  public setCardId(cardId: number): void {
+    return this.nativeViewPartialUpdate.setCardId(cardId);
+  }
+ 
+  public getCardId(): number {
+    return this.nativeViewPartialUpdate.getCardId();
+  }
+ 
+  public elmtIdExists(elmtId: number): boolean {
+    return this.nativeViewPartialUpdate.elmtIdExists(elmtId);
+  }
+ 
+  public isLazyItemRender(elmtId: number): boolean {
+    return this.nativeViewPartialUpdate.isLazyItemRender(elmtId);
+  }
+ 
+  public isFirstRender(): boolean {
+    return this.nativeViewPartialUpdate.isFirstRender();
+  }
+ 
+  public findChildByIdForPreview(viewId: number): object {
+    return this.nativeViewPartialUpdate.findChildByIdForPreview(viewId);
+  }
+ 
+  public resetRecycleCustomNode(): void {
+    return this.nativeViewPartialUpdate.resetRecycleCustomNode();
+  }
+ 
+  public queryNavDestinationInfo(): object {
+    return this.nativeViewPartialUpdate.queryNavDestinationInfo();
+  }
+ 
+  public queryNavigationInfo(): object {
+    return this.nativeViewPartialUpdate.queryNavigationInfo();
+  }
+ 
+  public queryRouterPageInfo(): object {
+    return this.nativeViewPartialUpdate.queryRouterPageInfo();
+  }
+ 
+  public getUIContext(): object {
+    return this.nativeViewPartialUpdate.getUIContext();
+  }
+ 
+  public sendStateInfo(stateInfo: string): void {
+    return this.nativeViewPartialUpdate.sendStateInfo(stateInfo);
+  }
+ 
+  public getUniqueId(): number {
+    return this.nativeViewPartialUpdate.getUniqueId();
+  }
+ 
+  public setIsV2(isV2: boolean): void {
+    return this.nativeViewPartialUpdate.setIsV2(isV2);
+  }
+
+  public getDialogController(): object {
+    return this.nativeViewPartialUpdate.getDialogController();
+  }
+
+  public allowReusableV2Descendant(): boolean {
+    return this.nativeViewPartialUpdate.allowReusableV2Descendant();
+  }
   
   // globally unique id, this is different from compilerAssignedUniqueChildId!
   id__(): number {
@@ -440,7 +558,12 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     // ifElseNode stores the most recent branch, so we can compare
     // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
     let removedChildElmtIds = new Array<number>();
-    If.branchId(branchId, removedChildElmtIds);
+    let reservedChildElmtIds = new Array<number>();
+    If.branchId(branchId, removedChildElmtIds, reservedChildElmtIds);
+
+    for (const reservedChildElmtId of reservedChildElmtIds) {
+      this.updateFuncByElmtId.get(reservedChildElmtId)?.setPending(true);
+    }
 
     //un-registers the removed child elementIDs using proxy
     UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
@@ -450,6 +573,19 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     this.purgeDeletedElmtIds();
 
     branchfunc();
+
+    let retakenElmtIds = new Array<number>();
+    const res: boolean = If.getRetakenElmtIds(retakenElmtIds);
+    if (res) {
+      for (const retakenElmtId of retakenElmtIds) {
+        this.updateFuncByElmtId.get(retakenElmtId)?.setPending(false);
+        if (this.updateFuncByElmtId.get(retakenElmtId)?.isChanged() && !this.dirtDescendantElementIds_.has(retakenElmtId)) {
+          this.dirtRetakenElementIds_.add(retakenElmtId);
+        }
+        this.updateFuncByElmtId.get(retakenElmtId)?.setIsChanged(false);
+      }
+    }
+
     PUV2ViewBase.arkThemeScopeManager?.onIfElseBranchUpdateExit(removedChildElmtIds)
   }
 
@@ -548,13 +684,13 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     // Create new elements if any.
     stateMgmtProfiler.begin('ViewPU/V2.forEachUpdateFunction (native)');
     diffIndexArray.forEach((indx) => {
-      ForEach.createNewChildStart(newIdArray[indx], this);
+      ForEach.createNewChildStart(newIdArray[indx], this.nativeViewPartialUpdate);
       if (itemGenFuncUsesIndex) {
         itemGenFunc(arr[indx], indx);
       } else {
         itemGenFunc(arr[indx]);
       }
-      ForEach.createNewChildFinish(newIdArray[indx], this);
+      ForEach.createNewChildFinish(newIdArray[indx], this.nativeViewPartialUpdate);
     });
 
     // un-registers the removed child elementIDs using proxy
@@ -572,7 +708,8 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   public createOrGetNode(elmtId: number, builder: () => ArkComponent): object {
     const entry = this.updateFuncByElmtId.get(elmtId);
     if (entry === undefined) {
-      throw new Error(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
+      stateMgmtConsole.warn(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
+      return builder();
     }
     let nodeInfo = entry.getNode();
     if (nodeInfo === undefined) {
@@ -792,13 +929,84 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       componentName: this.constructor.name, id: this.id__(), isV2: this.isViewV2,
       isCompFreezeAllowed_:this.isCompFreezeAllowed_, isViewActive_: this.isViewActive()
     };
-    stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
     let resInfo: string = '';
     try {
+      stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
       resInfo = JSON.stringify(dumpInfo);
     } catch (error) {
       stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
     }
     return resInfo;
+  }
+
+  public traverseChildDoRecycleOrReuse(recyleOrReuse: boolean): void {
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (
+        child &&
+        (child instanceof ViewPU || child instanceof ViewV2) &&
+        !child.hasBeenRecycled_ &&
+        !child.__isBlockRecycleOrReuse__
+      ) {
+        recyleOrReuse ? child.aboutToRecycleInternal() : child.aboutToReuseInternal();
+      } // if child
+    });
+  }
+
+  public processPropertyChangedFuncQueue(): void {
+    if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+      return;
+    }
+    let propertyChangedFuncQueue = PUV2ViewBase.propertyChangedFuncQueues.get(this.id__());
+    if (!propertyChangedFuncQueue) {
+      PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
+      return;
+    }
+    for (const propertyChangedFunc of propertyChangedFuncQueue) {
+      if (propertyChangedFunc && typeof propertyChangedFunc === 'function') {
+        propertyChangedFunc();
+      }
+    }
+    PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
+  }
+
+  public setPrebuildPhase(prebuildPhase: PrebuildPhase): void {
+    PUV2ViewBase.prebuildPhase_ = prebuildPhase;
+    if (PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd) {
+      this.isPrebuilding_ = true;
+      PUV2ViewBase.prebuildingElmtId_ = this.id__();
+      if (!PUV2ViewBase.prebuildFuncQueues.has(this.id__())) {
+        PUV2ViewBase.prebuildFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
+      }
+    } else if (PUV2ViewBase.prebuildPhase_ === PrebuildPhase.ExecutePrebuildCmd) {
+      this.isPrebuilding_ = true;
+      PUV2ViewBase.prebuildingElmtId_ = this.id__();
+    } else if (PUV2ViewBase.prebuildPhase_ === PrebuildPhase.PrebuildDone) {
+      PUV2ViewBase.prebuildingElmtId_ = -1;
+      PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
+      this.isPrebuilding_ = false;
+      this.processPropertyChangedFuncQueue();
+    }
+  }
+
+  protected isNeedBuildPrebuildCmd(): boolean {
+    const needBuild: boolean = PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd;
+    return needBuild;
+  }
+
+  private prebuildComponent(): void {
+    let prebuildFuncQueue = PUV2ViewBase.prebuildFuncQueues.get(this.id__());
+    if (!prebuildFuncQueue) {
+      stateMgmtConsole.error(`prebuildComponent: prebuildFuncQueue ${this.id__()} not in prebuildFuncQueues`);
+      return;
+    }
+    const prebuildFunc = prebuildFuncQueue.shift();
+    if (prebuildFunc && typeof prebuildFunc === 'function') {
+      prebuildFunc();
+    }
+  }
+
+  protected isEnablePrebuildInMultiFrame(): boolean {
+    return !this.isViewV2;
   }
 } // class PUV2ViewBase

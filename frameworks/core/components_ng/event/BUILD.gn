@@ -17,6 +17,7 @@ import(
 build_component_ng("event_ng") {
   sources = [
     "click_event.cpp",
+    "drag_drop_event.cpp",
     "drag_event.cpp",
     "event_hub.cpp",
     "focus_box.cpp",

@@ -154,6 +154,11 @@ public:
     void SetSystemTransitionType(NavigationSystemTransitionType type)
     {
         systemTransitionType_ = type;
+        if (navDestinationTransitionDelegate_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+                "reset customTransition delegate of navDestination cause by setting systemTransition");
+            navDestinationTransitionDelegate_ = nullptr;
+        }
     }
 
     NavigationSystemTransitionType GetSystemTransitionType() const
@@ -164,16 +169,15 @@ public:
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(bool isTransitionOut);
 
-    void InitSystemTransitionPush(bool transitionIn) override;
-    void EndSystemTransitionPush(bool transitionIn) override;
-    void FinishSystemTransitionPush(bool transitionIn, const int32_t animationId);
-    void InitSystemTransitionPop(bool transitionIn) override;
-    void EndSystemTransitionPop(bool transitionIn) override;
-    bool SystemTransitionPopCallback(const int32_t animationId);
+    void InitSystemTransitionPush(bool transitionIn);
+    void StartSystemTransitionPush(bool transitionIn);
+    void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
+    void InitSystemTransitionPop(bool isTransitionIn);
+    void StartSystemTransitionPop(bool transitionIn);
+    bool CheckTransitionPop(const int32_t animationId);
+    bool SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent = true);
     void InitDialogTransition(bool isZeroY);
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
-    void FinishSystemTransitionAnimationPush(RefPtr<FrameNode>& preNode, RefPtr<FrameNode>& naviagtionNode,
-        bool transitionIn, const int32_t animationId) override;
 
     void SetRecoverable(bool recoverable)
     {
@@ -220,7 +224,37 @@ public:
         return needForceMeasure_;
     }
 
+    void SetNavDestinationTransitionDelegate(NavDestinationTransitionDelegate&& delegate)
+    {
+        navDestinationTransitionDelegate_ = std::move(delegate);
+    }
+
+    int32_t DoTransition(NavigationOperation operation, bool isEnter);
+    bool HasStandardBefore() const;
+
+    void UpdateUserSetOpacity(float opacity)
+    {
+        userSetOpacity_ = opacity;
+    }
+
 private:
+    int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
+    int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
+    int32_t DoSystemFadeTransition(bool isEnter);
+    int32_t DoSystemSlideTransition(NavigationOperation operation, bool isEnter);
+    int32_t DoSystemExplodeTransition(NavigationOperation operation, bool isEnter);
+    int32_t DoSystemEnterExplodeTransition(NavigationOperation operation);
+    int32_t DoSystemExitExplodeTransition(NavigationOperation operation);
+    void DoMaskAnimation(const AnimationOption& option, Color begin, Color end);
+    void StartCustomTransitionAnimation(NavDestinationTransition& transition,
+        bool isEnter, bool& hasResetProperties, int32_t longestAnimationDuration);
+    int32_t MakeUniqueAnimationId();
+    void ResetCustomTransitionAnimationProperties();
+
+    std::optional<AnimationOption> GetTransitionAnimationOption(NavigationOperation operation, bool isEnter) const;
+    std::function<void()> BuildTransitionFinishCallback(
+        bool isSystemTransition = true, std::function<void()>&& extraOption = nullptr);
+
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
     bool isOnAnimation_ = false;
@@ -238,6 +272,9 @@ private:
     std::list<WeakPtr<UINode>> textNodeList_;
     NavigationSystemTransitionType systemTransitionType_ = NavigationSystemTransitionType::DEFAULT;
     bool needForceMeasure_ = false;
+    float userSetOpacity_ = 1.0f;
+
+    NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
 };
 
 } // namespace OHOS::Ace::NG

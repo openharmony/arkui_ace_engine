@@ -28,7 +28,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
-}
+} // namespace
 
 namespace OHOS::Ace::Framework {
 void ParseCjCustomDialogControllerOffset(DimensionOffset& offset, NativeCustomDialogControllerOptions options)
@@ -77,7 +77,9 @@ NativeCustomDialogController::NativeCustomDialogController(NativeCustomDialogCon
     dialogProperties_.onCancel = onCancel;
     dialogProperties_.autoCancel = options.autoCancel;
     dialogProperties_.customStyle = options.customStyle;
-    dialogProperties_.alignment = DIALOG_ALIGNMENT[options.alignment];
+    if (options.alignment >= 0 && options.alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        dialogProperties_.alignment = DIALOG_ALIGNMENT[options.alignment];
+    }
     DimensionOffset offset_;
     ParseCjCustomDialogControllerOffset(offset_, options);
     dialogProperties_.offset = offset_;
@@ -103,6 +105,74 @@ NativeCustomDialogController::NativeCustomDialogController(NativeCustomDialogCon
         AnimationOption closeAnimation;
         ParseCjAnimation(options.closeAnimation.value, closeAnimation);
         dialogProperties_.closeAnimation = closeAnimation;
+    }
+    // Parse isModalValue
+    if (options.isModal.hasValue) {
+        dialogProperties_.isModal = options.isModal.value;
+    }
+    // Parse onWillDismiss
+    if (options.onWillDismiss.hasValue) {
+        std::function<void(const int32_t& info, const int32_t& infoTem)> onWillDismissFunc =
+            [nativeFunc = CJLambda::Create(options.onWillDismiss.value)](
+                const int32_t& info, const int32_t& infoTem) { nativeFunc(info); };
+        dialogProperties_.onWillDismiss = onWillDismissFunc;
+    }
+    // Parse width
+    if (options.width.hasValue) {
+        auto width = CalcDimension(options.width.value.value, static_cast<DimensionUnit>(options.width.value.unitType));
+        dialogProperties_.width = width;
+    }
+    // Parse height
+    if (options.height.hasValue) {
+        auto height =
+            CalcDimension(options.height.value.value, static_cast<DimensionUnit>(options.height.value.unitType));
+        dialogProperties_.height = height;
+    }
+    // Parse backgroundBlurStyle
+    if (options.backgroundBlurStyle.hasValue) {
+        auto blurStyle = options.backgroundBlurStyle.value;
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            dialogProperties_.backgroundBlurStyle = blurStyle;
+        }
+    }
+    if (options.borderWidth.hasValue) {
+        auto nativeBorderWidth = options.borderWidth.value;
+        auto borderWidth = Dimension(nativeBorderWidth.value, static_cast<DimensionUnit>(nativeBorderWidth.unitType));
+        auto borderWidthProp = NG::BorderWidthProperty({ borderWidth, borderWidth, borderWidth, borderWidth });
+        dialogProperties_.borderWidth = borderWidthProp;
+    }
+    if (options.borderColor.hasValue) {
+        NG::BorderColorProperty colorProperty;
+        Color borderColor = Color(options.borderColor.value);
+        colorProperty.SetColor(borderColor);
+        dialogProperties_.borderColor = colorProperty;
+    }
+    if (options.borderStyle.hasValue) {
+        NG::BorderStyleProperty borderStyle;
+        auto nativeBorderSytle = options.borderStyle.value;
+        borderStyle.styleLeft = static_cast<BorderStyle>(nativeBorderSytle.left);
+        borderStyle.styleRight = static_cast<BorderStyle>(nativeBorderSytle.right);
+        borderStyle.styleTop = static_cast<BorderStyle>(nativeBorderSytle.top);
+        borderStyle.styleBottom = static_cast<BorderStyle>(nativeBorderSytle.bottom);
+        borderStyle.multiValued = true;
+        dialogProperties_.borderStyle = borderStyle;
+    }
+    if (options.shadow.hasValue) {
+        NativeShadowOptions shadowOptions = options.shadow.options;
+        // Parse shadow
+        Shadow shadow;
+        if (LessNotEqual(shadowOptions.radius, 0.0)) {
+            shadowOptions.radius = 0.0;
+        }
+        shadow.SetBlurRadius(shadowOptions.radius);
+        Color shadowColor = Color(shadowOptions.color);
+        shadow.SetColor(shadowColor);
+        shadow.SetShadowType(static_cast<ShadowType>(shadowOptions.shadowType));
+        shadow.SetIsFilled(shadowOptions.fill);
+        shadow.SetOffsetX(shadowOptions.offsetX);
+        shadow.SetOffsetY(shadowOptions.offsetY);
+        dialogProperties_.shadow = shadow;
     }
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -156,7 +226,8 @@ void NativeCustomDialogController::OpenDialog()
             dialogProperties_.windowScene = parent;
         }
     }
-    dialogProperties_.isSysBlurStyle = false;
+    dialogProperties_.isSysBlurStyle =
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? true : false;
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, AccessibilityManager::WeakClaim(this),
         dialogs_, pending_, isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_,
         dialogOperation_);

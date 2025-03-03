@@ -380,11 +380,9 @@ Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
             auto controller = peerImpl->GetController().Upgrade();
             auto pattern = controller ? controller->GetPattern().Upgrade() : nullptr;
             auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
-            auto frameNode = frameNodeWeakPtr ? frameNodeWeakPtr.GetRawPtr() : nullptr;
-            auto customNode = CallbackHelper(*value).BuildSync(frameNode);
-            auto customFrameNode = reinterpret_cast<FrameNode*>(customNode.GetRawPtr());
-            if (customFrameNode) {
-                result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());
+            auto customNode = CallbackHelper(*value).BuildSync(Referenced::RawPtr(frameNodeWeakPtr));
+            if (customNode) {
+                result = peerImpl->AddBuilderSpanImpl(Referenced::RawPtr(customNode), locOptions.value());
             }
         }
     }
@@ -496,7 +494,7 @@ Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer,
     CHECK_NULL_RETURN(value, nullptr);
     auto options = Converter::Convert<RangeOptions>(*value);
     RefPtr<SpanStringBase> ret = peerImpl->ToStyledStringImpl(options);
-    return reinterpret_cast<Ark_NativePointer>(ret.GetRawPtr());
+    return reinterpret_cast<Ark_NativePointer>(Referenced::RawPtr(ret));
 }
 } // RichEditorControllerAccessor
 const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor()

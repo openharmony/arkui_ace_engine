@@ -24,14 +24,32 @@ namespace OHOS::Ace::NG {
 constexpr float DEFAULT_SNAPSHOT_SCALE = 1.f;
 constexpr int32_t DEFAULT_DELAY_TIME = 300;
 
+enum SnapshotRegionMode {
+    COMMON,
+    LOCALIZED,
+    NO_REGION
+};
+struct LocalizedSnapshotRegion {
+    double start = -1.f;
+    double top = -1.f;
+    double end = -1.f;
+    double bottom = -1.f;
+};
+
 struct SnapshotOptions {
     float scale;
     bool waitUntilRenderFinished;
-    explicit SnapshotOptions(float scale = DEFAULT_SNAPSHOT_SCALE, bool waitUntilRenderFinished = false)
-        : scale(scale), waitUntilRenderFinished(waitUntilRenderFinished) {}
+    LocalizedSnapshotRegion snapshotRegion;
+    SnapshotRegionMode regionMode;
+    explicit SnapshotOptions(float scale = DEFAULT_SNAPSHOT_SCALE, bool waitUntilRenderFinished = false,
+        SnapshotRegionMode regionMode = SnapshotRegionMode::NO_REGION)
+        : scale(scale), waitUntilRenderFinished(waitUntilRenderFinished), regionMode(regionMode) {}
     std::string ToString() const
     {
-        return "{" + std::to_string(scale) + ", " + (waitUntilRenderFinished ? "true}" : "false}");
+        std::string region = (regionMode == SnapshotRegionMode::COMMON ? "{Common, " : "{Localized, ") +
+            std::to_string(snapshotRegion.start) + ", " + std::to_string(snapshotRegion.top) + ", " +
+            std::to_string(snapshotRegion.end) + ", " + std::to_string(snapshotRegion.bottom) + "}";
+        return "{" + std::to_string(scale) + ", " + (waitUntilRenderFinished ? "true, " : "false, ") + region + "}";
     }
 };
 struct SnapshotParam {

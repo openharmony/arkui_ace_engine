@@ -24,14 +24,19 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,6 +53,15 @@ constexpr size_t CANCEL_BUTTON_BACKGROUND_COLOR_INDEX = 1;
 constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
 constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 } // namespace
+
+bool CalendarDialogView::CheckOrientationChange()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, true);
+    return (!(SystemProperties::GetDeviceOrientation() == previousOrientation_)
+                ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < deviceHeightLimit
+                : Dimension(pipeline->GetRootHeight()).ConvertToVp() < deviceHeightLimit);
+}
 
 DeviceOrientation CalendarDialogView::previousOrientation_ { DeviceOrientation::PORTRAIT };
 
@@ -78,7 +92,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     auto weekFrameNode = CreateWeekNode(calendarNode);
     CHECK_NULL_RETURN(weekFrameNode, nullptr);
 
-    auto titleNode = CreateTitleNode(calendarNode);
+    auto titleNode = CreateTitleNode(calendarNode, contentColumn);
     CHECK_NULL_RETURN(titleNode, nullptr);
     auto titleLayoutProperty = titleNode->GetLayoutProperty();
     CHECK_NULL_RETURN(titleLayoutProperty, nullptr);
@@ -170,7 +184,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
             renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
         }
     }
-    UpdateBackgroundStyle(renderContext, dialogProperties, theme);
+    UpdateBackgroundStyle(renderContext, dialogProperties, theme, childNode);
 }
 
 void CalendarDialogView::OperationsToPattern(
@@ -254,7 +268,8 @@ void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode, RefPtr<FrameNo
     rightYearProperty->SetAccessibilityText(theme->GetCalendarTheme().nextYear);
 }
 
-RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
+RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode,
+    const RefPtr<FrameNode>& calendarDialogNode)
 {
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -291,17 +306,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(u"");
-    MarginProperty textMargin;
-    textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
-    textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
-    textLayoutProperty->UpdateMargin(textMargin);
-    textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
-    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
-    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateLayoutWeight(1);
-    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    UpdateTextLayoutProperty(textLayoutProperty, theme);
     textTitleNode->MarkModifyDone();
     textTitleNode->MountToParent(titleRow);
 
@@ -315,6 +320,10 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
         CreateTitleImageNode(calendarNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     rightYearArrowNode->MountToParent(titleRow);
     AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode, theme);
+
+    auto pattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetTitleNode(textTitleNode);
     return titleRow;
 }
 
@@ -446,6 +455,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     UpdateCalendarMonthData(calendarDialogNode, calendarNode, currentMonth);
     calendarPattern->SetStartDate(settingData.startDate);
     calendarPattern->SetEndDate(settingData.endDate);
+    calendarPattern->SetMarkToday(settingData.markToday);
+    calendarPattern->SetDisabledDateRange(settingData.disabledDateRange);
 
     CalendarDay calendarDay;
     PickerDate today = PickerDate::Current();
@@ -454,10 +465,9 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     calendarDay.day = static_cast<int32_t>(today.GetDay());
     calendarPattern->SetCalendarDay(calendarDay);
 
-    auto changeEvent = dialogEvent.find("changeId");
+    DialogEvent changeEvent = GetChangeEvent(settingData, calendarDialogNode, dialogEvent); // do not check nullptr
     for (int32_t i = 0; i < SWIPER_MONTHS_COUNT; i++) {
-        auto monthFrameNode = CreateCalendarMonthNode(
-            calendarNodeId, settingData, changeEvent == dialogEvent.end() ? nullptr : changeEvent->second);
+        auto monthFrameNode = CreateCalendarMonthNode(calendarNodeId, settingData, changeEvent);
         auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
         if (i == CURRENT_MONTH_INDEX) {
@@ -1008,14 +1018,46 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
 }
 
 void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& renderContext,
-    const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme)
+    const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme,
+    const RefPtr<FrameNode>& dialogNode)
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         CHECK_NULL_VOID(calendarTheme);
+        auto contentRenderContext = dialogNode->GetRenderContext();
+        CHECK_NULL_VOID(contentRenderContext);
+        auto pipeLineContext = dialogNode->GetContext();
+        CHECK_NULL_VOID(pipeLineContext);
         BlurStyleOption styleOption;
+        if (dialogProperties.blurStyleOption.has_value()) {
+            styleOption = dialogProperties.blurStyleOption.value();
+            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
+            }
+        }
         styleOption.blurStyle = static_cast<BlurStyle>(
             dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
+        if (dialogProperties.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
+            contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+        }
         renderContext->UpdateBackBlurStyle(styleOption);
+        if (dialogProperties.effectOption.has_value()) {
+            if (dialogProperties.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
+            }
+            if (contentRenderContext->GetBackBlurStyle().has_value()) {
+                contentRenderContext->UpdateBackBlurStyle(std::nullopt);
+            }
+            // Clear and re-render to avoid previous impact, when using backgroundEffect
+            contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+            contentRenderContext->UpdateBackgroundEffect(dialogProperties.effectOption.value());
+        }
+        // Clear and re-render to avoid previous impact
+        // Because when policy is BlurStyleActivePolicy.ALWAYS_INACTIVE, the background color shows inactiveColor
+        renderContext->ResetBackgroundColor();
         renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
     }
 }
@@ -1178,5 +1220,90 @@ void CalendarDialogView::UpdateButtons(
     CalendarDialogView::UpdateButtonStyles(
         buttonInfos, buttonIndex, buttonLayoutProperty, buttonNode->GetRenderContext());
     buttonNode->MarkModifyDone();
+}
+
+DialogEvent CalendarDialogView::GetChangeEvent(const CalendarSettingData& settingData,
+    const RefPtr<FrameNode>& frameNode, const std::map<std::string, NG::DialogEvent>& dialogEvent)
+{
+    auto changeIter = dialogEvent.find("changeId");
+    DialogEvent changeEvent = changeIter == dialogEvent.end() ? nullptr : changeIter->second;
+    CHECK_NULL_RETURN(!settingData.entryNode.Upgrade(), changeEvent);
+    changeEvent = [weak = WeakPtr<FrameNode>(frameNode), changeEvent](const std::string& info) -> void {
+        ReportChangeEvent(weak.Upgrade(), "CalendarPickerDialog", "onChange", info);
+        CHECK_NULL_VOID(changeEvent);
+        changeEvent(info);
+    };
+    return changeEvent;
+}
+
+bool CalendarDialogView::CanReportChangeEvent(PickerDate& pickerDate, const PickerDate& newPickerDate)
+{
+    auto year = newPickerDate.GetYear();
+    auto month = newPickerDate.GetMonth();
+    auto day = newPickerDate.GetDay();
+    if ((pickerDate.GetYear() == year) && (pickerDate.GetMonth() == month) && (pickerDate.GetDay() == day)) {
+        return false;
+    }
+    pickerDate.SetYear(year);
+    pickerDate.SetMonth(month);
+    pickerDate.SetDay(day);
+    return true;
+}
+
+bool CalendarDialogView::GetReportChangeEventDate(PickerDate& pickerDate, const std::string& eventData)
+{
+    auto dataJson = JsonUtil::ParseJsonString(eventData);
+    CHECK_NULL_RETURN(dataJson, false);
+    pickerDate.SetYear(dataJson->GetUInt("year"));
+    pickerDate.SetMonth(dataJson->GetUInt("month"));
+    pickerDate.SetDay(dataJson->GetUInt("day"));
+    return true;
+}
+
+bool CalendarDialogView::ReportChangeEvent(const RefPtr<FrameNode>& frameNode, const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto wrapperNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(wrapperNode, false);
+    auto dialogNode = wrapperNode->GetParent();
+    CHECK_NULL_RETURN(dialogNode, false);
+    auto pattern = frameNode->GetPattern<CalendarDialogPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    PickerDate pickerDate;
+    CHECK_NULL_RETURN(GetReportChangeEventDate(pickerDate, eventData), false);
+    CHECK_NULL_RETURN(pattern->CanReportChangeEvent(pickerDate), false);
+    return ReportChangeEvent(dialogNode->GetId(), compName, eventName, pickerDate);
+}
+
+bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& compName,
+    const std::string& eventName, const PickerDate& pickerDate)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put(compName.c_str(), eventName.c_str());
+    value->Put("year", pickerDate.GetYear());
+    value->Put("month", pickerDate.GetMonth());
+    value->Put("day", pickerDate.GetDay());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
+#endif
+    return true;
+}
+
+void CalendarDialogView::UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    RefPtr<CalendarTheme>& theme)
+{
+    textLayoutProperty->UpdateContent(u"");
+    MarginProperty textMargin;
+    textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
+    textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
+    textLayoutProperty->UpdateMargin(textMargin);
+    textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateLayoutWeight(1);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
 }
 } // namespace OHOS::Ace::NG

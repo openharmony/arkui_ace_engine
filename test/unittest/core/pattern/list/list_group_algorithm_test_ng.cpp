@@ -19,7 +19,10 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
-namespace {} // namespace
+namespace {
+constexpr int32_t HEADER_INDEX = 0;
+constexpr int32_t FOOTER_INDEX = 1;
+} // namespace
 
 class ListGroupAlgTestNg : public ListTestNg {
 public:
@@ -286,12 +289,11 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout001, TestSize.Level1)
     RectF firstItemRect = GetChildRect(groupNode, FOOTER_INDEX + 1);
     RectF secondItemRect = GetChildRect(groupNode, FOOTER_INDEX + 2);
     RectF footRect = GetChildRect(groupNode, FOOTER_INDEX);
-    EXPECT_TRUE(IsEqual(groupRect, RectF(0, 0, LIST_WIDTH, groupHeight)));
-    EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, LIST_WIDTH, GROUP_HEADER_LEN)));
-    EXPECT_TRUE(IsEqual(firstItemRect, RectF(0, GROUP_HEADER_LEN, LIST_WIDTH, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(
-        IsEqual(secondItemRect, RectF(0, GROUP_HEADER_LEN + SPACE + ITEM_MAIN_SIZE, LIST_WIDTH, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(IsEqual(footRect, RectF(0, groupHeight - GROUP_HEADER_LEN, LIST_WIDTH, GROUP_HEADER_LEN)));
+    EXPECT_TRUE(IsEqual(groupRect, RectF(0, 0, WIDTH, groupHeight)));
+    EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, WIDTH, GROUP_HEADER_LEN)));
+    EXPECT_TRUE(IsEqual(firstItemRect, RectF(0, GROUP_HEADER_LEN, WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(secondItemRect, RectF(0, GROUP_HEADER_LEN + SPACE + ITEM_MAIN_SIZE, WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(footRect, RectF(0, groupHeight - GROUP_HEADER_LEN, WIDTH, GROUP_HEADER_LEN)));
 }
 
 /**
@@ -419,7 +421,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::FOOTER);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    float expectOffset = LIST_HEIGHT - GetChildHeight(frameNode_, 0) - GROUP_HEADER_LEN;
+    float expectOffset = HEIGHT - GetChildHeight(frameNode_, 0) - GROUP_HEADER_LEN;
     EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), GROUP_HEADER_LEN);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), expectOffset + ITEM_MAIN_SIZE);
@@ -490,7 +492,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky003, TestSize.Level1)
     CreateGroupWithFooter(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone();
     RefPtr<FrameNode> secondGroupNode = GetChildFrameNode(frameNode_, 1);
-    float expectOffset = LIST_HEIGHT - GetChildHeight(frameNode_, 0) - GROUP_HEADER_LEN;
+    float expectOffset = HEIGHT - GetChildHeight(frameNode_, 0) - GROUP_HEADER_LEN;
     EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset + ITEM_MAIN_SIZE);
@@ -687,21 +689,21 @@ HWTEST_F(ListGroupAlgTestNg, LanesLayout001, TestSize.Level1)
     EXPECT_LT(GetChildX(groupNode, 0), GetChildX(groupNode, 1));
 
     /**
-     * @tc.steps: step2. maxLaneLength > LIST_WIDTH
+     * @tc.steps: step2. maxLaneLength > WIDTH
      * @tc.expected: has 1 lanes items
      */
     ClearOldNodes();
     model = CreateList();
     model.SetLaneMinLength(Dimension(300.f));
-    model.SetLaneMaxLength(Dimension(LIST_WIDTH + 100.f));
+    model.SetLaneMaxLength(Dimension(WIDTH + 100.f));
     CreateListItemGroups(1);
     CreateDone();
     groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), LIST_WIDTH);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), WIDTH);
     EXPECT_LT(GetChildY(groupNode, 0), GetChildY(groupNode, 1));
 
     /**
-     * @tc.steps: step3. maxLaneLength < LIST_WIDTH
+     * @tc.steps: step3. maxLaneLength < WIDTH
      * @tc.expected: has 1 lanes items
      */
     ClearOldNodes();
@@ -711,7 +713,7 @@ HWTEST_F(ListGroupAlgTestNg, LanesLayout001, TestSize.Level1)
     CreateListItemGroups(1);
     CreateDone();
     groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), LIST_WIDTH);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), WIDTH);
     EXPECT_LT(GetChildY(groupNode, 0), GetChildY(groupNode, 1));
 
     /**
@@ -737,7 +739,7 @@ HWTEST_F(ListGroupAlgTestNg, LanesLayout001, TestSize.Level1)
     CreateGroupWithSetting(1, V2::ListItemGroupStyle::NONE);
     CreateDone();
     groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildWidth(groupNode, HEADER_INDEX), LIST_WIDTH);
+    EXPECT_EQ(GetChildWidth(groupNode, HEADER_INDEX), WIDTH);
     EXPECT_LT(GetChildY(groupNode, 2), GetChildY(groupNode, 3));
 }
 
@@ -751,7 +753,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemAlign001, TestSize.Level1)
     /**
      * @tc.steps: step2. V2::ListItemAlign::START
      */
-    const float itemWidth = LIST_WIDTH - 100.f;
+    const float itemWidth = WIDTH - 100.f;
     ListModelNG model = CreateList();
     model.SetListItemAlign(V2::ListItemAlign::START);
     CreateListItemGroup(V2::ListItemGroupStyle::NONE);
@@ -766,14 +768,14 @@ HWTEST_F(ListGroupAlgTestNg, ListItemAlign001, TestSize.Level1)
      */
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     FlushUITasks();
-    EXPECT_EQ(GetChildX(groupNode, 0), (LIST_WIDTH - itemWidth) / 2);
+    EXPECT_EQ(GetChildX(groupNode, 0), (WIDTH - itemWidth) / 2);
 
     /**
      * @tc.steps: step3. V2::ListItemAlign::END
      */
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
     FlushUITasks();
-    EXPECT_EQ(GetChildX(groupNode, 0), LIST_WIDTH - itemWidth);
+    EXPECT_EQ(GetChildX(groupNode, 0), WIDTH - itemWidth);
 }
 
 /**
@@ -787,7 +789,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemAlign002, TestSize.Level1)
      * @tc.steps: step2. V2::ListItemAlign::START
      */
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    const float itemWidth = LIST_WIDTH - 100.f;
+    const float itemWidth = WIDTH - 100.f;
     ListModelNG model = CreateList();
     model.SetListItemAlign(V2::ListItemAlign::START);
     CreateListItemGroup(V2::ListItemGroupStyle::NONE);
@@ -795,14 +797,14 @@ HWTEST_F(ListGroupAlgTestNg, ListItemAlign002, TestSize.Level1)
     ViewAbstract::SetWidth(CalcLength(itemWidth));
     CreateDone();
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildX(groupNode, 0), LIST_WIDTH - itemWidth);
+    EXPECT_EQ(GetChildX(groupNode, 0), WIDTH - itemWidth);
 
     /**
      * @tc.steps: step2. V2::ListItemAlign::CENTER
      */
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     FlushUITasks();
-    EXPECT_EQ(GetChildX(groupNode, 0), (LIST_WIDTH - itemWidth) / 2);
+    EXPECT_EQ(GetChildX(groupNode, 0), (WIDTH - itemWidth) / 2);
 
     /**
      * @tc.steps: step3. V2::ListItemAlign::END
@@ -912,7 +914,7 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(GetChildY(groupNode, 8 + 1), ITEM_MAIN_SIZE * (8 / 2) + GROUP_HEADER_LEN);
     auto item9 = groupNode->GetChildByIndex(9 + 1)->GetHostNode();
     EXPECT_EQ(item9->IsActive(), false);
-    EXPECT_EQ(GetChildX(groupNode, 9 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildX(groupNode, 9 + 1), WIDTH / 2);
     EXPECT_EQ(GetChildY(groupNode, 9 + 1), ITEM_MAIN_SIZE * (9 / 2) + GROUP_HEADER_LEN);
 
     /**
@@ -929,14 +931,14 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(GetChildY(groupNode, 2 + 1), ITEM_MAIN_SIZE * (2 / 2) + GROUP_HEADER_LEN);
     auto item3 = groupNode->GetChildByIndex(3 + 1)->GetHostNode();
     EXPECT_EQ(item3->IsActive(), false);
-    EXPECT_EQ(GetChildX(groupNode, 3 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildX(groupNode, 3 + 1), WIDTH / 2);
     EXPECT_EQ(GetChildY(groupNode, 3 + 1), ITEM_MAIN_SIZE * (3 / 2) + GROUP_HEADER_LEN);
     auto item14 = groupNode->GetChildByIndex(14 + 1)->GetHostNode();
     EXPECT_EQ(item14->IsActive(), false);
     EXPECT_EQ(GetChildY(groupNode, 14 + 1), ITEM_MAIN_SIZE * (14 / 2) + GROUP_HEADER_LEN);
     auto item15 = groupNode->GetChildByIndex(15 + 1)->GetHostNode();
     EXPECT_EQ(item15->IsActive(), false);
-    EXPECT_EQ(GetChildX(groupNode, 15 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildX(groupNode, 15 + 1), WIDTH / 2);
     EXPECT_EQ(GetChildY(groupNode, 15 + 1), ITEM_MAIN_SIZE * (15 / 2) + GROUP_HEADER_LEN);
 }
 
@@ -1127,7 +1129,7 @@ HWTEST_F(ListGroupAlgTestNg, Space001, TestSize.Level1)
      * @tc.steps: step3. Set space > groupHeight
      * @tc.expected: Space reset to 0
      */
-    groupProperty->UpdateSpace(Dimension(LIST_HEIGHT));
+    groupProperty->UpdateSpace(Dimension(HEIGHT));
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(GetChildY(groupNode, 1), ITEM_MAIN_SIZE);
@@ -1168,7 +1170,7 @@ HWTEST_F(ListGroupAlgTestNg, Divider001, TestSize.Level1)
      * @tc.steps: step3. Set strokeWidth > groupHeight
      * @tc.expected: StrokeWidth reset to 0
      */
-    divider.strokeWidth = Dimension(LIST_HEIGHT);
+    divider.strokeWidth = Dimension(HEIGHT);
     groupProperty->UpdateDivider(divider);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();

@@ -148,12 +148,7 @@ class FetchingRangeEvaluator implements IFetchingRangeEvaluator {
 
   protected onCollectionChanged(totalCount: number): void {
     this.totalItems = Math.max(0, totalCount);
-    let newRangeToFetch: IndexRange;
-    if (this.fetchedRegistry.rangeToFetch.length > 0) {
-      newRangeToFetch = this.itemsOnScreen.visibleRange;
-    } else {
-      newRangeToFetch = this.fetchedRegistry.rangeToFetch;
-    }
+    let newRangeToFetch = this.itemsOnScreen.visibleRange;
     if (newRangeToFetch.end > this.totalItems) {
       const end = this.totalItems;
       const start = newRangeToFetch.start < end ? newRangeToFetch.start : end;
@@ -170,10 +165,7 @@ class FetchingRangeEvaluator implements IFetchingRangeEvaluator {
     this.totalItems--;
     this.fetchedRegistry.removeFetched(itemIndex);
 
-    const end =
-      this.fetchedRegistry.rangeToFetch.end < this.totalItems ? this.fetchedRegistry.rangeToFetch.end : this.totalItems;
-    const rangeToFetch = new IndexRange(this.fetchedRegistry.rangeToFetch.start, end);
-
+    const rangeToFetch = this.prefetchCount.getRangeToFetch(this.totalItems);
     this.fetchedRegistry.decrementFetchedGreaterThen(itemIndex, rangeToFetch);
   }
 
@@ -183,8 +175,7 @@ class FetchingRangeEvaluator implements IFetchingRangeEvaluator {
       return;
     }
 
-    const end = this.fetchedRegistry.rangeToFetch.end + 1;
-    const rangeToFetch = new IndexRange(this.fetchedRegistry.rangeToFetch.start, end);
+    const rangeToFetch = this.prefetchCount.getRangeToFetch(this.totalItems);
     this.fetchedRegistry.incrementFetchedGreaterThen(itemIndex - 1, rangeToFetch);
   }
 }

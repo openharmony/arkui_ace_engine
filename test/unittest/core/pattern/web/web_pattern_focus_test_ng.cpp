@@ -377,7 +377,7 @@ private:
 
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override {}
     void ClearMultiSelect() override {}
-    bool IsItemSelected(const GestureEvent& info)
+    bool IsItemSelected(float xOffset, float yOffset)
     {
         return false;
     }

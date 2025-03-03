@@ -1807,6 +1807,50 @@ HWTEST_F(EventManagerTestNg, EventManagerTest088, TestSize.Level1)
     EXPECT_EQ(touchPoint.isFalsified, false);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: EventManagerTest089
+ * @tc.desc: Test OnCrownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest089, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Call OnCrownEvent.
+    * @tc.expected: ret is false.
+    */
+    CrownEvent event;
+    bool ret = eventManager->OnCrownEvent(event);
+    EXPECT_FALSE(ret);
+
+    /**
+    * @tc.steps: step3. Call OnCrownEvent.
+    * @tc.expected: ret is true.
+    */
+    MockPipelineContext::SetUp();
+    ASSERT_NE(MockPipelineContext::GetCurrentContext(), nullptr);
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    ret = eventManager->OnCrownEvent(event);
+    EXPECT_TRUE(ret);
+
+    /**
+    * @tc.steps: step4. Call OnCrownEvent. pipelineContext is nullptr
+    * @tc.expected: ret is false.
+    */
+    MockContainer::Current()->pipelineContext_ = nullptr;
+    ret = eventManager->OnCrownEvent(event);
+    EXPECT_FALSE(ret);
+    MockPipelineContext::TearDown();
+}
+#endif
+
 /**
  * @tc.name: CleanRecognizersForDragBeginTest001
  * @tc.desc: Test CleanRecognizersForDragBegin
@@ -1854,5 +1898,37 @@ HWTEST_F(EventManagerTestNg, CleanRecognizersForDragBeginTest001, TestSize.Level
     eventManager->CleanRecognizersForDragBegin(event);
     EXPECT_EQ(eventManager->downFingerIds_.size(), 0);
     EXPECT_TRUE(unknownPropertyValue);
+}
+
+/**
+ * @tc.name: DispatchTouchCancelToRecognizerTest
+ * @tc.desc: Test DispatchTouchCancelToRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    auto& touchTestResult = eventManager->touchTestResults_;
+    const uint8_t targetCnt = 2; // defines 2 touch target;
+    const uint8_t fingerCnt = 2; // defines 2 fingers;
+    RefPtr<TouchEventActuator> targetRefs[targetCnt];
+    using TouchRecoginerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
+    TouchRecoginerTarget items[targetCnt];
+    int32_t fingers[fingerCnt] = { 0, 1 };
+    for (int32_t i = 0; i < targetCnt; ++i) {
+        targetRefs[i] = AceType::MakeRefPtr<TouchEventActuator>();
+        for (auto& finger : fingers) {
+            touchTestResult[finger].emplace_front(targetRefs[i]);
+            items[i].emplace_back(finger, touchTestResult[finger].begin());
+        }
+    }
+    EXPECT_EQ(touchTestResult.size(), fingerCnt);
+    EXPECT_EQ(touchTestResult[0].size(), targetCnt);
+    EXPECT_EQ(touchTestResult[1].size(), targetCnt);
+    eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(targetRefs[0]), items[0]);
+    EXPECT_EQ(touchTestResult.size(), fingerCnt);
+    EXPECT_EQ(touchTestResult[1].size(), 1);
+    eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(targetRefs[1]), items[1]);
+    EXPECT_EQ(touchTestResult.size(), 0);
 }
 } // namespace OHOS::Ace::NG

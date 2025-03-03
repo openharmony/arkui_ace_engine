@@ -126,9 +126,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsArrowWidthTest, TestSi
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_WIDTH);
     EXPECT_EQ(checkValue, "16.00vp");
@@ -142,9 +142,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsArrowWidthTest, TestSi
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_WIDTH);
     EXPECT_EQ(checkValue, "1.00px");
@@ -158,9 +158,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsArrowWidthTest, TestSi
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_WIDTH);
     EXPECT_EQ(checkValue, "16.00vp");
@@ -190,9 +190,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsArrowHeightTest, TestS
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_HEIGHT);
     EXPECT_EQ(checkValue, "8.00vp");
@@ -206,9 +206,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsArrowHeightTest, TestS
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_HEIGHT);
     EXPECT_EQ(checkValue, "1.00px");
@@ -222,9 +222,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsArrowHeightTest, TestS
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_HEIGHT);
     EXPECT_EQ(checkValue, "8.00vp");
@@ -254,9 +254,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsRadiusTest, TestSize.L
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_RADIUS);
     EXPECT_EQ(checkValue, "20.00vp");
@@ -270,9 +270,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsRadiusTest, TestSize.L
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_RADIUS);
     EXPECT_EQ(checkValue, "1.00px");
@@ -286,9 +286,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsRadiusTest, TestSize.L
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_RADIUS);
     EXPECT_EQ(checkValue, "20.00vp");
@@ -316,11 +316,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsBlurStyleTest, TestSiz
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
     auto checkValue = GetAttrValue<std::string>(childObject, BUBBLE_RENDER_PROP_BLUR_STYLE_VALUE);
     EXPECT_EQ(checkValue, "BlurStyle.COMPONENT_ULTRA_THICK");
@@ -334,11 +334,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsBlurStyleTest, TestSiz
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
     checkValue = GetAttrValue<std::string>(childObject, BUBBLE_RENDER_PROP_BLUR_STYLE_VALUE);
     EXPECT_EQ(checkValue, "BlurStyle.Regular");
@@ -352,11 +352,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsBlurStyleTest, TestSiz
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
     checkValue = GetAttrValue<std::string>(childObject, BUBBLE_RENDER_PROP_BLUR_STYLE_VALUE);
     EXPECT_EQ(checkValue, "BlurStyle.COMPONENT_ULTRA_THICK");
@@ -384,11 +384,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowDefaultTest, Tes
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "radius");
     EXPECT_EQ(checkValue, "0.000000");
@@ -432,11 +432,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowStyleTest, TestS
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "shadow");
     EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
 
@@ -452,11 +452,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowStyleTest, TestS
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     checkValue = GetAttrValue<std::string>(fullJson, "shadow");
     EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
 }
@@ -493,11 +493,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsRaiusNumb
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "radius");
     EXPECT_EQ(checkValue, "1.000000");
@@ -518,11 +518,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsRaiusNumb
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "radius");
     EXPECT_EQ(checkValue, "0.000000");
@@ -562,11 +562,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsRaiusReso
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "radius");
     EXPECT_EQ(checkValue, "1.000000");
@@ -605,11 +605,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsOffsetXNu
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "offsetX");
     EXPECT_EQ(checkValue, "1.000000");
@@ -631,11 +631,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsOffsetXNu
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "offsetX");
     EXPECT_EQ(checkValue, "-1.000000");
@@ -675,11 +675,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsOffsetXRe
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "offsetX");
     EXPECT_EQ(checkValue, "1.000000");
@@ -718,11 +718,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsOffsetYNu
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "offsetY");
     EXPECT_EQ(checkValue, "1.000000");
@@ -744,11 +744,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsOffsetYNu
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "offsetY");
     EXPECT_EQ(checkValue, "-1.000000");
@@ -788,11 +788,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsOffsetYRe
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "offsetY");
     EXPECT_EQ(checkValue, "1.000000");
@@ -829,11 +829,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsFillTest,
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "fill");
     EXPECT_EQ(checkValue, "1");
@@ -853,11 +853,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsFillTest,
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "fill");
     EXPECT_EQ(checkValue, "0");
@@ -895,11 +895,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsTypeTest,
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "type");
     EXPECT_EQ(checkValue, "1");
@@ -920,11 +920,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsTypeTest,
     modifier_->setBindPopup(node_, arkShow, &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "type");
     EXPECT_EQ(checkValue, "0");
@@ -964,11 +964,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsColorColo
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "color");
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -1008,11 +1008,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsColorStri
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "color");
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -1051,11 +1051,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsColorReso
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "color");
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
@@ -1095,11 +1095,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsColorColo
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "color");
     EXPECT_EQ(checkValue, "ColoringStrategy.PRIMARY");
@@ -1121,11 +1121,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsShadowOptionsColorColo
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
     popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     childNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(childNode.GetRawPtr(), nullptr);
+    ASSERT_NE(childNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(childNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "color");
     EXPECT_EQ(checkValue, "#FF000000");
@@ -1156,17 +1156,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsDefaultT
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontSize");
     EXPECT_EQ(checkValue, "14.00fp");
     checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
@@ -1210,17 +1210,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsTextColo
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
 }
@@ -1258,17 +1258,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsTextColo
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
 }
@@ -1306,17 +1306,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsTextColo
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
 }
@@ -1353,17 +1353,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsTextColo
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
 }
@@ -1401,17 +1401,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsFontSize
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontSize");
     EXPECT_EQ(checkValue, "11.00px");
 }
@@ -1453,17 +1453,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsFontWeig
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontWeight");
     EXPECT_EQ(checkValue, "FontWeight.Bolder");
 }
@@ -1505,17 +1505,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsFontWeig
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontWeight");
     EXPECT_EQ(checkValue, "400");
 }
@@ -1557,17 +1557,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsFontWeig
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontWeight");
     EXPECT_EQ(checkValue, "FontWeight.Medium");
 }
@@ -1604,17 +1604,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsFontStyl
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontStyle");
     EXPECT_EQ(checkValue, "FontStyle.Italic");
 }
@@ -1651,17 +1651,17 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsMessageOptionsFontStyl
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
 
     auto scrollNode = columnNode->GetFirstChild();
-    ASSERT_NE(scrollNode.GetRawPtr(), nullptr);
+    ASSERT_NE(scrollNode, nullptr);
 
     auto textNode = scrollNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontStyle");
     EXPECT_EQ(checkValue, "FontStyle.Normal");
 }
@@ -1691,10 +1691,10 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsOnWillDismissDefaultTe
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    ASSERT_NE(pattern.GetRawPtr(), nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     EXPECT_TRUE(pattern->GetInteractiveDismiss());
     EXPECT_FALSE(pattern->HasOnWillDismiss());
@@ -1729,10 +1729,10 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsOnWillDismissBoolTest,
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    ASSERT_NE(pattern.GetRawPtr(), nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     EXPECT_FALSE(pattern->GetInteractiveDismiss());
 }
@@ -1778,10 +1778,10 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsOnWillDismissCallbackT
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    ASSERT_NE(pattern.GetRawPtr(), nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     ASSERT_TRUE(pattern->HasOnWillDismiss());
     pattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
@@ -1830,10 +1830,10 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsOnStateChangeCallbackT
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     
     auto eventHub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
-    ASSERT_NE(eventHub.GetRawPtr(), nullptr);
+    ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireChangeEvent(true);
     ASSERT_TRUE(checkEvent.has_value());
@@ -1865,9 +1865,9 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsPrimaryButtonDefaultTe
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_PRIMARY_BUTTON_SHOW);
     EXPECT_FALSE(checkValue);
@@ -1882,8 +1882,7 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsPrimaryButtonTest, Tes
 {
     struct CheckEvent { int32_t resourceId; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    void (*checkCallback)(const Ark_Int32) =
-        [](const Ark_Int32 resourceId) { checkEvent = { .resourceId = resourceId }; };
+    auto checkCallback = [](const Ark_Int32 resourceId) { checkEvent = { .resourceId = resourceId }; };
 
     Ark_Literal_String_value_Callback_Void_action buttonAction = {
         .value = Converter::ArkValue<Ark_String>(PRIMARY_BUTTON_TEXT),
@@ -1898,39 +1897,40 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsPrimaryButtonTest, Tes
     TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
-    UINode* blankNode = reinterpret_cast<UINode *>(node_);
-    RefPtr<UINode> blankRef = AceType::Claim(blankNode);
-    auto context = blankNode->GetContext();
+    RefPtr<UINode> blankRef = AceType::Claim(reinterpret_cast<UINode *>(node_));
+    auto context = blankRef->GetContext();
     ASSERT_NE(context, nullptr);
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_PRIMARY_BUTTON_SHOW);
     EXPECT_TRUE(checkValue);
 
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
     auto combinedChildNode = columnNode->GetFirstChild();
-    ASSERT_NE(combinedChildNode.GetRawPtr(), nullptr);
+    ASSERT_NE(combinedChildNode, nullptr);
     auto rowNode = combinedChildNode->GetLastChild();
-    ASSERT_NE(rowNode.GetRawPtr(), nullptr);
+    ASSERT_NE(rowNode, nullptr);
     auto firstButtonNode = rowNode->GetFirstChild();
-    ASSERT_NE(firstButtonNode.GetRawPtr(), nullptr);
+    ASSERT_NE(firstButtonNode, nullptr);
     auto textNode = firstButtonNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValueString = GetAttrValue<std::string>(fullJson, TEXT_LAYOUT_PROP_CONTENT);
     EXPECT_EQ(checkValueString, PRIMARY_BUTTON_TEXT);
 
-    auto eventHub = reinterpret_cast<FrameNode *>(firstButtonNode.GetRawPtr())->GetEventHub<ButtonEventHub>();
-    ASSERT_NE(eventHub.GetRawPtr(), nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(firstButtonNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
     auto gestureEventHub = eventHub->GetGestureEventHub();
-    ASSERT_NE(gestureEventHub.GetRawPtr(), nullptr);
+    ASSERT_NE(gestureEventHub, nullptr);
     ASSERT_NE(gestureEventHub->GetClickEvent(), nullptr);
     gestureEventHub->ActClick();
     ASSERT_TRUE(checkEvent.has_value());
@@ -1946,8 +1946,7 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsSecondaryButtonTest, T
 {
     struct CheckEvent { int32_t resourceId; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    void (*checkCallback)(const Ark_Int32) =
-        [](const Ark_Int32 resourceId) { checkEvent = { .resourceId = resourceId }; };
+    auto checkCallback = [](const Ark_Int32 resourceId) { checkEvent = { .resourceId = resourceId }; };
 
     Ark_Literal_String_value_Callback_Void_action buttonAction = {
         .value = Converter::ArkValue<Ark_String>(SECONDARY_BUTTON_TEXT),
@@ -1962,39 +1961,40 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsSecondaryButtonTest, T
     TypeHelper::WriteToUnion<Ark_PopupOptions>(arkUnion) = arkOptions;
     modifier_->setBindPopup(node_, Converter::ArkValue<Ark_Boolean>(true), &arkUnion);
 
-    UINode* blankNode = reinterpret_cast<UINode *>(node_);
-    RefPtr<UINode> blankRef = AceType::Claim(blankNode);
-    auto context = blankNode->GetContext();
+    RefPtr<UINode> blankRef = AceType::Claim(reinterpret_cast<UINode *>(node_));
+    auto context = blankRef->GetContext();
     ASSERT_NE(context, nullptr);
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
     
-    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(popupInfo.popupNode.GetRawPtr()));
+    auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_SECONDARY_BUTTON_SHOW);
     EXPECT_TRUE(checkValue);
 
     auto columnNode = popupInfo.popupNode->GetFirstChild();
-    ASSERT_NE(columnNode.GetRawPtr(), nullptr);
+    ASSERT_NE(columnNode, nullptr);
     auto combinedChildNode = columnNode->GetFirstChild();
-    ASSERT_NE(combinedChildNode.GetRawPtr(), nullptr);
+    ASSERT_NE(combinedChildNode, nullptr);
     auto rowNode = combinedChildNode->GetLastChild();
-    ASSERT_NE(rowNode.GetRawPtr(), nullptr);
+    ASSERT_NE(rowNode, nullptr);
     auto secondButtonNode = rowNode->GetLastChild();
-    ASSERT_NE(secondButtonNode.GetRawPtr(), nullptr);
+    ASSERT_NE(secondButtonNode, nullptr);
     auto textNode = secondButtonNode->GetFirstChild();
-    ASSERT_NE(textNode.GetRawPtr(), nullptr);
+    ASSERT_NE(textNode, nullptr);
 
-    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(textNode.GetRawPtr()));
+    fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValueString = GetAttrValue<std::string>(fullJson, TEXT_LAYOUT_PROP_CONTENT);
     EXPECT_EQ(checkValueString, SECONDARY_BUTTON_TEXT);
 
-    auto eventHub = reinterpret_cast<FrameNode *>(secondButtonNode.GetRawPtr())->GetEventHub<ButtonEventHub>();
-    ASSERT_NE(eventHub.GetRawPtr(), nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(secondButtonNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
     auto gestureEventHub = eventHub->GetGestureEventHub();
-    ASSERT_NE(gestureEventHub.GetRawPtr(), nullptr);
+    ASSERT_NE(gestureEventHub, nullptr);
     ASSERT_NE(gestureEventHub->GetClickEvent(), nullptr);
     gestureEventHub->ActClick();
     ASSERT_TRUE(checkEvent.has_value());
@@ -2030,11 +2030,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsTransitionTest, TestSi
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
-    ASSERT_NE(popupInfo.popupNode.GetRawPtr(), nullptr);
+    ASSERT_NE(popupInfo.popupNode, nullptr);
 
     auto popupMockRenderContext = AceType::DynamicCast<MockRenderContext>(popupInfo.popupNode->GetRenderContext());
-    ASSERT_NE(popupMockRenderContext.GetRawPtr(), nullptr);
-    auto checkPtr = popupMockRenderContext->GetChainedTransitionEffect().GetRawPtr();
-    EXPECT_EQ(checkPtr, transitionHandler.GetRawPtr());
+    ASSERT_NE(popupMockRenderContext, nullptr);
+    auto checkPtr = popupMockRenderContext->GetChainedTransitionEffect();
+    EXPECT_EQ(checkPtr, transitionHandler);
 }
 }

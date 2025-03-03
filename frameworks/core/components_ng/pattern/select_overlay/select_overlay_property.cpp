@@ -36,7 +36,7 @@ void SelectOverlayInfo::GetCallerNodeAncestorViewPort(RectF& viewPort)
     } else {
         auto frameNode = callerFrameNode.Upgrade();
         if (frameNode) {
-            auto viewPortOption = frameNode->GetViewPort();
+            auto viewPortOption = frameNode->GetViewPort(true);
             if (viewPortOption.has_value()) {
                 viewPort = viewPortOption.value();
             }
@@ -52,5 +52,13 @@ const RectF& SelectOverlayInfo::GetFirstHandlePaintRect()
 const RectF& SelectOverlayInfo::GetSecondHandlePaintRect()
 {
     return handleLevelMode == HandleLevelMode::OVERLAY ? secondHandle.paintRect : secondHandle.localPaintRect;
+}
+
+TextMenuShowMode CastToTextMenuShowMode(int32_t value)
+{
+    if (value <= static_cast<int32_t>(TextMenuShowMode::BEGIN) || value > static_cast<int32_t>(TextMenuShowMode::END)) {
+        return TextMenuShowMode::DEFAULT;
+    }
+    return static_cast<TextMenuShowMode>(value);
 }
 } // namespace OHOS::Ace::NG

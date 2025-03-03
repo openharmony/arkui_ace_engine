@@ -73,6 +73,7 @@ constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_FALSE = false;
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
 constexpr Dimension BUBBLE_CHILD_OFFSET = 8.0_vp;
+const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
 
 const std::string CLIP_PATH = "M100 0 L0 100 L50 200 L150 200 L200 100 Z";
 const std::string BUBBLE_MESSAGE = "Hello World";
@@ -2080,4 +2081,187 @@ HWTEST_F(BubbleTestOneNg, BubbleAccessibilityTest002, TestSize.Level1)
     showedState = accessibilityProperty->GetShowedState();
     EXPECT_EQ(showedState, 1);
 }
+
+/**
+ * @tc.name: HandleKeyboardTest
+ * @tc.desc: Test HandleKeyboard function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, HandleKeyboardTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test HandleKeyboard.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    manager->keyboardInset_ = KEYBOARD_INSET;
+    layoutAlgorithm->wrapperSize_ = {1000.0f, 1000.0f};
+    bool isShowInSubwindow = false;
+    layoutAlgorithm->avoidKeyboard_ = true;
+    layoutAlgorithm->HandleKeyboard(AceType::RawPtr(layoutWrapper), isShowInSubwindow);
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_.Height(), 1000.0f);
+    layoutAlgorithm->wrapperSize_ = {1000.0f, 1000.0f};
+    isShowInSubwindow = true;
+    layoutAlgorithm->HandleKeyboard(AceType::RawPtr(layoutWrapper), isShowInSubwindow);
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_.Height(), 1000.0f);
+}
+
+/**
+ * @tc.name: AdjustPositionNewTest
+ * @tc.desc: Test AdjustPositionNew function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, AdjustPositionNewTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test AdjustPositionNew.
+     */
+    layoutAlgorithm->wrapperSize_ = {1000.0f, 1000.0f};
+    OffsetF position = {10.0f, 10.0f};
+    float height = 200.0f;
+    float width = 200.0f;
+    auto result = layoutAlgorithm->AdjustPositionNew(position, height, width);
+    EXPECT_EQ(result, position);
+    position = {1000.0f, 1000.0f};
+    result = layoutAlgorithm->AdjustPositionNew(position, height, width);
+    EXPECT_EQ(result, OffsetF(800.0f, 800.0f));
+    position = {200.0f, 1000.0f};
+    result = layoutAlgorithm->AdjustPositionNew(position, height, width);
+    EXPECT_EQ(result, OffsetF(200.0f, 800.0f));
+    position = {1000.0f, 200.0f};
+    result = layoutAlgorithm->AdjustPositionNew(position, height, width);
+    EXPECT_EQ(result, OffsetF(800.0f, 200.0f));
+}
+
+/**
+ * @tc.name: GetBubblePositionTest
+ * @tc.desc: Test GetBubblePosition function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, GetBubblePositionTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test GetBubblePosition.
+     */
+    layoutAlgorithm->placement_ = Placement::LEFT;
+    float xMin = 200.0f;
+    float xMax = 1000.0f;
+    float yMin = 200.0f;
+    float yMax = 1000.0f;
+    OffsetF position = {10.0f, 10.0f};
+    layoutAlgorithm->showArrow_ = true;
+    auto result = layoutAlgorithm->GetBubblePosition(position, xMin, xMax, yMin, yMax);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, true);
+    layoutAlgorithm->showArrow_ = true;
+    layoutAlgorithm->avoidKeyboard_ = true;
+    result = layoutAlgorithm->GetBubblePosition(position, xMin, xMax, yMin, yMax);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, false);
+}
+
+/**
+ * @tc.name: CheckArrowPositionTest
+ * @tc.desc: Test CheckArrowPosition function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, CheckArrowPositionTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test CheckArrowPosition.
+     */
+    layoutAlgorithm->placement_ = Placement::LEFT;
+    float xMin = 200.0f;
+    float xMax = 1000.0f;
+    float yMin = 200.0f;
+    float yMax = 1000.0f;
+    OffsetF position = {10.0f, 10.0f};
+    layoutAlgorithm->showArrow_ = true;
+    auto result = layoutAlgorithm->GetBubblePosition(position, xMin, xMax, yMin, yMax);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, true);
+    layoutAlgorithm->showArrow_ = true;
+    layoutAlgorithm->avoidKeyboard_ = true;
+    result = layoutAlgorithm->GetBubblePosition(position, xMin, xMax, yMin, yMax);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, false);
+}
+
 } // namespace OHOS::Ace::NG

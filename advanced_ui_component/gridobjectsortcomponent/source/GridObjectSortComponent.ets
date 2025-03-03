@@ -26,6 +26,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import accessibility from '@ohos.accessibility';
 
+
 //  declaring Constants
 const COL_IMAGE_TEXT = 3;
 const COL_TEXT = 4;
@@ -63,6 +64,12 @@ const ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE: string = 'gridobjectsortcomponent_a
 const ACCESSIBILITY_ILLEGAL_AREA: string = 'gridobjectsortcomponent_accessibility_illegal_area';
 const ACCESSIBILITY_SELECTED_ITEM_DRAG_START: string =
   'gridobjectsortcomponent_accessibility_selected_item_drag_start';
+const ACCESSIBILITY_DOUBLE_CLICK: string =
+  'gridobjectsortcomponent_accessibility_single_finger_double_click';
+const ACCESSIBILITY_COMPLETE_BUTTON: string =
+  'gridobjectsortcomponent_accessibility_complete_button';
+const ACCESSIBILITY_RESIDENT_AREA: string =
+  'gridobjectsortcomponent_accessibility_resident_area_edit_state';
 const ACCESSIBILITY_SELECTED_ITEM_DESC: string = 'gridobjectsortcomponent_accessibility_selected_item_desc';
 const ACCESSIBILITY_SELECTED_ITEM: string = 'gridobjectsortcomponent_accessibility_selected_item';
 const ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP: string = 'gridobjectsortcomponent_accessibility_selected_item_drag_stop';
@@ -122,15 +129,17 @@ class MenuItem {
   public symbolStyle: SymbolGlyphModifier;
   public isEnabled: boolean;
   public action: () => void;
+  public label: ResourceStr; // 适老化弹窗描述文字
   accessibilityText?: ResourceStr;
 
   constructor(value: Resource, symbolStyle: SymbolGlyphModifier,
-    enabled: boolean, accessibilityText: ResourceStr, action: () => void) {
+    enabled: boolean, accessibilityText: ResourceStr, action: () => void, label: ResourceStr) {
     this.value = value;
     this.symbolStyle = symbolStyle;
     this.isEnabled = enabled;
     this.action = action;
     this.accessibilityText = accessibilityText;
+    this.label = label;
   }
 }
 
@@ -208,6 +217,7 @@ export struct GridObjectSortComponent {
   @State editGridHeight: number = 0;
   @State addGridHeight: number = 0;
   @State subTitleHeight: number = 0;
+  @State isOpenAccessibility: boolean = accessibility.isScreenReaderOpenSync();
   private callbackId: number | undefined = undefined;
   // current column, text: 4 column  , image_text: 3 column
   private colNum: number = COL_IMAGE_TEXT;
@@ -219,13 +229,14 @@ export struct GridObjectSortComponent {
   private imageText: boolean = false;
   private menuItems: Array<MenuItem> = [
     new MenuItem(
-      $r('sys.media.ohos_ic_public_edit'), 
-      (new SymbolGlyphModifier($r('sys.symbol.square_and_pencil'))), 
-      true, 
-      this.getStringByResource(ACCESSIBILITY_HEADER_EDIT_BUTTON),
+      $r('sys.media.ohos_ic_public_edit'),
+      (new SymbolGlyphModifier($r('sys.symbol.square_and_pencil'))),
+      true,
+      this.getStringByResourceToken(ACCESSIBILITY_HEADER_EDIT_BUTTON),
       () => {
         this.goEdit();
-      })
+      },
+      this.getStringByResourceToken(ACCESSIBILITY_HEADER_EDIT_BUTTON))
   ];
   onSave?: (select: GridObjectSortComponentItem[], unselect: GridObjectSortComponentItem[]) => void;
   onCancel?: () => void;
@@ -256,7 +267,7 @@ export struct GridObjectSortComponent {
       this.maxAppFontScale = uiContent.getMaxFontScale();
       this.fontSizeScale = this.decideFontScale(uiContent);
       this.fontWeightScale =
-        (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontWeightScale ?? DEFAULT_FONT_WEIGHT_SCALE;
+        (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontWeightScale ?? DEFAULT_FONT_WEIGHT_SCALE;
     } catch (exception) {
       let code = (exception as BusinessError).code;
       let message = (exception as BusinessError).message;
@@ -276,6 +287,10 @@ export struct GridObjectSortComponent {
       this.firstIn = false;
     }, 500);
     this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
+    accessibility.on('screenReaderStateChange', (state: boolean) => {
+      // 上面的state  就是无障碍的状态
+      this.isOpenAccessibility = state;
+    });
   }
 
   // get adaptive for symbol font size
@@ -328,7 +343,7 @@ export struct GridObjectSortComponent {
       return 1;
     }
     let systemFontScale: number | undefined =
-      (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
+      (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
     return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
   }
 
@@ -436,7 +451,7 @@ export struct GridObjectSortComponent {
         type: 'requestFocusForAccessibility',
         bundleName: this.bundleName,
         triggerAction: 'common',
-        customId: `SaveMenuItem_${editableTittleBarUniqueId}`
+        customId: `ImageMenuItem_${editableTittleBarUniqueId}_0`
       });
       accessibility.sendAccessibilityEvent(eventInfo).then(() => {
         setTimeout(()=>{
@@ -506,10 +521,10 @@ export struct GridObjectSortComponent {
     if (targetIndex < 0) {
       targetIndex = this.selected.length - 1;
     } else {
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_SELECTED_ITEM_DRAG_MOVING,
         Math.floor(insertIndex / this.colNum) + 1,
-        insertIndex%this.colNum + 1
+        insertIndex % this.colNum + 1
       );
     }
     if (this.dragContent.visibility !== Visibility.Hidden) {
@@ -559,9 +574,9 @@ export struct GridObjectSortComponent {
       this.readFlag = false;
       // 播报区域为添加域的第1个，index为0
       this.readIndex4AddArea = 0;
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_DELETED,
-        `${this.content?.text  ?? ' '}`
+        this.getAccessibilityText(this.content?.text ?? ' ')
       );
     } }, () => {
       let addItemGridPosition = this.getAddItemGridPosition();
@@ -578,11 +593,11 @@ export struct GridObjectSortComponent {
       customId: ADD_GRID_FIRST_ITEM_ID
     });
     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-     setTimeout(() => {
-       this.readFlag = true;
-       this.readIndex4AddArea = -1;
-       }, ENTER_EXIT_ICON_DURATION
-     );
+      setTimeout(() => {
+        this.readFlag = true;
+        this.readIndex4AddArea = -1;
+      }, ENTER_EXIT_ICON_DURATION
+      );
     });
   }
 
@@ -874,14 +889,15 @@ export struct GridObjectSortComponent {
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
               .width(this.options.imageSize || SYMBOL_DEFAULT)
-              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
           } else if (url instanceof SymbolGlyphModifier) {
             SymbolGlyph()
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
               .width(this.options.imageSize || SYMBOL_DEFAULT)
               .attributeModifier(url)
-              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+              .symbolEffect(new SymbolEffect(), false)
           } else {
             Image(url)
               .draggable(false)
@@ -969,19 +985,35 @@ export struct GridObjectSortComponent {
       .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
         if (isVisible) {
           this.pointToAddTitleBarEditButton();
+        } else {
+          if (this.isPointToEditTitleBarSaveButton) {
+            let eventInfo: accessibility.EventInfo = ({
+              type: 'announceForAccessibility', // 表示主动播报的事件。
+              bundleName: this.bundleName, // 目标应用名；不可缺省。
+              triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+              textAnnouncedForAccessibility: getContext().resourceManager
+                .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
+            });
+            accessibility.sendAccessibilityEvent(eventInfo);
+          }
         }
       })
     EditableTitleBar({
       leftIconStyle: EditableLeftIconType.Cancel,
-      menuItems: [],
+      isSaveIconRequired: false,
+      menuItems: [{
+        value: $r('sys.symbol.checkmark'),
+        label: this.getStringByResourceToken(ACCESSIBILITY_COMPLETE_BUTTON),
+        accessibilityText: this.getStringByResourceToken(ACCESSIBILITY_COMPLETE_BUTTON),
+        action: () => {
+          this.saveClick = true;
+          this.onSaveEdit();
+        }
+      }],
       title: this.options.editTitle || $r('sys.string.ohos_grid_edit_title_edit'),
       onCancel: () => {
         this.cancelEdit();
       },
-      onSave: () => {
-        this.saveClick = true;
-        this.onSaveEdit();
-      }
     })
       .id(EDIT_TITLE_BAR_ID)
       .visibility(this.menuSwitch ? Visibility.Visible : Visibility.None)
@@ -1001,6 +1033,7 @@ export struct GridObjectSortComponent {
             .draggable(false)
             .attributeModifier(select.symbolStyle)
             .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+            .symbolEffect(new SymbolEffect(), false)
         } else {
           if (select.url === undefined) {
             SymbolGlyph()
@@ -1041,8 +1074,8 @@ export struct GridObjectSortComponent {
           .onClick(() => this.handleAddIconClick(select))
           .accessibilityLevel(YES)
           .accessibilityText(
-            this.getStringByResource(
-              ACCESSIBILITY_UNSELECTED_BUTTON, `${select.text  ?? ''}`)
+            this.getStringByResourceToken(
+              ACCESSIBILITY_UNSELECTED_BUTTON, this.getAccessibilityText(select.text))
           )
 
         SymbolGlyph(this.imageTextRemoveIcon(select))
@@ -1061,7 +1094,7 @@ export struct GridObjectSortComponent {
           .onClick(() => this.handleDeleteClick(select))
           .accessibilityLevel(YES)
           .accessibilityText(
-            this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DELETE, `${select.text  ?? ''}`)
+            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE, this.getAccessibilityText(select.text))
           )
       }
       .alignItems(HorizontalAlign.Center)
@@ -1117,9 +1150,9 @@ export struct GridObjectSortComponent {
     })
     this.readFlag = false;
     this.readIndex4EditArea = this.editGridDataLength - 1;
-    this.textAnnouncedForAccessibility = this.getStringByResource(
+    this.textAnnouncedForAccessibility = this.getStringByResourceToken(
       ACCESSIBILITY_UNSELECTED_ITEM_ADD,
-      `${this.content?.text  ?? ''}`,
+      this.getAccessibilityText(this.content?.text ?? ''),
       Math.floor(this.readIndex4EditArea / this.colNum) + 1,
       this.readIndex4EditArea % this.colNum + 1
     );
@@ -1185,7 +1218,7 @@ export struct GridObjectSortComponent {
           .onClick(() => this.handleDeleteClick(select))
           .accessibilityLevel(YES)
           .accessibilityText(
-            this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DELETE, `${select.text  ?? ''}`)
+            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE, this.getAccessibilityText(select.text))
           )
       }
       .borderRadius(50)
@@ -1323,9 +1356,10 @@ export struct GridObjectSortComponent {
             bottom: this.imageText ? ROW_GAP : MARGIN_EIGHT
           })
           .clickEffect({ level: ClickEffectLevel.LIGHT })
-          .onTouch((event: TouchEvent) => {
+          .onTouch(this.isOpenAccessibility ? undefined : (event: TouchEvent) => {
             this.handleAddItemTouch(event, item);
           })
+          .onClick(this.isOpenAccessibility ? () => this.handleAddItemClick(item) : undefined)
           .gesture(
             LongPressGesture({ repeat: true })
               .onAction((event: GestureEvent) => {
@@ -1369,8 +1403,8 @@ export struct GridObjectSortComponent {
           .accessibilityLevel(YES)
           .accessibilityText(
             this.readFlag ?
-            this.getStringByResource(
-              ACCESSIBILITY_UNSELECTED_ITEM, `${item.text  ?? ''}`
+            this.getStringByResourceToken(
+              ACCESSIBILITY_UNSELECTED_ITEM, this.getAccessibilityText(item.text ?? '')
             ) : this.textAnnouncedForAccessibility
           )
           .accessibilityDescription(
@@ -1399,10 +1433,11 @@ export struct GridObjectSortComponent {
     .accessibilityLevel(NO)
   }
 
-  getAddTagGridItemAccessibilityDesc(): string {
+  getAddTagGridItemAccessibilityDesc(): string { // 图文在编辑态不播报描述 纯文字在编辑态不播报双击长按事件
     return this.options?.type === GridObjectSortComponentType.IMAGE_TEXT ?
-      this.getStringByResource(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
-      this.getStringByResource(ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC)
+      this.menuSwitch ? ' ' : this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
+      this.menuSwitch ? this.getStringByResourceToken(ACCESSIBILITY_DOUBLE_CLICK) :
+      this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC)
   }
 
   handleAddItemTouch(event: TouchEvent, item: GridObjectSortComponentItem): void {
@@ -1467,13 +1502,80 @@ export struct GridObjectSortComponent {
 
       this.readFlag = false;
       this.readIndex4EditArea = this.editGridDataLength - 1;
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_UNSELECTED_ITEM_ADD,
-        `${this.content?.text  ?? ''}`,
+        this.getAccessibilityText(this.content?.text ?? ''),
         Math.floor(this.readIndex4EditArea / this.colNum) + 1,
         this.readIndex4EditArea % this.colNum + 1
       );
     }
+  }
+
+  handleAddItemClick(item: GridObjectSortComponentItem): void {
+    if (this.clickAddBtn || this.clickRemoveBtn) {
+      return;
+    }
+    this.content = item;
+
+    this.isTouchDown = false;
+    if (this.addAreaLongPressGesture || this.longScaleOnePointTwo === 1.05 || this.imageText) {
+      return;
+    }
+    animateTo({
+      duration: ENTER_EXIT_ICON_DURATION,
+      curve: COMMON_BEZIER
+    }, () => {
+      this.addIconShow = true;
+    })
+    if (this.options.type === GridObjectSortComponentType.TEXT) {
+      this.scaleAddIcon = 1;
+    }
+    this.scaleIcon = 0;
+    const index = this.unSelected.findIndex(i => i.id === item.id);
+    this.editGridDataLength = this.selected.length + 1;
+    const endPosition = this.getEditItemGridPosition(this.selected, index);
+    this.content = item;
+    this.unSelectedIndex = index;
+    this.clickAddBtn = true;
+    this.arrayUnSelectIsChange = 1;
+    this.calcGridHeight();
+    animateTo({
+      curve: REMOVE_ADD_SPRING, onFinish: () => {
+        if (!this.selected.some(val => val.id === item.id)) {
+          this.scaleIcon = 1;
+          this.scaleAddIcon = 0;
+          this.selected.push(item);
+          this.unSelected.splice(index, 1);
+          this.calcGridHeight();
+          this.arrayUnSelectIsChange = 2;
+          this.addItemMoveX = 0;
+          this.addItemMoveY = 0;
+          if (!this.gridComState) {
+            this.onSaveEdit();
+          }
+          animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: COMMON_BEZIER
+          }, () => {
+            this.addIconShow = false;
+          });
+          this.clickAddBtn = false;
+        }
+      }
+    }, () => {
+      this.addItemMoveX = endPosition.x;
+      this.addItemMoveY = endPosition.y;
+    })
+
+    this.readFlag = false;
+    this.readIndex4EditArea = this.editGridDataLength - 1;
+    this.textAnnouncedForAccessibility = this.getStringByResourceToken(
+      ACCESSIBILITY_UNSELECTED_ITEM_ADD,
+      this.getAccessibilityText(this.content?.text ?? ''),
+      Math.floor(this.readIndex4EditArea / this.colNum) + 1,
+      this.readIndex4EditArea % this.colNum + 1
+    );
+
   }
 
   @Builder
@@ -1532,12 +1634,12 @@ export struct GridObjectSortComponent {
             .accessibilityLevel(YES)
             .accessibilityText(
               this.readFlag ?
-              this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM, `${select.text  ?? ''}`) :
+              this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM, this.getAccessibilityText(select.text)) :
               this.textAnnouncedForAccessibility
             )
             .accessibilityDescription(
               this.readFlag ?
-              this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DESC) : ''
+              this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DESC) : ''
             )
           }
           .clip(false)
@@ -1617,8 +1719,8 @@ export struct GridObjectSortComponent {
         this.insertIndex = itemIndex;
         this.dragContent = this.selected[itemIndex];
         this.dragContentIndex = itemIndex;
-        this.textAnnouncedForAccessibility = getContext().resourceManager
-          .getStringByNameSync(ACCESSIBILITY_SELECTED_ITEM_DRAG_START, `${this.dragContent?.text}`);
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_START,
+          this.getAccessibilityText(this.dragContent?.text ?? ''));
         this.sendAccessibility();
         return this.PixelMapBuilder(this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text);
       })
@@ -1630,10 +1732,29 @@ export struct GridObjectSortComponent {
         this.onDragMoveEvent(event, itemIndex, insertIndex)
       )
       .onItemDragLeave((event: ItemDragInfo, itemIndex: number) => {
-        this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_ILLEGAL_AREA);
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_ILLEGAL_AREA);
         this.sendAccessibility();
       })
-    }.accessibilityLevel(NO)
+    }
+    .accessibilityLevel((this.selected.length === 0) ? YES : NO)
+    .parallelGesture(
+      LongPressGesture({ repeat: true })
+        .onAction(() => {
+          this.menuSwitch = true;
+        })
+        .onActionEnd(() => {
+          let eventInfo: accessibility.EventInfo = ({
+            type: 'announceForAccessibility', // 表示主动播报的事件。
+            bundleName: this.bundleName, // 目标应用名；不可缺省。
+            triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+            textAnnouncedForAccessibility: getContext().resourceManager
+              .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
+          });
+          accessibility.sendAccessibilityEvent(eventInfo);
+        }))
+    .accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_RESIDENT_AREA))
+    .accessibilityDescription(this.menuSwitch ? ' ' :
+    this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC))
   }
 
   pointToRepeat(type: string): void {
@@ -1685,13 +1806,13 @@ export struct GridObjectSortComponent {
     if (insertIndex !== -1) {
       this.selected.splice(itemIndex, 1);
       this.selected.splice(insertIndex, 0, this.dragContent);
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP,
         Math.floor(insertIndex / this.colNum) + 1,
         insertIndex % this.colNum + 1);
     } else {
       this.insertIndex = itemIndex;
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP,
         Math.floor(itemIndex / this.colNum) + 1,
         itemIndex % this.colNum + 1
@@ -1780,7 +1901,7 @@ export struct GridObjectSortComponent {
     .height('90%')
   }
 
-  getStringByResource(value?: string, ...args: Array<string | number>): string {
+  getStringByResourceToken(value?: string, ...args: Array<string | number>): string {
     if (value) {
       try {
         return getContext(this).resourceManager.getStringByNameSync(value, ...args);
@@ -1789,5 +1910,29 @@ export struct GridObjectSortComponent {
       }
     }
     return '';
+  }
+
+  /**
+   * 获取无障碍文本
+   *
+   * @param resource 资源
+   * @param selected select state
+   * @returns string
+   */
+  getAccessibilityText(resource: ResourceStr): string {
+    try {
+      let resourceString: string = '';
+      if (typeof resource === 'string') {
+        resourceString = resource;
+      } else {
+        resourceString = getContext().resourceManager.getStringSync(resource);
+      }
+      return resourceString;
+    } catch (error) {
+      let code: number = (error as BusinessError).code;
+      let message: string = (error as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
+      return '';
+    }
   }
 }

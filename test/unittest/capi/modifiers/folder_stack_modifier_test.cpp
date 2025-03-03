@@ -161,8 +161,8 @@ HWTEST_F(FolderStackModifierTest, setOnFolderStateChangeTest, TestSize.Level1)
     OnFoldStatusChangeCallback func = Converter::ArkValue<OnFoldStatusChangeCallback>(checkCallback, contextId);
 
     ASSERT_NE(frameNode, nullptr);
-    auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
-    frameNode->AttachToMainTree(true, context);
+    auto context = MockPipelineContext::GetCurrent();
+    frameNode->AttachToMainTree(true, Referenced::RawPtr(context));
     modifier_->setOnFolderStateChange(node_, &func);
 
     auto folderStackNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);
@@ -192,8 +192,8 @@ HWTEST_F(FolderStackModifierTest, setOnHoverStatusChangeTest, TestSize.Level1)
     auto func = Converter::ArkValue<OnHoverStatusChangeCallback>(checkCallback, contextId);
 
     ASSERT_NE(frameNode, nullptr);
-    auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
-    frameNode->AttachToMainTree(true, context);
+    auto context = MockPipelineContext::GetCurrent();
+    frameNode->AttachToMainTree(true, Referenced::RawPtr(context));
     modifier_->setOnHoverStatusChange(node_, &func);
 
     auto folderStackNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);

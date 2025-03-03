@@ -181,6 +181,7 @@ RefPtr<FrameNode> LoadingProgressPattern::BuildContentModifierNode()
 
 void LoadingProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
+    CHECK_NULL_VOID(json);
     json->Put("IsInVisibleArea", isVisibleArea_ ? "true" : "false");
 }
 

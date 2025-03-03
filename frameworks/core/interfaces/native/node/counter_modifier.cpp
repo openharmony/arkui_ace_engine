@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,12 +66,18 @@ void SetCounterBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     CHECK_NULL_VOID(frameNode);
     CounterModelNG::SetBackgroundColor(frameNode, Color(color));
 }
-void ResetCounterBackgroundColor(ArkUINodeHandle node) {}
+
+void ResetCounterBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::ResetBackgroundColor(frameNode);
+}
 
 namespace NodeModifier {
 const ArkUICounterModifier* GetCounterModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICounterModifier modifier = {
         .setEnableInc = SetEnableInc,
         .resetEnableInc = ResetEnableInc,
@@ -84,21 +90,14 @@ const ArkUICounterModifier* GetCounterModifier()
         .setCounterBackgroundColor = SetCounterBackgroundColor,
         .resetCounterBackgroundColor = ResetCounterBackgroundColor,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUICounterModifier* GetCJUICounterModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUICounterModifier modifier = {
         .setEnableInc = SetEnableInc,
         .resetEnableInc = ResetEnableInc,
@@ -111,14 +110,7 @@ const CJUICounterModifier* GetCJUICounterModifier()
         .setCounterBackgroundColor = SetCounterBackgroundColor,
         .resetCounterBackgroundColor = ResetCounterBackgroundColor,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

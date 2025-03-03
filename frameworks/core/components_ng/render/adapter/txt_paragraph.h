@@ -157,26 +157,7 @@ public:
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
 
-private:
-    void CreateBuilder();
-    bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);
-    inline size_t GetParagraphLength() const
-    {
-        return text_.length() + placeholderCnt_;
-    }
-    float MakeEmptyOffsetX();
-    bool HandleCaretWhenEmpty(CaretMetricsF& result);
-    void HandleTextAlign(CaretMetricsF& result, TextAlign align);
-    void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
-    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
-        RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE);
-    int32_t AdjustIndexForEmoji(int32_t index);
-    bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
-    void CalculateLeadingMarginOffest(float& x, float& y);
-    int32_t GetIndexWithoutPlaceHolder(int32_t index);
-    bool IsTargetCharAtIndex(char16_t targetChar, int32_t index);
-    bool IsIndexAtLineEnd(const Offset& offset, int32_t index);
-
+protected:
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE
     txt::Paragraph* GetParagraph();
@@ -191,6 +172,27 @@ private:
     std::unique_ptr<RSParagraphBuilder> builder_;
     std::shared_ptr<RSFontCollection> fontCollection_;
 #endif
+
+private:
+    void CreateBuilder();
+    bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);
+    inline size_t GetParagraphLength() const
+    {
+        return text_.length() + placeholderCnt_;
+    }
+    float MakeEmptyOffsetX(bool isLtr);
+    bool HandleCaretWhenEmpty(CaretMetricsF& result);
+    void HandleTextAlign(CaretMetricsF& result, TextAlign align);
+    void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
+    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
+        RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE);
+    int32_t AdjustIndexForEmoji(int32_t index);
+    bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
+    void CalculateLeadingMarginOffest(float& x, float& y);
+    int32_t GetIndexWithoutPlaceHolder(int32_t index);
+    bool IsTargetCharAtIndex(char16_t targetChar, int32_t index);
+    bool IsIndexAtLineEnd(const Offset& offset, int32_t index);
+
     std::u16string text_;
     int32_t placeholderCnt_ = 0;
     TextAlign textAlign_ = TextAlign::START;

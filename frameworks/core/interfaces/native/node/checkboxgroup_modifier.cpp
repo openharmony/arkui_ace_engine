@@ -167,6 +167,25 @@ void SetCheckboxGroupName(ArkUINodeHandle node, ArkUI_CharPtr group)
     CheckBoxGroupModelNG::SetCheckboxGroupName(frameNode, std::string(group));
 }
 
+void SetCheckboxGroupOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void (const BaseEventInfo*)>*>(callback);
+        CheckBoxGroupModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        CheckBoxGroupModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetCheckboxGroupOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelNG::SetOnChange(frameNode, nullptr);
+}
+
 ArkUI_CharPtr GetCheckboxGroupName(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -227,7 +246,7 @@ ArkUI_Int32 GetCheckboxGroupStyle(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICheckboxGroupModifier modifier = {
         .setCheckboxGroupSelectedColor = SetCheckboxGroupSelectedColor,
         .resetCheckboxGroupSelectedColor = ResetCheckboxGroupSelectedColor,
@@ -244,6 +263,8 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         .setCheckboxGroupStyle = SetCheckboxGroupStyle,
         .resetCheckboxGroupStyle = ResetCheckboxGroupStyle,
         .setCheckboxGroupName = SetCheckboxGroupName,
+        .setCheckboxGroupOnChange=SetCheckboxGroupOnChange,
+        .resetCheckboxGroupOnChange=ResetCheckboxGroupOnChange,
         .getCheckboxGroupName = GetCheckboxGroupName,
         .getCheckboxGroupSelectAll = GetCheckboxGroupSelectAll,
         .getCheckboxGroupSelectedColor = GetCheckboxGroupSelectedColor,
@@ -253,20 +274,13 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         .getCheckboxGroupMarkWidth = GetCheckboxGroupMarkWidth,
         .getCheckboxGroupStyle = GetCheckboxGroupStyle,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUICheckboxGroupModifier modifier = {
         .setCheckboxGroupSelectedColor = SetCheckboxGroupSelectedColor,
         .resetCheckboxGroupSelectedColor = ResetCheckboxGroupSelectedColor,
@@ -292,14 +306,7 @@ const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier()
         .getCheckboxGroupMarkWidth = GetCheckboxGroupMarkWidth,
         .getCheckboxGroupStyle = GetCheckboxGroupStyle,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -307,12 +314,31 @@ void SetCheckboxGroupChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const bool value) {
+    auto onEvent = [node, extraParam](const BaseEventInfo* info) {
+        const auto* groupInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        if (!groupInfo) {
+            return;
+        }
         ArkUINodeEvent event;
-        event.kind = COMPONENT_ASYNC_EVENT;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_CHECKBOX_GROUP_CHANGE;
-        event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
+        event.textInputEvent.subKind = ON_CHECKBOX_GROUP_CHANGE;
+        std::vector<std::string> nameList = groupInfo->GetNameList();
+        std::string status = std::to_string(groupInfo->GetStatus());
+
+        std::string nodeEventStr;
+        if (!nameList.empty()) {
+            nodeEventStr.append("Name:");
+            for (auto nameStr : nameList) {
+                nodeEventStr.append(nameStr);
+                nodeEventStr.append(",");
+            }
+            nodeEventStr.pop_back();
+            nodeEventStr.append(";");
+        }
+
+        nodeEventStr.append("Status:" + status);
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(nodeEventStr.c_str());
         SendArkUISyncEvent(&event);
     };
     CheckBoxGroupModelNG::SetOnChange(frameNode, std::move(onEvent));

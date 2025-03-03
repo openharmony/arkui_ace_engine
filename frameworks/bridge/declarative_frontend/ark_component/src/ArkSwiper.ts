@@ -121,6 +121,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperOnChangeModifier.identity, SwiperOnChangeModifier, event);
     return this;
   }
+  onSelected(event: (index: number) => void): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnSelectedModifier.identity, SwiperOnSelectedModifier, event);
+    return this;
+  }
   indicatorStyle(value?: IndicatorStyle | undefined): this {
     throw new Error('Method not implemented.');
   }
@@ -148,6 +152,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperOnGestureSwipeModifier.identity, SwiperOnGestureSwipeModifier, event);
     return this;
   }
+  onUnselected(event: (index: number) => void): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnUnselectedModifier.identity, SwiperOnUnselectedModifier, event);
+    return this;
+  }
   nestedScroll(value: SwiperNestedScrollMode): this {
     modifierWithKey(this._modifiersWithKeys, SwiperNestedScrollModifier.identity, SwiperNestedScrollModifier, value);
     return this;
@@ -166,6 +174,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   }
   pageFlipMode(value: PageFlipMode): this {
     modifierWithKey(this._modifiersWithKeys, SwiperPageFlipModeModifier.identity, SwiperPageFlipModeModifier, value);
+    return this;
+  }
+  onContentWillScroll(handler: ContentWillScrollCallback): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentWillScrollModifier.identity, SwiperOnContentWillScrollModifier, handler);
     return this;
   }
 }
@@ -345,7 +357,7 @@ class SwiperDisplayArrowModifier extends ModifierWithKey<ArkDisplayArrow> {
   }
 }
 
-class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | DigitIndicator> {
+class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | DigitIndicator | IndicatorComponentController> {
   static identity: Symbol = Symbol('swiperIndicator');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -369,6 +381,9 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
       let digitFontWeight;
       let selectedDigitFontSize;
       let selectedDigitFontWeight;
+      let space;
+      let ignoreSize;
+      let setIgnoreSize;
       if (typeof this.value === 'boolean') {
         getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
       } else if (typeof this.value === 'object' && (this.value as ArkDotIndicator).type === 'DotIndicator') {
@@ -384,6 +399,10 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         color = (this.value as ArkDotIndicator).colorValue;
         selectedColor = (this.value as ArkDotIndicator).selectedColorValue;
         maxDisplayCount = (this.value as ArkDotIndicator).maxDisplayCountValue;
+        space = (this.value as ArkDotIndicator).spaceValue;
+        ignoreSize = (this.value as ArkDotIndicator).ignoreSizeValue;
+        setIgnoreSize = (this.value as ArkDotIndicator).setIgnoreSizeValue;
+
         getUINativeModule().swiper.setSwiperIndicator(
           node,
           'ArkDotIndicator',
@@ -398,7 +417,10 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           left,
           top,
           right,
-          bottom
+          bottom,
+          space,
+          ignoreSize,
+          setIgnoreSize
         );
       } else if (typeof this.value === 'object' && (this.value as ArkDigitIndicator).type === 'DigitIndicator') {
         left = (this.value as ArkDigitIndicator).leftValue;
@@ -407,6 +429,8 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         bottom = (this.value as ArkDigitIndicator).bottomValue;
         fontColor = (this.value as ArkDigitIndicator).fontColorValue;
         selectedFontColor = (this.value as ArkDigitIndicator).selectedFontColorValue;
+        ignoreSize = (this.value as ArkDigitIndicator).ignoreSizeValue;
+        setIgnoreSize = (this.value as ArkDigitIndicator).setIgnoreSizeValue;
         let arkDigitFont = new ArkDigitFont();
         if (typeof (this.value as ArkDigitIndicator).digitFontValue === 'object') {
           digitFontSize = ((this.value as ArkDigitIndicator).digitFontValue as Font).size;
@@ -432,10 +456,12 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           left,
           top,
           right,
-          bottom
+          bottom,
+          ignoreSize,
+          setIgnoreSize
         );
       } else {
-        getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', true);
+        getUINativeModule().swiper.setSwiperIndicator(node, 'IndicatorComponentController', this.value );
       }
     }
   }
@@ -479,6 +505,18 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         !isBaseOrResourceEqual(
           (this.stageValue as ArkDotIndicator).maxDisplayCountValue,
           (this.value as ArkDotIndicator).maxDisplayCountValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).spaceValue,
+          (this.value as ArkDotIndicator).spaceValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).ignoreSizeValue,
+          (this.value as ArkDotIndicator).ignoreSizeValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).setIgnoreSizeValue,
+          (this.value as ArkDotIndicator).setIgnoreSizeValue
         )
       );
     } else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
@@ -506,7 +544,15 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         !isBaseOrResourceEqual(
           ((this.stageValue as ArkDigitIndicator).selectedDigitFontValue as Font).weight,
           ((this.value as ArkDigitIndicator).selectedDigitFontValue as Font).weight
-        )
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDigitIndicator).ignoreSizeValue,
+          (this.value as ArkDigitIndicator).ignoreSizeValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDigitIndicator).setIgnoreSizeValue,
+          (this.value as ArkDigitIndicator).setIgnoreSizeValue
+        ) 
       );
     } else {
       return true;
@@ -562,6 +608,21 @@ class SwiperOnChangeModifier extends ModifierWithKey<Callback<number>> {
     }
   }
 }
+
+class SwiperOnSelectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnSelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnSelected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnSelected(node, this.value);
+    }
+  }
+}
+
 class SwiperDisableSwipeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('swiperDisableSwipe');
   applyPeer(node: KNode, reset: boolean): void {
@@ -679,8 +740,8 @@ class SwiperAutoPlayModifier extends ModifierWithKey<ArkAutoPlay> {
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
-      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay) ||
+      !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 class SwiperIndexModifier extends ModifierWithKey<number> {
@@ -781,6 +842,19 @@ class SwiperOnGestureSwipeModifier extends ModifierWithKey<Callback<number, Swip
     }
   }
 }
+class SwiperOnUnselectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnUnselected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnUnselected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnUnselected(node, this.value);
+    }
+  }
+}
 class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -837,6 +911,22 @@ class SwiperPageFlipModeModifier extends ModifierWithKey<PageFlipMode> {
       getUINativeModule().swiper.resetSwiperPageFlipMode(node);
     } else {
       getUINativeModule().swiper.setSwiperPageFlipMode(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperOnContentWillScrollModifier extends ModifierWithKey<(result: SwiperContentWillScrollResult) => boolean> {
+  constructor(value: (result: SwiperContentWillScrollResult) => boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnContentWillScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentWillScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentWillScroll(node, this.value);
     }
   }
   checkObjectDiff(): boolean {

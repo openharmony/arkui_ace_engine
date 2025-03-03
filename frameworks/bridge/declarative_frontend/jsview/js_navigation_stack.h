@@ -122,6 +122,10 @@ public:
     void SetRecoveryFromReplaceDestination(int32_t index, bool value) override;
     bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex) override;
 
+    bool HasSingletonMoved() override;
+    bool IsTopFromSingletonMoved() override;
+    void ResetSingletonMoved() override;
+
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;
@@ -141,7 +145,7 @@ private:
     std::string ConvertParamToString(const JSRef<JSVal>& param, bool needLimit = false) const;
     void ParseJsObject(
         std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit, bool needLimit) const;
-    static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
+    void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
 
     int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
         RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
@@ -161,6 +165,8 @@ private:
     std::string ErrorToMessage(int32_t errorCode);
 
     bool RemoveDestinationIfNeeded(const JSRef<JSObject>& param, int32_t errorCode, int32_t index);
+
+    bool ExecutePopCallback(const RefPtr<NG::UINode>& uiNode, uint64_t navDestinationId, const JSRef<JSVal>& param);
 private:
     JSRef<JSObject> thisObj_;
 };

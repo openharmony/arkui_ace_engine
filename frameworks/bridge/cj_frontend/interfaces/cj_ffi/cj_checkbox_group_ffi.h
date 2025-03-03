@@ -41,6 +41,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetPaddings(CJEdge params);
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetOnChange(void (*callback)(FFiCheckboxGroupResult info));
 CJ_EXPORT void FfiCheckBoxGroupSetResponseRegion(CJResponseRegion value);
 CJ_EXPORT void FfiCheckBoxGroupSetResponseRegionArray(VectorStringPtr vecContent);
+CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetUnSelectedColor(uint32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetMark(
+    uint32_t strokeColor, double size, int32_t sizeUnit, double strokeWidth, int32_t strokeWidthUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetCheckboxShape(int32_t value);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_CHECKBOX_GROUP_FFI_H

@@ -20,6 +20,7 @@ import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import commonEventManager from '@ohos.commonEventManager';
 import Base from '@ohos.base';
 
+const errCodeAbnormal: number = 100014;
 @Component
 export struct FullScreenLaunchComponent {
   @BuilderParam content: Callback<void> = this.doNothingBuilder;
@@ -151,10 +152,13 @@ export struct FullScreenLaunchComponent {
             this.onError(err);
           }
           this.isShow = false;
-          hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error!%{public}s', err.message)
-          this.getUIContext().showAlertDialog({
-            message: err.message
-          })
+          hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error:%{public}d!%{public}s', err.code,
+            err.message)
+          if (err.code != errCodeAbnormal) {
+            this.getUIContext().showAlertDialog({
+              message: err.message
+            })
+          }
         }
       )
       .onTerminated(info => {

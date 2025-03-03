@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,16 +17,67 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
-class TabBarModifierTestNg : public TabsTestNg {
-public:
-};
+class TabBarModifierTestNg : public TabsTestNg {};
 
 /**
- * @tc.name: TabBarModifierSetIndicator001
+ * @tc.name: SetIndicator001
+ * @tc.desc: Test SetIndicator style, will show underline on selected tabBar item
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarModifierTestNg, SetIndicator001, TestSize.Level1)
+{
+    IndicatorStyle indicator;
+    indicator.color = Color::BLACK;
+    indicator.height = 10.0_vp;
+    indicator.width = 20.0_vp;
+    indicator.borderRadius = 2.0_vp;
+    indicator.marginTop = 3.0_vp;
+
+    TabsModelNG model = CreateTabs();
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        TabContentModelNG tabContentModel = CreateTabContent();
+        // SetIndicator
+        tabContentModel.SetIndicator(indicator);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps1: Test indicator style
+     */
+    auto tabBarModifier = OnDraw();
+    EXPECT_EQ(tabBarModifier->indicatorColor_->Get(), LinearColor(indicator.color));
+    EXPECT_EQ(tabBarModifier->indicatorHeight_->Get(), indicator.height.ConvertToPx());
+    EXPECT_EQ(tabBarModifier->indicatorWidth_->Get(), indicator.width.ConvertToPx());
+    EXPECT_EQ(tabBarModifier->indicatorBorderRadius_->Get(), indicator.borderRadius.ConvertToPx());
+    EXPECT_EQ(tabBarModifier->indicatorMarginTop_->Get(), 0);
+
+    /**
+     * @tc.steps2: Test Default selected item
+     * @tc.expected: The selected item would show underline
+     */
+    EXPECT_TRUE(CurrentIndex(0));
+    EXPECT_EQ(tabBarModifier->indicatorLeft_->Get(), 80.0f);
+    EXPECT_EQ(tabBarModifier->indicatorTop_->Get(), 28.0f);
+
+    /**
+     * @tc.steps3: Change selected item
+     * @tc.expected: Would change underline offset
+     */
+    ChangeIndex(1);
+    EXPECT_TRUE(CurrentIndex(1));
+    tabBarModifier = OnDraw();
+    EXPECT_EQ(tabBarModifier->indicatorLeft_->Get(), 260.0f);
+    EXPECT_EQ(tabBarModifier->indicatorTop_->Get(), 28.0f);
+}
+
+/**
+ * @tc.name: SetIndicator002
  * @tc.desc: test SetIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarModifierTestNg, TabBarModifierSetIndicator001, TestSize.Level1)
+HWTEST_F(TabBarModifierTestNg, SetIndicator002, TestSize.Level1)
 {
     OffsetF indicatorOffset = { 0.0f, 0.0f };
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
@@ -403,6 +454,7 @@ HWTEST_F(TabBarModifierTestNg, TabBarPatternOnModifyDone001, TestSize.Level1)
         tabBarPattern_->OnModifyDone();
         tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     }
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -427,12 +479,12 @@ HWTEST_F(TabBarModifierTestNg, TabBarPatternOnModifyDone002, TestSize.Level1)
     layoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarPattern_->OnModifyDone();
     tabBarNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
-    tabBarNode_->eventHub_->focusHub_ = AceType::MakeRefPtr<FocusHub>(tabBarNode_->eventHub_);
-    ASSERT_NE(tabBarNode_->eventHub_->focusHub_, nullptr);
+    tabBarNode_->focusHub_ = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(tabBarNode_)));
+    ASSERT_NE(tabBarNode_->focusHub_, nullptr);
     tabBarPattern_->OnModifyDone();
-    tabBarPattern_->swiperController_->removeTabBarEventCallback_();
-    tabBarPattern_->swiperController_->addTabBarEventCallback_();
-    EXPECT_NE(tabBarPattern_->swiperController_, nullptr);
+    swiperController_->GetRemoveTabBarEventCallback()();
+    swiperController_->GetAddTabBarEventCallback()();
+    EXPECT_NE(swiperController_, nullptr);
 }
 
 /**
@@ -529,28 +581,5 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetForegroundDrawFunction002, Te
     ASSERT_EQ(drawFunction, nullptr);
     auto clone = tabBarPaintProperty_->Clone();
     EXPECT_NE(clone, nullptr);
-}
-
-/**
- * @tc.name: TabBarPatternGetInnerFocusPaintRect001
- * @tc.desc: test GetInnerFocusPaintRect
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarModifierTestNg, TabBarPatternGetInnerFocusPaintRect001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2. Test function InitOnKeyEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-    tabBarPattern_->isFirstFocus_ = true;
-    auto event = KeyEvent();
-    auto paintRect = RoundRect();
-    tabBarPattern_->GetInnerFocusPaintRect(paintRect);
-    EXPECT_TRUE(tabBarPattern_->isFirstFocus_);
 }
 } // namespace OHOS::Ace::NG

@@ -33,6 +33,8 @@ void ConstructGestureStyle(GestureStyle& gestureInfo)
     auto tmpLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
     gestureInfo.onLongPress = std::move(tmpLongPressFunc);
 }
+const double NUMBER_TEN = 10.0;
+const double NUMBER_FIVE = 10.0;
 } // namespace
 
 class SpanStringTestNg : public testing::Test {
@@ -40,6 +42,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     static ImageSpanOptions GetImageOption(const std::string& src);
+    static ImageSpanOptions GetColorFilterImageOption(const std::string& src);
 };
 
 void SpanStringTestNg::SetUpTestSuite()
@@ -64,14 +67,34 @@ ImageSpanOptions SpanStringTestNg::GetImageOption(const std::string& src)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(2.0_vp);
     MarginProperty margins;
-    margins.SetEdges(CalcLength(10.0));
+    margins.SetEdges(CalcLength(NUMBER_TEN));
     PaddingProperty paddings;
-    paddings.SetEdges(CalcLength(5.0));
+    paddings.SetEdges(CalcLength(NUMBER_FIVE));
     ImageSpanAttribute attr { .paddingProp = paddings,
         .marginProp = margins,
         .borderRadius = borderRadius,
         .objectFit = ImageFit::COVER,
         .verticalAlign = VerticalAlign::BOTTOM };
+    ImageSpanOptions option { .image = src, .imageAttribute = attr };
+    return option;
+}
+
+ImageSpanOptions SpanStringTestNg::GetColorFilterImageOption(const std::string& src)
+{
+    ImageSpanSize size { .width = 50.0_vp, .height = 50.0_vp };
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(2.0_vp);
+    MarginProperty margins;
+    margins.SetEdges(CalcLength(NUMBER_TEN));
+    PaddingProperty paddings;
+    paddings.SetEdges(CalcLength(NUMBER_FIVE));
+    std::vector<float> colorFilterMat {1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0};
+    ImageSpanAttribute attr { .paddingProp = paddings,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM,
+        .colorFilterMatrix = colorFilterMat };
     ImageSpanOptions option { .image = src, .imageAttribute = attr };
     return option;
 }
@@ -1713,6 +1736,413 @@ HWTEST_F(SpanStringTestNg, SpanString018, TestSize.Level1)
     spanString->ClearAllSpans();
     spans = spanString->GetSpans(0, 10);
     EXPECT_EQ(spans.size(), 0);
+}
+
+/**
+ * @tc.name: SpanStringTest019
+ * @tc.desc: Test basic function of ImageAttachment setting color filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString019, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetColorFilterImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto imageSpan = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    EXPECT_EQ(imageSpan->GetImageSpanOptions().imageAttribute, imageOption.imageAttribute);
+    mutableStr->InsertString(0, u"123");
+    mutableStr->InsertString(4, u"456");
+    auto imageOption1 = SpanStringTestNg::GetColorFilterImageOption("src/icon-2.png");
+    auto imageSpan1 = AceType::MakeRefPtr<SpanString>(imageOption1);
+    mutableStr->AppendSpanString(imageSpan1);
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    spanString->AppendSpanString(mutableStr);
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 3);
+    spanString->AppendSpanString(spanString);
+    spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 6);
+}
+
+/*
+ * @tc.name: SpanStringTest020
+ * @tc.desc: Test InsertString method adjusts span positions correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString020, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    textBackgroundStyle.backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 7, 9));
+    spanString->InsertString(3, u"ab"); // 在位置3插入2字符
+    
+    auto spans = spanString->GetSpans(9, 2); // 原span范围7-9变为7-11
+    EXPECT_EQ(spans.size(), 1);
+    if (!spans.empty()) {
+        auto span = AceType::DynamicCast<BackgroundColorSpan>(spans.front());
+        EXPECT_NE(span, nullptr);
+        EXPECT_EQ(span->GetStartIndex(), 9);  // 7 + 2 = 9
+        EXPECT_EQ(span->GetEndIndex(), 11);   // 9 + 2 = 11
+    }
+}
+
+/**
+ * @tc.name: SpanStringTest021
+ * @tc.desc: Test RemoveString shortens span positions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString021, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    TextBackgroundStyle textBackgroundStyle;
+    textBackgroundStyle.backgroundColor = Color::BLUE;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 3, 7));
+    
+    spanString->RemoveString(5, 2); // 删除位置5的两个字符
+    
+    auto spans = spanString->GetSpans(3, 2); // 原3-7变为3-5
+    EXPECT_EQ(spans.size(), 1);
+    if (!spans.empty()) {
+        EXPECT_EQ(spans.front()->GetEndIndex(), 5);
+    }
+}
+
+/**
+ * @tc.name: SpanStringTest022
+ * @tc.desc: Test ReplaceSpan replaces existing span
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString022, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    TextBackgroundStyle oldStyle;
+    oldStyle.backgroundColor = Color::GRAY;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(oldStyle, 2, 5));
+
+    TextBackgroundStyle newStyle;
+    newStyle.backgroundColor = Color::GREEN;
+    auto newSpan = AceType::MakeRefPtr<BackgroundColorSpan>(newStyle, 2, 5);
+    
+    spanString->ReplaceSpan(2, 3, newSpan); // 替换2-5范围的span
+    
+    auto spans = spanString->GetSpans(2, 3);
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(AceType::DynamicCast<BackgroundColorSpan>(spans.front())->GetBackgroundColor().backgroundColor.value(),
+        Color::GREEN);
+}
+
+/**
+ * @tc.name: SpanStringTest023
+ * @tc.desc: Test RemoveSpans removes spans in range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString023, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    TextBackgroundStyle style;
+    style.backgroundColor = Color::RED;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 1, 3));
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 4, 6));
+    
+    spanString->RemoveSpans(2, 3, true); // 移除2-5区间
+    
+    EXPECT_EQ(spanString->GetSpans(1, 6).size(), 2); // 剩余2个span
+}
+
+/**
+ * @tc.name: SpanStringTest024
+ * @tc.desc: Test ClearAllSpans removes all spans
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString024, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    TextBackgroundStyle style;
+    style.backgroundColor = Color::RED;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 0, 2));
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 5, 8));
+    
+    spanString->ClearAllSpans();
+    
+    EXPECT_EQ(spanString->GetSpans(0, 10).size(), 0);
+}
+
+/**
+ * @tc.name: SpanStringTest025
+ * @tc.desc: Test ReplaceSpanString replaces text and spans
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString025, TestSize.Level1)
+{
+    auto original = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    TextBackgroundStyle originalStyle;
+    originalStyle.backgroundColor = Color::BLACK;
+    original->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(originalStyle, 2, 5));
+
+    auto replacement = AceType::MakeRefPtr<MutableSpanString>(u"abc");
+    TextBackgroundStyle newStyle;
+    newStyle.backgroundColor = Color::WHITE;
+    replacement->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(newStyle, 0, 3));
+    
+    original->ReplaceSpanString(3, 2, replacement); // 替换位置3的2字符为"abc"
+    
+    auto spans = original->GetSpans(3, 3); // 新插入的span应位于3-6
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(AceType::DynamicCast<BackgroundColorSpan>(spans.front())->GetBackgroundColor().backgroundColor.value(),
+        Color::WHITE);
+}
+
+/**
+ * @tc.name: SpanStringTest026
+ * @tc.desc: Test InsertSpanString merges spans correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString026, TestSize.Level1)
+{
+    auto target = AceType::MakeRefPtr<MutableSpanString>(u"0123");
+    auto source = AceType::MakeRefPtr<MutableSpanString>(u"abc");
+    TextBackgroundStyle style;
+    style.backgroundColor = Color::RED;
+    source->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 0, 3));
+    
+    target->InsertSpanString(2, source); // 在位置2插入"abc"
+    
+    auto spans = target->GetSpans(2, 3); // 检查插入的span是否在2-5
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(spans.front()->GetEndIndex(), 5);
+}
+
+/**
+ * @tc.name: SpanStringTest027
+ * @tc.desc: Test AppendSpanString adds to the end
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString027, TestSize.Level1)
+{
+    auto target = AceType::MakeRefPtr<MutableSpanString>(u"start");
+    auto source = AceType::MakeRefPtr<MutableSpanString>(u"end");
+    TextBackgroundStyle style;
+    style.backgroundColor = Color::TRANSPARENT;
+    source->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 0, 3));
+    
+    target->AppendSpanString(source);
+    
+    auto spans = target->GetSpans(5, 3); // 检查追加后的span在5-8
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(spans.front()->GetEndIndex(), 8);
+}
+
+/**
+ * @tc.name: SpanStringTest028
+ * @tc.desc: Test span adjustment when inserting at text beginning
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString028, TestSize.Level1)
+{
+    // 初始化10字符文本+span覆盖5-8区间
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    TextBackgroundStyle style;
+    style.backgroundColor = Color::FromRGB(255, 0, 0);
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 5, 8));
+
+    // 在文本开头插入3个字符
+    spanString->InsertString(0, u"ABC");
+    
+    // 验证span位置偏移
+    auto spans = spanString->GetSpans(8, 3); // 原5-8应变为8-11
+    EXPECT_EQ(spans.size(), 1);
+    if (!spans.empty()) {
+        auto span = AceType::DynamicCast<BackgroundColorSpan>(spans.front());
+        EXPECT_EQ(span->GetStartIndex(), 8);
+        EXPECT_EQ(span->GetEndIndex(), 11);
+    }
+
+    // 验证原始文本内容
+    EXPECT_EQ(spanString->GetString(), "ABC0123456789");
+}
+
+/**
+ * @tc.name: SpanStringTest029
+ * @tc.desc: Test overlapping spans after multiple insertions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString029, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"base text");
+    
+    // 添加三个重叠span
+    TextBackgroundStyle redStyle, blueStyle, greenStyle;
+    redStyle.backgroundColor = Color::RED;
+    blueStyle.backgroundColor = Color::BLUE;
+    greenStyle.backgroundColor = Color::GREEN;
+    
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(redStyle, 2, 6));   // 覆盖2-6
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(blueStyle, 4, 8));  // 覆盖4-8
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(greenStyle, 0, 3)); // 覆盖0-3
+
+    // 在位置5插入3个字符
+    spanString->InsertString(5, u"XYZ");
+
+    // 验证span位置调整
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 3); // 应保持三个span
+
+    auto frontSpan = AceType::DynamicCast<BackgroundColorSpan>(spans.front());
+    EXPECT_EQ(frontSpan->GetStartIndex(), 0);
+    EXPECT_EQ(frontSpan->GetEndIndex(), 3);
+    
+
+    auto midSpan = AceType::DynamicCast<BackgroundColorSpan>(*(std::next(spans.begin())));
+    EXPECT_EQ(midSpan->GetStartIndex(), 3);
+    EXPECT_EQ(midSpan->GetEndIndex(), 4);
+    
+    auto lastSpan = AceType::DynamicCast<BackgroundColorSpan>(spans.back());
+    EXPECT_EQ(lastSpan->GetStartIndex(), 4);
+    EXPECT_EQ(lastSpan->GetEndIndex(), 11);
+}
+
+/**
+ * @tc.name: SpanStringTest030
+ * @tc.desc: Test span removal with partial overlap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString030, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"abcdefghijklmn");
+    TextBackgroundStyle style;
+    style.backgroundColor = Color::FromARGB(255, 100, 150, 200);
+    
+    // 添加两个相邻span
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 3, 7));  // span1:3-7
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 7, 10)); // span2:7-10
+
+    // 删除6-9区间的字符（影响两个span）
+    spanString->RemoveString(6, 3); // 删除位置6的3字符（字符6,7,8）
+    
+    // 验证span调整
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 2);
+    
+    // span1调整后：3-6（原3-7，删除位置6导致结束变为6）
+    auto firstSpan = AceType::DynamicCast<BackgroundColorSpan>(spans.front());
+    EXPECT_EQ(firstSpan->GetStartIndex(), 3);
+    EXPECT_EQ(firstSpan->GetEndIndex(), 6);
+    
+    // span2调整后：6-7（原7-10，删除3字符后位置变为7-3=4 → 7→4, 10→7）
+    auto secondSpan = AceType::DynamicCast<BackgroundColorSpan>(spans.back());
+    EXPECT_EQ(secondSpan->GetStartIndex(), 6); // 7 - (6 <= pos <9被删除)
+    EXPECT_EQ(secondSpan->GetEndIndex(), 7);   // 10 - 3 =7
+}
+
+/**
+ * @tc.name: SpanStringTest031
+ * @tc.desc: Test complex span replacement scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString031, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"Hello World");
+    
+    // 创建三种样式
+    TextBackgroundStyle styleA, styleB, styleC;
+    styleA.backgroundColor = Color(0xFFFF0000); // ARGB
+    styleB.backgroundColor = Color(0xFF00FF00);
+    styleC.backgroundColor = Color(0xFF0000FF);
+    
+    // 添加交错span
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(styleA, 0, 5));   // Hello
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(styleB, 3, 8));   // lo Wo
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(styleC, 6, 11));  // World
+
+    // 替换4-6区间的文本为"XXX"（3字符）
+    spanString->ReplaceString(4, 2, u"XXX");
+
+    // 验证文本内容
+    EXPECT_EQ(spanString->GetString(), "HellXXXWorld");
+    
+    // 验证span调整（总长度增加1）
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 3);
+    
+    auto spanA = AceType::DynamicCast<BackgroundColorSpan>(spans.front());
+    EXPECT_EQ(spanA->GetStartIndex(), 0);
+    EXPECT_EQ(spanA->GetEndIndex(), 3);
+
+    auto spanB = AceType::DynamicCast<BackgroundColorSpan>(*(std::next(spans.begin())));
+    EXPECT_EQ(spanB->GetStartIndex(), 3);
+    EXPECT_EQ(spanB->GetEndIndex(), 7);
+    
+    auto spanC = AceType::DynamicCast<BackgroundColorSpan>(spans.back());
+    EXPECT_EQ(spanC->GetStartIndex(), 7);
+    EXPECT_EQ(spanC->GetEndIndex(), 12);
+}
+
+/**
+ * @tc.name: SpanStringTest032
+ * @tc.desc: Test inserting at span start boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString032, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"ABCDEFGHIJ");
+    TextBackgroundStyle style;
+    style.backgroundColor = Color::BLUE;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 3, 7));
+
+    // 在span起始位置前插入2字符
+    spanString->InsertString(3, u"XY");
+    
+    auto spans = spanString->GetSpans(5, 4); // 原3-7变为5-9
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(spans.front()->GetStartIndex(), 5);
+    EXPECT_EQ(spans.front()->GetEndIndex(), 9);
+}
+
+/**
+ * @tc.name: SpanStringTest033
+ * @tc.desc: Test removing entire span coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString033, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+    TextBackgroundStyle style;
+    style.backgroundColor = Color::GREEN;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(style, 2, 6));
+
+    // 删除完全覆盖span的区域
+    spanString->RemoveString(2, 4);
+    
+    auto spans = spanString->GetSpans(2, 4);
+    EXPECT_TRUE(spans.empty());
+}
+
+/**
+ * @tc.name: SpanStringTest034
+ * @tc.desc: Test replacing span with larger range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString034, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"TestString");
+    TextBackgroundStyle oldStyle, newStyle;
+    oldStyle.backgroundColor = Color::RED;
+    newStyle.backgroundColor = Color::BLUE;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(oldStyle, 1, 4));
+
+    // 替换span为更大范围
+    auto newSpan = AceType::MakeRefPtr<BackgroundColorSpan>(newStyle, 0, 5);
+    spanString->ReplaceSpan(1, 3, newSpan);
+    
+    auto spans = spanString->GetSpans(0, 5);
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(AceType::DynamicCast<BackgroundColorSpan>(spans.front())->GetBackgroundColor().backgroundColor.value(),
+        Color::BLUE);
 }
 
 /**

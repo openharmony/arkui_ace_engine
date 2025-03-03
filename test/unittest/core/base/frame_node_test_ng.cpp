@@ -398,7 +398,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg006, TestSize.Level1)
     DimensionRect dimensionRect;
     FRAME_NODE2->AddHotZoneRect(dimensionRect);
     FRAME_NODE2->RemoveLastHotZoneRect();
-    EXPECT_NE(FRAME_NODE2->eventHub_, nullptr);
+    EXPECT_NE(FRAME_NODE2->GetEventHub<EventHub>(), nullptr);
 
     FRAME_NODE->ProcessOffscreenNode(FRAME_NODE3);
     FRAME_NODE->GetTransformRectRelativeToWindow();
@@ -482,7 +482,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToJsonValue007, TestSize.Level1)
      */
     FRAME_NODE->FromJson(jsonValue);
     FRAME_NODE->renderContext_ = nullptr;
-    FRAME_NODE->eventHub_->focusHub_ = nullptr;
+    FRAME_NODE->focusHub_ = nullptr;
     auto jsonValue2 = JsonUtil::Create(true);
     FRAME_NODE->ToJsonValue(jsonValue2, filter);
     FRAME_NODE->FromJson(jsonValue2);
@@ -582,7 +582,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAdjustGridOffset0011, TestSize.Level1)
     EXPECT_TRUE(active);
 
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
-    FRAME_NODE2->GetAncestorNodeOfFrame();
+    FRAME_NODE2->GetAncestorNodeOfFrame(false);
 
     FRAME_NODE2->SetActive(false);
 
@@ -648,7 +648,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.steps: step3.set callback and release lastParentOffsetToWindow_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
+    FRAME_NODE2->GetEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
     FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
     FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_2);
     EXPECT_FALSE(flag);
@@ -768,24 +768,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0016, TestSize.Level1)
 
     FRAME_NODE2->CreateRenderTask(true);
     EXPECT_FALSE(FRAME_NODE2->isRenderDirtyMarked_);
-}
-
-/**
- * @tc.name: FrameNodeTestNg_GetParentGlobalOffset0017
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeGetParentGlobalOffset0017, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. SetParent for FRAME_NODE2 and callback GetParentGlobalOffset.
-     * @tc.expected: expect The parent is same with 1.
-     */
-    FRAME_NODE2->GetParentGlobalOffset();
-    FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
-    auto parent = FRAME_NODE2->GetAncestorNodeOfFrame();
-    FRAME_NODE2->GetParentGlobalOffset();
-    EXPECT_EQ(parent, 1);
 }
 
 /**
@@ -963,7 +945,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
      * @tc.expected: expect The function return value is OUT_OF_REGION.
      */
     FRAME_NODE2->isActive_ = false;
-    FRAME_NODE2->eventHub_->SetEnabled(false);
+    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(false);
     auto test = FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
     EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
@@ -985,9 +967,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
     const PointF parentRevertPoint;
     TouchRestrict touchRestrict;
     AxisTestResult onAxisResult;
-    FRAME_NODE2->eventHub_->GetOrCreateInputEventHub();
+    FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
-    EXPECT_NE(FRAME_NODE2->eventHub_->inputEventHub_, nullptr);
+    EXPECT_NE(FRAME_NODE2->GetEventHub<EventHub>()->inputEventHub_, nullptr);
 }
 
 /**
@@ -1053,6 +1035,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving0029, TestSize.Level1)
      * @tc.steps: step1. callback MarkRemoving.
      * @tc.expected: expect The function return value is true.
      */
+    FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     FRAME_NODE2->AddChild(FRAME_NODE3);
     FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
     auto mark = FRAME_NODE2->MarkRemoving();
@@ -1176,11 +1159,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAnimateHoverEffect0034, TestSize.Level1)
      * @tc.expected: AnimateHoverEffectScale has been called
      */
     auto one = FrameNode::GetOrCreateFrameNode("one", 12, []() { return AceType::MakeRefPtr<Pattern>(); });
-    one->eventHub_->inputEventHub_ = nullptr;
+    one->GetEventHub<EventHub>()->inputEventHub_ = nullptr;
     auto renderContext = AceType::DynamicCast<MockRenderContext>(one->renderContext_);
     EXPECT_CALL(*renderContext, AnimateHoverEffectScale(_));
     one->AnimateHoverEffect(false);
-    auto inputEventHub = one->eventHub_->GetOrCreateInputEventHub();
+    auto inputEventHub = one->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     inputEventHub->hoverEffectType_ = HoverEffectType::UNKNOWN;
     one->AnimateHoverEffect(false);
     inputEventHub->hoverEffectType_ = HoverEffectType::AUTO;
@@ -1421,7 +1404,7 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
     frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
     layoutProperty->UpdateLayoutConstraint(layoutConstraintF_);
 
-    frameNode->eventHub_->GetOrCreateFocusHub();
+    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
     EXPECT_NE(frameNode->eventHub_, nullptr);
 
@@ -1429,9 +1412,9 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
      * @tc.steps: step5. set currentFocus_ is true and call SwapDirtyLayoutWrapperOnMainThread.
      * @tc.expected: expect cover branch IsCurrentFocus() is true and function is run ok .
      */
-    frameNode->eventHub_->GetOrCreateFocusHub()->currentFocus_ = true;
+    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub()->currentFocus_ = true;
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
-    EXPECT_TRUE(frameNode->eventHub_->GetOrCreateFocusHub()->IsCurrentFocus());
+    EXPECT_TRUE(frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub()->IsCurrentFocus());
 }
 
 /**
@@ -1500,7 +1483,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback048, TestSize
     callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
     callbackInfo.period = minInterval;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
-    FRAME_NODE2->ProcessThrottledVisibleCallback();
+    FRAME_NODE2->ProcessThrottledVisibleCallback(false);
     EXPECT_EQ(FRAME_NODE2->throttledCallbackOnTheWay_, false);
 }
 
@@ -2032,7 +2015,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg069, TestSize.Level1)
 {
     auto frameNode =
         FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     auto pattern_ = frameNode->GetPattern();
     EXPECT_NE(pattern_, nullptr);
     bool result = frameNode->CheckAutoSave();
@@ -2052,7 +2035,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg070, TestSize.Level1)
 {
     auto frameNode =
         FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     int64_t deadline = 1;
     bool result = frameNode->RenderCustomChild(deadline);
     bool res = frameNode->UINode::RenderCustomChild(deadline);
@@ -2127,7 +2110,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg083, TestSize.Level1)
     */
     auto frameNodeTemp =
         FrameNode::CreateFrameNode("root", 2, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     /**
      * @tc.steps: step2. frameNodeTemp is a root node
      * @tc.expect: frameNodeTemp call RequestParentDirty
@@ -2204,7 +2187,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg085, TestSize.Level1)
         FrameNode::CreateFrameNode("main", 3, AceType::MakeRefPtr<Pattern>(), false);
     frameNode->AddChild(childNode2);
     childNode2->SetActive(false);
-    
+
     std::list<RefPtr<FrameNode>> list = frameNode->FrameNode::GetActiveChildren();
     EXPECT_EQ(list.size(), 1);
 }
@@ -2295,7 +2278,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg088, TestSize.Level1)
     */
     auto frameNode =
         FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     /**
      * @tc.steps: step2. make opts and safeAreaExpandOpts_
      * @tc.expect: SafeAreaExpandOpts is set to Json
@@ -2468,4 +2451,27 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg090, TestSize.Level1)
     EXPECT_TRUE(json->Contains(label));
 }
 
+/**
+ * @tc.name: FrameNodeTestNg091
+ * @tc.desc: Test AddFrameNodeChangeInfoFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg091, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddFrameNodeChangeInfoFlag(1 << 5);
+    EXPECT_EQ(frameNode->GetChangeInfoFlag(), 1 << 5);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg092
+ * @tc.desc: Test AddFrameNodeChangeInfoFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg092, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddFrameNodeChangeInfoFlag(0);
+    EXPECT_EQ(frameNode->GetChangeInfoFlag(), 0);
+}
 } // namespace OHOS::Ace::NG

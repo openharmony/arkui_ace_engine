@@ -30,7 +30,7 @@ namespace {
 const std::u16string DIGIT_WHITE_LIST = u"[0-9]";
 const std::u16string DIGIT_DECIMAL_WHITE_LIST = u"[0-9.]";
 const std::u16string PHONE_WHITE_LIST = uR"([0-9 \+\-\*\#\(\)])";
-const std::u16string EMAIL_WHITE_LIST = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@-])";
+const std::u16string EMAIL_WHITE_LIST = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@"-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
@@ -327,7 +327,7 @@ bool ContentController::FilterWithAscii(std::u16string& result)
     if (errorText.empty()) {
         textChange = false;
     } else {
-        LOGI("FilterWithAscii Error text %{private}s", UtfUtils::Str16ToStr8(errorText).c_str());
+        LOGI("FilterWithAscii Error text %{private}s", UtfUtils::Str16DebugToStr8(errorText).c_str());
     }
     return textChange;
 }
@@ -367,7 +367,7 @@ bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16st
         eventHub->FireOnInputFilterError(errorValue);
         auto textFieldAccessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
         CHECK_NULL_RETURN(textFieldAccessibilityProperty, false);
-        textFieldAccessibilityProperty->SetErrorText(UtfUtils::Str16ToStr8(errorValue));
+        textFieldAccessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(errorValue));
     }
     return !errorValue.empty();
 }
@@ -432,7 +432,7 @@ std::string ContentController::GetSelectedLimitValue(int32_t& index, int32_t& st
     int32_t endIndex = index + AI_TEXT_RANGE_RIGHT;
     FormatIndex(startIndex, endIndex);
     index = index - startIndex;
-    return UtfUtils::Str16ToStr8(GetSelectedValue(startIndex, endIndex));
+    return UtfUtils::Str16DebugToStr8(GetSelectedValue(startIndex, endIndex));
 }
 
 } // namespace OHOS::Ace::NG

@@ -42,8 +42,10 @@ public:
         value->propTextIconSpace_ = CloneTextIconSpace();
         value->propSecurityComponentDescription_ = CloneSecurityComponentDescription();
         value->propIconStyle_ = CloneIconStyle();
+        value->propSymbolIconStyle_ = CloneSymbolIconStyle();
         value->propIconSize_ = CloneIconSize();
         value->propFontSize_ = CloneFontSize();
+        value->propSymbolIconSize_ = CloneSymbolIconSize();
         value->propStateEffect_ = CloneStateEffect();
         value->propHoverEffect_ = CloneHoverEffect();
         value->propFontStyle_ = CloneFontStyle();
@@ -78,7 +80,9 @@ public:
         ResetTextIconSpace();
         ResetSecurityComponentDescription();
         ResetIconStyle();
+        ResetSymbolIconStyle();
         ResetIconSize();
+        ResetSymbolIconSize();
         ResetFontSize();
         ResetStateEffect();
         ResetHoverEffect();
@@ -111,7 +115,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LeftSpace, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecurityComponentDescription, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconStyle, int32_t, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolIconStyle, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolIconSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StateEffect, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverEffect, HoverEffectType, PROPERTY_UPDATE_NORMAL);

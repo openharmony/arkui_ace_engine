@@ -42,7 +42,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode001, TestSize.Level1)
     auto builder = CreateCustomNode();
     model.SetCustomBuilder(AceType::RawPtr(frameNode_), AceType::RawPtr(builder));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->customBuilder_, builder);
     EXPECT_EQ(pattern_->progressChild_, nullptr);
 
@@ -52,7 +52,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode001, TestSize.Level1)
      */
     model.SetCustomBuilder(AceType::RawPtr(frameNode_), AceType::RawPtr(builder));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->customBuilder_, builder);
 
     /**
@@ -62,7 +62,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode001, TestSize.Level1)
     auto newBuilder = CreateCustomNode();
     model.SetCustomBuilder(AceType::RawPtr(frameNode_), AceType::RawPtr(newBuilder));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->customBuilder_, newBuilder);
 
     /**
@@ -71,7 +71,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode001, TestSize.Level1)
      */
     model.SetCustomBuilder(AceType::RawPtr(frameNode_), nullptr);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->customBuilder_, nullptr);
     EXPECT_NE(pattern_->progressChild_, nullptr);
 
@@ -81,7 +81,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode001, TestSize.Level1)
      */
     model.SetCustomBuilder(AceType::RawPtr(frameNode_), nullptr);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->customBuilder_, nullptr);
     EXPECT_NE(pattern_->progressChild_, nullptr);
 }
@@ -112,7 +112,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode002, TestSize.Level1)
     auto builder = CreateCustomNode();
     model.SetCustomBuilder(AceType::RawPtr(frameNode_), AceType::RawPtr(builder));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->customBuilder_, builder);
     EXPECT_EQ(pattern_->progressChild_, nullptr);
     EXPECT_EQ(pattern_->loadingTextNode_, nullptr);
@@ -144,11 +144,11 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode003, TestSize.Level1)
      */
     layoutProperty_->UpdateIsRefreshing(true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     model.SetCustomBuilder(AceType::RawPtr(frameNode_), nullptr);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->customBuilder_, nullptr);
     EXPECT_NE(pattern_->progressChild_, nullptr);
     auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
@@ -172,7 +172,7 @@ HWTEST_F(RefreshLayoutTestNg, AttrRefreshing001, TestSize.Level1)
      */
     layoutProperty_->UpdateIsRefreshing(true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 
     /**
@@ -181,7 +181,7 @@ HWTEST_F(RefreshLayoutTestNg, AttrRefreshing001, TestSize.Level1)
      */
     layoutProperty_->UpdateIsRefreshing(false);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
 }
 
@@ -276,7 +276,7 @@ HWTEST_F(RefreshLayoutTestNg, VersionElevenAttrRefreshing001, TestSize.Level1)
      */
     layoutProperty_->UpdateIsRefreshing(true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 
     /**
@@ -285,7 +285,7 @@ HWTEST_F(RefreshLayoutTestNg, VersionElevenAttrRefreshing001, TestSize.Level1)
      */
     layoutProperty_->UpdateIsRefreshing(false);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
 }
 
@@ -378,7 +378,7 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText001, TestSize.Level1)
 
     layoutProperty_->ResetLoadingText();
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->loadingTextNode_, nullptr);
 }
 

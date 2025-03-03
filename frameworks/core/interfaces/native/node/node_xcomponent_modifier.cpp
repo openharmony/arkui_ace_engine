@@ -63,7 +63,8 @@ void SetXComponentOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!XComponentModelNG::IsTexture(frameNode)) {
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
@@ -76,7 +77,8 @@ void ResetXComponentOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!XComponentModelNG::IsTexture(frameNode)) {
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
     ViewAbstract::SetOpacity(frameNode, 1.0f);
@@ -215,6 +217,9 @@ void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
         renderFit = static_cast<RenderFit>(renderFitNumber);
     }
     auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
     if (type == XComponentType::TEXTURE) {
         ViewAbstract::SetRenderFit(frameNode, renderFit);
         return;
@@ -227,18 +232,106 @@ void ResetXComponentRenderFit(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
     if (type == XComponentType::TEXTURE) {
         ViewAbstract::SetRenderFit(frameNode, RenderFit::RESIZE_FILL);
         return;
     }
     XComponentModelNG::SetRenderFit(frameNode, RenderFit::RESIZE_FILL);
 }
+
+ArkUI_Int32 GetXComponentRenderFit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<ArkUI_Int32>(RenderFit::RESIZE_FILL));
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::TEXTURE) {
+        return static_cast<ArkUI_Int32>(ViewAbstract::GetRenderFit(frameNode));
+    }
+    return static_cast<ArkUI_Int32>(XComponentModelNG::GetSurfaceRenderFit(frameNode));
+}
+
+void SetXComponentSurfaceRect(ArkUINodeHandle node, ArkUI_Int32 offsetX,
+    ArkUI_Int32 offsetY, ArkUI_Int32 surfaceWidth, ArkUI_Int32 surfaceHeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (surfaceWidth <= 0 || surfaceHeight <= 0) {
+        return;
+    }
+    XComponentModelNG::SetXComponentSurfaceRect(frameNode, static_cast<float>(offsetX), static_cast<float>(offsetY),
+        static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight));
+}
+
+void GetXComponentSurfaceRect(ArkUINodeHandle node, ArkUI_Int32& offsetX, ArkUI_Int32& offsetY,
+    ArkUI_Int32& surfaceWidth, ArkUI_Int32& surfaceHeight)
+{
+    float surfaceRectOffsetX = 0.0f;
+    float surfaceRectOffsetY = 0.0f;
+    float surfaceRectWidth = 0.0f;
+    float surfaceRectHeight = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::GetXComponentSurfaceRect(frameNode, surfaceRectOffsetX, surfaceRectOffsetY,
+        surfaceRectWidth, surfaceRectHeight);
+    offsetX = static_cast<ArkUI_Int32>(surfaceRectOffsetX);
+    offsetY = static_cast<ArkUI_Int32>(surfaceRectOffsetY);
+    surfaceWidth = static_cast<ArkUI_Int32>(surfaceRectWidth);
+    surfaceHeight = static_cast<ArkUI_Int32>(surfaceRectHeight);
+}
+
+void ResetXComponentSurfaceRect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float width  = ViewAbstract::GetWidth(frameNode).GetNativeValue(static_cast<DimensionUnit>(0));
+    float height = ViewAbstract::GetHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(0));
+    XComponentModelNG::SetXComponentSurfaceRect(frameNode, 0.0f, 0.0f, width, height);
+}
+
+ArkUI_Bool GetXComponentEnableAnalyzer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type != XComponentType::SURFACE && type != XComponentType::TEXTURE) {
+        return false;
+    }
+    ArkUI_Bool isEnable = XComponentModelNG::GetXComponentEnableAnalyzer(frameNode);
+    return isEnable;
+}
+
+void StartImageAnalyzer(ArkUINodeHandle node, void* arkuiNode, void* userData,
+    XComponentAnalyzerCallback callback)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_VOID(xcPattern);
+    std::function<void(int32_t)> nativeAnalyzerCallback = [arkuiNode, userData, callback](int32_t statusCode) {
+        if (callback) {
+            callback(arkuiNode, statusCode, userData);
+        }
+    };
+    xcPattern->NativeStartImageAnalyzer(nativeAnalyzerCallback);
+}
+
+void StopImageAnalyzer(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->StopImageAnalyzer();
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIXComponentModifier* GetXComponentModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIXComponentModifier modifier = {
         .setXComponentEnableAnalyzer = SetXComponentEnableAnalyzer,
         .resetXComponentEnableAnalyzer = ResetXComponentEnableAnalyzer,
@@ -265,22 +358,22 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .resetXComponentEnableTransparentLayer = ResetXComponentEnableTransparentLayer,
         .setXComponentRenderFit = SetXComponentRenderFit,
         .resetXComponentRenderFit = ResetXComponentRenderFit,
+        .getXComponentRenderFit = GetXComponentRenderFit,
+        .setXComponentSurfaceRect = SetXComponentSurfaceRect,
+        .getXComponentSurfaceRect = GetXComponentSurfaceRect,
+        .resetXComponentSurfaceRect = ResetXComponentSurfaceRect,
+        .getXComponentEnableAnalyzer = GetXComponentEnableAnalyzer,
+        .startImageAnalyzer = StartImageAnalyzer,
+        .stopImageAnalyzer = StopImageAnalyzer,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIXComponentModifier* GetCJUIXComponentModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIXComponentModifier modifier = {
         .loadXComponent = nullptr, // loadXComponent
         .setXComponentOptions = nullptr, // setXComponentOptions
@@ -301,14 +394,7 @@ const CJUIXComponentModifier* GetCJUIXComponentModifier()
         .setXComponentLibraryname = SetXComponentLibraryname,
         .setImageAIOptions = SetImageAIOptions,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

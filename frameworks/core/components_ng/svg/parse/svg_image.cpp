@@ -14,10 +14,13 @@
  */
 
 #include "frameworks/core/components_ng/svg/parse/svg_image.h"
+#include "frameworks/core/common/container.h"
 
 #include "base/base64/base64_util.h"
 #include "core/components_ng/svg/parse/svg_constants.h"
 #include "core/image/image_source_info.h"
+#include "core/common/ace_application_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -39,6 +42,40 @@ void SvgImage::OnDraw(RSCanvas& canvas, const Size& viewPort, const std::optiona
     auto y = ConvertDimensionToPx(imageAttr_.y, viewPort, SvgLengthType::VERTICAL);
     auto width = ConvertDimensionToPx(imageAttr_.width, viewPort, SvgLengthType::HORIZONTAL);
     auto height = ConvertDimensionToPx(imageAttr_.height, viewPort, SvgLengthType::VERTICAL);
+    if (LessOrEqual(width, 0.0f) || LessOrEqual(height, 0.0f)) {
+        LOGW("Svg image size is illegal");
+        return;
+    }
+
+    auto srcType = ParseHrefAttr(imageAttr_.href);
+    auto data = std::make_shared<RSData>();
+    switch (srcType) {
+        case SrcType::BASE64:
+            data = LoadBase64Image(imageAttr_.href);
+            break;
+        case SrcType::ASSET:
+            data = LoadLocalImage(imageAttr_.href);
+            break;
+        default:
+            LOGW("Unknown svg href src type");
+    }
+    CHECK_NULL_VOID(data);
+    RSImage image;
+    image.MakeFromEncoded(data);
+    auto dstRect = CalcDstRect(Size(image.GetWidth(), image.GetHeight()), Rect(x, y, width, height));
+    canvas.DrawImageRect(image, dstRect, RSSamplingOptions());
+}
+
+void SvgImage::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    if (imageAttr_.href.empty()) {
+        LOGW("Svg image href is empty");
+        return;
+    }
+    auto x = GetMeasuredPosition(imageAttr_.x, lengthRule, SvgLengthType::HORIZONTAL);
+    auto y = GetMeasuredPosition(imageAttr_.y, lengthRule, SvgLengthType::VERTICAL);
+    auto width = GetMeasuredLength(imageAttr_.width, lengthRule, SvgLengthType::HORIZONTAL);
+    auto height = GetMeasuredLength(imageAttr_.height, lengthRule, SvgLengthType::VERTICAL);
     if (LessOrEqual(width, 0.0f) || LessOrEqual(height, 0.0f)) {
         LOGW("Svg image size is illegal");
         return;
@@ -156,11 +193,16 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
         return RSRect(0, 0, 0, 0);
     }
     auto scaleValue = std::min(viewBox.Width() / realSize.Width(), viewBox.Height() / realSize.Height());
+    auto scaleValueY = scaleValue;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        scaleValue = viewBox.Width() / realSize.Width();
+        scaleValueY = viewBox.Height() / realSize.Height();
+    }
     auto spaceX = viewBox.Width() - realSize.Width() * scaleValue;
-    auto spaceY = viewBox.Height() - realSize.Height() * scaleValue;
+    auto spaceY = viewBox.Height() - realSize.Height() * scaleValueY;
     auto offsetX = viewBox.Left() + spaceX * 0.5f; // 0.5f Align Center
     auto offsetY = viewBox.Top() + spaceY * 0.5f; // 0.5f Align Center
-    return RSRect(offsetX, offsetY, realSize.Width() * scaleValue + offsetX, realSize.Height() * scaleValue + offsetY);
+    return RSRect(offsetX, offsetY, realSize.Width() * scaleValue + offsetX, realSize.Height() * scaleValueY + offsetY);
 }
 
 bool SvgImage::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)

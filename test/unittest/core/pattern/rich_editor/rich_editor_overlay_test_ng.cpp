@@ -526,17 +526,17 @@ HWTEST_F(RichEditorOverlayTestNg, BindSelectionMenu001, TestSize.Level1)
 
     std::function<void()> nullFunc = nullptr;
 
-    richEditorPattern->BindSelectionMenu(
-        TextResponseType::RIGHT_CLICK, TextSpanType::MIXED, nullFunc, onAppear, onDisappear);
+    richEditorPattern->BindSelectionMenu(TextResponseType::RIGHT_CLICK, TextSpanType::MIXED, nullFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_TRUE(richEditorPattern->selectionMenuMap_.empty());
 
     richEditorPattern->selectionMenuMap_[key] = params1;
-    richEditorPattern->BindSelectionMenu(
-        TextResponseType::RIGHT_CLICK, TextSpanType::MIXED, buildFunc, onAppear, onDisappear);
+    richEditorPattern->BindSelectionMenu(TextResponseType::RIGHT_CLICK, TextSpanType::MIXED, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 
-    richEditorPattern->BindSelectionMenu(
-        TextResponseType::RIGHT_CLICK, TextSpanType::IMAGE, buildFunc, onAppear, onDisappear);
+    richEditorPattern->BindSelectionMenu(TextResponseType::RIGHT_CLICK, TextSpanType::IMAGE, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 }
 

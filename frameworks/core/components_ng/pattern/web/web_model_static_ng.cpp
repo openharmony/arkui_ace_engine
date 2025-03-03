@@ -272,14 +272,6 @@ void WebModelNG::SetTextAutosizing(FrameNode* frameNode, bool isTextAutosizing)
     webPattern->UpdateTextAutosizing(isTextAutosizing);
 }
 
-void WebModelNG::SetSmoothDragResizeEnabled(FrameNode* frameNode, bool isSmoothDragResizeEnabled)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
-}
-
 void WebModelNG::SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);

@@ -206,19 +206,9 @@ HWTEST_F(WebPatternKeyboardTestNg, FilterScrollEvent001, TestSize.Level1)
     auto webPattern = webPatternFrameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
 
-    webPattern->isNeedUpdateScrollAxis_ = true;
-
-    webPattern->FilterScrollEvent(100, 50, 10, 5);
-    EXPECT_EQ(webPattern->expectedScrollAxis_, Axis::HORIZONTAL);
-
-    webPattern->FilterScrollEvent(50, 100, 5, 10);
-    EXPECT_EQ(webPattern->expectedScrollAxis_, Axis::VERTICAL);
-
-    webPattern->FilterScrollEvent(0, 0, 10, 5);
-    EXPECT_EQ(webPattern->expectedScrollAxis_, Axis::HORIZONTAL);
-
-    webPattern->FilterScrollEvent(0, 0, 5, 10);
-    EXPECT_EQ(webPattern->expectedScrollAxis_, Axis::VERTICAL);
+    webPattern->OnScrollStart(1.0, 2.0);
+    bool isConsumed = webPattern->FilterScrollEvent(100, 50, 10, 5);
+    EXPECT_FALSE(isConsumed);
 #endif
 }
 
@@ -241,8 +231,6 @@ HWTEST_F(WebPatternKeyboardTestNg, FilterScrollEvent002, TestSize.Level1)
 
     auto webPattern = webPatternFrameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
-
-    webPattern->isNeedUpdateScrollAxis_ = false;
 
     bool isConsumed = webPattern->FilterScrollEvent(100, 50, 10, 5);
     EXPECT_FALSE(isConsumed);

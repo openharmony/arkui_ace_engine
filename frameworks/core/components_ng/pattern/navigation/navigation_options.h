@@ -42,6 +42,7 @@ struct NavigationBarOptions {
     std::optional<BarStyle> barStyle;
     std::optional<CalcDimension> paddingStart;
     std::optional<CalcDimension> paddingEnd;
+    bool textHideOptions = false;
 
     bool operator== (const NavigationBarOptions& other) const
     {

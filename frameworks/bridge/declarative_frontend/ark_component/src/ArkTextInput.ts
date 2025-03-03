@@ -901,8 +901,8 @@ class TextInputOnSubmitModifier extends ModifierWithKey<(enterKey: EnterKeyType,
   }
 }
 
-class TextInputOnChangeModifier extends ModifierWithKey<(value: string) => void> {
-  constructor(value: (value: string) => void) {
+class TextInputOnChangeModifier extends ModifierWithKey<(value: ChangeValueInfo) => void> {
+  constructor(value: (value: ChangeValueInfo) => void) {
     super(value);
   }
   static identity = Symbol('textInputOnChange');
@@ -1335,6 +1335,20 @@ class TextInputControllerModifier extends ModifierWithKey<TextInputController> {
 
 }
 
+class TextInputOnWillChangeModifier extends ModifierWithKey<Callback<ChangeValueInfo, boolean>> {
+  constructor(value: Callback<ChangeValueInfo, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnWillChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillChange(node);
+    } else {
+      getUINativeModule().textInput.setOnWillChange(node, this.value);
+    }
+  }
+}
+
 class TextInputOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
   constructor(value: Callback<InsertValue, boolean>) {
     super(value);
@@ -1562,7 +1576,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputOnSubmitModifier, callback);
     return this;
   }
-  onChange(callback: (value: string) => void): TextInputAttribute {
+  onChange(callback: (value: ChangeValueInfo) => void): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputOnChangeModifier.identity,
       TextInputOnChangeModifier, callback);
     return this;
@@ -1958,6 +1972,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     } else {
       modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, undefined);
     }
+    return this;
+  }
+  onWillChange(callback: Callback<ChangeValueInfo, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillChangeModifier.identity, TextInputOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback: Callback<InsertValue, boolean>): this {

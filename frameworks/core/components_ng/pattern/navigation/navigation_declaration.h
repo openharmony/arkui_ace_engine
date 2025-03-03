@@ -33,6 +33,14 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
     return pipeline->GetTheme<NavigationBarTheme>();
 }
 
+
+inline RefPtr<NavigationBarTheme> NavigationGetTheme(int32_t themeScopeId)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<NavigationBarTheme>(themeScopeId);
+}
+
 // TODO：move some items to theme
 // title bar back button
 constexpr const char* BACK_BUTTON = "Back";
@@ -122,6 +130,9 @@ constexpr const char* DES_FIELD = "__NavdestinationField__";
 
 // font scale
 constexpr float STANDARD_FONT_SCALE = 1.0f;
+
+
+constexpr uint32_t BAR_ITEM_MARGIN_NUM = 2;
 
 enum class NavToolbarItemStatus {
     NORMAL = 0,
@@ -219,14 +230,25 @@ enum class NavigationOperation {
 };
 
 enum NavDestinationLifecycle {
-    ON_WILL_APPEAR,
+    ON_WILL_APPEAR = 0,
     ON_APPEAR,
     ON_WILL_SHOW,
     ON_SHOW,
+    ON_ACTIVE,
     ON_WILL_HIDE,
+    ON_INACTIVE,
     ON_HIDE,
     ON_WILL_DISAPPEAR,
     ON_DISAPPEAR
+};
+
+enum class NavDestinationActiveReason {
+    TRANSITION = 0,
+    CONTENT_COVER,
+    SHEET,
+    DIALOG,
+    OVERLAY,
+    APP_STATE_CHANGE
 };
 
 enum class NavigationSystemTransitionType {
@@ -234,7 +256,12 @@ enum class NavigationSystemTransitionType {
     TITLE = 1,
     CONTENT = 1 << 1,
     DEFAULT = 1 | (1 << 1),
+    FADE = 1 << 2,
+    EXPLODE = 1 << 3,
+    SLIDE_RIGHT = 1 << 4,
+    SLIDE_BOTTOM = 1 << 5,
 };
+
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
 {
     return static_cast<NavigationSystemTransitionType>(static_cast<uint32_t>(lv) & static_cast<uint32_t>(rv));
@@ -243,6 +270,18 @@ struct NavSafeArea {
     float top = 0.0f;
     float bottom = 0.0f;
 };
+
+struct NavDestinationTransition {
+    int32_t delay;
+    int32_t duration;
+    RefPtr<Curve> curve;
+    std::function<void()> event;
+    std::function<void()> onTransitionEnd;
+};
+
+using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(
+    NavigationOperation operation, bool isEnter)>;
+using NavDestinationOnNewParamCallback = std::function<void(napi_value param)>;
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

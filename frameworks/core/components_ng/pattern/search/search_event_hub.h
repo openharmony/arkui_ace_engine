@@ -55,7 +55,7 @@ public:
                     .SetDescription(host->GetAutoEventParamValue(""))
                     .SetHost(host);
             }
-            builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(UtfUtils::Str16ToStr8(value));
+            builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(UtfUtils::Str16DebugToStr8(value));
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
     }

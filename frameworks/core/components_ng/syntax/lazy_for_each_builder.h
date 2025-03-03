@@ -300,6 +300,8 @@ public:
         return historicalTotalCount_;
     }
 
+    void SetDestroying(bool isDestroying, bool cleanStatus);
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 

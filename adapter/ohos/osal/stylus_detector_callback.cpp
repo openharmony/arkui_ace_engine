@@ -368,7 +368,7 @@ NG::OffsetF StylusDetectorCallBack::GetPaintRectGlobalOffset(
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, NG::OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto textPaintOffset = frameNode->GetPaintRectOffset();
+    auto textPaintOffset = frameNode->GetPaintRectOffset(false, true);
     return textPaintOffset - rootOffset;
 }
 

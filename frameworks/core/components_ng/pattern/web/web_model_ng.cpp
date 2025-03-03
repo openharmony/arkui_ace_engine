@@ -1186,6 +1186,14 @@ void WebModelNG::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
     webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
 }
 
+void WebModelNG::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+}
+
 void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1229,13 +1237,6 @@ void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     CHECK_NULL_VOID(webPattern);
 
     webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
-}
-
-void WebModelNG::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
-{
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void WebModelNG::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
@@ -1328,4 +1329,50 @@ void WebModelNG::SetEnabledHapticFeedback(bool isEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateEnabledHapticFeedback(isEnabled);
 }
+
+void WebModelNG::SetOptimizeParserBudgetEnabled(bool enable)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOptimizeParserBudgetEnabled(enable);
+}
+
+void WebModelNG::SetWebMediaAVSessionEnabled(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
+}
+
+void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
+void WebModelNG::SetMixedMode(FrameNode* frameNode, MixedModeContent mixedContentMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMixedMode(mixedContentMode);
+}
+
+void WebModelNG::SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateCacheMode(cacheMode);
+}
+
+void WebModelNG::SetDarkMode(FrameNode* frameNode, WebDarkMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDarkMode(mode);
+}
+
 } // namespace OHOS::Ace::NG

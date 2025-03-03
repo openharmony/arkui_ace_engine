@@ -31,8 +31,6 @@ class ACE_EXPORT ContainerModalPatternEnhance : public ContainerModalPattern {
 public:
     ContainerModalPatternEnhance() = default;
     ~ContainerModalPatternEnhance() override = default;
-    void OnWindowFocused() override;
-    void OnWindowUnfocused() override;
     void OnWindowForceUnfocused() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height);
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
@@ -58,6 +56,7 @@ public:
         RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
     void EnableTapGestureOnNode(
         RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    void HandleGestureRowHitTestMode(RefPtr<FrameNode>& gestureRow);
     bool GetFloatingTitleVisible() override;
     bool GetCustomTitleVisible() override;
     bool GetControlButtonVisible() override;

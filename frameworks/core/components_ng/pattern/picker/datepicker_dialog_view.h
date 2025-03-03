@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 class DateTimeAnimationController;
 class CheckBoxPaintProperty;
+class DatePickerPattern;
 class ACE_EXPORT DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
@@ -38,6 +39,7 @@ public:
     static void SetStartDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
     static void SetEndDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
     static void SetSelectedDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
+    static void SetMode(const RefPtr<FrameNode>& frameNode, const DatePickerMode& mode);
     static void SetShowLunar(const RefPtr<FrameNode>& frameNode, bool lunar = false);
     static void SetDateTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
     static void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
@@ -92,16 +94,21 @@ private:
     static RefPtr<FrameNode> CreateAndMountMonthDaysNode(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& pickerRow,
         std::function<void(bool)>&& lunarChangeEvent);
+    static bool SetSelectedDateAndFocus(const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateAndMountTimeNode(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& pickerRow);
     static std::function<void()> CreateAndSetDialogSwitchEvent(const RefPtr<FrameNode>& pickerStack,
         const RefPtr<FrameNode>& contentColumn, const DatePickerSettingData& settingData);
     static void SwitchPickerPage(const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn,
         const RefPtr<DateTimeAnimationController>& animationController, bool useMilitary = false);
-    static void SwitchDatePickerPage(const RefPtr<FrameNode>& dateNode, bool IsSwitchByTitle = false);
+    static void SwitchDatePickerPage(const RefPtr<FrameNode>& dateNode, bool isSwitchByTitle = false);
+    static void UpdateDateNodeVisibilityAndWeight(const RefPtr<LayoutProperty>& layoutProperty,
+        const RefPtr<LayoutProperty>& dateChildNodeLayoutProperty, bool isSwitchByTitle, uint32_t index);
     static void HideContentChildrenButton(const RefPtr<FrameNode>& contentRow);
     static void SwitchContentRowButton(const RefPtr<FrameNode>& contentRow, bool useMilitary = false);
     static void ShowContentRowButton(const RefPtr<FrameNode>& contentRow, bool isFirstPage = true);
+    static bool InitContentRowVisibility(const RefPtr<FrameNode>& contentRow);
+    static bool UpdateButtonVisibility(const RefPtr<FrameNode>& buttonNode);
     static void CreateAndAddTitleClickEvent(
         std::function<void()>& titleSwitchEvent, const RefPtr<FrameNode>& buttonTitleNode);
     static void BuildDialogAcceptAndCancelButton(const std::vector<ButtonInfo>& buttonInfos,
@@ -169,10 +176,15 @@ private:
     static void UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
     static void SwitchFocusStatus(
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);
+    static DialogEvent GetDateChangeEvent(const RefPtr<FrameNode>& frameNode,
+        const std::map<std::string, NG::DialogEvent>& dialogEvent);
+    static void ToggleTitleDisplay(
+        RefPtr<DatePickerPattern>& datePickerPattern, RefPtr<DatePickerPattern>& monthDaysPickerPattern);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;
     static bool isUserSetFont_;
+    static bool isEnableHapticFeedback_;
     static Dimension selectedTextStyleFont_;
     static Dimension normalTextStyleFont_;
     static Dimension disappearTextStyleFont_;

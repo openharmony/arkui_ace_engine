@@ -23,29 +23,17 @@
 
 namespace OHOS::Ace::NG {
 struct VideoSourceInfo {
-    std::string src;
-    std::string bundleName = "";
-    std::string moduleName = "";
+    std::string src_;
+    std::string bundleName_ = "";
+    std::string moduleName_ = "";
     bool operator==(const VideoSourceInfo& videoSrcInfo) const
     {
-        return src == videoSrcInfo.src && bundleName == videoSrcInfo.bundleName &&
-            moduleName == videoSrcInfo.moduleName;
+        return src_ == videoSrcInfo.src_ && bundleName_ == videoSrcInfo.bundleName_ &&
+            moduleName_ == videoSrcInfo.moduleName_;
     }
     bool operator!=(const VideoSourceInfo& videoSrcInfo) const
     {
         return !operator==(videoSrcInfo);
-    }
-    const std::string& GetSrc()
-    {
-        return src;
-    }
-    const std::string& GetBundleName()
-    {
-        return bundleName;
-    }
-    const std::string& GetModuleName()
-    {
-        return moduleName;
     }
 };
 

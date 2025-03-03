@@ -87,6 +87,9 @@ void ListItemDragManager::InitDragDropEvent()
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     dragEvent->SetLongPressEventFunc(std::move(actionLongPress));
     gestureHub->SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    CHECK_NULL_VOID(dragEventActuator);
+    dragEventActuator->SetIsForDragDrop(true);
 }
 
 void ListItemDragManager::DeInitDragDropEvent()
@@ -327,7 +330,7 @@ void ListItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, c
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    if (IsInHotZone(index, frameRect)) {
+    if (IsInHotZone(index, frameRect) && parent->GetDragPreviewOption().enableEdgeAutoScroll) {
         pattern->HandleMoveEventInComp(point);
         if (!scrolling_) {
             pattern->SetHotZoneScrollCallback([weak = WeakClaim(this)]() {

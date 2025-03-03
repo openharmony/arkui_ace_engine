@@ -57,7 +57,6 @@ public:
             ParsePattern(themeConstants, theme);
             theme->showTime_ = SHOW_TIME;
             theme->hideTime_ = HIDE_TIME;
-            theme->targetSpace_ = TARGET_SPACE;
             return theme;
         }
 

@@ -18,8 +18,13 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float START_NODE_LEN = 80.0f;
+constexpr float END_NODE_LEN = 100.0f;
+constexpr float SWIPER_TH = 0.25f;
 constexpr float START_NODE_TH = START_NODE_LEN * SWIPER_TH;
 constexpr float END_NODE_TH = END_NODE_LEN * SWIPER_TH;
+constexpr float DELETE_AREA_DISTANCE = 50.0f;
+constexpr float SWIPER_SPEED_TH = 1500.0f;
 } // namespace
 
 class ListSwipeTestNg : public ListTestNg {
@@ -28,7 +33,8 @@ public:
         std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect);
     void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,
         V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
-    void CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc);
+    void CreateSwipeItemsWithComponentContent(const RefPtr<NG::UINode>& startBuilderNode,
+        const RefPtr<NG::UINode>& endBuilderNode, V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
     void CreateSwipeDone();
     AssertionResult DragSwiperItem(const RefPtr<FrameNode>& frameNode, float dragDelta, float velocityDelta,
         ListItemSwipeIndex listItemSwipeIndex = ListItemSwipeIndex::ITEM_CHILD);
@@ -65,6 +71,29 @@ void ListSwipeTestNg::CreateSwipeItems(
 {
     for (int32_t index = 0; index < itemNumber; index++) {
         ListItemModelNG itemModel = CreateSwipeItem(startAction, endAction, effect);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListSwipeTestNg::CreateSwipeItemsWithComponentContent(const RefPtr<NG::UINode>& startBuilderNode,
+    const RefPtr<NG::UINode>& endBuilderNode, V2::SwipeEdgeEffect effect, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < itemNumber; index++) {
+        ListItemModelNG itemModel = CreateListItem();
+        itemModel.SetSwiperAction(nullptr, nullptr, nullptr, effect);
+        if (startBuilderNode) {
+            itemModel.SetDeleteAreaWithFrameNode(
+                startBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+        }
+        if (endBuilderNode) {
+            itemModel.SetDeleteAreaWithFrameNode(
+                endBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
+        }
+        {
+            GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
+            ViewStackProcessor::GetInstance()->Pop();
+        }
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -133,7 +162,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem001, TestSize.Level1)
     CreateSwipeDone();
 
     RectF startNodeRect = RectF(-START_NODE_LEN, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
-    RectF itemNodeRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    RectF itemNodeRect = RectF(0, 0, WIDTH, ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 0), RectF()));
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 1), itemNodeRect));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
@@ -191,8 +220,8 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem002, TestSize.Level1)
     CreateSwipeItem(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
 
-    RectF endNodeRect = RectF(LIST_WIDTH, 0, END_NODE_LEN, ITEM_MAIN_SIZE);
-    RectF itemNodeRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    RectF endNodeRect = RectF(WIDTH, 0, END_NODE_LEN, ITEM_MAIN_SIZE);
+    RectF itemNodeRect = RectF(0, 0, WIDTH, ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 0), RectF()));
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 1), itemNodeRect));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
@@ -384,8 +413,8 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_Layout001, TestSize.Level1)
     CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
 
-    RectF startNodeRect = RectF(LIST_WIDTH, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
-    RectF itemNodeRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    RectF startNodeRect = RectF(WIDTH, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
+    RectF itemNodeRect = RectF(0, 0, WIDTH, ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 0), RectF()));
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 1), itemNodeRect));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
@@ -445,7 +474,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_Layout002, TestSize.Level1)
     CreateSwipeDone();
 
     RectF endNodeRect = RectF(-END_NODE_LEN, 0, END_NODE_LEN, ITEM_MAIN_SIZE);
-    RectF itemNodeRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    RectF itemNodeRect = RectF(0, 0, WIDTH, ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 0), RectF()));
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 1), itemNodeRect));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
@@ -506,7 +535,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_Layout003, TestSize.Level1)
     CreateSwipeDone();
 
     RectF startNodeRect = RectF(0, -START_NODE_LEN, ITEM_MAIN_SIZE, START_NODE_LEN);
-    RectF itemNodeRect = RectF(0, 0, ITEM_MAIN_SIZE, LIST_HEIGHT);
+    RectF itemNodeRect = RectF(0, 0, ITEM_MAIN_SIZE, HEIGHT);
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 0), RectF()));
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 1), itemNodeRect));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
@@ -565,8 +594,8 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_Layout004, TestSize.Level1)
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
 
-    RectF endNodeRect = RectF(0, LIST_HEIGHT, ITEM_MAIN_SIZE, END_NODE_LEN);
-    RectF itemNodeRect = RectF(0, 0, ITEM_MAIN_SIZE, LIST_HEIGHT);
+    RectF endNodeRect = RectF(0, HEIGHT, ITEM_MAIN_SIZE, END_NODE_LEN);
+    RectF itemNodeRect = RectF(0, 0, ITEM_MAIN_SIZE, HEIGHT);
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 0), RectF()));
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 1), itemNodeRect));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
@@ -628,7 +657,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_Layout005, TestSize.Level1)
     CreateSwipeDone();
 
     RectF startNodeRect = RectF(0, -START_NODE_LEN, ITEM_MAIN_SIZE, START_NODE_LEN);
-    RectF itemNodeRect = RectF(0, 0, ITEM_MAIN_SIZE, LIST_HEIGHT);
+    RectF itemNodeRect = RectF(0, 0, ITEM_MAIN_SIZE, HEIGHT);
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 0), RectF()));
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 1), itemNodeRect));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
@@ -688,8 +717,8 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_Layout006, TestSize.Level1)
     CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
 
-    RectF endNodeRect = RectF(0, LIST_HEIGHT, ITEM_MAIN_SIZE, END_NODE_LEN);
-    RectF itemNodeRect = RectF(0, 0, ITEM_MAIN_SIZE, LIST_HEIGHT);
+    RectF endNodeRect = RectF(0, HEIGHT, ITEM_MAIN_SIZE, END_NODE_LEN);
+    RectF itemNodeRect = RectF(0, 0, ITEM_MAIN_SIZE, HEIGHT);
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 0), RectF()));
     EXPECT_TRUE(IsEqual(GetChildRect(item_, 1), itemNodeRect));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
@@ -1549,8 +1578,8 @@ HWTEST_F(ListSwipeTestNg, ClickJudge002, TestSize.Level1)
      */
     EXPECT_TRUE(DragSwiperItem(item_, -END_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_END));
     EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, 10.f)));
-    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(LIST_WIDTH - 10.f, 10.f)));
-    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(LIST_WIDTH + 10.f, 10.f)));
+    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(WIDTH - 10.f, 10.f)));
+    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(WIDTH + 10.f, 10.f)));
 }
 
 /**
@@ -1581,8 +1610,8 @@ HWTEST_F(ListSwipeTestNg, ClickJudge003, TestSize.Level1)
      */
     EXPECT_TRUE(DragSwiperItem(item_, -START_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_START));
     EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, 10.f)));
-    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(LIST_WIDTH - 10.f, 10.f)));
-    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(LIST_WIDTH + 10.f, 10.f)));
+    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(WIDTH - 10.f, 10.f)));
+    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(WIDTH + 10.f, 10.f)));
 }
 
 /**
@@ -1659,8 +1688,8 @@ HWTEST_F(ListSwipeTestNg, ClickJudge006, TestSize.Level1)
      */
     EXPECT_TRUE(DragSwiperItem(item_, -END_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_END));
     EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, 10.f)));
-    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(10.f, LIST_HEIGHT - 10.f)));
-    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, LIST_HEIGHT + 10.f)));
+    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(10.f, HEIGHT - 10.f)));
+    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, HEIGHT + 10.f)));
 }
 
 /**
@@ -1679,8 +1708,8 @@ HWTEST_F(ListSwipeTestNg, SetBuilderComponent01, TestSize.Level1)
     auto startBuilder = CreateCustomNode("Start", START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItemsWithComponentContent(startBuilder, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    const RectF itemNodeInitialRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
-    const RectF itemNodeSwipeStartRect = RectF(START_NODE_LEN, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    const RectF itemNodeInitialRect = RectF(0, 0, WIDTH, ITEM_MAIN_SIZE);
+    const RectF itemNodeSwipeStartRect = RectF(START_NODE_LEN, 0, WIDTH, ITEM_MAIN_SIZE);
     const float slightSwipeDelta = START_NODE_LEN * SWIPER_TH;
     const float obviousSwipeDelta = START_NODE_LEN * SWIPER_TH + 1;
 

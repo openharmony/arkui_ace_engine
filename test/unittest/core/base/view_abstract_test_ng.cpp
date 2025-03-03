@@ -14,6 +14,8 @@
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#include "core/components/select/select_theme.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -213,6 +215,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
     ViewAbstract::SetLayoutDirection(direction);
     ViewAbstract::SetLayoutDirection(AceType::RawPtr(FRAME_NODE_REGISTER), direction);
     ViewAbstract::GetAlignRules(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::SetBackgroundImageSyncMode(true);
 
     /**
      * @tc.expected: Return expected results..
@@ -561,8 +564,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest010, TestSize.Level1)
     ViewAbstract::SetOnBlur(callback);
     ViewAbstract::SetFlexBasis(VALUE);
 
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     ViewAbstract::SetVisibility(VisibleType::VISIBLE);
@@ -1613,5 +1616,288 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest030, TestSize.Level1)
      */
     bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OpenPopup
+ * @tc.desc: Test OpenPopup of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, OpenPopup, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    RefPtr<PopupParam> param2 = nullptr;
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    RefPtr<FrameNode> contentNode2 = nullptr;
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+
+    /**
+     * @tc.steps: step2. Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenPopup(param2, contentNode2), ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode2), ERROR_CODE_DIALOG_CONTENT_ERROR);
+    int32_t targetId = -1;
+    param->SetTargetId(std::to_string(targetId));
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_TARGET_INFO_NOT_EXIST);
+    targetId = 10000;
+    param->SetTargetId(std::to_string(targetId));
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_TARGET_INFO_NOT_EXIST);
+    param->SetTargetId(std::to_string(targetNode->GetId()));
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE);
+    param->SetIsShow(true);
+    param->SetUseCustomComponent(true);
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+}
+
+/**
+ * @tc.name: UpdatePopup
+ * @tc.desc: Test UpdatePopup of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, UpdatePopup, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    param->SetIsShow(true);
+    param->SetUseCustomComponent(true);
+    param->SetShowInSubWindow(false);
+    param->SetTargetId(std::to_string(targetNode->GetId()));
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_NO_ERROR);
+    auto context = contentNode->GetContextWithCheck();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->popupMap_[targetNode->GetId()].isCurrentOnShow = true;
+    param->SetIsPartialUpdate(true);
+    EXPECT_EQ(ViewAbstract::UpdatePopup(param, contentNode), ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: ClosePopup
+ * @tc.desc: Test ClosePopup of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ClosePopup, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    param->SetIsShow(true);
+    param->SetUseCustomComponent(true);
+    param->SetTargetId(std::to_string(targetNode->GetId()));
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_NO_ERROR);
+    auto context = contentNode->GetContextWithCheck();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->popupMap_[targetNode->GetId()].isCurrentOnShow = true;
+    EXPECT_EQ(ViewAbstract::ClosePopup(contentNode), ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ViewAbstract::ClosePopup(contentNode), ERROR_CODE_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: OpenMenu
+ * @tc.desc: Test OpenMenu of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, OpenMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and menuParam.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    MenuParam menuParam;
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    RefPtr<FrameNode> contentNode2 = nullptr;
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    int32_t targetId = targetNode->GetId();
+    /**
+     * @tc.steps: step2. Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode2, targetId), ERROR_CODE_DIALOG_CONTENT_ERROR);
+    targetId = -1;
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_TARGET_INFO_NOT_EXIST);
+    targetId = 10000;
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_TARGET_INFO_NOT_EXIST);
+    targetId = targetNode->GetId();
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE);
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    targetId = targetNode->GetId();
+    auto targetNodePipelineContext = targetNode->GetContextWithCheck();
+    ASSERT_NE(targetNodePipelineContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    targetNodePipelineContext->SetThemeManager(themeManager);
+    targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+}
+
+/**
+ * @tc.name: UpdateMenu
+ * @tc.desc: Test UpdateMenu of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, UpdateMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and menuParam.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    MenuParam menuParam;
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    RefPtr<FrameNode> contentNode2 = nullptr;
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto targetId = targetNode->GetId();
+    auto targetNodePipelineContext = targetNode->GetContextWithCheck();
+    ASSERT_NE(targetNodePipelineContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    targetNodePipelineContext->SetThemeManager(themeManager);
+    targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->menuMap_[targetId];
+    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode2), ERROR_CODE_DIALOG_CONTENT_ERROR);
+    overlayManager->menuMap_.clear();
+    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+}
+
+/**
+ * @tc.name: CloseMenu
+ * @tc.desc: Test CloseMenu of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CloseMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and menuParam.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    MenuParam menuParam;
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    RefPtr<FrameNode> contentNode2 = nullptr;
+
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto targetId = targetNode->GetId();
+    auto targetNodePipelineContext = targetNode->GetContextWithCheck();
+    ASSERT_NE(targetNodePipelineContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    targetNodePipelineContext->SetThemeManager(themeManager);
+    targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->menuMap_[targetId];
+    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode2), ERROR_CODE_DIALOG_CONTENT_ERROR);
+    overlayManager->menuMap_.clear();
+    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
 }
 } // namespace OHOS::Ace::NG

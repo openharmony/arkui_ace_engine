@@ -59,13 +59,14 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-enum class Status { DRAGGING, ON_DROP, NONE };
+enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
 struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
 };
+enum class SelectionMenuCalblackId { MENU_APPEAR, MENU_SHOW, MENU_HIDE };
 
 // TextPattern is the base class for text render node to perform paint text.
 class TextPattern : public virtual Pattern,
@@ -81,6 +82,7 @@ public:
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+        ResetOriginCaretPosition();
     }
 
     ~TextPattern() override;
@@ -118,7 +120,7 @@ public:
         return MakeRefPtr<TextEventHub>();
     }
 
-    bool IsDragging() const
+    virtual bool IsDragging() const
     {
         return status_ == Status::DRAGGING;
     }
@@ -165,7 +167,7 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpTextStyleInfo();
     void DumpTextStyleInfo2();
     void DumpTextStyleInfo3();
@@ -221,10 +223,11 @@ public:
     void SetTextDetectTypes(const std::string& types)
     {
         dataDetectorAdapter_->SetTextDetectTypes(types);
+        textDetectTypes_ = types; // url value is not recorded in dataDetectorAdapter_, need to record it here
     }
     std::string GetTextDetectTypes()
     {
-        return dataDetectorAdapter_->textDetectTypes_;
+        return textDetectTypes_;
     }
     RefPtr<DataDetectorAdapter> GetDataDetectorAdapter()
     {
@@ -327,7 +330,8 @@ public:
 
     void InitSurfaceChangedCallback();
     void InitSurfacePositionChangedCallback();
-    virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfaceChanged(
+        int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type);
     virtual void HandleSurfacePositionChanged(int32_t posX, int32_t posY) {};
     bool HasSurfaceChangedCallback()
     {
@@ -352,7 +356,6 @@ public:
         onClick_ = std::move(onClick);
         distanceThreshold_ = distanceThreshold;
     }
-    virtual void OnColorConfigurationUpdate() override;
 
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
@@ -371,7 +374,8 @@ public:
     void ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData);
     void AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData);
 
-    std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end) const;
+    std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end, bool includeStartHalf = false,
+        bool includeEndHalf = true, bool getSubstrDirectly = true) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
     virtual RefPtr<UINode> GetChildByIndex(int32_t index) const;
@@ -454,9 +458,9 @@ public:
     // It is currently used by RichEditorPattern.
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
-    virtual std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const
+    virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const
     {
-        std::list<ParagraphManager::ParagraphInfo> res;
+        std::vector<ParagraphManager::ParagraphInfo> res;
         CHECK_NULL_RETURN(pManager_, res);
         return pManager_->GetParagraphs();
     }
@@ -517,7 +521,7 @@ public:
     }
 
     void BindSelectionMenu(TextSpanType spanType, TextResponseType responseType, std::function<void()>& menuBuilder,
-        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+        const SelectMenuParam& menuParam);
 
     void SetTextController(const RefPtr<TextController>& controller)
     {
@@ -567,11 +571,11 @@ public:
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
-    void SetStyledString(const RefPtr<SpanString>& value);
+    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
-        bool includeEndHalf = false) const;
+        bool includeEndHalf = false, bool getSubstrDirectly = false) const;
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
@@ -579,6 +583,7 @@ public:
     void HandleOnCopy();
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
+    bool IsShowTranslate();
     bool IsShowSearch();
     void SetTextSelectableMode(TextSelectableMode value);
 
@@ -592,9 +597,14 @@ public:
         textResponseType_ = type;
     }
 
+    bool IsSelectedTypeChange()
+    {
+        return selectedType_.has_value() && oldSelectedType_ != selectedType_.value();
+    }
+
     bool CheckSelectedTypeChange()
     {
-        auto changed = selectedType_.has_value() && oldSelectedType_ != selectedType_.value();
+        auto changed = IsSelectedTypeChange();
         if (changed) {
             oldSelectedType_ = selectedType_.value();
         }
@@ -770,6 +780,15 @@ public:
     std::string GetCaretColor() const;
     std::string GetSelectedBackgroundColor() const;
 
+    void ResetCustomFontColor();
+    void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
+    bool GetOriginCaretPosition(OffsetF& offset) const;
+    void ResetOriginCaretPosition();
+    bool RecordOriginCaretPosition(const OffsetF& offset);
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -817,6 +836,8 @@ protected:
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
     void UpdateSelectionType(const SelectionInfo& selection);
     void CopyBindSelectionMenuParams(SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams);
+    virtual void OnHandleSelectionMenuCallback(
+        SelectionMenuCalblackId callbackId, std::shared_ptr<SelectionMenuParams> menuParams);
     bool IsSelectedBindSelectionMenu();
     bool CheckAndClick(const RefPtr<SpanItem>& item);
     bool CalculateClickedSpanPosition(const PointF& textOffset);
@@ -980,7 +1001,8 @@ private:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+        return RenderContext::ContextParam { .type = RenderContext::ContextType::CANVAS,
+                                             .surfaceName = std::nullopt };
     }
 
     SourceTool GetCurrentDragTool() const
@@ -1001,6 +1023,10 @@ private:
     void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
+    void UpdateMarqueeStartPolicy();
+    void ProcessVisibleAreaCallback();
+    void PauseSymbolAnimation();
+    void ResumeSymbolAnimation();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1049,6 +1075,10 @@ private:
     Offset lastLeftMouseMoveLocation_;
     bool isAutoScrollByMouse_ = false;
     bool shiftFlag_ = false;
+    std::string textDetectTypes_ = "";
+    // Used to record original caret position for "shift + up/down"
+    // Less than 0 is invalid, initialized as invalid in constructor
+    OffsetF originCaretPosition_;
 };
 } // namespace OHOS::Ace::NG
 

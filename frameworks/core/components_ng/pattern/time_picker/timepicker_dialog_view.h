@@ -30,6 +30,8 @@ public:
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static void SetStartTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
+    static void SetEndTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
     static void SetSelectedTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
     static void SetDialogTitleDate(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerDate& value);
     static void SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime = false);
@@ -107,10 +109,10 @@ private:
         const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateCancelButtonTextLayoutProperty(
         const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
-    static bool switchFlag_;
-    static Dimension selectedTextStyleFont_;
-    static Dimension normalTextStyleFont_;
-    static Dimension disappearTextStyleFont_;
+    static thread_local bool switchFlag_;
+    static thread_local Dimension selectedTextStyleFont_;
+    static thread_local Dimension normalTextStyleFont_;
+    static thread_local Dimension disappearTextStyleFont_;
 };
 } // namespace OHOS::Ace::NG
 

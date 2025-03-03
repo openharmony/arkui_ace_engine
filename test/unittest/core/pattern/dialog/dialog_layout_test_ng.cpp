@@ -881,4 +881,75 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithm031, TestSize.Level1)
     dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
     EXPECT_EQ(dialogLayoutAlgorithm.alignment_, DialogAlignment::TOP_END);
 }
+
+/**
+ * @tc.name: DialogLayoutAlgorithm032
+ * @tc.desc: Test CreateDialogNode with customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithm032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a custom node and childLayoutWrapper
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    dialogTheme->text_align_title_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    /**
+     * @tc.steps: step2. create dialog with a custom node and layoutWrapper.
+     * @tc.expected: the dialog node created successfully.
+     */
+    DialogProperties propsCustom;
+    propsCustom.type = DialogType::ACTION_SHEET;
+    propsCustom.title = "dialog title";
+    propsCustom.subtitle = "dialog subtitle";
+    propsCustom.content = "dialog content test";
+    propsCustom.sheetsInfo = sheetItems;
+    propsCustom.buttons = btnItems;
+    auto dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
+    layoutWrapper->AppendChild(childLayoutWrapper);
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+    /**
+     * @tc.steps: step3. change props to create dialog with a custom node.
+     * @tc.expected: the dialog node and layoutWrapper2 created successfully.
+     */
+    propsCustom.customStyle = true;
+    propsCustom.title = "dialog title";
+    propsCustom.subtitle = "";
+    propsCustom.content = "";
+    dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto layoutWrapper2 = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper2, nullptr);
+    layoutWrapper2->AppendChild(childLayoutWrapper);
+    DialogLayoutAlgorithm dialogLayoutAlgorithm2;
+    dialogLayoutAlgorithm2.Measure(layoutWrapper2.rawPtr_);
+    /**
+     * @tc.steps: step4. change props to create dialog with a custom node.
+     * @tc.expected: the dialog node and layoutWrapper2 created successfully.
+     */
+    propsCustom.title = "";
+    propsCustom.subtitle = "dialog subtitle";
+    propsCustom.content = "";
+    dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto layoutWrapper3 = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper3, nullptr);
+    layoutWrapper3->AppendChild(childLayoutWrapper);
+    DialogLayoutAlgorithm dialogLayoutAlgorithm3;
+    dialogLayoutAlgorithm3.Measure(layoutWrapper3.rawPtr_);
+}
 } // namespace OHOS::Ace::NG

@@ -71,7 +71,6 @@ private:
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     RefPtr<TextFieldForegroundModifier> textFieldForegroundModifier_;
     WeakPtr<ScrollBar> scrollBar_;
-
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPaintMethod);
 };
 

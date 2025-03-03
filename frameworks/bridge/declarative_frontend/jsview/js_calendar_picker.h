@@ -32,6 +32,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
+    static void JsMarkToday(const JSCallbackInfo& info);
 
 private:
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
@@ -42,6 +43,7 @@ private:
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
     static bool ParseJsDimensionVpWithCheck(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static void ParseDisabledDateRange(const JSRef<JSVal>& disabledDateRangeVal, NG::CalendarSettingData& settingData);
 };
 
 class JSCalendarPickerDialog : JSAlertDialog {
@@ -60,6 +62,7 @@ private:
     static std::map<std::string, NG::DialogCancelEvent> LifeCycleDialogEvent(const JSCallbackInfo& info);
 
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate = false);
+    static void ParseDisabledDateRange(const JSRef<JSVal>& disabledDateRangeVal, NG::CalendarSettingData& settingData);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_PICKER_H

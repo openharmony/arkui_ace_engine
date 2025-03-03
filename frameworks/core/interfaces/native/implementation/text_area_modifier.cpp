@@ -223,10 +223,10 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [arkCallback = CallbackHelper(*value)](const std::u16string& text, PreviewText& prevText) {
+    auto onChange = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& info) {
         Converter::ConvContext ctx;
-        auto textArkString = Converter::ArkValue<Ark_String>(text, &ctx);
-        auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText, &ctx);
+        auto textArkString = Converter::ArkValue<Ark_String>(info.value, &ctx);
+        auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx);
         arkCallback.Invoke(textArkString, textArkPrevText);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));

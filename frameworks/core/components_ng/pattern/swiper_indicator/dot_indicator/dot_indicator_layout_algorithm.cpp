@@ -26,9 +26,6 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-} // namespace
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -38,12 +35,9 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutConstraint);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
-    CHECK_NULL_VOID(swiperNode);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    auto direction = swiperPattern->GetDirection();
+    auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto direction = indicatorPattern->GetDirection();
     auto paintProperty = frameNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
@@ -77,22 +71,45 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto indicatorHeight =
         static_cast<float>(((userItemHeight > userSelectedItemHeight) ?
             userItemHeight : userSelectedItemHeight) + indicatorHeightPadding.ConvertToPx() * 2);
+    auto noPaddingIndicatorHeight = indicatorHeight - indicatorHeightPadding.ConvertToPx();
     auto allPointDiameterSum = userItemWidth * (indicatorDisplayCount_ + 1);
     if (paintProperty->GetIsCustomSizeValue(false)) {
         allPointDiameterSum = userItemWidth * (indicatorDisplayCount_ - 1) + userSelectedItemWidth;
     }
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (indicatorDisplayCount_ - 1);
+    
+    auto indicatorDotItemSpace = paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
+    auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (indicatorDisplayCount_ - 1);
     auto paddingSide = theme->GetIndicatorPaddingDot().ConvertToPx();
+    
     auto indicatorWidth = paddingSide + allPointDiameterSum + allPointSpaceSum + paddingSide;
-
+    auto noPaddingIndicatorWidth = indicatorWidth - paddingSide * 1.5;
+    auto ignoreSize = paintProperty->GetIgnoreSizeValue(false);
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;
         indicatorHeight_ = indicatorHeight;
+        ignorSizeIndicatorWidth_ = indicatorWidth;
+        ignorSizeIndicatorHeight_ = ignoreSize ? noPaddingIndicatorHeight : indicatorHeight;
     } else {
         indicatorWidth_ = indicatorHeight;
         indicatorHeight_ = indicatorWidth;
+        ignorSizeIndicatorWidth_ = indicatorHeight;
+        ignorSizeIndicatorHeight_ = ignoreSize ? noPaddingIndicatorWidth : indicatorWidth;
     }
 
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (isSingle_ && calcLayoutConstraint && calcLayoutConstraint->selfIdealSize) {
+        auto idealSize =
+            CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
+        auto width = calcLayoutConstraint->selfIdealSize->Width();
+        auto height = calcLayoutConstraint->selfIdealSize->Height();
+        if (width) {
+            indicatorWidth_ = std::max(indicatorWidth_, idealSize.Width());
+        }
+
+        if (height) {
+            indicatorHeight_ = std::max(indicatorHeight_, idealSize.Height());
+        }
+    }
     SizeF frameSize = { -1.0f, -1.0f };
     do {
         frameSize.SetSizeT(SizeF { indicatorWidth_, indicatorHeight_ });
@@ -102,6 +119,8 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } while (false);
 
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(frameSize);
 }
 
@@ -110,19 +129,16 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
-    CHECK_NULL_VOID(swiperNode);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    auto indicatorlayoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    CHECK_NULL_VOID(indicatorlayoutProperty);
-
-    auto currentOffset = SwiperIndicatorUtils::CalcIndicatrFrameOffSet(
-        swiperLayoutProperty, indicatorlayoutProperty, indicatorWidth_, indicatorHeight_);
-    geometryNode->SetMarginFrameOffset(currentOffset);
+    auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    OffsetF currentOffset = OffsetF(0.0f, 0.0f);
+    auto needSet = indicatorPattern->GetDotCurrentOffset(currentOffset, ignorSizeIndicatorWidth_,
+        ignorSizeIndicatorHeight_);
+    if (needSet) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->SetMarginFrameOffset(currentOffset);
+    }
 }
 
 double DotIndicatorLayoutAlgorithm::GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge)

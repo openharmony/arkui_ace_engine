@@ -202,6 +202,8 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder) override;
     void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder) override;
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) override;
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;
 
     void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
@@ -212,7 +214,6 @@ public:
             intelligentTrackingPreventionResultId) override;
     void SetTextAutosizing(bool isTextAutosizing) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
-    void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) override;
     void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) override;
@@ -226,6 +227,9 @@ public:
     void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnabledHapticFeedback(bool isEnabled) override;
+    void SetOptimizeParserBudgetEnabled(bool enable) override;
+    void SetWebMediaAVSessionEnabled(bool isEnabled) override;
+    void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc);
@@ -238,8 +242,11 @@ public:
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
     static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
     static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
+    static void SetMixedMode(FrameNode* frameNode, MixedModeContent mixedMode);
     static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    static void SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode);
+    static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
     static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
     static void SetForceDarkAccess(FrameNode* frameNode, bool access);
     static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
@@ -255,7 +262,6 @@ public:
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetNativeEmbedModeEnabled(FrameNode* frameNode, bool isEmbedModeEnabled);
     static void SetTextAutosizing(FrameNode* frameNode, bool isTextAutosizing);
-    static void SetSmoothDragResizeEnabled(FrameNode* frameNode, bool isSmoothDragResizeEnabled);
     static void SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedMode);
     static void SetCacheMode(FrameNode* frameNode, const std::optional<WebCacheMode>& cacheMode);

@@ -28,7 +28,7 @@
 namespace OHOS::Ace {
 class WaterFlowModel {
 public:
-    static WaterFlowModel* GetInstance();
+    ACE_FORCE_EXPORT static WaterFlowModel* GetInstance();
     virtual ~WaterFlowModel() = default;
 
     virtual void Create() = 0;

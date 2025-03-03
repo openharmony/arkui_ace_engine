@@ -92,6 +92,13 @@ void TextAreaMenuTestNg::SetUpTestSuite()
             }
             return textFieldTheme;
         });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type, int id) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(MIN_PLATFORM_VERSION);
     MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -279,7 +286,7 @@ HWTEST_F(TextAreaMenuTestNg, SelectTextShowMenu004, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -321,7 +328,7 @@ HWTEST_F(TextAreaMenuTestNg, SelectTextShowMenu005, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -535,7 +542,7 @@ HWTEST_F(TextAreaMenuTestNg, SelectTextShowMenu009, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -611,7 +618,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection002, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -672,7 +679,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection004, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -707,7 +714,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection005, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -736,7 +743,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection006, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -803,7 +810,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection008, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -880,7 +887,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection010, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -923,7 +930,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection011, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -960,7 +967,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection012, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 

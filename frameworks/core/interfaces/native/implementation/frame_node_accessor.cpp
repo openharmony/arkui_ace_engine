@@ -132,7 +132,7 @@ Ark_NativePointer GetFirstChildImpl(FrameNodePeer* peer)
     CHECK_NULL_RETURN(peer->node, nullptr);
     auto child = peer->node->GetFirstChild();
     CHECK_NULL_RETURN(child, nullptr);
-    return AceType::DynamicCast<FrameNode>(child.GetRawPtr());
+    return AceType::DynamicCast<FrameNode>(Referenced::RawPtr(child));
 }
 
 RefPtr<FrameNode> GetParentNode(RefPtr<FrameNode> nodeRef)
@@ -174,7 +174,7 @@ Ark_NativePointer GetParentImpl(FrameNodePeer* peer)
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->node, nullptr);
     auto parent = GetParentNode(peer->node);
-    return parent.GetRawPtr();
+    return Referenced::RawPtr(parent);
 }
 Ark_Int32 GetChildrenCountImpl(FrameNodePeer* peer)
 {

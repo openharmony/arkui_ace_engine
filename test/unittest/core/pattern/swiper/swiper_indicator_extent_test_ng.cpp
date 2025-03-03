@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,9 @@ public:
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator007, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DOT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
@@ -49,7 +51,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator007, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator008, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
@@ -69,7 +73,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator008, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperInitIndicator009, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DOT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
@@ -2007,7 +2013,9 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
  */
 HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     ASSERT_NE(indicatorNode_, nullptr);
     auto wrapper = indicatorNode_->CreatePaintWrapper();
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
@@ -2020,10 +2028,30 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, Tes
     paintMethod->mouseClickIndex_ = 10;
     LinearVector<float> itemHalfSizes = { 5.0f, 5.0f, 10.0f, 10.0f };
     Dimension paddingSide = Dimension(5.0f);
+    Dimension indicatorDotItemSpace = Dimension(8.0f);
     /**
      * @tc.expected: PaintHoverIndicator longPointCenterX_ first eq 177.0f
      */
-    paintMethod->PaintHoverIndicator(itemHalfSizes, paddingSide);
+    paintMethod->PaintHoverIndicator(itemHalfSizes, paddingSide, indicatorDotItemSpace);
     EXPECT_NEAR(paintMethod->longPointCenterX_.first, 177.0f, 0.001f);
+}
+
+/**
+ * @tc.name: SwiperDigitIndicatorLayoutAlgorithmCalcFrameHeight0001
+ * @tc.desc: Test Swiper DigitIndicatorLayoutAlgorithm::CalcFrameHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmCalcFrameHeight0001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->OnModifyDone();
+    auto algorithm = AceType::DynamicCast<DigitIndicatorLayoutAlgorithm>(indicatorPattern->CreateLayoutAlgorithm());
+    float indicatorHeight = 20.0f;
+    auto frameHeight = algorithm->CalcFrameHeight(indicatorNode_, indicatorHeight);
+    EXPECT_EQ(frameHeight, 20.0f);
 }
 } // namespace OHOS::Ace::NG

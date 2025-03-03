@@ -62,6 +62,10 @@ public:
     void ResetSliderInteractionMode() override {};
     void ResetMinResponsiveDistance() override {};
     void ResetValidSlideRange() override {};
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override {};
+    void ResetBlockColor() override {};
+    void ResetTrackColor() override {};
+    void ResetSelectColor() override {};
 #ifdef SUPPORT_DIGITAL_CROWN
     void ResetDigitalCrownSensitivity() override {};
 #endif

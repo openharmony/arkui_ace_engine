@@ -16,6 +16,7 @@
 #include "core/components/common/layout/grid_container_info.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 

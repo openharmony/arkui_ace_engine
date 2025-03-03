@@ -21,7 +21,8 @@ namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> TapGesture::CreateRecognizer()
 {
-    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(fingers_, count_, distanceThreshold_);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(
+        fingers_, count_, distanceThreshold_, isLimitFingerCount_);
     if (onActionId_) {
         clickRecognizer->SetOnAction(*onActionId_);
     }
@@ -31,6 +32,9 @@ RefPtr<NGGestureRecognizer> TapGesture::CreateRecognizer()
     clickRecognizer->SetPriority(priority_);
     clickRecognizer->SetPriorityMask(gestureMask_);
     clickRecognizer->SetGestureInfo(gestureInfo_);
+    if (gestureInfo_) {
+        gestureInfo_->SetDisposeTag(false);
+    }
     clickRecognizer->SetUserData(userData_);
     return clickRecognizer;
 }

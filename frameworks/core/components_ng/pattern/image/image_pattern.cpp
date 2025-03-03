@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/network/download_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
@@ -292,7 +293,7 @@ void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
     const auto& geometryNode = host->GetGeometryNode();
     auto contentRect = geometryNode->GetContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset_, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(true);
     visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
@@ -326,7 +327,7 @@ OffsetF ImagePattern::GetParentGlobalOffset() const
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    return host->GetPaintRectOffset() - rootOffset;
+    return host->GetPaintRectOffset(false, true) - rootOffset;
 }
 
 void ImagePattern::OnAreaChangedInner()
@@ -558,6 +559,8 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         return;
     }
 
+    ACE_SCOPED_TRACE("StartDecoding imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
+
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     bool autoResize = props->GetAutoResize().value_or(autoResizeDefault_);
@@ -566,10 +569,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
-    bool isHdrDecoderNeed = false;
-    if (renderProp && renderProp->HasDynamicMode()) {
-        isHdrDecoderNeed = true;
-    }
+    bool isHdrDecoderNeed = renderProp && renderProp->HasDynamicMode();
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
@@ -750,7 +750,7 @@ void ImagePattern::LoadImage(
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
-    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
+    if (!((propertyChangeFlag & PROPERTY_UPDATE_LAYOUT) == PROPERTY_UPDATE_LAYOUT) ||
         visibleType == VisibleType::GONE) {
         loadingCtx_->FinishMearuse();
     }
@@ -1101,13 +1101,12 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 bool ImagePattern::RecycleImageData()
 {
     //when image component is [onShow] , [no cache], do not clean image data
-    bool dataValid = false;
-    bool isCheckDataCache =
+    bool isDataNoCache =
         (!loadingCtx_ ||
         (loadingCtx_->GetSourceInfo().GetSrcType() == SrcType::NETWORK &&
         SystemProperties::GetDownloadByNetworkEnabled() &&
-        ImageLoadingContext::QueryDataFromCache(loadingCtx_->GetSourceInfo(), dataValid) == nullptr));
-    if (isShow_ || isCheckDataCache) {
+        DownloadManager::GetInstance()->IsContains(loadingCtx_->GetSourceInfo().GetSrc()) == false));
+    if (isShow_ || isDataNoCache) {
         return false;
     }
     auto frameNode = GetHost();
@@ -1120,13 +1119,13 @@ bool ImagePattern::RecycleImageData()
     if (!rsRenderContext) {
         return false;
     }
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str());
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "OnRecycleImageData imageInfo: %{public}s",
-        imageDfxConfig_.ToStringWithSrc().c_str());
     ACE_SCOPED_TRACE("OnRecycleImageData imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
     return true;
 }
@@ -1142,6 +1141,8 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     frameNode->SetTrimMemRecycle(false);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s OnNotifyMemoryLevel %{public}d.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str(), level);
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
     loadingCtx_ = nullptr;
@@ -1293,6 +1294,14 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
+}
+
+void ImagePattern::OnDetachFromMainTree()
+{
+    if (isNeedReset_) {
+        ResetImageAndAlt();
+        isNeedReset_ = false;
+    }
 }
 
 void ImagePattern::EnableDrag()
@@ -1595,6 +1604,8 @@ inline void ImagePattern::DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderP
     if (fillColor.has_value()) {
         auto color = fillColor.value();
         DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
+    } else {
+        DumpLog::GetInstance().AddDesc("fillColor: Null");
     }
 }
 
@@ -2247,7 +2258,11 @@ bool ImagePattern::IsFormRender()
 {
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->IsFormRender();
+
+    auto container = Container::Current();
+    bool isDynamicComponent = container && container->IsDynamicRender() &&
+                              container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    return pipeline->IsFormRender() && !isDynamicComponent;
 }
 
 void ImagePattern::UpdateFormDurationByRemainder()
@@ -2370,6 +2385,8 @@ void ImagePattern::ResetImage()
     if (!altImage_) {
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s ResetImage.",
+            imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
     }
@@ -2385,6 +2402,8 @@ void ImagePattern::ResetAltImage()
         CHECK_NULL_VOID(host);
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s ResetAltImage.",
+            imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
     }
@@ -2392,6 +2411,14 @@ void ImagePattern::ResetAltImage()
 
 void ImagePattern::ResetImageAndAlt()
 {
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s reseting Image and Alt.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.imageSrc_.c_str());
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsInDestroying() && frameNode->IsOnMainTree()) {
+        isNeedReset_ = true;
+        return;
+    }
     image_ = nullptr;
     loadingCtx_ = nullptr;
     srcRect_.Reset();
@@ -2400,8 +2427,6 @@ void ImagePattern::ResetImageAndAlt()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);
@@ -2583,5 +2608,17 @@ void ImagePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         json->Put("currentLoadImageState", currentLoadImageState.c_str());
     }
+}
+
+void ImagePattern::AddPixelMapToUiManager()
+{
+    CHECK_NULL_VOID(image_);
+    auto pixmap = image_->GetPixelMap();
+    CHECK_NULL_VOID(pixmap);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddPixelMap(host->GetId(), pixmap);
 }
 } // namespace OHOS::Ace::NG

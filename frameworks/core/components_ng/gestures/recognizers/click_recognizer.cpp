@@ -46,6 +46,7 @@ void ClickRecognizer::ForceCleanRecognizer()
     tapDeadlineTimer_.Cancel();
     currentTouchPointsNum_ = 0;
     responseRegionBuffer_.clear();
+    paintRect_ = RectF();
 }
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
@@ -68,10 +69,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
         NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        auto paintRect = renderContext->GetPaintRectWithoutTransform();
-        localPoint = localPoint + paintRect.GetOffset();
+        localPoint = localPoint + paintRect_.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE,
                 "InputTracking id:%{public}d, this MOVE/UP event is out of region, try to reject click gesture",
@@ -84,8 +82,8 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     return true;
 }
 
-ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold)
-    : MultiFingersRecognizer(fingers), count_(count), distanceThreshold_(distanceThreshold)
+ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), count_(count), distanceThreshold_(distanceThreshold)
 {
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
@@ -164,6 +162,7 @@ void ClickRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
+    auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     if (backupTouchPointsForSucceedBlock_.has_value()) {
@@ -203,6 +202,9 @@ void ClickRecognizer::OnAccepted()
     if (onAccessibilityEventFunc_ && !onClick_) {
         onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
     }
+    if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
+        ResetStateVoluntarily();
+    }
 }
 
 void ClickRecognizer::OnRejected()
@@ -237,10 +239,6 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
-    if (!IsInAttachedNode(event, false)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     UpdateInfoWithDownEvent(event);
 }
 
@@ -249,6 +247,7 @@ void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
+        paintRect_ = RectF();
         tapDeadlineTimer_.Cancel();
     }
     if (currentTouchPointsNum_ == 0) {
@@ -256,6 +255,9 @@ void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
         if (!frameNode.Invalid()) {
             auto host = frameNode.Upgrade();
             responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            paintRect_ = renderContext->GetPaintRectWithoutTransform();
         }
     }
     if (fingersId_.find(event.id) == fingersId_.end()) {
@@ -308,6 +310,10 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture judge reject");
         return;
     }
+    if (CheckLimitFinger()) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
 }
 
@@ -315,6 +321,10 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+        --currentTouchPointsNum_;
+    }
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
@@ -328,12 +338,9 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     UpdateFingerListInfo();
     auto isUpInRegion = IsPointInRegion(event);
-    if (fingersId_.find(event.id) != fingersId_.end()) {
-        fingersId_.erase(event.id);
-        --currentTouchPointsNum_;
-    }
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
+        paintRect_ = RectF();
     }
     bool fingersNumberSatisfied = equalsToFingers_;
     // Check whether multi-finger taps are completed in count_ times
@@ -341,6 +348,9 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         // Turn off the multi-finger lift deadline timer
         fingerDeadlineTimer_.Cancel();
         tappedCount_++;
+        if (CheckLimitFinger()) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
         if (tappedCount_ == count_) {
             TriggerClickAccepted(event);
             return;
@@ -352,6 +362,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
         if (fingersNumberSatisfied) {
             Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+            AboutToAddToPendingRecognizers(event);
         } else {
             extraInfo_ += "finger number not satisfied.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -514,14 +525,17 @@ void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto host = GetAttachedNode().Upgrade();
         CHECK_NULL_VOID(host);
+        auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
         Recorder::EventParamsBuilder builder;
-        builder.SetId(host->GetInspectorId().value_or(""))
+        builder.SetEventType(Recorder::EventType::CLICK)
+            .SetId(host->GetInspectorId().value_or(""))
             .SetType(host->GetTag())
-            .SetText(host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true))
+            .SetText(accessibilityProperty->GetGroupText(true))
             .SetDescription(host->GetAutoEventParamValue(""))
             .SetHost(host);
-        auto rectSwitch = Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT);
-        if (rectSwitch) {
+        auto pointSwitch = Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_POINT);
+        if (pointSwitch) {
             static const int32_t precision = 2;
             std::stringstream ss;
             ss << std::fixed << std::setprecision(precision) << info.GetGlobalPoint().GetX() << ","
@@ -603,7 +617,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
 
 RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 {
-    return AceType::MakeRefPtr<TapGesture>(count_, fingers_, distanceThreshold_);
+    return AceType::MakeRefPtr<TapGesture>(count_, fingers_, distanceThreshold_, isLimitFingerCount_);
 }
 
 void ClickRecognizer::CleanRecognizerState()
@@ -628,5 +642,17 @@ OnAccessibilityEventFunc ClickRecognizer::GetOnAccessibilityEventFunc()
         node->OnAccessibilityEvent(eventType);
     };
     return callback;
+}
+
+void ClickRecognizer::AboutToAddToPendingRecognizers(const TouchEvent& event)
+{
+    if (event.sourceType == SourceType::MOUSE &&
+        (refereeState_ == RefereeState::PENDING || refereeState_ == RefereeState::PENDING_BLOCKED)) {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto eventManager = pipeline->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        eventManager->AddToMousePendingRecognizers(AceType::WeakClaim(this));
+    }
 }
 } // namespace OHOS::Ace::NG

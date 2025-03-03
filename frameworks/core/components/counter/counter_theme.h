@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<CounterTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -61,7 +61,7 @@ public:
             theme->contentTextStyle_.SetFontSize(counterPattern->GetAttr<Dimension>("title_font_size", 15.0_vp));
             theme->contentTextStyle_.SetTextColor(counterPattern->GetAttr<Color>("title_font_color",
                 Color(0xff191919)));
-            theme->backgroundColor_ = counterPattern->GetAttr<Color>("title_background_color", Color::WHITE);
+            theme->backgroundColor_ = counterPattern->GetAttr<Color>("title_background_color", Color::TRANSPARENT);
         }
     };
 
@@ -127,9 +127,11 @@ public:
         return borderStyle_;
     }
 
-private:
+protected:
     TextStyle contentTextStyle_;
-    Color backgroundColor_ = Color(0xff191919);
+    Color backgroundColor_ = Color(Color::TRANSPARENT);
+
+private:
     Dimension height_ = 32.0_vp;
     Dimension width_ = 100.0_vp;
     Dimension controlWidth_ = 32.0_vp;

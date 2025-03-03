@@ -37,9 +37,13 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -84,13 +88,13 @@ std::string SpanItem::GetFont() const
 
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->PutFixedAttr("content", UtfUtils::Str16ToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
-    json->PutFixedAttr("unicode", std::to_string(GetSymbolUnicode()).c_str(), filter, FIXED_ATTR_CONTENT);
+    json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
         return;
     }
+    json->PutExtAttr("unicode", std::to_string(GetSymbolUnicode()).c_str(), filter);
     if (fontStyle) {
         json->PutExtAttr("font", GetFont().c_str(), filter);
         json->PutExtAttr("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str(), filter);
@@ -221,13 +225,14 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 {
     BaseSpan::UpdateTextBackgroundFromParent(style);
     spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->MarkDirty();
 }
 
 void SpanNode::DumpInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(
-        std::string("Content: ").append("\"").append(UtfUtils::Str16ToStr8(spanItem_->content)).append("\""));
+        std::string("Content: ").append("\"").append(UtfUtils::Str16DebugToStr8(spanItem_->content)).append("\""));
     auto textStyle = spanItem_->GetTextStyle();
     if (!textStyle) {
         return;
@@ -375,6 +380,29 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     return -1;
 }
 
+bool SpanItem::UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle)
+{
+    auto symbolType = symbolSpanStyle.GetSymbolType();
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = symbolSpanStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        if (fontFamilies.empty()) {
+            return false;
+        }
+        symbolSpanStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        symbolSpanStyle.SetFontFamilies(fontFamilies);
+    }
+    return true;
+}
+
 void SpanItem::UpdateSymbolSpanParagraph(
     const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder, bool isDragging)
 {
@@ -398,7 +426,9 @@ void SpanItem::UpdateSymbolSpanParagraph(
         if (!symbolEffectSwitch_ || isDragging) {
             symbolSpanStyle.SetEffectStrategy(0);
         }
-        symbolSpanStyle.SetFontFamilies({"HM Symbol"});
+        if (!UpdateSymbolSpanFontFamily(symbolSpanStyle)) {
+            return;
+        }
         builder->PushStyle(symbolSpanStyle);
     }
     textStyle_ = symbolSpanStyle;
@@ -434,14 +464,14 @@ void SpanItem::UpdateTextStyleForAISpan(const std::u16string& spanContent, const
     const TextStyle& textStyle, const TextStyle& aiSpanStyle)
 {
     int32_t spanContentLength = static_cast<int32_t>(spanContent.length());
-    int32_t spanStart = position - spanContentLength;
+    int32_t spanStart = this->position - spanContentLength;
     if (needRemoveNewLine) {
         spanStart -= 1;
     }
     int32_t preEnd = spanStart;
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
-        if (aiSpan.start >= position || preEnd >= position) {
+        if (aiSpan.start >= this->position || preEnd >= this->position) {
             break;
         }
         int32_t aiSpanStartInSpan = std::max(spanStart, aiSpan.start);
@@ -451,15 +481,20 @@ void SpanItem::UpdateTextStyleForAISpan(const std::u16string& spanContent, const
             aiSpanMap.erase(aiSpanMap.begin());
             continue;
         }
+        /*
+        | content has been handled | normal text | aiSpan text style | remain text   |
+        spanStart(fix)             preEnd        aiSpanStartInSpan   aiSpanEndInSpan spanStart + spanContentLength(fix)
+        */
         int32_t contentStart = preEnd - spanStart;
         if (preEnd < aiSpanStartInSpan) {
             UpdateTextStyle(spanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd),
-                builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
-            contentStart = contentStart + aiSpanStartInSpan - preEnd;
+                builder, textStyle, this->selectedStart - contentStart, this->selectedEnd - contentStart);
+            contentStart = contentStart + aiSpanStartInSpan - preEnd; // aiSpan's relative offset from span
         }
-        auto displayContent = StringUtils::Str8ToStr16(aiSpan.content)
+        auto displayContent = UtfUtils::Str8DebugToStr16(aiSpan.content)
             .substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateTextStyle(displayContent, builder, aiSpanStyle, selectedStart - contentStart, selectedEnd - contentStart);
+        UpdateTextStyle(displayContent, builder, aiSpanStyle,
+            this->selectedStart - contentStart, this->selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
             return;
@@ -493,8 +528,8 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
         bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
             bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-            if (customFont) {
-                isCustomFont = true;
+            if (!customFont) {
+                TAG_LOGI(AceLogTag::ACE_TEXT, "Span FontRegister failed id:%{public}d", frameNode->GetId());
             }
         }
         if (isCustomFont) {
@@ -509,44 +544,40 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
 }
 
 void SpanItem::UpdateTextStyle(const std::u16string& content, const RefPtr<Paragraph>& builder,
-    const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd)
+    const TextStyle& textStyle, int32_t selStart, int32_t selEnd)
 {
     if (!IsDragging()) {
         UpdateContentTextStyle(content, builder, textStyle);
     } else {
+        // for content such as Hellow Wrold, update text style for three parts:
+        // [0, selStart), [selStart, selEnd), [selEnd, content.length) through UpdateContentTextStyle
+        auto contentLength = static_cast<int32_t>(content.length());
+        CHECK_NULL_VOID(selEnd > 0);
+        selStart = selStart < 0 ? 0: selStart;
+        selEnd = selEnd > contentLength ? contentLength : selEnd;
         if (content.empty()) {
             builder->PushStyle(textStyle);
             builder->PopStyle();
             return;
         }
-        auto contentLength = static_cast<int32_t>(content.length());
         if (selStart > 0) {
-            UpdateContentTextStyle(content.substr(0, selStart), builder, textStyle);
+            UpdateContentTextStyle(
+                TextEmojiProcessor::SubU16string(0, selStart, content, false, true), builder, textStyle);
         }
-        auto finalSelStart = selStart;
-        if (finalSelStart < 0) {
-            finalSelStart = 0;
-        }
-        auto finalSelEnd = selEnd;
-        if (finalSelEnd < 0) {
-            finalSelEnd = 0;
-        }
-        if (finalSelEnd > 0 && finalSelEnd > contentLength) {
-            finalSelEnd = contentLength;
-        }
-        if (finalSelStart < contentLength) {
-            auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (selStart < contentLength) {
             TextStyle selectedTextStyle = textStyle;
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
             Color textDecorationColor = selectedTextStyle.GetTextDecorationColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextDecorationColor(textDecorationColor);
-            UpdateContentTextStyle(content.substr(finalSelStart, finalSelEnd - finalSelStart), builder,
-                selectedTextStyle);
+            UpdateContentTextStyle(
+                TextEmojiProcessor::SubU16string(selStart, selEnd - selStart, content, false, true),
+                builder, selectedTextStyle);
         }
-
-        if (finalSelEnd < contentLength) {
-            UpdateContentTextStyle(content.substr(finalSelEnd), builder, textStyle);
+        if (selEnd < contentLength) {
+            UpdateContentTextStyle(
+                TextEmojiProcessor::SubU16string(selEnd, content.length() - selEnd, content, false, true),
+                builder, textStyle);
         }
     }
 }
@@ -648,7 +679,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         }                                                       \
     } while (false)
 
-RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
+RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<SpanItem>();
     COPY_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
@@ -723,7 +754,7 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
+    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
     EncodeFontStyleTlv(buff);
     EncodeTextLineStyleTlv(buff);
     if (backgroundStyle.has_value()) {
@@ -793,7 +824,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     int32_t start = TLVUtil::ReadInt32(buff, cursor);
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
-    sameSpan->content = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
+    sameSpan->content = UtfUtils::Str8DebugToStr16(TLVUtil::ReadString(buff, cursor));
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
@@ -890,14 +921,14 @@ bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
         TLVUtil::WriteInt32(buff, interval.first);
         TLVUtil::WriteInt32(buff, interval.second);
-        TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
+        TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
         return true;
     }
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
+    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
     if (options.offset.has_value()) {
         TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_OFFSET_TAG);
         TLVUtil::WriteInt32(buff, options.offset.value());
@@ -937,7 +968,7 @@ RefPtr<ImageSpanItem> ImageSpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32
     int32_t start = TLVUtil::ReadInt32(buff, cursor);
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
-    sameSpan->content = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
+    sameSpan->content = UtfUtils::Str8DebugToStr16(TLVUtil::ReadString(buff, cursor));
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
@@ -1033,22 +1064,26 @@ void ImageSpanItem::ResetImageSpanOptions()
     options.imageAttribute.reset();
 }
 
-RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
+RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
-    if (options.HasValue()) {
-        sameSpan->SetImageSpanOptions(options);
-    } else {
-        // 用与Text控件复制ImageSpan子控件，生成并保存options数据
-        sameSpan->SetImageSpanOptions(GetImageSpanOptionsFromImageNode());
-        if (!(sameSpan->options.imagePixelMap.value())) {
-            /*
-                ImageSpan子控件，存在resource和pixelMap两种来源。
-                ImageSpan(resource)场景，复制图片为属性字符串为空格。
-                因此设置为NORMAL。在ImageSpanItem::EncodeTlv时，SpanItemType为NORMAL时，组装SpanItem。
-            */
-            sameSpan->spanItemType = SpanItemType::NORMAL;
+    if (isEncodeTlvS) {
+        if (options.HasValue()) {
+            sameSpan->SetImageSpanOptions(options);
+        } else {
+            // 用与Text控件复制ImageSpan子控件，生成并保存options数据
+            sameSpan->SetImageSpanOptions(GetImageSpanOptionsFromImageNode());
+            if (!(sameSpan->options.imagePixelMap.value_or(nullptr))) {
+                /*
+                    ImageSpan子控件，存在resource和pixelMap两种来源。
+                    ImageSpan(resource)场景，复制图片为属性字符串为空格。
+                    因此设置为NORMAL。在ImageSpanItem::EncodeTlv时，SpanItemType为NORMAL时，组装SpanItem。
+                */
+                sameSpan->spanItemType = SpanItemType::NORMAL;
+            }
         }
+    } else {
+        sameSpan->SetImageSpanOptions(options);
     }
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
@@ -1129,7 +1164,7 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
         if (options.image.has_value()) {
-            resultObject.valueString = UtfUtils::Str8ToStr16(options.image.value());
+            resultObject.valueString = UtfUtils::Str8DebugToStr16(options.image.value());
         }
         if (options.imagePixelMap.has_value()) {
             resultObject.valuePixelMap = options.imagePixelMap.value();
@@ -1243,7 +1278,7 @@ void PlaceholderSpanItem::DumpInfo() const
         dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
 }
 
-RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
+RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
     sameSpan->onMeasure = onMeasure;
@@ -1272,7 +1307,7 @@ void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
 
 void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
-    json->Put("Content", UtfUtils::Str16ToStr8(spanItem_->content).c_str());
+    json->Put("Content", UtfUtils::Str16DebugToStr8(spanItem_->content).c_str());
     auto textStyle = spanItem_->GetTextStyle();
     if (!textStyle) {
         return;

@@ -21,6 +21,7 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkScrollBarCreate(int64_t scrollerID, int32_t direction, int32_t state);
+CJ_EXPORT void FfiOHOSAceFrameworkSetEnableNestedScroll(bool value);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_SCROLLBAR_FFI_H

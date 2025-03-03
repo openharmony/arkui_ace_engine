@@ -14,7 +14,11 @@
  */
 
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include <cstdint>
+#include "ui/base/geometry/dimension.h"
+#include "ui/base/utils/utils.h"
 
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/app_bar_helper.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -25,10 +29,17 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/app_bar/app_bar_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_WIDTH = 96;
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT = 8;
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT = 12;
+
 RefPtr<AppBarTheme> GetAppBarTheme()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -64,18 +75,57 @@ RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
     auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<AtomicServicePattern>());
     // add children
-    auto menuBarRow = BuildMenuBarRow();
-    atom->AddChild(stage);
-    atom->AddChild(menuBarRow);
+    contentStage_ = stage;
+    atomicService_ = atom;
+    BindJSContainer();
     // init
     atom->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     stage->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    atomicService_ = atom;
-    auto pattern = atom->GetPattern<AtomicServicePattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->UpdateColor(std::nullopt);
-    pattern->UpdateLayout();
     return atom;
+}
+
+void AppBarView::BindJSContainer()
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto isSucc = ExecuteCustomAppBarAbc();
+    if (!isSucc) {
+        return;
+    }
+    auto customAppBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomAppBarNode();
+    CHECK_NULL_VOID(customAppBarNode);
+    atom->AddChild(customAppBarNode);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AppInfoCallBack();
+    pattern->AppScreenCallBack();
+    pattern->AppBgColorCallBack();
+}
+
+void AppBarView::AddContentToJSContainer()
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto stageNodeWrapper = pattern->GetStageNodeWrapper();
+    CHECK_NULL_VOID(stageNodeWrapper);
+    CHECK_NULL_VOID(contentStage_);
+    stageNodeWrapper->AddChild(contentStage_);
+    stageNodeWrapper->MarkModifyDone();
+    stageNodeWrapper->MarkDirtyNode();
+
+    auto focusHub = contentStage_->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->AnyChildFocusHub([](const RefPtr<FocusHub>& child) {
+        auto node = child->GetFrameNode();
+        auto focusView = node ? node->GetPattern<FocusView>() : nullptr;
+        if (focusView) {
+            focusView->FocusViewShow();
+            return true;
+        }
+        return false;
+    });
 }
 
 RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
@@ -282,6 +332,41 @@ void AppBarView::DestroyServicePanel()
     LOGI("ServicePanel release session:%{public}d", sessionId_);
 }
 
+void AppBarView::CreateServicePanel(
+    const std::string& appGalleryBundleName, const std::string& abilityName, std::map<std::string, std::string>& params)
+{
+#ifndef PREVIEW
+    if (OHOS::Ace::SystemProperties::GetAtomicServiceBundleName().empty() &&
+        OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName().empty()) {
+        LOGE("UIExtension BundleName is empty.");
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    ModalUIExtensionCallbacks callbacks;
+    callbacks.onRelease = [wp = WeakClaim(this)](int32_t releaseCode) {
+        auto bar = wp.Upgrade();
+        bar->DestroyServicePanel();
+    };
+    callbacks.onError = [wp = WeakClaim(this)](int32_t code, const std::string& name, const std::string& message) {
+        auto bar = wp.Upgrade();
+        bar->DestroyServicePanel();
+    };
+    auto wantWrap = WantWrap::CreateWantWrap(appGalleryBundleName, abilityName);
+    wantWrap->SetWantParam(params);
+    LOGI("ServicePanel request bundle: %{public}s, ability: %{public}s. "
+         "UIExtension bundle: %{public}s, ability: %{public}s, module: %{public}s",
+        appGalleryBundleName.c_str(), abilityName.c_str(), params["bundleName"].c_str(), params["abilityName"].c_str(),
+        params["module"].c_str());
+    ModalUIExtensionConfig config;
+    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, callbacks, config);
+#endif
+}
+
 void AppBarView::CreateServicePanel(bool firstTry)
 {
 #ifndef PREVIEW
@@ -362,10 +447,17 @@ std::optional<RectF> AppBarView::GetAppBarRect()
         }
         parent = parent->GetParent();
     }
-    offset.AddY(theme->GetMenuBarTopMargin().ConvertToPx());
-    auto manager = pipeline->GetSafeAreaManager();
-    CHECK_NULL_RETURN(manager, std::nullopt);
-    offset.AddY(manager->GetSystemSafeArea().top_.Length());
+    auto atomRect = atom->GetGeometryNode()->GetFrameRect();
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto left = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT, DimensionUnit::VP).ConvertToPx();
+    auto right = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT, DimensionUnit::VP).ConvertToPx();
+    if (LessOrEqual(offset.GetX(), 0.0) && atomRect.Width() > 0) {
+        auto width = Dimension(ATOMIC_SERVICE_MENU_BAR_WIDTH, DimensionUnit::VP).ConvertToPx();
+        offset.SetX(isRtl ? (right) : (atomRect.Width() - width - left));
+    } else {
+        size.AddWidth((left + right));
+        offset.AddX(isRtl ? 0 : -left);
+    }
     return RectF(offset, size);
 }
 
@@ -378,7 +470,41 @@ void AppBarView::SetStatusBarItemColor(bool isLight)
     auto theme = GetAppBarTheme();
     auto menuBar = pattern->GetMenuBar();
     pattern->settedColorMode = isLight;
-    pattern->UpdateMenuBarColor(theme, menuBar, isLight);
-    pattern->UpdateColor(isLight);
+    pattern->ColorConfigurationCallBack();
+}
+
+void AppBarView::OnMenuClick()
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    CHECK_NULL_VOID(theme);
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        LOGI("start panel bundleName is %{public}s, abilityName is %{public}s", theme->GetBundleName().c_str(),
+            theme->GetAbilityName().c_str());
+        pipeline->FireSharePanelCallback(theme->GetBundleName(), theme->GetAbilityName());
+    } else {
+        CreateServicePanel(true);
+    }
+}
+
+void AppBarView::OnCloseClick()
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "AppBar OnCloseClick");
+    if (container->IsUIExtensionWindow()) {
+        container->TerminateUIExtension();
+    } else {
+        auto windowManager = pipeline->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->WindowPerformBack();
+    }
 }
 } // namespace OHOS::Ace::NG

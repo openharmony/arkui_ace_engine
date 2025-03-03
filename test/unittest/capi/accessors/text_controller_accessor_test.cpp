@@ -56,9 +56,9 @@ class MockTextController : public TextController {
 public:
     MOCK_METHOD(void, CloseSelectionMenu, ());
 
-    void SetStyledString(const RefPtr<SpanStringBase>& value) override
+    void SetStyledString(const RefPtr<SpanStringBase>& value, bool closeSelectOverlay) override
     {
-        SpanString* spanString = DynamicCast<SpanString>(value.GetRawPtr());
+        auto spanString = DynamicCast<SpanString>(value);
         if (spanString) {
             g_actualSpanString = spanString->GetString();
         }

@@ -29,16 +29,31 @@ struct CJFlexParams {
     int32_t alignContent;
 };
 
+struct CJFlexOptions {
+    int32_t direction;
+    int32_t wrap;
+    int32_t justifyContent;
+    int32_t alignItems;
+    int32_t alignContent;
+    double mainSpace;
+    int32_t mainSpaceUnit;
+    double crossSpace;
+    int32_t crossSpaceUnit;
+};
+
 CJ_EXPORT void FfiOHOSAceFrameworkFlexCreate();
 CJ_EXPORT void FfiOHOSAceFrameworkFlexCreateWithParams(CJFlexParams params);
 CJ_EXPORT void FfiOHOSAceFrameworkFlexSetFlexWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkFlexSetFlexHeight(double height, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkFlexSetFlexSize(double width, int32_t widthUnit, double height, int32_t heightUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkFlexCreateByOptions(CJFlexOptions options);
 }
 
 namespace OHOS::Ace {
 void FlexCreateFlexComponent(CJFlexParams params);
 void FlexCreateWrapComponent(CJFlexParams params);
+void FlexCreateFlexComponentByOptions(CJFlexOptions options);
+void FlexCreateWrapComponentByOptions(CJFlexOptions options);
 } // namespace OHOS::Ace
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_FLEX_FFI_H

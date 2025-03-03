@@ -208,13 +208,7 @@ void ResetTrackBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<SliderTheme>();
-    CHECK_NULL_VOID(theme);
-
-    SliderModelNG::SetTrackBackgroundColor(
-        frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor()), true);
+    SliderModelNG::ResetTrackColor(frameNode);
 }
 
 void SetSelectColor(ArkUINodeHandle node, uint32_t color)
@@ -228,12 +222,7 @@ void ResetSelectColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<SliderTheme>();
-    CHECK_NULL_VOID(theme);
-    SliderModelNG::SetSelectColor(
-        frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor()), true);
+    SliderModelNG::ResetSelectColor(frameNode);
 }
 
 void SetShowSteps(ArkUINodeHandle node, int showSteps)
@@ -312,7 +301,7 @@ void SetSliderStyle(ArkUINodeHandle node, int value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value >= static_cast<int32_t>(SLIDER_MODE.size())) {
+    if (value < 0 || value >= static_cast<int32_t>(SLIDER_MODE.size())) {
         return;
     }
     SliderModelNG::SetSliderMode(frameNode, SLIDER_MODE[value]);
@@ -448,6 +437,9 @@ void SetSliderBlockType(ArkUINodeHandle node, int value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value < 0 || value >= static_cast<int32_t>(SLIDER_STYLE_TYPE.size())) {
+        return;
+    }
     SliderModelNG::SetBlockType(frameNode, SLIDER_STYLE_TYPE[value]);
 }
 
@@ -513,6 +505,25 @@ void ResetMinResponsiveDistance(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetMinResponsiveDistance(frameNode);
+}
+
+void SetOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(float, int32_t)>*>(callback);
+        SliderModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        SliderModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetOnChange(frameNode, nullptr);
 }
 
 ArkUI_Uint32 GetBlockColor(ArkUINodeHandle node)
@@ -655,16 +666,37 @@ ArkUISliderValidSlideRange GetSliderValidSlideRange(ArkUINodeHandle node)
     };
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, errorReturn);
-    auto rangeValue = SliderModelNG::GetValidSlideRange(frameNode).GetRawPtr();
+    auto rangeValue = SliderModelNG::GetValidSlideRange(frameNode);
     CHECK_NULL_RETURN(rangeValue && rangeValue->HasValidValues(), errorReturn);
     return { rangeValue->GetFromValue(), rangeValue->GetToValue() };
+}
+
+ArkUI_Bool GetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return SliderModelNG::GetEnableHapticFeedback(frameNode);
+}
+
+void SetEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetEnableHapticFeedback(frameNode, true);
 }
 } // namespace SliderModifier
 
 namespace NodeModifier {
 const ArkUISliderModifier* GetSliderModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISliderModifier modifier = {
         .setShowTips = SliderModifier::SetShowTips,
         .resetShowTips = SliderModifier::ResetShowTips,
@@ -719,6 +751,8 @@ const ArkUISliderModifier* GetSliderModifier()
         .resetInteractionMode = SliderModifier::ResetInteractionMode,
         .setMinResponsiveDistance = SliderModifier::SetMinResponsiveDistance,
         .resetMinResponsiveDistance = SliderModifier::ResetMinResponsiveDistance,
+        .setOnChange = SliderModifier::SetOnChange,
+        .resetOnChange = SliderModifier::ResetOnChange,
         .getBlockColor = SliderModifier::GetBlockColor,
         .getTrackBackgroundColor = SliderModifier::GetTrackBackgroundColor,
         .getSelectColor = SliderModifier::GetSelectColor,
@@ -735,22 +769,18 @@ const ArkUISliderModifier* GetSliderModifier()
         .getSliderBlockShape = SliderModifier::GetSliderBlockShape,
         .getThickness = SliderModifier::GetThickness,
         .getSliderValidSlideRange = SliderModifier::GetSliderValidSlideRange,
+        .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUISliderModifier* GetCJUISliderModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISliderModifier modifier = {
         .setShowTips = SliderModifier::SetShowTips,
         .resetShowTips = SliderModifier::ResetShowTips,
@@ -821,15 +851,11 @@ const CJUISliderModifier* GetCJUISliderModifier()
         .getSliderBlockShape = SliderModifier::GetSliderBlockShape,
         .getThickness = SliderModifier::GetThickness,
         .getSliderValidSlideRange = SliderModifier::GetSliderValidSlideRange,
+        .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

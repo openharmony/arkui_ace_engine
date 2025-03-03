@@ -26,6 +26,10 @@ struct CJBadgeStyle {
     double fontSize;
     double badgeSize;
     uint32_t badgeColor;
+    uint32_t fontWeight;
+    uint32_t borderColor;
+    double borderWidth;
+    uint32_t borderWidthUnit;
 };
 
 CJ_EXPORT void FfiOHOSAceFrameworkBadgeCreate(int32_t count, CJBadgeStyle style, int32_t position, int32_t maxCount);

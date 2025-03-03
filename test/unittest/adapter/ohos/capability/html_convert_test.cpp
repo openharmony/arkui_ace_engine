@@ -178,7 +178,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert000, TestSize.Level1)
     auto dstSpan = toSpan.ToSpanString(out);
     EXPECT_NE(dstSpan, nullptr);
     auto items = dstSpan->GetSpanItems();
-    EXPECT_EQ(items.size(), 16);
+    EXPECT_EQ(items.size(), 17);
 }
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert001, TestSize.Level1)
@@ -210,9 +210,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert001, TestSize.Level1)
 HWTEST_F(HtmlConvertTestNg, HtmlConvert002, TestSize.Level1)
 {
     auto imageOption = GetImageOption("src/icon-1.png");
-    auto imageSpan = AceType::MakeRefPtr<MutableSpanString>(imageOption);
-    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>(u"123456");
-    imageSpan->AppendSpanString(mutableStr2);
+    auto imageSpan = AceType::MakeRefPtr<MutableSpanString>(u"123456");
 
     std::vector<uint8_t> buffer;
     imageSpan->EncodeTlv(buffer);
@@ -327,7 +325,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert007, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
     EXPECT_EQ(spans.size(), 1);
     auto it = spans.begin();
-    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(50, DimensionUnit::PX));
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(50, DimensionUnit::VP));
 }
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)

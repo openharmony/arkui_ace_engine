@@ -30,10 +30,8 @@ namespace {
 using StartServer = bool (*)(const std::string& packageName);
 using StartServerForSocketPair = bool (*)(int32_t);
 using SendMessage = void (*)(const std::string& message);
-using SendLayoutMessage = void (*)(const std::string& message);
 using StopServer = void (*)(const std::string& packageName);
 using StoreMessage = void (*)(int32_t instanceId, const std::string& message);
-using StoreInspectorInfo = void (*)(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
 using RemoveMessage = void (*)(int32_t instanceId);
 using WaitForConnection = bool (*)();
 using SetSwitchCallBack = void (*)(const std::function<void(bool)>& setStatus,
@@ -41,9 +39,7 @@ using SetSwitchCallBack = void (*)(const std::function<void(bool)>& setStatus,
 using SetDebugModeCallBack = void (*)(const std::function<void()>& setDebugMode);
 
 SendMessage g_sendMessage = nullptr;
-SendLayoutMessage g_sendLayoutMessage = nullptr;
 RemoveMessage g_removeMessage = nullptr;
-StoreInspectorInfo g_storeInspectorInfo = nullptr;
 StoreMessage g_storeMessage = nullptr;
 SetSwitchCallBack g_setSwitchCallBack = nullptr;
 SetDebugModeCallBack g_setDebugModeCallBack = nullptr;
@@ -100,8 +96,6 @@ bool ConnectServerManager::InitFunc()
     g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(dlsym(handlerConnectServerSo_, "SetSwitchCallBack"));
     g_setDebugModeCallBack =
         reinterpret_cast<SetDebugModeCallBack>(dlsym(handlerConnectServerSo_, "SetDebugModeCallBack"));
-    g_sendLayoutMessage = reinterpret_cast<SendLayoutMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
-    g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(dlsym(handlerConnectServerSo_, "StoreInspectorInfo"));
     g_waitForConnection = reinterpret_cast<WaitForConnection>(dlsym(handlerConnectServerSo_, "WaitForConnection"));
 #else
     using namespace OHOS::ArkCompiler;
@@ -110,8 +104,6 @@ bool ConnectServerManager::InitFunc()
     g_removeMessage = reinterpret_cast<RemoveMessage>(&Toolchain::RemoveMessage);
     g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(&Toolchain::SetSwitchCallBack);
     g_setDebugModeCallBack = reinterpret_cast<SetDebugModeCallBack>(&Toolchain::SetDebugModeCallBack);
-    g_sendLayoutMessage = reinterpret_cast<SendLayoutMessage>(&Toolchain::SendLayoutMessage);
-    g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(&Toolchain::StoreInspectorInfo);
     g_waitForConnection = reinterpret_cast<WaitForConnection>(&Toolchain::WaitForConnection);
 #endif
     if (g_sendMessage == nullptr || g_storeMessage == nullptr || g_removeMessage == nullptr) {
@@ -119,8 +111,7 @@ bool ConnectServerManager::InitFunc()
         return false;
     }
 
-    if (g_storeInspectorInfo == nullptr || g_setSwitchCallBack == nullptr || g_waitForConnection == nullptr ||
-        g_sendLayoutMessage == nullptr) {
+    if (g_setSwitchCallBack == nullptr || g_waitForConnection == nullptr) {
         CloseConnectServerSo();
         return false;
     }
@@ -234,9 +225,8 @@ void ConnectServerManager::AddInstance(
 void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
 {
     LOGI("ConnectServerManager SendInspector Start");
-    g_sendLayoutMessage(jsonTreeStr);
-    g_sendLayoutMessage(jsonSnapshotStr);
-    g_storeInspectorInfo(jsonTreeStr, jsonSnapshotStr);
+    g_sendMessage(jsonTreeStr);
+    g_sendMessage(jsonSnapshotStr);
 }
 
 void ConnectServerManager::RemoveInstance(int32_t instanceId)

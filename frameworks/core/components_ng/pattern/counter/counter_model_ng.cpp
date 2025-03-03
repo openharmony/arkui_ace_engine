@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -92,8 +90,11 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(symbol);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::CENTER);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->UpdateContent(symbol);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    }
     textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
@@ -134,7 +135,7 @@ void CounterModelNG::SetEnableDec(bool enableDec)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
         subNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -156,7 +157,7 @@ void CounterModelNG::SetEnableInc(bool enableInc)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
         addNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -175,9 +176,7 @@ void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
                         clickEvent();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onInc");
-#endif
+                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc");
                     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -193,9 +192,7 @@ void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
     auto gestureHub = subNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
                         clickEvent();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDec");
-#endif
+                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
                     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -266,7 +263,7 @@ void CounterModelNG::SetEnableDec(FrameNode* frameNode, bool enableDec)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
         subNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -286,7 +283,7 @@ void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
         addNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -369,7 +366,7 @@ void CounterModelNG::SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc)
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
                         clickEvent();
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onInc");
+                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc");
 #endif
                     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
@@ -386,9 +383,14 @@ void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
                         clickEvent();
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDec");
+                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
 #endif
                     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
+}
+
+void CounterModelNG::ResetBackgroundColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
 }
 } // namespace OHOS::Ace::NG

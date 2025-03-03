@@ -21,6 +21,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -49,8 +50,8 @@ enum class DismissReason {
     CLOSE_BUTTON,
 };
 
-class BubblePattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView);
+class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     BubblePattern() = default;
@@ -220,6 +221,16 @@ public:
         hasTransition_ = hasTransition;
     }
 
+    void SetAvoidKeyboard(bool avoidKeyboard)
+    {
+        avoidKeyboard_ = avoidKeyboard;
+    }
+
+    bool GetAvoidKeyboard()
+    {
+        return avoidKeyboard_;
+    }
+
     bool GetHasTransition() const
     {
         return hasTransition_;
@@ -337,6 +348,7 @@ private:
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
     bool isSetMessageColor_ = false;
     Border border_;
+    bool avoidKeyboard_ = false;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

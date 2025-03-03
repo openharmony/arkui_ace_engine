@@ -23,7 +23,9 @@
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkImageCreateWithUrl(const char* url);
 CJ_EXPORT void FfiOHOSAceFrameworkImageCreateWithPixelMap(int64_t pixelMapId);
+CJ_EXPORT void FfiOHOSAceFrameworkImageCreateWithContent(int32_t imageContent);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetAlt(const char* url);
+CJ_EXPORT void FfiOHOSAceFrameworkImageSetAltWithPixelMap(int64_t pixelMapId);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetObjectFit(int32_t objectFit);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetObjectRepeat(int32_t objectRepeat);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetInterpolation(int32_t interpolation);
@@ -36,6 +38,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkImageSetImageFill(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetAutoResize(bool autoResize);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetMatchTextDirection(bool isMatchTextDirection);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetFitOriginalSize(bool isFitOriginalSize);
+CJ_EXPORT void FfiOHOSAceFrameworkImageSetColorFilter(void* vectorHandle);
+CJ_EXPORT void FfiOHOSAceFrameworkImageDynamicRangeMode(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkImageCopyOption(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkImageDraggable(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkImageOnError(void (*callback)(CJImageError errorInfo));
 CJ_EXPORT void FfiOHOSAceFrameworkImageOnFinish(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkImageOnComplete(void (*callback)(CJImageComplete completeInfo));

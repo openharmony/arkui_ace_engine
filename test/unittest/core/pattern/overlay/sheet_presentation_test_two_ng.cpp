@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,6 +59,7 @@ private:
 void SheetPresentationTestTwoNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
@@ -150,6 +152,7 @@ void SheetPresentationTestTwoNg::SetSheetType(RefPtr<SheetPresentationPattern> s
 void SheetPresentationTestTwoNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -802,6 +805,8 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode004, TestSize.Level
     EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
     EXPECT_NE(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
     EXPECT_FALSE(sheetPattern->isDismissProcess_);
+    auto focusHub = host->GetFocusHub();
+    focusHub->currentFocus_ = true;
     EXPECT_TRUE(sheetPattern->AvoidKeyboardBeforeTranslate());
     sheetPattern->AvoidKeyboardBySheetMode();
     SheetPresentationTestTwoNg::TearDownTestCase();
@@ -940,11 +945,11 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode007, TestSize.Level
 }
 
 /**
- * @tc.name: IsCustomHeightOrDetentsChanged001
+ * @tc.name: IsNeedPlayTransition001
  * @tc.desc: Test update detents of sheetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged001, TestSize.Level1)
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sheet page.
@@ -972,11 +977,11 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged001, TestSize
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step3. excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
-    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
      * @tc.steps: step4. change detents of SheetStyle.
@@ -990,22 +995,22 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged001, TestSize
     style.detents.emplace_back(detent);
 
     /**
-     * @tc.steps: step5. excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step5. excute the IsNeedPlayTransition function.
      * @tc.expected: true
      */
     layoutProperty->UpdateSheetStyle(style);
-    style.sheetMode = SheetMode::LARGE;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, true);
+    style.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
 /**
- * @tc.name: IsCustomHeightOrDetentsChanged002
+ * @tc.name: IsNeedPlayTransition002
  * @tc.desc: Test update sheetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged002, TestSize.Level1)
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sheet page.
@@ -1015,8 +1020,8 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged002, TestSize
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
     SheetStyle style;
-    style.height = Dimension(100.0f, DimensionUnit::AUTO);
-    style.sheetMode = SheetMode::MEDIUM;
+    style.sheetHeight.height = Dimension(100.0f, DimensionUnit::AUTO);
+    style.sheetHeight.sheetMode = SheetMode::MEDIUM;
     style.showDragBar = false;
     style.showCloseIcon = false;
     style.isTitleBuilder = false;
@@ -1035,85 +1040,85 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged002, TestSize
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step3. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: true
      */
     layoutProperty->UpdateSheetStyle(style);
-    style.height = Dimension(200.0f, DimensionUnit::AUTO);
-    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, true);
+    style.sheetHeight.height = Dimension(200.0f, DimensionUnit::AUTO);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step4. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step4. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: true
      */
     layoutProperty->UpdateSheetStyle(style);
-    style.sheetMode = SheetMode::LARGE;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, true);
+    style.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step5. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step5. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.showDragBar = true;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step6. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step6. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.showCloseIcon = true;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step7. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step7. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.isTitleBuilder = true;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step8. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step8. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.backgroundColor = Color::BLACK;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step9. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step9. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.maskColor = Color::BLACK;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step10. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step10. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.bottomOffset = OffsetF(200.0, 200.0);
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
 /**
- * @tc.name: IsCustomHeightOrDetentsChanged003
+ * @tc.name: IsNeedPlayTransition003
  * @tc.desc: Test update sheetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged003, TestSize.Level1)
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sheet page.
@@ -1149,89 +1154,260 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged003, TestSize
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step3. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     styleOption.blurStyle = BlurStyle::THICK;
     style.backgroundBlurStyle = styleOption;
-    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step4. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step4. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.sheetTitle = "title2";
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step5. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step5. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.sheetSubtitle = "subtile2";
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step6. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step6. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.scrollSizeMode = ScrollSizeMode::CONTINUOUS;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step7. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step7. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     BorderWidth.SetBorderWidth(Dimension(20.0));
     style.borderWidth = BorderWidth;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step8. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step8. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.borderColor = { Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK };
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step9. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step9. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.borderStyle = { BorderStyle::DASHED, BorderStyle::DASHED, BorderStyle::DASHED, BorderStyle::DASHED };
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step10. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step10. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     shadow = ShadowConfig::NoneShadow;
     style.shadow = shadow;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step11. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step11. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.width = Dimension(200.0f, DimensionUnit::AUTO);
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
     SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition004
+ * @tc.desc: Branch: if (!inputStyle.detentSelection.has_value() || inputStyle.detents.size() == 0).
+ *           Condition: !inputStyle.detentSelection.has_value().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition004, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    style.detents.emplace_back(detent);
+    SheetHeight detent1;
+    detent1.height->unit_ = DimensionUnit::VP;
+    detent1.height->value_ = 100;
+    style.detents.emplace_back(detent1);
+    layoutProperty->UpdateSheetStyle(style);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition005
+ * @tc.desc: Branch: if (!inputStyle.detentSelection.has_value() || inputStyle.detents.size() == 0).
+ *           Condition: inputStyle.detents.size() == 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition005, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateSheetStyle(style);
+    SheetHeight sheetHeight;
+    sheetHeight.sheetMode = SheetMode::MEDIUM;
+    style.detentSelection = sheetHeight;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition006
+ * @tc.desc: Branch: if ((selection.sheetMode.has_value() && selection.sheetMode.value() == NG::SheetMode::AUTO)).
+ *           Condition: (selection.sheetMode.has_value() && selection.sheetMode.value() == NG::SheetMode::AUTO).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition006, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetHeight sheetHeight;
+    sheetHeight.sheetMode = SheetMode::AUTO;
+    style.detents.emplace_back(sheetHeight);
+    layoutProperty->UpdateSheetStyle(style);
+    style.detentSelection = sheetHeight;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 0);
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition007
+ * @tc.desc: Branch: if (inputStyle.detents[index] == inputStyle.detentSelection.value()).
+ *           Condition 1: inputStyle.detents[index] == inputStyle.detentSelection.value().
+ *                     2: inputStyle.detents[index] != inputStyle.detentSelection.value().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition007, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    style.detents.emplace_back(detent);
+    SheetHeight detent1;
+    detent1.height->unit_ = DimensionUnit::VP;
+    detent1.height->value_ = 100;
+    style.detents.emplace_back(detent1);
+    layoutProperty->UpdateSheetStyle(style);
+    style.detentSelection = detent1;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+
+    layoutProperty->UpdateSheetStyle(style);
+    SheetHeight selection1;
+    selection1.sheetMode = SheetMode::LARGE;
+    style.detentSelection = selection1;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsNeedPlayTransition008
+ * @tc.desc: Branch: if (!isFirstTransition && preStyle.detentSelection == inputStyle.detentSelection).
+ *           Condition: preStyle.detentSelection == inputStyle.detentSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition008, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetHeight height1;
+    height1.sheetMode = SheetMode::AUTO;
+    SheetHeight height2;
+    height2.height->unit_ = DimensionUnit::VP;
+    height2.height->value_ = 100;
+    style.detents.emplace_back(height1);
+    style.detents.emplace_back(height2);
+    layoutProperty->UpdateSheetStyle(style);
+    style.detentSelection = height2;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
+
+    layoutProperty->UpdateSheetStyle(style);
+    style.detentSelection = height2;
+    style.showDragBar = true;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
+    EXPECT_EQ(sheetPattern->GetDetentsIndex(), 1);
 }
 
 /**
@@ -1274,7 +1450,7 @@ HWTEST_F(SheetPresentationTestTwoNg, FireOnHeightDidChange001, TestSize.Level1)
      * @tc.expected: Make sure the modalStack holds the sheetNode.
      */
     SheetStyle sheetStyle;
-    sheetStyle.height = Dimension(100.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetHeight.height = Dimension(100.0f, DimensionUnit::AUTO);
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
@@ -1286,18 +1462,18 @@ HWTEST_F(SheetPresentationTestTwoNg, FireOnHeightDidChange001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. same height to excute FireOnHeightDidChange.
-     * @tc.expected: preDidHeight_ is 100.
+     * @tc.expected: preDidHeight_ is -8.
      */
 
-    sheetPattern->FireOnHeightDidChange(100);
-    EXPECT_EQ(sheetPattern->preDidHeight_, 100);
+    sheetPattern->FireOnHeightDidChange();
+    EXPECT_EQ(sheetPattern->preDidHeight_, -8);
 
     /**
      * @tc.steps: step5. new height to excute FireOnHeightDidChange.
-     * @tc.expected: preDidHeight_ is 200.
+     * @tc.expected: preDidHeight_ is -8.
      */
-    sheetPattern->FireOnHeightDidChange(200);
-    EXPECT_EQ(sheetPattern->preDidHeight_, 200);
+    sheetPattern->FireOnHeightDidChange();
+    EXPECT_EQ(sheetPattern->preDidHeight_, -8);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -1737,9 +1913,13 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus003, TestSize.Level1)
 HWTEST_F(SheetPresentationTestTwoNg, UpdateBackBlurStyle001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create target node.
+     * @tc.steps: step1. create target node and set API12.
      */
     SheetPresentationTestTwoNg::SetUpTestCase();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
     auto stageNode = FrameNode::CreateFrameNode(
@@ -1959,7 +2139,7 @@ HWTEST_F(SheetPresentationTestTwoNg, CalculateSheetOffsetInOtherScenes001, TestS
      */
     auto layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
-    sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(layoutWrapper.GetRawPtr());
+    sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_,
         SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() + (1000 - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() - 500) / 2);
 
@@ -1988,7 +2168,7 @@ HWTEST_F(SheetPresentationTestTwoNg, CalculateSheetOffsetInOtherScenes001, TestS
      */
     layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
-    sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(layoutWrapper.GetRawPtr());
+    sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_,
         4500 + (2000 - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - 4500 - 600) / 2);
     SheetPresentationTestTwoNg::TearDownTestCase();
@@ -2460,5 +2640,345 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     auto sheetMaxHeight = sheetPattern->GetMaxSheetHeightBeforeDragUpdate();
     EXPECT_EQ(sheetHeight, 1040);
     EXPECT_EQ(sheetMaxHeight, 1040);
+}
+
+/**
+ * @tc.name: CreateScrollNode001
+ * @tc.desc: Branch: if (sheetStyle.sheetEffectEdge.has_value()
+ *                      && sheetStyle.sheetEffectEdge.value() == NG::SheetEffectEdge::NONE).
+ *           Condition: 1.sheetStyle.sheetEffectEdge.has_value(),
+ *                      2.sheetStyle.sheetEffectEdge.value() = NG::SheetEffectEdge::NONE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, CreateScrollNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scroll node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetStyle style;
+    style.sheetEffectEdge = NG::SheetEffectEdge::NONE;
+    auto scrollNode = SheetView::CreateScrollNode(style);
+    ASSERT_NE(scrollNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. create scroll pattern, test target branch.
+     * @tc.expected: scrollPattern->GetEffectEdge() == EffectEdge::NONE.
+     */
+    auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
+    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::NONE);
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::NONE);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateScrollNode002
+ * @tc.desc: Branch: if (sheetStyle.sheetEffectEdge.has_value()
+ *                      && sheetStyle.sheetEffectEdge.value() == NG::SheetEffectEdge::NONE).
+ *           Condition: !sheetStyle.sheetEffectEdge.has_value().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, CreateScrollNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scroll node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetStyle style;
+    auto scrollNode = SheetView::CreateScrollNode(style);
+    ASSERT_NE(scrollNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. create scroll pattern, test target branch.
+     * @tc.expected: scrollPattern->GetEffectEdge() == EffectEdge::NONE.
+     */
+    auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
+    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::ALL);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateScrollNode003
+ * @tc.desc: Branch: if (sheetStyle.sheetEffectEdge.has_value()
+ *                      && sheetStyle.sheetEffectEdge.value() == NG::SheetEffectEdge::NONE).
+ *           Condition: 1.sheetStyle.sheetEffectEdge.has_value(),
+ *                      2.sheetStyle.sheetEffectEdge.value() = NG::SheetEffectEdge::START.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, CreateScrollNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scroll node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetStyle style;
+    style.sheetEffectEdge = NG::SheetEffectEdge::START;
+    auto scrollNode = SheetView::CreateScrollNode(style);
+    ASSERT_NE(scrollNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. create scroll pattern, test target branch.
+     * @tc.expected: scrollPattern->GetEffectEdge() == EffectEdge::START.
+     */
+    auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
+    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: InitScrollPropsTest001
+ * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
+ *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::NONE,
+ *                      2.scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, IsScrollable().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 001, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 003,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 004, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+
+    auto scrollNode =
+        FrameNode::CreateFrameNode("Scroll", 005, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 1121,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get scrollPattern and sheetPattern.
+     */
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step3. init sheetPattern value, set scrollSizeMode_, scrollableDistance_, sheetEffectEdge_.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
+    scrollPattern->scrollableDistance_ = 5.2f;
+    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::NONE;
+
+    /**
+     * @tc.steps: step4. test "InitScrollProps",
+     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS,
+     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
+     */
+    sheetPattern->InitScrollProps();
+    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::NONE);
+    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
+    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::ALL);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: InitScrollPropsTest002
+ * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
+ *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::NONE,
+ *                      2.scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, IsScrollable().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 01, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 03,
+        AceType::MakeRefPtr<SheetPresentationPattern>(04, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 05, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+
+    auto scrollNode =
+        FrameNode::CreateFrameNode("Scroll", 06, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 07,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get sheetPattern、 scrollPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. init sheetPattern value.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
+    scrollPattern->scrollableDistance_ = 5.2f;
+    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::NONE;
+
+    /**
+     * @tc.steps: step4. test "InitScrollProps",
+     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT,
+     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
+     */
+    sheetPattern->InitScrollProps();
+    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::NONE);
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::ALL);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: InitScrollPropsTest003
+ * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
+ *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::START,
+ *                      2.scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, IsScrollable().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 3,
+        AceType::MakeRefPtr<SheetPresentationPattern>(4, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 5, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+
+    auto scrollNode =
+        FrameNode::CreateFrameNode("Scroll", 6, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 7,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get sheetPattern and scrollPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. init sheetPattern value.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
+    scrollPattern->scrollableDistance_ = 3.6f;
+    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::START;
+
+    /**
+     * @tc.steps: step4. test "InitScrollProps",
+     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT,
+     * scrollableDistance_ < 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
+     */
+    sheetPattern->InitScrollProps();
+    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: InitScrollPropsTest004
+ * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
+ *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::START,
+ *                      2.scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, IsScrollable().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 10, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 20,
+        AceType::MakeRefPtr<SheetPresentationPattern>(30, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 40, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+
+    auto scrollNode =
+        FrameNode::CreateFrameNode("Scroll", 50, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 60,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    
+    /**
+     * @tc.steps: step2. get sheetPattern and scrollPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. init sheetPattern value.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
+    scrollPattern->scrollableDistance_ = 1.3f;
+    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::START;
+
+    /**
+     * @tc.steps: step4. test "InitScrollProps",
+     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS,
+     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::START.
+     */
+    sheetPattern->InitScrollProps();
+    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
+    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
+    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
+    SheetPresentationTestTwoNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

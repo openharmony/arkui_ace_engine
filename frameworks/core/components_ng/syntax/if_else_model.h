@@ -32,9 +32,10 @@ public:
     virtual ~IfElseModel() = default;
     virtual void Create() = 0;
     virtual void Pop() = 0;
-    virtual void SetBranchId(int32_t value, std::list<int32_t>& removedElmtId) = 0;
+    virtual void SetBranchId(int32_t value, std::list<int32_t>& removedElmtId, std::list<int32_t>& reservedElmtId) = 0;
     virtual int32_t GetBranchId() = 0;
     virtual bool CanRetake(const std::string& id) = 0;
+    virtual bool GetRetakenElmtIds(std::list<int32_t>& retakenElmtIds) = 0;
 };
 } // namespace OHOS::Ace
 

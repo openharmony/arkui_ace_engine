@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -90,6 +91,17 @@ void SetFadingEdge(ArkUINodeHandle node, ArkUI_Bool fadingEdge)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetFadingEdge(frameNode, fadingEdge);
+}
+void SetTabOnUnselected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnUnselected(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnUnselected(frameNode, nullptr);
+    }
 }
 void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -242,12 +254,17 @@ void ResetDivider(ArkUINodeHandle node)
 
     TabsModelNG::SetDivider(frameNode, divider);
 }
-
 void ResetFadingEdge(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetFadingEdge(frameNode, true);
+}
+void ResetTabOnUnselected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnUnselected(frameNode, nullptr);
 }
 void ResetBarBackgroundColor(ArkUINodeHandle node)
 {
@@ -455,16 +472,55 @@ void ResetBarBackgroundEffect(ArkUINodeHandle node)
     TabsModelNG::SetBarBackgroundEffect(frameNode, effectOption);
 }
 
+void SetTabsOnSelected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnSelected(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnSelected(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnSelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnSelected(frameNode, nullptr);
+}
+
+void SetCachedMaxCount(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+        mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+        cacheMode = static_cast<TabsCacheMode>(mode);
+    }
+    TabsModelNG::SetCachedMaxCount(frameNode, count, cacheMode);
+}
+
+void ResetCachedMaxCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetCachedMaxCount(frameNode, std::nullopt, TabsCacheMode::CACHE_BOTH_SIDE);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITabsModifier modifier = {
         .setTabBarMode = SetTabBarMode,
         .setScrollableBarModeOptions = SetScrollableBarModeOptions,
         .setBarGridAlign = SetBarGridAlign,
         .setDivider = SetDivider,
         .setFadingEdge = SetFadingEdge,
+        .setTabOnUnselected = SetTabOnUnselected,
         .setBarBackgroundColor = SetBarBackgroundColor,
         .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
         .setBarOverlap = SetBarOverlap,
@@ -482,6 +538,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetBarGridAlign = ResetBarGridAlign,
         .resetDivider = ResetDivider,
         .resetFadingEdge = ResetFadingEdge,
+        .resetTabOnUnselected = ResetTabOnUnselected,
         .resetBarBackgroundColor = ResetBarBackgroundColor,
         .resetBarBackgroundBlurStyle = ResetBarBackgroundBlurStyle,
         .resetBarOverlap = ResetBarOverlap,
@@ -507,22 +564,19 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
+        .setCachedMaxCount = SetCachedMaxCount,
+        .resetCachedMaxCount = ResetCachedMaxCount,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITabsModifier* GetCJUITabsModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITabsModifier modifier = {
         .setTabBarMode = SetTabBarMode,
         .setScrollableBarModeOptions = SetScrollableBarModeOptions,
@@ -569,15 +623,10 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

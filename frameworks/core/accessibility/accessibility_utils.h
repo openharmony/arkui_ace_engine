@@ -112,6 +112,7 @@ enum class AccessibilityEventType : size_t {
     ANNOUNCE_FOR_ACCESSIBILITY = 0x10000000,
     PAGE_OPEN = 0x20000000,
     ELEMENT_INFO_CHANGE = 0x40000000,
+    SCROLLING_EVENT = 0x40000003,
     UNKNOWN,
 };
 
@@ -168,6 +169,8 @@ enum class AceAction : uint32_t {
     ACTION_CLEAR_SELECTION,
     ACTION_SET_CURSOR_POSITION,
     ACTION_EXEC_SUB_COMPONENT,
+    ACTION_NEXT_HTML_ITEM,
+    ACTION_PREVIOUS_HTML_ITEM,
 };
 
 struct AccessibilityValue {

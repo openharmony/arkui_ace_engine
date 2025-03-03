@@ -31,6 +31,9 @@ void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnima
     CHECK_NULL_VOID(host);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(host);
     CHECK_NULL_VOID(selectOverlayNode);
+    if (!menuIsShow) {
+        DeleteHotAreas();
+    }
     info_->menuInfo.menuIsShow = menuIsShow;
     selectOverlayNode->UpdateToolBar(false, noAnimation);
 }

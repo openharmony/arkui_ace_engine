@@ -41,6 +41,9 @@ public:
     virtual void SetChangeEvent(NG::GroupChangeEvent&& changeEvent) {};
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
     virtual void SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyle) {};
+    virtual void ResetSelectedColor() {};
+    virtual void ResetUnSelectedColor() {};
+    virtual void ResetCheckMarkColor() {};
 
 private:
     static std::unique_ptr<CheckBoxGroupModel> instance_;

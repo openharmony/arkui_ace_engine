@@ -457,6 +457,11 @@ bool CalendarMonthPattern::IsDateInRange(const CalendarDay& day)
     date.SetYear(day.month.year);
     date.SetMonth(day.month.month);
     date.SetDay(day.day);
+    for (const auto& range : disabledDateRange_) {
+        if (PickerDate::IsDateInRange(date, range.first, range.second)) {
+            return false;
+        }
+    }
     return PickerDate::IsDateInRange(date, startDate_, endDate_);
 }
 

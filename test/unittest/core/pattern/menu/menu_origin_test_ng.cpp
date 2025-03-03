@@ -611,18 +611,19 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate005, TestSize.Level1)
      * @tc.steps: step3: create custom menu pattern
      * @tc.expected: enableFold is ture
      */
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_EQ(menuPattern->enableFold_, true);
-    ASSERT_EQ(menuPattern->GetHoverMode(), true);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    ASSERT_EQ(menuWrapperPattern->enableFold_, true);
+    ASSERT_EQ(menuWrapperPattern->GetHoverMode(), true);
 
     /**
      * @tc.steps: step4: menu pattern SetFold
      * @tc.expected: enableFold is fasle/ture
      */
-    menuPattern->SetHoverMode(true);
-    ASSERT_EQ(menuPattern->enableFold_, true);
-    menuPattern->SetHoverMode(false);
-    ASSERT_EQ(menuPattern->enableFold_, false);
+    menuWrapperPattern->SetHoverMode(true);
+    ASSERT_EQ(menuWrapperPattern->enableFold_, true);
+    menuWrapperPattern->SetHoverMode(false);
+    ASSERT_EQ(menuWrapperPattern->enableFold_, false);
 }
 
 /**
@@ -1275,6 +1276,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
     algorithm->canExpandCurrentWindow_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
+    selectTheme->menuPadding_ = 10.0_vp;
     selectTheme->menuLargeMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
     ASSERT_EQ(algorithm->optionPadding_, 10.0f);

@@ -100,14 +100,12 @@ private:
     AccessibilityHoverTestPathForThird HoverPathForThird(
         const int64_t hostElementId,
         const NG::PointF& point,
-        AccessibilityElementInfo& rootInfo,
-        NG::OffsetF hostOffset);
+        AccessibilityElementInfo& rootInfo);
     bool HoverPathForThirdRecursive(
         const int64_t hostElementId,
         const NG::PointF& hoverPoint,
         const AccessibilityElementInfo& nodeInfo,
-        AccessibilityHoverTestPathForThird& path,
-        NG::OffsetF hostOffset);
+        AccessibilityHoverTestPathForThird& path);
     std::pair<bool, bool> GetSearchStrategyForThird(
         const AccessibilityElementInfo& nodeInfo);
     bool IsAccessibilityFocusable(const AccessibilityElementInfo& nodeInfo);

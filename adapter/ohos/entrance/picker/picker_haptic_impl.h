@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 class PickerAudioHapticImpl : public IPickerAudioHaptic {
 public:
-    PickerAudioHapticImpl();
+    PickerAudioHapticImpl(const std::string& uri, const std::string& effectId);
     ~PickerAudioHapticImpl() = default;
     void Play(size_t speed) override;
     void PlayOnce() override;

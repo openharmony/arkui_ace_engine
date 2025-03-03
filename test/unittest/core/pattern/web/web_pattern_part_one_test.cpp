@@ -1229,7 +1229,7 @@ HWTEST_F(WebPatternPartOneTest, OnDetachContext_001, TestSize.Level1)
     webPattern->OnModifyDone();
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     MockPipelineContext::TearDown();
     EXPECT_EQ(webPattern->nodeAttach_, false);
     EXPECT_EQ(webPattern->scrollableParentInfo_.hasParent, true);
@@ -1257,7 +1257,7 @@ HWTEST_F(WebPatternPartOneTest, OnDetachContext_002, TestSize.Level1)
     webPattern->delegate_ = nullptr;
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     MockPipelineContext::TearDown();
     EXPECT_EQ(webPattern->nodeAttach_, false);
     EXPECT_EQ(webPattern->scrollableParentInfo_.hasParent, true);
@@ -1286,7 +1286,7 @@ HWTEST_F(WebPatternPartOneTest, OnDetachContext_003, TestSize.Level1)
     webPattern->observer_ = nullptr;
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     MockPipelineContext::TearDown();
     EXPECT_EQ(webPattern->nodeAttach_, false);
     EXPECT_EQ(webPattern->scrollableParentInfo_.hasParent, true);
@@ -1316,7 +1316,7 @@ HWTEST_F(WebPatternPartOneTest, OnDetachContext_004, TestSize.Level1)
     webPattern->selectOverlayProxy_ = nullptr;
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     MockPipelineContext::TearDown();
     EXPECT_EQ(webPattern->nodeAttach_, false);
     EXPECT_EQ(webPattern->scrollableParentInfo_.hasParent, true);
@@ -1347,7 +1347,7 @@ HWTEST_F(WebPatternPartOneTest, OnDetachContext_005, TestSize.Level1)
     webPattern->tooltipId_ = -1;
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     MockPipelineContext::TearDown();
     EXPECT_EQ(webPattern->nodeAttach_, false);
     EXPECT_EQ(webPattern->scrollableParentInfo_.hasParent, true);

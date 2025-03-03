@@ -24,7 +24,7 @@
 #include "core/common/interaction/interaction_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/drag_drop_event.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
@@ -84,10 +84,20 @@ struct PreparedInfoForDrag {
     bool isMenuShow = false;
     int32_t badgeNumber = 0;
     float previewScale = 1.0f;
+    bool isNeedCreateTiled = false;
     OffsetF dragPreviewOffsetToScreen = { 0.0f, 0.0f };
     OffsetF dragMovePosition = { 0.0f, 0.0f };
     RefPtr<PixelMap> pixelMap;
     RefPtr<FrameNode> imageNode;
+};
+
+struct PreparedAsyncCtxForAnimate {
+    int32_t containerId = -1;
+    bool hasTouchPoint = false;
+    DragPointerEvent dragPointerEvent;
+    DragPreviewOption dragPreviewOption;
+    DimensionOffset touchPoint = DimensionOffset(0.0_vp, 0.0_vp);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
 };
 
 struct DragframeNodeInfo {
@@ -106,6 +116,9 @@ struct DragDropInfo {
     // The inspectorId acts as a preview surrogate identifier which is used
     // to retrieve a preview image for the item being dragged.
     std::string inspectorId;
+    std::function<RefPtr<UINode>()> buildFunc;
+    bool onlyForLifting = false;
+    bool delayCreating = false;
 };
 
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
@@ -193,6 +206,7 @@ public:
     void SetPanEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void SetDragDropEvent();
     void SetCustomDragEvent(
         const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
     bool HasDragEvent() const;
@@ -208,7 +222,7 @@ public:
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
     RefPtr<FrameNode> GetFrameNode() const;
     void OnContextAttached() {}
-    std::string GetHitTestModeStr() const;
+    static std::string GetHitTestModeStr(const RefPtr<GestureEventHub>& GestureEventHub);
     HitTestMode GetHitTestMode() const;
     void SetHitTestMode(HitTestMode hitTestMode);
     void RemoveDragEvent();
@@ -247,14 +261,15 @@ public:
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(
-        const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const RectF& innerRect = RectF()) const;
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const PreparedInfoForDrag& dragInfoData,
+        const float scale = 1.0f, const RectF& innerRect = RectF()) const;
     void CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNode, bool isMenuShow);
     OffsetF GetDragPreviewInitPositionToScreen(const RefPtr<PipelineBase>& context, PreparedInfoForDrag& data);
     int32_t GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData);
     bool TryDoDragStartAnimation(const RefPtr<PipelineBase>& context, const RefPtr<Subwindow>& subwindow,
         const GestureEvent& info, PreparedInfoForDrag& data);
-    float GetDefaultPixelMapScale(const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
+    float GetDefaultPixelMapScale(
+        const RefPtr<FrameNode>& frameNode, const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
@@ -296,13 +311,19 @@ public:
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
         const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     int32_t GetSelectItemSize();
-    bool IsNeedSwitchToSubWindow() const;
+    bool IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInfoData) const;
     RefPtr<PixelMap> GetDragPreviewPixelMap();
     void SetDragGatherPixelMaps(const GestureEvent& info);
     void SetMouseDragGatherPixelMaps();
     void SetNotMouseDragGatherPixelMaps();
     void FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void SetMouseDragMonitorState(bool state);
+    bool ParsePixelMapAsync(DragDropInfo& dragDropInfo, const DragDropInfo& dragPreviewInfo,
+        const GestureEvent& info);
+    void DoOnDragStartHandling(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
+        DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
+        DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
+    void HideMenu();
 #if defined(PIXEL_MAP_SUPPORTED)
     static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(
@@ -325,6 +346,10 @@ public:
     bool IsGestureEmpty() const;
 
     bool IsPanEventEmpty() const;
+
+    void SetExcludedAxisForPanEvent(bool isExcludedAxis);
+
+    void DumpVelocityInfoFroPanEvent(int32_t fingerId);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -342,10 +367,11 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
-    void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
-        float scale);
-    void ProcessMenuPreviewScale(
-        const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale);
+    void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
+    void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale,
+        const PreparedInfoForDrag& dragInfoData);
+    void ProcessMenuPreviewScale(const RefPtr<FrameNode> imageNode, float& scale, float previewScale,
+        float windowScale, float defaultMenuPreviewScale);
 
     template<typename T>
     const RefPtr<T> GetAccessibilityRecognizer();

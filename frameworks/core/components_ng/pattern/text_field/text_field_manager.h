@@ -83,7 +83,7 @@ public:
     {
         const auto& pattern = onFocusTextField.Upgrade();
         if (pattern && pattern->GetHost()) {
-            onFocusTextFieldId = pattern->GetHost()->GetId();
+            onFocusTextFieldId_ = pattern->GetHost()->GetId();
         }
         if (onFocusTextField_ != onFocusTextField) {
             SetImeAttached(false);
@@ -170,7 +170,7 @@ public:
 
     void AvoidKeyBoardInNavigation();
 
-    void SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navNode, float avoidKeyboardOffset);
+    void SetNavContentAvoidKeyboardOffset(const RefPtr<FrameNode>& navNode, float avoidKeyboardOffset);
 
     void SetNeedToRequestKeyboard(bool val) override
     {
@@ -183,11 +183,11 @@ public:
     }
 
     bool GetIfFocusTextFieldIsInline() {
-        return focusFieldIsInline;
+        return focusFieldIsInline_;
     }
 
     void SetIfFocusTextFieldIsInline(bool isinline) {
-        focusFieldIsInline = isinline;
+        focusFieldIsInline_ = isinline;
     }
 
     void GetInlineTextFieldAvoidPositionYAndHeight(double& positionY, double& height) {
@@ -209,7 +209,7 @@ public:
     }
 
     int32_t GetOnFocusTextFieldId() {
-        return onFocusTextFieldId;
+        return onFocusTextFieldId_;
     }
 
     bool GetLaterAvoid() const
@@ -332,7 +332,7 @@ private:
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
     bool IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo);
 
-    bool focusFieldIsInline = false;
+    bool focusFieldIsInline_ = false;
     double inlinePositionY_ = 0.0f;
     double inlineHeight_ = 0.0f;
     bool hasMove_ = false;
@@ -348,7 +348,7 @@ private:
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
     WeakPtr<FrameNode> weakNavNode_;
-    int32_t onFocusTextFieldId = -1;
+    int32_t onFocusTextFieldId_ = -1;
     int32_t lastAvoidFieldId_ = -1;
     int32_t lastRequestKeyboardId_ = -1;
     bool imeAttachCalled_ = false;

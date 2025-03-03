@@ -121,8 +121,9 @@ public:
         return !initialized_;
     }
 
-    float GetChildSize(int32_t index) const
+    float GetChildSize(int32_t index, bool isStackFromEnd = false)
     {
+        index = isStackFromEnd ? static_cast<int32_t>(childrenSize_.size()) - index - 1 : index;
         if (index > (static_cast<int32_t>(childrenSize_.size()) - 1) || index < 0 ||
             NearEqual(childrenSize_[index], DEFAULT_SIZE)) {
             return defaultSize_;

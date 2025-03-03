@@ -17,14 +17,14 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "frameworks/core/common/window_animation_config.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "frameworks/core/accessibility/accessibility_manager.h"
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_director.h>
 
@@ -74,7 +74,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
      */
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
-    
+
     /**
      * @tc.steps: step2. call RegisterUIExtensionInFocus
      * @tc.expected: expect uiExtensionFocused_ and sessionWrapper_ is not nullptr
@@ -128,7 +128,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
      */
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
-    
+
     /**
      * @tc.steps: step2. call IsWrapExtensionAbilityId
      */
@@ -179,7 +179,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level1)
      */
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
-    
+
     /**
      * @tc.steps: step2. call AddAliveUIExtension
      * @tc.expected: size of aliveUIExtensions_ is 1.

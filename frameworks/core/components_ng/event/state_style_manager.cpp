@@ -129,11 +129,25 @@ void StateStyleManager::HandleTouchUp()
     }
 }
 
-void StateStyleManager::FireStateFunc(bool isReset)
+static bool isCanUpdate(UIState subscribers, UIState handlingState, UIState currentState)
 {
-    auto node = GetFrameNode();
-    CHECK_NULL_VOID(node);
-    auto nodeId = node->GetId();
+    return ((subscribers & handlingState) == handlingState || currentState == UI_STATE_NORMAL);
+}
+
+void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset)
+{
+    std::function<void(UIState)> onStateStyleChange;
+    if (isCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState)) {
+        onStateStyleChange = innerStateStyleSubscribers_.second;
+        if (onStateStyleChange) {
+            ScopedViewStackProcessor processor;
+            onStateStyleChange(currentState);
+        }
+    }
+    if (isCanUpdate(frontendSubscribers_, handlingState, currentState)) {
+        auto node = GetFrameNode();
+        CHECK_NULL_VOID(node);
+        auto nodeId = node->GetId();
 #ifdef IS_RELEASE_VERSION
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE,"Start execution, node is %{public}s, "
         "reset is %{public}d", node->GetTag().c_str(), isReset);
@@ -141,16 +155,30 @@ void StateStyleManager::FireStateFunc(bool isReset)
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Start execution, node is %{public}s/%{public}d, "
         "reset is %{public}d", node->GetTag().c_str(), nodeId, isReset);
 #endif
-    auto uiNode = DynamicCast<UINode>(node);
-    CHECK_NULL_VOID(uiNode);
-    RefPtr<CustomNodeBase> customNode;
-    GetCustomNode(customNode, uiNode);
-    if (!customNode || (!customNode->FireHasNodeUpdateFunc(nodeId))) {
-        TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
+        auto uiNode = DynamicCast<UINode>(node);
+        CHECK_NULL_VOID(uiNode);
+        RefPtr<CustomNodeBase> customNode;
+        GetCustomNode(customNode, uiNode);
+        if (!customNode || (!customNode->FireHasNodeUpdateFunc(nodeId))) {
+            TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
+            return;
+        }
+        ScopedViewStackProcessor processor;
+        customNode->FireNodeUpdateFunc(nodeId);
         return;
     }
-    ScopedViewStackProcessor processor;
-    customNode->FireNodeUpdateFunc(nodeId);
+    if (isCanUpdate(userStateStyleSubscribers_.first, handlingState, currentState)) {
+        onStateStyleChange = userStateStyleSubscribers_.second;
+        if (onStateStyleChange) {
+            ScopedViewStackProcessor processor;
+            onStateStyleChange(currentState);
+        }
+    }
+}
+
+void StateStyleManager::FireStateFunc(UIState handlingState, UIState currentState, bool isReset)
+{
+    HandleStateChangeInternal(handlingState, currentState, isReset);
 }
 
 void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node)
@@ -268,7 +296,7 @@ void StateStyleManager::PostListItemPressStyleTask(UIState state)
     CHECK_NULL_VOID(node);
     auto nodeId = node->GetId();
     if (node->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-        auto frameNode = node->GetAncestorNodeOfFrame();
+        auto frameNode = node->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(frameNode);
         if (frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             auto listGroupPattern = DynamicCast<ListItemGroupPattern>(frameNode->GetPattern());
@@ -304,7 +332,7 @@ void StateStyleManager::HandleScrollingParent()
 
     auto scrollingListener = MakeRefPtr<ScrollingListener>(std::move(scrollingEventCallback));
 
-    auto parent = node->GetAncestorNodeOfFrame();
+    auto parent = node->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto pattern = parent->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -312,7 +340,7 @@ void StateStyleManager::HandleScrollingParent()
             hasScrollingParent_ = true;
             pattern->RegisterScrollingListener(scrollingListener);
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
 }
 
@@ -321,14 +349,14 @@ void StateStyleManager::CleanScrollingParentListener()
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
 
-    auto parent = node->GetAncestorNodeOfFrame();
+    auto parent = node->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto pattern = parent->GetPattern();
         CHECK_NULL_VOID(pattern);
         if (pattern->ShouldDelayChildPressedState()) {
             pattern->CleanScrollingListener();
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
 }
 
@@ -345,7 +373,7 @@ void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>&
         CHECK_NULL_VOID(context);
         auto localMat = context->GetLocalTransformMatrix();
         vTrans.emplace_back(localMat);
-        host = host->GetAncestorNodeOfFrame();
+        host = host->GetAncestorNodeOfFrame(true);
     }
 
     Point temp(localPointF.GetX(), localPointF.GetY());
@@ -363,11 +391,11 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
     if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
         return true;
     }
-    auto parent = node->GetAncestorNodeOfFrame();
+    auto parent = node->GetAncestorNodeOfFrame(true);
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         if (!renderContext) {
-            parent = parent->GetAncestorNodeOfFrame();
+            parent = parent->GetAncestorNodeOfFrame(true);
             continue;
         }
         // If the parent node has a "clip" attribute, the press region should be re-evaluated.
@@ -375,7 +403,7 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
         if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, location)) {
             return true;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return false;
 }
@@ -391,7 +419,7 @@ bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, 
     auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType);
     Offset offset = { paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() };
     PointF current = { location.GetX(), location.GetY() };
-    Transform(current, node);
+    NGGestureRecognizer::Transform(current, node);
     PointF parentPoint = { current.GetX() + offset.GetX(), current.GetY() + offset.GetY() };
     if (!node->InResponseRegionList(parentPoint, responseRegionList)) {
         return true;

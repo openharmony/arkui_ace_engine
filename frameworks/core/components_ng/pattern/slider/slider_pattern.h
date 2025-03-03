@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <optional>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
@@ -55,6 +56,7 @@ public:
                     CHECK_NULL_VOID(pattern);
                     pattern->UpdateImagePositionY(y);
                 });
+            sliderContentModifier_->SetHost(GetHost());
         }
         InitAccessibilityVirtualNodeTask();
         sliderContentModifier_->SetUseContentModifier(UseContentModifier());
@@ -152,9 +154,25 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    void SetEnableHapticFeedback(bool value)
+    {
+        isEnableHaptic_ = value;
+    }
+
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHaptic_;
+    }
+
     void SetSliderValue(double value, int32_t mode);
     void InitAccessibilityVirtualNodeTask();
-
+    void SetIsAccessibilityOn(bool value)
+    {
+        isAccessibilityOn_ = value;
+    }
+    void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
     {
@@ -218,6 +236,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
+    void InitHapticController();
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
     {
@@ -322,6 +341,7 @@ private:
     void SetStepPointAccessibilityVirtualNode(
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
     void SendAccessibilityValueEvent(int32_t mode);
+    void ClearSliderVirtualNode();
     void InitOrRefreshSlipFactor();
     RefPtr<PanEvent> CreatePanEvent();
 
@@ -399,6 +419,8 @@ private:
     RefPtr<FrameNode> imageFrameNode_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
+    SliderModel::SliderMode sliderMode_ = SliderModel::SliderMode::OUTSET;
+    bool isAccessibilityOn_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
 
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     RefPtr<FrameNode> parentAccessibilityNode_;
@@ -407,7 +429,8 @@ private:
     bool isInitAccessibilityVirtualNode_ = false;
     uint64_t lastSendPostValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
-    
+    bool isEnableHaptic_ = true;
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     double slipfactor_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };

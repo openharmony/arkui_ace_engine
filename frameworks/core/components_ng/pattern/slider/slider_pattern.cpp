@@ -53,13 +53,14 @@ constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
+const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
 constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
-constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.crown.strength2";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.crown.strength6";
+constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
+constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
 #endif
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
@@ -117,6 +118,41 @@ void SliderPattern::OnModifyDone()
     AccessibilityVirtualNodeRenderTask();
     InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
+    InitHapticController();
+}
+
+void SliderPattern::PlayHapticFeedback(bool isShowSteps, float step, float oldValue)
+{
+    if (!hapticController_ || !isEnableHaptic_) {
+        return;
+    }
+    if (isShowSteps || NearEqual(valueRatio_, 1) || NearEqual(valueRatio_, 0)) {
+        hapticController_->PlayOnce();
+    }
+}
+
+void SliderPattern::InitHapticController()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (GetEnableHapticFeedback()) {
+        if (!hapticController_) {
+            auto context = host->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance("", SLIDER_EFFECT_ID_NAME);
+            });
+        }
+    } else {
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
+    }
 }
 
 void SliderPattern::HandleEnabled()
@@ -148,14 +184,21 @@ void SliderPattern::InitAccessibilityHoverEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto level = accessibilityProperty->GetAccessibilityLevel();
     auto eventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    if (level == AccessibilityProperty::Level::NO_STR || level == AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+        ClearSliderVirtualNode();
+        return;
+    }
     eventHub->SetAccessibilityHoverEvent([weak = WeakClaim(this)](bool isHover, AccessibilityHoverInfo& info) {
         auto slider = weak.Upgrade();
         CHECK_NULL_VOID(slider);
         slider->HandleAccessibilityHoverEvent(isHover, info);
     });
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
+
     accessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
         if (focus) {
             auto slider = weak.Upgrade();
@@ -189,6 +232,7 @@ public:
         if (state) {
             sliderPattern->InitAccessibilityVirtualNodeTask();
         }
+        sliderPattern->SetIsAccessibilityOn(state);
         return true;
     }
 private:
@@ -263,7 +307,12 @@ bool SliderPattern::CheckCreateAccessibilityVirtualNode()
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, false);
     bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier() || !isShowSteps) {
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    auto level = accessibilityProperty->GetAccessibilityLevel();
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier() || !isShowSteps ||
+        (level == AccessibilityProperty::Level::NO_STR) ||
+        (level == AccessibilityProperty::Level::NO_HIDE_DESCENDANTS)) {
         return false;
     }
     return true;
@@ -289,7 +338,6 @@ bool SliderPattern::InitAccessibilityVirtualNode()
     FrameNode::ProcessOffscreenNode(parentAccessibilityNode_);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SaveAccessibilityVirtualNode(parentAccessibilityNode_);
-    accessibilityProperty->SetAccessibilityText(" ");
     ModifyAccessibilityVirtualNode();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     return true;
@@ -476,12 +524,12 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
     auto gestureHub = pointNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (isClickAbled && !pointAccessibilityNodeEventVec_[index]) {
-        auto clickHandle = [weak = WeakClaim(this), index, reverse](GestureEvent& info) {
+        auto clickHandle = [weak = WeakClaim(this), index](GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);
             auto offsetStep = index - pattern->GetCurrentStepIndex();
-            pattern->MoveStep(reverse ? -offsetStep : offsetStep);
+            pattern->MoveStep(offsetStep);
             pattern->FireChangeEvent(SliderChangeMode::End);
             if (pattern->showTips_) {
                 pattern->bubbleFlag_ = true;
@@ -592,6 +640,21 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return UpdateParameters();
 }
 
+void SliderPattern::ClearSliderVirtualNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pointAccessibilityNodeVec_.clear();
+    pointAccessibilityNodeEventVec_.clear();
+    isInitAccessibilityVirtualNode_ = false;
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SaveAccessibilityVirtualNode(nullptr);
+    auto eventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAccessibilityHover();
+}
+
 bool SliderPattern::UpdateParameters()
 {
     auto host = GetHost();
@@ -617,6 +680,12 @@ bool SliderPattern::UpdateParameters()
     auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
+    if (sliderMode_ != sliderMode && isAccessibilityOn_) {
+        ClearSliderVirtualNode();
+        InitAccessibilityVirtualNodeTask();
+        InitAccessibilityHoverEvent();
+        sliderMode_ = sliderMode;
+    }
     if (sliderMode == SliderModel::SliderMode::OUTSET) {
         borderBlank_ = std::max(trackThickness_, blockLength + hotBlockShadowWidth_ / HALF);
     } else if (sliderMode == SliderModel::SliderMode::INSET) {
@@ -831,7 +900,7 @@ void SliderPattern::InitializeBubble()
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(sliderTheme);
     valueRatio_ = std::clamp(valueRatio_, 0.0f, 1.0f);
     std::string content = std::to_string(static_cast<int>(std::round(valueRatio_ * 100.0f))) + '%';
@@ -929,7 +998,7 @@ OffsetF SliderPattern::CalculateGlobalSafeOffset()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
-    auto overlayGlobalOffset = host->GetPaintRectOffset();
+    auto overlayGlobalOffset = host->GetPaintRectOffset(false, true);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto safeAreaManger = pipelineContext->GetSafeAreaManager();
@@ -987,7 +1056,9 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    const auto& content = host->GetGeometryNode()->GetContent();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    const auto& content = geometryNode->GetContent();
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
@@ -1010,6 +1081,10 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     value_ = std::clamp(value_, min, max);
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
+    bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
+    if (valueChangeFlag_) {
+        PlayHapticFeedback(isShowSteps, step, oldValue);
+    }
     UpdateCircleCenterOffset();
 }
 
@@ -1585,8 +1660,9 @@ void SliderPattern::HandleCrownAction(double mainDelta)
     crownMovingLength_ += mainDelta;
     crownMovingLength_ = std::clamp(crownMovingLength_, 0.0, static_cast<double>(sliderLength_));
     valueRatio_ = crownMovingLength_ / sliderLength_;
-    CHECK_NULL_VOID(stepRatio_ != 0);
-    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    auto stepRatio = sliderPaintProperty->GetStepRatio();
+    CHECK_NULL_VOID(stepRatio != 0);
+    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio) * stepRatio;
     float oldValue = value_;
     value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
     sliderPaintProperty->UpdateValue(value_);
@@ -1603,13 +1679,11 @@ void SliderPattern::StartVibrateFeedback()
 {
     crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
     if (valueChangeFlag_ && reachBoundary_) {
-        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_STRONG, state);
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_STRONG);
     } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_WEAK, state);
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_WEAK);
     }
 }
 #endif
@@ -1625,7 +1699,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     CHECK_NULL_RETURN(paintProperty, SliderContentModifier::Parameters());
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, SliderContentModifier::Parameters());
-    auto theme = pipeline->GetTheme<SliderTheme>();
+    auto theme = pipeline->GetTheme<SliderTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(theme, SliderContentModifier::Parameters());
     auto stepRatio = paintProperty->GetStepRatio();
     SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio, hotBlockShadowWidth_,
@@ -1770,6 +1844,7 @@ void SliderPattern::OnRestoreInfo(const std::string& restoreInfo)
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
+    CHECK_NULL_VOID(info);
     if (!info->IsValid() || !info->IsObject()) {
         return;
     }
@@ -1921,6 +1996,7 @@ void SliderPattern::UpdateValue(float value)
 void SliderPattern::OnAttachToFrameNode()
 {
     RegisterVisibleAreaChange();
+    InitHapticController();
 }
 
 void SliderPattern::StartAnimation()
@@ -1939,6 +2015,9 @@ void SliderPattern::StartAnimation()
 
 void SliderPattern::StopAnimation()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     CHECK_NULL_VOID(sliderContentModifier_);
     if (!sliderContentModifier_->GetVisible()) {
         return;
@@ -2101,6 +2180,9 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
@@ -2136,5 +2218,19 @@ void SliderPattern::InitOrRefreshSlipFactor()
     CHECK_NULL_VOID(theme);
     auto sliderPPI = theme->GetSliderPPI();
     slipfactor_ = sliderPPI * SLIP_FACTOR_COEFFICIENT / totalStepCount;
+}
+
+bool SliderPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, result);
+    result = !paintProperty->HasBlockColor() ||
+        !paintProperty->HasTrackBackgroundColor() ||
+        !paintProperty->HasSelectColor() ||
+        !paintProperty->HasStepColor();
+    return result;
 }
 } // namespace OHOS::Ace::NG

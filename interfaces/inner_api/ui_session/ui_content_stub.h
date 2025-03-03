@@ -41,6 +41,15 @@ private:
     int32_t UnregisterComponentChangeEventCallbackInner(
         MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterWebUnfocusEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t ResetTranslateTextAllInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t ResetTranslateTextInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetWebViewCurrentLanguageInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetWebViewTranslateTextInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t StartWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t SendTranslateResultInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t SendTranslateResultStrInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t EndWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_H

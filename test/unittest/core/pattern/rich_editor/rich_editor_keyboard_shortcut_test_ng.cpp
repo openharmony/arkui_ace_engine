@@ -144,10 +144,10 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestS
     richEditorPattern->CursorMove(CaretMoveIntent::Left);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->CursorMove(CaretMoveIntent::LeftWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 17);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::RightWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 21);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::ParagraghBegin);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
@@ -332,9 +332,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts201, TestS
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleOnDeleteComb(true);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->HandleOnDeleteComb(false);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
 }
 
 /**
@@ -518,6 +518,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextThemeFontSize101, TestSize.Lev
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     context->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     auto theme = context->GetTheme<TextTheme>();
     ASSERT_NE(theme, nullptr);
     auto ret = richEditorPattern->GetTextThemeFontSize();
@@ -615,30 +616,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTripleClickEvent001, TestSize.L
 }
 
 /**
- * @tc.name: TestRichEditorShowCaretNoTwinkling001
- * @tc.desc: test ShowCaretNoTwinkling
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, TestRichEditorShowCaretNoTwinkling001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richOffset = Offset(44, 50);
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    richEditorPattern->ShowCaretNoTwinkling(richOffset);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-}
-
-/**
  * @tc.name: PreferredParagraph001
  * @tc.desc: test PreferredParagraph
  * @tc.type: FUNC
@@ -705,6 +682,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextColorInJson001, TestSize.Level
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     std::optional<Color> value;
     auto ret = richEditorPattern->GetTextColorInJson(value);
@@ -897,6 +875,34 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->GetDeletedSpan(changeValue, innerPosition, length, direction);
     EXPECT_NE(innerPosition, 10);
+}
+
+/**
+ * @tc.name: HandleMouseEvent001
+ * @tc.desc: test HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto scrollBar = richEditorPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    scrollBar->isHover_ = true;
+    scrollBar->isPressed_ = true;
+    MouseInfo info;
+    richEditorPattern->HandleMouseEvent(info);
+    auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
+    EXPECT_TRUE(mouseStyleManager->mouseStyleNodeId_.has_value());
 }
 
 /**
@@ -1123,7 +1129,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
     richEditorPattern->textSelector_ = TextSelector(0, 6);
     richEditorPattern->contentRect_ = { 0.0, 10.0, 500.0, 500.0 };
     richEditorPattern->isShowPlaceholder_ = true;
-    auto res = richEditorPattern->GetSelectArea();
+    auto res = richEditorPattern->GetSelectArea(SelectRectsType::ALL_LINES);
+    EXPECT_TRUE(res.IsValid());
+    res = richEditorPattern->GetSelectArea(SelectRectsType::LEFT_TOP_POINT);
     EXPECT_TRUE(res.IsValid());
 }
 
@@ -1257,7 +1265,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
      */
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
@@ -1265,7 +1272,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
      */
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->isMoveCaretAnywhere_ = false;
     richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
@@ -1299,10 +1305,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchUp001, TestSize.Level1)
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->moveCaretState_.isTouchCaret = true;
     richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
     richEditorPattern->HandleTouchUp();
-    EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
+    EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }
 
 /**

@@ -78,6 +78,9 @@ public:
 
     void UpdateParentOffsetToWindow(const OffsetF& offset) override;
 
+    void NotifyForeground() override;
+    void NotifyBackground() override;
+
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
@@ -90,9 +93,12 @@ private:
         const std::shared_ptr<Framework::JsValue>& jsContext);
 
     void AttachRenderContext();
+    void AttachRenderContextInIsolatedComponent();
+    void AttachRenderContextInDynamicComponent();
     void RegisterSizeChangedCallback();
     void RegisterConfigChangedCallback();
     void UnRegisterConfigChangedCallback();
+    void RegisterContainerHandler();
 
     SizeF ComputeAdaptiveSize(const SizeF& size) const;
     void HandleCardSizeChangeEvent(const SizeF& size);
@@ -118,6 +124,7 @@ private:
     static std::mutex usingWorkerMutex_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     AceLogTag aceLogTag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
+    bool isForeground_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRendererImpl);
 };

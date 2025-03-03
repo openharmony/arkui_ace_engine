@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 
+#include <vector>
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
@@ -95,6 +96,9 @@ struct MouseEvent final : public PointerEvent {
     float scrollX = 0.0f;
     float scrollY = 0.0f;
     float scrollZ = 0.0f;
+    float rawDeltaX = 0.0f;
+    float rawDeltaY = 0.0f;
+    std::vector<MouseButton> pressedButtonsArray;
     bool mockFlushEvent = false;
     MouseAction action = MouseAction::NONE;
     MouseAction pullAction = MouseAction::NONE;
@@ -109,8 +113,10 @@ struct MouseEvent final : public PointerEvent {
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
     std::vector<MouseEvent> history;
+    WeakPtr<NG::FrameNode> node;
     bool isInjected = false;
     bool isPrivacyMode = false;
+    bool isMockWindowTransFlag = false;
 
     Offset GetOffset() const
     {
@@ -172,6 +178,9 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.isInjected = isInjected;
         mouseEvent.isPrivacyMode = isPrivacyMode;
         mouseEvent.mockFlushEvent = mockFlushEvent;
+        mouseEvent.rawDeltaX = rawDeltaX;
+        mouseEvent.rawDeltaY = rawDeltaY;
+        mouseEvent.pressedButtonsArray = pressedButtonsArray;
         return mouseEvent;
     }
 
@@ -234,36 +243,7 @@ struct MouseEvent final : public PointerEvent {
         return event;
     }
 
-    MouseEvent operator-(const Offset& offset) const
-    {
-        MouseEvent mouseEvent;
-        mouseEvent.x = x - offset.GetX();
-        mouseEvent.x = x - offset.GetX();
-        mouseEvent.y = y - offset.GetY();
-        mouseEvent.z = z;
-        mouseEvent.deltaX = deltaX;
-        mouseEvent.deltaY = deltaY;
-        mouseEvent.deltaZ = deltaZ;
-        mouseEvent.scrollX = scrollX;
-        mouseEvent.scrollY = scrollY;
-        mouseEvent.scrollZ = scrollZ;
-        mouseEvent.screenX = screenX - offset.GetX();
-        mouseEvent.screenY = screenY - offset.GetY();
-        mouseEvent.action = action;
-        mouseEvent.button = button;
-        mouseEvent.pressedButtons = pressedButtons;
-        mouseEvent.time = time;
-        mouseEvent.deviceId = deviceId;
-        mouseEvent.targetDisplayId = targetDisplayId;
-        mouseEvent.sourceType = sourceType;
-        mouseEvent.sourceTool = sourceTool;
-        mouseEvent.pointerEvent = pointerEvent;
-        mouseEvent.originalId = originalId;
-        mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
-        mouseEvent.isInjected = isInjected;
-        mouseEvent.isPrivacyMode = isPrivacyMode;
-        return mouseEvent;
-    }
+    MouseEvent operator-(const Offset& offset) const;
     std::shared_ptr<MMI::PointerEvent> GetMouseEventPointerEvent() const;
 };
 
@@ -344,6 +324,33 @@ public:
         return pointerEvent_;
     }
 
+    void SetRawDeltaX(float rawDeltaX)
+    {
+        rawDeltaX_ = rawDeltaX;
+    }
+    float GetRawDeltaX()
+    {
+        return rawDeltaX_;
+    }
+
+    void SetRawDeltaY(float rawDeltaY)
+    {
+        rawDeltaY_ = rawDeltaY;
+    }
+    float GetRawDeltaY()
+    {
+        return rawDeltaY_;
+    }
+    
+    void SetPressedButtons(const std::vector<MouseButton>& pressedButtonsArray)
+    {
+        pressedButtonsArray_ = pressedButtonsArray;
+    }
+    std::vector<MouseButton> GetPressedButtons()
+    {
+        return pressedButtonsArray_;
+    }
+
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
@@ -355,6 +362,9 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset screenLocation_;
+    float rawDeltaX_ = 0.0f;
+    float rawDeltaY_ = 0.0f;
+    std::vector<MouseButton> pressedButtonsArray_;
 };
 
 using HoverEffectFunc = std::function<void(bool)>;
@@ -366,6 +376,47 @@ class HoverInfo : public BaseEventInfo {
 public:
     HoverInfo() : BaseEventInfo("onHover") {}
     ~HoverInfo() override = default;
+
+    HoverInfo& SetGlobalLocation(const Offset& globalLocation)
+    {
+        globalLocation_ = globalLocation;
+        return *this;
+    }
+    HoverInfo& SetLocalLocation(const Offset& localLocation)
+    {
+        localLocation_ = localLocation;
+        return *this;
+    }
+
+    HoverInfo& SetScreenLocation(const Offset& screenLocation)
+    {
+        screenLocation_ = screenLocation;
+        return *this;
+    }
+
+    const Offset& GetScreenLocation() const
+    {
+        return screenLocation_;
+    }
+
+    const Offset& GetLocalLocation() const
+    {
+        return localLocation_;
+    }
+
+    const Offset& GetGlobalLocation() const
+    {
+        return globalLocation_;
+    }
+
+private:
+    // global position at which the touch point contacts the screen.
+    Offset globalLocation_;
+    // Different from global location, The local location refers to the location of the contact point relative to the
+    // current node which has the recognizer.
+    Offset localLocation_;
+
+    Offset screenLocation_;
 };
 
 class AccessibilityHoverInfo : public BaseEventInfo {
@@ -431,6 +482,7 @@ private:
 };
 
 using OnHoverFunc = std::function<void(bool, HoverInfo& info)>;
+using OnHoverMoveFunc = std::function<void(HoverInfo& info)>;
 using OnHoverEventFunc = std::function<void(bool)>;
 
 using OnAccessibilityHoverFunc = std::function<void(bool, AccessibilityHoverInfo& info)>;
@@ -489,11 +541,18 @@ public:
         onPenHoverEventCallback_ = onPenHoverEventCallback;
     }
 
+    void SetPenHoverMoveCallback(const OnHoverMoveFunc& onPenHoverMoveEventCallback)
+    {
+        onPenHoverMoveEventCallback_ = onPenHoverMoveEventCallback;
+    }
+
     bool HandleHoverEvent(bool isHovered, const MouseEvent& event);
 
     void HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event);
 
     bool HandlePenHoverEvent(bool isHovered, const TouchEvent& event);
+
+    bool HandlePenHoverMoveEvent(const TouchEvent& event);
 
     bool IsHoverTarget() const
     {
@@ -508,6 +567,11 @@ public:
     bool IsPenHoverTarget() const
     {
         return onPenHoverEventCallback_ != nullptr;
+    }
+
+    bool IsPenHoverMoveTarget() const
+    {
+        return onPenHoverMoveEventCallback_ != nullptr;
     }
 
     bool HandleHoverEvent(bool isHovered)
@@ -535,6 +599,7 @@ private:
     OnHoverFunc onHoverEventCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverCallback_;
     OnHoverFunc onPenHoverEventCallback_;
+    OnHoverMoveFunc onPenHoverMoveEventCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {

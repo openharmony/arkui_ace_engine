@@ -89,11 +89,11 @@ bool WaterFlowPattern::IsAtBottom() const
 };
 bool WaterFlowPattern::IsAtTopWithDelta() const
 {
-    return layoutInfo_->OverScrollTop();
+    return layoutInfo_->IsAtTopWithDelta();
 };
 bool WaterFlowPattern::IsAtBottomWithDelta() const
 {
-    return layoutInfo_->OverScrollBottom();
+    return layoutInfo_->IsAtBottomWithDelta();
 };
 bool WaterFlowPattern::IsReverse() const
 {
@@ -418,9 +418,6 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScroll
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
     float distance = reverse ? mainContentSize : -mainContentSize;
-    if (layoutProperty->IsReverse()) {
-        distance = -distance;
-    }
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
@@ -492,10 +489,10 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         return sections_;
     }
     sections_ = AceType::MakeRefPtr<WaterFlowSections>();
-    auto sectionChangeCallback = [weakPattern = WeakClaim(this)](int32_t start, int32_t count) {
+    auto sectionChangeCallback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->NotifyDataChange(start, count);
+        pattern->layoutInfo_->NotifySectionChange(start);
     };
     auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
@@ -503,7 +500,7 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         pattern->AddSectionChangeStartPos(start);
     };
     sections_->SetOnDataChange(callback);
-    sections_->SetNotifyDataChange(sectionChangeCallback);
+    sections_->SetNotifySectionChange(sectionChangeCallback);
     return sections_;
 }
 
@@ -708,11 +705,12 @@ ScopeFocusAlgorithm WaterFlowPattern::GetScopeFocusAlgorithm()
 {
     return { layoutInfo_->axis_ == Axis::VERTICAL, true, ScopeType::OTHERS,
         [wp = WeakClaim(this)](
-            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
             auto self = wp.Upgrade();
             if (self) {
                 nextFocusNode = self->GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         } };
 }
 
@@ -807,7 +805,8 @@ void WaterFlowPattern::DumpAdvanceInfo()
 
     DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
     DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value_or(1)));
+    DumpLog::GetInstance().AddDesc(
+        "CachedCount:" + std::to_string(property->GetCachedCount().value_or(layoutInfo_->defCachedCount_)));
     DumpLog::GetInstance().AddDesc("ScrollAlign:" + scrollAlign[static_cast<int32_t>(layoutInfo_->align_)]);
 
     property->IsReverse() ? DumpLog::GetInstance().AddDesc("isReverse:true")
@@ -826,6 +825,8 @@ void WaterFlowPattern::DumpAdvanceInfo()
     property->GetItemMaxSize().has_value()
         ? DumpLog::GetInstance().AddDesc("ItemMaxSize:" + property->GetItemMaxSize().value().ToString())
         : DumpLog::GetInstance().AddDesc("ItemMaxSize:null");
+    layoutInfo_->Mode() == LayoutMode::TOP_DOWN ? DumpLog::GetInstance().AddDesc("Mode:TOP_DOWN")
+                                                : DumpLog::GetInstance().AddDesc("Mode:SLIDING_WINDOW");
 
     if (sections_) {
         DumpInfoAddSections();

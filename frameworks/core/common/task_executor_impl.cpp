@@ -195,7 +195,7 @@ bool TaskExecutorImpl::OnPostTask(
         (type == TaskType::PLATFORM || type == TaskType::UI || type == TaskType::JS)) {
         TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(
             std::move(task), currentId, delayTime, std::move(traceIdFunc));
-        taskWrapper_->Call(std::move(wrappedTask));
+        taskWrapper_->Call(std::move(wrappedTask), delayTime);
         return true;
     }
 

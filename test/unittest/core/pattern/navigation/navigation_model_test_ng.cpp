@@ -85,6 +85,7 @@ void NavigationModelTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 /**
@@ -786,56 +787,6 @@ HWTEST_F(NavigationModelTestNg, SetTitleMode002, TestSize.Level1)
     titleBarLayoutProperty->propTitleHeight_ = Dimension();
     EXPECT_TRUE(titleBarLayoutProperty->GetTitleHeight().has_value());
     navigationModel.SetTitleMode(mode);
-}
-
-/**
- * @tc.name: SetTitleMode003
- * @tc.desc: Test SetTitleMode and cover all conditions outside the clickCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationModelTestNg, SetTitleMode003, TestSize.Level1)
-{
-    MockPipelineContextGetTheme();
-    NavigationModelNG navigationModel;
-    navigationModel.Create();
-    navigationModel.SetNavigationStack();
-    navigationModel.SetTitle("navigationModel", false);
-
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    ASSERT_NE(navigationGroupNode, nullptr);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    ASSERT_NE(navBarNode, nullptr);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-    ASSERT_NE(titleBarNode, nullptr);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
-
-    NavigationTitleMode mode = NavigationTitleMode::MINI;
-    navigationEventHub->enabled_ = true;
-    EXPECT_FALSE(titleBarLayoutProperty->GetTitleHeight().has_value());
-    EXPECT_EQ(titleBarNode->GetBackButton(), nullptr);
-    EXPECT_EQ(mode, NavigationTitleMode::MINI);
-    EXPECT_TRUE(navigationEventHub->IsEnabled());
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-
-    navigationEventHub->enabled_ = false;
-    titleBarNode->backButton_ = nullptr;
-    EXPECT_EQ(titleBarNode->GetBackButton(), nullptr);
-    EXPECT_FALSE(navigationEventHub->IsEnabled());
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-
-    EXPECT_NE(titleBarNode->GetBackButton(), nullptr);
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-
-    mode = NavigationTitleMode::FREE;
-    EXPECT_NE(mode, NavigationTitleMode::MINI);
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-
-    titleBarLayoutProperty->propTitleHeight_ = Dimension();
-    EXPECT_TRUE(titleBarLayoutProperty->GetTitleHeight().has_value());
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
 }
 
 /**
@@ -2036,5 +1987,30 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions003, TestSize.Level1)
 
     float offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
     EXPECT_NE(offsetY, 0.0f);
+}
+
+/**
+ * @tc.name: SetEnableToolBarAdaptationTest001
+ * @tc.desc: Test set enable tool bar adaptation
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationModelTestNg, SetEnableToolBarAdaptation, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
+    EXPECT_TRUE(toolbarNode->enableToolBarAdaptation_);
+    navigationModel.SetEnableToolBarAdaptation(false);
+    EXPECT_FALSE(toolbarNode->enableToolBarAdaptation_);
 }
 } // namespace OHOS::Ace::NG

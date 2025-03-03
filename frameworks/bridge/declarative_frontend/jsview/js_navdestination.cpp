@@ -61,19 +61,31 @@ constexpr int32_t PARAMATER_LENGTH_ONE = 1;
 constexpr int32_t PARAMATER_LENGTH_TWO = 2;
 constexpr uint32_t FIRST_INDEX = 0;
 constexpr uint32_t SECOND_INDEX = 1;
-constexpr int32_t JS_EMUN_TRANSITIONTYPE_NONE = 1;
-constexpr int32_t JS_EMUN_TRANSITIONTYPE_TITLE = 2;
-constexpr int32_t JS_EMUN_TRANSITIONTYPE_CONTENT = 3;
+constexpr int32_t JS_ENUM_TRANSITIONTYPE_NONE = 1;
+constexpr int32_t JS_ENUM_TRANSITIONTYPE_TITLE = 2;
+constexpr int32_t JS_ENUM_TRANSITIONTYPE_CONTENT = 3;
+constexpr int32_t JS_ENUM_TRANSITIONTYPE_FADE = 4;
+constexpr int32_t JS_ENUM_TRANSITIONTYPE_EXPLODE = 5;
+constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_RIGHT = 6;
+constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_BOTTOM = 7;
 
 NG::NavigationSystemTransitionType ParseTransitionType(int32_t value)
 {
     switch (value) {
-        case JS_EMUN_TRANSITIONTYPE_NONE:
+        case JS_ENUM_TRANSITIONTYPE_NONE:
             return NG::NavigationSystemTransitionType::NONE;
-        case JS_EMUN_TRANSITIONTYPE_TITLE:
+        case JS_ENUM_TRANSITIONTYPE_TITLE:
             return NG::NavigationSystemTransitionType::TITLE;
-        case JS_EMUN_TRANSITIONTYPE_CONTENT:
+        case JS_ENUM_TRANSITIONTYPE_CONTENT:
             return NG::NavigationSystemTransitionType::CONTENT;
+        case JS_ENUM_TRANSITIONTYPE_FADE:
+            return NG::NavigationSystemTransitionType::FADE;
+        case JS_ENUM_TRANSITIONTYPE_EXPLODE:
+            return NG::NavigationSystemTransitionType::EXPLODE;
+        case JS_ENUM_TRANSITIONTYPE_SLIDE_RIGHT:
+            return NG::NavigationSystemTransitionType::SLIDE_RIGHT;
+        case JS_ENUM_TRANSITIONTYPE_SLIDE_BOTTOM:
+            return NG::NavigationSystemTransitionType::SLIDE_BOTTOM;
         default:
             return NG::NavigationSystemTransitionType::DEFAULT;
     }
@@ -189,6 +201,15 @@ void JSNavDestination::SetHideTitleBar(const JSCallbackInfo& info)
         isAnimated = info[1]->ToBoolean();
     }
     NavDestinationModel::GetInstance()->SetHideTitleBar(isHide, isAnimated);
+}
+
+void JSNavDestination::SetHideBackButton(const JSCallbackInfo& info)
+{
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideBackButton(isHide);
 }
 
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
@@ -522,6 +543,9 @@ void JSNavDestination::SetRecoverable(const JSCallbackInfo& info)
 
 void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
 {
+    bool hideText = false;
+    JSNavigationUtils::ParseHideToolBarText(info, hideText);
+    NavDestinationModel::GetInstance()->SetHideItemText(hideText);
     if (info[0]->IsUndefined() || info[0]->IsArray()) {
         std::vector<NG::BarItem> toolBarItems;
         if (info[0]->IsArray()) {
@@ -578,6 +602,43 @@ void JSNavDestination::BindToNestedScrollable(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->UpdateBindingWithScrollable(std::move(bindFunc));
 }
 
+void JSNavDestination::SetCustomTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        NavDestinationModel::GetInstance()->SetCustomTransition(nullptr);
+        return;
+    }
+    auto jsTransitionDelegate = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto transitionDelegate = [execCtx = info.GetExecutionContext(), delegate = std::move(jsTransitionDelegate)](
+        NG::NavigationOperation operation, bool isEnter) -> std::optional<std::vector<NG::NavDestinationTransition>> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, std::nullopt);
+        JSRef<JSVal> params[2];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
+        params[1] = JSRef<JSVal>::Make(ToJSValue(isEnter));
+        auto ret = delegate->ExecuteJS(2, params);
+        if (!ret->IsArray()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavDestination custom transition invalid!");
+            return std::nullopt;
+        }
+        std::vector<NG::NavDestinationTransition> allTransitions;
+        auto allTransitionObj = JSRef<JSArray>::Cast(ret);
+        for (size_t index = 0; index < allTransitionObj->Length(); ++index) {
+            auto transitionValue = allTransitionObj->GetValueAt(index);
+            if (!transitionValue->IsObject()) {
+                continue;
+            }
+            auto navDestinationTransition = JSNavigationUtils::ParseNavDestinationTransition(
+                JSRef<JSObject>::Cast(transitionValue), execCtx);
+            if (navDestinationTransition.has_value()) {
+                allTransitions.emplace_back(navDestinationTransition.value());
+            }
+        }
+        return allTransitions;
+    };
+
+    NavDestinationModel::GetInstance()->SetCustomTransition(std::move(transitionDelegate));
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSNavDestinationContext::JSBind(globalObj);
@@ -585,6 +646,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("create", &JSNavDestination::Create);
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
     JSClass<JSNavDestination>::StaticMethod("hideTitleBar", &JSNavDestination::SetHideTitleBar);
+    JSClass<JSNavDestination>::StaticMethod("hideBackButton", &JSNavDestination::SetHideBackButton);
     JSClass<JSNavDestination>::StaticMethod("backButtonIcon", &JSNavDestination::SetBackButtonIcon);
     JSClass<JSNavDestination>::StaticMethod("backgroundColor", &JSNavDestination::SetBackgroundColor);
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
@@ -603,6 +665,9 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillShow", &JSNavDestination::SetWillShow);
     JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
+    JSClass<JSNavDestination>::StaticMethod("onActive", &JSNavDestination::SetOnActive);
+    JSClass<JSNavDestination>::StaticMethod("onInactive", &JSNavDestination::SetOnInactive);
+    JSClass<JSNavDestination>::StaticMethod("onResult", &JSNavDestination::SetResultCallback);
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
     JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
     JSClass<JSNavDestination>::StaticMethod("recoverable", &JSNavDestination::SetRecoverable);
@@ -611,6 +676,8 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("systemTransition", &JSNavDestination::SetSystemTransition);
     JSClass<JSNavDestination>::StaticMethod("bindToScrollable", &JSNavDestination::BindToScrollable);
     JSClass<JSNavDestination>::StaticMethod("bindToNestedScrollable", &JSNavDestination::BindToNestedScrollable);
+    JSClass<JSNavDestination>::StaticMethod("customTransition", &JSNavDestination::SetCustomTransition);
+    JSClass<JSNavDestination>::StaticMethod("onNewParam", &JSNavDestination::SetOnNewParam);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -636,5 +703,82 @@ void JSNavDestination::SetSystemTransition(const JSCallbackInfo& info)
     auto value = info[0]->ToNumber<int32_t>();
     NG::NavigationSystemTransitionType type = ParseTransitionType(value);
     NavDestinationModel::GetInstance()->SetSystemTransitionType(type);
+}
+
+void JSNavDestination::SetResultCallback(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(info[0]);
+    if (func->IsEmpty()) {
+        return;
+    }
+    auto setPopCallback = [func](const RefPtr<NG::NavPathInfo>& info) {
+        auto pathInfo = AceType::DynamicCast<JSNavPathInfo>(info);
+        CHECK_NULL_VOID(pathInfo);
+        pathInfo->SetNavDestinationPopCallback(func);
+    };
+    NavDestinationModel::GetInstance()->SetOnPop(setPopCallback);
+}
+
+void JSNavDestination::SetOnActive(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0) {
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto onActive = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onActiveCallback = [exeCtx = info.GetExecutionContext(), func = std::move(onActive)](int32_t reason) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(exeCtx);
+        ACE_SCORING_EVENT("NavDestination.OnActive");
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
+        func->ExecuteJS(1, params);
+    };
+    NavDestinationModel::GetInstance()->SetOnActive(std::move(onActiveCallback));
+    info.ReturnSelf();
+}
+
+void JSNavDestination::SetOnInactive(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0) {
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto onInactive = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onInactiveCallback = [execCtx = info.GetExecutionContext(), func = std::move(onInactive)](int32_t reason) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.OnInactive");
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
+        func->ExecuteJS(1, params);
+    };
+    NavDestinationModel::GetInstance()->SetOnInactive(std::move(onInactiveCallback));
+    info.ReturnSelf();
+}
+
+void JSNavDestination::SetOnNewParam(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto onNewParam = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onNewParamCallback = [execCtx = info.GetExecutionContext(), func = std::move(onNewParam)](napi_value param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.onNewParam");
+        JSRef<JSVal> params[1];
+        params[0] = JsConverter::ConvertNapiValueToJsVal(param);
+        func->ExecuteJS(1, params);
+    };
+    NavDestinationModel::GetInstance()->SetOnNewParam(std::move(onNewParamCallback));
+    info.ReturnSelf();
 }
 } // namespace OHOS::Ace::Framework

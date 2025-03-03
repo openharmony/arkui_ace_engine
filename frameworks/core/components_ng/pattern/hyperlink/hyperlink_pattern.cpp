@@ -53,7 +53,7 @@ void HyperlinkPattern::EnableDrag()
         auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
         CHECK_NULL_RETURN(hyperlinkLayoutProperty, info);
         std::string address = hyperlinkLayoutProperty->GetAddress().value_or("");
-        std::string content = UtfUtils::Str16ToStr8(hyperlinkPattern->GetTextForDisplay());
+        std::string content = UtfUtils::Str16DebugToStr8(hyperlinkPattern->GetTextForDisplay());
         auto json = JsonUtil::Create(true);
         json->Put("url", address.c_str());
         json->Put("title", content.c_str());

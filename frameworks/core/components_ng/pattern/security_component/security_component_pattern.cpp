@@ -32,6 +32,7 @@ static std::unordered_map<uint64_t, RefPtr<FrameNode>> g_scNodeMap;
 static std::vector<uint64_t> g_omittedNodeIndex;
 static uint64_t g_scIndex = 0;
 static std::mutex g_scMutex;
+const std::string SYSTEM_INTERNAL_ERROR_MESSAGE = "system internal error";
 #endif
 }
 SecurityComponentPattern::SecurityComponentPattern()
@@ -179,7 +180,8 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     gestureInfo.SetDisplayX(item.GetDisplayX());
     gestureInfo.SetDisplayY(item.GetDisplayY());
     gestureInfo.SetPointerEvent(info.GetPointerEvent());
-    int res = ReportSecurityComponentClickEvent(gestureInfo);
+    std::string message;
+    int res = ReportSecurityComponentClickEvent(gestureInfo, message);
     if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
         return;
     }
@@ -253,12 +255,15 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
         CHECK_NULL_VOID(jsonNode);
         std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
         int32_t res;
+        int32_t code = SecurityComponentErrorCode::SUCCESS;
+        std::string message;
         // if info.GetPointerEvent() is null, device may in screen read mode
         // otherwise, this event should be dropped in menu
         if (buttonPattern->IsParentMenu(frameNode) && info.GetPointerEvent() != nullptr) {
             res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
         } else {
-            res = buttonPattern->ReportSecurityComponentClickEvent(info);
+            res = buttonPattern->ReportSecurityComponentClickEvent(info, message);
+            code = res;
             if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
                 res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
             } else if (res != 0) {
@@ -266,7 +271,10 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
                 res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
             }
         }
+        buttonPattern->HandleReportSecCompClickEventResult(code, message);
         jsonShrd->Put("handleRes", res);
+        jsonShrd->Put("code", code);
+        jsonShrd->Put("message", message.c_str());
         info.SetSecCompHandleEvent(jsonShrd);
 #endif
     };
@@ -280,29 +288,57 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
 void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& iconNode,
     const InspectorFilter& filter) const
 {
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto* pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
     auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconProp);
     CHECK_NULL_VOID(iconProp->GetCalcLayoutConstraint());
     // GetDimension would ret a empty dimension when width is empty
     auto width = iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width();
-    CHECK_EQUAL_VOID(width.has_value(), false);
-    json->PutExtAttr("iconSize", width->GetDimension().ToString().c_str(), filter);
+    if (width.has_value()) {
+        json->PutExtAttr("iconSize", width->GetDimension().ToString().c_str(), filter);
+    } else {
+        json->PutExtAttr("iconSize", theme->GetIconSize().ToString().c_str(), filter);
+    }
     json->PutExtAttr("iconColor", iconProp->GetImageSourceInfo()->GetFillColor().
-        value_or(Color::WHITE).ColorToString().c_str(), filter);
+        value_or(theme->GetIconColor()).ColorToString().c_str(), filter);
+}
+
+void SecurityComponentPattern::ToJsonValueSymbolIconNode(std::unique_ptr<JsonValue>& json,
+    const RefPtr<FrameNode>& symbolIconNode, const InspectorFilter& filter) const
+{
+    CHECK_NULL_VOID(symbolIconNode);
+    auto iconProp = symbolIconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(iconProp);
+    json->PutExtAttr("iconSize",
+        iconProp->GetFontSize().value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("iconColor",
+        V2::ConvertSymbolColorToString(iconProp->GetSymbolColorListValue({})).c_str(), filter);
 }
 
 void SecurityComponentPattern::ToJsonValueTextNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& textNode,
     const InspectorFilter& filter) const
 {
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto* pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
     auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProp);
-    json->PutExtAttr("fontSize", textProp->GetFontSize().value_or(Dimension(0.0)).ToString().c_str(), filter);
+    json->PutExtAttr("fontSize", textProp->GetFontSize().value_or(theme->GetFontSize()).ToString().c_str(), filter);
     json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(
         textProp->GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
     json->PutExtAttr("fontFamily", "HarmonyOS Sans", filter);
     json->PutExtAttr("fontStyle",
         static_cast<int64_t>(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)), filter);
-    json->PutExtAttr("fontColor", textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str(), filter);
+    json->PutExtAttr("fontColor",
+        textProp->GetTextColor().value_or(theme->GetFontColor()).ColorToString().c_str(), filter);
 }
 
 void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -314,6 +350,10 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     }
     auto node = GetHost();
     CHECK_NULL_VOID(node);
+    auto* pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
 
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -328,20 +368,27 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     if (iconNode != nullptr) {
         ToJsonValueIconNode(json, iconNode, filter);
     }
+    RefPtr<FrameNode> symbolIconNode = GetSecCompChildNode(node, V2::SYMBOL_ETS_TAG);
+    if (symbolIconNode != nullptr) {
+        ToJsonValueSymbolIconNode(json, symbolIconNode, filter);
+    }
     RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
     if (textNode != nullptr) {
         ToJsonValueTextNode(json, textNode, filter);
     }
     auto paddingJson = JsonUtil::Create(true);
     CHECK_NULL_VOID(paddingJson);
-    paddingJson->Put("top", layoutProperty->GetBackgroundTopPadding().value_or(Dimension(0.0)).ToString().c_str());
+    paddingJson->Put("top",
+        layoutProperty->GetBackgroundTopPadding().value_or(theme->GetBackgroundTopPadding()).ToString().c_str());
     paddingJson->Put("bottom",
-        layoutProperty->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ToString().c_str());
-    paddingJson->Put("left", layoutProperty->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ToString().c_str());
-    paddingJson->Put("right", layoutProperty->GetBackgroundRightPadding().value_or(Dimension(0.0)).ToString().c_str());
+        layoutProperty->GetBackgroundBottomPadding().value_or(theme->GetBackgroundBottomPadding()).ToString().c_str());
+    paddingJson->Put("left",
+        layoutProperty->GetBackgroundLeftPadding().value_or(theme->GetBackgroundLeftPadding()).ToString().c_str());
+    paddingJson->Put("right",
+        layoutProperty->GetBackgroundRightPadding().value_or(theme->GetBackgroundRightPadding()).ToString().c_str());
     json->PutExtAttr("padding", paddingJson, filter);
     json->PutExtAttr("textIconSpace",
-        layoutProperty->GetTextIconSpace().value_or(Dimension(0.0)).ToString().c_str(), filter);
+        layoutProperty->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ToString().c_str(), filter);
     ToJsonValueRect(json, filter);
 }
 
@@ -353,6 +400,10 @@ void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json,
     }
     auto node = GetHost();
     CHECK_NULL_VOID(node);
+    auto* pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
 
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
     if (buttonNode != nullptr) {
@@ -362,13 +413,13 @@ void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json,
             json->PutExtAttr("backgroundColor",
                 renderContext->GetBackgroundColor().value().ColorToString().c_str(), filter);
         } else {
-            json->PutExtAttr("backgroundColor", Color::BLACK.ColorToString().c_str(), filter);
+            json->PutExtAttr("backgroundColor", theme->GetBackgroundColor().ColorToString().c_str(), filter);
         }
         if (renderContext->HasBorderColor()) {
             json->PutExtAttr("borderColor",
                 renderContext->GetBorderColor()->leftColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
         } else {
-            json->PutExtAttr("borderColor", Color::BLACK.ColorToString().c_str(), filter);
+            json->PutExtAttr("borderColor", theme->GetBorderColor().ColorToString().c_str(), filter);
         }
         if (renderContext->HasBorderStyle()) {
             json->PutExtAttr("borderStyle",
@@ -381,14 +432,14 @@ void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json,
         const auto& borderWidth = bgProp->GetBorderWidthProperty();
         if (borderWidth != nullptr) {
             json->PutExtAttr("borderWidth",
-                borderWidth->leftDimen.value_or(Dimension(0.0)).ToString().c_str(), filter);
+                borderWidth->leftDimen.value_or(theme->GetBorderWidth()).ToString().c_str(), filter);
         }
         auto borderRadius = bgProp->GetBorderRadius();
         if (borderRadius.has_value()) {
-            json->PutExtAttr("borderRadius", borderRadius->radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).
+            json->PutExtAttr("borderRadius", borderRadius->radiusTopLeft.value_or(theme->GetBorderRadius()).
                 ToString().c_str(), filter);
         } else {
-            json->PutExtAttr("borderRadius", "0.00vp", filter);
+            json->PutExtAttr("borderRadius", theme->GetBorderRadius().ToString().c_str(), filter);
         }
     }
 }
@@ -802,7 +853,7 @@ std::function<int32_t(int32_t)> SecurityComponentPattern::CreateFirstUseDialogCl
     };
 }
 
-int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event)
+int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event, std::string& message)
 {
     if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
         SC_LOG_WARN("ClickEventHandler: security component has not registered.");
@@ -824,14 +875,14 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
     if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
         OnClickAfterFirstUseDialog = [] (int32_t) {};
         return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-            frameNode, event, std::move(OnClickAfterFirstUseDialog));
+            frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
     }
 
     OnClickAfterFirstUseDialog = CreateFirstUseDialogCloseFunc(
         frameNode, pipeline, "ArkUISecurityComponentGestureTriggerOnClick");
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-        frameNode, event, std::move(OnClickAfterFirstUseDialog));
+        frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
 }
 
 int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEvent& event)
@@ -864,6 +915,18 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event, std::move(OnClickAfterFirstUseDialog));
+}
+
+void SecurityComponentPattern::HandleReportSecCompClickEventResult(int32_t& code, std::string& message)
+{
+    if (!message.empty()) {
+        code = SecurityComponentErrorCode::PROPERTY_SETING_ERROR;
+    }
+
+    if (code != SecurityComponentErrorCode::SUCCESS && message.empty()) {
+        message = SYSTEM_INTERNAL_ERROR_MESSAGE;
+        code = SecurityComponentErrorCode::SYSTEM_INTERNAL_ERROR;
+    }
 }
 #endif
 } // namespace OHOS::Ace::NG

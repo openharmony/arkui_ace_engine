@@ -48,17 +48,18 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
-            theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
-            theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
-            theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-    private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextFieldTheme>& theme) const
+    protected:
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextFieldTheme>& theme) const
         {
+            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
+            theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
+            theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
+            theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle || !theme) {
                 return;
             }
@@ -72,7 +73,7 @@ public:
             ParsePatternSubThirdPart(pattern, theme);
             ParsePatternSubFourthPart(pattern, theme);
         }
-
+    private:
         void ParsePatternSubFirstPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
         {
             theme->padding_ = Edge(pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
@@ -223,6 +224,8 @@ public:
 
             theme->inlinePaddingLeft_ = pattern->GetAttr<Dimension>("inline_padding_left", 2.0_vp);
             theme->inlinePaddingRight_ = pattern->GetAttr<Dimension>("inline_padding_right", 12.0_vp);
+            auto supportTranslate = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->translateIsSupport_ = StringUtils::StringToInt(supportTranslate);
             auto supportSearch = pattern->GetAttr<std::string>("textfield_menu_search_is_support", "0");
             theme->supportSearch_ = StringUtils::StringToInt(supportSearch);
         }
@@ -396,6 +399,26 @@ public:
     const Dimension& GetIconSize() const
     {
         return iconSize_;
+    }
+
+    const Dimension& GetCancelIconSize() const
+    {
+        return cancelIconSize_;
+    }
+
+    const Dimension& GetPasswordIconSize() const
+    {
+        return passwordIconSize_;
+    }
+
+    const Dimension& GetCancelIconPadding() const
+    {
+        return cancelIconPadding_;
+    }
+
+    const Dimension& GetPasswordIconPadding() const
+    {
+        return passwordIconPadding_;
     }
 
     const Dimension& GetIconHotZoneSize() const
@@ -703,6 +726,11 @@ public:
         return aiWriteAbilityName_;
     }
 
+    bool GetTranslateIsSupport() const
+    {
+        return translateIsSupport_;
+    }
+
     bool GetIsSupportSearch() const
     {
         return supportSearch_;
@@ -815,6 +843,15 @@ public:
 
 protected:
     TextFieldTheme() = default;
+    TextStyle textStyle_;
+    Color textColor_;
+    Color placeholderColor_;
+    Color bgColor_;
+    Color focusBgColor_;
+    Color inlineBgColor_;
+    Color cursorColor_;
+    Color symbolColor_;
+    Color textColorDisable_;
 
 private:
     Edge padding_;
@@ -826,17 +863,12 @@ private:
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
 
-    Color bgColor_;
     Radius borderRadiusSize_;
-    Color placeholderColor_;
-    Color focusBgColor_;
     Color focusPlaceholderColor_;
     Color focusTextColor_;
-    Color textColor_;
     Color disableTextColor_;
     Color underlineActivedColor_;
     Color underlineTypingColor_;
-    Color textColorDisable_;
     Color selectedColor_;
     Color hoverColor_;
     Color pressColor_;
@@ -854,7 +886,6 @@ private:
     Color passwordErrorInputColor_;
     Color passwordErrorBorderColor_;
     Color passwordErrorLableColor_;
-    TextStyle textStyle_;
     TextStyle errorTextStyle_;
     TextStyle countTextStyle_;
     TextStyle overCountStyle_;
@@ -863,7 +894,6 @@ private:
     TextStyle overCountTextStyle_;
     Color inlineTextColor_;
     Radius inlineRadiusSize_;
-    Color inlineBgColor_;
     Color inlineBorderColor_;
     Color defaultCounterColor_;
     Color overCounterColor_;
@@ -879,7 +909,6 @@ private:
     Dimension overHideLength_;
 
     // UX::cursor state cursor-color=#000000, cursor blur-radius=0.9, cursor-width=2, cursor-height=24, cursor-radius=1
-    Color cursorColor_;
     Dimension cursorRadius_;
     Dimension cursorWidth_;
     bool needFade_ = false;
@@ -888,10 +917,13 @@ private:
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
+    Dimension cancelIconSize_ = 16.0_vp;
+    Dimension passwordIconSize_ = 20.0_vp;
+    Dimension cancelIconPadding_ = 14.0_vp;
+    Dimension passwordIconPadding_ = 10.0_vp;
 
     // Replace image(icon) with symbol
     Dimension symbolSize_;
-    Color symbolColor_;
     uint32_t showSymbolId_ = 0;
     uint32_t hideSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
@@ -905,6 +937,7 @@ private:
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
+    bool translateIsSupport_ = false;
     bool supportSearch_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;
 

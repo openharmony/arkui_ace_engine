@@ -18,7 +18,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 // for indicator
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
@@ -62,7 +61,9 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     dotIndicatorModifier_->SetIsHorizontalAndRTL(isHorizontalAndRightToLeft_);
     dotIndicatorModifier_->SetNeedUpdate(true);
     dotIndicatorModifier_->SetForceStopPageRate(FLT_MAX);
-
+    dotIndicatorModifier_->SetIndicatorDotItemSpace(paintProperty->GetSpaceValue(
+        swiperTheme->GetIndicatorDotItemSpace()));
+    
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * HALF_FLOAT;
     dotIndicatorModifier_->SetCenterY(centerY_);
@@ -130,7 +131,7 @@ std::pair<float, float> OverlengthDotIndicatorPaintMethod::CalculatePointCenterX
         if (IsCustomSizeValue_) {
             allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - NUM_1) + selectedItemWidth;
         }
-        auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - NUM_1));
+        auto allPointSpaceSum = static_cast<float>(space * (itemCount_ - NUM_1));
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
         startCenterX = rectWidth - startCenterX;
         endCenterX = rectWidth - endCenterX;
@@ -161,7 +162,9 @@ std::tuple<std::pair<float, float>, LinearVector<float>> OverlengthDotIndicatorP
 
     int32_t displayCount = itemCount_;
     // use radius calculation
-    auto itemSpace = INDICATOR_ITEM_SPACE.ConvertToPx();
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(swiperTheme->GetIndicatorDotItemSpace());
+    auto itemSpace = indicatorDotItemSpace.ConvertToPx();
     if (maxDisplayCount_ > 0) {
         displayCount = maxDisplayCount_;
     }
@@ -170,7 +173,8 @@ std::tuple<std::pair<float, float>, LinearVector<float>> OverlengthDotIndicatorP
     itemHalfSizes.emplace_back(itemHeight * HALF_FLOAT);
     itemHalfSizes.emplace_back(selectedItemWidth * HALF_FLOAT);
     itemHalfSizes.emplace_back(selectedItemHeight * HALF_FLOAT);
-    CalculateNormalMargin(itemHalfSizes, frameSize, displayCount);
+    bool ignoreSize = paintProperty->GetIgnoreSizeValue(false);
+    CalculateNormalMargin(itemHalfSizes, frameSize, displayCount, indicatorDotItemSpace, ignoreSize);
 
     auto longPointCenterX = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(),
         static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()), static_cast<float>(itemSpace), currentIndex_);

@@ -66,6 +66,7 @@ const Color DEFAULT_TEXT_SHADOW_COLOR = Color::BLACK;
 constexpr bool DEFAULT_TEXT_SHADOW_FILL = false;
 constexpr ShadowType DEFAULT_TEXT_SHADOW_TYPE = ShadowType::COLOR;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 
 uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
 {
@@ -124,6 +125,17 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
         return ParseJsColorFromResource(vm, value, result);
     }
     return false;
+}
+
+bool ArkTSUtils::ParseJsColorContent(const EcmaVM* vm, const Local<JSValueRef>& value)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    auto obj = value->ToObject(vm);
+    auto colorContentValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colorContent_"));
+    return !colorContentValue.IsEmpty() && colorContentValue->IsString(vm) &&
+           colorContentValue->ToString(vm)->ToString(vm) == "ORIGIN";
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(
@@ -500,6 +512,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
     }
     if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
+        result.SetResourceId(resId->Int32Value(vm));
         return true;
     }
     return false;
@@ -1532,6 +1545,28 @@ void ArkTSUtils::PushOuterBorderDimensionVector(
     }
 }
 
+void ArkTSUtils::ParseJsSymbolFontFamilyName(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
+    std::string& customFamilyName)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        return;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    CompleteResourceObject(vm, jsObj);
+    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return;
+    }
+    auto resourceObject = GetResourceObject(vm, jsValue);
+    if (!resourceObject) {
+        return;
+    }
+    std::string bundleName = resourceObject->GetBundleName();
+    std::string moduleName = resourceObject->GetModuleName();
+    customFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
+    std::replace(customFamilyName.begin(), customFamilyName.end(), '.', '_');
+}
+
 bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId)
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
@@ -1551,6 +1586,12 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
     if (!resourceWrapper) {
         return false;
+    }
+    auto strValue = resourceWrapper->GetString(resId->Uint32Value(vm));
+    if (!strValue.empty()) {
+        auto customSymbolId = static_cast<uint32_t>(strtol(strValue.c_str(), nullptr, 16));
+        symbolId = customSymbolId;
+        return true;
     }
     auto resIdNum = resId->Int32Value(vm);
     if (resIdNum == -1) {
@@ -1882,6 +1923,29 @@ Local<JSValueRef> ArkTSUtils::JsGetModifierKeyState(ArkUIRuntimeCallInfo* info)
     auto pressedKeyCodes = eventInfo->GetPressedKeyCodes();
     return ArkTSUtils::GetModifierKeyState(info, pressedKeyCodes);
 }
+
+Local<JSValueRef> ArkTSUtils::JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<AxisInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    return panda::NumberRef::New(info->GetVM(), eventInfo->GetHorizontalAxis());
+}
+
+Local<JSValueRef> ArkTSUtils::JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<AxisInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    return panda::NumberRef::New(info->GetVM(), eventInfo->GetVerticalAxis());
+}
+
 bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     if (!jsValue->IsObject(vm)) {

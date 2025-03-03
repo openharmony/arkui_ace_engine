@@ -72,8 +72,8 @@ public:
      */
     FlowItemIndex GetCrossIndexForNextItem(int32_t segmentIdx) const;
 
-    bool OverScrollTop() override;
-    bool OverScrollBottom() override;
+    bool IsAtTopWithDelta() override;
+    bool IsAtBottomWithDelta() override;
     
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex) const;
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;
@@ -187,6 +187,7 @@ public:
     int32_t GetLastItem() const;
 
     void NotifyDataChange(int32_t index, int32_t count) override {};
+    void NotifySectionChange(int32_t index) override {};
     void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override
     {}

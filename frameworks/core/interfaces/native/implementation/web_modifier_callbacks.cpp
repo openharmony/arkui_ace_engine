@@ -1170,7 +1170,7 @@ WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
     attributes.values = arkValues.array;
     parameter.attributes = attributes;
 
-    auto frameNode = refNode.GetRawPtr();
+    auto frameNode = Referenced::RawPtr(refNode);
     auto arkCallback = CallbackHelper(*valueCallback);
     const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebKeyboardOptions,
         Callback_WebKeyboardOptions_Void>(parameter);

@@ -199,8 +199,9 @@ void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawi
     brush.SetColor(previewTextDecorationColor);
     drawingContext.canvas.AttachBrush(brush);
     for (const auto& previewTextRect : previewTextRects) {
+        auto padding = &previewTextRect == &previewTextRects.back() ? 0 : roundRectRadius;
         RSRect rect(previewTextRect.Left(), previewTextRect.Bottom() - previewTextUnderlineWidth,
-            previewTextRect.Right(), previewTextRect.Bottom());
+            previewTextRect.Right() + padding, previewTextRect.Bottom());
         drawingContext.canvas.DrawRoundRect(RSRoundRect(rect, roundRectRadius, roundRectRadius));
     }
     drawingContext.canvas.DetachBrush();
@@ -314,13 +315,12 @@ void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 
-void RichEditorOverlayModifier::StartFloatingCaretLand()
+void RichEditorOverlayModifier::StartFloatingCaretLand(const OffsetF& originCaretOffset)
 {
     AnimationOption option = AnimationOption();
     option.SetDuration(LAND_DURATION);
     option.SetCurve(LAND_CURVE);
     caretLanding_ = true;
-    auto originCaretOffset = caretOffset_->Get();
     AnimationUtils::Animate(
         option,
         [weak = WeakClaim(this), originCaretOffset]() {

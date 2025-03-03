@@ -36,6 +36,24 @@ enum class ToastWindowType {
     TOAST_IN_TYPE_SYSTEM_FLOAT,
     TOAST_WINDOW_COUNT
 };
+enum class MenuWindowState : int32_t {
+    DEFAULT = 0,
+    ATTACHING = 1,
+    ATTACHED = 2,
+    DETACHING = 3,
+    DETACHED = 4
+};
+
+enum class SubwindowType {
+    TYPE_SYSTEM_TOP_MOST_TOAST = 0,
+    TYPE_TOP_MOST_TOAST,
+    TYPE_MENU,
+    TYPE_POPUP,
+    TYPE_DIALOG,
+    TYPE_SELECT_MENU,
+    TYPE_SHEET,
+    SUB_WINDOW_TYPE_COUNT,
+};
 
 class ACE_EXPORT Subwindow : public AceType {
     DECLARE_ACE_TYPE(Subwindow, AceType)
@@ -43,8 +61,9 @@ class ACE_EXPORT Subwindow : public AceType {
 public:
     static RefPtr<Subwindow> CreateSubwindow(int32_t instanceId);
 
-    virtual bool InitContainer() = 0;
+    virtual void InitContainer() = 0;
     virtual void ResizeWindow() = 0;
+    virtual void ResizeWindowForMenu() = 0;
     virtual NG::RectF GetRect() = 0;
     virtual void SetRect(const NG::RectF& rect) = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
@@ -86,6 +105,7 @@ public:
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;
     virtual void MarkDirtyDialogSafeArea() = 0;
+    virtual bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) = 0;
 
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId) {};
@@ -94,10 +114,16 @@ public:
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual Rect GetFoldExpandAvailableRect() const = 0;
     virtual NG::RectF GetWindowRect() const
     {
         return NG::RectF();
     }
+    virtual bool NeedAvoidKeyboard()
+    {
+        return false;
+    }
+    virtual bool CheckHostWindowStatus() const = 0;
     virtual bool IsFreeMultiWindow() const = 0;
     virtual void OnFreeMultiWindowSwitch(bool enable) = 0;
     virtual int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) = 0;
@@ -164,6 +190,26 @@ public:
         return isSystemTopMost_;
     }
 
+    void SetIsRosenWindowCreate(bool isRosenWindowCreate)
+    {
+        isRosenWindowCreate_ = isRosenWindowCreate;
+    }
+
+    bool GetIsRosenWindowCreate() const
+    {
+        return isRosenWindowCreate_;
+    }
+
+    void SetIsSelectOverlaySubWindow(bool isSelectOverlaySubWindow)
+    {
+        isSelectOverlaySubWindow_ = isSelectOverlaySubWindow;
+    }
+
+    bool GetIsSelectOverlaySubWindow() const
+    {
+        return isSelectOverlaySubWindow_;
+    }
+
     virtual void ClearToast() = 0;
     virtual void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback) = 0;
@@ -188,12 +234,28 @@ public:
     virtual void DestroyWindow() = 0;
     virtual void ResizeDialogSubwindow() = 0;
     virtual uint64_t GetDisplayId() = 0;
+    virtual bool IsSameDisplayWithParentWindow(bool useInitializedId = false) = 0;
+    virtual OHOS::Ace::MenuWindowState GetAttachState() {return MenuWindowState::DEFAULT;};
+    virtual OHOS::Ace::MenuWindowState GetDetachState() {return MenuWindowState::DEFAULT;};
+
+    virtual void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) = 0;
 
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    bool isRosenWindowCreate_ = false;
+    bool isSelectOverlaySubWindow_ = false;
     ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
     // toast main window ID
     uint32_t mainWindowId_ = 0;

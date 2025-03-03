@@ -1577,4 +1577,100 @@ HWTEST_F(StageTestNg, PagePatternTest018, TestSize.Level1)
     auto nodeTest = testStageManager->GetPrevPageWithTransition();
     EXPECT_EQ(testStageManager->stageInTrasition_, false);
 }
+
+/**
+ * @tc.name: GetTopPagesWithTransition001
+ * @tc.desc: test branch: if (page)
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, GetTopPagesWithTransition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StageManager.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call function GetTopPagesWithTransition.
+     *                   Branch: if (page) {
+     *                   Condition: page => nullptr
+     * @tc.expected: No pageNode will return.
+     */
+    auto topPages = stageManager->GetTopPagesWithTransition();
+    ASSERT_TRUE(topPages.empty());
+
+    /**
+     * @tc.steps: step3. Add one pageNode to StageNode, and call function GetTopPagesWithTransition again.
+     *                   Branch: if (page) {
+     *                   Condition: page != nullptr.
+     * @tc.expected: Only one pageNode will return.
+     */
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "testUrl", "testPath");
+    ASSERT_NE(pageInfo, nullptr);
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
+    ASSERT_NE(pagePattern, nullptr);
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    ASSERT_NE(pageNode, nullptr);
+    stageNode->AddChild(pageNode);
+    topPages = stageManager->GetTopPagesWithTransition();
+    ASSERT_EQ(topPages.size(), 1);
+    ASSERT_EQ(topPages[0], pageNode);
+}
+
+/**
+ * @tc.name: GetTopPagePaths001
+ * @tc.desc: test branch: for (auto& page : pages)
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, GetTopPagePaths001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StageNode and StageManager.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+    std::string pageUrl = "";
+    const std::string TEST_PATH = "TestPath/TestName";
+    auto testGetPagePathCallback = [&pageUrl, &TEST_PATH](const std::string& url) -> std::string {
+        pageUrl = url;
+        return TEST_PATH;
+    };
+    stageManager->SetGetPagePathCallback(std::move(testGetPagePathCallback));
+
+    /**
+     * @tc.steps: step2. Call function GetTopPagePaths.
+     *                   Branch: for (auto& page : pages)
+     *                   Condition: pages is empty
+     * @tc.expected: No pagePath will return.
+     */
+    auto topPagePaths = stageManager->GetTopPagePaths();
+    ASSERT_TRUE(topPagePaths.empty());
+
+    /**
+     * @tc.steps: step3. Add one page to StageNode, then call function GetTopPagePaths again.
+     *                   Branch: for (auto& page : pages)
+     *                   Condition: pages contains one page
+     * @tc.expected: One pagePath will return.
+     */
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "myUrl", "myPath");
+    ASSERT_NE(pageInfo, nullptr);
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
+    ASSERT_NE(pagePattern, nullptr);
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    ASSERT_NE(pageNode, nullptr);
+    stageNode->AddChild(pageNode);
+    topPagePaths = stageManager->GetTopPagePaths();
+    ASSERT_EQ(topPagePaths.size(), 1);
+    ASSERT_EQ(topPagePaths[0], TEST_PATH);
+    ASSERT_EQ(pageUrl, "myUrl");
+}
 } // namespace OHOS::Ace::NG

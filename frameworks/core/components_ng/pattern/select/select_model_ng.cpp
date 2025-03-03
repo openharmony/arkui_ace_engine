@@ -804,4 +804,31 @@ void SelectModelNG::SetValueChangeEvent(FrameNode* frameNode, NG::ValueChangeEve
     CHECK_NULL_VOID(hub);
     hub->SetValueChangeEvent(std::move(valueChangeEvent));
 }
+
+void SelectModelNG::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLayoutDirection(value);
+}
+
+void SelectModelNG::ResetFontColor()
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetFontColor();
+}
+
+void SelectModelNG::BackgroundColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColor, color);
+    ViewAbstract::SetBackgroundColor(color);
+}
+
+void SelectModelNG::ResetBackgroundColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SelectPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, BackgroundColor);
+}
 } // namespace OHOS::Ace::NG

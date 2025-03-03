@@ -33,6 +33,7 @@ public:
     void SetDefaultPickerItemHeight(const Dimension& value) override;
     void SetGradientHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override;
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
@@ -68,21 +69,25 @@ public:
 
     void SetSingleRange(bool isSingleRange) override
     {
+        std::lock_guard<std::mutex> lock(isSingleMutex_);
         isSingleRange_ = isSingleRange;
     }
 
     bool GetSingleRange() override
     {
+        std::lock_guard<std::mutex> lock(isSingleMutex_);
         return isSingleRange_;
     }
 
     static void SetTextPickerSingeRange(bool isSingleRange)
     {
+        std::lock_guard<std::mutex> lock(isSingleMutex_);
         isSingleRange_ = isSingleRange;
     }
 
     static bool GetTextPickerSingeRange()
     {
+        std::lock_guard<std::mutex> lock(isSingleMutex_);
         return isSingleRange_;
     }
 
@@ -92,12 +97,15 @@ public:
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
     void SetDivider(const ItemDivider& divider) override;
     void HasUserDefinedOpacity() override;
+    void SetColumnWidths(const std::vector<Dimension>& widths) override;
 
     static void InitialSetupSinglePicker(FrameNode* frameNode, uint32_t columnKind);
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
     static void SetHasSelectAttr(FrameNode* frameNode, bool value);
@@ -135,6 +143,7 @@ public:
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, TextCascadeChangeEvent&& onScrollStop);
     static int32_t GetSelectedSize(FrameNode* frameNode);
+    static int32_t GetColumnWidthsSize(FrameNode* frameNode);
     static std::string getTextPickerValues(FrameNode* frameNode);
     static std::vector<uint32_t> getTextPickerSelecteds(FrameNode* frameNode);
     static int32_t GetCanLoop(FrameNode* frameNode);
@@ -146,24 +155,37 @@ public:
         const std::string value, const uint32_t index);
     static void SetOnValueChangeEvent(FrameNode* frameNode, TextCascadeValueChangeEvent&& onChange);
     static void SetOnSelectedChangeEvent(FrameNode* frameNode, TextCascadeSelectedChangeEvent&& onChange);
+    static void SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths);
+    static std::vector<Dimension> GetColumnWidths(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
+
 private:
+    void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
+    void SetCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
+
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
     static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
-    void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
-    void SetCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetUnCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void ValidateData(
         NG::TextCascadePickerOptions& options, const std::vector<std::string>& values, uint32_t index,
         std::vector<std::string>& selectedValues, std::vector<uint32_t>& valuesIndex);
-    static inline uint32_t showCount_ = 0;
+
+    uint32_t maxCount_ = 0;
+    std::vector<uint32_t> kinds_;
     static inline bool isCascade_ = false;
+    static inline bool isSingleRange_ = true;
+    static inline uint32_t showCount_ = 0;
     static inline std::vector<NG::RangeContent> rangeValue_;
     static inline std::vector<NG::TextCascadePickerOptions> options_;
-    uint32_t maxCount_ = 0;
-    static inline bool isSingleRange_ = true;
+    static inline std::mutex showCountMutex_;
+    static inline std::mutex rangeValueMutex_;
+    static inline std::mutex optionsMutex_;
+    static inline std::mutex isCascadeMutex_;
+    static inline std::mutex isSingleMutex_;
 };
 
 class ACE_EXPORT TextPickerDialogModelNG : public TextPickerDialogModel {

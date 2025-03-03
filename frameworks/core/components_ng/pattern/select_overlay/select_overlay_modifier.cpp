@@ -17,6 +17,7 @@
 
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -268,6 +269,10 @@ void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(secondHandleIsShow_);
 
     if (!isNewAvoid_ && !firstHandleIsShow_->Get() && !secondHandleIsShow_->Get()) {
+        return;
+    }
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
 

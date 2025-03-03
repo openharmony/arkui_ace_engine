@@ -32,6 +32,7 @@ class TouchPoint(BaseBean):
     timestamp = ''
     isInjected = 0
     original_str = ''
+    downFingerIds = 0
 
     def __init__(self, input_str):
         super().__init__()
@@ -47,19 +48,21 @@ class TouchPoint(BaseBean):
         self.timestamp = get_value_as_str(input_str, get_sample_key(touch_point_keyword, 'timestamp'),
                                           get_sample_separator_count(touch_point_keyword, 'timestamp'))
         self.isInjected = get_value_as_int(input_str, get_sample_key(touch_point_keyword, 'isInjected'),
-                                           get_sample_separator_count(touch_point_keyword, 'isInjected'), True)
+                                           get_sample_separator_count(touch_point_keyword, 'isInjected'))
+        self.downFingerIds = get_value_as_str(input_str, get_sample_key(touch_point_keyword, 'downFingerIds'),
+                                           get_sample_separator_count(touch_point_keyword, 'downFingerIds'), True)
         self.check_parse_result()
 
     def check_parse_result(self):
-        if (self.id is None or self.point is None or self.screenPoint is None or self.type is None or self.timestamp
-                is None or self.isInjected is None):
+        if (self.id is None or self.type is None or self.timestamp
+                is None or self.isInjected is None or self.downFingerIds is None):
             self.parse_failed()
         else:
             self.parse_succeed()
 
     def to_string(self):
-        return ('id: {}, point: {}, screenPoint: {}, type: {}, timestamp: {}, isInjected: {}'
-                .format(self.id, self.point, self.screenPoint, self.type, self.timestamp, self.isInjected))
+        return ('id: {}, point: {}, screenPoint: {}, type: {}, timestamp: {}, isInjected: {}, downFingerIds: {}'
+                .format(self.id, self.point, self.screenPoint, self.type, self.timestamp, self.isInjected, self.downFingerIds))
 
     def to_summary_string(self):
         return ('id: {}, {}, {}, {}, {}'

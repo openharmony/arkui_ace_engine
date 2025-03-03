@@ -58,6 +58,9 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
+    if (!IsModeSwitchComplete()) {
+        return;
+    }
 
     auto offset = paintWrapper->GetGeometryNode()->GetFrameOffset();
     auto viewPort = paintWrapper->GetGeometryNode()->GetFrameRect() - offset;
@@ -81,8 +84,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetInShowArea(SelectOverlayLayoutAlgorithm::CheckInShowArea(info_));
     selectOverlayContentModifier_->SetHandleReverse(info_.handleReverse);
     selectOverlayContentModifier_->SetIsSingleHandle(info_.isSingleHandle);
-    selectOverlayContentModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow);
-    selectOverlayContentModifier_->SetSecondHandleIsShow(info_.secondHandle.isShow);
+    selectOverlayContentModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow || info_.firstHandle.forceDraw);
+    selectOverlayContentModifier_->SetSecondHandleIsShow(info_.secondHandle.isShow || info_.firstHandle.forceDraw);
     selectOverlayContentModifier_->SetIsHandleLineShow(info_.isHandleLineShow);
     selectOverlayContentModifier_->SetIsHiddenHandle(isHiddenHandle_);
 
@@ -180,4 +183,20 @@ void SelectOverlayPaintMethod::CheckHandleIsShown()
     }
 }
 
+bool SelectOverlayPaintMethod::IsModeSwitchComplete() const
+{
+    if (info_.enableHandleLevel && info_.handleLevelMode == HandleLevelMode::EMBED) {
+        CHECK_NULL_RETURN(selectOverlayContentModifier_, false);
+        auto pattern = selectOverlayContentModifier_->GetSelectOverlayPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto parentNode = host->GetAncestorNodeOfFrame(true);
+        CHECK_NULL_RETURN(parentNode, false);
+        auto callerNode = info_.callerFrameNode.Upgrade();
+        CHECK_NULL_RETURN(callerNode, false);
+        return parentNode == info_.callerFrameNode.Upgrade();
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

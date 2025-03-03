@@ -70,6 +70,7 @@ void NavigationLayoutTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 /*
@@ -132,6 +133,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest019, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest020, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -165,6 +167,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest020, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest021, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -198,6 +201,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest021, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest022, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -231,6 +235,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest022, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest023, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -257,6 +262,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest023, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest024, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -290,6 +296,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest024, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest025, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -323,6 +330,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest025, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest026, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -356,6 +364,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest026, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest027, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationPattern navigationPattern;
     bool isPopPage = true;
     EXPECT_EQ(navigationPattern.TriggerCustomAnimation(nullptr, nullptr, isPopPage), false);
@@ -368,6 +377,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest027, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest028, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -387,6 +397,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest028, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest029, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -416,6 +427,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest029, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest030, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -448,6 +460,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest030, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest031, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -481,6 +494,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest031, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest032, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -510,6 +524,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest032, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest033, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -539,6 +554,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest033, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest034, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -555,36 +571,13 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest034, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavigationPatternTest035
- * @tc.desc: Test UpdatePreNavDesZIndex function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest035, TestSize.Level1)
-{
-    NavigationModelNG model;
-    model.Create();
-    model.SetNavigationStack();
-    auto navigation =
-        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ASSERT_NE(navigation, nullptr);
-    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-
-    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
-    auto preTopNavDestination = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(preTopNavDestination, nullptr);
-    auto newTopNavDestination = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(newTopNavDestination, nullptr);
-    navigationPattern->UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination);
-}
-
-/**
  * @tc.name: NavigationPatternTest036
  * @tc.desc: Test SyncWithJsStackIfNeeded function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest036, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -605,6 +598,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest036, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest037, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -637,6 +631,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest037, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest038, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -677,6 +672,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest038, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest039, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -716,6 +712,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest039, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest040, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -749,6 +746,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest040, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest041, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -782,6 +780,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest041, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest042, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -818,6 +817,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest042, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest043, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -852,6 +852,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest043, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest044, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -880,6 +881,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest044, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest045, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -909,6 +911,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest045, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest046, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -935,6 +938,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest046, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest047, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -964,6 +968,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest047, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest048, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -993,6 +998,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest048, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest049, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1019,6 +1025,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest049, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest050, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1050,6 +1057,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest050, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest051, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1080,6 +1088,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest051, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest052, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1110,6 +1119,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest052, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest053, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1140,6 +1150,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest053, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest054, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1161,6 +1172,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest054, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest055, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1184,6 +1196,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest055, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest056, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1207,6 +1220,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest056, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest057, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     NavigationModelNG model;
     model.Create();
     model.SetNavigationStack();
@@ -1284,105 +1298,6 @@ HWTEST_F(NavigationLayoutTestNg, HandleBack002, TestSize.Level1)
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
     EXPECT_EQ(navigationPattern->GetNavigationMode(), NavigationMode::SPLIT);
     navigationNode->HandleBack(navDestinationNode, isLastChild, isOverride);
-}
-
-/**
- * @tc.name: TransitionWithPop001
- * @tc.desc: Test TransitionWithPop and match all conditions of "isLastChild" and "isNavBar".
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationLayoutTestNg, TransitionWithPop001, TestSize.Level1)
-{
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-
-    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
-    auto backButtonNode = FrameNode::CreateFrameNode(
-        V2::BACK_BUTTON_ETS_TAG, 7, AceType::MakeRefPtr<ButtonPattern>());
-    titleBarNode->backButton_ = backButtonNode;
-    preNode->titleBarNode_ = titleBarNode;
-
-    RefPtr<FrameNode> curNode1 = nullptr;
-    bool isNavBar = false;
-    auto preTitleNode = AceType::DynamicCast<TitleBarNode>(preNode->GetTitleBarNode());
-    ASSERT_NE(preTitleNode, nullptr);
-    EXPECT_NE(preTitleNode->GetBackButton(), nullptr);
-    EXPECT_EQ(curNode1, nullptr);
-    EXPECT_FALSE(isNavBar);
-    navigationNode->TransitionWithPop(preNode, curNode1, isNavBar);
-
-    auto curNode2 = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(curNode2, nullptr);
-    auto curNavDestinationTest = AceType::DynamicCast<NavDestinationGroupNode>(curNode2);
-    ASSERT_NE(curNavDestinationTest, nullptr);
-    EXPECT_NE(AceType::DynamicCast<TitleBarNode>(curNavDestinationTest->GetTitleBarNode()), nullptr);
-    navigationNode->TransitionWithPop(preNode, curNode2, isNavBar);
-
-    isNavBar = true;
-    auto curNode3 = NavBarNode::GetOrCreateNavBarNode(
-        "navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    EXPECT_TRUE(isNavBar);
-    ASSERT_NE(curNode3, nullptr);
-    curNode3->titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto navBarNodeTest = AceType::DynamicCast<NavBarNode>(curNode3);
-    ASSERT_NE(navBarNodeTest, nullptr);
-    EXPECT_NE(AceType::DynamicCast<TitleBarNode>(navBarNodeTest->GetTitleBarNode()), nullptr);
-    navigationNode->TransitionWithPop(preNode, curNode3, isNavBar);
-}
-
-/**
- * @tc.name: TransitionWithPop002
- * @tc.desc: Test TransitionWithPop and match the logic of the callback as follows:
- *               shallowBuilder is true/false
- *               IsCacheNode return true/false
- *               GetContentNode return true/false
- *           In addition, the conditions GetTransitionType return true/false have been covered by the last case
- *           TransitionWithPop001, which is affected by the curNode.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationLayoutTestNg, TransitionWithPop002, TestSize.Level1)
-{
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-
-    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
-    auto backButtonNode = FrameNode::CreateFrameNode(
-        V2::BACK_BUTTON_ETS_TAG, 7, AceType::MakeRefPtr<ButtonPattern>());
-    titleBarNode->backButton_ = backButtonNode;
-    preNode->titleBarNode_ = titleBarNode;
-
-    preNode->isCacheNode_ = true;
-    auto preTitleNode = AceType::DynamicCast<TitleBarNode>(preNode->GetTitleBarNode());
-    ASSERT_NE(preTitleNode, nullptr);
-    EXPECT_NE(preTitleNode->GetBackButton(), nullptr);
-    EXPECT_TRUE(preNode->IsCacheNode());
-    navigationNode->TransitionWithPop(preNode, nullptr, false);
-
-    preNode->isCacheNode_ = false;
-    auto prePattern = preNode->GetPattern<NavDestinationPattern>();
-    ASSERT_NE(prePattern, nullptr);
-    prePattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
-        []() { return FrameNode::CreateFrameNode("temp", 234, AceType::MakeRefPtr<ButtonPattern>()); });
-    EXPECT_NE(prePattern->GetShallowBuilder(), nullptr);
-    EXPECT_FALSE(preNode->IsCacheNode());
-    EXPECT_EQ(preNode->GetContentNode(), nullptr);
-    navigationNode->TransitionWithPop(preNode, nullptr, false);
-
-    preNode->contentNode_ = FrameNode::CreateFrameNode("temp", 235, AceType::MakeRefPtr<ButtonPattern>());
-    EXPECT_NE(preNode->GetContentNode(), nullptr);
-    navigationNode->TransitionWithPop(preNode, nullptr, false);
 }
 
 /**
@@ -1544,7 +1459,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit001, TestSize.Level1)
     preNode->eventHub_ = nullptr;
     bool isNavBar = false;
 
-    EXPECT_EQ(preNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(preNode->GetEventHubOnly<EventHub>(), nullptr);
     EXPECT_FALSE(isNavBar);
     // Make sure navDestination is true
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
@@ -1761,6 +1676,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationAvoidKeyboardTest, TestSize.Level1)
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationSize001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. Create NavigationNode & NavigationPattern.
      * @tc.expected: step1. NavigationPattern has default size.

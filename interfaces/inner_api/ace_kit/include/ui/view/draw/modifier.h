@@ -16,12 +16,17 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_MODIFIER_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_MODIFIER_H
 
+#include <memory>
+
 #include "ui/base/ace_type.h"
 
-namespace OHOS::Rosen::Drawing {
+namespace OHOS::Rosen {
+namespace Drawing {
 class Canvas;
 }
 
+class RSPropertyBase;
+} // namespace OHOS::Rosen
 namespace OHOS::Ace::Kit {
 using RSCanvas = OHOS::Rosen::Drawing::Canvas;
 
@@ -37,6 +42,10 @@ class Modifier : public Ace::AceType {
 public:
     Modifier() = default;
     ~Modifier() = default;
+
+    virtual void OnAttached() = 0;
+
+    virtual void AttachRSProperty(const std::shared_ptr<Rosen::RSPropertyBase>& property) = 0;
 };
 } // namespace OHOS::Ace::Kit
 

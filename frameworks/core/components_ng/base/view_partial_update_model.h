@@ -32,7 +32,7 @@ namespace OHOS::Ace {
 struct NodeInfoPU {
     std::function<void()> appearFunc;
     std::function<void()> didBuildFunc;
-    std::function<RefPtr<AceType>()> renderFunc;
+    std::function<RefPtr<AceType>(int64_t, bool&)> renderFunc;
     std::function<void()> updateFunc;
     std::function<void()> removeFunc;
     std::function<void(const RefPtr<AceType>&)> updateNodeFunc;
@@ -43,11 +43,11 @@ struct NodeInfoPU {
     std::function<void(NG::LayoutWrapper*)> layoutFunc;
     std::function<void(NG::LayoutWrapper*)> placeChildrenFunc;
     std::function<void(bool)> reloadFunc;
-    std::function<RefPtr<AceType>()> completeReloadFunc;
+    std::function<RefPtr<AceType>(int64_t, bool&)> completeReloadFunc;
     std::function<void(int32_t)> nodeUpdateFunc;
     std::function<bool(int32_t)> hasNodeUpdateFunc;
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
-    std::function<void(bool)> setActiveFunc;
+    std::function<void(bool, bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<std::string()> onDumpInspectorFunc;
     std::function<void*()> getThisFunc;
@@ -57,6 +57,7 @@ struct NodeInfoPU {
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
     bool isCustomTitle = false;
+    bool isCustomAppBar = false;
     int32_t codeRow = -1;
     int32_t codeCol = -1;
 

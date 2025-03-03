@@ -44,8 +44,5 @@ struct UpdateParagraphStyleForUpdate {
 struct RichEditorSymbolSpanStyle {
     std::optional<Dimension> fontSize;
 };
-
-void AssignArkValue(Ark_Materialized& dst, const std::string& src);
-void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src);
 } // namespace OHOS::Ace::NG::Converter
 #endif

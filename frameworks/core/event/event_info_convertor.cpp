@@ -21,4 +21,13 @@ bool EventInfoConvertor::ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo,
     return false;
 }
 
+bool EventInfoConvertor::IsTouchEventNeedAbandoned(const TouchEventInfo& touchEventInfo)
+{
+    return false;
+}
+
+bool EventInfoConvertor::MatchCompatibleCondition()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

@@ -14,8 +14,10 @@
  */
 
 #include "cj_animator.h"
-#include "bridge/common/utils/utils.h"
+
 #include "cj_lambda.h"
+
+#include "bridge/common/utils/utils.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -113,12 +115,10 @@ void AnimatorResultImpl::ApplyOption()
 
 void AnimatorResultImpl::SetOnframe(int64_t funcId)
 {
-    auto func = reinterpret_cast<void(*)(double)>(funcId);
+    auto func = reinterpret_cast<void (*)(double)>(funcId);
     onframe_ = CJLambda::Create(func);
     animator_->ClearInterpolators();
-    auto onFrameCallback = [&callback = onframe_,
-                                weakOption = std::weak_ptr<AnimatorOption>(option_)]
-                            (double value) {
+    auto onFrameCallback = [&callback = onframe_, weakOption = std::weak_ptr<AnimatorOption>(option_)](double value) {
         auto option = weakOption.lock();
         ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
         callback(value);
@@ -141,37 +141,51 @@ void AnimatorResultImpl::SetOnframe(int64_t funcId)
     return;
 }
 
+void AnimatorResultImpl::SetOnFrame(int64_t funcId)
+{
+    return SetOnframe(funcId);
+}
+
 void AnimatorResultImpl::SetOnfinish(int64_t funcId)
 {
-    auto func = reinterpret_cast<void(*)(void)>(funcId);
+    auto func = reinterpret_cast<void (*)(void)>(funcId);
     onfinish_ = CJLambda::Create(func);
     animator_->ClearStopListeners();
-    animator_->AddStopListener([&callback = onfinish_] {
-        callback();
-    });
+    animator_->AddStopListener([&callback = onfinish_] { callback(); });
     return;
+}
+
+void AnimatorResultImpl::SetOnFinish(int64_t funcId)
+{
+    return SetOnfinish(funcId);
 }
 
 void AnimatorResultImpl::SetOncancel(int64_t funcId)
 {
-    auto func = reinterpret_cast<void(*)(void)>(funcId);
+    auto func = reinterpret_cast<void (*)(void)>(funcId);
     oncancel_ = CJLambda::Create(func);
     animator_->ClearIdleListeners();
-    animator_->AddIdleListener([&callback = oncancel_] {
-        callback();
-    });
+    animator_->AddIdleListener([&callback = oncancel_] { callback(); });
     return;
+}
+
+void AnimatorResultImpl::SetOnCancel(int64_t funcId)
+{
+    return SetOncancel(funcId);
 }
 
 void AnimatorResultImpl::SetOnrepeat(int64_t funcId)
 {
-    auto func = reinterpret_cast<void(*)(void)>(funcId);
+    auto func = reinterpret_cast<void (*)(void)>(funcId);
     onrepeat_ = CJLambda::Create(func);
     animator_->ClearRepeatListeners();
-    animator_->AddRepeatListener([&callback = onrepeat_] {
-        callback();
-    });
+    animator_->AddRepeatListener([&callback = onrepeat_] { callback(); });
     return;
+}
+
+void AnimatorResultImpl::SetOnRepeat(int64_t funcId)
+{
+    return SetOnrepeat(funcId);
 }
 
 void AnimatorResultImpl::Destroy()
@@ -183,4 +197,4 @@ void AnimatorResultImpl::Destroy()
         }
     }
 }
-}
+} // namespace OHOS::Ace

@@ -220,27 +220,29 @@ void RefreshPattern::InitProgressNode()
     progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
+    host->AddChild(progressChild_, 0);
     auto gestureHub = progressChild_->GetEventHub<EventHub>();
     if (gestureHub) {
         gestureHub->SetEnabled(false);
     }
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
     auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<RefreshTheme>();
-    CHECK_NULL_VOID(theme);
-    loadingProgressSizeTheme_ = theme->GetProgressDiameter();
-    triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
+    if (context) {
+        auto theme = context->GetTheme<RefreshTheme>();
+        if (theme) {
+            loadingProgressSizeTheme_ = theme->GetProgressDiameter();
+            triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
+            progressPaintProperty->UpdateColor(theme->GetProgressColor());
+        }
+    }
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(loadingProgressSizeTheme_.ConvertToPx()),
             CalcLength(loadingProgressSizeTheme_.ConvertToPx())));
-    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
-    CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
-    host->AddChild(progressChild_, 0);
     progressChild_->MarkDirtyNode();
-    progressPaintProperty->UpdateColor(theme->GetProgressColor());
 }
 
 void RefreshPattern::UpdateLoadingTextOpacity(float opacity)

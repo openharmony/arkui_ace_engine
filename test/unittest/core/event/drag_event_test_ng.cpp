@@ -14,7 +14,7 @@
  */
 
 #include "test/unittest/core/event/drag_event_test_ng.h"
-
+#include "test/mock/base/mock_task_executor.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -775,6 +775,11 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
      * @tc.steps: step7. Invoke onActionCancel callback, GetIsBindOverlayValue is true.
      * @tc.expected: cover getDeviceType() == SourceType::MOUSE.
      */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
@@ -855,7 +860,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
      * @tc.steps: step2. CreatePixelMap and Invoke CreatePreviewNode function.
      * @tc.expected: GetClickEffectLevelValue is correct.
      */
-    frameNode->eventHub_->SetEnabled(true);
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
@@ -864,7 +869,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     auto imageContext = imageNode->GetRenderContext();
@@ -899,14 +904,14 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
  */
 HWTEST_F(DragEventTestNg, DragEventTestNg010, TestSize.Level1)
 {
-    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
-    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
 
     auto frameNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     
-    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
-    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
 }
 
 /**
@@ -1053,18 +1058,18 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
      * @tc.steps: step2. CreatePixelMap and Invoke CreatePreviewNode and CreateBadgeTextNode function.
      * @tc.expected:  imageNode and textNode is not nullptr, badge size is correct.
      */
-    frameNode->eventHub_->SetEnabled(true);
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
     const int32_t childSize = 3; // selected item count.
-    auto textNode = dragEventActuator->CreateBadgeTextNode(childSize);
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(childSize);
     EXPECT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(textLayoutProperty, nullptr);
@@ -1122,13 +1127,13 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
      * @tc.steps: step3. CreatePixelMap and Invoke CreatePreviewNode function.
      * @tc.expected:  imageNode is not nullptr.
      */
-    frameNode->eventHub_->SetEnabled(true);
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
@@ -1138,7 +1143,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
      * @tc.expected: MountPixelMapToRootNode success, overlayManager has badgeNode, badge size is correct.
      */
     dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
-    dragEventActuator->ShowPreviewBadgeAnimation(dragEventActuator, overlayManager);
+    DragAnimationHelper::ShowPreviewBadgeAnimation(gestureHub, overlayManager);
     auto textNode = overlayManager->GetPixelMapBadgeNode();
     EXPECT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -1414,7 +1419,7 @@ HWTEST_F(DragEventTestNg, TestResetNode001, TestSize.Level1)
     /**
      * @tc.steps: step3. Reset frameNode scale.
      */
-    DragEventActuator::ResetNode(frameNode);
+    DragDropFuncWrapper::ResetNode(frameNode);
     auto resetScale = renderContext->GetTransformScaleValue({ 0.0f, 0.0f });
     EXPECT_EQ(resetScale.x, 1.0f);
     EXPECT_EQ(resetScale.y, 1.0f);
@@ -1813,7 +1818,7 @@ HWTEST_F(DragEventTestNg, TestApplyShadow, TestSize.Level1)
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     EXPECT_NE(imageNode, nullptr);
     imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
-    DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
+    DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
     auto imageContext = imageNode->GetRenderContext();
     EXPECT_NE(imageContext, nullptr);
     auto shadow = imageContext->GetBackShadow();
@@ -1821,11 +1826,11 @@ HWTEST_F(DragEventTestNg, TestApplyShadow, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestBrulStyleToEffection001
- * @tc.desc: Test BrulStyleToEffection.
+ * @tc.name: TestBlurStyleToEffection001
+ * @tc.desc: Test BlurStyleToEffection.
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventTestNg, TestBrulStyleToEffection001, TestSize.Level1)
+HWTEST_F(DragEventTestNg, TestBlurStyleToEffection001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create DragEventActuator.
@@ -1838,13 +1843,13 @@ HWTEST_F(DragEventTestNg, TestBrulStyleToEffection001, TestSize.Level1)
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
     /**
-     * @tc.steps: step2. Invoke BrulStyleToEffection function.
+     * @tc.steps: step2. Invoke BlurStyleToEffection function.
      */
     std::vector<float> vecGrayScale = {0.0f, 0.0f};
     BlurStyleOption blurStyleInfo = {BlurStyle::NO_MATERIAL, ThemeColorMode::SYSTEM,
      AdaptiveColor::DEFAULT, 1.0, {vecGrayScale}};
     std::optional<BlurStyleOption> optBlurStyleInfo(blurStyleInfo);
-    auto optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    auto optEffectOption = DragDropFuncWrapper::BlurStyleToEffection(optBlurStyleInfo);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     EXPECT_EQ(optEffectOption.has_value(), false);
@@ -1868,9 +1873,9 @@ HWTEST_F(DragEventTestNg, TestBrulStyleToEffection001, TestSize.Level1)
     auto blThemeInstance = BlurStyleTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(BlurStyleTheme::TypeId())).WillRepeatedly(Return(blThemeInstance));
     /**
-     * @tc.steps: step4. Invoke BrulStyleToEffection function.
+     * @tc.steps: step4. Invoke BlurStyleToEffection function.
      */
-    optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    optEffectOption = DragDropFuncWrapper::BlurStyleToEffection(optBlurStyleInfo);
     ASSERT_NE(optEffectOption.has_value(), true);
 }
 
@@ -1895,7 +1900,7 @@ HWTEST_F(DragEventTestNg, TestRadiusToSigma001, TestSize.Level1)
      * @tc.steps: step2. Invoke RadiusToSigma function invalid.
      */
     float radius = -1.0f;
-    auto sigMa = dragEventActuator->RadiusToSigma(radius);
+    auto sigMa = DragDropFuncWrapper::RadiusToSigma(radius);
     EXPECT_EQ(sigMa, 0.0f);
      /**
      * @tc.steps: step3. Invoke RadiusToSigma function.
@@ -1904,7 +1909,7 @@ HWTEST_F(DragEventTestNg, TestRadiusToSigma001, TestSize.Level1)
     float blurSigmaScale = 0.57735f;
     radius = 2.0f;
     float retSigMa = blurSigmaScale * radius + scaleHalf;
-    sigMa = dragEventActuator->RadiusToSigma(radius);
+    sigMa = DragDropFuncWrapper::RadiusToSigma(radius);
     EXPECT_EQ(sigMa, retSigMa);
 }
 
@@ -2008,5 +2013,126 @@ HWTEST_F(DragEventTestNg, ReSetResponseRegion, TestSize.Level1)
     ASSERT_EQ(gestureEventHub->responseRegion_.size(), 1);
     EXPECT_EQ(gestureEventHub->responseRegion_[0].width_, originRect.width_);
     EXPECT_EQ(gestureEventHub->responseRegion_[0].height_, originRect.height_);
+}
+
+/**
+ * @tc.name: SetResponseRegionFullTest
+ * @tc.desc: Test DragClog001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragClog001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback([](){});
+    dragDropManager->RemoveDeadlineTimer();
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetAsyncDragCallback(), nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    guestureEventHub->HandleOnDragStart(info);
+    dragDropManager->HandleSyncOnDragStart(DragStartRequestStatus::READY);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetAsyncDragCallback(), nullptr);
+}
+
+/**
+ * @tc.name: DragEventPreviewLongPressActionTestNG001
+ * @tc.desc: Test DragEventPreviewLongPressActionTestNG001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventPreviewLongPressActionTestNG001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    GestureEventFunc actionStart = [](GestureEvent& info) {};
+    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
+    GestureEventFunc actionEnd = [](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = []() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(std::move(actionStart), std::move(actionUpdate),
+        std::move(actionEnd), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+    EXPECT_NE(dragEventActuator->userCallback_, nullptr);
+    /**
+     * @tc.steps: step2. Invoke OnCollectTouchTarget.
+     * @tc.expected: call OnCollectTouchTarget and create previewLongPressRecognizer_ successful.
+     */
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    EXPECT_NE(getEventTargetImpl, nullptr);
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    EXPECT_NE(dragEventActuator->previewLongPressRecognizer_->onAction_, nullptr);
+
+    /**
+     * @tc.steps: step3. Test previewLongPressRecognizer_ onAction callback with pan success.
+     * @tc.expected: onAction callback complete successful.
+     */
+    dragEventActuator->isOnBeforeLiftingAnimation_ = true;
+    GestureEvent info = GestureEvent();
+    (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
+    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
+
+    /**
+     * @tc.steps: step4. Test previewLongPressRecognizer_ onAction callback with pan reject.
+     * @tc.expected: onAction callback return.
+     */
+    dragEventActuator->isOnBeforeLiftingAnimation_ = true;
+    auto panRecognizer = dragEventActuator->panRecognizer_;
+    panRecognizer->disposal_ = GestureDisposal::REJECT;
+    (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
+    EXPECT_TRUE(dragEventActuator->isOnBeforeLiftingAnimation_);
+}
+
+/**
+ * @tc.name: GetThumbnailPixelMap
+ * @tc.desc: test GetThumbnailPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, GetThumbnailPixelMap, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    DragDropInfo dragDropInfo;
+    frameNode->SetDragPreview(dragDropInfo);
+    NG::DragPreviewOption previewOptions;
+    previewOptions.isLiftingDisabled = true;
+    frameNode->SetDragPreviewOptions(previewOptions);
+
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE_EQUAL_DEFAULT);
+    dragEventActuator->gestureEventHub_ = gestureEventHub;
+    /**
+     * @tc.steps: step2. Create DragEvent and set as DragEventActuator's DragEvent.
+     * @tc.expected: dragEventActuator's userCallback_ is not null.
+     */
+
+    dragEventActuator->GetThumbnailPixelMap(true);
+    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
 }
 } // namespace OHOS::Ace::NG

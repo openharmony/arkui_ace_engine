@@ -23,6 +23,7 @@ build_component("common") {
 
     # #properties
     "properties/alignment.cpp",
+    "properties/animatable_color.cpp",
     "properties/animatable_path.cpp",
     "properties/border.cpp",
     "properties/border_edge.cpp",

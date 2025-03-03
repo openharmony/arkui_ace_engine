@@ -75,7 +75,7 @@ HWTEST_F(WaterFlowSectionAccessorTest, LengthTest, TestSize.Level1)
 {
     auto controller = peer_->GetController();
     ASSERT_NE(controller, nullptr);
-    auto refPtr = controller.GetRawPtr();
+    auto refPtr = Referenced::RawPtr(controller);
     ASSERT_NE(refPtr, nullptr);
     MockWaterFlowSections* mockSections = reinterpret_cast<MockWaterFlowSections*>(refPtr);
 

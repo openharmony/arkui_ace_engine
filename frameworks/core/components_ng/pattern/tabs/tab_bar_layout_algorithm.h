@@ -90,6 +90,11 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    float GetBarGridMargin()
+    {
+        return barGridMargin_;
+    }
+
 private:
     void MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
     void MeasureScrollableMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
@@ -121,7 +126,6 @@ private:
     void CalculateItemWidthsForSymmetricExtensible(LayoutWrapper* layoutWrapper,
         const std::vector<float>& spaceRequests, const std::vector<float>& leftBuffer,
         const std::vector<float>& rightBuffer, float allocatedWidth);
-    void UpdateHorizontalPadding(LayoutWrapper* layoutWrapper, float horizontalPadding) const;
     void MeasureMask(LayoutWrapper* layoutWrapper) const;
     void UpdateChildMarginProperty(float rightMargin, float leftMargin, const RefPtr<LayoutWrapper>& childWrapper);
     bool GetBarAdaptiveHeight(LayoutWrapper* layoutWrapper);
@@ -129,6 +133,7 @@ private:
     void SetTabBarMargin(RefPtr<LayoutWrapper> layoutWrapper, int32_t index);
     void UpdateMaxLines(LayoutWrapper* layoutWrapper, int32_t index);
     float GetCurrentOffset(RefPtr<TabBarLayoutProperty>& layoutProperty, ScrollableBarModeOptions& layoutStyle);
+    void CheckBorderAndPadding(SizeF& frameSize, const PaddingPropertyF& padding);
 
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;
@@ -141,6 +146,7 @@ private:
     float endMainPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float barGridMargin_ = 0.0f;
+    float verticalPadding_ = 0.0f;
     std::map<int32_t, float> visibleItemLength_;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     std::optional<int32_t> jumpIndex_;

@@ -33,4 +33,16 @@ ReportDataFunc LoadReportDataFunc()
     }
     return func;
 }
+
+ReportSyncEventFunc LoadReportSyncEventFunc()
+{
+    auto handle = dlopen(RES_SCHED_CLIENT_SO.c_str(), RTLD_NOW);
+    CHECK_NULL_RETURN(handle, nullptr);
+    auto func = reinterpret_cast<ReportSyncEventFunc>(dlsym(handle, "ReportSyncEvent"));
+    if (func == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+    return func;
+}
 } // namespace OHOS::Ace

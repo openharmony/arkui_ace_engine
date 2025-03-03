@@ -659,11 +659,6 @@ public:
         tag_type_ = type;
     }
 
-    void SetSmoothDragResizeEnabled(bool isEnabled)
-    {
-        isSmoothDragResizeEnabled_ = isEnabled;
-    }
-
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
     {
@@ -1125,6 +1120,16 @@ public:
         return declaration_->GetAdsBlockedEventId();
     }
 
+    void SetOptimizeParserBudgetEnabled(bool enable)
+    {
+        isParserBudgetOptimized_ = enable;
+    }
+
+    bool GetOptimizeParserBudgetEnabled() const
+    {
+        return isParserBudgetOptimized_;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -1185,7 +1190,6 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
-    bool isSmoothDragResizeEnabled_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;
@@ -1201,6 +1205,7 @@ private:
     CopyOptions CopyOptionMode_ = CopyOptions::Distributed;
     std::tuple<bool, bool> native_video_player_config_{false, false};
     std::string shared_render_process_token_;
+    bool isParserBudgetOptimized_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -28,7 +28,7 @@ void UpdateRowPadding(const RefPtr<FrameNode>& row)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto padding = CalcLength((theme->GetMenuIconPadding() - theme->GetOutPadding()));
+    auto padding = CalcLength(theme->GetMenuItemHorIntervalPadding());
 
     auto layoutProps = row->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);

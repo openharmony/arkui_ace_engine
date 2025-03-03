@@ -1036,6 +1036,12 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         TaskExecutor::TaskType::UI, "ArkUIShowDialog");
 }
 
+void FrontendDelegateImpl::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
+{
+    ShowDialog(dialogAttr.title, dialogAttr.message, buttons, dialogAttr.autoCancel, std::move(callback), callbacks);
+}
+
 void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
@@ -1090,6 +1096,12 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIShowActionMenu");
+}
+
+void FrontendDelegateImpl::ShowActionMenu(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback)
+{
+    ShowActionMenu(dialogAttr.title, buttons, std::move(callback));
 }
 
 void FrontendDelegateImpl::EnableAlertBeforeBackPage(

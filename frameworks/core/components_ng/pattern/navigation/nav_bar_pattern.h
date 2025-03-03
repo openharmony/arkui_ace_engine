@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_event_hub.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -45,21 +46,26 @@ public:
     {
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
+    
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<NavBarEventHub>();
+    }
 
-    void OnCoordScrollStart();
-    float OnCoordScrollUpdate(float offset);
-    void OnCoordScrollEnd();
-    bool CanCoordScrollUp(float offset) const;
+    void OnCoordScrollStart() override;
+    float OnCoordScrollUpdate(float offset, float currentOffset) override;
+    void OnCoordScrollEnd() override;
+    bool CanCoordScrollUp(float offset) const override;
 
     void OnAttachToFrameNode() override;
 
-    bool NeedCoordWithScroll()
+    bool NeedCoordWithScroll() override
     {
-        return !isHideTitlebar_ && titleMode_ == NavigationTitleMode::FREE;
+        return !isHideTitlebar_;
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& menuNode);
 
-    float GetTitleBarHeightLessThanMaxBarHeight() const;
+    float GetTitleBarHeightLessThanMaxBarHeight() const override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

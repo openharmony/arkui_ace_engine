@@ -18,6 +18,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -65,7 +66,7 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         UpdateShowMagnifier();
         return false;
     }
-    auto screenHeight = SystemProperties::GetDevicePhysicalHeight();
+    auto screenHeight = SystemProperties::GetDeviceHeight();
     magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(screenHeight - menuHeight));
     auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
@@ -104,6 +105,12 @@ bool MagnifierController::UpdateMagnifierOffset()
     CHECK_NULL_RETURN(UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, paintOffset), false);
     CHECK_NULL_RETURN(UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, paintOffset), false);
     auto geometryNode = magnifierFrameNode_->GetGeometryNode();
+    if (localOffsetChanged_ && NearEqual(params_.offsetX_, magnifierOffset.x) &&
+        NearEqual(params_.offsetY_, magnifierOffset.y)) {
+        // change x one pixel so magnifier can refresh
+        magnifierPaintOffset.SetX(magnifierPaintOffset.GetX() - 1.0f);
+        magnifierOffset.x += 1.0f;
+    }
     geometryNode->SetFrameOffset(magnifierPaintOffset);
     childContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(magnifierPaintOffset.GetX()), Dimension(magnifierPaintOffset.GetY())));
@@ -300,8 +307,11 @@ void MagnifierController::CreateMagnifierChildNode()
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTINPUT_ETS_TAG, nodeId);
-    auto childNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto childNode = FrameNode::GetOrCreateFrameNode(V2::MAGNIFIER_TAG, nodeId,
+        [weak = WeakClaim(Referenced::RawPtr(textBasePattern))]() {
+            auto textBase = weak.Upgrade();
+            return AceType::MakeRefPtr<MagnifierPattern>(textBase);
+        });
     CHECK_NULL_VOID(childNode);
     InitMagnifierParams();
     ViewAbstract::SetWidth(AceType::RawPtr(childNode), CalcLength(magnifierNodeWidth_));

@@ -29,27 +29,16 @@ class InspectorFilter;
 
 class CheckBoxGroupPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintProperty, PaintProperty)
-private:
-    WeakPtr<FrameNode> host_;
 
 public:
     CheckBoxGroupPaintProperty() = default;
     ~CheckBoxGroupPaintProperty() override = default;
 
-    void SetHost(const WeakPtr<FrameNode>& host)
-    {
-        host_ = host;
-    }
-
-    RefPtr<FrameNode> GetHost() const
-    {
-        return host_.Upgrade();
-    }
-
     RefPtr<PaintProperty> Clone() const override
     {
         auto paintProperty = MakeRefPtr<CheckBoxGroupPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
+        paintProperty->UpdatePaintPropertyHost(this);
         paintProperty->propCheckBoxGroupSelect_ = CloneCheckBoxGroupSelect();
         paintProperty->propCheckBoxGroupSelectedColor_ = CloneCheckBoxGroupSelectedColor();
         paintProperty->propCheckBoxGroupUnSelectedColor_ = CloneCheckBoxGroupUnSelectedColor();
@@ -69,6 +58,9 @@ public:
         ResetCheckBoxGroupSelectedColor();
         ResetCheckBoxGroupUnSelectedColor();
         ResetCheckBoxGroupCheckMarkColor();
+        ResetCheckBoxGroupSelectedColorFlagByUser();
+        ResetCheckBoxGroupUnSelectedColorFlagByUser();
+        ResetCheckBoxGroupCheckMarkColorFlagByUser();
         ResetCheckBoxGroupCheckMarkSize();
         ResetCheckBoxGroupCheckMarkWidth();
         ResetCheckBoxGroupSelectedStyle();
@@ -108,6 +100,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupUnSelectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelectedColorFlagByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupUnSelectedColorFlagByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkColorFlagByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkSize, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelectedStyle, CheckBoxStyle, PROPERTY_UPDATE_RENDER);

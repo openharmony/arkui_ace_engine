@@ -318,7 +318,7 @@ public:
         return hoverListener_;
     }
 
-    RefPtr<TouchEventImpl>& GetTouchListener()
+    std::function<void(UIState)>& GetTouchListener()
     {
         return touchListener_;
     }
@@ -379,8 +379,8 @@ protected:
     void OnAttachToFrameNode() override;
     void InitTouchEvent();
     void InitHoverEvent();
-    void OnTouchDown();
-    void OnTouchUp();
+    void HandlePressedStyle();
+    void HandleNormalStyle();
     void HandleHoverEvent(bool isHover);
     void HandleBackgroundColor();
     void UpdateTexOverflow(bool isMarqueeStart);
@@ -415,7 +415,7 @@ private:
     RefPtr<FrameNode> contentModifierNode_;
     std::optional<GestureEventFunc> clickEventFunc_;
     int32_t nodeId_ = -1;
-    RefPtr<TouchEventImpl> touchListener_;
+    std::function<void(UIState)> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;
     bool isFocus_ = false;

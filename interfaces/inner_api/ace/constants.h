@@ -49,6 +49,7 @@ enum class UIContentType {
     SECURITY_UI_EXTENSION,     // security ui extension
     ISOLATED_COMPONENT,     // isolatedComponent
     DYNAMIC_COMPONENT,     // dynamicComponent
+    MODAL_UI_EXTENSION = 10,    // modal ui extension
 };
 } // namespace OHOS::Ace
 

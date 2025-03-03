@@ -31,6 +31,7 @@ const EditableLeftIconType = editabletitlebar.EditableLeftIconType;
 const SubHeader = subheader.SubHeader;
 const OperationType = subheader.OperationType;
 const accessibility = requireNapi('accessibility');
+
 const COL_IMAGE_TEXT = 3;
 const COL_TEXT = 4;
 const GRID_COL_3 = '1fr 1fr 1fr';
@@ -64,6 +65,9 @@ const LONG_TOUCH_SCALE = curves.cubicBezierCurve(0.2, 0, 0.2, 1);
 const ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE = 'gridobjectsortcomponent_accessibility_item_long_press_gesture';
 const ACCESSIBILITY_ILLEGAL_AREA = 'gridobjectsortcomponent_accessibility_illegal_area';
 const ACCESSIBILITY_SELECTED_ITEM_DRAG_START = 'gridobjectsortcomponent_accessibility_selected_item_drag_start';
+const ACCESSIBILITY_DOUBLE_CLICK = 'gridobjectsortcomponent_accessibility_single_finger_double_click';
+const ACCESSIBILITY_COMPLETE_BUTTON = 'gridobjectsortcomponent_accessibility_complete_button';
+const ACCESSIBILITY_RESIDENT_AREA = 'gridobjectsortcomponent_accessibility_resident_area_edit_state';
 const ACCESSIBILITY_SELECTED_ITEM_DESC = 'gridobjectsortcomponent_accessibility_selected_item_desc';
 const ACCESSIBILITY_SELECTED_ITEM = 'gridobjectsortcomponent_accessibility_selected_item';
 const ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP = 'gridobjectsortcomponent_accessibility_selected_item_drag_stop';
@@ -84,27 +88,31 @@ const NO = 'no';
 const ADD = 'add';
 const EDIT = 'edit';
 const DELETE = 'delete';
+
 export var GridObjectSortComponentType;
-(function (w31) {
-    w31['IMAGE_TEXT'] = 'image_text';
-    w31['TEXT'] = 'text';
+(function (v106) {
+    v106['IMAGE_TEXT'] = 'image_text';
+    v106['TEXT'] = 'text';
 })(GridObjectSortComponentType || (GridObjectSortComponentType = {}));
+
 class MenuItem {
-    constructor(r31, s31, t31, u31, v31) {
-        this.value = r31;
-        this.symbolStyle = s31;
-        this.isEnabled = t31;
-        this.action = v31;
-        this.accessibilityText = u31;
+    constructor(p106, q106, r106, s106, t106, u106) {
+        this.value = p106;
+        this.symbolStyle = q106;
+        this.isEnabled = r106;
+        this.action = t106;
+        this.accessibilityText = s106;
+        this.label = u106;
     }
 }
+
 export class GridObjectSortComponent extends ViewPU {
-    constructor(i31, j31, k31, l31 = -1, m31 = undefined, n31) {
-        super(i31, k31, l31, n31);
-        if (typeof m31 === 'function') {
-            this.paramsGenerator_ = m31;
+    constructor(g106, h106, i106, j106 = -1, k106 = undefined, l106) {
+        super(g106, i106, j106, l106);
+        if (typeof k106 === 'function') {
+            this.paramsGenerator_ = k106;
         }
-        this.__options = new SynchedPropertyObjectOneWayPU(j31.options, this, 'options');
+        this.__options = new SynchedPropertyObjectOneWayPU(h106.options, this, 'options');
         this.dataList = [];
         this.__selected = new ObservedPropertyObjectPU([], this, 'selected');
         this.__unSelected = new ObservedPropertyObjectPU([], this, 'unSelected');
@@ -164,18 +172,56 @@ export class GridObjectSortComponent extends ViewPU {
         this.__editGridHeight = new ObservedPropertySimplePU(0, this, 'editGridHeight');
         this.__addGridHeight = new ObservedPropertySimplePU(0, this, 'addGridHeight');
         this.__subTitleHeight = new ObservedPropertySimplePU(0, this, 'subTitleHeight');
+        this.__isOpenAccessibility =
+            new ObservedPropertySimplePU(accessibility.isScreenReaderOpenSync(), this, 'isOpenAccessibility');
         this.callbackId = undefined;
         this.colNum = COL_IMAGE_TEXT;
         this.vibrationDone = false;
-        this.touchDown = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.touchBorderRadius = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.hoverBackgroundColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.focusBorder = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.touchDown = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_click_effect'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        };
+        this.touchBorderRadius = {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_corner_radius_clicked'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        };
+        this.hoverBackgroundColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_hover'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        };
+        this.focusBorder = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_focused_outline'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        };
         this.imageText = false;
         this.menuItems = [
-            new MenuItem({ 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_edit'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, (new SymbolGlyphModifier({ 'id': -1, 'type': 40000, params: ['sys.symbol.square_and_pencil'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })), true, this.getStringByResource(ACCESSIBILITY_HEADER_EDIT_BUTTON), () => {
+            new MenuItem({
+                'id': -1,
+                'type': 20000,
+                params: ['sys.media.ohos_ic_public_edit'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }, (new SymbolGlyphModifier({
+                'id': -1,
+                'type': 40000,
+                params: ['sys.symbol.square_and_pencil'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            })), true, this.getStringByResourceToken(ACCESSIBILITY_HEADER_EDIT_BUTTON), () => {
                 this.goEdit();
-            })
+            }, this.getStringByResourceToken(ACCESSIBILITY_HEADER_EDIT_BUTTON))
         ];
         this.onSave = undefined;
         this.onCancel = undefined;
@@ -185,300 +231,311 @@ export class GridObjectSortComponent extends ViewPU {
         this.__readFlag = new ObservedPropertySimplePU(true, this, 'readFlag');
         this.__readIndex4AddArea = new ObservedPropertySimplePU(-1, this, 'readIndex4AddArea');
         this.__readIndex4EditArea = new ObservedPropertySimplePU(-1, this, 'readIndex4EditArea');
-        this.__isPointToAddTitleBarEditButton = new ObservedPropertySimplePU(false, this, 'isPointToAddTitleBarEditButton');
-        this.__isPointToEditTitleBarSaveButton = new ObservedPropertySimplePU(false, this, 'isPointToEditTitleBarSaveButton');
+        this.__isPointToAddTitleBarEditButton =
+            new ObservedPropertySimplePU(false, this, 'isPointToAddTitleBarEditButton');
+        this.__isPointToEditTitleBarSaveButton =
+            new ObservedPropertySimplePU(false, this, 'isPointToEditTitleBarSaveButton');
         this.preTextAnnouncedForAccessibility = '';
         this.textAnnouncedForAccessibility = '';
         this.envCallback = {
-            onConfigurationUpdated: (p31) => {
-                let q31 = this.getUIContext();
-                this.fontSizeScale = this.decideFontScale(q31);
-                this.fontWeightScale = p31.fontWeightScale;
+            onConfigurationUpdated: (n106) => {
+                let o106 = this.getUIContext();
+                this.fontSizeScale = this.decideFontScale(o106);
+                this.fontWeightScale = n106.fontWeightScale;
             },
-            onMemoryLevel: (o31) => { }
+            onMemoryLevel: (m106) => {
+            }
         };
-        this.setInitiallyProvidedValue(j31);
+        this.setInitiallyProvidedValue(h106);
         this.declareWatch('gridComState', this.onGridComStateChange);
         this.declareWatch('fontSizeScale', this.calcAreaInfo);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(h31) {
-        if (h31.options === undefined) {
+
+    setInitiallyProvidedValue(f106) {
+        if (f106.options === undefined) {
             this.__options.set({});
         }
-        if (h31.dataList !== undefined) {
-            this.dataList = h31.dataList;
+        if (f106.dataList !== undefined) {
+            this.dataList = f106.dataList;
         }
-        if (h31.selected !== undefined) {
-            this.selected = h31.selected;
+        if (f106.selected !== undefined) {
+            this.selected = f106.selected;
         }
-        if (h31.unSelected !== undefined) {
-            this.unSelected = h31.unSelected;
+        if (f106.unSelected !== undefined) {
+            this.unSelected = f106.unSelected;
         }
-        if (h31.copySelected !== undefined) {
-            this.copySelected = h31.copySelected;
+        if (f106.copySelected !== undefined) {
+            this.copySelected = f106.copySelected;
         }
-        if (h31.copyUnSelected !== undefined) {
-            this.copyUnSelected = h31.copyUnSelected;
+        if (f106.copyUnSelected !== undefined) {
+            this.copyUnSelected = f106.copyUnSelected;
         }
-        if (h31.content !== undefined) {
-            this.content = h31.content;
+        if (f106.content !== undefined) {
+            this.content = f106.content;
         }
-        if (h31.dragContent !== undefined) {
-            this.dragContent = h31.dragContent;
+        if (f106.dragContent !== undefined) {
+            this.dragContent = f106.dragContent;
         }
-        if (h31.dragContentIndex !== undefined) {
-            this.dragContentIndex = h31.dragContentIndex;
+        if (f106.dragContentIndex !== undefined) {
+            this.dragContentIndex = f106.dragContentIndex;
         }
-        if (h31.hoverId !== undefined) {
-            this.hoverId = h31.hoverId;
+        if (f106.hoverId !== undefined) {
+            this.hoverId = f106.hoverId;
         }
-        if (h31.gridComState !== undefined) {
-            this.gridComState = h31.gridComState;
+        if (f106.gridComState !== undefined) {
+            this.gridComState = f106.gridComState;
         }
-        if (h31.menuSwitch !== undefined) {
-            this.menuSwitch = h31.menuSwitch;
+        if (f106.menuSwitch !== undefined) {
+            this.menuSwitch = f106.menuSwitch;
         }
-        if (h31.areaWidth !== undefined) {
-            this.areaWidth = h31.areaWidth;
+        if (f106.areaWidth !== undefined) {
+            this.areaWidth = f106.areaWidth;
         }
-        if (h31.blockWidth !== undefined) {
-            this.blockWidth = h31.blockWidth;
+        if (f106.blockWidth !== undefined) {
+            this.blockWidth = f106.blockWidth;
         }
-        if (h31.blockHeight !== undefined) {
-            this.blockHeight = h31.blockHeight;
+        if (f106.blockHeight !== undefined) {
+            this.blockHeight = f106.blockHeight;
         }
-        if (h31.longScaleOnePointTwo !== undefined) {
-            this.longScaleOnePointTwo = h31.longScaleOnePointTwo;
+        if (f106.longScaleOnePointTwo !== undefined) {
+            this.longScaleOnePointTwo = f106.longScaleOnePointTwo;
         }
-        if (h31.scaleGridItemNinetyPercent !== undefined) {
-            this.scaleGridItemNinetyPercent = h31.scaleGridItemNinetyPercent;
+        if (f106.scaleGridItemNinetyPercent !== undefined) {
+            this.scaleGridItemNinetyPercent = f106.scaleGridItemNinetyPercent;
         }
-        if (h31.reboundSize !== undefined) {
-            this.reboundSize = h31.reboundSize;
+        if (f106.reboundSize !== undefined) {
+            this.reboundSize = f106.reboundSize;
         }
-        if (h31.scaleIcon !== undefined) {
-            this.scaleIcon = h31.scaleIcon;
+        if (f106.scaleIcon !== undefined) {
+            this.scaleIcon = f106.scaleIcon;
         }
-        if (h31.addIconShow !== undefined) {
-            this.addIconShow = h31.addIconShow;
+        if (f106.addIconShow !== undefined) {
+            this.addIconShow = f106.addIconShow;
         }
-        if (h31.scaleAddIcon !== undefined) {
-            this.scaleAddIcon = h31.scaleAddIcon;
+        if (f106.scaleAddIcon !== undefined) {
+            this.scaleAddIcon = f106.scaleAddIcon;
         }
-        if (h31.isStartDrag !== undefined) {
-            this.isStartDrag = h31.isStartDrag;
+        if (f106.isStartDrag !== undefined) {
+            this.isStartDrag = f106.isStartDrag;
         }
-        if (h31.insertIndex !== undefined) {
-            this.insertIndex = h31.insertIndex;
+        if (f106.insertIndex !== undefined) {
+            this.insertIndex = f106.insertIndex;
         }
-        if (h31.itemIndex !== undefined) {
-            this.itemIndex = h31.itemIndex;
+        if (f106.itemIndex !== undefined) {
+            this.itemIndex = f106.itemIndex;
         }
-        if (h31.editGridDataLength !== undefined) {
-            this.editGridDataLength = h31.editGridDataLength;
+        if (f106.editGridDataLength !== undefined) {
+            this.editGridDataLength = f106.editGridDataLength;
         }
-        if (h31.isTouchDown !== undefined) {
-            this.isTouchDown = h31.isTouchDown;
+        if (f106.isTouchDown !== undefined) {
+            this.isTouchDown = f106.isTouchDown;
         }
-        if (h31.addItemMoveX !== undefined) {
-            this.addItemMoveX = h31.addItemMoveX;
+        if (f106.addItemMoveX !== undefined) {
+            this.addItemMoveX = f106.addItemMoveX;
         }
-        if (h31.addItemMoveY !== undefined) {
-            this.addItemMoveY = h31.addItemMoveY;
+        if (f106.addItemMoveY !== undefined) {
+            this.addItemMoveY = f106.addItemMoveY;
         }
-        if (h31.editItemMoveX !== undefined) {
-            this.editItemMoveX = h31.editItemMoveX;
+        if (f106.editItemMoveX !== undefined) {
+            this.editItemMoveX = f106.editItemMoveX;
         }
-        if (h31.editItemMoveY !== undefined) {
-            this.editItemMoveY = h31.editItemMoveY;
+        if (f106.editItemMoveY !== undefined) {
+            this.editItemMoveY = f106.editItemMoveY;
         }
-        if (h31.unSelectedIndex !== undefined) {
-            this.unSelectedIndex = h31.unSelectedIndex;
+        if (f106.unSelectedIndex !== undefined) {
+            this.unSelectedIndex = f106.unSelectedIndex;
         }
-        if (h31.clickAddBtn !== undefined) {
-            this.clickAddBtn = h31.clickAddBtn;
+        if (f106.clickAddBtn !== undefined) {
+            this.clickAddBtn = f106.clickAddBtn;
         }
-        if (h31.selectedIndex !== undefined) {
-            this.selectedIndex = h31.selectedIndex;
+        if (f106.selectedIndex !== undefined) {
+            this.selectedIndex = f106.selectedIndex;
         }
-        if (h31.clickRemoveBtn !== undefined) {
-            this.clickRemoveBtn = h31.clickRemoveBtn;
+        if (f106.clickRemoveBtn !== undefined) {
+            this.clickRemoveBtn = f106.clickRemoveBtn;
         }
-        if (h31.addAreaLongPressGesture !== undefined) {
-            this.addAreaLongPressGesture = h31.addAreaLongPressGesture;
+        if (f106.addAreaLongPressGesture !== undefined) {
+            this.addAreaLongPressGesture = f106.addAreaLongPressGesture;
         }
-        if (h31.arraySelectIsChange !== undefined) {
-            this.arraySelectIsChange = h31.arraySelectIsChange;
+        if (f106.arraySelectIsChange !== undefined) {
+            this.arraySelectIsChange = f106.arraySelectIsChange;
         }
-        if (h31.arrayUnSelectIsChange !== undefined) {
-            this.arrayUnSelectIsChange = h31.arrayUnSelectIsChange;
+        if (f106.arrayUnSelectIsChange !== undefined) {
+            this.arrayUnSelectIsChange = f106.arrayUnSelectIsChange;
         }
-        if (h31.textItemEditWidth !== undefined) {
-            this.textItemEditWidth = h31.textItemEditWidth;
+        if (f106.textItemEditWidth !== undefined) {
+            this.textItemEditWidth = f106.textItemEditWidth;
         }
-        if (h31.textItemEditHeight !== undefined) {
-            this.textItemEditHeight = h31.textItemEditHeight;
+        if (f106.textItemEditHeight !== undefined) {
+            this.textItemEditHeight = f106.textItemEditHeight;
         }
-        if (h31.imageItemWidth !== undefined) {
-            this.imageItemWidth = h31.imageItemWidth;
+        if (f106.imageItemWidth !== undefined) {
+            this.imageItemWidth = f106.imageItemWidth;
         }
-        if (h31.saveClick !== undefined) {
-            this.saveClick = h31.saveClick;
+        if (f106.saveClick !== undefined) {
+            this.saveClick = f106.saveClick;
         }
-        if (h31.imageTextAddIconShow !== undefined) {
-            this.imageTextAddIconShow = h31.imageTextAddIconShow;
+        if (f106.imageTextAddIconShow !== undefined) {
+            this.imageTextAddIconShow = f106.imageTextAddIconShow;
         }
-        if (h31.imageTextRemoveIconShow !== undefined) {
-            this.imageTextRemoveIconShow = h31.imageTextRemoveIconShow;
+        if (f106.imageTextRemoveIconShow !== undefined) {
+            this.imageTextRemoveIconShow = f106.imageTextRemoveIconShow;
         }
-        if (h31.firstIn !== undefined) {
-            this.firstIn = h31.firstIn;
+        if (f106.firstIn !== undefined) {
+            this.firstIn = f106.firstIn;
         }
-        if (h31.fontSizeScale !== undefined) {
-            this.fontSizeScale = h31.fontSizeScale;
+        if (f106.fontSizeScale !== undefined) {
+            this.fontSizeScale = f106.fontSizeScale;
         }
-        if (h31.fontWeightScale !== undefined) {
-            this.fontWeightScale = h31.fontWeightScale;
+        if (f106.fontWeightScale !== undefined) {
+            this.fontWeightScale = f106.fontWeightScale;
         }
-        if (h31.customColumns !== undefined) {
-            this.customColumns = h31.customColumns;
+        if (f106.customColumns !== undefined) {
+            this.customColumns = f106.customColumns;
         }
-        if (h31.editGridHeight !== undefined) {
-            this.editGridHeight = h31.editGridHeight;
+        if (f106.editGridHeight !== undefined) {
+            this.editGridHeight = f106.editGridHeight;
         }
-        if (h31.addGridHeight !== undefined) {
-            this.addGridHeight = h31.addGridHeight;
+        if (f106.addGridHeight !== undefined) {
+            this.addGridHeight = f106.addGridHeight;
         }
-        if (h31.subTitleHeight !== undefined) {
-            this.subTitleHeight = h31.subTitleHeight;
+        if (f106.subTitleHeight !== undefined) {
+            this.subTitleHeight = f106.subTitleHeight;
         }
-        if (h31.callbackId !== undefined) {
-            this.callbackId = h31.callbackId;
+        if (f106.isOpenAccessibility !== undefined) {
+            this.isOpenAccessibility = f106.isOpenAccessibility;
         }
-        if (h31.colNum !== undefined) {
-            this.colNum = h31.colNum;
+        if (f106.callbackId !== undefined) {
+            this.callbackId = f106.callbackId;
         }
-        if (h31.vibrationDone !== undefined) {
-            this.vibrationDone = h31.vibrationDone;
+        if (f106.colNum !== undefined) {
+            this.colNum = f106.colNum;
         }
-        if (h31.touchDown !== undefined) {
-            this.touchDown = h31.touchDown;
+        if (f106.vibrationDone !== undefined) {
+            this.vibrationDone = f106.vibrationDone;
         }
-        if (h31.touchBorderRadius !== undefined) {
-            this.touchBorderRadius = h31.touchBorderRadius;
+        if (f106.touchDown !== undefined) {
+            this.touchDown = f106.touchDown;
         }
-        if (h31.hoverBackgroundColor !== undefined) {
-            this.hoverBackgroundColor = h31.hoverBackgroundColor;
+        if (f106.touchBorderRadius !== undefined) {
+            this.touchBorderRadius = f106.touchBorderRadius;
         }
-        if (h31.focusBorder !== undefined) {
-            this.focusBorder = h31.focusBorder;
+        if (f106.hoverBackgroundColor !== undefined) {
+            this.hoverBackgroundColor = f106.hoverBackgroundColor;
         }
-        if (h31.imageText !== undefined) {
-            this.imageText = h31.imageText;
+        if (f106.focusBorder !== undefined) {
+            this.focusBorder = f106.focusBorder;
         }
-        if (h31.menuItems !== undefined) {
-            this.menuItems = h31.menuItems;
+        if (f106.imageText !== undefined) {
+            this.imageText = f106.imageText;
         }
-        if (h31.onSave !== undefined) {
-            this.onSave = h31.onSave;
+        if (f106.menuItems !== undefined) {
+            this.menuItems = f106.menuItems;
         }
-        if (h31.onCancel !== undefined) {
-            this.onCancel = h31.onCancel;
+        if (f106.onSave !== undefined) {
+            this.onSave = f106.onSave;
         }
-        if (h31.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = h31.isFollowingSystemFontScale;
+        if (f106.onCancel !== undefined) {
+            this.onCancel = f106.onCancel;
         }
-        if (h31.maxAppFontScale !== undefined) {
-            this.maxAppFontScale = h31.maxAppFontScale;
+        if (f106.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = f106.isFollowingSystemFontScale;
         }
-        if (h31.bundleName !== undefined) {
-            this.bundleName = h31.bundleName;
+        if (f106.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = f106.maxAppFontScale;
         }
-        if (h31.readFlag !== undefined) {
-            this.readFlag = h31.readFlag;
+        if (f106.bundleName !== undefined) {
+            this.bundleName = f106.bundleName;
         }
-        if (h31.readIndex4AddArea !== undefined) {
-            this.readIndex4AddArea = h31.readIndex4AddArea;
+        if (f106.readFlag !== undefined) {
+            this.readFlag = f106.readFlag;
         }
-        if (h31.readIndex4EditArea !== undefined) {
-            this.readIndex4EditArea = h31.readIndex4EditArea;
+        if (f106.readIndex4AddArea !== undefined) {
+            this.readIndex4AddArea = f106.readIndex4AddArea;
         }
-        if (h31.isPointToAddTitleBarEditButton !== undefined) {
-            this.isPointToAddTitleBarEditButton = h31.isPointToAddTitleBarEditButton;
+        if (f106.readIndex4EditArea !== undefined) {
+            this.readIndex4EditArea = f106.readIndex4EditArea;
         }
-        if (h31.isPointToEditTitleBarSaveButton !== undefined) {
-            this.isPointToEditTitleBarSaveButton = h31.isPointToEditTitleBarSaveButton;
+        if (f106.isPointToAddTitleBarEditButton !== undefined) {
+            this.isPointToAddTitleBarEditButton = f106.isPointToAddTitleBarEditButton;
         }
-        if (h31.preTextAnnouncedForAccessibility !== undefined) {
-            this.preTextAnnouncedForAccessibility = h31.preTextAnnouncedForAccessibility;
+        if (f106.isPointToEditTitleBarSaveButton !== undefined) {
+            this.isPointToEditTitleBarSaveButton = f106.isPointToEditTitleBarSaveButton;
         }
-        if (h31.textAnnouncedForAccessibility !== undefined) {
-            this.textAnnouncedForAccessibility = h31.textAnnouncedForAccessibility;
+        if (f106.preTextAnnouncedForAccessibility !== undefined) {
+            this.preTextAnnouncedForAccessibility = f106.preTextAnnouncedForAccessibility;
         }
-        if (h31.envCallback !== undefined) {
-            this.envCallback = h31.envCallback;
+        if (f106.textAnnouncedForAccessibility !== undefined) {
+            this.textAnnouncedForAccessibility = f106.textAnnouncedForAccessibility;
+        }
+        if (f106.envCallback !== undefined) {
+            this.envCallback = f106.envCallback;
         }
     }
-    updateStateVars(g31) {
-        this.__options.reset(g31.options);
+
+    updateStateVars(e106) {
+        this.__options.reset(e106.options);
     }
-    purgeVariableDependenciesOnElmtId(f31) {
-        this.__options.purgeDependencyOnElmtId(f31);
-        this.__selected.purgeDependencyOnElmtId(f31);
-        this.__unSelected.purgeDependencyOnElmtId(f31);
-        this.__copySelected.purgeDependencyOnElmtId(f31);
-        this.__copyUnSelected.purgeDependencyOnElmtId(f31);
-        this.__content.purgeDependencyOnElmtId(f31);
-        this.__dragContent.purgeDependencyOnElmtId(f31);
-        this.__dragContentIndex.purgeDependencyOnElmtId(f31);
-        this.__hoverId.purgeDependencyOnElmtId(f31);
-        this.__gridComState.purgeDependencyOnElmtId(f31);
-        this.__menuSwitch.purgeDependencyOnElmtId(f31);
-        this.__areaWidth.purgeDependencyOnElmtId(f31);
-        this.__blockWidth.purgeDependencyOnElmtId(f31);
-        this.__blockHeight.purgeDependencyOnElmtId(f31);
-        this.__longScaleOnePointTwo.purgeDependencyOnElmtId(f31);
-        this.__scaleGridItemNinetyPercent.purgeDependencyOnElmtId(f31);
-        this.__reboundSize.purgeDependencyOnElmtId(f31);
-        this.__scaleIcon.purgeDependencyOnElmtId(f31);
-        this.__addIconShow.purgeDependencyOnElmtId(f31);
-        this.__scaleAddIcon.purgeDependencyOnElmtId(f31);
-        this.__isStartDrag.purgeDependencyOnElmtId(f31);
-        this.__insertIndex.purgeDependencyOnElmtId(f31);
-        this.__itemIndex.purgeDependencyOnElmtId(f31);
-        this.__editGridDataLength.purgeDependencyOnElmtId(f31);
-        this.__isTouchDown.purgeDependencyOnElmtId(f31);
-        this.__addItemMoveX.purgeDependencyOnElmtId(f31);
-        this.__addItemMoveY.purgeDependencyOnElmtId(f31);
-        this.__editItemMoveX.purgeDependencyOnElmtId(f31);
-        this.__editItemMoveY.purgeDependencyOnElmtId(f31);
-        this.__unSelectedIndex.purgeDependencyOnElmtId(f31);
-        this.__clickAddBtn.purgeDependencyOnElmtId(f31);
-        this.__selectedIndex.purgeDependencyOnElmtId(f31);
-        this.__clickRemoveBtn.purgeDependencyOnElmtId(f31);
-        this.__addAreaLongPressGesture.purgeDependencyOnElmtId(f31);
-        this.__arraySelectIsChange.purgeDependencyOnElmtId(f31);
-        this.__arrayUnSelectIsChange.purgeDependencyOnElmtId(f31);
-        this.__textItemEditWidth.purgeDependencyOnElmtId(f31);
-        this.__textItemEditHeight.purgeDependencyOnElmtId(f31);
-        this.__imageItemWidth.purgeDependencyOnElmtId(f31);
-        this.__saveClick.purgeDependencyOnElmtId(f31);
-        this.__imageTextAddIconShow.purgeDependencyOnElmtId(f31);
-        this.__imageTextRemoveIconShow.purgeDependencyOnElmtId(f31);
-        this.__firstIn.purgeDependencyOnElmtId(f31);
-        this.__fontSizeScale.purgeDependencyOnElmtId(f31);
-        this.__fontWeightScale.purgeDependencyOnElmtId(f31);
-        this.__customColumns.purgeDependencyOnElmtId(f31);
-        this.__editGridHeight.purgeDependencyOnElmtId(f31);
-        this.__addGridHeight.purgeDependencyOnElmtId(f31);
-        this.__subTitleHeight.purgeDependencyOnElmtId(f31);
-        this.__readFlag.purgeDependencyOnElmtId(f31);
-        this.__readIndex4AddArea.purgeDependencyOnElmtId(f31);
-        this.__readIndex4EditArea.purgeDependencyOnElmtId(f31);
-        this.__isPointToAddTitleBarEditButton.purgeDependencyOnElmtId(f31);
-        this.__isPointToEditTitleBarSaveButton.purgeDependencyOnElmtId(f31);
+
+    purgeVariableDependenciesOnElmtId(d106) {
+        this.__options.purgeDependencyOnElmtId(d106);
+        this.__selected.purgeDependencyOnElmtId(d106);
+        this.__unSelected.purgeDependencyOnElmtId(d106);
+        this.__copySelected.purgeDependencyOnElmtId(d106);
+        this.__copyUnSelected.purgeDependencyOnElmtId(d106);
+        this.__content.purgeDependencyOnElmtId(d106);
+        this.__dragContent.purgeDependencyOnElmtId(d106);
+        this.__dragContentIndex.purgeDependencyOnElmtId(d106);
+        this.__hoverId.purgeDependencyOnElmtId(d106);
+        this.__gridComState.purgeDependencyOnElmtId(d106);
+        this.__menuSwitch.purgeDependencyOnElmtId(d106);
+        this.__areaWidth.purgeDependencyOnElmtId(d106);
+        this.__blockWidth.purgeDependencyOnElmtId(d106);
+        this.__blockHeight.purgeDependencyOnElmtId(d106);
+        this.__longScaleOnePointTwo.purgeDependencyOnElmtId(d106);
+        this.__scaleGridItemNinetyPercent.purgeDependencyOnElmtId(d106);
+        this.__reboundSize.purgeDependencyOnElmtId(d106);
+        this.__scaleIcon.purgeDependencyOnElmtId(d106);
+        this.__addIconShow.purgeDependencyOnElmtId(d106);
+        this.__scaleAddIcon.purgeDependencyOnElmtId(d106);
+        this.__isStartDrag.purgeDependencyOnElmtId(d106);
+        this.__insertIndex.purgeDependencyOnElmtId(d106);
+        this.__itemIndex.purgeDependencyOnElmtId(d106);
+        this.__editGridDataLength.purgeDependencyOnElmtId(d106);
+        this.__isTouchDown.purgeDependencyOnElmtId(d106);
+        this.__addItemMoveX.purgeDependencyOnElmtId(d106);
+        this.__addItemMoveY.purgeDependencyOnElmtId(d106);
+        this.__editItemMoveX.purgeDependencyOnElmtId(d106);
+        this.__editItemMoveY.purgeDependencyOnElmtId(d106);
+        this.__unSelectedIndex.purgeDependencyOnElmtId(d106);
+        this.__clickAddBtn.purgeDependencyOnElmtId(d106);
+        this.__selectedIndex.purgeDependencyOnElmtId(d106);
+        this.__clickRemoveBtn.purgeDependencyOnElmtId(d106);
+        this.__addAreaLongPressGesture.purgeDependencyOnElmtId(d106);
+        this.__arraySelectIsChange.purgeDependencyOnElmtId(d106);
+        this.__arrayUnSelectIsChange.purgeDependencyOnElmtId(d106);
+        this.__textItemEditWidth.purgeDependencyOnElmtId(d106);
+        this.__textItemEditHeight.purgeDependencyOnElmtId(d106);
+        this.__imageItemWidth.purgeDependencyOnElmtId(d106);
+        this.__saveClick.purgeDependencyOnElmtId(d106);
+        this.__imageTextAddIconShow.purgeDependencyOnElmtId(d106);
+        this.__imageTextRemoveIconShow.purgeDependencyOnElmtId(d106);
+        this.__firstIn.purgeDependencyOnElmtId(d106);
+        this.__fontSizeScale.purgeDependencyOnElmtId(d106);
+        this.__fontWeightScale.purgeDependencyOnElmtId(d106);
+        this.__customColumns.purgeDependencyOnElmtId(d106);
+        this.__editGridHeight.purgeDependencyOnElmtId(d106);
+        this.__addGridHeight.purgeDependencyOnElmtId(d106);
+        this.__subTitleHeight.purgeDependencyOnElmtId(d106);
+        this.__isOpenAccessibility.purgeDependencyOnElmtId(d106);
+        this.__readFlag.purgeDependencyOnElmtId(d106);
+        this.__readIndex4AddArea.purgeDependencyOnElmtId(d106);
+        this.__readIndex4EditArea.purgeDependencyOnElmtId(d106);
+        this.__isPointToAddTitleBarEditButton.purgeDependencyOnElmtId(d106);
+        this.__isPointToEditTitleBarSaveButton.purgeDependencyOnElmtId(d106);
     }
+
     aboutToBeDeleted() {
         this.__options.aboutToBeDeleted();
         this.__selected.aboutToBeDeleted();
@@ -529,6 +586,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.__editGridHeight.aboutToBeDeleted();
         this.__addGridHeight.aboutToBeDeleted();
         this.__subTitleHeight.aboutToBeDeleted();
+        this.__isOpenAccessibility.aboutToBeDeleted();
         this.__readFlag.aboutToBeDeleted();
         this.__readIndex4AddArea.aboutToBeDeleted();
         this.__readIndex4EditArea.aboutToBeDeleted();
@@ -537,412 +595,545 @@ export class GridObjectSortComponent extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get options() {
         return this.__options.get();
     }
-    set options(e31) {
-        this.__options.set(e31);
+
+    set options(c106) {
+        this.__options.set(c106);
     }
+
     get selected() {
         return this.__selected.get();
     }
-    set selected(d31) {
-        this.__selected.set(d31);
+
+    set selected(b106) {
+        this.__selected.set(b106);
     }
+
     get unSelected() {
         return this.__unSelected.get();
     }
-    set unSelected(c31) {
-        this.__unSelected.set(c31);
+
+    set unSelected(a106) {
+        this.__unSelected.set(a106);
     }
+
     get copySelected() {
         return this.__copySelected.get();
     }
-    set copySelected(b31) {
-        this.__copySelected.set(b31);
+
+    set copySelected(z105) {
+        this.__copySelected.set(z105);
     }
+
     get copyUnSelected() {
         return this.__copyUnSelected.get();
     }
-    set copyUnSelected(a31) {
-        this.__copyUnSelected.set(a31);
+
+    set copyUnSelected(y105) {
+        this.__copyUnSelected.set(y105);
     }
+
     get content() {
         return this.__content.get();
     }
-    set content(z30) {
-        this.__content.set(z30);
+
+    set content(x105) {
+        this.__content.set(x105);
     }
+
     get dragContent() {
         return this.__dragContent.get();
     }
-    set dragContent(y30) {
-        this.__dragContent.set(y30);
+
+    set dragContent(w105) {
+        this.__dragContent.set(w105);
     }
+
     get dragContentIndex() {
         return this.__dragContentIndex.get();
     }
-    set dragContentIndex(x30) {
-        this.__dragContentIndex.set(x30);
+
+    set dragContentIndex(v105) {
+        this.__dragContentIndex.set(v105);
     }
+
     get hoverId() {
         return this.__hoverId.get();
     }
-    set hoverId(w30) {
-        this.__hoverId.set(w30);
+
+    set hoverId(u105) {
+        this.__hoverId.set(u105);
     }
+
     get gridComState() {
         return this.__gridComState.get();
     }
-    set gridComState(v30) {
-        this.__gridComState.set(v30);
+
+    set gridComState(t105) {
+        this.__gridComState.set(t105);
     }
+
     get menuSwitch() {
         return this.__menuSwitch.get();
     }
-    set menuSwitch(u30) {
-        this.__menuSwitch.set(u30);
+
+    set menuSwitch(s105) {
+        this.__menuSwitch.set(s105);
     }
+
     get areaWidth() {
         return this.__areaWidth.get();
     }
-    set areaWidth(t30) {
-        this.__areaWidth.set(t30);
+
+    set areaWidth(r105) {
+        this.__areaWidth.set(r105);
     }
+
     get blockWidth() {
         return this.__blockWidth.get();
     }
-    set blockWidth(s30) {
-        this.__blockWidth.set(s30);
+
+    set blockWidth(q105) {
+        this.__blockWidth.set(q105);
     }
+
     get blockHeight() {
         return this.__blockHeight.get();
     }
-    set blockHeight(r30) {
-        this.__blockHeight.set(r30);
+
+    set blockHeight(p105) {
+        this.__blockHeight.set(p105);
     }
+
     get longScaleOnePointTwo() {
         return this.__longScaleOnePointTwo.get();
     }
-    set longScaleOnePointTwo(q30) {
-        this.__longScaleOnePointTwo.set(q30);
+
+    set longScaleOnePointTwo(o105) {
+        this.__longScaleOnePointTwo.set(o105);
     }
+
     get scaleGridItemNinetyPercent() {
         return this.__scaleGridItemNinetyPercent.get();
     }
-    set scaleGridItemNinetyPercent(p30) {
-        this.__scaleGridItemNinetyPercent.set(p30);
+
+    set scaleGridItemNinetyPercent(n105) {
+        this.__scaleGridItemNinetyPercent.set(n105);
     }
+
     get reboundSize() {
         return this.__reboundSize.get();
     }
-    set reboundSize(o30) {
-        this.__reboundSize.set(o30);
+
+    set reboundSize(m105) {
+        this.__reboundSize.set(m105);
     }
+
     get scaleIcon() {
         return this.__scaleIcon.get();
     }
-    set scaleIcon(n30) {
-        this.__scaleIcon.set(n30);
+
+    set scaleIcon(l105) {
+        this.__scaleIcon.set(l105);
     }
+
     get addIconShow() {
         return this.__addIconShow.get();
     }
-    set addIconShow(m30) {
-        this.__addIconShow.set(m30);
+
+    set addIconShow(k105) {
+        this.__addIconShow.set(k105);
     }
+
     get scaleAddIcon() {
         return this.__scaleAddIcon.get();
     }
-    set scaleAddIcon(l30) {
-        this.__scaleAddIcon.set(l30);
+
+    set scaleAddIcon(j105) {
+        this.__scaleAddIcon.set(j105);
     }
+
     get isStartDrag() {
         return this.__isStartDrag.get();
     }
-    set isStartDrag(k30) {
-        this.__isStartDrag.set(k30);
+
+    set isStartDrag(i105) {
+        this.__isStartDrag.set(i105);
     }
+
     get insertIndex() {
         return this.__insertIndex.get();
     }
-    set insertIndex(j30) {
-        this.__insertIndex.set(j30);
+
+    set insertIndex(h105) {
+        this.__insertIndex.set(h105);
     }
+
     get itemIndex() {
         return this.__itemIndex.get();
     }
-    set itemIndex(i30) {
-        this.__itemIndex.set(i30);
+
+    set itemIndex(g105) {
+        this.__itemIndex.set(g105);
     }
+
     get editGridDataLength() {
         return this.__editGridDataLength.get();
     }
-    set editGridDataLength(h30) {
-        this.__editGridDataLength.set(h30);
+
+    set editGridDataLength(f105) {
+        this.__editGridDataLength.set(f105);
     }
+
     get isTouchDown() {
         return this.__isTouchDown.get();
     }
-    set isTouchDown(g30) {
-        this.__isTouchDown.set(g30);
+
+    set isTouchDown(e105) {
+        this.__isTouchDown.set(e105);
     }
+
     get addItemMoveX() {
         return this.__addItemMoveX.get();
     }
-    set addItemMoveX(f30) {
-        this.__addItemMoveX.set(f30);
+
+    set addItemMoveX(d105) {
+        this.__addItemMoveX.set(d105);
     }
+
     get addItemMoveY() {
         return this.__addItemMoveY.get();
     }
-    set addItemMoveY(e30) {
-        this.__addItemMoveY.set(e30);
+
+    set addItemMoveY(c105) {
+        this.__addItemMoveY.set(c105);
     }
+
     get editItemMoveX() {
         return this.__editItemMoveX.get();
     }
-    set editItemMoveX(d30) {
-        this.__editItemMoveX.set(d30);
+
+    set editItemMoveX(b105) {
+        this.__editItemMoveX.set(b105);
     }
+
     get editItemMoveY() {
         return this.__editItemMoveY.get();
     }
-    set editItemMoveY(c30) {
-        this.__editItemMoveY.set(c30);
+
+    set editItemMoveY(a105) {
+        this.__editItemMoveY.set(a105);
     }
+
     get unSelectedIndex() {
         return this.__unSelectedIndex.get();
     }
-    set unSelectedIndex(b30) {
-        this.__unSelectedIndex.set(b30);
+
+    set unSelectedIndex(z104) {
+        this.__unSelectedIndex.set(z104);
     }
+
     get clickAddBtn() {
         return this.__clickAddBtn.get();
     }
-    set clickAddBtn(a30) {
-        this.__clickAddBtn.set(a30);
+
+    set clickAddBtn(y104) {
+        this.__clickAddBtn.set(y104);
     }
+
     get selectedIndex() {
         return this.__selectedIndex.get();
     }
-    set selectedIndex(z29) {
-        this.__selectedIndex.set(z29);
+
+    set selectedIndex(x104) {
+        this.__selectedIndex.set(x104);
     }
+
     get clickRemoveBtn() {
         return this.__clickRemoveBtn.get();
     }
-    set clickRemoveBtn(y29) {
-        this.__clickRemoveBtn.set(y29);
+
+    set clickRemoveBtn(w104) {
+        this.__clickRemoveBtn.set(w104);
     }
+
     get addAreaLongPressGesture() {
         return this.__addAreaLongPressGesture.get();
     }
-    set addAreaLongPressGesture(x29) {
-        this.__addAreaLongPressGesture.set(x29);
+
+    set addAreaLongPressGesture(v104) {
+        this.__addAreaLongPressGesture.set(v104);
     }
+
     get arraySelectIsChange() {
         return this.__arraySelectIsChange.get();
     }
-    set arraySelectIsChange(w29) {
-        this.__arraySelectIsChange.set(w29);
+
+    set arraySelectIsChange(u104) {
+        this.__arraySelectIsChange.set(u104);
     }
+
     get arrayUnSelectIsChange() {
         return this.__arrayUnSelectIsChange.get();
     }
-    set arrayUnSelectIsChange(v29) {
-        this.__arrayUnSelectIsChange.set(v29);
+
+    set arrayUnSelectIsChange(t104) {
+        this.__arrayUnSelectIsChange.set(t104);
     }
+
     get textItemEditWidth() {
         return this.__textItemEditWidth.get();
     }
-    set textItemEditWidth(u29) {
-        this.__textItemEditWidth.set(u29);
+
+    set textItemEditWidth(s104) {
+        this.__textItemEditWidth.set(s104);
     }
+
     get textItemEditHeight() {
         return this.__textItemEditHeight.get();
     }
-    set textItemEditHeight(t29) {
-        this.__textItemEditHeight.set(t29);
+
+    set textItemEditHeight(r104) {
+        this.__textItemEditHeight.set(r104);
     }
+
     get imageItemWidth() {
         return this.__imageItemWidth.get();
     }
-    set imageItemWidth(s29) {
-        this.__imageItemWidth.set(s29);
+
+    set imageItemWidth(q104) {
+        this.__imageItemWidth.set(q104);
     }
+
     get saveClick() {
         return this.__saveClick.get();
     }
-    set saveClick(r29) {
-        this.__saveClick.set(r29);
+
+    set saveClick(p104) {
+        this.__saveClick.set(p104);
     }
+
     get imageTextAddIconShow() {
         return this.__imageTextAddIconShow.get();
     }
-    set imageTextAddIconShow(q29) {
-        this.__imageTextAddIconShow.set(q29);
+
+    set imageTextAddIconShow(o104) {
+        this.__imageTextAddIconShow.set(o104);
     }
+
     get imageTextRemoveIconShow() {
         return this.__imageTextRemoveIconShow.get();
     }
-    set imageTextRemoveIconShow(p29) {
-        this.__imageTextRemoveIconShow.set(p29);
+
+    set imageTextRemoveIconShow(n104) {
+        this.__imageTextRemoveIconShow.set(n104);
     }
+
     get firstIn() {
         return this.__firstIn.get();
     }
-    set firstIn(o29) {
-        this.__firstIn.set(o29);
+
+    set firstIn(m104) {
+        this.__firstIn.set(m104);
     }
+
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
-    set fontSizeScale(n29) {
-        this.__fontSizeScale.set(n29);
+
+    set fontSizeScale(l104) {
+        this.__fontSizeScale.set(l104);
     }
+
     get fontWeightScale() {
         return this.__fontWeightScale.get();
     }
-    set fontWeightScale(m29) {
-        this.__fontWeightScale.set(m29);
+
+    set fontWeightScale(k104) {
+        this.__fontWeightScale.set(k104);
     }
+
     get customColumns() {
         return this.__customColumns.get();
     }
-    set customColumns(l29) {
-        this.__customColumns.set(l29);
+
+    set customColumns(j104) {
+        this.__customColumns.set(j104);
     }
+
     get editGridHeight() {
         return this.__editGridHeight.get();
     }
-    set editGridHeight(k29) {
-        this.__editGridHeight.set(k29);
+
+    set editGridHeight(i104) {
+        this.__editGridHeight.set(i104);
     }
+
     get addGridHeight() {
         return this.__addGridHeight.get();
     }
-    set addGridHeight(j29) {
-        this.__addGridHeight.set(j29);
+
+    set addGridHeight(h104) {
+        this.__addGridHeight.set(h104);
     }
+
     get subTitleHeight() {
         return this.__subTitleHeight.get();
     }
-    set subTitleHeight(i29) {
-        this.__subTitleHeight.set(i29);
+
+    set subTitleHeight(g104) {
+        this.__subTitleHeight.set(g104);
     }
+
+    get isOpenAccessibility() {
+        return this.__isOpenAccessibility.get();
+    }
+
+    set isOpenAccessibility(f104) {
+        this.__isOpenAccessibility.set(f104);
+    }
+
     get readFlag() {
         return this.__readFlag.get();
     }
-    set readFlag(h29) {
-        this.__readFlag.set(h29);
+
+    set readFlag(e104) {
+        this.__readFlag.set(e104);
     }
+
     get readIndex4AddArea() {
         return this.__readIndex4AddArea.get();
     }
-    set readIndex4AddArea(g29) {
-        this.__readIndex4AddArea.set(g29);
+
+    set readIndex4AddArea(d104) {
+        this.__readIndex4AddArea.set(d104);
     }
+
     get readIndex4EditArea() {
         return this.__readIndex4EditArea.get();
     }
-    set readIndex4EditArea(f29) {
-        this.__readIndex4EditArea.set(f29);
+
+    set readIndex4EditArea(c104) {
+        this.__readIndex4EditArea.set(c104);
     }
+
     get isPointToAddTitleBarEditButton() {
         return this.__isPointToAddTitleBarEditButton.get();
     }
-    set isPointToAddTitleBarEditButton(e29) {
-        this.__isPointToAddTitleBarEditButton.set(e29);
+
+    set isPointToAddTitleBarEditButton(b104) {
+        this.__isPointToAddTitleBarEditButton.set(b104);
     }
+
     get isPointToEditTitleBarSaveButton() {
         return this.__isPointToEditTitleBarSaveButton.get();
     }
-    set isPointToEditTitleBarSaveButton(d29) {
-        this.__isPointToEditTitleBarSaveButton.set(d29);
+
+    set isPointToEditTitleBarSaveButton(a104) {
+        this.__isPointToEditTitleBarSaveButton.set(a104);
     }
+
     aboutToAppear() {
         this.dataList.length = 50;
-        this.selected = this.dataList && this.deduplicate(this.dataList).filter(c29 => c29.selected).sort(this.sortBy());
-        this.unSelected = this.dataList && this.deduplicate(this.dataList).filter(b29 => !b29.selected).sort(this.sortBy());
+        this.selected =
+            this.dataList && this.deduplicate(this.dataList).filter(z103 => z103.selected).sort(this.sortBy());
+        this.unSelected =
+            this.dataList && this.deduplicate(this.dataList).filter(y103 =>!y103.selected).sort(this.sortBy());
         this.copySelected = this.selected.slice();
         this.copyUnSelected = this.unSelected.slice();
         this.editGridDataLength = this.selected.length;
         this.imageText = this.options.type === GridObjectSortComponentType.IMAGE_TEXT;
         try {
-            let a29 = this.getUIContext();
-            this.isFollowingSystemFontScale = a29.isFollowingSystemFontScale();
-            this.maxAppFontScale = a29.getMaxFontScale();
-            this.fontSizeScale = this.decideFontScale(a29);
+            let x103 = this.getUIContext();
+            this.isFollowingSystemFontScale = x103.isFollowingSystemFontScale();
+            this.maxAppFontScale = x103.getMaxFontScale();
+            this.fontSizeScale = this.decideFontScale(x103);
             this.fontWeightScale =
-                a29.getHostContext()?.config.fontWeightScale ?? DEFAULT_FONT_WEIGHT_SCALE;
-        }
-        catch (x28) {
-            let y28 = x28.code;
-            let z28 = x28.message;
-            hilog.error(0x3900, 'Ace', `GridObjectSortComponent Faild to init fontsizescale info, code:${y28}, message: ${z28}`);
+                x103.getHostContext()?.config?.fontWeightScale ?? DEFAULT_FONT_WEIGHT_SCALE;
+        } catch (u103) {
+            let v103 = u103.code;
+            let w103 = u103.message;
+            hilog.error(0x3900, 'Ace',
+                `GridObjectSortComponent Faild to init fontsizescale info, code:${v103}, message: ${w103}`);
         }
         try {
             this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
-        }
-        catch (u28) {
-            let v28 = u28.code;
-            let w28 = u28.message;
-            hilog.error(0x3900, 'Ace', `GridObjectSortComponent Faild to get environment param error: ${v28}, ${w28}`);
+        } catch (r103) {
+            let s103 = r103.code;
+            let t103 = r103.message;
+            hilog.error(0x3900, 'Ace',
+                `GridObjectSortComponent Faild to get environment param error: ${s103}, ${t103}`);
         }
         this.calcGridHeight();
         setTimeout(() => {
             this.firstIn = false;
         }, 500);
         this.bundleName = getContext(this)?.abilityInfo?.bundleName;
+        accessibility.on('screenReaderStateChange', (q103) => {
+            this.isOpenAccessibility = q103;
+        });
     }
+
     getAdaptiveSymbolFontSize() {
-        let t28 = this.fontSizeScale;
-        if (!this.isFollowingSystemFontScale || t28 === undefined) {
-            t28 = MIN_FONT_SCALE;
+        let p103 = this.fontSizeScale;
+        if (!this.isFollowingSystemFontScale || p103 === undefined) {
+            p103 = MIN_FONT_SCALE;
         }
-        t28 = Math.min(MIN_SYMBOL_FONT_SCALE, t28);
-        t28 = Math.max(t28, MIN_FONT_SCALE);
-        return (t28 * SYMBOL_SIZE_12FP).toString() + 'vp';
+        p103 = Math.min(MIN_SYMBOL_FONT_SCALE, p103);
+        p103 = Math.max(p103, MIN_FONT_SCALE);
+        return (p103 * SYMBOL_SIZE_12FP).toString() + 'vp';
     }
-    getSymbolFontSizeFrom(s28) {
-        if (s28 === undefined) {
+
+    getSymbolFontSizeFrom(o103) {
+        if (o103 === undefined) {
             return SYMBOL_DEFAULT;
         }
-        if (typeof s28 === 'number') {
-            return s28.toString() + 'vp';
+        if (typeof o103 === 'number') {
+            return o103.toString() + 'vp';
         }
-        return s28;
+        return o103;
     }
+
     calcTextItemEditHeight() {
-        let r28 = MeasureText.measureTextSize({
+        let n103 = MeasureText.measureTextSize({
             textContent: this.dataList[0]?.text ?? '',
-            fontSize: `${(LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })?.value ??
+            fontSize: `${(LengthMetrics.resource({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_button3'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            })?.value ??
                 DEFAULT_TEXT_SIZE) * (this.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE)}vp`,
             overflow: TextOverflow.Ellipsis,
             maxLines: TEXT_MAX_LINES
         });
         this.textItemEditHeight = this.fontSizeScale === DEFAULT_FONT_SIZE_SCALE ?
-            GRID_ITEM_HEIGHT_TEXT : px2vp(r28.height);
+            GRID_ITEM_HEIGHT_TEXT : px2vp(n103.height);
         this.textItemEditHeight = this.textItemEditHeight + PADDING_EIGHT * 2;
     }
-    decideFontScale(p28) {
+
+    decideFontScale(l103) {
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
-        let q28 = p28.getHostContext()?.config.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
-        return Math.min(q28, this.maxAppFontScale, MAX_FONT_SCALE);
+        let m103 = l103.getHostContext()?.config?.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
+        return Math.min(m103, this.maxAppFontScale, MAX_FONT_SCALE);
     }
+
     calcColNum() {
         if (this.imageText || (this.fontSizeScale && this.fontSizeScale > DEFAULT_FONT_SIZE_SCALE)) {
             this.customColumns = GRID_COL_3;
             this.colNum = COL_IMAGE_TEXT;
-        }
-        else {
+        } else {
             this.customColumns = GRID_COL_4;
             this.colNum = COL_TEXT;
         }
     }
+
     aboutToDisappear() {
         Context.animateTo({
             duration: ENTER_EXIT_ICON_DURATION,
@@ -961,15 +1152,17 @@ export class GridObjectSortComponent extends ViewPU {
             this.callbackId = void (0);
         }
     }
-    deduplicate(l28) {
-        const m28 = [];
-        l28.forEach(n28 => {
-            if (!m28.some(o28 => o28.id === n28.id)) {
-                m28.push(n28);
+
+    deduplicate(h103) {
+        const i103 = [];
+        h103.forEach(j103 => {
+            if (!i103.some(k103 => k103.id === j103.id)) {
+                i103.push(j103);
             }
         });
-        return m28;
+        return i103;
     }
+
     onGridComStateChange() {
         this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
         if (!this.imageText) {
@@ -978,11 +1171,13 @@ export class GridObjectSortComponent extends ViewPU {
                 this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
         }
     }
+
     sortBy() {
-        return (j28, k28) => {
-            return j28.order - k28.order;
+        return (f103, g103) => {
+            return f103.order - g103.order;
         };
     }
+
     cancelEdit() {
         if (this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn) {
             return;
@@ -1007,6 +1202,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.isPointToAddTitleBarEditButton = true;
         this.onCancel && this.onCancel();
     }
+
     goEdit() {
         Context.animateTo({
             duration: ENTER_EXIT_ICON_DURATION,
@@ -1018,22 +1214,24 @@ export class GridObjectSortComponent extends ViewPU {
         this.isPointToEditTitleBarSaveButton = true;
         this.calcGridHeight();
     }
+
     pointToEditTitleBarSaveButton() {
         if (this.isPointToEditTitleBarSaveButton) {
-            let h28 = this.getUIContext().getFrameNodeById(EDIT_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
-            let i28 = ({
+            let d103 = this.getUIContext().getFrameNodeById(EDIT_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
+            let e103 = ({
                 type: 'requestFocusForAccessibility',
                 bundleName: this.bundleName,
                 triggerAction: 'common',
-                customId: `SaveMenuItem_${h28}`
+                customId: `ImageMenuItem_${d103}_0`
             });
-            accessibility.sendAccessibilityEvent(i28).then(() => {
+            accessibility.sendAccessibilityEvent(e103).then(() => {
                 setTimeout(() => {
                     this.isPointToEditTitleBarSaveButton = false;
                 }, ENTER_EXIT_ICON_DURATION);
             });
         }
     }
+
     onSaveEdit() {
         if (this.isStartDrag) {
             return;
@@ -1052,12 +1250,12 @@ export class GridObjectSortComponent extends ViewPU {
             this.gridComState = false;
             this.copySelected = this.selected.slice();
             this.copyUnSelected = this.unSelected.slice();
-            const f28 = this.getNewData(this.selected, true, 0);
-            const g28 = this.getNewData(this.unSelected, false, this.selected.length);
-            this.selected = f28;
-            this.unSelected = g28;
+            const b103 = this.getNewData(this.selected, true, 0);
+            const c103 = this.getNewData(this.unSelected, false, this.selected.length);
+            this.selected = b103;
+            this.unSelected = c103;
             this.calcGridHeight();
-            this.onSave && this.onSave(f28, g28);
+            this.onSave && this.onSave(b103, c103);
         });
         setTimeout(() => {
             this.saveClick = false;
@@ -1065,347 +1263,385 @@ export class GridObjectSortComponent extends ViewPU {
         this.menuSwitch = false;
         this.isPointToAddTitleBarEditButton = true;
     }
+
     pointToAddTitleBarEditButton() {
         if (this.isPointToAddTitleBarEditButton) {
-            let d28 = this.getUIContext()?.getFrameNodeById(ADD_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
-            let e28 = ({
+            let z102 = this.getUIContext()?.getFrameNodeById(ADD_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
+            let a103 = ({
                 type: 'requestFocusForAccessibility',
                 bundleName: this.bundleName,
                 triggerAction: 'common',
-                customId: `ComposeTitleBar_ImageMenuItem_${d28}_0`
+                customId: `ComposeTitleBar_ImageMenuItem_${z102}_0`
             });
-            accessibility.sendAccessibilityEvent(e28).then(() => {
+            accessibility.sendAccessibilityEvent(a103).then(() => {
                 setTimeout(() => {
                     this.isPointToAddTitleBarEditButton = false;
                 }, ENTER_EXIT_ICON_DURATION);
             });
         }
     }
-    onDragMoveEvent(z27, a28, b28) {
-        if (!this.gridComState || (z27.x < this.blockWidth / 3 && z27.y < this.blockHeight / 3)) {
+
+    onDragMoveEvent(v102, w102, x102) {
+        if (!this.gridComState || (v102.x < this.blockWidth / 3 && v102.y < this.blockHeight / 3)) {
             return;
         }
-        let c28 = b28;
-        if (c28 < 0) {
-            c28 = this.selected.length - 1;
-        }
-        else {
-            this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DRAG_MOVING, Math.floor(b28 / this.colNum) + 1, b28 % this.colNum + 1);
+        let y102 = x102;
+        if (y102 < 0) {
+            y102 = this.selected.length - 1;
+        } else {
+            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_MOVING,
+                Math.floor(x102 / this.colNum) + 1, x102 % this.colNum + 1);
         }
         if (this.dragContent.visibility !== Visibility.Hidden) {
             this.dragContent.visibility = Visibility.Hidden;
         }
-        if (this.insertIndex !== b28 || a28 !== b28) {
+        if (this.insertIndex !== x102 || w102 !== x102) {
             this.sendAccessibility();
         }
-        this.insertIndex = b28;
+        this.insertIndex = x102;
     }
+
     sendAccessibility() {
         if (this.preTextAnnouncedForAccessibility !== this.textAnnouncedForAccessibility) {
-            let y27 = ({
+            let u102 = ({
                 type: 'announceForAccessibility',
                 bundleName: this.bundleName,
                 triggerAction: 'common',
                 textAnnouncedForAccessibility: this.textAnnouncedForAccessibility
             });
-            accessibility.sendAccessibilityEvent(y27);
+            accessibility.sendAccessibilityEvent(u102);
             this.preTextAnnouncedForAccessibility = this.textAnnouncedForAccessibility;
         }
     }
-    handleDeleteClick(u27) {
+
+    handleDeleteClick(q102) {
         if (this.clickAddBtn || this.clickRemoveBtn) {
             return;
         }
         this.clickRemoveBtn = true;
         this.scaleIcon = 0;
         this.arraySelectIsChange = 1;
-        let v27 = this.selected.findIndex(x27 => x27.id === u27.id);
-        this.content = u27;
-        this.selectedIndex = v27;
+        let r102 = this.selected.findIndex(t102 => t102.id === q102.id);
+        this.content = q102;
+        this.selectedIndex = r102;
         this.calcGridHeight();
-        Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
-            this.scaleIcon = 1;
-            this.selected.splice(v27, 1);
-            this.unSelected.unshift(u27);
-            this.calcGridHeight();
-            this.editGridDataLength = this.editGridDataLength - 1;
-            this.editItemMoveX = 0;
-            this.editItemMoveY = 0;
-            this.arraySelectIsChange = 2;
-            this.clickRemoveBtn = false;
-            this.readFlag = false;
-            this.readIndex4AddArea = 0;
-            this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_DELETED, `${this.content?.text ?? ' '}`);
-        } }, () => {
-            let w27 = this.getAddItemGridPosition();
-            this.editItemMoveX = w27.x;
-            this.editItemMoveY = w27.y;
+        Context.animateTo({
+            curve: REMOVE_ADD_SPRING, onFinish: () => {
+                this.scaleIcon = 1;
+                this.selected.splice(r102, 1);
+                this.unSelected.unshift(q102);
+                this.calcGridHeight();
+                this.editGridDataLength = this.editGridDataLength - 1;
+                this.editItemMoveX = 0;
+                this.editItemMoveY = 0;
+                this.arraySelectIsChange = 2;
+                this.clickRemoveBtn = false;
+                this.readFlag = false;
+                this.readIndex4AddArea = 0;
+                this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_DELETED,
+                    this.getAccessibilityText(this.content?.text ?? ' '));
+            }
+        }, () => {
+            let s102 = this.getAddItemGridPosition();
+            this.editItemMoveX = s102.x;
+            this.editItemMoveY = s102.y;
         });
     }
+
     pointToAddArea() {
-        let t27 = ({
+        let p102 = ({
             type: 'requestFocusForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
             customId: ADD_GRID_FIRST_ITEM_ID
         });
-        accessibility.sendAccessibilityEvent(t27).then(() => {
+        accessibility.sendAccessibilityEvent(p102).then(() => {
             setTimeout(() => {
                 this.readFlag = true;
                 this.readIndex4AddArea = -1;
             }, ENTER_EXIT_ICON_DURATION);
         });
     }
-    getNewData(o27, p27, q27) {
-        return o27.map((r27, s27) => {
-            r27.selected = p27;
-            r27.order = q27 + s27;
-            r27.visibility = Visibility.Visible;
-            return r27;
+
+    getNewData(k102, l102, m102) {
+        return k102.map((n102, o102) => {
+            n102.selected = l102;
+            n102.order = m102 + o102;
+            n102.visibility = Visibility.Visible;
+            return n102;
         });
     }
+
     getBlockWidth() {
-        const n27 = (this.areaWidth - 32) / this.colNum;
-        return n27;
+        const j102 = (this.areaWidth - 32) / this.colNum;
+        return j102;
     }
+
     calcGridHeight() {
         this.editGridHeight = this.getGridHeight(this.selected, EDIT);
         this.addGridHeight = this.getGridHeight(this.unSelected);
     }
-    getGridHeight(f27, g27) {
-        let h27 = 0;
-        let i27 = f27.length;
-        f27.forEach(m27 => {
-            if (m27.visibility === Visibility.Hidden) {
-                i27 = i27 - 1;
+
+    getGridHeight(b102, c102) {
+        let d102 = 0;
+        let e102 = b102.length;
+        b102.forEach(i102 => {
+            if (i102.visibility === Visibility.Hidden) {
+                e102 = e102 - 1;
             }
         });
-        let j27 = 0;
-        let k27 = i27 % this.colNum === 0;
-        if (this.clickAddBtn && k27) {
-            j27 = 1;
+        let f102 = 0;
+        let g102 = e102 % this.colNum === 0;
+        if (this.clickAddBtn && g102) {
+            f102 = 1;
+        } else if (this.isStartDrag && g102 && c102) {
+            f102 = 1;
+        } else if (this.clickRemoveBtn && g102 && !c102) {
+            f102 = 1;
+        } else {
+            f102 = 0;
         }
-        else if (this.isStartDrag && k27 && g27) {
-            j27 = 1;
+        let h102 = Math.ceil(e102 / this.colNum) + f102;
+        d102 = this.blockHeight * h102;
+        if (e102 === 0) {
+            d102 = 0;
         }
-        else if (this.clickRemoveBtn && k27 && !g27) {
-            j27 = 1;
-        }
-        else {
-            j27 = 0;
-        }
-        let l27 = Math.ceil(i27 / this.colNum) + j27;
-        h27 = this.blockHeight * l27;
-        if (i27 === 0) {
-            h27 = 0;
-        }
-        return h27;
+        return d102;
     }
-    imageTextRemoveIcon(c27) {
-        const d27 = this.clickRemoveBtn && this.content.id === c27.id;
-        const e27 = d27 ? { 'id': -1, 'type': 40000, params: ['sys.symbol.plus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        return e27;
+
+    imageTextRemoveIcon(y101) {
+        const z101 = this.clickRemoveBtn && this.content.id === y101.id;
+        const a102 = z101 ? {
+            'id': -1,
+            'type': 40000,
+            params: ['sys.symbol.plus_circle_fill'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        } : {
+            'id': -1,
+            'type': 40000,
+            params: ['sys.symbol.minus_circle_fill'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        };
+        return a102;
     }
-    imageTextAddIcon(z26) {
-        const a27 = this.clickAddBtn && this.content.id === z26.id && this.gridComState;
-        const b27 = a27 ? { 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 40000, params: ['sys.symbol.plus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        return b27;
+
+    imageTextAddIcon(v101) {
+        const w101 = this.clickAddBtn && this.content.id === v101.id && this.gridComState;
+        const x101 = w101 ? {
+            'id': -1,
+            'type': 40000,
+            params: ['sys.symbol.minus_circle_fill'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        } : {
+            'id': -1,
+            'type': 40000,
+            params: ['sys.symbol.plus_circle_fill'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        };
+        return x101;
     }
-    imageTextAddIconVisible(w26) {
-        const x26 = this.clickAddBtn && this.content.id === w26.id && !this.gridComState;
-        const y26 = x26 ? Visibility.Hidden : Visibility.Visible;
-        return y26;
+
+    imageTextAddIconVisible(s101) {
+        const t101 = this.clickAddBtn && this.content.id === s101.id && !this.gridComState;
+        const u101 = t101 ? Visibility.Hidden : Visibility.Visible;
+        return u101;
     }
-    getCoodXY(r26) {
-        let s26 = 0;
-        let t26 = 0;
-        const u26 = this.colNum;
-        const v26 = Math.trunc(r26 % u26);
-        if (r26 >= this.dragContentIndex) {
-            if (r26 <= this.insertIndex && r26 !== this.dragContentIndex) {
-                if (v26 === 0) {
-                    s26 = s26 + this.blockWidth * (u26 - 1);
-                    t26 = t26 - this.blockHeight;
-                }
-                else {
-                    s26 = s26 - this.blockWidth;
+
+    getCoodXY(n101) {
+        let o101 = 0;
+        let p101 = 0;
+        const q101 = this.colNum;
+        const r101 = Math.trunc(n101 % q101);
+        if (n101 >= this.dragContentIndex) {
+            if (n101 <= this.insertIndex && n101 !== this.dragContentIndex) {
+                if (r101 === 0) {
+                    o101 = o101 + this.blockWidth * (q101 - 1);
+                    p101 = p101 - this.blockHeight;
+                } else {
+                    o101 = o101 - this.blockWidth;
                 }
             }
-        }
-        else {
-            if (r26 >= this.insertIndex) {
-                if (v26 === u26 - 1) {
-                    s26 = s26 - this.blockWidth * (u26 - 1);
-                    t26 = t26 + this.blockHeight;
-                }
-                else {
-                    s26 = s26 + this.blockWidth;
+        } else {
+            if (n101 >= this.insertIndex) {
+                if (r101 === q101 - 1) {
+                    o101 = o101 - this.blockWidth * (q101 - 1);
+                    p101 = p101 + this.blockHeight;
+                } else {
+                    o101 = o101 + this.blockWidth;
                 }
             }
         }
         if (!this.isStartDrag) {
-            s26 = 0;
-            t26 = 0;
+            o101 = 0;
+            p101 = 0;
         }
-        return { x: s26, y: t26 };
+        return { x: o101, y: p101 };
     }
+
     getAddItemGridPosition() {
-        const f26 = this.selected.length;
-        const g26 = this.colNum;
-        const h26 = (this.selectedIndex + 1) % g26;
-        const i26 = Math.ceil((this.selectedIndex + 1) / g26);
-        const j26 = Math.ceil(f26 / g26);
-        const k26 = this.imageText;
-        let l26 = 0;
-        if (h26 === 0) {
-            l26 = k26 || (this.fontSizeScale && this.fontSizeScale > 1) ? -this.blockWidth * 2 : -this.blockWidth * 3;
+        const b101 = this.selected.length;
+        const c101 = this.colNum;
+        const d101 = (this.selectedIndex + 1) % c101;
+        const e101 = Math.ceil((this.selectedIndex + 1) / c101);
+        const f101 = Math.ceil(b101 / c101);
+        const g101 = this.imageText;
+        let h101 = 0;
+        if (d101 === 0) {
+            h101 = g101 || (this.fontSizeScale && this.fontSizeScale > 1) ? -this.blockWidth * 2 : -this.blockWidth * 3;
+        } else {
+            h101 = -this.blockWidth * (d101 - 1);
         }
-        else {
-            l26 = -this.blockWidth * (h26 - 1);
-        }
-        let m26 = SUBTITLE_HEIGHT;
-        let n26 = 0;
-        const o26 = j26 - i26;
-        const p26 = f26 % g26;
-        const q26 = p26 === 1 ? o26 : o26 + 1;
+        let i101 = SUBTITLE_HEIGHT;
+        let j101 = 0;
+        const k101 = f101 - e101;
+        const l101 = b101 % c101;
+        const m101 = l101 === 1 ? k101 : k101 + 1;
         if (this.fontSizeScale && this.fontSizeScale > 1) {
-            m26 = this.subTitleHeight;
+            i101 = this.subTitleHeight;
         }
-        n26 = q26 * this.blockHeight + m26;
+        j101 = m101 * this.blockHeight + i101;
         return {
-            x: l26,
-            y: n26
+            x: h101,
+            y: j101
         };
     }
-    getCoveringGridPosition(c26) {
-        let d26 = 0;
-        let e26 = 0;
-        if (c26 > this.selectedIndex && this.arraySelectIsChange !== 2) {
-            d26 = c26 % this.colNum === 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
-            e26 = c26 % this.colNum === 0 ? -this.blockHeight : 0;
+
+    getCoveringGridPosition(y100) {
+        let z100 = 0;
+        let a101 = 0;
+        if (y100 > this.selectedIndex && this.arraySelectIsChange !== 2) {
+            z100 = y100 % this.colNum === 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+            a101 = y100 % this.colNum === 0 ? -this.blockHeight : 0;
         }
         return {
-            x: d26,
-            y: e26
+            x: z100,
+            y: a101
         };
     }
-    getEditItemGridPosition(q25, r25) {
-        const s25 = q25.length;
-        const t25 = this.colNum;
-        const u25 = Math.trunc(s25 % t25);
-        const v25 = Math.trunc(r25 % t25);
-        let w25 = Math.abs(u25 - v25) * this.blockWidth;
-        if (u25 < v25) {
-            w25 = -w25;
+
+    getEditItemGridPosition(m100, n100) {
+        const o100 = m100.length;
+        const p100 = this.colNum;
+        const q100 = Math.trunc(o100 % p100);
+        const r100 = Math.trunc(n100 % p100);
+        let s100 = Math.abs(q100 - r100) * this.blockWidth;
+        if (q100 < r100) {
+            s100 = -s100;
+        } else if (q100 > r100) {
+            s100 = s100;
+        } else {
+            s100 = 0;
         }
-        else if (u25 > v25) {
-            w25 = w25;
-        }
-        else {
-            w25 = 0;
-        }
-        let x25 = 0;
-        let y25 = 0;
-        let z25 = Math.trunc(r25 / this.colNum);
-        let a26 = SUBTITLE_HEIGHT;
-        const b26 = !this.imageText && this.gridComState && r25 > 3;
-        if (b26) {
-            y25 = (z25 + 1) * (this.blockHeight - 8) + 8;
-        }
-        else {
-            y25 = (z25 + 1) * this.blockHeight;
+        let t100 = 0;
+        let u100 = 0;
+        let v100 = Math.trunc(n100 / this.colNum);
+        let w100 = SUBTITLE_HEIGHT;
+        const x100 = !this.imageText && this.gridComState && n100 > 3;
+        if (x100) {
+            u100 = (v100 + 1) * (this.blockHeight - 8) + 8;
+        } else {
+            u100 = (v100 + 1) * this.blockHeight;
         }
         if (this.fontSizeScale && this.fontSizeScale > 1) {
-            a26 = this.subTitleHeight;
+            w100 = this.subTitleHeight;
         }
-        x25 = y25 + a26;
+        t100 = u100 + w100;
         return {
-            x: w25,
-            y: x25
+            x: s100,
+            y: t100
         };
     }
-    getCoveringGridPositionBottom(l25) {
-        let m25 = 0;
-        let n25 = 0;
-        const o25 = l25 % this.colNum === 0;
-        const p25 = this.gridComState && !this.imageText ? -this.blockHeight + 8 : -this.blockHeight;
-        if (l25 > this.unSelectedIndex && this.arrayUnSelectIsChange !== 2) {
-            m25 = o25 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
-            n25 = o25 ? p25 : 0;
+
+    getCoveringGridPositionBottom(h100) {
+        let i100 = 0;
+        let j100 = 0;
+        const k100 = h100 % this.colNum === 0;
+        const l100 = this.gridComState && !this.imageText ? -this.blockHeight + 8 : -this.blockHeight;
+        if (h100 > this.unSelectedIndex && this.arrayUnSelectIsChange !== 2) {
+            i100 = k100 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+            j100 = k100 ? l100 : 0;
         }
         return {
-            x: m25,
-            y: n25
+            x: i100,
+            y: j100
         };
     }
-    getAddItemRightMove(h25) {
-        let i25 = this.blockWidth;
-        let j25 = 0;
-        let k25 = (h25 + 1) % this.colNum === 0;
-        if (k25) {
-            i25 = -this.blockWidth * (this.colNum - 1);
-            j25 = this.imageText ? this.blockHeight : this.blockHeight - 8;
+
+    getAddItemRightMove(d100) {
+        let e100 = this.blockWidth;
+        let f100 = 0;
+        let g100 = (d100 + 1) % this.colNum === 0;
+        if (g100) {
+            e100 = -this.blockWidth * (this.colNum - 1);
+            f100 = this.imageText ? this.blockHeight : this.blockHeight - 8;
         }
-        return { x: i25, y: j25 };
+        return { x: e100, y: f100 };
     }
-    getShowAreaItemTranslate(e25) {
+
+    getShowAreaItemTranslate(a100) {
         if (this.isStartDrag) {
-            let g25 = this.getCoodXY(e25);
+            let c100 = this.getCoodXY(a100);
             return {
-                x: g25.x,
-                y: g25.y
+                x: c100.x,
+                y: c100.y
             };
         }
-        if (!this.isStartDrag && e25 === this.selectedIndex) {
+        if (!this.isStartDrag && a100 === this.selectedIndex) {
             return {
                 x: this.editItemMoveX,
                 y: this.editItemMoveY
             };
         }
-        if (!this.isStartDrag && e25 !== this.selectedIndex && this.clickRemoveBtn) {
-            let f25 = this.getCoveringGridPosition(e25);
+        if (!this.isStartDrag && a100 !== this.selectedIndex && this.clickRemoveBtn) {
+            let b100 = this.getCoveringGridPosition(a100);
             return {
-                x: f25.x,
-                y: f25.y
+                x: b100.x,
+                y: b100.y
             };
         }
         return { x: 0, y: 0 };
     }
-    getAddAreaItemTranslate(b25) {
+
+    getAddAreaItemTranslate(x99) {
         if (this.clickRemoveBtn) {
-            let d25 = this.getAddItemRightMove(b25);
+            let z99 = this.getAddItemRightMove(x99);
             return {
-                x: d25.x,
-                y: d25.y
+                x: z99.x,
+                y: z99.y
             };
         }
-        if (!this.clickRemoveBtn && b25 === this.unSelectedIndex) {
+        if (!this.clickRemoveBtn && x99 === this.unSelectedIndex) {
             return {
                 x: this.addItemMoveX,
                 y: -this.addItemMoveY
             };
         }
-        if (!this.clickRemoveBtn && b25 !== this.unSelectedIndex && this.clickAddBtn) {
-            let c25 = this.getCoveringGridPositionBottom(b25);
+        if (!this.clickRemoveBtn && x99 !== this.unSelectedIndex && this.clickAddBtn) {
+            let y99 = this.getCoveringGridPositionBottom(x99);
             return {
-                x: c25.x,
-                y: c25.y
+                x: y99.x,
+                y: y99.y
             };
         }
         return { x: 0, y: 0 };
     }
-    PixelMapBuilder(a24, b24, c24 = null) {
-        this.observeComponentCreation2((z24, a25) => {
+
+    PixelMapBuilder(w98, x98, y98 = null) {
+        this.observeComponentCreation2((v99, w99) => {
             Stack.create({ alignContent: Alignment.Center });
             Stack.clip(false);
             Stack.height(this.blockHeight * 1.5);
             Stack.width(this.blockWidth * 1.2);
         }, Stack);
-        this.observeComponentCreation2((d24, e24) => {
+        this.observeComponentCreation2((z98, a99) => {
             If.create();
             if (this.imageText) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((x24, y24) => {
+                    this.observeComponentCreation2((t99, u99) => {
                         Column.create();
                         Column.alignItems(HorizontalAlign.Center);
                         Column.justifyContent(FlexAlign.Center);
@@ -1416,35 +1652,34 @@ export class GridObjectSortComponent extends ViewPU {
                         Column.borderRadius(this.touchBorderRadius);
                         Column.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo });
                     }, Column);
-                    this.observeComponentCreation2((p24, q24) => {
+                    this.observeComponentCreation2((l99, m99) => {
                         If.create();
-                        if (a24 === undefined) {
+                        if (w98 === undefined) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((v24, w24) => {
+                                this.observeComponentCreation2((r99, s99) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.height(this.options.imageSize || SYMBOL_DEFAULT);
                                     SymbolGlyph.width(this.options.imageSize || SYMBOL_DEFAULT);
-                                    SymbolGlyph.fontSize(this.options.imageSize || SYMBOL_DEFAULT);
+                                    SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
                                 }, SymbolGlyph);
                             });
-                        }
-                        else if (a24 instanceof SymbolGlyphModifier) {
+                        } else if (w98 instanceof SymbolGlyphModifier) {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((t24, u24) => {
+                                this.observeComponentCreation2((p99, q99) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.height(this.options.imageSize || SYMBOL_DEFAULT);
                                     SymbolGlyph.width(this.options.imageSize || SYMBOL_DEFAULT);
-                                    SymbolGlyph.attributeModifier.bind(this)(a24);
-                                    SymbolGlyph.fontSize(this.options.imageSize || SYMBOL_DEFAULT);
+                                    SymbolGlyph.attributeModifier.bind(this)(w98);
+                                    SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
+                                    SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(2, () => {
-                                this.observeComponentCreation2((r24, s24) => {
-                                    Image.create(a24);
+                                this.observeComponentCreation2((n99, o99) => {
+                                    Image.create(w98);
                                     Image.draggable(false);
                                     Image.height(this.options.imageSize || IMAGE_DEFAULT);
                                     Image.width(this.options.imageSize || IMAGE_DEFAULT);
@@ -1453,10 +1688,16 @@ export class GridObjectSortComponent extends ViewPU {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((n24, o24) => {
-                        Text.create(b24);
+                    this.observeComponentCreation2((j99, k99) => {
+                        Text.create(x98);
                         Text.textAlign(TextAlign.Center);
-                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.ohos_id_text_size_button3'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
                         Text.margin({ top: 2 });
                         Text.maxLines(TEXT_MAX_LINES);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1464,12 +1705,24 @@ export class GridObjectSortComponent extends ViewPU {
                         Text.maxFontScale(ObservedObject.GetRawObject(this.fontSizeScale));
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((l24, m24) => {
-                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                    this.observeComponentCreation2((h99, i99) => {
+                        SymbolGlyph.create({
+                            'id': -1,
+                            'type': 40000,
+                            params: ['sys.symbol.minus_circle_fill'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
                         SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
                         SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
                         SymbolGlyph.draggable(false);
-                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.fontColor([{
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_secondary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        }]);
                         SymbolGlyph.width(ICON_SIZE);
                         SymbolGlyph.height(ICON_SIZE);
                         SymbolGlyph.position({
@@ -1479,10 +1732,9 @@ export class GridObjectSortComponent extends ViewPU {
                     }, SymbolGlyph);
                     Column.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((j24, k24) => {
+                    this.observeComponentCreation2((f99, g99) => {
                         Row.create();
                         Row.borderRadius(50);
                         Row.padding({
@@ -1492,14 +1744,32 @@ export class GridObjectSortComponent extends ViewPU {
                         Row.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo });
                         Row.alignItems(VerticalAlign.Center);
                         Row.justifyContent(FlexAlign.Center);
-                        Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Row.backgroundColor({
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_button_normal'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
                         Row.width(this.textItemEditWidth);
                         Row.height(this.textItemEditHeight);
                     }, Row);
-                    this.observeComponentCreation2((h24, i24) => {
-                        Text.create(b24);
-                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                    this.observeComponentCreation2((d99, e99) => {
+                        Text.create(x98);
+                        Text.fontColor({
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_text_primary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.ohos_id_text_size_button3'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.textAlign(TextAlign.Center);
                         Text.maxLines(TEXT_MAX_LINES);
@@ -1507,12 +1777,24 @@ export class GridObjectSortComponent extends ViewPU {
                         Text.maxFontScale(ObservedObject.GetRawObject(this.fontSizeScale));
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((f24, g24) => {
-                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                    this.observeComponentCreation2((b99, c99) => {
+                        SymbolGlyph.create({
+                            'id': -1,
+                            'type': 40000,
+                            params: ['sys.symbol.minus_circle_fill'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
                         SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
                         SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
                         SymbolGlyph.draggable(false);
-                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.fontColor([{
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_secondary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        }]);
                         SymbolGlyph.width(ICON_SIZE);
                         SymbolGlyph.height(ICON_SIZE);
                         SymbolGlyph.position({
@@ -1527,136 +1809,195 @@ export class GridObjectSortComponent extends ViewPU {
         If.pop();
         Stack.pop();
     }
-    HeaderTitleBuilder(j23 = null) {
-        this.observeComponentCreation2((w23, x23) => {
+
+    HeaderTitleBuilder(e98 = null) {
+        this.observeComponentCreation2((r98, s98) => {
             __Common__.create();
             __Common__.id(ADD_TITLE_BAR_ID);
             __Common__.visibility(!this.menuSwitch ? Visibility.Visible : Visibility.None);
-            __Common__.onVisibleAreaChange([0.0, 1.0], (y23, z23) => {
-                if (y23) {
+            __Common__.onVisibleAreaChange([0.0, 1.0], (t98, u98) => {
+                if (t98) {
                     this.pointToAddTitleBarEditButton();
+                } else {
+                    if (this.isPointToEditTitleBarSaveButton) {
+                        let v98 = ({
+                            type: 'announceForAccessibility',
+                            bundleName: this.bundleName,
+                            triggerAction: 'common',
+                            textAnnouncedForAccessibility: getContext().resourceManager
+                                .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE)
+                        });
+                        accessibility.sendAccessibilityEvent(v98);
+                    }
                 }
             });
         }, __Common__);
         {
-            this.observeComponentCreation2((s23, t23) => {
-                if (t23) {
-                    let u23 = new ComposeTitleBar(this, {
-                        title: this.options.normalTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+            this.observeComponentCreation2((n98, o98) => {
+                if (o98) {
+                    let p98 = new ComposeTitleBar(this, {
+                        title: this.options.normalTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_title_chanel'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        },
                         menuItems: this.menuItems,
-                    }, undefined, s23, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 963, col: 5 });
-                    ViewPU.create(u23);
-                    let v23 = () => {
+                    }, undefined, n98, () => {
+                    }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 977, col: 5 });
+                    ViewPU.create(p98);
+                    let r = () => {
                         return {
-                            title: this.options.normalTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            title: this.options.normalTitle || {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.ohos_grid_edit_title_chanel'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
                             menuItems: this.menuItems
                         };
                     };
-                    u23.paramsGenerator_ = v23;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(s23, {});
+                    p98.paramsGenerator_ = r;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(n98, {});
                 }
             }, { name: 'ComposeTitleBar' });
         }
         __Common__.pop();
-        this.observeComponentCreation2((o23, p23) => {
+        this.observeComponentCreation2((j98, k98) => {
             __Common__.create();
             __Common__.id(EDIT_TITLE_BAR_ID);
             __Common__.visibility(this.menuSwitch ? Visibility.Visible : Visibility.None);
-            __Common__.onVisibleAreaChange([0.0, 1.0], (q23, r23) => {
-                if (q23) {
+            __Common__.onVisibleAreaChange([0.0, 1.0], (l98, m98) => {
+                if (l98) {
                     this.pointToEditTitleBarSaveButton();
                 }
             });
         }, __Common__);
         {
-            this.observeComponentCreation2((k23, l23) => {
-                if (l23) {
-                    let m23 = new EditableTitleBar(this, {
+            this.observeComponentCreation2((f98, g98) => {
+                if (g98) {
+                    let h98 = new EditableTitleBar(this, {
                         leftIconStyle: EditableLeftIconType.Cancel,
-                        menuItems: [],
-                        title: this.options.editTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_edit'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                        onCancel: () => {
-                            this.cancelEdit();
-                        },
-                        onSave: () => {
-                            this.saveClick = true;
-                            this.onSaveEdit();
-                        }
-                    }, undefined, k23, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 974, col: 5 });
-                    ViewPU.create(m23);
-                    let n23 = () => {
-                        return {
-                            leftIconStyle: EditableLeftIconType.Cancel,
-                            menuItems: [],
-                            title: this.options.editTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_edit'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            onCancel: () => {
-                                this.cancelEdit();
+                        isSaveIconRequired: false,
+                        menuItems: [{
+                            value: {
+                                'id': -1,
+                                'type': 40000,
+                                params: ['sys.symbol.checkmark'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             },
-                            onSave: () => {
+                            label: this.getStringByResourceToken(ACCESSIBILITY_COMPLETE_BUTTON),
+                            accessibilityText: this.getStringByResourceToken(ACCESSIBILITY_COMPLETE_BUTTON),
+                            action: () => {
                                 this.saveClick = true;
                                 this.onSaveEdit();
                             }
+                        }],
+                        title: this.options.editTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_title_edit'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        },
+                        onCancel: () => {
+                            this.cancelEdit();
+                        },
+                    }, undefined, f98, () => {
+                    }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 999, col: 5 });
+                    ViewPU.create(h98);
+                    let q = () => {
+                        return {
+                            leftIconStyle: EditableLeftIconType.Cancel,
+                            isSaveIconRequired: false,
+                            menuItems: [{
+                                value: {
+                                    'id': -1,
+                                    'type': 40000,
+                                    params: ['sys.symbol.checkmark'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                label: this.getStringByResourceToken(ACCESSIBILITY_COMPLETE_BUTTON),
+                                accessibilityText: this.getStringByResourceToken(ACCESSIBILITY_COMPLETE_BUTTON),
+                                action: () => {
+                                    this.saveClick = true;
+                                    this.onSaveEdit();
+                                }
+                            }],
+                            title: this.options.editTitle || {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.ohos_grid_edit_title_edit'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
+                            onCancel: () => {
+                                this.cancelEdit();
+                            }
                         };
                     };
-                    m23.paramsGenerator_ = n23;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(k23, {});
+                    h98.paramsGenerator_ = q;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(f98, {});
                 }
             }, { name: 'EditableTitleBar' });
         }
         __Common__.pop();
     }
-    ImageTextBuilder(m22, n22, o22 = null) {
-        this.observeComponentCreation2((h23, i23) => {
+
+    ImageTextBuilder(h97, i97, j97 = null) {
+        this.observeComponentCreation2((c98, d98) => {
             Column.create();
             Column.padding({ left: MARGIN_EIGHT, right: MARGIN_EIGHT });
             Column.width('100%');
         }, Column);
-        this.observeComponentCreation2((f23, g23) => {
+        this.observeComponentCreation2((a98, b98) => {
             Column.create();
             Column.alignItems(HorizontalAlign.Center);
             Column.justifyContent(FlexAlign.Center);
             Column.width('100%');
             Column.height(this.imageItemWidth);
             Column.padding({ left: MARGIN_EIGHT, right: MARGIN_EIGHT });
-            Column.borderRadius((this.isTouchDown && m22.id === this.content.id) ||
-                m22.id === this.hoverId ? this.touchBorderRadius : 0);
-            Column.backgroundColor(this.isTouchDown && m22.id === this.content.id
-                ? this.touchDown : m22.id === this.hoverId ? this.hoverBackgroundColor : '');
-            Column.scale(m22.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Column.borderRadius((this.isTouchDown && h97.id === this.content.id) ||
+                h97.id === this.hoverId ? this.touchBorderRadius : 0);
+            Column.backgroundColor(this.isTouchDown && h97.id === this.content.id
+                ? this.touchDown : h97.id === this.hoverId ? this.hoverBackgroundColor : '');
+            Column.scale(h97.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } :
+                {});
         }, Column);
-        this.observeComponentCreation2((v22, w22) => {
+        this.observeComponentCreation2((q97, r97) => {
             If.create();
-            if (m22.symbolStyle !== undefined) {
+            if (h97.symbolStyle !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((d23, e23) => {
+                    this.observeComponentCreation2((y97, z97) => {
                         SymbolGlyph.create();
                         SymbolGlyph.draggable(false);
-                        SymbolGlyph.attributeModifier.bind(this)(m22.symbolStyle);
+                        SymbolGlyph.attributeModifier.bind(this)(h97.symbolStyle);
                         SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
+                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                     }, SymbolGlyph);
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((x22, y22) => {
+                    this.observeComponentCreation2((s97, t97) => {
                         If.create();
-                        if (m22.url === undefined) {
+                        if (h97.url === undefined) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b23, c23) => {
+                                this.observeComponentCreation2((w97, x97) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
                                 }, SymbolGlyph);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((z22, a23) => {
-                                    Image.create(m22.url);
+                                this.observeComponentCreation2((u97, v97) => {
+                                    Image.create(h97.url);
                                     Image.draggable(false);
                                     Image.height(this.options.imageSize || IMAGE_DEFAULT);
                                     Image.width((this.options.imageSize || IMAGE_DEFAULT));
@@ -1669,10 +2010,16 @@ export class GridObjectSortComponent extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((t22, u22) => {
-            Text.create(m22.text);
+        this.observeComponentCreation2((o97, p97) => {
+            Text.create(h97.text);
             Text.textAlign(TextAlign.Center);
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_button3'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
             Text.margin({ top: 2 });
             Text.maxLines(TEXT_MAX_LINES);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1684,30 +2031,43 @@ export class GridObjectSortComponent extends ViewPU {
             });
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((r22, s22) => {
-            SymbolGlyph.create(this.imageTextAddIcon(m22));
+        this.observeComponentCreation2((m97, n97) => {
+            SymbolGlyph.create(this.imageTextAddIcon(h97));
             SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
             SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.visibility(n22 === 'add' ? this.imageTextAddIconVisible(m22) : Visibility.Hidden);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+            SymbolGlyph.visibility(i97 === 'add' ? this.imageTextAddIconVisible(h97) : Visibility.Hidden);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }]);
             SymbolGlyph.width(ICON_SIZE);
             SymbolGlyph.height(ICON_SIZE);
             SymbolGlyph.position({
                 x: this.blockWidth - 40,
                 y: -MARGIN_EIGHT
             });
-            SymbolGlyph.onClick(() => this.handleAddIconClick(m22));
+            SymbolGlyph.onClick(() => this.handleAddIconClick(h97));
             SymbolGlyph.accessibilityLevel(YES);
-            SymbolGlyph.accessibilityText(this.getStringByResource(ACCESSIBILITY_UNSELECTED_BUTTON, `${m22.text ?? ''}`));
+            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_BUTTON,
+                this.getAccessibilityText(h97.text)));
         }, SymbolGlyph);
-        this.observeComponentCreation2((p22, q22) => {
-            SymbolGlyph.create(this.imageTextRemoveIcon(m22));
+        this.observeComponentCreation2((k97, l97) => {
+            SymbolGlyph.create(this.imageTextRemoveIcon(h97));
             SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
             SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-            SymbolGlyph.visibility(n22 === 'delete' && this.gridComState ? Visibility.Visible :
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }]);
+            SymbolGlyph.visibility(i97 === 'delete' && this.gridComState ? Visibility.Visible :
             Visibility.Hidden);
             SymbolGlyph.width(ICON_SIZE);
             SymbolGlyph.height(ICON_SIZE);
@@ -1715,34 +2075,36 @@ export class GridObjectSortComponent extends ViewPU {
                 x: this.blockWidth - 40,
                 y: -MARGIN_EIGHT
             });
-            SymbolGlyph.onClick(() => this.handleDeleteClick(m22));
+            SymbolGlyph.onClick(() => this.handleDeleteClick(h97));
             SymbolGlyph.accessibilityLevel(YES);
-            SymbolGlyph.accessibilityText(this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DELETE, `${m22.text ?? ''}`));
+            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE,
+                this.getAccessibilityText(h97.text)));
         }, SymbolGlyph);
         Column.pop();
         Column.pop();
     }
-    handleAddIconClick(h22) {
+
+    handleAddIconClick(c97) {
         if (this.clickAddBtn || this.clickRemoveBtn) {
             return;
         }
         this.scaleIcon = 0;
-        this.content = h22;
-        const i22 = this.unSelected.findIndex(l22 => l22.id === h22.id);
+        this.content = c97;
+        const d97 = this.unSelected.findIndex(g97 => g97.id === c97.id);
         this.editGridDataLength = this.selected.length + 1;
-        const j22 = this.getEditItemGridPosition(this.selected, i22);
-        this.unSelectedIndex = i22;
+        const e97 = this.getEditItemGridPosition(this.selected, d97);
+        this.unSelectedIndex = d97;
         this.arrayUnSelectIsChange = 1;
         this.clickAddBtn = true;
         this.calcGridHeight();
         Context.animateTo({
             curve: REMOVE_ADD_SPRING,
             onFinish: () => {
-                if (!this.selected.some(k22 => k22.id === h22.id)) {
+                if (!this.selected.some(f97 => f97.id === c97.id)) {
                     this.arrayUnSelectIsChange = 2;
                     this.scaleIcon = 1;
-                    this.selected.push(h22);
-                    this.unSelected.splice(i22, 1);
+                    this.selected.push(c97);
+                    this.unSelected.splice(d97, 1);
                     this.calcGridHeight();
                     this.addItemMoveX = 0;
                     this.addItemMoveY = 0;
@@ -1753,40 +2115,50 @@ export class GridObjectSortComponent extends ViewPU {
                 }
             }
         }, () => {
-            this.addItemMoveX = j22.x;
-            this.addItemMoveY = j22.y;
+            this.addItemMoveX = e97.x;
+            this.addItemMoveY = e97.y;
         });
         this.readFlag = false;
         this.readIndex4EditArea = this.editGridDataLength - 1;
-        this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_UNSELECTED_ITEM_ADD, `${this.content?.text ?? ''}`, Math.floor(this.readIndex4EditArea / this.colNum) + 1, this.readIndex4EditArea % this.colNum + 1);
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD,
+            this.getAccessibilityText(this.content?.text ?? ''), Math.floor(this.readIndex4EditArea / this.colNum) + 1,
+            this.readIndex4EditArea % this.colNum + 1);
     }
-    TextBlockBuilder(t21, u21 = null) {
-        this.observeComponentCreation2((f22, g22) => {
+
+    TextBlockBuilder(o96, p96 = null) {
+        this.observeComponentCreation2((a97, b97) => {
             Stack.create();
-            Stack.scale(t21.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Stack.scale(o96.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } :
+                {});
             Stack.padding({
                 left: MARGIN_EIGHT,
                 right: MARGIN_EIGHT
             });
             Stack.height(this.textItemEditHeight);
         }, Stack);
-        this.observeComponentCreation2((d22, e22) => {
+        this.observeComponentCreation2((y96, z96) => {
             Row.create();
             Context.animation(!this.firstIn ? {
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
             } : { duration: 0 });
             Row.borderRadius(50);
-            Row.width(this.clickRemoveBtn && t21.id === this.content.id ?
+            Row.width(this.clickRemoveBtn && o96.id === this.content.id ?
                 this.textItemEditWidth + 8 : this.textItemEditWidth);
             Row.translate(this.gridComState ? this.clickRemoveBtn &&
-                t21.id === this.content.id ? { x: 0 } : { x: -4 } : { x: 0 });
+                o96.id === this.content.id ? { x: 0 } : { x: -4 } : { x: 0 });
             Row.height('100%');
             Context.animation(null);
-            Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Row.backgroundColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_button_normal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
         }, Row);
         Row.pop();
-        this.observeComponentCreation2((b22, c22) => {
+        this.observeComponentCreation2((w96, x96) => {
             Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
             Context.animation(!this.firstIn ? {
                 duration: ENTER_EXIT_ICON_DURATION,
@@ -1797,34 +2169,59 @@ export class GridObjectSortComponent extends ViewPU {
                 left: TEXT_PADDING_LEFT_RIGHT,
                 right: TEXT_PADDING_LEFT_RIGHT,
             });
-            Flex.backgroundColor(this.isTouchDown && t21.id === this.content.id ? this.touchDown
-                : t21.id === this.hoverId ? this.hoverBackgroundColor
+            Flex.backgroundColor(this.isTouchDown && o96.id === this.content.id ? this.touchDown
+                : o96.id === this.hoverId ? this.hoverBackgroundColor
                     : '');
-            Flex.width(this.clickRemoveBtn && t21.id === this.content.id ?
+            Flex.width(this.clickRemoveBtn && o96.id === this.content.id ?
                 this.textItemEditWidth + 8 : this.textItemEditWidth);
-            Flex.translate(this.gridComState ? this.clickRemoveBtn && t21.id === this.content.id ?
+            Flex.translate(this.gridComState ? this.clickRemoveBtn && o96.id === this.content.id ?
                 { x: 0 } : { x: -4 } : { x: 0 });
             Flex.height('100%');
             Context.animation(null);
         }, Flex);
-        this.observeComponentCreation2((z21, a22) => {
-            SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.plus'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        this.observeComponentCreation2((u96, v96) => {
+            SymbolGlyph.create({
+                'id': -1,
+                'type': 40000,
+                params: ['sys.symbol.plus'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER
             });
             SymbolGlyph.fontSize(this.getAdaptiveSymbolFontSize());
             SymbolGlyph.draggable(false);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-            SymbolGlyph.visibility(this.clickRemoveBtn && t21.id === this.content.id ? Visibility.Visible : Visibility.None);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_text_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }]);
+            SymbolGlyph.visibility(this.clickRemoveBtn && o96.id === this.content.id ? Visibility.Visible :
+            Visibility.None);
             SymbolGlyph.transition({ type: TransitionType.All, scale: { x: 0, y: 0, } });
             SymbolGlyph.margin({ right: 4 });
             Context.animation(null);
         }, SymbolGlyph);
-        this.observeComponentCreation2((x21, y21) => {
-            Text.create(t21.text);
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        this.observeComponentCreation2((s96, t96) => {
+            Text.create(o96.text);
+            Text.fontColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_text_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_button3'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Center);
             Text.maxLines(TEXT_MAX_LINES);
@@ -1832,8 +2229,14 @@ export class GridObjectSortComponent extends ViewPU {
             Text.maxFontScale(ObservedObject.GetRawObject(this.fontSizeScale));
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((v21, w21) => {
-            SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        this.observeComponentCreation2((q96, r96) => {
+            SymbolGlyph.create({
+                'id': -1,
+                'type': 40000,
+                params: ['sys.symbol.minus_circle_fill'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER,
@@ -1841,34 +2244,43 @@ export class GridObjectSortComponent extends ViewPU {
             SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
             SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }]);
             SymbolGlyph.width(ICON_SIZE);
             SymbolGlyph.transition({ type: TransitionType.All, scale: { x: 0, y: 0, centerX: '50%' } });
-            SymbolGlyph.scale(t21.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon } : {});
+            SymbolGlyph.scale(o96.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon } : {});
             SymbolGlyph.visibility(this.gridComState ? 0 : 1);
             SymbolGlyph.position({
                 x: this.blockWidth - 52,
                 y: -MARGIN_EIGHT
             });
             Context.animation(null);
-            SymbolGlyph.onClick(() => this.handleDeleteClick(t21));
+            SymbolGlyph.onClick(() => this.handleDeleteClick(o96));
             SymbolGlyph.accessibilityLevel(YES);
-            SymbolGlyph.accessibilityText(this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DELETE, `${t21.text ?? ''}`));
+            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE,
+                this.getAccessibilityText(o96.text)));
         }, SymbolGlyph);
         Flex.pop();
         Stack.pop();
     }
-    TextBlockAddItemBuilder(d21, e21 = null) {
-        this.observeComponentCreation2((r21, s21) => {
+
+    TextBlockAddItemBuilder(y95, z95 = null) {
+        this.observeComponentCreation2((m96, n96) => {
             Stack.create();
-            Stack.scale(d21.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Stack.scale(y95.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } :
+                {});
             Stack.padding({
                 left: MARGIN_EIGHT,
                 right: MARGIN_EIGHT
             });
             Stack.height(this.textItemEditHeight);
         }, Stack);
-        this.observeComponentCreation2((p21, q21) => {
+        this.observeComponentCreation2((k96, l96) => {
             Row.create();
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
@@ -1876,13 +2288,19 @@ export class GridObjectSortComponent extends ViewPU {
             });
             Row.borderRadius(50);
             Row.height('100%');
-            Row.width(this.addIconShow && d21.id === this.content.id ? this.textItemEditWidth : '100%');
-            Row.translate(this.addIconShow && d21.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
+            Row.width(this.addIconShow && y95.id === this.content.id ? this.textItemEditWidth : '100%');
+            Row.translate(this.addIconShow && y95.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
             Context.animation(null);
-            Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Row.backgroundColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_button_normal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
         }, Row);
         Row.pop();
-        this.observeComponentCreation2((n21, o21) => {
+        this.observeComponentCreation2((i96, j96) => {
             Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
@@ -1893,30 +2311,49 @@ export class GridObjectSortComponent extends ViewPU {
                 left: TEXT_PADDING_LEFT_RIGHT,
                 right: TEXT_PADDING_LEFT_RIGHT,
             });
-            Flex.backgroundColor(this.isTouchDown && d21.id === this.content.id ? this.touchDown
-                : d21.id === this.hoverId ? this.hoverBackgroundColor : '');
-            Flex.width(this.addIconShow && d21.id === this.content.id ? this.textItemEditWidth : '100%');
-            Flex.translate(this.addIconShow && d21.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
+            Flex.backgroundColor(this.isTouchDown && y95.id === this.content.id ? this.touchDown
+                : y95.id === this.hoverId ? this.hoverBackgroundColor : '');
+            Flex.width(this.addIconShow && y95.id === this.content.id ? this.textItemEditWidth : '100%');
+            Flex.translate(this.addIconShow && y95.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
             Context.animation(null);
             Flex.height('100%');
         }, Flex);
-        this.observeComponentCreation2((l21, m21) => {
-            SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.plus'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        this.observeComponentCreation2((g96, h96) => {
+            SymbolGlyph.create({
+                'id': -1,
+                'type': 40000,
+                params: ['sys.symbol.plus'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER
             });
             SymbolGlyph.fontSize(this.getAdaptiveSymbolFontSize());
             SymbolGlyph.draggable(false);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-            SymbolGlyph.visibility(this.addIconShow && d21.id === this.content.id ? Visibility.None : Visibility.Visible);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_text_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }]);
+            SymbolGlyph.visibility(this.addIconShow && y95.id === this.content.id ? Visibility.None :
+            Visibility.Visible);
             SymbolGlyph.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
             SymbolGlyph.margin({ right: 4 });
             Context.animation(null);
         }, SymbolGlyph);
-        this.observeComponentCreation2((j21, k21) => {
-            Text.create(d21.text);
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        this.observeComponentCreation2((e96, f96) => {
+            Text.create(y95.text);
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_button3'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Start);
             Text.maxLines(TEXT_MAX_LINES);
@@ -1924,17 +2361,29 @@ export class GridObjectSortComponent extends ViewPU {
             Text.maxFontScale(ObservedObject.GetRawObject(this.fontSizeScale));
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((f21, g21) => {
+        this.observeComponentCreation2((a96, b96) => {
             If.create();
-            if (this.gridComState && this.addIconShow && d21.id === this.content.id) {
+            if (this.gridComState && this.addIconShow && y95.id === this.content.id) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((h21, i21) => {
-                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                    this.observeComponentCreation2((c96, d96) => {
+                        SymbolGlyph.create({
+                            'id': -1,
+                            'type': 40000,
+                            params: ['sys.symbol.minus_circle_fill'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
                         SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
                         SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
-                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.fontColor([{
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_secondary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        }]);
                         SymbolGlyph.width(ICON_SIZE);
                         SymbolGlyph.translate(this.gridComState ? { x: -MARGIN_EIGHT } : {});
                         SymbolGlyph.position({
@@ -1943,8 +2392,7 @@ export class GridObjectSortComponent extends ViewPU {
                         });
                     }, SymbolGlyph);
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -1953,6 +2401,7 @@ export class GridObjectSortComponent extends ViewPU {
         Flex.pop();
         Stack.pop();
     }
+
     onAddTagLongPressEnd() {
         this.addAreaLongPressGesture = false;
         Context.animateTo({
@@ -1962,14 +2411,16 @@ export class GridObjectSortComponent extends ViewPU {
             this.longScaleOnePointTwo = 1;
         });
     }
-    AddTagBuilder(i20 = null) {
-        this.observeComponentCreation2((b21, c21) => {
+
+    AddTagBuilder(d95 = null) {
+        this.observeComponentCreation2((w95, x95) => {
             Grid.create();
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
             });
-            Grid.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {});
+            Grid.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } :
+                {});
             Context.animation(null);
             Grid.columnsTemplate(this.customColumns);
             Grid.padding({
@@ -1980,29 +2431,30 @@ export class GridObjectSortComponent extends ViewPU {
             Grid.height(this.addGridHeight);
             Grid.accessibilityLevel(NO);
         }, Grid);
-        this.observeComponentCreation2((j20, k20) => {
+        this.observeComponentCreation2((e95, f95) => {
             ForEach.create();
-            const l20 = (n20, o20) => {
-                const p20 = n20;
+            const n = (i95, j95) => {
+                const k95 = i95;
                 {
-                    const q20 = (z20, a21) => {
-                        GridItem.create(() => { }, false);
+                    const o = (u95, v95) => {
+                        GridItem.create(() => {
+                        }, false);
                         Context.animation({
-                            curve: this.clickRemoveBtn ? DRAG_SPRING : o20 === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
+                            curve: this.clickRemoveBtn ? DRAG_SPRING :
+                                j95 === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
                         });
                         GridItem.clip(false);
-                        GridItem.translate(this.getAddAreaItemTranslate(o20));
+                        GridItem.translate(this.getAddAreaItemTranslate(j95));
                         Context.animation(null);
                     };
-                    const r20 = () => {
-                        this.observeComponentCreation2(q20, GridItem);
-                        this.observeComponentCreation2((u20, v20) => {
+                    const p = () => {
+                        this.observeComponentCreation2(o, GridItem);
+                        this.observeComponentCreation2((p95, q95) => {
                             Stack.create();
-                            Stack.onHover((y20) => {
-                                if (y20) {
-                                    this.hoverId = p20.id;
-                                }
-                                else {
+                            Stack.onHover((t95) => {
+                                if (t95) {
+                                    this.hoverId = k95.id;
+                                } else {
                                     this.hoverId = '';
                                 }
                             });
@@ -2010,12 +2462,13 @@ export class GridObjectSortComponent extends ViewPU {
                                 bottom: this.imageText ? ROW_GAP : MARGIN_EIGHT
                             });
                             Stack.clickEffect({ level: ClickEffectLevel.LIGHT });
-                            Stack.onTouch((x20) => {
-                                this.handleAddItemTouch(x20, p20);
+                            Stack.onTouch(this.isOpenAccessibility ? undefined : (s95) => {
+                                this.handleAddItemTouch(s95, k95);
                             });
+                            Stack.onClick(this.isOpenAccessibility ? () => this.handleAddItemClick(k95) : undefined);
                             Gesture.create(GesturePriority.Low);
                             LongPressGesture.create({ repeat: true });
-                            LongPressGesture.onAction((w20) => {
+                            LongPressGesture.onAction((r95) => {
                                 if (!this.gridComState) {
                                     Context.animateTo({
                                         duration: ENTER_EXIT_ICON_DURATION,
@@ -2028,8 +2481,7 @@ export class GridObjectSortComponent extends ViewPU {
                                     setTimeout(() => {
                                         this.pointToRepeat(ADD);
                                     }, ENTER_EXIT_ICON_DURATION);
-                                }
-                                else {
+                                } else {
                                     Context.animateTo({
                                         duration: ENTER_EXIT_ICON_DURATION,
                                         curve: LONG_TOUCH_SCALE
@@ -2047,28 +2499,29 @@ export class GridObjectSortComponent extends ViewPU {
                             });
                             LongPressGesture.pop();
                             Gesture.pop();
-                            Stack.id(`add_grid_item_${o20}`);
+                            Stack.id(`add_grid_item_${j95}`);
                             Stack.onAppear(() => {
-                                if (!this.readFlag && o20 === this.readIndex4AddArea) {
+                                if (!this.readFlag && j95 === this.readIndex4AddArea) {
                                     this.pointToAddArea();
                                 }
                             });
                             Stack.accessibilityGroup(true);
                             Stack.accessibilityLevel(YES);
                             Stack.accessibilityText(this.readFlag ?
-                            this.getStringByResource(ACCESSIBILITY_UNSELECTED_ITEM, `${p20.text ?? ''}`) : this.textAnnouncedForAccessibility);
-                            Stack.accessibilityDescription(this.readFlag ? this.getAddTagGridItemAccessibilityDesc() : ' ');
+                            this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM,
+                                this.getAccessibilityText(k95.text ?? '')) : this.textAnnouncedForAccessibility);
+                            Stack.accessibilityDescription(this.readFlag ? this.getAddTagGridItemAccessibilityDesc() :
+                                ' ');
                         }, Stack);
-                        this.observeComponentCreation2((s20, t20) => {
+                        this.observeComponentCreation2((n95, o95) => {
                             If.create();
                             if (this.imageText) {
                                 this.ifElseBranchUpdateFunction(0, () => {
-                                    this.ImageTextBuilder.bind(this)(p20, ADD);
+                                    this.ImageTextBuilder.bind(this)(k95, ADD);
                                 });
-                            }
-                            else {
+                            } else {
                                 this.ifElseBranchUpdateFunction(1, () => {
-                                    this.TextBlockAddItemBuilder.bind(this)(p20);
+                                    this.TextBlockAddItemBuilder.bind(this)(k95);
                                 });
                             }
                         }, If);
@@ -2076,32 +2529,35 @@ export class GridObjectSortComponent extends ViewPU {
                         Stack.pop();
                         GridItem.pop();
                     };
-                    r20();
+                    p();
                 }
             };
-            this.forEachUpdateFunction(j20, this.unSelected, l20, (m20) => m20.id.toString(), true, false);
+            this.forEachUpdateFunction(e95, this.unSelected, n, (h95) => h95.id.toString(), true, false);
         }, ForEach);
         ForEach.pop();
         Grid.pop();
     }
+
     getAddTagGridItemAccessibilityDesc() {
         return this.options?.type === GridObjectSortComponentType.IMAGE_TEXT ?
-        this.getStringByResource(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
-        this.getStringByResource(ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC);
+            this.menuSwitch ? ' ' : this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
+            this.menuSwitch ? this.getStringByResourceToken(ACCESSIBILITY_DOUBLE_CLICK) :
+            this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC);
     }
-    handleAddItemTouch(c20, d20) {
+
+    handleAddItemTouch(x94, y94) {
         if (this.clickAddBtn || this.clickRemoveBtn) {
             return;
         }
-        if (c20.type === TouchType.Down) {
-            this.content = d20;
+        if (x94.type === TouchType.Down) {
+            this.content = y94;
             this.isTouchDown = true;
         }
-        if (c20.type === TouchType.Cancel) {
+        if (x94.type === TouchType.Cancel) {
             this.isTouchDown = false;
             return;
         }
-        if (c20.type === TouchType.Up) {
+        if (x94.type === TouchType.Up) {
             this.isTouchDown = false;
             if (this.addAreaLongPressGesture || this.longScaleOnePointTwo === 1.05 || this.imageText) {
                 return;
@@ -2116,20 +2572,84 @@ export class GridObjectSortComponent extends ViewPU {
                 this.scaleAddIcon = 1;
             }
             this.scaleIcon = 0;
-            const e20 = this.unSelected.findIndex(h20 => h20.id === d20.id);
+            const z94 = this.unSelected.findIndex(c95 => c95.id === y94.id);
             this.editGridDataLength = this.selected.length + 1;
-            const f20 = this.getEditItemGridPosition(this.selected, e20);
-            this.content = d20;
-            this.unSelectedIndex = e20;
+            const a95 = this.getEditItemGridPosition(this.selected, z94);
+            this.content = y94;
+            this.unSelectedIndex = z94;
             this.clickAddBtn = true;
             this.arrayUnSelectIsChange = 1;
             this.calcGridHeight();
-            Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
-                if (!this.selected.some(g20 => g20.id === d20.id)) {
+            Context.animateTo({
+                curve: REMOVE_ADD_SPRING, onFinish: () => {
+                    if (!this.selected.some(b95 => b95.id === y94.id)) {
+                        this.scaleIcon = 1;
+                        this.scaleAddIcon = 0;
+                        this.selected.push(y94);
+                        this.unSelected.splice(z94, 1);
+                        this.calcGridHeight();
+                        this.arrayUnSelectIsChange = 2;
+                        this.addItemMoveX = 0;
+                        this.addItemMoveY = 0;
+                        if (!this.gridComState) {
+                            this.onSaveEdit();
+                        }
+                        Context.animateTo({
+                            duration: ENTER_EXIT_ICON_DURATION,
+                            curve: COMMON_BEZIER
+                        }, () => {
+                            this.addIconShow = false;
+                        });
+                        this.clickAddBtn = false;
+                    }
+                }
+            }, () => {
+                this.addItemMoveX = a95.x;
+                this.addItemMoveY = a95.y;
+            });
+            this.readFlag = false;
+            this.readIndex4EditArea = this.editGridDataLength - 1;
+            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD,
+                this.getAccessibilityText(this.content?.text ?? ''),
+                Math.floor(this.readIndex4EditArea / this.colNum) + 1, this.readIndex4EditArea % this.colNum + 1);
+        }
+    }
+
+    handleAddItemClick(s94) {
+        if (this.clickAddBtn || this.clickRemoveBtn) {
+            return;
+        }
+        this.content = s94;
+        this.isTouchDown = false;
+        if (this.addAreaLongPressGesture || this.longScaleOnePointTwo === 1.05 || this.imageText) {
+            return;
+        }
+        Context.animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: COMMON_BEZIER
+        }, () => {
+            this.addIconShow = true;
+        });
+        if (this.options.type === GridObjectSortComponentType.TEXT) {
+            this.scaleAddIcon = 1;
+        }
+        this.scaleIcon = 0;
+        const t94 = this.unSelected.findIndex(w94 => w94.id === s94.id);
+        this.editGridDataLength = this.selected.length + 1;
+        const u94 = this.getEditItemGridPosition(this.selected, t94);
+        this.content = s94;
+        this.unSelectedIndex = t94;
+        this.clickAddBtn = true;
+        this.arrayUnSelectIsChange = 1;
+        this.calcGridHeight();
+        Context.animateTo({
+            curve: REMOVE_ADD_SPRING,
+            onFinish: () => {
+                if (!this.selected.some(v94 => v94.id === s94.id)) {
                     this.scaleIcon = 1;
                     this.scaleAddIcon = 0;
-                    this.selected.push(d20);
-                    this.unSelected.splice(e20, 1);
+                    this.selected.push(s94);
+                    this.unSelected.splice(t94, 1);
                     this.calcGridHeight();
                     this.arrayUnSelectIsChange = 2;
                     this.addItemMoveX = 0;
@@ -2145,21 +2665,44 @@ export class GridObjectSortComponent extends ViewPU {
                     });
                     this.clickAddBtn = false;
                 }
-            } }, () => {
-                this.addItemMoveX = f20.x;
-                this.addItemMoveY = f20.y;
-            });
-            this.readFlag = false;
-            this.readIndex4EditArea = this.editGridDataLength - 1;
-            this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_UNSELECTED_ITEM_ADD, `${this.content?.text ?? ''}`, Math.floor(this.readIndex4EditArea / this.colNum) + 1, this.readIndex4EditArea % this.colNum + 1);
-        }
+            }
+        }, () => {
+            this.addItemMoveX = u94.x;
+            this.addItemMoveY = u94.y;
+        });
+        this.readFlag = false;
+        this.readIndex4EditArea = this.editGridDataLength - 1;
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD,
+            this.getAccessibilityText(this.content?.text ?? ''), Math.floor(this.readIndex4EditArea / this.colNum) + 1,
+            this.readIndex4EditArea % this.colNum + 1);
     }
-    EditTagBuilder(s18 = null) {
-        this.observeComponentCreation2((a20, b20) => {
+
+    EditTagBuilder(h93 = null) {
+        this.observeComponentCreation2((p94, q94) => {
             Column.create();
-            Column.accessibilityLevel(NO);
+            Column.accessibilityLevel((this.selected.length === 0) ? YES : NO);
+            Gesture.create(GesturePriority.Parallel);
+            LongPressGesture.create({ repeat: true });
+            LongPressGesture.onAction(() => {
+                this.menuSwitch = true;
+            });
+            LongPressGesture.onActionEnd(() => {
+                let r94 = ({
+                    type: 'announceForAccessibility',
+                    bundleName: this.bundleName,
+                    triggerAction: 'common',
+                    textAnnouncedForAccessibility: getContext().resourceManager
+                        .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE)
+                });
+                accessibility.sendAccessibilityEvent(r94);
+            });
+            LongPressGesture.pop();
+            Gesture.pop();
+            Column.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_RESIDENT_AREA));
+            Column.accessibilityDescription(this.menuSwitch ? ' ' :
+            this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC));
         }, Column);
-        this.observeComponentCreation2((m19, n19) => {
+        this.observeComponentCreation2((b94, c94) => {
             Grid.create();
             Context.animation(!this.firstIn ? {
                 duration: ENTER_EXIT_ICON_DURATION,
@@ -2168,7 +2711,7 @@ export class GridObjectSortComponent extends ViewPU {
             Grid.accessibilityLevel(NO);
             Gesture.create(GesturePriority.Parallel);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((z19) => {
+            LongPressGesture.onAction((o94) => {
                 if (!this.gridComState) {
                     Context.animateTo({
                         duration: ENTER_EXIT_ICON_DURATION,
@@ -2180,15 +2723,14 @@ export class GridObjectSortComponent extends ViewPU {
                     setTimeout(() => {
                         this.pointToRepeat(EDIT);
                     }, ENTER_EXIT_ICON_DURATION);
-                }
-                else {
+                } else {
                     Context.animateTo({
                         duration: ENTER_EXIT_ICON_DURATION,
                         curve: LONG_TOUCH_SCALE
                     }, () => {
                         this.longScaleOnePointTwo = 1.05;
                     });
-                    if (z19.repeat && !this.vibrationDone) {
+                    if (o94.repeat && !this.vibrationDone) {
                         try {
                             vibrator.startVibration({
                                 type: 'time',
@@ -2199,8 +2741,7 @@ export class GridObjectSortComponent extends ViewPU {
                             }).then(() => {
                                 this.vibrationDone = true;
                             });
-                        }
-                        catch {
+                        } catch {
                             this.vibrationDone = false;
                         }
                     }
@@ -2223,56 +2764,61 @@ export class GridObjectSortComponent extends ViewPU {
             });
             Grid.height(this.editGridHeight);
             Context.animation(null);
-            Grid.onItemDragStart((x19, y19) => {
-                this.itemIndex = y19;
+            Grid.onItemDragStart((m94, n94) => {
+                this.itemIndex = n94;
                 this.selectedIndex = -1;
                 if (!this.gridComState) {
                     return;
                 }
                 this.isStartDrag = true;
-                this.insertIndex = y19;
-                this.dragContent = this.selected[y19];
-                this.dragContentIndex = y19;
-                this.textAnnouncedForAccessibility = getContext().resourceManager
-                    .getStringByNameSync(ACCESSIBILITY_SELECTED_ITEM_DRAG_START, `${this.dragContent?.text}`);
+                this.insertIndex = n94;
+                this.dragContent = this.selected[n94];
+                this.dragContentIndex = n94;
+                this.textAnnouncedForAccessibility =
+                    this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_START,
+                        this.getAccessibilityText(this.dragContent?.text ?? ''));
                 this.sendAccessibility();
-                return { builder: () => {
-                    this.PixelMapBuilder.call(this, this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text);
-                } };
+                return {
+                    builder: () => {
+                        this.PixelMapBuilder.call(this, this.dragContent?.symbolStyle || this.dragContent?.url,
+                            this.dragContent?.text);
+                    }
+                };
             });
-            Grid.onItemDrop((t19, u19, v19, w19) => {
-                this.insertItem(u19, v19);
+            Grid.onItemDrop((i94, j94, k94, l94) => {
+                this.insertItem(j94, k94);
             });
-            Grid.onItemDragMove((q19, r19, s19) => this.onDragMoveEvent(q19, r19, s19));
-            Grid.onItemDragLeave((o19, p19) => {
-                this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_ILLEGAL_AREA);
+            Grid.onItemDragMove((f94, g94, h94) => this.onDragMoveEvent(f94, g94, h94));
+            Grid.onItemDragLeave((d94, e94) => {
+                this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_ILLEGAL_AREA);
                 this.sendAccessibility();
             });
         }, Grid);
-        this.observeComponentCreation2((t18, u18) => {
+        this.observeComponentCreation2((i93, j93) => {
             ForEach.create();
-            const v18 = (x18, y18) => {
-                const z18 = x18;
+            const k = (m93, n93) => {
+                const o93 = m93;
                 {
-                    const a19 = (k19, l19) => {
-                        GridItem.create(() => { }, false);
+                    const l = (z93, a94) => {
+                        GridItem.create(() => {
+                        }, false);
                         Context.animation({
-                            curve: this.isStartDrag ? DRAG_SPRING : y18 === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
+                            curve: this.isStartDrag ? DRAG_SPRING :
+                                n93 === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
                         });
                         GridItem.clip(false);
-                        GridItem.translate(this.getShowAreaItemTranslate(y18));
+                        GridItem.translate(this.getShowAreaItemTranslate(n93));
                         Context.animation(null);
-                        GridItem.visibility(z18.visibility);
+                        GridItem.visibility(o93.visibility);
                     };
-                    const b19 = () => {
-                        this.observeComponentCreation2(a19, GridItem);
-                        this.observeComponentCreation2((e19, f19) => {
+                    const m = () => {
+                        this.observeComponentCreation2(l, GridItem);
+                        this.observeComponentCreation2((t93, u93) => {
                             Stack.create();
-                            Stack.onHover((j19) => {
-                                if (j19) {
-                                    this.hoverId = z18.id;
-                                }
-                                else {
+                            Stack.onHover((y93) => {
+                                if (y93) {
+                                    this.hoverId = o93.id;
+                                } else {
                                     this.hoverId = '';
                                 }
                             });
@@ -2281,15 +2827,15 @@ export class GridObjectSortComponent extends ViewPU {
                             Stack.margin({
                                 bottom: this.imageText ? ROW_GAP : this.gridComState ? ROW_GAP : MARGIN_EIGHT
                             });
-                            Stack.onTouch((i19) => {
+                            Stack.onTouch((x93) => {
                                 if (this.clickAddBtn || this.clickRemoveBtn) {
                                     return;
                                 }
-                                if (i19.type === TouchType.Down) {
-                                    this.content = z18;
+                                if (x93.type === TouchType.Down) {
+                                    this.content = o93;
                                     this.isTouchDown = true;
                                 }
-                                if (i19.type === TouchType.Up || i19.type === TouchType.Cancel) {
+                                if (x93.type === TouchType.Up || x93.type === TouchType.Cancel) {
                                     this.isTouchDown = false;
                                     Context.animateTo({
                                         duration: ENTER_EXIT_ICON_DURATION,
@@ -2299,10 +2845,10 @@ export class GridObjectSortComponent extends ViewPU {
                                     });
                                 }
                             });
-                            Stack.id(`edit_grid_item_${y18}`);
-                            Stack.onVisibleAreaChange([0.0, 1.0], (g19, h19) => {
-                                if (g19) {
-                                    if (!this.readFlag && y18 === this.readIndex4EditArea) {
+                            Stack.id(`edit_grid_item_${n93}`);
+                            Stack.onVisibleAreaChange([0.0, 1.0], (v93, w93) => {
+                                if (v93) {
+                                    if (!this.readFlag && n93 === this.readIndex4EditArea) {
                                         this.pointToNextOne();
                                     }
                                 }
@@ -2310,21 +2856,21 @@ export class GridObjectSortComponent extends ViewPU {
                             Stack.accessibilityGroup(true);
                             Stack.accessibilityLevel(YES);
                             Stack.accessibilityText(this.readFlag ?
-                            this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM, `${z18.text ?? ''}`) :
+                            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM,
+                                this.getAccessibilityText(o93.text)) :
                             this.textAnnouncedForAccessibility);
                             Stack.accessibilityDescription(this.readFlag ?
-                            this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DESC) : '');
+                            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DESC) : '');
                         }, Stack);
-                        this.observeComponentCreation2((c19, d19) => {
+                        this.observeComponentCreation2((r93, s93) => {
                             If.create();
                             if (this.imageText) {
                                 this.ifElseBranchUpdateFunction(0, () => {
-                                    this.ImageTextBuilder.bind(this)(z18, DELETE);
+                                    this.ImageTextBuilder.bind(this)(o93, DELETE);
                                 });
-                            }
-                            else {
+                            } else {
                                 this.ifElseBranchUpdateFunction(1, () => {
-                                    this.TextBlockBuilder.bind(this)(z18);
+                                    this.TextBlockBuilder.bind(this)(o93);
                                 });
                             }
                         }, If);
@@ -2332,38 +2878,38 @@ export class GridObjectSortComponent extends ViewPU {
                         Stack.pop();
                         GridItem.pop();
                     };
-                    b19();
+                    m();
                 }
             };
-            this.forEachUpdateFunction(t18, this.selected, v18, (w18) => w18.id.toString(), true, false);
+            this.forEachUpdateFunction(i93, this.selected, k, (l93) => l93.id.toString(), true, false);
         }, ForEach);
         ForEach.pop();
         Grid.pop();
         Column.pop();
     }
-    pointToRepeat(m18) {
+
+    pointToRepeat(b93) {
         this.readFlag = false;
-        let n18 = '';
-        let o18 = -1;
-        if (m18 === ADD) {
-            o18 = this.unSelected.findIndex(r18 => r18.id === this.content.id);
-            this.readIndex4AddArea = o18;
-            n18 = `add_grid_item_${o18}`;
-        }
-        else {
-            o18 = this.selected.findIndex(q18 => q18.id === this.content.id);
-            this.readIndex4EditArea = o18;
-            n18 = `edit_grid_item_${o18}`;
+        let c93 = '';
+        let d93 = -1;
+        if (b93 === ADD) {
+            d93 = this.unSelected.findIndex(g93 => g93.id === this.content.id);
+            this.readIndex4AddArea = d93;
+            c93 = `add_grid_item_${d93}`;
+        } else {
+            d93 = this.selected.findIndex(f93 => f93.id === this.content.id);
+            this.readIndex4EditArea = d93;
+            c93 = `edit_grid_item_${d93}`;
         }
         this.textAnnouncedForAccessibility = getContext().resourceManager
             .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE);
-        let p18 = ({
+        let e93 = ({
             type: 'requestFocusForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            customId: n18
+            customId: c93
         });
-        accessibility.sendAccessibilityEvent(p18).then(() => {
+        accessibility.sendAccessibilityEvent(e93).then(() => {
             setTimeout(() => {
                 this.readFlag = true;
                 this.readIndex4EditArea = -1;
@@ -2372,7 +2918,8 @@ export class GridObjectSortComponent extends ViewPU {
             }, ENTER_EXIT_ICON_DURATION);
         });
     }
-    insertItem(k18, l18) {
+
+    insertItem(z92, a93) {
         if (!this.gridComState) {
             return;
         }
@@ -2384,14 +2931,17 @@ export class GridObjectSortComponent extends ViewPU {
             this.longScaleOnePointTwo = 1;
         });
         this.isStartDrag = false;
-        if (l18 !== -1) {
-            this.selected.splice(k18, 1);
-            this.selected.splice(l18, 0, this.dragContent);
-            this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP, Math.floor(l18 / this.colNum) + 1, l18 % this.colNum + 1);
-        }
-        else {
-            this.insertIndex = k18;
-            this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP, Math.floor(k18 / this.colNum) + 1, k18 % this.colNum + 1);
+        if (a93 !== -1) {
+            this.selected.splice(z92, 1);
+            this.selected.splice(a93, 0, this.dragContent);
+            this.textAnnouncedForAccessibility =
+                this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP, Math.floor(a93 / this.colNum) + 1,
+                    a93 % this.colNum + 1);
+        } else {
+            this.insertIndex = z92;
+            this.textAnnouncedForAccessibility =
+                this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP, Math.floor(z92 / this.colNum) + 1,
+                    z92 % this.colNum + 1);
         }
         this.preTextAnnouncedForAccessibility = this.textAnnouncedForAccessibility;
         this.dragContent.visibility = Visibility.Visible;
@@ -2399,14 +2949,15 @@ export class GridObjectSortComponent extends ViewPU {
         this.readFlag = false;
         this.readIndex4EditArea = this.insertIndex;
     }
+
     pointToNextOne() {
-        let j18 = ({
+        let y92 = ({
             type: 'requestFocusForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
             customId: `edit_grid_item_${this.readIndex4EditArea}`
         });
-        accessibility.sendAccessibilityEvent(j18).then(() => {
+        accessibility.sendAccessibilityEvent(y92).then(() => {
             setTimeout(() => {
                 this.readFlag = true;
                 this.readIndex4EditArea = -1;
@@ -2415,6 +2966,7 @@ export class GridObjectSortComponent extends ViewPU {
             }, ENTER_EXIT_ICON_DURATION);
         });
     }
+
     calcAreaInfo() {
         this.calcColNum();
         this.blockWidth = this.getBlockWidth();
@@ -2426,52 +2978,71 @@ export class GridObjectSortComponent extends ViewPU {
             this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
         this.calcGridHeight();
     }
+
     initialRender() {
-        this.observeComponentCreation2((h18, i18) => {
+        this.observeComponentCreation2((w92, x92) => {
             Column.create();
             Column.width('100%');
             Column.height('90%');
         }, Column);
         this.HeaderTitleBuilder.bind(this)();
-        this.observeComponentCreation2((f18, g18) => {
+        this.observeComponentCreation2((u92, v92) => {
             Scroll.create();
         }, Scroll);
-        this.observeComponentCreation2((b18, c18) => {
+        this.observeComponentCreation2((q92, r92) => {
             Column.create();
-            Column.onAreaChange((d18, e18) => {
-                this.areaWidth = Number(e18.width);
+            Column.onAreaChange((s92, t92) => {
+                this.areaWidth = Number(t92.width);
                 this.calcAreaInfo();
             });
             Column.width('100%');
         }, Column);
-        this.observeComponentCreation2((z17, a18) => {
+        this.observeComponentCreation2((o92, p92) => {
             __Common__.create();
             __Common__.margin({ bottom: MARGIN_EIGHT });
         }, __Common__);
         {
-            this.observeComponentCreation2((v17, w17) => {
-                if (w17) {
-                    let x17 = new SubHeader(this, {
+            this.observeComponentCreation2((k92, l92) => {
+                if (l92) {
+                    let m92 = new SubHeader(this, {
                         primaryTitle: '',
-                        secondaryTitle: this.options.showAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        secondaryTitle: this.options.showAreaTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_subtitle_sort'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        },
                         icon: '',
                         operationType: OperationType.BUTTON
-                    }, undefined, v17, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1747, col: 11 });
-                    ViewPU.create(x17);
-                    let y17 = () => {
+                    }, undefined, k92, () => {
+                    }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1865, col: 11 });
+                    ViewPU.create(m92);
+                    let j = () => {
                         return {
                             primaryTitle: '',
-                            secondaryTitle: this.options.showAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            secondaryTitle: this.options.showAreaTitle || {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.ohos_grid_edit_subtitle_sort'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
                             icon: '',
                             operationType: OperationType.BUTTON
                         };
                     };
-                    x17.paramsGenerator_ = y17;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(v17, {
+                    m92.paramsGenerator_ = j;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(k92, {
                         primaryTitle: '',
-                        secondaryTitle: this.options.showAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        secondaryTitle: this.options.showAreaTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_subtitle_sort'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        },
                         icon: '',
                         operationType: OperationType.BUTTON
                     });
@@ -2480,43 +3051,62 @@ export class GridObjectSortComponent extends ViewPU {
         }
         __Common__.pop();
         this.EditTagBuilder.bind(this)();
-        this.observeComponentCreation2((r17, s17) => {
+        this.observeComponentCreation2((g92, h92) => {
             __Common__.create();
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
             });
-            __Common__.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {});
+            __Common__.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ?
+                { y: -this.blockHeight } : {});
             Context.animation(null);
             __Common__.margin({ bottom: MARGIN_EIGHT });
-            __Common__.onAreaChange((t17, u17) => {
-                this.subTitleHeight = Number(u17.height);
+            __Common__.onAreaChange((i92, j92) => {
+                this.subTitleHeight = Number(j92.height);
             });
         }, __Common__);
         {
-            this.observeComponentCreation2((n17, o17) => {
-                if (o17) {
-                    let p17 = new SubHeader(this, {
+            this.observeComponentCreation2((c92, d92) => {
+                if (d92) {
+                    let e92 = new SubHeader(this, {
                         primaryTitle: '',
-                        secondaryTitle: this.options.addAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        secondaryTitle: this.options.addAreaTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_subtitle_add'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        },
                         icon: '',
                         operationType: OperationType.BUTTON
-                    }, undefined, n17, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1756, col: 11 });
-                    ViewPU.create(p17);
-                    let q17 = () => {
+                    }, undefined, c92, () => {
+                    }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1874, col: 11 });
+                    ViewPU.create(e92);
+                    let i = () => {
                         return {
                             primaryTitle: '',
-                            secondaryTitle: this.options.addAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            secondaryTitle: this.options.addAreaTitle || {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.ohos_grid_edit_subtitle_add'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
                             icon: '',
                             operationType: OperationType.BUTTON
                         };
                     };
-                    p17.paramsGenerator_ = q17;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(n17, {
+                    e92.paramsGenerator_ = i;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(c92, {
                         primaryTitle: '',
-                        secondaryTitle: this.options.addAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        secondaryTitle: this.options.addAreaTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_subtitle_add'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        },
                         icon: '',
                         operationType: OperationType.BUTTON
                     });
@@ -2529,17 +3119,35 @@ export class GridObjectSortComponent extends ViewPU {
         Scroll.pop();
         Column.pop();
     }
-    getStringByResource(k17, ...l17) {
-        if (k17) {
+
+    getStringByResourceToken(f, ...g) {
+        if (f) {
             try {
-                return getContext(this).resourceManager.getStringByNameSync(k17, ...l17);
-            }
-            catch (m17) {
-                console.error(`Ace SegmentButton getAccessibilityDescription, error: ${m17.toString()}`);
+                return getContext(this).resourceManager.getStringByNameSync(f, ...g);
+            } catch (h) {
+                console.error(`Ace SegmentButton getAccessibilityDescription, error: ${h.toString()}`);
             }
         }
         return '';
     }
+
+    getAccessibilityText(a) {
+        try {
+            let e = '';
+            if (typeof a === 'string') {
+                e = a;
+            } else {
+                e = getContext().resourceManager.getStringSync(a);
+            }
+            return e;
+        } catch (b) {
+            let c = b.code;
+            let d = b.message;
+            hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${c}, message: ${d}`);
+            return '';
+        }
+    }
+
     rerender() {
         this.updateDirtyElements();
     }

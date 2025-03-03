@@ -103,6 +103,10 @@ public:
      */
     static void JsSendStateInfo(const std::string& stateInfo);
 
+    static void JsPushPrebuildCompCmd(const JSCallbackInfo& info);
+
+    static bool JsCheckIsPrebuildTimeout();
+
 private:
     static void JSVisualState(const JSCallbackInfo& info);
     static std::map<std::string, JSRef<JSObject>> viewMap_;

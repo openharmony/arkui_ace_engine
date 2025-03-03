@@ -126,4 +126,9 @@ void PixelMapPreview::Scale(float xAxis, float yAxis) {}
 
 void PixelMapPreview::Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) {}
 
+uint32_t PixelMapPreview::WritePixels(const WritePixelsOptions& opts)
+{
+    return 0;
+}
+
 } // namespace OHOS::Ace

@@ -30,12 +30,11 @@ ArkUINativeModuleValue Component3DBridge::SetShaderInputBuffer(ArkUIRuntimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    CHECK_NULL_RETURN(!secondArg.IsNull(), panda::JSValueRef::Undefined(vm));
     if (firstArg.IsEmpty() || !firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(!secondArg.IsNull(), panda::JSValueRef::Undefined(vm));
     if (!secondArg->IsArray(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -54,12 +53,10 @@ ArkUINativeModuleValue Component3DBridge::SetShaderInputBuffer(ArkUIRuntimeCallI
             break;
         }
     }
-    auto modifiers = GetArkUINodeModifiers();
-    if (modifiers) {
-        auto component3DModifier = modifiers->getComponent3DModifier();
-        if (component3DModifier) {
-            component3DModifier->setShaderInputBuffer(nativeNode, bufferArray.data(), bufferArray.size());
-        }
+
+    auto component3DModifier = GetArkUINodeModifiers()->getComponent3DModifier();
+    if (component3DModifier) {
+        component3DModifier->setShaderInputBuffer(nativeNode, bufferArray.data(), bufferArray.size());
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -74,12 +71,9 @@ ArkUINativeModuleValue Component3DBridge::ResetShaderInputBuffer(ArkUIRuntimeCal
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto modifiers = GetArkUINodeModifiers();
-    if (modifiers) {
-        auto component3DModifier = modifiers->getComponent3DModifier();
-        if (component3DModifier) {
-            component3DModifier->resetShaderInputBuffer(nativeNode);
-        }
+    auto component3DModifier = GetArkUINodeModifiers()->getComponent3DModifier();
+    if (component3DModifier) {
+        component3DModifier->resetShaderInputBuffer(nativeNode);
     }
 
     return panda::JSValueRef::Undefined(vm);

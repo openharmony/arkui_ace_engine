@@ -338,7 +338,9 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(xcPattern, nullptr);
-    xcPattern->SetImageAIOptions(params->aiOptions);
+    if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+        xcPattern->SetImageAIOptions(params->aiOptions);
+    }
     return frameNode;
 }
 
@@ -545,5 +547,50 @@ void XComponentModelNG::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetRenderFit(renderFit);
+}
+
+RenderFit XComponentModelNG::GetSurfaceRenderFit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RenderFit::RESIZE_FILL);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, RenderFit::RESIZE_FILL);
+    return xcPattern->GetSurfaceRenderFit();
+}
+
+void XComponentModelNG::SetXComponentSurfaceRect(FrameNode* frameNode, float offsetX, float offsetY,
+    float surfaceWidth, float surfaceHeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetIdealSurfaceOffsetX(offsetX);
+    xcPattern->SetIdealSurfaceOffsetY(offsetY);
+    xcPattern->SetIdealSurfaceWidth(surfaceWidth);
+    xcPattern->SetIdealSurfaceHeight(surfaceHeight);
+
+    const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = xcPattern->UpdateSurfaceRect();
+    xcPattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, needFireNativeEvent);
+}
+
+void XComponentModelNG::GetXComponentSurfaceRect(FrameNode* frameNode, float& offsetX, float& offsetY,
+    float& surfaceWidth, float& surfaceHeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    auto surfaceOffset = xcPattern->GetSurfaceOffset();
+    offsetX = surfaceOffset.GetX();
+    offsetY = surfaceOffset.GetY();
+    auto surfaceSize = xcPattern->GetSurfaceSize();
+    surfaceWidth = surfaceSize.Width();
+    surfaceHeight = surfaceSize.Height();
+}
+
+bool XComponentModelNG::GetXComponentEnableAnalyzer(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, false);
+    return xcPattern->GetEnableAnalyzer();
 }
 } // namespace OHOS::Ace::NG

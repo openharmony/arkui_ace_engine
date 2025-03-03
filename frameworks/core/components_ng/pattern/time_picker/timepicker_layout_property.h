@@ -39,10 +39,11 @@ public:
     {
         auto value = MakeRefPtr<TimePickerLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propLoop_= CloneLoop();
+        value->propLoop_ = CloneLoop();
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
+        value->propDigitalCrownSensitivity_ = CloneDigitalCrownSensitivity();
         return value;
     }
 
@@ -53,6 +54,62 @@ public:
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
+        ResetDigitalCrownSensitivity();
+    }
+
+    void FontAddJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    {
+        Color defaultDisappearColor = Color::BLACK;
+        Color defaultNormalColor = Color::BLACK;
+        Color defaultSelectColor = Color::BLACK;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        auto frameNode = GetHost();
+        if (pipeline && frameNode) {
+            auto pickerTheme = pipeline->GetTheme<PickerTheme>(frameNode->GetThemeScopeId());
+            if (pickerTheme) {
+                defaultDisappearColor = pickerTheme->GetDisappearOptionStyle().GetTextColor();
+                defaultNormalColor = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+                defaultSelectColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+            }
+        }
+
+        auto disappearFont = JsonUtil::Create(true);
+        disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
+        disappearFont->Put(
+            "weight", V2::ConvertWrapFontWeightToStirng(GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
+        disappearFont->Put("family", V2::ConvertFontFamily(GetDisappearFontFamilyValue({})).c_str());
+        disappearFont->Put("style", GetDisappearFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+            ? "FontStyle.Normal" : "FontStyle.Italic");
+
+        auto disappearTextStyle = JsonUtil::Create(true);
+        disappearTextStyle->Put("color", GetDisappearColor().value_or(defaultDisappearColor).ColorToString().c_str());
+        disappearTextStyle->Put("font", disappearFont);
+        json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
+
+        auto normalFont = JsonUtil::Create(true);
+        normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
+        normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
+        normalFont->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
+        normalFont->Put("style", GetFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+            ? "FontStyle.Normal" : "FontStyle.Italic");
+
+        auto normalTextStyle = JsonUtil::Create(true);
+        normalTextStyle->Put("color", GetColor().value_or(defaultNormalColor).ColorToString().c_str());
+        normalTextStyle->Put("font", normalFont);
+        json->PutExtAttr("textStyle", normalTextStyle, filter);
+
+        auto selectedFont = JsonUtil::Create(true);
+        selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
+        selectedFont->Put(
+            "weight", V2::ConvertWrapFontWeightToStirng(GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
+        selectedFont->Put("family", V2::ConvertFontFamily(GetSelectedFontFamilyValue({})).c_str());
+        selectedFont->Put("style", GetSelectedFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+            ? "FontStyle.Normal" : "FontStyle.Italic");
+
+        auto selectedTextStyle = JsonUtil::Create(true);
+        selectedTextStyle->Put("color", GetSelectedColor().value_or(defaultSelectColor).ColorToString().c_str());
+        selectedTextStyle->Put("font", selectedFont);
+        json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -65,40 +122,10 @@ public:
         json->PutExtAttr("useMilitaryTime",
             V2::ConvertBoolToString(GetIsUseMilitaryTimeValue(false)).c_str(), filter);
         json->PutExtAttr("loop", V2::ConvertBoolToString(GetLoopValue(true)).c_str(), filter);
-        auto disappearFont = JsonUtil::Create(true);
-        disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
-        disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
-            GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
-        disappearFont->Put("family", V2::ConvertFontFamily(GetDisappearFontFamilyValue({})).c_str());
-        disappearFont->Put("style", GetDisappearFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-            ? "FontStyle.Normal" : "FontStyle.Italic");
-        auto disappearTextStyle = JsonUtil::Create(true);
-        disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
-        disappearTextStyle->Put("font", disappearFont);
-        json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
 
-        auto normalFont = JsonUtil::Create(true);
-        normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
-        normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
-        normalFont->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
-        normalFont->Put("style", GetFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-            ? "FontStyle.Normal" : "FontStyle.Italic");
-        auto normalTextStyle = JsonUtil::Create(true);
-        normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
-        normalTextStyle->Put("font", normalFont);
-        json->PutExtAttr("textStyle", normalTextStyle, filter);
-
-        auto selectedFont = JsonUtil::Create(true);
-        selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
-        selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
-            GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
-        selectedFont->Put("family", V2::ConvertFontFamily(GetSelectedFontFamilyValue({})).c_str());
-        selectedFont->Put("style", GetSelectedFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-            ? "FontStyle.Normal" : "FontStyle.Italic");
-        auto selectedTextStyle = JsonUtil::Create(true);
-        selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
-        selectedTextStyle->Put("font", selectedFont);
-        json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
+        FontAddJsonValue(json, filter);
+        json->PutExtAttr("enableCascade",
+            V2::ConvertBoolToString(GetIsEnableCascade().value_or(false)).c_str(), filter);
 
         auto options = JsonUtil::Create(true);
         options->Put("hour", TimeFormat::GetHourFormat(
@@ -108,6 +135,9 @@ public:
             options->Put("second", TimeFormat::GetSecondFormat(GetPrefixSecondValue(0)).c_str());
         }
         json->PutExtAttr("dateTimeOptions", options, filter);
+        auto crownSensitivity = GetDigitalCrownSensitivity();
+        json->PutExtAttr("digitalCrownSensitivity",
+            std::to_string(crownSensitivity.value_or(DEFAULT_CROWNSENSITIVITY)).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsUseMilitaryTime, bool, PROPERTY_UPDATE_MEASURE);
@@ -148,7 +178,7 @@ public:
         SelectedTextStyle, FontFamily, SelectedFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         SelectedTextStyle, ItalicFontStyle, SelectedFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
-
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DigitalCrownSensitivity, int32_t, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerLayoutProperty);
 };

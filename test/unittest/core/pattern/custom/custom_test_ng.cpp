@@ -104,7 +104,8 @@ HWTEST_F(CustomTestNg, CustomTest001, TestSize.Level1)
 
     RefPtr<AceType> view;
     auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
-    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };
@@ -151,7 +152,8 @@ HWTEST_F(CustomTestNg, CustomTest002, TestSize.Level1)
 
     RefPtr<AceType> view;
     auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
-    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };
@@ -199,7 +201,8 @@ HWTEST_F(CustomTestNg, CustomTest003, TestSize.Level1)
      */
     RefPtr<AceType> view;
     auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
-    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };
@@ -317,7 +320,8 @@ HWTEST_F(CustomTestNg, CustomTest005, TestSize.Level1)
      */
     RefPtr<AceType> view;
     auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
-    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };
@@ -374,7 +378,8 @@ HWTEST_F(CustomTestNg, CustomTest006, TestSize.Level1)
      */
     RefPtr<AceType> view;
     auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
-    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };
@@ -436,7 +441,8 @@ HWTEST_F(CustomTestNg, CustomTest007, TestSize.Level1)
      */
     RefPtr<AceType> view;
     auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
-    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };
@@ -492,7 +498,8 @@ HWTEST_F(CustomTestNg, CustomTest008, TestSize.Level1)
      */
     RefPtr<AceType> view;
     auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
-    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };
@@ -640,8 +647,8 @@ HWTEST_F(CustomTestNg, CustomTest012, TestSize.Level1)
      * @tc.steps: step1. Create CustomNodeLayoutAlgorithm and frameNode.
      * @tc.expected: Make Text as CustomNode parent.
      */
-    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm(
-        []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
+    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm([](int64_t deadline, bool& isTimeout) {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
     auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
 
     /**
@@ -660,10 +667,12 @@ HWTEST_F(CustomTestNg, CustomTest012, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper = customNode->CreateLayoutWrapper();
-    auto renderfunction = []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
+    auto renderfunction = [](int64_t deadline, bool& isTimeout) {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
     test.renderFunction_ = renderfunction;
     test.Measure(AceType::RawPtr(layoutWrapper));
-    EXPECT_NE(renderfunction(), nullptr);
+    bool isTimeout = false;
+    EXPECT_NE(renderfunction(0, isTimeout), nullptr);
 }
 
 /**
@@ -677,8 +686,8 @@ HWTEST_F(CustomTestNg, CustomTest013, TestSize.Level1)
      * @tc.steps: step1. Create test.
      * @tc.expected: Make Text as CustomNode parent.
      */
-    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm(
-        []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
+    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm([](int64_t deadline, bool& isTimeout) {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
 
     /**
      * @tc.steps: step2. Create frameNode.
@@ -695,7 +704,8 @@ HWTEST_F(CustomTestNg, CustomTest013, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper = customNode->CreateLayoutWrapper();
-    auto renderfunction = []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
+    auto renderfunction = [](int64_t deadline, bool& isTimeout) {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
     test.renderFunction_ = renderfunction;
     NG::LayoutWrapper* testMeasureFun;
     auto measureFuncation = [&testMeasureFun](
@@ -703,7 +713,8 @@ HWTEST_F(CustomTestNg, CustomTest013, TestSize.Level1)
     customNode->SetMeasureFunction(std::move(measureFuncation));
 
     test.Measure(AceType::RawPtr(layoutWrapper));
-    EXPECT_NE(renderfunction(), nullptr);
+    bool isTimeout = false;
+    EXPECT_NE(renderfunction(0, isTimeout), nullptr);
 }
 
 /**
@@ -717,8 +728,8 @@ HWTEST_F(CustomTestNg, CustomTest014, TestSize.Level1)
      * @tc.steps: step1. Create test.
      * @tc.expected: Make Text as CustomNode parent.
      */
-    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm(
-        []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
+    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm([](int64_t deadline, bool& isTimeout) {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
 
     /**
      * @tc.steps: step2. Create frameNode.
@@ -735,7 +746,8 @@ HWTEST_F(CustomTestNg, CustomTest014, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper = customNode->CreateLayoutWrapper();
-    auto renderfunction = []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
+    auto renderfunction = [](int64_t deadline, bool& isTimeout) {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
     test.renderFunction_ = renderfunction;
     NG::LayoutWrapper* testLayoutFunction;
     auto LayoutFunction = [&testLayoutFunction](
@@ -790,7 +802,7 @@ HWTEST_F(CustomTestNg, CustomTest016, TestSize.Level1)
      * @tc.steps: step2. Create renderFunction and Call Render.
      * @tc.expected: Add Child Success
      */
-    auto renderFunction = [&]() -> RefPtr<UINode> {
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         RefPtr<UINode> uiNode =
             CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
         return uiNode;
@@ -816,7 +828,7 @@ HWTEST_F(CustomTestNg, CustomTest017, TestSize.Level1)
      * @tc.steps: step2. Create completeReloadFunc_ and Call FlushReload.
      * @tc.expected: Add Child Success
      */
-    auto renderFunction = [&]() -> RefPtr<UINode> {
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         RefPtr<UINode> uiNode =
             CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
         return uiNode;
@@ -861,7 +873,8 @@ HWTEST_F(CustomTestNg, CustomTest018, TestSize.Level1)
      */
     RefPtr<AceType> view;
     auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
-    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+    auto renderFunction =
+        [internalRender = std::move(renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto uiNode = internalRender();
         return AceType::DynamicCast<UINode>(uiNode);
     };
@@ -970,8 +983,8 @@ HWTEST_F(CustomTestNg, CustomTest022, TestSize.Level1)
      * @tc.steps: step1. Create test.
      * @tc.expected: Make Text as CustomNode parent.
      */
-    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm(
-        []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
+    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm([](int64_t deadline, bool& isTimeout) {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
 
     /**
      * @tc.steps: step2. Create LayoutWrapper, customNode.
@@ -983,7 +996,7 @@ HWTEST_F(CustomTestNg, CustomTest022, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode("Child1", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto frameChild2 =
         FrameNode::GetOrCreateFrameNode("Child2", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto renderfunction = [frameChild1, frameChild2]() -> RefPtr<UINode> {
+    auto renderfunction = [frameChild1, frameChild2](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         ViewStackProcessor::GetInstance()->Push(frameChild1);
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Push(frameChild2);
@@ -1011,8 +1024,8 @@ HWTEST_F(CustomTestNg, CustomTest023, TestSize.Level1)
     /**
      * @tc.steps: step1. Create test.
      */
-    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm(
-        []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
+    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm([](int64_t deadline, bool& isTimeout) {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
 
     /**
      * @tc.steps: step2. Create LayoutWrapper, customNode, set LayoutFunction and invoke Layout.
@@ -1154,7 +1167,7 @@ HWTEST_F(CustomTestNg, CustomTest027, TestSize.Level1)
      * @tc.steps: step2. Create renderFunction and Call Render.
      * @tc.expected: Add Child Success
      */
-    auto renderFunction = []() -> RefPtr<UINode> {
+    auto renderFunction = [](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         RefPtr<UINode> uiNode =
             CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
         return uiNode;
@@ -1544,5 +1557,45 @@ HWTEST_F(CustomTestNg, CustomTest037, TestSize.Level1)
     auto layoutWrapper = customNode->CreateLayoutWrapper();
     test.Measure(AceType::RawPtr(layoutWrapper));
     EXPECT_FALSE(measureFuncFlag);
+}
+
+/**
+ * @tc.name: CustomTest038
+ * @tc.desc: test call OnAppear timeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest038, TestSize.Level1)
+{
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        isTimeout = false;
+        return uiNode;
+    };
+    customNode->executeFireOnAppear_ = false;
+    customNode->renderFunction_ = renderFunction;
+    bool result = customNode->Render(1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CustomTest039
+ * @tc.desc: test call renderFunction timeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest039, TestSize.Level1)
+{
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        isTimeout = true;
+        return uiNode;
+    };
+    customNode->executeFireOnAppear_ = true;
+    customNode->renderFunction_ = renderFunction;
+    bool result = customNode->Render();
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

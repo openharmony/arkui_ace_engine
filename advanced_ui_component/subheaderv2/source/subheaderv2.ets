@@ -21,6 +21,7 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 import { HashMap } from '@kit.ArkTS';
+import { KeyCode } from '@kit.InputKit';
 
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
@@ -85,6 +86,7 @@ export interface SubHeaderV2SelectOptions {
   selectedIndex?: number;
   selectedContent?: string;
   onSelect?: SubHeaderV2SelectOnSelect;
+  defaultFocus?: boolean;
 }
 
 @ObservedV2
@@ -97,12 +99,15 @@ export class SubHeaderV2Select {
   public selectedContent?: string;
   @Trace
   public onSelect?: SubHeaderV2SelectOnSelect;
+  @Trace
+  public defaultFocus?: boolean;
 
   constructor(options: SubHeaderV2SelectOptions) {
     this.options = options.options;
     this.selectedIndex = options.selectedIndex;
     this.selectedContent = options.selectedContent;
     this.onSelect = options.onSelect;
+    this.defaultFocus = options.defaultFocus;
   }
 }
 
@@ -123,6 +128,7 @@ export interface SubHeaderV2OperationItemOptions {
   accessibilityText?: ResourceStr;
   accessibilityDescription?: ResourceStr;
   accessibilityLevel?: string;
+  defaultFocus?: boolean;
 }
 
 @ObservedV2
@@ -137,6 +143,8 @@ export class SubHeaderV2OperationItem {
   public accessibilityDescription?: ResourceStr;
   @Trace
   public accessibilityLevel?: string;
+  @Trace
+  public defaultFocus?: boolean;
 
   constructor(options: SubHeaderV2OperationItemOptions) {
     this.content = options.content;
@@ -144,34 +152,59 @@ export class SubHeaderV2OperationItem {
     this.accessibilityText = options.accessibilityText;
     this.accessibilityDescription = options.accessibilityDescription;
     this.accessibilityLevel = options.accessibilityLevel;
+    this.defaultFocus = options.defaultFocus;
   }
 }
 
+@ObservedV2
 class ContentIconOption {
+  @Trace
   public content?: ResourceStr;
+  @Trace
   public subContent?: ResourceStr;
+  @Trace
   public iconOptions?: SubHeaderV2IconType;
+  @Trace
   public action?: () => void;
+  @Trace
   public accessibilityLevel?: string;
+  @Trace
   public accessibilityText?: ResourceStr;
+  @Trace
   public accessibilityDescription?: ResourceStr;
+  @Trace
+  public defaultFocus?: boolean;
 }
 
+@ObservedV2
 class FontStyle {
+  @Trace
   public maxLines: number = 0;
+  @Trace
   public fontWeight: number = 0;
+  @Trace
   public fontColor?: ResourceColor;
+  @Trace
   public alignment?: Alignment;
 }
 
+@ObservedV2
 class SubHeaderTheme {
+  @Trace
   public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
+  @Trace
   public fontSecondaryColor: ResourceColor = $r('sys.color.font_secondary');
+  @Trace
   public fontButtonColor: ResourceColor = $r('sys.color.font_emphasize');
+  @Trace
   public iconArrowColor: ResourceColor = $r('sys.color.icon_tertiary');
+  @Trace
   public textArrowHoverBgColor: ResourceColor = $r('sys.color.interactive_hover');
+  @Trace
   public borderFocusColor: ResourceColor = $r('sys.color.interactive_focus');
+  @Trace
   public leftIconColor: ResourceColor = $r('sys.color.icon_secondary');
+  @Trace
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
@@ -369,6 +402,7 @@ export struct SubHeaderV2 {
       .width('auto')
       .selected(this.selectedIndex)
       .value(this.selectedContent)
+      .defaultFocus(this.select?.defaultFocus)
       .onSelect((index: number, value?: string) => {
         this.selectedIndex = index;
         if (value) {
@@ -473,6 +507,20 @@ export struct SubHeaderV2 {
 
   @Styles
   private rightAreaClickEvent() {
+    .onKeyEvent((event: KeyEvent) => {
+      if (!event) {
+        return;
+      }
+      if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
+        event.type === KeyType.Down) {
+        if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW ||
+          this.operationType === SubHeaderV2OperationType.BUTTON) &&
+        this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
+          this.operationItems[0].action();
+        }
+        event.stopPropagation();
+      }
+    })
     .onClick(() => {
       if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW ||
         this.operationType === SubHeaderV2OperationType.BUTTON) &&
@@ -552,6 +600,25 @@ export struct SubHeaderV2 {
     }
   }
 
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
+    let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.fontSize = this.updateFontScale();
+    if (this.isSuitableAging()) {
+      this.ageing = true;
+      this.subHeaderModifier.isAgeing = this.ageing;
+    } else {
+      this.ageing = false;
+      this.subHeaderModifier.isAgeing = this.ageing;
+    }
+    children.forEach((child) => {
+      constraint.minHeight = Math.min(Number(this.getMinHeight()), Number(constraint.maxHeight));
+      result.height = child.measure(constraint).height;
+      result.width = Number(constraint.maxWidth);
+    })
+    return result;
+  }
+
   @Builder
   ButtonStyle(): void {
     if (this.operationItems) {
@@ -562,6 +629,7 @@ export struct SubHeaderV2 {
             maxLines: DOUBLE_LINE_NUM,
             fontColor: this.subHeaderV2Theme.fontButtonColor,
           })
+          .defaultFocus(this.operationItems[0].defaultFocus)
           .focusable(true)
       }
       .focusable(true)
@@ -628,6 +696,8 @@ export struct SubHeaderV2 {
             alignment: Alignment.End,
             fontColor: this.subHeaderV2Theme.fontSecondaryColor,
           })
+          .focusable(true)
+          .defaultFocus(this.operationItems[0].defaultFocus)
           .margin({
             end: this.getTextArrowMarginRight(),
           })
@@ -647,13 +717,13 @@ export struct SubHeaderV2 {
   @Builder
   ArrowStyle(): void {
     Row() {
-      Image($r('sys.media.ohos_ic_public_arrow_right'))
-        .fillColor(this.subHeaderV2Theme.iconArrowColor)
+      SymbolGlyph($r('sys.symbol.chevron_right'))
+        .fontSize(RIGHT_SINGLE_ICON_SIZE)
+        .fontColor([this.subHeaderV2Theme.iconArrowColor])
+        .draggable(false)
+        .focusable(true)
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
-        .focusable(true)
-        .draggable(false)
-        .matchTextDirection(true)
     }
     .justifyContent(FlexAlign.End)
   }
@@ -706,13 +776,13 @@ export struct SubHeaderV2 {
     } else {
       Row() {
         Button({ type: ButtonType.Normal, stateEffect: false }) {
-          Image($r('sys.media.ohos_ic_public_arrow_right'))
-            .fillColor(this.subHeaderV2Theme.iconArrowColor)
+          SymbolGlyph($r('sys.symbol.chevron_right'))
+            .fontSize(RIGHT_SINGLE_ICON_SIZE)
+            .fontColor([this.subHeaderV2Theme.iconArrowColor])
+            .draggable(false)
+            .focusable(true)
             .width(ARROW_ICON_WIDTH)
             .height(OPERATE_ITEM_LENGTH)
-            .focusable(true)
-            .draggable(false)
-            .matchTextDirection(true)
         }
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
@@ -758,9 +828,10 @@ export struct SubHeaderV2 {
               item: {
                 iconOptions: this.operationItems?.[index].content,
                 action: this.operationItems?.[index].action,
-                accessibilityLevel: item.accessibilityLevel,
-                accessibilityText: item.accessibilityText,
-                accessibilityDescription: item.accessibilityDescription,
+                defaultFocus: this.operationItems?.[index].defaultFocus,
+                accessibilityLevel: this.operationItems?.[index].accessibilityLevel,
+                accessibilityText: this.operationItems?.[index].accessibilityText,
+                accessibilityDescription: this.operationItems?.[index].accessibilityDescription,
               },
               isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
             })
@@ -814,6 +885,7 @@ export struct SubHeaderV2 {
       .rightAreaParentStyles()
       .hoverEffect(HoverEffect.None)
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+      .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
     } else {
@@ -841,7 +913,9 @@ export struct SubHeaderV2 {
       .rightAreaParentAgingStyles()
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
       .hoverEffect(HoverEffect.None)
+      .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
+      .accessibilityDescription(this.getAccessibilityDescription())
     } else {
       Row() {
         this.rightArea();
@@ -1094,6 +1168,7 @@ struct SingleIconStyle {
         this.IconZone();
       }
       .focusable(true)
+      .defaultFocus(this.item.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE)
       .height(SINGLE_ICON_ZONE_SIZE)
       .align(Alignment.Center)

@@ -42,7 +42,7 @@ void SetOnClickImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnClick = Converter::OptConvert<Callback_ClickEvent_Void>(*callback_);
     if (arkOnClick) {
         auto onClick = [arkCallback = CallbackHelper(arkOnClick.value())](GestureEvent& info) {
@@ -59,7 +59,7 @@ void SetOnTouchImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnTouch = Converter::OptConvert<Callback_TouchEvent_Void>(*callback_);
     if (arkOnTouch) {
         auto onTouch = [arkCallback = CallbackHelper(arkOnTouch.value())](TouchEventInfo& info) {
@@ -76,7 +76,7 @@ void SetOnAppearImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnAppear = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnAppear) {
         auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value())]() {
@@ -92,7 +92,7 @@ void SetOnDisappearImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnDisAppear = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnDisAppear) {
         auto onDisAppear = [arkCallback = CallbackHelper(arkOnDisAppear.value())]() {
@@ -112,7 +112,7 @@ void SetOnFocusImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnFocus = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnFocus) {
         auto onFocus = [arkCallback = CallbackHelper(arkOnFocus.value())]() {
@@ -128,7 +128,7 @@ void SetOnBlurImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnBlur = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnBlur) {
         auto onBlur = [arkCallback = CallbackHelper(arkOnBlur.value())]() {
@@ -144,7 +144,7 @@ void SetOnHoverImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnHover = Converter::OptConvert<HoverCallback>(*callback_);
     if (arkOnHover) {
         auto onHover = [arkCallback = CallbackHelper(arkOnHover.value())](bool isHover, HoverInfo& info) {
@@ -162,7 +162,7 @@ void SetOnMouseImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnMouse = Converter::OptConvert<Callback_MouseEvent_Void>(*callback_);
     if (arkOnMouse) {
         auto onMouse = [arkCallback = CallbackHelper(arkOnMouse.value())](MouseInfo& info) {
@@ -185,7 +185,7 @@ void SetOnVisibleAreaApproximateChangeImpl(UICommonEventPeer* peer,
     CHECK_NULL_VOID(options);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
-    auto rawPtr = refPtr.GetRawPtr();
+    auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnVisibleChange = Converter::OptConvert<VisibleAreaChangeCallback>(*event);
     CHECK_NULL_VOID(arkOnVisibleChange);
     auto onVisibleChange = [arkCallback = CallbackHelper(arkOnVisibleChange.value())]

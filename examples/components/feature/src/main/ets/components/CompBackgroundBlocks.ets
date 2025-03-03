@@ -122,10 +122,10 @@ export struct CompBackgroundBlocks {
         isEnabled: $enableCompBackgroundImageRepeat,
         value: $compBackgroundImageRepeat,
         dataSource: [
-          { label: 'TopStart', value: ImageRepeat.NoRepeat },
-          { label: 'TopStart', value: ImageRepeat.X },
-          { label: 'TopStart', value: ImageRepeat.Y },
-          { label: 'TopStart', value: ImageRepeat.XY },
+          { label: 'NoRepeat', value: ImageRepeat.NoRepeat },
+          { label: 'X', value: ImageRepeat.X },
+          { label: 'Y', value: ImageRepeat.Y },
+          { label: 'XY', value: ImageRepeat.XY },
         ]
       })
       RadioBlock({

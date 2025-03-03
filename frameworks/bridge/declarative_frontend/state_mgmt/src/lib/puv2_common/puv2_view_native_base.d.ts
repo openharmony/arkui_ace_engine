@@ -19,7 +19,7 @@
  *  all definitions in this file are framework internal
  */
 declare class NativeViewPartialUpdate {
-  constructor();
+  constructor(thisObj: object);
   markNeedUpdate(): void;
   findChildById(compilerAssignedUniqueChildId: string): View;
   syncInstanceId(): void;
@@ -32,11 +32,21 @@ declare class NativeViewPartialUpdate {
   static createRecycle(componentCall: any, isRecycling: boolean,
     reuseId: string, callback: () => void): void;
   finishUpdateFunc(elmtId: number): void;
-  isLazyItemRender(elmtId : number) : boolean;
+  isLazyItemRender(elmtId : number): boolean;
   setCardId(cardId: number): void;
   getCardId(): number;
   resetRecycleCustomNode(): void;
   sendStateInfo(stateInfo: string): void;
   setIsV2(isV2: boolean): void;
   allowReusableV2Descendant(): boolean;
+  getInstanceId(): number;
+  markStatic(): void;
+  elmtIdExists(elmtId: number): boolean;
+  findChildByIdForPreview(viewId: number): object;
+  queryNavDestinationInfo(): object;
+  queryNavigationInfo(): object;
+  queryRouterPageInfo(): object;
+  getUIContext(): object;
+  getUniqueId(): number;
+  getDialogController(): object;
 }

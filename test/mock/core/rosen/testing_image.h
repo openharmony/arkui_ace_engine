@@ -26,7 +26,7 @@ namespace OHOS::Ace::Testing {
 class TestingImage {
 public:
     TestingImage() = default;
-    ~TestingImage() = default;
+    virtual ~TestingImage() = default;
 
     virtual int GetWidth()
     {

@@ -1284,10 +1284,11 @@ HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
     std::map<std::string, std::vector<std::string>> items;
     EventRecorder::Get().SaveJavascriptItems(items);
     std::optional<std::map<std::string, std::vector<std::string>>> input;
-    EventRecorder::Get().HandleJavascriptItems(input);
+    std::optional<std::vector<std::string>> orderItems;
+    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
 
     input = std::make_optional<std::map<std::string, std::vector<std::string>>>();
-    EventRecorder::Get().HandleJavascriptItems(input);
+    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
     EXPECT_TRUE(input.has_value());
 
     input = std::nullopt;
@@ -1296,7 +1297,7 @@ HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
     EventController::Get().hasWebProcessed_ = true;
     EventRecorder::Get().SaveJavascriptItems(items);
     EXPECT_FALSE(Recorder::EventRecorder::Get().cacheScriptItems_.has_value());
-    EventRecorder::Get().HandleJavascriptItems(input);
+    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
     EXPECT_FALSE(input.has_value());
 
     EventController::Get().hasCached_ = false;
@@ -1304,7 +1305,7 @@ HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
     EventRecorder::Get().SaveJavascriptItems(items);
     EXPECT_TRUE(EventRecorder::Get().cacheScriptItems_.has_value());
     input = std::nullopt;
-    EventRecorder::Get().HandleJavascriptItems(input);
+    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
     EXPECT_TRUE(input.has_value());
     EXPECT_FALSE(EventRecorder::Get().cacheScriptItems_.has_value());
 

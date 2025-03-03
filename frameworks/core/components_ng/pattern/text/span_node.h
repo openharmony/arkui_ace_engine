@@ -72,6 +72,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
+        spanItem_->MarkDirty();                                              \
         RequestTextFlushDirty();                                             \
     }                                                                        \
     void Reset##name()                                                       \
@@ -123,6 +124,7 @@ public:                                                                         
             return;                                                              \
         }                                                                        \
         spanItem_->textLineStyle->Update##name(value);                           \
+        spanItem_->MarkDirty();                                                  \
         RequestTextFlushDirty();                                                 \
     }                                                                            \
     void Reset##name()                                                           \
@@ -186,9 +188,8 @@ public:
     {
         children.clear();
     }
-    // position of last char + 1
     int32_t rangeStart = -1;
-    int32_t position = -1;
+    int32_t position = -1; // position of last char + 1
     int32_t imageNodeId = -1;
     int32_t paragraphIndex = -1;
     uint32_t length = 0;
@@ -215,9 +216,11 @@ public:
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
     std::optional<LeadingMargin> leadingMargin;
-    int32_t selectedStart = -1;
+    int32_t selectedStart = -1; // relative offset from span, [selectedStart, selectedEnd)
     int32_t selectedEnd = -1;
+    bool needReLayout = false;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
+    bool UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle);
     void UpdateSymbolSpanParagraph(
         const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder,
         bool isDragging = false);
@@ -239,7 +242,7 @@ public:
     virtual void EndDrag();
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
-    virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
+    virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::function<void()> urlOnRelease;
     void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
@@ -334,6 +337,25 @@ public:
     
     virtual void SpanDumpInfo();
     void SpanDumpInfoAdvance();
+    void MarkDirty()
+    {
+        needReLayout = true;
+    }
+    void UpdateContent(const std::u16string& newContent)
+    {
+        content = newContent;
+        MarkDirty();
+    }
+
+    void UpdateTextColorWithoutCheck(Color color)
+    {
+        fontStyle->propTextColor = color;
+    }
+
+    void UpdateTextDecorationColorWithoutCheck(Color color)
+    {
+        fontStyle->propTextDecorationColor = color;
+    }
 
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
@@ -416,6 +438,7 @@ public:
             return;
         }
         spanItem_->unicode = unicode;
+        spanItem_->MarkDirty();
         RequestTextFlushDirty(true);
     }
 
@@ -425,6 +448,7 @@ public:
             return;
         }
         spanItem_->content = content;
+        spanItem_->MarkDirty();
         RequestTextFlushDirty(true);
     }
 
@@ -451,6 +475,16 @@ public:
         }
     }
 
+    void UpdateTextColorWithoutCheck(Color color)
+    {
+        spanItem_->UpdateTextColorWithoutCheck(color);
+    }
+
+    void UpdateTextDecorationColorWithoutCheck(Color color)
+    {
+        spanItem_->UpdateTextDecorationColorWithoutCheck(color);
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
@@ -471,6 +505,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
     DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolType, SymbolType);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -553,6 +588,8 @@ public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
     PlaceholderRun run_;
+    std::optional<Color> dragBackgroundColor_;
+    bool isDragShadowNeeded_ = true;
     PlaceholderSpanItem()
     {
         this->spanItemType = SpanItemType::PLACEHOLDER;
@@ -574,6 +611,12 @@ public:
     const RefPtr<UINode> GetCustomNode() const
     {
         return customNode_;
+    }
+
+    void UpdateColorByResourceId()
+    {
+        CHECK_NULL_VOID(dragBackgroundColor_.has_value());
+        dragBackgroundColor_.value().UpdateColorByResourceId();
     }
 
 private:
@@ -626,6 +669,18 @@ public:
         return false;
     }
 
+    void MarkModifyDone() override
+    {
+        FrameNode::MarkModifyDone();
+        placeholderSpanItem_->MarkDirty();
+    }
+
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override
+    {
+        FrameNode::MarkDirtyNode(extraFlag);
+        placeholderSpanItem_->MarkDirty();
+    }
+
     void DumpInfo() override
     {
         FrameNode::DumpInfo();
@@ -648,7 +703,7 @@ public:
         this->spanItemType = SpanItemType::CustomSpan;
     }
     ~CustomSpanItem() override = default;
-    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const override;
     ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
@@ -728,7 +783,7 @@ public:
     void SetImageSpanOptions(const ImageSpanOptions& options);
     void ResetImageSpanOptions();
     ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
-    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const override;
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 
     bool EncodeTlv(std::vector<uint8_t>& buff) override;

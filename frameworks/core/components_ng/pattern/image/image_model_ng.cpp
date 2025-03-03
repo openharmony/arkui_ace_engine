@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,17 +18,19 @@
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
 
+#include "interfaces/native/node/resource.h"
+
+#include "base/image/image_defines.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/image/image_source_info.h"
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
 #endif
-#include "interfaces/native/node/resource.h"
-#include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -64,8 +66,8 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     ACE_IMAGE_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, src.c_str());
     RefPtr<FrameNode> frameNode;
     if (imageInfoConfig.isImageSpan) {
-        frameNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
-            nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        frameNode = ImageSpanNode::GetOrCreateSpanNode(
+            V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(
             V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -94,7 +96,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
         CreateSourceInfo(imageInfoConfig.src, pixMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
     srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
 
-    if (pattern->GetImageType() != ImagePattern::ImageType::BASE) {
+    if (pattern->GetImageType() != ImageType::BASE) {
         if (pattern->GetHasSizeChanged()) {
             pattern->ResetPictureSize();
         }
@@ -107,14 +109,14 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
         }
     }
     pattern->SetNeedLoadAlt(true);
-    pattern->SetImageType(ImagePattern::ImageType::BASE);
+    pattern->SetImageType(ImageType::BASE);
 
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
 
 void ImageModelNG::ResetImage()
 {
-    auto *stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     RefPtr<FrameNode> frameNode;
     frameNode = FrameNode::GetOrCreateFrameNode(
@@ -128,7 +130,7 @@ void ImageModelNG::ResetImage()
     CHECK_NULL_VOID(pattern);
     pattern->SetNeedLoadAlt(false);
     pattern->ResetImageAndAlt();
-    if (pattern->GetImageType() == ImagePattern::ImageType::ANIMATION) {
+    if (pattern->GetImageType() == ImageType::ANIMATION) {
         if (pattern->GetHasSizeChanged()) {
             pattern->ResetPictureSize();
         }
@@ -139,7 +141,7 @@ void ImageModelNG::ResetImage()
             ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageFrameNode);
             frameNode->RemoveChild(imageFrameNode);
         }
-        pattern->SetImageType(ImagePattern::ImageType::BASE);
+        pattern->SetImageType(ImageType::BASE);
     }
 }
 
@@ -155,10 +157,10 @@ void ImageModelNG::ResetImage(FrameNode* frameNode)
     pattern->ResetImageAndAlt();
 }
 
-void ImageModelNG::SetInitialSrc(FrameNode *frameNode, const std::string &src, const std::string &bundleName,
-    const std::string &moduleName, bool isUriPureNumber)
+void ImageModelNG::SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
+    const std::string& moduleName, bool isUriPureNumber)
 {
-    auto srcInfo = ImageSourceInfo{ src, bundleName, moduleName };
+    auto srcInfo = ImageSourceInfo { src, bundleName, moduleName };
     srcInfo.SetIsUriPureNumber(isUriPureNumber);
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
@@ -214,7 +216,7 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
     frameNode->SetDraggable(draggable);
     pattern->SetSrcUndefined(false);
     pattern->StopAnimation();
-    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    pattern->SetImageType(ImageType::ANIMATION);
     std::vector<ImageProperties> images = imageList;
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
@@ -245,7 +247,7 @@ RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::strin
     return frameNode;
 }
 
-void ImageModelNG::SetAlt(const ImageSourceInfo &src)
+void ImageModelNG::SetAlt(const ImageSourceInfo& src)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src);
 }
@@ -296,7 +298,7 @@ void ImageModelNG::SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality 
     pattern->SetImageQuality(imageQuality);
 }
 
-void ImageModelNG::SetBorder(const Border &border) {}
+void ImageModelNG::SetBorder(const Border& border) {}
 
 void ImageModelNG::SetBorderRadius(const Dimension& value)
 {
@@ -342,7 +344,7 @@ void ImageModelNG::SetBorderRadius(const NG::BorderRadiusProperty& borderRadius)
     pattern->SetNeedBorderRadius(true);
 }
 
-void ImageModelNG::SetBorderRadius(FrameNode *frameNode, const Dimension& value)
+void ImageModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
 {
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
@@ -390,7 +392,7 @@ void ImageModelNG::SetBackBorder()
     pattern->SetNeedBorderRadius(true);
 }
 
-void ImageModelNG::SetBackBorder(FrameNode *frameNode)
+void ImageModelNG::SetBackBorder(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true, frameNode);
@@ -399,7 +401,7 @@ void ImageModelNG::SetBackBorder(FrameNode *frameNode)
     pattern->SetNeedBorderRadius(true);
 }
 
-void ImageModelNG::ResetBackBorder(FrameNode *frameNode)
+void ImageModelNG::ResetBackBorder(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true, frameNode);
@@ -416,7 +418,7 @@ void ImageModelNG::SetImageFit(ImageFit value)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value);
 }
 
-void ImageModelNG::SetImageMatrix(const Matrix4 &value)
+void ImageModelNG::SetImageMatrix(const Matrix4& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value);
 }
@@ -431,7 +433,7 @@ void ImageModelNG::SetFitOriginSize(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, value);
 }
 
-void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback)
+void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -440,7 +442,7 @@ void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent 
     eventHub->SetOnComplete(std::move(callback));
 }
 
-void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback)
+void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -458,17 +460,29 @@ void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
     eventHub->SetOnFinish(std::move(callback));
 }
 
-void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension> &size)
+void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
     SizeF sourceSize =
         SizeF(static_cast<float>(size.first.ConvertToPx()), static_cast<float>(size.second.ConvertToPx()));
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
 }
 
-void ImageModelNG::SetImageFill(const Color &color)
+void ImageModelNG::SetImageFill(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+}
+
+void ImageModelNG::ResetImageFill()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ImageRenderProperty, SvgFillColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+}
+
+void ImageModelNG::ResetImageFill(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ImageRenderProperty, SvgFillColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
 }
 
 void ImageModelNG::SetImageInterpolation(ImageInterpolation interpolation)
@@ -503,13 +517,13 @@ void ImageModelNG::SetSyncMode(bool syncMode)
     pattern->SetSyncLoad(syncMode);
 }
 
-void ImageModelNG::SetColorFilterMatrix(const std::vector<float> &matrix)
+void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
     ACE_RESET_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter);
 }
 
-void ImageModelNG::SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter)
+void ImageModelNG::SetDrawingColorFilter(RefPtr<DrawingColorFilter>& colorFilter)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter);
     ACE_RESET_PAINT_PROPERTY(ImageRenderProperty, ColorFilter);
@@ -532,11 +546,11 @@ void ImageModelNG::SetDraggable(bool draggable)
     frameNode->SetCustomerDraggable(draggable);
 }
 
-void ImageModelNG::SetOnDragStart(OnDragStartFunc &&onDragStart)
+void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)
 {
 #ifndef ACE_UNITTEST
-    auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent> &event,
-        const std::string &extraParams) -> DragDropInfo {
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
         auto dragInfo = dragStartFunc(event, extraParams);
         DragDropInfo info;
         info.extraInfo = dragInfo.extraInfo;
@@ -548,22 +562,22 @@ void ImageModelNG::SetOnDragStart(OnDragStartFunc &&onDragStart)
 #endif
 }
 
-void ImageModelNG::SetOnDragEnter(OnDragDropFunc &&onDragEnter) {}
+void ImageModelNG::SetOnDragEnter(OnDragDropFunc&& onDragEnter) {}
 
-void ImageModelNG::SetOnDragLeave(OnDragDropFunc &&onDragLeave) {}
+void ImageModelNG::SetOnDragLeave(OnDragDropFunc&& onDragLeave) {}
 
-void ImageModelNG::SetOnDragMove(OnDragDropFunc &&onDragMove) {}
+void ImageModelNG::SetOnDragMove(OnDragDropFunc&& onDragMove) {}
 
-void ImageModelNG::SetOnDrop(OnDragDropFunc &&onDrop) {}
+void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
-void ImageModelNG::SetCopyOption(const CopyOptions &copyOption)
+void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCopyOption(copyOption);
 }
 
-bool ImageModelNG::UpdateDragItemInfo(DragItemInfo &itemInfo)
+bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)
 {
     return false;
 }
@@ -577,7 +591,6 @@ void ImageModelNG::InitImage(FrameNode *frameNode, const std::string& src)
     srcInfo.SetIsUriPureNumber(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
-
 
 void ImageModelNG::SetPixelMap(FrameNode* frameNode, void* drawableDescriptor)
 {
@@ -620,7 +633,7 @@ void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawable
     CHECK_NULL_VOID(pattern);
 
     pattern->StopAnimation();
-    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    pattern->SetImageType(ImageType::ANIMATION);
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
     pattern->SetIteration(iterations);
@@ -638,7 +651,7 @@ void ImageModelNG::SetResource(FrameNode* frameNode, void* resource)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 
-void ImageModelNG::SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter)
+void ImageModelNG::SetDrawingColorFilter(FrameNode* frameNode, RefPtr<DrawingColorFilter>& colorFilter)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, frameNode);
@@ -652,12 +665,12 @@ void ImageModelNG::SetCopyOption(FrameNode *frameNode, const std::optional<CopyO
     pattern->SetCopyOption(copyOption.value_or(CopyOptions::None));
 }
 
-void ImageModelNG::SetAutoResize(FrameNode *frameNode, bool autoResize)
+void ImageModelNG::SetAutoResize(FrameNode* frameNode, bool autoResize)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize, frameNode);
 }
 
-void ImageModelNG::ResetAutoResize(FrameNode *frameNode)
+void ImageModelNG::ResetAutoResize(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
@@ -671,7 +684,7 @@ void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice);
 }
 
-void ImageModelNG::SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice)
+void ImageModelNG::SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice, frameNode);
 }
@@ -691,7 +704,7 @@ void ImageModelNG::ResetResizableLattice()
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr);
 }
 
-void ImageModelNG::ResetResizableLattice(FrameNode *frameNode)
+void ImageModelNG::ResetResizableLattice(FrameNode* frameNode)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr, frameNode);
 }
@@ -716,12 +729,12 @@ void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, const std::optional<
     }
 }
 
-void ImageModelNG::SetImageMatrix(FrameNode *frameNode, const Matrix4 &value)
+void ImageModelNG::SetImageMatrix(FrameNode* frameNode, const Matrix4& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value, frameNode);
 }
 
-void ImageModelNG::SetImageFit(FrameNode *frameNode, ImageFit value)
+void ImageModelNG::SetImageFit(FrameNode* frameNode, ImageFit value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value, frameNode);
@@ -732,12 +745,12 @@ void ImageModelNG::SetImageFit(FrameNode *frameNode, std::optional<ImageFit> val
     SetImageFit(frameNode, value.value_or(ImageFit::COVER));
 }
 
-void ImageModelNG::SetFitOriginSize(FrameNode *frameNode, bool value)
+void ImageModelNG::SetFitOriginSize(FrameNode* frameNode, bool value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, value, frameNode);
 }
 
-void ImageModelNG::SetSyncMode(FrameNode *frameNode, bool syncMode)
+void ImageModelNG::SetSyncMode(FrameNode* frameNode, bool syncMode)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
     CHECK_NULL_VOID(pattern);
@@ -756,7 +769,7 @@ void ImageModelNG::SetImageSourceSize(FrameNode *frameNode, const std::optional<
     }
 }
 
-void ImageModelNG::SetMatchTextDirection(FrameNode *frameNode, bool value)
+void ImageModelNG::SetMatchTextDirection(FrameNode* frameNode, bool value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value, frameNode);
 }
@@ -798,11 +811,11 @@ void ImageModelNG::SetAltPixelMap(FrameNode* frameNode, void* pixelMap)
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pixelMap);
-    #ifndef ACE_UNITTEST
+#ifndef ACE_UNITTEST
     RefPtr<PixelMap> pixelMapPtr = PixelMap::GetFromDrawable(pixelMap);
     auto srcInfo = CreateSourceInfo("", pixelMapPtr, "", "");
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, srcInfo, frameNode);
-    #endif
+#endif
 }
 
 void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, const std::optional<ImageInterpolation>& interpolation)
@@ -815,7 +828,7 @@ void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, const std::option
     }
 }
 
-void ImageModelNG::ResetImageInterpolation(FrameNode *frameNode)
+void ImageModelNG::ResetImageInterpolation(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
@@ -824,13 +837,13 @@ void ImageModelNG::ResetImageInterpolation(FrameNode *frameNode)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, defaultInterpolation, frameNode);
 }
 
-void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)
+void ImageModelNG::SetColorFilterMatrix(FrameNode* frameNode, const std::vector<float>& matrix)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix, frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, frameNode);
 }
 
-void ImageModelNG::SetDraggable(FrameNode *frameNode, bool draggable)
+void ImageModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -902,8 +915,8 @@ void ImageModelNG::SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()
     eventHub->SetOnFinish(std::move(callback));
 }
 
-void ImageModelNG::SetOnDownloadProgress(FrameNode* frameNode,
-    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& callback)
+void ImageModelNG::SetOnDownloadProgress(
+    FrameNode* frameNode, std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
@@ -996,7 +1009,7 @@ bool ImageModelNG::GetFitOriginalSize(FrameNode* frameNode)
     return layoutProperty->GetImageSizeStyle()->GetFitOriginalSize().value_or(false);
 }
 
-uint32_t ImageModelNG::GetFillColor(FrameNode *frameNode)
+uint32_t ImageModelNG::GetFillColor(FrameNode* frameNode)
 {
     uint32_t errorCode = -1;
     CHECK_NULL_RETURN(frameNode, errorCode);
@@ -1036,7 +1049,7 @@ ImagePattern* ImageModelNG::GetImagePattern()
     return frameNode->GetPatternPtr<ImagePattern>();
 }
 
-ImageResizableSlice ImageModelNG::GetResizableSlice(FrameNode *frameNode)
+ImageResizableSlice ImageModelNG::GetResizableSlice(FrameNode* frameNode)
 {
     ImageResizableSlice resizable;
     CHECK_NULL_RETURN(frameNode, resizable);
@@ -1070,7 +1083,7 @@ void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetImage();
-    if (pattern->GetImageType() == ImagePattern::ImageType::ANIMATION) {
+    if (pattern->GetImageType() == ImageType::ANIMATION) {
         if (pattern->GetHasSizeChanged()) {
             pattern->ResetPictureSize();
         }
@@ -1081,7 +1094,7 @@ void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
             ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageFrameNode);
             frameNode->RemoveChild(imageFrameNode);
         }
-        pattern->SetImageType(ImagePattern::ImageType::BASE);
+        pattern->SetImageType(ImageType::BASE);
     }
 }
 
@@ -1104,7 +1117,7 @@ void ImageModelNG::SetOrientation(ImageRotateOrientation orientation)
     pattern->SetOrientation(orientation);
 }
 
-void ImageModelNG::SetOrientation(FrameNode *frameNode, const std::optional<ImageRotateOrientation>& orientation)
+void ImageModelNG::SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation)
 {
     const auto orientationValue = orientation.value_or(ImageRotateOrientation::UP);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientationValue, frameNode);

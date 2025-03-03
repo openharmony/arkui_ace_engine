@@ -82,6 +82,12 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_big_half.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_small_off.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_small_on.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="examples/components/figures/app_page1.png" desc="自研的二进制图片"/> 
+                <filteritem type="filepath" name="examples/components/figures/app_page2.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="examples/components/figures/app_page3.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="examples/components/figures/关键设计.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="examples/components/figures/模块设计图.png" desc="自研的二进制图片"/>
+                <filteritem type="filepath" name="examples/components/figures/运行方案.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/rate_star_small_half.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/select_arrow_disabled.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/select_arrow_normal.png" desc="自研的二进制图片"/>

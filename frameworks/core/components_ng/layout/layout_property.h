@@ -161,7 +161,7 @@ public:
 
     void UpdateLayoutWeight(float value);
 
-    void UpdateChainWeight(const LayoutWeightPair& value);
+    void UpdateChainWeight(const ChainWeightPair& value);
 
     void UpdatePixelRound(uint16_t value)
     {
@@ -207,6 +207,8 @@ public:
     virtual void UpdateCalcMinSize(const CalcSize& value);
 
     virtual void UpdateCalcMaxSize(const CalcSize& value);
+
+    std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
@@ -407,7 +409,8 @@ protected:
 
 private:
     // This will call after ModifyLayoutConstraint.
-    void CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax);
+    void CheckSelfIdealSize(const SizeF& originMax);
+    void CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void CheckAspectRatio();
     void CheckBorderAndPadding();
@@ -423,6 +426,7 @@ private:
     void PaddingToJsonValue(const std::unique_ptr<PaddingProperty>& padding,
         std::string attrName, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
@@ -432,6 +436,9 @@ private:
     std::optional<LayoutConstraintF> parentLayoutConstraint_;
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcSelfIdealSizeRpn_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcMinSizeRpn_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcMaxSizeRpn_;
     std::unique_ptr<PaddingProperty> safeAreaPadding_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;

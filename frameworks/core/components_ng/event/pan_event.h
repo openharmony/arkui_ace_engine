@@ -119,11 +119,19 @@ public:
         return panEvents_.empty();
     }
 
+    void SetExcludedAxis(bool isExcludedAxis)
+    {
+        isExcludedAxis_ = isExcludedAxis;
+    }
+
+    void DumpVelocityInfo(int32_t fingerId);
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;
     RefPtr<PanEvent> userCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
+    bool isExcludedAxis_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

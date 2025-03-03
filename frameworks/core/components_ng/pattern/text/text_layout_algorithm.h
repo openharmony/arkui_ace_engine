@@ -118,7 +118,7 @@ private:
     void UpdateSensitiveContent(std::u16string& content);
     void CheckNeedReCreateParagraph(
         const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<TextPattern>& textPattern);
-    void ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty, bool needRemain);
     std::pair<bool, double> GetSuitableSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     std::pair<bool, double> GetSuitableSizeLD(TextStyle& textStyle, const std::u16string& content,

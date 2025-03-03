@@ -53,6 +53,7 @@ public:
     float MeasureDecorator(float contentWidth, const std::u16string& textContent, bool showPlaceHolder) override;
     void LayoutDecorator() override;
     float GetBoundHeight() const override;
+    bool HasContent() const;
 private:
     void UpdateCounterContentAndStyle(uint32_t textLength, uint32_t maxLength, bool isVisible = true);
     float MeasureTextNodeHeight();

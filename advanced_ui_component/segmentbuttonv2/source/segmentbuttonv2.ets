@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ import {
 } from '@kit.ArkUI';
 import { SizeT } from '@ohos.arkui.node';
 import { i18n } from '@kit.LocalizationKit';
+import util from '@ohos.util';
 
 export interface SegmentButtonV2ItemOptions {
   text?: ResourceStr;
@@ -197,12 +198,18 @@ export class SegmentButtonV2Item {
 
 @ObservedV2
 export class SegmentButtonV2Items extends Array<SegmentButtonV2Item> {
-  constructor(items: SegmentButtonV2ItemOptions[]) {
-    super();
+  constructor(length: number);
 
-    for (let options of items) {
-      if (options) {
-        this.push(new SegmentButtonV2Item(options))
+  constructor(items: SegmentButtonV2ItemOptions[]);
+
+  constructor(lengthOrItemOptionsArray: number | SegmentButtonV2ItemOptions[]) {
+    super(typeof lengthOrItemOptionsArray === 'number' ? lengthOrItemOptionsArray : 0);
+
+    if (typeof lengthOrItemOptionsArray !== 'number' && lengthOrItemOptionsArray && lengthOrItemOptionsArray.length) {
+      for (let options of lengthOrItemOptionsArray) {
+        if (options) {
+          this.push(new SegmentButtonV2Item(options))
+        }
       }
     }
   }
@@ -212,6 +219,8 @@ export class SegmentButtonV2Items extends Array<SegmentButtonV2Item> {
     return this.some((item) => item.isHybrid);
   }
 }
+
+const EMPTY_ITEMS = new SegmentButtonV2Items([]);
 
 @ComponentV2
 export struct TabSegmentButtonV2 {
@@ -545,10 +554,13 @@ struct SimpleSegmentButtonV2 {
   private isMouseWheelScroll: boolean = false;
   private isDragging: boolean = false;
   private panStartGlobalX: number = 0;
+  private panStartIndex: number = -1;
+  private focusGroupId: string = util.generateRandomUUID();
 
   @Computed
   get normalizedSelectedIndex(): number {
-    return normalize(this.selectedIndex, 0, this.items.length - 1);
+    const items = this.getItems();
+    return normalize(this.selectedIndex, 0, items.length - 1);
   }
 
   @Computed
@@ -559,7 +571,7 @@ struct SimpleSegmentButtonV2 {
   @LocalBuilder
   private ContentLayer() {
     Flex({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } }) {
-      Repeat(this.items)
+      Repeat(this.getItems())
         .each((repeatItem: RepeatItem<SegmentButtonV2Item>) => {
           Button({ type: ButtonType.Normal }) {
             SegmentButtonV2ItemContent({
@@ -583,7 +595,7 @@ struct SimpleSegmentButtonV2 {
               itemMinHeight: this.itemMinHeight,
               itemPadding: this.itemPadding,
               languageDirection: this.languageDirection,
-              hasHybrid: this.items.hasHybrid,
+              hasHybrid: this.getItems().hasHybrid,
             })
           }
           .accessibilityGroup(true)
@@ -595,6 +607,7 @@ struct SimpleSegmentButtonV2 {
           .borderRadius(this.getItemBorderRadius())
           .direction(this.languageDirection)
           .enabled(repeatItem.item.enabled)
+          .focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem))
           .hoverEffect(HoverEffect.None)
           .layoutWeight(1)
           .padding(0)
@@ -628,7 +641,7 @@ struct SimpleSegmentButtonV2 {
                 this.updateItemScale(0.95);
               }
               this.updateTouchPressedItemIndex(repeatItem.index);
-            } else if (event.type === TouchType.Up) {
+            } else if ([TouchType.Up, TouchType.Cancel].includes(event.type)) {
               this.updateItemScale(1)
               this.updateTouchPressedItemIndex(-1);
             }
@@ -643,35 +656,41 @@ struct SimpleSegmentButtonV2 {
           .onMouse((event) => {
             if (event.action === MouseAction.Press) {
               this.updateMousePressedItemIndex(repeatItem.index);
-            } else if (event.action === MouseAction.Release) {
+            } else if ([MouseAction.Release, MouseAction.CANCEL].includes(event.action)) {
               this.updateMousePressedItemIndex(-1);
             }
           })
         })
+        .key(generateUniqueKye(this.focusGroupId))
     }
     .constraintSize({
       minWidth: '100%',
       minHeight: this.getButtonMinHeight()
     })
-    .padding(this.getButtonPadding())
+    .clip(false)
     .direction(this.languageDirection)
+    .focusScopeId(this.focusGroupId, true)
+    .padding(this.getButtonPadding())
     .priorityGesture(
       PanGesture()
         .onActionStart((event) => {
+          const finger = event.fingerList.find(Boolean);
+          if (!finger) {
+            return;
+          }
+          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          if (!this.isItemEnabled(index)) {
+            return;
+          }
           if (event.axisHorizontal !== 0 || event.axisVertical !== 0) {
             this.isMouseWheelScroll = true;
             return;
           }
-          const finger = event.fingerList.find(Boolean);
-          if (!finger) {
-            // todo log error?
-            return;
-          }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
           if (index === this.normalizedSelectedIndex) {
             this.isDragging = true;
           }
           this.panStartGlobalX = finger.globalX;
+          this.panStartIndex = index;
         })
         .onActionUpdate((event) => {
           if (!this.isDragging) {
@@ -679,15 +698,15 @@ struct SimpleSegmentButtonV2 {
           }
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
-            // todo log error?
             return;
           }
           const index = this.getIndexByPosition(finger.globalX, finger.globalY);
-          if (index !== -1) {
-            this.updateSelectedIndex(index);
-          }
+          this.updateSelectedIndex(index);
         })
         .onActionEnd((event) => {
+          if (!this.isItemEnabled(this.panStartIndex)) {
+            return;
+          }
           // handle mouse wheel scroll event
           if (this.isMouseWheelScroll) {
             const offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
@@ -702,9 +721,11 @@ struct SimpleSegmentButtonV2 {
             return;
           }
           // handle swipe event
+          if (!this.isItemEnabled(this.normalizedSelectedIndex)) {
+            return;
+          }
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
-            // todo log error?
             return;
           }
           let deltaIndex = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
@@ -716,8 +737,21 @@ struct SimpleSegmentButtonV2 {
         .onActionCancel(() => {
           this.isDragging = false;
           this.isMouseWheelScroll = false;
+          this.panStartIndex = -1;
         })
     )
+  }
+
+  private getFocusPriority(repeatItem: RepeatItem<SegmentButtonV2Item>): FocusPriority | undefined {
+    return this.normalizedSelectedIndex === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
+  }
+
+  private isItemEnabled(index: number): boolean {
+    const items = this.getItems();
+    if (index < 0 || index >= items.length) {
+      return false;
+    }
+    return items[index].enabled;
   }
 
   @LocalBuilder
@@ -739,7 +773,7 @@ struct SimpleSegmentButtonV2 {
 
   @LocalBuilder
   EffectLayer() {
-    Repeat(this.itemRects)
+    Repeat(this.getItemRects())
       .each((repeatItem) => {
         Stack()
           .backgroundColor(this.getEffectBackgroundColor(repeatItem))
@@ -754,6 +788,17 @@ struct SimpleSegmentButtonV2 {
       })
   }
 
+  private getItemRects(): SegmentButtonV2ItemRect[] {
+    if (!this.items) {
+      return [];
+    }
+    if (this.items.length === this.itemRects.length) {
+      return this.itemRects;
+    }
+
+    return this.itemRects.slice(0, this.items.length);
+  }
+
   build() {
     Stack() {
       Stack() {
@@ -763,16 +808,22 @@ struct SimpleSegmentButtonV2 {
       }
       .borderRadius(this.getButtonBorderRadius())
       .backgroundBlurStyle(this.getButtonBackgroundBlurStyle(), this.getButtonBackgroundBlurStyleOptions())
+      .clip(false)
       .direction(this.languageDirection)
     }
     .backgroundColor(this.getButtonBackgroundColor())
     .backgroundEffect(this.buttonBackgroundEffect)
     .borderRadius(this.getButtonBorderRadius())
+    .clip(false)
     .constraintSize({
       minWidth: '100%',
       minHeight: this.getButtonMinHeight()
     })
     .direction(this.languageDirection)
+  }
+
+  private getItems(): SegmentButtonV2Items {
+    return this.items ?? EMPTY_ITEMS;
   }
 
   private getItemBackplateShadow(): ShadowOptions | ShadowStyle | undefined {
@@ -863,7 +914,8 @@ struct SimpleSegmentButtonV2 {
   }
 
   getItemSpace(): LengthMetrics {
-    if (this.itemSpace && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSpace)) {
+    if (this.itemSpace && this.itemSpace.unit !== LengthUnit.PERCENT
+      && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSpace)) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
@@ -887,7 +939,8 @@ struct SimpleSegmentButtonV2 {
   }
 
   private updateSelectedIndex(selectedIndex: number) {
-    if (selectedIndex < 0 || selectedIndex > this.items.length - 1 || selectedIndex === this.selectedIndex) {
+    if (!this.isItemEnabled(selectedIndex) || selectedIndex === this.selectedIndex
+    ) {
       return;
     }
     this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
@@ -905,23 +958,11 @@ struct SimpleSegmentButtonV2 {
   }
 
   private getItemAccessibilityDescription(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    if (typeof repeatItem.item.accessibilityDescription === 'object') {
-      return parseStringResource(this.getUIContext(), repeatItem.item.accessibilityDescription);
-    } else if (typeof repeatItem.item.accessibilityDescription === 'string') {
-      return repeatItem.item.accessibilityDescription;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityDescription as ESObject as string;
   }
 
   private getItemAccessibilityText(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    if (typeof repeatItem.item.accessibilityText === 'object') {
-      return parseStringResource(this.getUIContext(), repeatItem.item.accessibilityText);
-    } else if (typeof repeatItem.item.accessibilityText === 'string') {
-      return repeatItem.item.accessibilityText;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityText as ESObject as string;
   }
 
   private isSelected(repeatItem: RepeatItem<SegmentButtonV2Item>): boolean | undefined {
@@ -953,7 +994,8 @@ struct SimpleSegmentButtonV2 {
     if (this.buttonMinHeight && LengthMetricsUtils.getInstance().isNaturalNumber(this.buttonMinHeight)) {
       return LengthMetricsUtils.getInstance().stringify(this.buttonMinHeight);
     }
-    return this.items.hasHybrid ? this.theme.hybridButtonMinHeight : this.theme.buttonMinHeight;
+    const items = this.getItems();
+    return items.hasHybrid ? this.theme.hybridButtonMinHeight : this.theme.buttonMinHeight;
   }
 }
 
@@ -1056,17 +1098,18 @@ export struct MultiCapsuleSegmentButtonV2 {
   @Param
   languageDirection?: Direction = undefined;
   private theme: MultiplySegmentButtonV2Theme = multiplyCapsuleTheme;
+  private focusGroupId: string = util.generateRandomUUID();
 
   build() {
     Flex({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } }) {
-      Repeat(this.items)
+      Repeat(this.getItems())
         .each((repeatItem: RepeatItem<SegmentButtonV2Item>) => {
           Button({ type: ButtonType.Normal }) {
             SegmentButtonV2ItemContent({
               theme: this.theme,
               item: repeatItem.item,
               selected: this.isSelected(repeatItem),
-              hasHybrid: this.items.hasHybrid,
+              hasHybrid: this.getItems().hasHybrid,
               itemMinFontScale: this.itemMinFontScale,
               itemMaxFontScale: this.itemMaxFontScale,
               itemFontColor: this.itemFontColor,
@@ -1087,6 +1130,7 @@ export struct MultiCapsuleSegmentButtonV2 {
             })
               .borderRadius(this.getItemButtonBorderRadius(repeatItem))
               .backgroundBlurStyle(this.getItemBackgroundBlurStyle(), this.getItemBackgroundBlurStyleOptions())
+              .direction(this.languageDirection)
           }
           .accessibilityGroup(true)
           .accessibilityChecked(this.isSelected(repeatItem))
@@ -1099,28 +1143,42 @@ export struct MultiCapsuleSegmentButtonV2 {
           .constraintSize({ minHeight: this.getItemMinHeight() })
           .direction(this.languageDirection)
           .enabled(repeatItem.item.enabled)
+          .focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem))
           .layoutWeight(1)
           .padding(0)
           .onClick(() => {
             this.onItemClicked?.(repeatItem.index);
             let selection: number[];
+            const items = this.getItems();
+            const selectedIndexes = this.selectedIndexes ?? [];
             if (this.isSelected(repeatItem)) {
-              selection = this.selectedIndexes.filter((index) => {
-                if (index < 0 || index > this.items.length - 1) {
+              selection = selectedIndexes.filter((index) => {
+                if (index < 0 || index > items.length - 1) {
                   return false;
                 }
                 return index !== repeatItem.index;
               });
             } else {
-              selection = this.selectedIndexes
-                .filter((index) => index >= 0 && index <= this.items.length - 1)
+              selection = selectedIndexes
+                .filter((index) => index >= 0 && index <= items.length - 1)
                 .concat(repeatItem.index);
             }
             this.$selectedIndexes(selection);
           })
         })
+        .key(generateUniqueKye(this.focusGroupId))
     }
+    .clip(false)
     .direction(this.languageDirection)
+    .focusScopeId(this.focusGroupId, true)
+  }
+
+  private getFocusPriority(repeatItem: RepeatItem<SegmentButtonV2Item>): FocusPriority | undefined {
+    return Math.min(...this.selectedIndexes) === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
+  }
+
+  getItems(): SegmentButtonV2Items {
+    return this.items ?? EMPTY_ITEMS;
   }
 
   getItemBackgroundBlurStyleOptions(): BackgroundBlurStyleOptions | undefined {
@@ -1138,27 +1196,16 @@ export struct MultiCapsuleSegmentButtonV2 {
   }
 
   private getItemAccessibilityDescription(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    if (typeof repeatItem.item.accessibilityDescription === 'object') {
-      return parseStringResource(this.getUIContext(), repeatItem.item.accessibilityDescription);
-    } else if (typeof repeatItem.item.accessibilityDescription === 'string') {
-      return repeatItem.item.accessibilityDescription;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityDescription as ESObject as string;
   }
 
   private getItemAccessibilityText(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    if (typeof repeatItem.item.accessibilityText === 'object') {
-      return parseStringResource(this.getUIContext(), repeatItem.item.accessibilityText);
-    } else if (typeof repeatItem.item.accessibilityText === 'string') {
-      return repeatItem.item.accessibilityText;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityText as ESObject as string;
   }
 
   private getItemSpace(): LengthMetrics {
-    if (this.itemSpace && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSpace)) {
+    if (this.itemSpace && this.itemSpace.unit !== LengthUnit.PERCENT
+      && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSpace)) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
@@ -1179,35 +1226,31 @@ export struct MultiCapsuleSegmentButtonV2 {
   }
 
   private isSelected(repeatItem: RepeatItem<SegmentButtonV2Item>): boolean {
-    return this.selectedIndexes.includes(repeatItem.index);
+    const selectedIndexes = this.selectedIndexes ?? [];
+    return selectedIndexes.includes(repeatItem.index);
   }
 
   private getItemButtonBorderRadius(repeatItem: RepeatItem<SegmentButtonV2Item>): LocalizedBorderRadiuses {
+    const items = this.getItems();
     const noneBorderRadius: LengthMetrics = LengthMetrics.vp(0);
-    if (repeatItem.index === 0) {
-      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
-      return {
-        topStart: borderRadius,
-        bottomStart: borderRadius,
-        topEnd: noneBorderRadius,
-        bottomEnd: noneBorderRadius,
-      };
-    }
-    if (repeatItem.index === Math.min(this.items.length - 1, 4)) {
-      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
-      return {
-        topStart: noneBorderRadius,
-        bottomStart: noneBorderRadius,
-        topEnd: borderRadius,
-        bottomEnd: borderRadius,
-      };
-    }
-    return {
+    const borderRadiuses: LocalizedBorderRadiuses = {
       topStart: noneBorderRadius,
       bottomStart: noneBorderRadius,
       topEnd: noneBorderRadius,
       bottomEnd: noneBorderRadius,
     };
+    if (repeatItem.index === 0) {
+      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
+      borderRadiuses.topStart = borderRadius;
+      borderRadiuses.bottomStart = borderRadius;
+
+    }
+    if (repeatItem.index === items.length - 1) {
+      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
+      borderRadiuses.topEnd = borderRadius;
+      borderRadiuses.bottomEnd = borderRadius;
+    }
+    return borderRadiuses;
   }
 }
 
@@ -1279,7 +1322,7 @@ struct SegmentButtonV2ItemContent {
 
   build() {
     Column({ space: 2 }) {
-      if (this.item.symbol) {
+      if (this.item.symbol || this.item.symbolModifier) {
         SymbolGlyph(this.item.symbol)
           .fontSize(this.getSymbolFontSize())
           .fontColor([this.getItemSymbolFillColor()])
@@ -1329,7 +1372,7 @@ struct SegmentButtonV2ItemContent {
   }
 
   private getSymbolFontSize(): Dimension {
-    if (this.itemSymbolFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSymbolFontSize)) {
+    if (this.itemSymbolFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSymbolFontSize) && this.itemSymbolFontSize.unit !== LengthUnit.PERCENT) {
       return LengthMetricsUtils.getInstance().stringify(this.itemSymbolFontSize);
     }
     return this.theme.itemSymbolFontSize;
@@ -1408,12 +1451,12 @@ struct SegmentButtonV2ItemContent {
 
   private getItemFontSize(): Length {
     if (this.selected) {
-      if (this.itemSelectedFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSelectedFontSize)) {
+      if (this.itemSelectedFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSelectedFontSize)  && this.itemSelectedFontSize.unit !== LengthUnit.PERCENT) {
         return LengthMetricsUtils.getInstance().stringify(this.itemSelectedFontSize);
       }
       return this.theme.itemFontSize;
     }
-    if (this.itemFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemFontSize)) {
+    if (this.itemFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemFontSize) && this.itemFontSize.unit !== LengthUnit.PERCENT) {
       return LengthMetricsUtils.getInstance().stringify(this.itemFontSize);
     }
     return this.theme.itemFontSize;
@@ -1480,19 +1523,6 @@ class LengthMetricsUtils {
   }
 }
 
-function parseStringResource(context: UIContext, resource: Resource): string | undefined {
-  const resourceManager = context.getHostContext()?.resourceManager;
-  if (!resourceManager) {
-    return undefined;
-  }
-  try {
-    return resourceManager.getStringSync(resource);
-  } catch (err) {
-    // todo log err
-    return undefined;
-  }
-}
-
 function parseNumericResource(context: UIContext, resource: Resource): number | undefined {
   const resourceManager = context.getHostContext()?.resourceManager;
   if (!resourceManager) {
@@ -1508,4 +1538,36 @@ function parseNumericResource(context: UIContext, resource: Resource): number | 
 
 function normalize(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function generateUniqueKye(groupId: string) {
+  return (item: SegmentButtonV2Item, index: number): string => {
+    let key = groupId;
+    if (item.text) {
+      if (typeof item.text === 'string') {
+        key += item.text;
+      } else {
+        key += getResourceUniqueId(item.text);
+      }
+    }
+    if (item.icon) {
+      if (typeof item.icon === 'string') {
+        key += item.icon;
+      } else {
+        key += getResourceUniqueId(item.icon);
+      }
+    }
+    if (item.symbol) {
+      key += getResourceUniqueId(item.symbol);
+    }
+    return key;
+  }
+}
+
+function getResourceUniqueId(resource: Resource): string {
+  if (resource.id !== -1) {
+    return `${resource.id}`;
+  } else {
+    return JSON.stringify(resource);
+  }
 }

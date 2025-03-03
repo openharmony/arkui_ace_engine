@@ -40,6 +40,9 @@ void SequencedRecognizer::OnAccepted()
 
 void SequencedRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         (*callback)(info);
@@ -454,4 +457,26 @@ void SequencedRecognizer::ForceCleanRecognizer()
     currentIndex_ = 0;
     childTouchTestList_.clear();
 }
+
+void SequencedRecognizer::CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    if (currentIndex_ == static_cast<int32_t>(recognizers_.size() - 1)) {
+        SetIsNeedResetRecognizer(true);
+    }
+}
+
+void SequencedRecognizer::CleanRecognizerStateVoluntarily()
+{
+    for (const auto& child : recognizers_) {
+        if (child && AceType::InstanceOf<RecognizerGroup>(child)) {
+            child->CleanRecognizerStateVoluntarily();
+        }
+    }
+    if (IsNeedResetRecognizerState()) {
+        currentIndex_ = 0;
+        refereeState_ = RefereeState::READY;
+        SetIsNeedResetRecognizer(false);
+    }
+}
+
 } // namespace OHOS::Ace::NG

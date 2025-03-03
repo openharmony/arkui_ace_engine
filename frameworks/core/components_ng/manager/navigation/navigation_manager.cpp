@@ -17,7 +17,9 @@
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
@@ -321,38 +323,168 @@ const std::vector<NavdestinationRecoveryInfo> NavigationManager::GetNavigationRe
     return ret;
 }
 
-void NavigationManager::OnContainerModalButtonsRectChange()
+void NavigationManager::AddNavigation(int32_t parentId, int32_t navigationId)
 {
-    for (auto& pair : buttonsRectChangeListeners_) {
-        if (pair.second) {
-            pair.second();
+    auto iter = navigationMaps_.find(parentId);
+    if (iter == navigationMaps_.end()) {
+        // insert into navigation maps
+        std::vector<int32_t> navigationIds;
+        navigationIds.push_back(navigationId);
+        navigationMaps_[parentId] = navigationIds;
+        return;
+    }
+    auto navigations = iter->second;
+    navigations.push_back(navigationId);
+    iter->second = navigations;
+}
+
+void NavigationManager::RemoveNavigation(int32_t navigationId)
+{
+    for (auto navigationIter = navigationMaps_.begin(); navigationIter != navigationMaps_.end();) {
+        auto navigationIds = navigationIter->second;
+        auto it = std::find(navigationIds.begin(), navigationIds.end(), navigationId);
+        if (it == navigationIds.end()) {
+            navigationIter++;
+            continue;
+        }
+        navigationIds.erase(it);
+        if (navigationIds.empty()) {
+            navigationIter = navigationMaps_.erase(navigationIter);
+        } else {
+            navigationIter++;
         }
     }
 }
 
-void NavigationManager::AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener)
+std::vector<int32_t> NavigationManager::FindNavigationInTargetParent(int32_t targetId)
 {
-    if (!hasRegisterListener_) {
-        auto pipeline = pipeline_.Upgrade();
-        CHECK_NULL_VOID(pipeline);
-        auto containerModalListener =
-            [weakMgr = WeakClaim(this)](const RectF&, const RectF&) {
-                auto mgr = weakMgr.Upgrade();
-                CHECK_NULL_VOID(mgr);
-                mgr->OnContainerModalButtonsRectChange();
-            };
-        ContainerModalViewEnhance::AddButtonsRectChangeListener(
-            AceType::RawPtr(pipeline), std::move(containerModalListener));
-        hasRegisterListener_ = true;
+    auto it = navigationMaps_.find(targetId);
+    if (it == navigationMaps_.end()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find inner navigation");
+        return {};
     }
-    buttonsRectChangeListeners_[id] = listener;
+    return it->second;
 }
 
-void NavigationManager::RemoveButtonsRectChangeListener(int32_t id)
+void NavigationManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
 {
-    auto it = buttonsRectChangeListeners_.find(id);
-    if (it != buttonsRectChangeListeners_.end()) {
-        buttonsRectChangeListeners_.erase(it);
+    NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
+    if (activeReason == NavDestinationActiveReason::TRANSITION) {
+        NavigationPattern::FireNavigationLifecycle(node, static_cast<NavDestinationLifecycle>(lifecycle),
+            activeReason);
+        return;
     }
+    // fire navdestination lifecycle in outer layer
+    FireLowerLayerLifecycle(nullptr, lifecycle, reason);
+}
+
+void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    CHECK_NULL_VOID(node);
+    NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
+    auto currentLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
+    NavigationPattern::FireNavigationLifecycle(node, currentLifecycle, activeReason);
+    NavDestinationLifecycle lowerLifecycle = NavDestinationLifecycle::ON_ACTIVE;
+    if (lifecycle == NavDestinationLifecycle::ON_ACTIVE) {
+        lowerLifecycle = NavDestinationLifecycle::ON_INACTIVE;
+    }
+    if (lifecycle == NavDestinationLifecycle::ON_INACTIVE) {
+        lowerLifecycle = NavDestinationLifecycle::ON_ACTIVE;
+    }
+    FireLowerLayerLifecycle(node, static_cast<int32_t>(lowerLifecycle), reason);
+}
+
+void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    NavDestinationLifecycle lowerLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
+    NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
+    auto pipelineContext = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    RefPtr<UINode> curNode = node;
+    // sheet page node is not attach on root, get parent node sheetWrapper
+    if (node && node->GetTag() == V2::SHEET_PAGE_TAG) {
+        curNode = node->GetParent();
+    }
+    int32_t curNodeIndex = curNode ? rootNode->GetChildIndex(curNode)
+        : static_cast<int32_t>(rootNode->GetChildren().size());
+    // find lower layer node below node
+    for (auto index = curNodeIndex - 1; index >= 0; index--) {
+        auto child = AceType::DynamicCast<FrameNode>(rootNode->GetChildAtIndex(index));
+        if (!child) {
+            continue;
+        }
+        auto tag = child->GetTag();
+        if (tag == V2::SHEET_WRAPPER_TAG) {
+            NavigationPattern::FireNavigationLifecycle(child->GetChildAtIndex(0), lowerLifecycle, activeReason);
+            return;
+        }
+        if (tag == V2::MODAL_PAGE_TAG) {
+            NavigationPattern::FireNavigationLifecycle(child, lowerLifecycle, activeReason);
+            return;
+        }
+        if (IsOverlayValid(child)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "overlay has onShow");
+            return;
+        }
+        if (IsCustomDialogValid(child)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom dialog onShow");
+            return;
+        }
+    }
+    // fire last page lifecycle
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto lastPage = stageManager->GetLastPage();
+    CHECK_NULL_VOID(lastPage);
+    NavigationPattern::FireNavigationLifecycle(lastPage, lowerLifecycle, activeReason);
+}
+
+void NavigationManager::FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetMainPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->FireLowerLayerLifecycle(node, lifecycle, reason);
+}
+
+bool NavigationManager::IsOverlayValid(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() != V2::OVERLAY_ETS_TAG) {
+        return false;
+    }
+    auto overlays = node->GetChildren();
+    // check overlay is visible, if overlay is visible, don't need fire active lifecycle
+    for (auto index = 0; index < static_cast<int32_t>(overlays.size()); index++) {
+        auto overlay = AceType::DynamicCast<FrameNode>(node->GetChildAtIndex(index));
+        if (!overlay) {
+            continue;
+        }
+        auto layoutProperty = overlay->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NavigationManager::IsCustomDialogValid(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    // if lower layer is dialog, don't need to trigger lifecycle
+    auto pattern = frameNode->GetPattern();
+    if (!InstanceOf<DialogPattern>(pattern)) {
+        return false;
+    }
+    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+    if (!dialogPattern) {
+        return false;
+    }
+    auto dialogProperty = dialogPattern->GetDialogProperties();
+    // if dialog is custom dialog, don't need to trigger active lifecycle, it triggers when dialog closed
+    return dialogProperty.isUserCreatedDialog;
 }
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/components/xcomponent/rosen_render_xcomponent.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 #ifdef OHOS_STANDARD_SYSTEM

@@ -107,7 +107,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestPixelMap, T
     ASSERT_TRUE(layoutProperty);
     auto sourceInfo = layoutProperty->GetImageSourceInfo();
     ASSERT_TRUE(sourceInfo);
-    EXPECT_EQ(sourceInfo->GetPixmap().GetRawPtr(), pixelMap.GetRawPtr());
+    EXPECT_EQ(sourceInfo->GetPixmap(), pixelMap);
 }
 
 /*

@@ -60,6 +60,7 @@ template("napi_promptaction_static") {
     sources = [
       "../promptaction/prompt_action.cpp",
       "../promptaction/prompt_controller.cpp",
+      "js_level_order.cpp",
       "js_prompt_action.cpp",
       "js_prompt_controller.cpp",
     ]

@@ -39,6 +39,8 @@ private:
     static void DumpInfoAddPositionDesc(SwiperPattern& swiper);
     static void DumpInfoAddGestureDesc(SwiperPattern& swiper);
     static void DumpInfoAddAnimationDesc(SwiperPattern& swiper);
+    static void SetChangeIndexWithModeImpl(const RefPtr<SwiperController>& controller,
+        const WeakPtr<SwiperPattern>& weak);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_HELPER_H

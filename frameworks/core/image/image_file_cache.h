@@ -64,6 +64,7 @@ public:
     void ClearCacheFile(const std::vector<std::string>& removeFiles);
     std::string ConstructCacheFilePath(const std::string& fileName);
     void DumpCacheInfo();
+    void ClearAllCacheFiles();
 private:
     void SaveCacheInner(const std::string& cacheKey, const std::string& suffix, size_t cacheSize,
         std::vector<std::string>& removeVector);

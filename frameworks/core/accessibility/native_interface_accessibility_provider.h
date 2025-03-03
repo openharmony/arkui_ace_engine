@@ -21,6 +21,12 @@
 
 #include "core/accessibility/accessibility_provider.h"
 
+enum AccessibilityProviderOperatorErrorCode : int32_t {
+    OPERATOR_SUCCESS = 0,
+    NOT_REGISTERED = -10001,
+    COPY_FAILED = -10002,
+};
+
 struct ArkUI_AccessibilityProvider {
 public:
     ArkUI_AccessibilityProvider() = default;
@@ -50,14 +56,18 @@ public:
         void (*callback)(int32_t errorCode));
     int32_t AccessibilityProviderRegisterCallback(
         ArkUI_AccessibilityProviderCallbacks* callbacks);
+    int32_t AccessibilityProviderRegisterCallbackWithInstance(const char* instanceId,
+        ArkUI_AccessibilityProviderCallbacksWithInstance* callbacks);
     void SetInnerAccessibilityProvider(
         const OHOS::Ace::WeakPtr<OHOS::Ace::AccessibilityProvider>& accessibilityProvider);
     bool IsRegister();
     void SetRegisterCallback(RegisterCallback callback);
 
 private:
-    ArkUI_AccessibilityProviderCallbacks* accessibilityProviderCallbacks_ = nullptr;
+    ArkUI_AccessibilityProviderCallbacks accessibilityProviderCallbacks_ {};
+    ArkUI_AccessibilityProviderCallbacksWithInstance accessibilityProviderCallbacksWithInstance_ {};
     OHOS::Ace::WeakPtr<OHOS::Ace::AccessibilityProvider> accessibilityProvider_;
     RegisterCallback registerCallback_;
+    std::string instanceId_;
 };
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_NATIVE_INTERFACE_ACCESSIBILITY_HANDLE_H

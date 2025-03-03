@@ -32,8 +32,9 @@ class ACE_FORCE_EXPORT LongPressGesture : public Gesture {
 
 public:
     LongPressGesture(
-        int32_t fingers, bool repeat, int32_t duration, bool isForDrag = false, bool isDisableMouseLeft = false)
-        : Gesture(fingers), repeat_(repeat), duration_(duration), isForDrag_(isForDrag),
+        int32_t fingers, bool repeat, int32_t duration, bool isForDrag = false, bool isDisableMouseLeft = false,
+        bool isLimitFingerCount = false)
+        : Gesture(fingers, isLimitFingerCount), repeat_(repeat), duration_(duration), isForDrag_(isForDrag),
           isDisableMouseLeft_(isDisableMouseLeft)
     {
         if (gestureInfo_) {

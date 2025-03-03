@@ -35,6 +35,7 @@ public:
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetTextCaretColor(const Color& value) override;
@@ -73,10 +74,6 @@ public:
     void SetCopyOption(CopyOptions copyOption) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
-    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
-    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
-    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
-    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
@@ -103,6 +100,7 @@ public:
     static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<Ace::TextAlign>& value);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void ResetTextColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
@@ -163,7 +161,7 @@ public:
     static Dimension GetFontSize(FrameNode* frameNode);
     static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
     static Ace::FontStyle GetItalicFontStyle(FrameNode* frameNode);
-    static Color GetDefaultColor();
+    static Color GetDefaultColor(int32_t themeScopeId);
     static Color GetFontColor(FrameNode* frameNode);
     static Dimension GetTextBaselineOffset(FrameNode* frameNode);
     static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);

@@ -27,6 +27,7 @@
 namespace OHOS::Ace {
 
 using OnHoverCallback = std::function<void(bool, HoverInfo& info)>;
+using OnHoverMoveCallback = std::function<void(HoverInfo& info)>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
 using OnPreDragFunc = std::function<void(const PreDragStatus)>;
@@ -131,6 +132,11 @@ public:
     void SetOnHoverId(const OnHoverCallback& onHoverId)
     {
         onHoverId_ = onHoverId;
+    }
+
+    void SetOnHoverMoveId(const OnHoverMoveCallback& onHoverMoveId)
+    {
+        onHoverMoveId_ = onHoverMoveId;
     }
 
     OnHoverCallback GetOnHoverId() const
@@ -396,6 +402,7 @@ private:
     bool decorationUpdateFlag_ = false;
     HoverAnimationType animationType_ = HoverAnimationType::UNKNOWN;
     OnHoverCallback onHoverId_;
+    OnHoverMoveCallback onHoverMoveId_;
     OnMouseCallback onMouseId_;
     OnTouchEventCallback onTouchMoveId_;
     OnTouchEventCallback onTouchUpId_;

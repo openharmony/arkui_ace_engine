@@ -14,20 +14,25 @@
  */
 
 #include "adapter/ohos/entrance/picker/picker_haptic_controller.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+using std::chrono_literals::operator""s;
+using std::chrono_literals::operator""ms;
 const std::string AUDIO_TEST_URI = "/system/etc/arkui/timepicker.ogg";
 const std::string EFFECT_ID_NAME = "haptic.clock.timer";
 constexpr size_t SPEED_THRESHOLD_156_MM_PER_SEC = 156;
 constexpr size_t SPEED_PLAY_ONCE_5_MM_PER_SEC = 5;
 } // namespace
 
-PickerHapticController::PickerHapticController() noexcept
+PickerHapticController::PickerHapticController(const std::string& uri, const std::string& effectId) noexcept
 {
+    std::string effectiveUri = uri.empty() ? AUDIO_TEST_URI : uri;
+    std::string effectiveEffectId = effectId.empty() ? EFFECT_ID_NAME : effectId;
     audioHapticManager_ = Media::AudioHapticManagerFactory::CreateAudioHapticManager();
     if (audioHapticManager_) {
-        effectSourceId_ = audioHapticManager_->RegisterSourceWithEffectId(AUDIO_TEST_URI, EFFECT_ID_NAME);
+        effectSourceId_ = audioHapticManager_->RegisterSourceWithEffectId(effectiveUri, effectiveEffectId);
         Media::AudioLatencyMode latencyMode = Media::AudioLatencyMode::AUDIO_LATENCY_MODE_FAST;
         audioHapticManager_->SetAudioLatencyMode(effectSourceId_, latencyMode);
         AudioStandard::StreamUsage streamUsage = AudioStandard::StreamUsage::STREAM_USAGE_NOTIFICATION;

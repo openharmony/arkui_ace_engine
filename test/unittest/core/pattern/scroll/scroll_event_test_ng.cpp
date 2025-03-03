@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ public:
 AssertionResult ScrollEventTestNg::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode, float expectOffset)
 {
     pattern_->ScrollToNode(focusFrameNode);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return IsEqual(pattern_->GetTotalOffset(), expectOffset);
 }
 
@@ -361,7 +361,7 @@ HWTEST_F(ScrollEventTestNg, HandleDrag003, TestSize.Level1)
     info.SetMainVelocity(velocity);
     info.SetMainDelta(offset);
     pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 10.0f);
 
     // Update 2 finger position.
@@ -370,15 +370,16 @@ HWTEST_F(ScrollEventTestNg, HandleDrag003, TestSize.Level1)
     info.SetMainVelocity(velocity);
     info.SetMainDelta(offset);
     pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 20.0f);
 
     // Lift finger and end List sliding.
     info.SetMainVelocity(0.0);
     info.SetMainDelta(0.0);
+    pattern_->scrollableEvent_->GetScrollable()->lastMainDelta_ = 0.0;
     pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
     pattern_->scrollableEvent_->GetScrollable()->isDragging_ = false;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 20.0f);
 }
 
@@ -513,7 +514,7 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll004, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent(SCROLL_HEIGHT);
+    CreateContent(HEIGHT);
     CreateScrollDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
@@ -710,7 +711,7 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap001, TestSize.Level1)
      */
     float lastIntervalSize = CONTENT_MAIN_SIZE - 11 * intervalSize;
     float viewIntervalSize = 4 * intervalSize;
-    float startOffset = intervalSize - (SCROLL_HEIGHT - viewIntervalSize - lastIntervalSize);
+    float startOffset = intervalSize - (HEIGHT - viewIntervalSize - lastIntervalSize);
     delta = 1;
     ScrollBy(0, delta);
     EXPECT_TRUE(Position(delta - VERTICAL_SCROLLABLE_DISTANCE));
@@ -824,7 +825,7 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().SetTicks(TICK);
     float halfInterval = intervalSize / 2;
-    float centerPosition = SCROLL_HEIGHT / 2;
+    float centerPosition = HEIGHT / 2;
     float centerOffset = halfInterval - centerPosition + 2 * intervalSize;
     float delta = -1;
     ScrollBy(0, delta);
@@ -1031,7 +1032,7 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations002, TestSize.Level1)
      * @tc.expected: Scroll back
      */
     MockAnimationManager::GetInstance().SetTicks(TICK);
-    float delta = 1 - (firstPagination - SCROLL_HEIGHT) / 2;
+    float delta = 1 - (firstPagination - HEIGHT) / 2;
     ScrollBy(0, delta);
     EXPECT_TRUE(Position(delta));
     EXPECT_TRUE(TickPosition(delta / TICK));
@@ -1041,7 +1042,7 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations002, TestSize.Level1)
      * @tc.steps: step2. Scroll down greater than half of first snapPaginations
      * @tc.expected: Scroll to first snapPaginations
      */
-    delta = (SCROLL_HEIGHT - firstPagination) / 2;
+    delta = (HEIGHT - firstPagination) / 2;
     ScrollBy(0, delta);
     EXPECT_TRUE(Position(delta));
     EXPECT_TRUE(TickPosition(-337.5));
@@ -1137,8 +1138,8 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations004, TestSize.Level1)
     const float firstPagination = 100;
     const float secondPagination = 150;
     std::vector<Dimension> snapPaginations = {
-        Dimension(firstPagination / SCROLL_HEIGHT, DimensionUnit::PERCENT),
-        Dimension(secondPagination / SCROLL_HEIGHT, DimensionUnit::PERCENT),
+        Dimension(firstPagination / HEIGHT, DimensionUnit::PERCENT),
+        Dimension(secondPagination / HEIGHT, DimensionUnit::PERCENT),
     };
     std::pair<bool, bool> enableSnapToSide = { true, true };
     ScrollModelNG model = CreateScroll();
@@ -1270,7 +1271,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
     auto viewPortLength = pattern_->GetMainContentSize();
     pattern_->scrollableDistance_ = viewPortLength * 10;
     pattern_->currentOffset_ = -viewPortLength * 5 - 10.0f;
-    SizeF viewPortExtent(SCROLL_WIDTH, viewPortLength * 11);
+    SizeF viewPortExtent(WIDTH, viewPortLength * 11);
     pattern_->viewPortExtent_ = viewPortExtent;
     pattern_->SetIntervalSize(Dimension(static_cast<double>(viewPortLength)));
     pattern_->CaleSnapOffsets();
@@ -1405,11 +1406,11 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
     CreateScrollDone();
 
     /**
-     * @tc.steps: step1. Scroll down less than half of SCROLL_HEIGHT
+     * @tc.steps: step1. Scroll down less than half of HEIGHT
      * @tc.expected: Scroll back
      */
     MockAnimationManager::GetInstance().SetTicks(TICK);
-    const float halfHeight = SCROLL_HEIGHT / 2;
+    const float halfHeight = HEIGHT / 2;
     float delta = 1 - halfHeight;
     ScrollBy(0, delta);
     EXPECT_TRUE(Position(delta));
@@ -1417,14 +1418,14 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
     EXPECT_TRUE(TickPosition(0));
 
     /**
-     * @tc.steps: step2. Scroll down greater than half of SCROLL_HEIGHT
+     * @tc.steps: step2. Scroll down greater than half of HEIGHT
      * @tc.expected: Scroll to next page
      */
     delta = -halfHeight;
     ScrollBy(0, delta);
     EXPECT_TRUE(Position(delta));
-    EXPECT_TRUE(TickPosition((delta - SCROLL_HEIGHT) / 2));
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition((delta - HEIGHT) / 2));
+    EXPECT_TRUE(TickPosition(-HEIGHT));
 
     /**
      * @tc.steps: step3. Scroll down less than half of last page
@@ -1432,7 +1433,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
      */
     const float lastPageHeight = 200;
     const float halfLastPageHeight = lastPageHeight / 2;
-    float currentOffset = -SCROLL_HEIGHT;
+    float currentOffset = -HEIGHT;
     delta = 1 - halfLastPageHeight;
     ScrollBy(0, delta);
     EXPECT_TRUE(Position(delta + currentOffset));
@@ -1517,13 +1518,13 @@ HWTEST_F(ScrollEventTestNg, SetEffectEdge001, TestSize.Level1)
     auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
     scrollable->HandleTouchDown();
     pattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
 
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
     pattern_->UpdateCurrentOffset(100, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 100);
 }
 
@@ -1543,12 +1544,12 @@ HWTEST_F(ScrollEventTestNg, SetEffectEdge002, TestSize.Level1)
     auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
     scrollable->HandleTouchDown();
     pattern_->UpdateCurrentOffset(100, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     pattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE - 100);
 }
 
@@ -1583,7 +1584,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging005, TestSize.Level1)
      * @tc.expected: Not trigger snap animation
      */
     pattern_->currentOffset_ = -viewPortLength + 0.01f;
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->IsScrollableStopped());
 }
 
@@ -1613,10 +1614,10 @@ HWTEST_F(ScrollEventTestNg, EnablePaging006, TestSize.Level1)
     DragUpdate(-10);
     DragEnd(-SCROLL_PAGING_SPEED_THRESHOLD - 1);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(state, ScrollState::FLING);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(state, ScrollState::IDLE);
 }
 
@@ -1640,8 +1641,8 @@ HWTEST_F(ScrollEventTestNg, CAPIScrollPage001, TestSize.Level1)
      */
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.f);
     pattern_->ScrollPage(false, false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -SCROLL_HEIGHT);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), -HEIGHT);
 
     /**
      * @tc.steps: step3. scroll to previous page with animation
@@ -1649,7 +1650,7 @@ HWTEST_F(ScrollEventTestNg, CAPIScrollPage001, TestSize.Level1)
     pattern_->ScrollPage(true, true);
     EXPECT_TRUE(pattern_->AnimateRunning());
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.f);
 }
 
@@ -1687,7 +1688,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop001, TestSize.Level1)
 
     pattern_->Fling(200.f);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isScrollStartCalled, 1);
     EXPECT_EQ(isScrollStopCalled, 1);
     EXPECT_EQ(stopHasStart, 1);
@@ -1700,7 +1701,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop001, TestSize.Level1)
     isScrollStopCalled = 0;
     stopHasStart = 0;
     pattern_->Fling(20.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isScrollStartCalled, 1);
     EXPECT_EQ(isScrollStopCalled, 1);
     EXPECT_EQ(stopHasStart, 1);
@@ -1741,7 +1742,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop002, TestSize.Level1)
     DragEnd(-241.f);
     pattern_->Fling(241.f);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isScrollStartCalled, 2);
     EXPECT_EQ(isScrollStopCalled, 2);
     EXPECT_EQ(stopHasStart, 2);
@@ -1756,7 +1757,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop002, TestSize.Level1)
     DragStart(frameNode_, Offset());
     DragEnd(-200.f);
     pattern_->Fling(20.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isScrollStartCalled, 1);
     EXPECT_EQ(isScrollStopCalled, 1);
     EXPECT_EQ(stopHasStart, 1);
@@ -1798,7 +1799,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop003, TestSize.Level1)
     DragEnd(-200.f);
     pattern_->Fling(200.f);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isScrollStartCalled, 1);
     EXPECT_EQ(isScrollStopCalled, 1);
     EXPECT_EQ(stopHasStart, 1);
@@ -1814,7 +1815,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop003, TestSize.Level1)
     DragEnd(-200.f);
     pattern_->Fling(20.f);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isScrollStartCalled, 1);
     EXPECT_EQ(isScrollStopCalled, 1);
     EXPECT_EQ(stopHasStart, 1);

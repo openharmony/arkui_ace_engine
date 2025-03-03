@@ -32,7 +32,8 @@ using std::shared_ptr;
 using RegisterFunctionType = std::function<shared_ptr<JsValue>(shared_ptr<JsRuntime>, shared_ptr<JsValue>,
                                                                const std::vector<shared_ptr<JsValue>> &, int32_t)>;
 using LOG_PRINT = int (*)(int id, int level, const char *tag, const char *fmt, const char *message);
-using UncaughtExceptionCallback = std::function<void(shared_ptr<JsValue>, std::shared_ptr<JsRuntime>)>;
+using UncaughtExceptionCallback = std::function<void(
+    shared_ptr<JsValue>, std::shared_ptr<JsRuntime>, const std::string& uniqueId)>;
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class JsRuntime {
@@ -44,6 +45,13 @@ public:
     virtual void Reset() = 0;
     virtual void SetLogPrint(LOG_PRINT out) = 0;
     virtual bool StartDebugger() = 0;
+    virtual void SetUniqueId(const std::string& uniqueId) {};
+
+    virtual const std::string& GetUniqueId() const
+    {
+        static const std::string res;
+        return res;
+    }
 
     // Evaluate a piece of js code, returns true if success.
     // If exception occurs during execution, it is handled inside this interface.

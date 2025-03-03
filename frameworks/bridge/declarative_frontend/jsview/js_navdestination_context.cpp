@@ -151,4 +151,15 @@ void JSNavDestinationContext::Destructor(JSNavDestinationContext* context)
         context->DecRefCount();
     }
 }
+
+void JSNavPathInfo::UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info)
+{
+    NG::NavPathInfo::UpdateNavPathInfo(info);
+    auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(info);
+    if (!jsPathInfo) {
+        return;
+    }
+    param_ = jsPathInfo->GetParam();
+    onPop_ = jsPathInfo->GetOnPop();
+}
 } // namespace OHOS::Ace::Framework

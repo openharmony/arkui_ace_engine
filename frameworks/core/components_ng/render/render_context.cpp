@@ -48,7 +48,7 @@ void RenderContext::RequestNextFrame() const
         requestFrame_();
         auto node = GetHost();
         CHECK_NULL_VOID(node);
-        auto eventHub = node->GetEventHub<NG::EventHub>();
+        auto eventHub = node->GetEventHubOnly<NG::EventHub>();
         if (node->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
             auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
             CHECK_NULL_VOID(pipeline);
@@ -65,11 +65,6 @@ void RenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
 RefPtr<FrameNode> RenderContext::GetHost() const
 {
     return host_.Upgrade();
-}
-
-FrameNode* RenderContext::GetUnsafeHost() const
-{
-    return UnsafeRawPtr(host_);
 }
 
 void RenderContext::SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)

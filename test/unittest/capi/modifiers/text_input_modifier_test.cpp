@@ -678,12 +678,12 @@ HWTEST_F(TextInputModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
 
     PreviewText previewText {.offset = -1, .value = u""};
     ASSERT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnChange(u"test", previewText);
+    eventHub->FireOnChange({u"test", previewText});
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     ASSERT_EQ(checkEvent->value.has_value(), true);
     EXPECT_EQ(checkEvent->value.value(), "test");
-    eventHub->FireOnChange(u"test_2", previewText);
+    eventHub->FireOnChange({u"test_2", previewText});
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     ASSERT_EQ(checkEvent->value.has_value(), true);

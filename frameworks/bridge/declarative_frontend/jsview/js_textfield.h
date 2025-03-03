@@ -46,7 +46,7 @@ public:
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const std::string& value);
+    static void SetFontWeight(const JSCallbackInfo& info);
     static void SetMinFontScale(const JSCallbackInfo& info);
     static void SetMaxFontScale(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
@@ -137,6 +137,9 @@ public:
     static void SetEnablePreviewText(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
+    static void SetKeyboardAppearance(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
+    static void SetOnWillChange(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);

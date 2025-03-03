@@ -36,7 +36,8 @@ int PrintLog(int id, int level, const char* tag, const char* fmt, const char* me
 
 class JsiBaseUtils {
 public:
-    static void ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime);
+    static void ReportJsErrorEvent(
+        std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime, const std::string& uniqueId);
     static std::string TransSourceStack(RefPtr<JsAcePage> runningPage, const std::string& rawStack);
     // native implementation for js function: console.debug()
     static shared_ptr<JsValue> AppDebugLogPrint(const shared_ptr<JsRuntime>& runtime,

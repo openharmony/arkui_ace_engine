@@ -24,9 +24,36 @@
 #include "core/components_ng/render/drawing.h"
 
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
+#include "frameworks/core/components_ng/svg/parse/svg_pattern.h"
 
 namespace OHOS::Ace::NG {
 
+enum class PaintType {
+    COLOR = 0,
+    LINEAR_GRADIENT,
+    RADIAL_GRADIENT,
+    PATTERN,
+    NONE
+};
+
+struct RsRadialGradient {
+    RSPoint center_;
+    RSPoint focal_;
+    RSTileMode spreadMethod_;
+    RSScalar r_;
+    std::vector<RSScalar> pos_;
+    std::vector<RSColorQuad> colors_;
+    std::optional<RSMatrix> matrix_;
+};
+
+struct RsLinearGradient {
+    RSPoint startPoint_;
+    RSPoint endPoint_;
+    RSTileMode spreadMethod_;
+    std::vector<RSScalar> pos_;
+    std::vector<RSColorQuad> colors_;
+    std::optional<RSMatrix> matrix_;
+};
 class SvgGraphic : public SvgNode {
     DECLARE_ACE_TYPE(SvgGraphic, SvgNode);
 
@@ -36,7 +63,7 @@ public:
         InitGraphicFlag();
     }
     ~SvgGraphic() override = default;
-
+    void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override;
     void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override;
 protected:
     void OnGraphicFill()
@@ -45,9 +72,9 @@ protected:
             auto smoothEdge = GetSmoothEdge();
             if (SystemProperties::GetDebugEnabled()) {
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
-                    path_.ConvertToSVGString().c_str(), smoothEdge);
+                    path_->ConvertToSVGString().c_str(), smoothEdge);
             }
-            if (!path_.IsValid()) {
+            if (!path_->IsValid()) {
                 TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
@@ -58,14 +85,58 @@ protected:
                 auto tmpFillBrush = fillBrush_;
                 tmpFillBrush.SetFilter(filter);
                 rsCanvas_->AttachBrush(tmpFillBrush);
-                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DrawPath(path_.value());
                 rsCanvas_->DetachBrush();
             } else {
                 rsCanvas_->AttachBrush(fillBrush_);
-                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DrawPath(path_.value());
                 rsCanvas_->DetachBrush();
             }
         }
+    }
+
+    void OnGraphicFill(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+        RSRecordingPath& rsPath, PaintType paintType)
+    {
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        auto smoothEdge = GetSmoothEdge();
+        if (GreatNotEqual(smoothEdge, 0.0f)) {
+            RSFilter filter;
+            filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+                RSBlurType::NORMAL, static_cast<double>(smoothEdge), false
+            ));
+            brush.SetFilter(filter);
+        }
+        if (!InitBrush(canvas, brush, svgCoordinateSystemContext, paintType)) {
+            LOGW("OnGraphicFill call InitBrush paint type :%{public}d failed ", paintType);
+            return;
+        }
+        canvas.AttachBrush(brush);
+        canvas.DrawPath(rsPath);
+        canvas.DetachBrush();
+    }
+
+    void OnGraphicStroke(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+        RSRecordingPath& rsPath, PaintType paintType)
+    {
+        RSPen rsPen;
+        auto smoothEdge = GetSmoothEdge();
+        if (GreatNotEqual(smoothEdge, 0.0f)) {
+            RSFilter filter;
+            filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+                RSBlurType::NORMAL, static_cast<double>(smoothEdge), false
+            ));
+            rsPen.SetFilter(filter);
+        }
+        if (!InitPenFill(rsPen, svgCoordinateSystemContext, paintType)) {
+            LOGW("OnGraphicStroke call InitBrush paint type :%{public}d failed ", paintType);
+            return;
+        }
+        SetPenStyle(rsPen);
+        canvas.AttachPen(rsPen);
+        canvas.DrawPath(rsPath);
+        canvas.DetachPen();
     }
 
     void OnGraphicStroke()
@@ -74,9 +145,9 @@ protected:
             auto smoothEdge = GetSmoothEdge();
             if (SystemProperties::GetDebugEnabled()) {
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
-                    path_.ConvertToSVGString().c_str(), smoothEdge);
+                    path_->ConvertToSVGString().c_str(), smoothEdge);
             }
-            if (!path_.IsValid()) {
+            if (!path_->IsValid()) {
                 TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
@@ -87,13 +158,11 @@ protected:
                 auto tmpStrokePen = strokePen_;
                 tmpStrokePen.SetFilter(filter);
                 rsCanvas_->AttachPen(tmpStrokePen);
-                rsCanvas_->DrawPath(path_);
-                rsCanvas_->DetachPen();
             } else {
                 rsCanvas_->AttachPen(strokePen_);
-                rsCanvas_->DrawPath(path_);
-                rsCanvas_->DetachPen();
             }
+            rsCanvas_->DrawPath(path_.value());
+            rsCanvas_->DetachPen();
         }
     }
 
@@ -119,16 +188,43 @@ protected:
     void SetRadialGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient);
     void SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& gradient, std::vector<RSScalar> pos,
         std::vector<RSColorQuad> colors);
+    void ApplyTransform(RSRecordingPath& path);
 
-    RSRecordingPath path_;
+    std::optional<RSRecordingPath> path_;
     RSBrush fillBrush_;
     RSPen strokePen_;
     FillState fillState_;
 
 private:
+    PaintType GetHrefType(const std::string& href);
+    std::optional<Color> GetFillColor();
     void UpdateColorFilter(RSFilter& filter);
+    RsLinearGradient ConvertToRsLinearGradient(const SvgLinearGradientInfo& linearGradientInfo);
+    RsRadialGradient ConvertToRsRadialGradient(const SvgRadialGradientInfo& radialGradientInfo);
+    PaintType GetFillType();
+    bool InitBrush(RSCanvas& canvas, RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+        PaintType paintType);
+    void SetBrushColor(RSBrush& brush);
+    bool SetBrushLinearGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    bool SetBrushRadialGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    bool SetBrushPattern(RSCanvas& canvas, RSBrush& brush,
+        const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    bool GradientHasColors();
+    PaintType GetStrokeType();
+    bool InitPenFill(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext, PaintType paintType);
+    void SetPenColor(RSPen& rsPen);
+    void SetPenStyle(RSPen& rsPen);
+    void AddColorFilterEffect(RSPen& rsPen);
+    bool SetPenLinearGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    bool SetPenRadialGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     bool CheckHrefPattern();
     void RectifyTargetSize(const Rect& bounds, double& width, double& height);
+    RSMatrix GetLocalMatrix(SvgLengthScaleUnit gradientUnits,
+        const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    double GetFillOpacity();
+    double GetStrokeOpacity();
+    void SetBrushOpacity(RSBrush& brush);
+    void SetPenOpacity(RSPen& pen);
 };
 
 } // namespace OHOS::Ace::NG

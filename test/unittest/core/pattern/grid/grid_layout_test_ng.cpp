@@ -258,7 +258,7 @@ HWTEST_F(GridLayoutTestNg, LayoutRTL001, TestSize.Level1)
     int32_t colsNumber = 4;
     for (int32_t index = 0; index < 10; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
-        float offsetX = GRID_WIDTH - index % colsNumber * itemWidth - itemWidth;
+        float offsetX = WIDTH - index % colsNumber * itemWidth - itemWidth;
         float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
@@ -290,7 +290,7 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL001, TestSize.Level1)
     int32_t colsNumber = 4;
     for (int32_t index = 0; index < 10; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
-        float offsetX = GRID_WIDTH - index % colsNumber * itemWidth - itemWidth;
+        float offsetX = WIDTH - index % colsNumber * itemWidth - itemWidth;
         float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
@@ -323,7 +323,7 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL002, TestSize.Level1)
     int32_t rowsNumber = 4;
     for (int32_t index = 0; index < 8; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
-        float offsetX = GRID_WIDTH - floor(index / rowsNumber) * itemWidth * 2 - itemWidth;
+        float offsetX = WIDTH - floor(index / rowsNumber) * itemWidth * 2 - itemWidth;
         float offsetY = index % colsNumber * ITEM_MAIN_SIZE;
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
@@ -355,7 +355,7 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL003, TestSize.Level1)
     int32_t colsNumber = 4;
     for (int32_t index = 0; index < 10; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
-        float offsetX = index % colsNumber * itemWidth + (GRID_WIDTH - colsNumber * itemWidth);
+        float offsetX = index % colsNumber * itemWidth + (WIDTH - colsNumber * itemWidth);
         float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
@@ -388,8 +388,8 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL004, TestSize.Level1)
     int32_t rowsNumber = 4;
     for (int32_t index = 0; index < 8; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
-        float offsetX = GRID_WIDTH - floor(index / rowsNumber) * itemWidth * 2 - itemWidth;
-        float offsetY = GRID_HEIGHT - index % colsNumber * ITEM_MAIN_SIZE - ITEM_MAIN_SIZE;
+        float offsetX = WIDTH - floor(index / rowsNumber) * itemWidth * 2 - itemWidth;
+        float offsetY = HEIGHT - index % colsNumber * ITEM_MAIN_SIZE - ITEM_MAIN_SIZE;
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
@@ -440,11 +440,11 @@ HWTEST_F(GridLayoutTestNg, GridGetChildrenExpandedSize001, TestSize.Level1)
     model.SetRowsGap(Dimension(10));
     CreateGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
     CreateDone();
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH, ITEM_MAIN_SIZE * 5 + 10 * 4));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WIDTH, ITEM_MAIN_SIZE * 5 + 10 * 4));
 
     auto padding = 10.f;
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH - padding, ITEM_MAIN_SIZE * 5 + 10 * 4));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WIDTH - padding, ITEM_MAIN_SIZE * 5 + 10 * 4));
 
     ClearOldNodes();
     model = CreateGrid();
@@ -453,10 +453,10 @@ HWTEST_F(GridLayoutTestNg, GridGetChildrenExpandedSize001, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     CreateGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
     CreateDone();
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 5 + 10 * 4, GRID_HEIGHT));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 5 + 10 * 4, HEIGHT));
 
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 5 + 10 * 4, GRID_HEIGHT - padding));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 5 + 10 * 4, HEIGHT - padding));
 }
 
 /**

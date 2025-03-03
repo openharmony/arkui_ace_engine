@@ -19,6 +19,7 @@
 #include <chrono>
 #include <cstdint>
 #include <map>
+#include <memory>
 
 namespace OHOS::Ace {
 
@@ -36,29 +37,30 @@ enum class MonitorStatus {
     RUNNING,
 };
 
-#define COMPONENT_CREATION_DURATION() ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_CREATION)
-#define COMPONENT_LIFECYCLE_DURATION() ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_LIFECYCLE)
-#define COMPONENT_UPDATE_DURATION() ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_UPDATE)
-#define JS_CALLBACK_DURATION() ScopedMonitor scopedMonitor(MonitorTag::JS_CALLBACK)
-#define STATIC_API_DURATION() ScopedMonitor scopedMonitor(MonitorTag::STATIC_API)
-#define OTHER_DURATION() ScopedMonitor scopedMonitor(MonitorTag::OTHER)
+#define COMPONENT_CREATION_DURATION(id) ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_CREATION, id)
+#define COMPONENT_LIFECYCLE_DURATION(id) ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_LIFECYCLE, id)
+#define COMPONENT_UPDATE_DURATION(id) ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_UPDATE, id)
+#define JS_CALLBACK_DURATION(id) ScopedMonitor scopedMonitor(MonitorTag::JS_CALLBACK, id)
+#define STATIC_API_DURATION(id) ScopedMonitor scopedMonitor(MonitorTag::STATIC_API, id)
+#define OTHER_DURATION(id) ScopedMonitor scopedMonitor(MonitorTag::OTHER, id)
 
 typedef std::chrono::steady_clock::time_point TimePoint;
 
 class ScopedMonitor {
 public:
-    explicit ScopedMonitor(MonitorTag tag);
+    explicit ScopedMonitor(MonitorTag tag, int32_t instanceId);
     ~ScopedMonitor();
 
 private:
     MonitorTag tag_;
     TimePoint begin_;
     TimePoint end_;
+    int32_t instanceId_;
 };
 
 class ArkUIPerfMonitor {
 public:
-    static ArkUIPerfMonitor& GetInstance();
+    static std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor(int32_t instanceId);
     ArkUIPerfMonitor();
     void StartPerf();
     void FinishPerf();

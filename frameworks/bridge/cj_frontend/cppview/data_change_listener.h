@@ -36,6 +36,7 @@ public:
     void OnDataDeleted(size_t index);
     void OnDataChanged(size_t index);
     void OnDataMoved(size_t from, size_t to);
+    void OnDataSetChanged(const std::list<V2::Operation>& dataOperations);
 
     template<class... Args>
     void NotifyAll(void (V2::DataChangeListener::*method)(Args...), Args... args)
@@ -49,6 +50,21 @@ public:
             }
             ++it;
             ((*listener).*method)(args...);
+        }
+    }
+
+    template<class... Args>
+    void NotifyAll(void (V2::DataChangeListener::*method)(Args...), const std::list<V2::Operation>& args)
+    {
+        ContainerScope scope(instanceId_);
+        for (auto it = listeners_.begin(); it != listeners_.end();) {
+            auto listener = it->Upgrade();
+            if (!listener) {
+                it = listeners_.erase(it);
+                continue;
+            }
+            ++it;
+            ((*listener).*method)(args);
         }
     }
 

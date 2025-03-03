@@ -1080,7 +1080,7 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
     auto resultNode = eventHub->FireOnItemDragStart(dragInfo, expectedIdx);
 
     // check result
-    EXPECT_EQ(resultNode.GetRawPtr(), reinterpret_cast<void *>(expectedCustomNode));
+    EXPECT_EQ(resultNode, reinterpret_cast<UINode *>(expectedCustomNode));
 
     DisposeNode(expectedCustomNode);
 }

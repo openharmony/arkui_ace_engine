@@ -51,6 +51,24 @@ std::function<RefPtr<Pattern>(void)> PatternCreator(const sptr<Rosen::SceneSessi
     return patternCreator;
 }
 
+void CheckParentNodeDfx(RefPtr<FrameNode>& node, sptr<Rosen::SceneSession>& sceneSession, int persistentId)
+{
+    if (node == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "node is nullptr, sessionId:%{public}d", persistentId);
+        return;
+    }
+    if (sceneSession == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "session is nullptr, nodeId:%{public}d, sessionId:%{public}d",
+            node->GetId(), persistentId);
+        return;
+    }
+    auto parent = node->GetParentFrameNode();
+    if (parent) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "parentId:%{public}d, nodeId:%{public}d, sessionId:%{public}d",
+            parent->GetId(), node->GetId(), sceneSession->GetPersistentId());
+    }
+}
+
 RefPtr<FrameNode> CreateNodeHelper(int32_t persistentId, int32_t inNodeId)
 {
     if (inNodeId < 0) {
@@ -83,6 +101,7 @@ RefPtr<FrameNode> CreateNodeHelper(int32_t persistentId, int32_t inNodeId)
         auto node = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, PatternCreator(sceneSession));
         stack->Push(node);
         UpdateAlignmentProperty();
+        CheckParentNodeDfx(node, sceneSession, persistentId);
         return node;
     }
 
@@ -90,14 +109,20 @@ RefPtr<FrameNode> CreateNodeHelper(int32_t persistentId, int32_t inNodeId)
     auto nodeId = inNodeId >= 0 ? inNodeId : stack->ClaimNodeId();
     ACE_SCOPED_TRACE("Create[%s][self:%d][%s]",
         V2::WINDOW_SCENE_ETS_TAG, nodeId, sceneSession->GetSessionInfo().bundleName_.c_str());
-    auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
+    auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, persistentId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
+    if (windowNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "windowNode is nullptr, persistentId: %{public}d", persistentId);
+        return windowNode;
+    }
     stack->Push(windowNode);
     UpdateAlignmentProperty();
 
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
     }
+    auto node = AceType::DynamicCast<FrameNode>(windowNode);
+    CheckParentNodeDfx(node, sceneSession, persistentId);
     return windowNode;
 }
 

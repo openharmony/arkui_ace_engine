@@ -61,4 +61,9 @@ void NativeSwiperController::SetController(const RefPtr<SwiperController>& contr
     controller_ = controller;
 }
 
+void NativeSwiperController::ChangeIndex(int32_t index, bool useAnimation)
+{
+    controller_->ChangeIndex(index, useAnimation);
+}
+
 } // namespace OHOS::Ace::Framework

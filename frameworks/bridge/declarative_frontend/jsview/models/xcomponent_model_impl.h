@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class XComponentModelImpl : public OHOS::Ace::XComponentModel {
+class ACE_FORCE_EXPORT XComponentModelImpl : public OHOS::Ace::XComponentModel {
 public:
     void Create(const std::optional<std::string>& id, XComponentType type,
         const std::optional<std::string>& libraryname,

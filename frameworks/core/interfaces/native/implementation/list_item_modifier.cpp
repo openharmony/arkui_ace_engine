@@ -56,7 +56,7 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
             auto customNode = CallbackHelper(value).BuildSync(node);
             CHECK_NULL_VOID(customNode);
             ListItemModelNG::SetDeleteArea(
-                frameNode, customNode.GetRawPtr(), nullptr, nullptr, nullptr, nullptr,
+                frameNode, Referenced::RawPtr(customNode), nullptr, nullptr, nullptr, nullptr,
                 Dimension(0, DimensionUnit::VP), isStartArea);
         },
         [isStartArea, frameNode, node](const Ark_SwipeActionItem& value) {
@@ -80,7 +80,7 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
 
             auto length = Converter::OptConvert<Dimension>(value.actionAreaDistance);
 
-            ListItemModelNG::SetDeleteArea(frameNode, customNode.GetRawPtr(), std::move(onActionCallback),
+            ListItemModelNG::SetDeleteArea(frameNode, Referenced::RawPtr(customNode), std::move(onActionCallback),
                 std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback),
                 std::move(onStateChangeCallback), length, isStartArea);
         },

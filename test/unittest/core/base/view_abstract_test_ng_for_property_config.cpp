@@ -1203,4 +1203,149 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisallowDropForcedly001, TestSize.Level
      */
     ViewStackProcessor::GetInstance()->Finish();
 }
+
+/**
+ * @tc.name: ViewAbstractRequestFocus001
+ * @tc.desc: Test request focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractRequestFocus001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->GetOrCreateFocusManager();
+
+    /**
+    * @tc.steps: Set frameNode null
+    * @tc.expected: retCode is ERROR_CODE_NON_EXIST.
+    */
+    focusHub->focusable_ = false;
+    auto retCode = ViewAbstract::RequestFocus(nullptr);
+    ASSERT_EQ(retCode, ERROR_CODE_NON_EXIST);
+
+    auto child = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->AddChild(child);
+    auto childFocusHub = child->GetOrCreateFocusHub();
+    childFocusHub->focusType_ = FocusType::NODE;
+
+    /**
+    * @tc.steps: Set frameNode focusable false
+    * @tc.expected: retCode is ERROR_CODE_NON_FOCUSABLE.
+    */
+    focusHub->focusable_ = true;
+    childFocusHub->focusable_ = false;
+    retCode = ViewAbstract::RequestFocus(AceType::RawPtr(child));
+    ASSERT_EQ(retCode, ERROR_CODE_NON_FOCUSABLE);
+
+    /**
+    * @tc.steps: Set child focusable false
+    * @tc.expected: retCode is ERROR_CODE_NON_FOCUSABLE_ANCESTOR.
+    */
+    childFocusHub->parentFocusable_ = false;
+    childFocusHub->focusable_ = true;
+    retCode = ViewAbstract::RequestFocus(AceType::RawPtr(child));
+    ASSERT_EQ(retCode, ERROR_CODE_NON_FOCUSABLE_ANCESTOR);
+
+
+    /**
+    * @tc.steps: Set both frameNode and child focusable true
+    * @tc.expected: retCode is ERROR_CODE_NO_ERROR.
+    */
+    childFocusHub->parentFocusable_ = true;
+    focusHub->focusable_ = true;
+    retCode = ViewAbstract::RequestFocus(AceType::RawPtr(child));
+    ASSERT_EQ(retCode, ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: ClearFocusTest001
+ * @tc.desc: Test clear focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ClearFocusTest001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    focusHub->currentFocus_ = true;
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+
+    /**
+    * @tc.steps: Set frameNode focus true
+    * @tc.expected: focus lost focus to view root.
+    */
+    ViewAbstract::ClearFocus(instanceId);
+    ASSERT_EQ(focusHub->currentFocus_, true);
+
+    /**
+    * @tc.steps: Set frameNode focus true
+    * @tc.expected: focus lost focus to view root failed.
+    */
+    focusHub->currentFocus_ = true;
+    ViewAbstract::ClearFocus(-1);
+    ASSERT_EQ(focusHub->currentFocus_, true);
+}
+
+/**
+ * @tc.name: FocusActivateTest001
+ * @tc.desc: Test set focus active
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, FocusActivateTest001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    focusHub->currentFocus_ = true;
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+
+    ViewAbstract::FocusActivate(instanceId, false, true);
+    ASSERT_FALSE(context->isFocusActive_);
+    ASSERT_TRUE(context->autoFocusInactive_);
+}
+
+/**
+ * @tc.name: SetAutoFocusTransferTest001
+ * @tc.desc: Test set focus transfer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetAutoFocusTransferTest001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    focusHub->currentFocus_ = true;
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+
+    ViewAbstract::SetAutoFocusTransfer(instanceId, true);
+    ASSERT_TRUE(focusManager->isAutoFocusTransfer_);
+
+    ViewAbstract::SetAutoFocusTransfer(instanceId, false);
+    ASSERT_FALSE(focusManager->isAutoFocusTransfer_);
+}
 } // namespace OHOS::Ace::NG

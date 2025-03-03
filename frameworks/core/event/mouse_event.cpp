@@ -57,10 +57,49 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     if (event.tiltY.has_value()) {
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
     }
+    NG::PointF lastLocalPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
+    hoverInfo.SetLocalLocation(Offset(localX, localY));
+    hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
+    hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     // onPenHoverEventCallback_ may be overwritten in its invoke so we copy it first
     auto onPenHoverEventCallback = onPenHoverEventCallback_;
     onPenHoverEventCallback(isHovered, hoverInfo);
+    return !hoverInfo.IsStopPropagation();
+}
+
+bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
+{
+    if (!onPenHoverMoveEventCallback_) {
+        return false;
+    }
+    HoverInfo hoverInfo;
+    hoverInfo.SetTimeStamp(event.time);
+    hoverInfo.SetDeviceId(event.deviceId);
+    hoverInfo.SetSourceDevice(event.sourceType);
+    hoverInfo.SetSourceTool(event.sourceTool);
+    if (event.tiltX.has_value()) {
+        hoverInfo.SetTiltX(event.tiltX.value_or(0.0f));
+    }
+    if (event.tiltY.has_value()) {
+        hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
+    }
+    NG::PointF lastLocalPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
+    hoverInfo.SetLocalLocation(Offset(localX, localY));
+    hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
+    hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
+    // onPenHoverMoveEventCallback_ may be overwritten in its invoke so we copy it first
+    auto onPenHoverMoveEventCallback = onPenHoverMoveEventCallback_;
+    onPenHoverMoveEventCallback(hoverInfo);
     return !hoverInfo.IsStopPropagation();
 }
 
@@ -147,6 +186,9 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetSourceTool(event.sourceTool);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetPressedKeyCodes(event.pressedKeyCodes_);
+    info.SetRawDeltaX(event.rawDeltaX);
+    info.SetRawDeltaY(event.rawDeltaY);
+    info.SetPressedButtons(event.pressedButtonsArray);
     // onMouseCallback_ may be overwritten in its invoke so we copy it first
     auto onMouseCallback = onMouseCallback_;
     onMouseCallback(info);
@@ -155,5 +197,39 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
 std::shared_ptr<MMI::PointerEvent> MouseEvent::GetMouseEventPointerEvent() const
 {
     return InputManager::CreatePointerEvent(pointerEvent);
+}
+
+MouseEvent MouseEvent::operator-(const Offset& offset) const
+{
+    MouseEvent mouseEvent;
+    mouseEvent.x = x - offset.GetX();
+    mouseEvent.x = x - offset.GetX();
+    mouseEvent.y = y - offset.GetY();
+    mouseEvent.z = z;
+    mouseEvent.deltaX = deltaX;
+    mouseEvent.deltaY = deltaY;
+    mouseEvent.deltaZ = deltaZ;
+    mouseEvent.scrollX = scrollX;
+    mouseEvent.scrollY = scrollY;
+    mouseEvent.scrollZ = scrollZ;
+    mouseEvent.screenX = screenX - offset.GetX();
+    mouseEvent.screenY = screenY - offset.GetY();
+    mouseEvent.action = action;
+    mouseEvent.button = button;
+    mouseEvent.pressedButtons = pressedButtons;
+    mouseEvent.time = time;
+    mouseEvent.deviceId = deviceId;
+    mouseEvent.targetDisplayId = targetDisplayId;
+    mouseEvent.sourceType = sourceType;
+    mouseEvent.sourceTool = sourceTool;
+    mouseEvent.pointerEvent = pointerEvent;
+    mouseEvent.originalId = originalId;
+    mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+    mouseEvent.isInjected = isInjected;
+    mouseEvent.isPrivacyMode = isPrivacyMode;
+    mouseEvent.rawDeltaX = rawDeltaX;
+    mouseEvent.rawDeltaY = rawDeltaY;
+    mouseEvent.pressedButtonsArray = pressedButtonsArray;
+    return mouseEvent;
 }
 } // namespace OHOS::Ace

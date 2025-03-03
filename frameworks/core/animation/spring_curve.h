@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT SpringCurve : public Curve {
+class ACE_FORCE_EXPORT SpringCurve : public Curve {
     DECLARE_ACE_TYPE(SpringCurve, Curve);
 
 public:

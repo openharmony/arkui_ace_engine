@@ -32,7 +32,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
+}
 void ImageProvider::CacheImageObject(const RefPtr<ImageObject>& obj)
 {
     CHECK_NULL_VOID(obj);
@@ -45,18 +47,24 @@ void ImageProvider::CacheImageObject(const RefPtr<ImageObject>& obj)
     }
 }
 
-std::mutex ImageProvider::taskMtx_;
+std::timed_mutex ImageProvider::taskMtx_;
 std::unordered_map<std::string, ImageProvider::Task> ImageProvider::tasks_;
 
 bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
 {
     CHECK_NULL_RETURN(imageObj, false);
+    auto&& dfxConfig = imageObj->GetImageDfxConfig();
+    // Attempt to acquire a timed lock (maximum wait time: 1000ms)
+    auto lock = imageObj->GetPrepareImageDataLock();
+    if (!lock.owns_lock()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Failed to acquire lock within timeout. %{private}s-%{public}s.",
+            dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
+        return false;
+    }
     // data already loaded
     if (imageObj->GetData()) {
         return true;
     }
-
-    auto&& dfxConfig = imageObj->GetImageDfxConfig();
 
     auto container = Container::CurrentSafelyWithCheck();
     if (container && container->IsSubContainer()) {
@@ -213,7 +221,14 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 
 bool ImageProvider::RegisterTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
-    std::scoped_lock<std::mutex> lock(taskMtx_);
+    if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without registerTask access.",
+            MAX_WAITING_TIME_FOR_TASKS);
+        return false;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, taskMtx_);
     // key exists -> task is running
     auto it = tasks_.find(key);
     if (it != tasks_.end()) {
@@ -226,7 +241,14 @@ bool ImageProvider::RegisterTask(const std::string& key, const WeakPtr<ImageLoad
 
 std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string& key)
 {
-    std::scoped_lock<std::mutex> lock(taskMtx_);
+    if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without endTask access.",
+            MAX_WAITING_TIME_FOR_TASKS);
+        return {};
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, taskMtx_);
     auto it = tasks_.find(key);
     if (it == tasks_.end()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "task not found in map %{private}s", key.c_str());
@@ -242,7 +264,14 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
 
 void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
-    std::scoped_lock<std::mutex> lock(taskMtx_);
+    if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without cancelTask access.",
+            MAX_WAITING_TIME_FOR_TASKS);
+        return;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, taskMtx_);
     auto it = tasks_.find(key);
     CHECK_NULL_VOID(it != tasks_.end());
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
@@ -266,7 +295,15 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
     if (sync) {
         CreateImageObjHelper(src, true);
     } else {
-        std::scoped_lock<std::mutex> lock(taskMtx_);
+        if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "Failed to acquire mutex within %{public}" PRIu64
+                "milliseconds, proceeding without createImageObject access.",
+                MAX_WAITING_TIME_FOR_TASKS);
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
         task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
@@ -331,7 +368,15 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
     if (imageDecoderOptions.sync) {
         MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
     } else {
-        std::scoped_lock<std::mutex> lock(taskMtx_);
+        if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "Failed to acquire mutex within %{public}" PRIu64
+                "milliseconds, proceeding without makeCanvasImage access.",
+                MAX_WAITING_TIME_FOR_TASKS);
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
         task.Reset(

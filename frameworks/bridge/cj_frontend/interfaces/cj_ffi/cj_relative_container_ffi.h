@@ -58,8 +58,20 @@ extern "C" {
         CBarrierStyle* barrier;
     };
 
+    struct CLocalizedBarrierStyle {
+        char* id;
+        int32_t localizedDirection;
+        CArrString referencedId;
+    };
+
+    struct CLocalizedBarrierInfos {
+        int64_t size;
+        CLocalizedBarrierStyle* localizedBarrier;
+    };
+
     CJ_EXPORT void FfiOHOSAceFrameworkRelativeContainerCreate();
     CJ_EXPORT void FfiOHOSAceFrameworkReletiveContainerGuideLine(CGuideLineInfos guidelines);
     CJ_EXPORT void FfiOHOSAceFrameworkReletiveContainerBarrier(CBarrierInfos barriers);
+    CJ_EXPORT void FfiOHOSAceFrameworkReletiveContainerLocalizedBarrier(CLocalizedBarrierInfos barriers);
 }
 #endif // OHOS_ACE_FRAMEWORK_CJ_RELATIVE_CONTAINER_FFI_H

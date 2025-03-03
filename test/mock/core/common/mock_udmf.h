@@ -63,6 +63,9 @@ public:
     MOCK_METHOD(void, AddSpanStringRecord,
         (const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data), (override));
     MOCK_METHOD(std::vector<uint8_t>, GetSpanStringRecord, (const RefPtr<UnifiedData>& unifiedData), (override));
+    MOCK_METHOD(
+        int32_t, StartAsyncDataRetrieval, (napi_env env, napi_value napiValue, const std::string& key), (override));
+    MOCK_METHOD(int32_t, Cancel, (const std::string& key), (override));
 };
 class MockUnifiedData : public UnifiedData {
     DECLARE_ACE_TYPE(MockUnifiedData, UnifiedData);

@@ -19,6 +19,8 @@
 #include <cstdint>
 
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/dimension.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
@@ -102,6 +104,16 @@ enum class DialogButtonDirection {
 enum class KeyboardAvoidMode {
     DEFAULT = 0,
     NONE,
+};
+
+enum class LevelMode {
+    OVERLAY = 0,
+    EMBEDDED,
+};
+
+enum class ImmersiveMode {
+    DEFAULT = 0,
+    EXTEND,
 };
 
 class DialogAlignmentUtils {
@@ -241,6 +253,8 @@ struct DialogProperties {
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;
@@ -260,6 +274,7 @@ struct DialogProperties {
     // These attributes is used for CustomDialog.
     RefPtr<AceType> customComponent;         // Used for CustomDialog in declarative.
     std::function<void(bool)> onStatusChanged; // Called when dialog appear or disappear.
+    bool isUserCreatedDialog = false; // used for user create dialog for navdestination lifecycle
 
     // These attributes is used for ActionSheet.
     std::vector<ActionSheetInfo> sheetsInfo;
@@ -267,6 +282,8 @@ struct DialogProperties {
     WeakPtr<NG::UINode> windowScene;
     std::optional<DimensionRect> maskRect;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr; // Used for AlertDialog and ActionSheet transition
+    RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;
 
     WeakPtr<NG::UINode> contentNode;
     std::function<void()> onDidAppear;
@@ -279,6 +296,11 @@ struct DialogProperties {
 
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
+    std::optional<Dimension> keyboardAvoidDistance;
+    std::optional<double> levelOrder;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 struct PromptDialogAttr {
@@ -288,6 +310,7 @@ struct PromptDialogAttr {
     bool showInSubWindow = false;
     bool isModal = false;
     bool enableHoverMode = false;
+    bool isUserCreatedDialog = false;
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::function<void(const int32_t& info, const int32_t& instanceId)> customOnWillDismiss;
@@ -297,6 +320,8 @@ struct PromptDialogAttr {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;
@@ -310,6 +335,8 @@ struct PromptDialogAttr {
     bool customStyle = false;
     std::optional<Color> maskColor;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;
     std::function<void()> onDidAppear;
     std::function<void()> onDidDisappear;
     std::function<void()> onWillAppear;
@@ -317,6 +344,11 @@ struct PromptDialogAttr {
     std::function<void(DialogProperties&)> onLanguageChange;
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
+    std::optional<Dimension> keyboardAvoidDistance;
+    std::optional<double> levelOrder;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 } // namespace OHOS::Ace

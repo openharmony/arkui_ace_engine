@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,14 +22,17 @@
 #define protected public
 #include "test/mock/core/common/mock_container.h"
 
+#include "core/components/swiper/swiper_component.h"
+#include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/arc_swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -58,21 +61,25 @@ public:
     void SetUp() override;
     void TearDown() override;
     void GetSwiper();
-    RefPtr<PaintWrapper> CreateSwiperDone();
+    void CreateSwiperDone();
     SwiperModelNG CreateSwiper();
     SwiperModelNG CreateArcSwiper();
     void CreateSwiperItems(int32_t itemNumber = ITEM_NUMBER);
     void CreateItemWithSize(float width, float height);
-    void CreateDefaultSwiper();
     void CreateWithArrow();
+    void InitCaptureTest();
+
     void ShowNext();
     void ShowPrevious();
-    void ChangeIndex(int32_t index);
+    void ChangeIndex(int32_t index, bool useAnimation = false);
+    void ChangeIndex(int32_t index, SwiperAnimationMode mode);
+    void SwipeTo(int32_t index);
+    void SwipeToWithoutAnimation(int32_t index);
     void RemoveSwiperItem(int32_t index);
     void AddSwiperItem(int32_t slot);
-    AssertionResult DigitText(std::u16string expectDigit);
 
-    void InitCaptureTest();
+    AssertionResult DigitText(std::u16string expectDigit);
+    AssertionResult CurrentIndex(int32_t expectIndex);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> pattern_;

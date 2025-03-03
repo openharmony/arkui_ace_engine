@@ -86,6 +86,10 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     textPickerPattern->SetIsShowInDialog(true);
     textPickerPattern->SetPickerTag(false);
     textPickerPattern->SetTextProperties(settingData.properties);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        textPickerPattern->SetIsEnableHaptic(settingData.isEnableHapticFeedback);
+        textPickerPattern->ColumnPatternInitHapticController();
+    }
     auto context = textPickerNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();

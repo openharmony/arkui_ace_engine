@@ -52,6 +52,7 @@ public:
         value->propDisableTextStyleAnimation_ = CloneDisableTextStyleAnimation();
         value->propDefaultTextStyle_ = CloneDefaultTextStyle();
         value->propDefaultTextOverflow_ = CloneDefaultTextOverflow();
+        value->propDigitalCrownSensitivity_ = CloneDigitalCrownSensitivity();
         return value;
     }
 
@@ -73,6 +74,7 @@ public:
         ResetDisableTextStyleAnimation();
         ResetDefaultTextStyle();
         ResetDefaultTextOverflow();
+        ResetDigitalCrownSensitivity();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -131,43 +133,53 @@ public:
 
     void SetFonts(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        Color defaultDisappearColor = Color::BLACK;
+        Color defaultNormalColor = Color::BLACK;
+        Color defaultSelectColor = Color::BLACK;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        auto frameNode = GetHost();
+        if (pipeline && frameNode) {
+            auto pickerTheme = pipeline->GetTheme<PickerTheme>(frameNode->GetThemeScopeId());
+            if (pickerTheme) {
+                defaultDisappearColor = pickerTheme->GetDisappearOptionStyle().GetTextColor();
+                defaultNormalColor = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+                defaultSelectColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+            }
+        }
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
-        disappearFont->Put("weight",
-            V2::ConvertWrapFontWeightToStirng(GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
+        disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+            GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
         disappearFont->Put("family", V2::ConvertFontFamily(GetDisappearFontFamilyValue({})).c_str());
         disappearFont->Put("style", GetDisappearFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
             ? "FontStyle.Normal" : "FontStyle.Italic");
         auto disappearTextStyle = JsonUtil::Create(true);
-        disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
+        disappearTextStyle->Put("color", GetDisappearColor().value_or(defaultDisappearColor).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
         json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
 
         auto normalFont = JsonUtil::Create(true);
         normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
-        normalFont->Put("weight",
-            V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
+        normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
         normalFont->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
         normalFont->Put("style", GetFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
             ? "FontStyle.Normal" : "FontStyle.Italic");
         auto normalTextStyle = JsonUtil::Create(true);
-        normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
+        normalTextStyle->Put("color", GetColor().value_or(defaultNormalColor).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
         json->PutExtAttr("textStyle", normalTextStyle, filter);
 
         auto selectedFont = JsonUtil::Create(true);
         selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
-        selectedFont->Put("weight",
-            V2::ConvertWrapFontWeightToStirng(GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
+        selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+            GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
         selectedFont->Put("family", V2::ConvertFontFamily(GetSelectedFontFamilyValue({})).c_str());
         selectedFont->Put("style", GetSelectedFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
             ? "FontStyle.Normal" : "FontStyle.Italic");
         auto selectedTextStyle = JsonUtil::Create(true);
-        selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
+        selectedTextStyle->Put("color", GetSelectedColor().value_or(defaultSelectColor).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
-        auto canLoop = GetCanLoopValue();
-        json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);
 
         auto isDisableTextStyleAnimation = GetDisableTextStyleAnimation().value_or(false);
         json->PutExtAttr("disableTextStyleAnimation", isDisableTextStyleAnimation ? "true" : "false", filter);
@@ -184,11 +196,15 @@ public:
             V2::ConvertWrapTextOverflowToString(GetDefaultTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         defaultTextStyle->Put("font", defaultFont);
         json->PutExtAttr("defaultTextStyle", defaultTextStyle, filter);
+        auto crownSensitivity = GetDigitalCrownSensitivity();
+        json->PutExtAttr("digitalCrownSensitivity",
+            std::to_string(crownSensitivity.value_or(DEFAULT_CROWNSENSITIVITY)).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CanLoop, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DigitalCrownSensitivity, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selecteds, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
@@ -245,7 +261,7 @@ public:
         DefaultTextStyle, AdaptMinFontSize, DefaultMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DefaultTextStyle, AdaptMaxFontSize, DefaultMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultTextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutProperty);

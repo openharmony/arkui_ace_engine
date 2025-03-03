@@ -46,6 +46,7 @@ void IndexerTestNg::SetUp()
 
 void IndexerTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;

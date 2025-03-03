@@ -1095,7 +1095,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveLineEndTest001, TestSize.Level1)
     /**
      * @tc.expected: Moving to the right character when there is initial text
      */
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     EXPECT_EQ(pattern_->GetSelectMode(), SelectionMode::NONE);
     EXPECT_EQ(pattern_->GetCaretIndex(), DEFAULT_TEXT.length())
         << "Text is " + pattern_->GetTextValue() + ", CaretIndex is " + std::to_string(pattern_->GetCaretIndex());
@@ -1507,9 +1507,7 @@ HWTEST_F(TextInputCursorTest, FinishTextPreview003, TestSize.Level1)
      * @tc.steps: call InsertValueOperation
      * @tc.expected: check GetIsPreviewText return false
      */
-    SourceAndValueInfo info;
-    info.insertValue = HELLO_TEXT_U16;
-    pattern_->InsertValue(info.insertValue, info.isIME);
+    pattern_->InsertValue(HELLO_TEXT_U16, false);
     EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_TEXT);
     FlushLayoutTask(frameNode_);
 }

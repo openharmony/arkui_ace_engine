@@ -14,7 +14,7 @@
  */
 #define private public
 #define protected public
-#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 
 #include <cmath>
 #include <memory>
@@ -156,9 +156,20 @@ void SessionWrapperImpl::NotifyCreate()
 {
 }
 
+RefPtr<SystemWindowScene> SessionWrapperImpl::GetWindowScene()
+{
+    return nullptr;
+}
+
 int32_t SessionWrapperImpl::GetWindowSceneId()
 {
     return 1;
+}
+
+Rosen::WSRect SessionWrapperImpl::GetWindowSceneRect()
+{
+    Rosen::WSRect rect = {0, 0, 0, 0};
+    return rect;
 }
 
 void SessionWrapperImpl::NotifyForeground()
@@ -268,13 +279,17 @@ void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, s
 {
 }
 
-bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+bool SessionWrapperImpl::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
 {
     return false;
 }
 
-bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+bool SessionWrapperImpl::SendBusinessData(
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     return false;
 }
+
+void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
 } // namespace OHOS::Ace::NG

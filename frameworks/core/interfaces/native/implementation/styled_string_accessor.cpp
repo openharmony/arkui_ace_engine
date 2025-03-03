@@ -505,7 +505,7 @@ void ToHtmlImpl(const Ark_StyledString* styledString)
     auto peer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->spanString);
-    auto htmlStr = OHOS::Ace::HtmlUtils::ToHtml(peer->spanString.GetRawPtr());
+    auto htmlStr = OHOS::Ace::HtmlUtils::ToHtml(Referenced::RawPtr(peer->spanString));
     LOGE("StyledStringAccessor::ToHtmlImpl - return value need to be supported");
 }
 void MarshallingImpl(const Ark_StyledString* styledString)
@@ -514,7 +514,7 @@ void MarshallingImpl(const Ark_StyledString* styledString)
     StyledStringPeer* peer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->spanString);
-    auto spanStringRawPtr = peer->spanString.GetRawPtr();
+    auto spanStringRawPtr = Referenced::RawPtr(peer->spanString);
     std::vector<uint8_t> tlvData;
     spanStringRawPtr->EncodeTlv(tlvData);
 

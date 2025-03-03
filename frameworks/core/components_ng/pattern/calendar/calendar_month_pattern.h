@@ -59,7 +59,12 @@ public:
         if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
             InitCurrentVirtualNode();
         }
-        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, startDate_, endDate_, isCalendarDialog_);
+        CalendarPaintParams params;
+        params.startDate = startDate_;
+        params.endDate = endDate_;
+        params.markToday = markToday_;
+        params.disabledDateRange = disabledDateRange_;
+        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, params, isCalendarDialog_);
     }
 
     const ObtainedMonth& GetMonthData() const
@@ -99,6 +104,16 @@ public:
     void SetEndDate(const PickerDate& endDate)
     {
         endDate_ = endDate;
+    }
+
+    void SetMarkToday(bool markToday)
+    {
+        markToday_ = markToday;
+    }
+
+    void SetDisabledDateRange(const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange)
+    {
+        disabledDateRange_ = disabledDateRange;
     }
 
     bool IsCalendarDialog() const
@@ -227,6 +242,8 @@ private:
     CalendarDay calendarDay_;
     PickerDate startDate_;
     PickerDate endDate_;
+    bool markToday_ = false;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange_;
     CalendarDay focusedCalendarDay_;
     ObtainedMonth obtainedMonth_;
     MonthState monthState_ = MonthState::CUR_MONTH;

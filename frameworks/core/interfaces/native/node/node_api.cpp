@@ -62,6 +62,7 @@
 #include "core/text/html_utils.h"
 #include "interfaces/native/native_type.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -131,40 +132,48 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
+void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+    func = nullptr;
+}
+
+void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+}
+
 namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIStateModifier modifier = {
         .getUIState = GetUIState,
         .setSupportedUIState = SetSupportedUIState,
+        .addSupportedUIState = AddSupportedUIState,
+        .removeSupportedUIState = RemoveSupportedUIState
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIStateModifier* GetCJUIStateModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIStateModifier modifier = {
         .getUIState = GetUIState,
         .setSupportedUIState = SetSupportedUIState,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier
@@ -243,6 +252,11 @@ ArkUINodeHandle CreateCustomNode(ArkUI_CharPtr tag)
 ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
 {
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
+}
+
+ArkUI_Bool IsRightToLeft()
+{
+    return AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
 void CreateNewScope()
@@ -396,6 +410,11 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
     NodeModifier::SetOnKeyEventDispatch,
+    nullptr,
+    NodeModifier::SetOnAxisEvent,
+    NodeModifier::SetOnClick,
+    NodeModifier::SetOnHover,
+    NodeModifier::SetOnHoverMove,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -484,9 +503,11 @@ const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnScrollStop,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCalendarPickerOnChange,
 };
+#endif
 
 const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
@@ -506,6 +527,9 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperAnimationEnd,
     NodeModifier::SetSwiperGestureSwipe,
     NodeModifier::SetSwiperOnContentDidScroll,
+    NodeModifier::SetSwiperSelected,
+    NodeModifier::SetSwiperUnselected,
+    NodeModifier::SetSwiperContentWillScroll,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -522,6 +546,7 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListDidScroll,
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
+    NodeModifier::SetOnListScrollVisibleContentChange,
 };
 
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -608,6 +633,12 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnPreDrag,
     NodeModifier::ResetOnKeyPreIme,
     NodeModifier::ResetOnFocusAxisEvent,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnAxisEvent,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnHoverMove,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -712,6 +743,9 @@ const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
 };
 
 const ResetComponentAsyncEventHandler CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -728,6 +762,7 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnListDidScroll,
     NodeModifier::ResetOnListReachStart,
     NodeModifier::ResetOnListReachEnd,
+    NodeModifier::ResetOnScrollVisibleContentChange,
 };
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1756,79 +1791,66 @@ ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
 
 const ArkUIBasicAPI* GetBasicAPI()
 {
-    /* clang-format off */
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIBasicAPI basicImpl = {
-        CreateNode,
-        CreateNodeWithParams,
-        GetNodeByViewStack,
-        DisposeNode,
-        GetName,
-        DumpTreeNode,
-
-        AddChild,
-        RemoveChild,
-        InsertChildAfter,
-        InsertChildBefore,
-        InsertChildAt,
-        GetAttribute,
-        SetAttribute,
-        ResetAttribute,
-
-        NotifyComponentAsyncEvent,
-        NotifyResetComponentAsyncEvent,
-        RegisterNodeAsyncEventReceiver,
-        UnregisterNodeAsyncEventReceiver,
-
-        nullptr,
-
-        ApplyModifierFinish,
-        MarkDirty,
-        IsBuilderNode,
-        ConvertLengthMetricsUnit,
-
-        GetContextByNode,
-
-        PostFrameCallback,
+        .createNode = CreateNode,
+        .createNodeWithParams = CreateNodeWithParams,
+        .getNodeByViewStack = GetNodeByViewStack,
+        .disposeNode = DisposeNode,
+        .getName = GetName,
+        .dump = DumpTreeNode,
+        .addChild = AddChild,
+        .removeChild = RemoveChild,
+        .insertChildAfter = InsertChildAfter,
+        .insertChildBefore = InsertChildBefore,
+        .insertChildAt = InsertChildAt,
+        .getAttribute = GetAttribute,
+        .setAttribute = SetAttribute,
+        .resetAttribute = ResetAttribute,
+        .registerNodeAsyncEvent = NotifyComponentAsyncEvent,
+        .unRegisterNodeAsyncEvent = NotifyResetComponentAsyncEvent,
+        .registerNodeAsyncEventReceiver = RegisterNodeAsyncEventReceiver,
+        .unRegisterNodeAsyncEventReceiver = UnregisterNodeAsyncEventReceiver,
+        .checkAsyncEvent = nullptr,
+        .applyModifierFinish = ApplyModifierFinish,
+        .markDirty = MarkDirty,
+        .isBuilderNode = IsBuilderNode,
+        .convertLengthMetricsUnit = ConvertLengthMetricsUnit,
+        .getContextByNode = GetContextByNode,
+        .postFrameCallback = PostFrameCallback,
     };
-    /* clang-format on */
-
+    CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
 }
 
 const CJUIBasicAPI* GetCJUIBasicAPI()
 {
-    /* clang-format off */
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIBasicAPI basicImpl = {
-        CreateNode,
-        DisposeNode,
-        GetName,
-        DumpTreeNode,
-
-        AddChild,
-        RemoveChild,
-        InsertChildAfter,
-        InsertChildBefore,
-        InsertChildAt,
-        GetAttribute,
-        SetAttribute,
-        ResetAttribute,
-
-        NotifyComponentAsyncEvent,
-        NotifyResetComponentAsyncEvent,
-        RegisterNodeAsyncEventReceiver,
-        UnregisterNodeAsyncEventReceiver,
-
-        nullptr,
-
-        ApplyModifierFinish,
-        MarkDirty,
-        IsBuilderNode,
-        ConvertLengthMetricsUnit,
-
-        GetContextByNode,
+        .createNode = CreateNode,
+        .disposeNode = DisposeNode,
+        .getName = GetName,
+        .dump = DumpTreeNode,
+        .addChild = AddChild,
+        .removeChild = RemoveChild,
+        .insertChildAfter = InsertChildAfter,
+        .insertChildBefore = InsertChildBefore,
+        .insertChildAt = InsertChildAt,
+        .getAttribute = GetAttribute,
+        .setAttribute = SetAttribute,
+        .resetAttribute = ResetAttribute,
+        .registerNodeAsyncEvent = NotifyComponentAsyncEvent,
+        .unRegisterNodeAsyncEvent = NotifyResetComponentAsyncEvent,
+        .registerNodeAsyncEventReceiver = RegisterNodeAsyncEventReceiver,
+        .unRegisterNodeAsyncEventReceiver = UnregisterNodeAsyncEventReceiver,
+        .checkAsyncEvent = nullptr,
+        .applyModifierFinish = ApplyModifierFinish,
+        .markDirty = MarkDirty,
+        .isBuilderNode = IsBuilderNode,
+        .convertLengthMetricsUnit = ConvertLengthMetricsUnit,
+        .getContextByNode = GetContextByNode,
     };
-    /* clang-format on */
-
+    CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
 }
 
@@ -1927,28 +1949,60 @@ ArkUI_Int32 RegisterOnWillDismissWithUserData(
     return CustomDialog::RegisterOnWillDialogDismissWithUserData(handler, userData, callback);
 }
 
+ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetKeyboardAvoidDistance(handle, distance, unit);
+}
+
+ArkUI_Int32 SetDialogLevelMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
+{
+    return CustomDialog::SetLevelMode(handle, mode);
+}
+
+ArkUI_Int32 SetDialogLevelUniqueId(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId)
+{
+    return CustomDialog::SetLevelUniqueId(handle, uniqueId);
+}
+
+ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
+{
+    return CustomDialog::SetImmersiveMode(handle, mode);
+}
+
+ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
+{
+    return CustomDialog::SetLevelOrder(handle, levelOrder);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIDialogAPI dialogImpl = {
-        CreateDialog,
-        DisposeDialog,
-        SetDialogContent,
-        RemoveDialogContent,
-        SetDialogContentAlignment,
-        ResetDialogContentAlignment,
-        SetDialogModalMode,
-        SetDialogAutoCancel,
-        SetDialogMask,
-        SetDialogBackgroundColor,
-        SetDialogCornerRadius,
-        SetDialogGridColumnCount,
-        EnableDialogCustomStyle,
-        EnableDialogCustomAnimation,
-        ShowDialog,
-        CloseDialog,
-        RegisterOnWillDialogDismiss,
-        RegisterOnWillDismissWithUserData
+        .create = CreateDialog,
+        .dispose = DisposeDialog,
+        .setContent = SetDialogContent,
+        .removeContent = RemoveDialogContent,
+        .setContentAlignment = SetDialogContentAlignment,
+        .resetContentAlignment = ResetDialogContentAlignment,
+        .setModalMode = SetDialogModalMode,
+        .setAutoCancel = SetDialogAutoCancel,
+        .setMask = SetDialogMask,
+        .setBackgroundColor = SetDialogBackgroundColor,
+        .setCornerRadius = SetDialogCornerRadius,
+        .setGridColumnCount = SetDialogGridColumnCount,
+        .enableCustomStyle = EnableDialogCustomStyle,
+        .enableCustomAnimation = EnableDialogCustomAnimation,
+        .show = ShowDialog,
+        .close = CloseDialog,
+        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
+        .registerOnWillDismissWithUserData = RegisterOnWillDismissWithUserData,
+        .setKeyboardAvoidDistance = SetKeyboardAvoidDistance,
+        .setLevelMode = SetDialogLevelMode,
+        .setLevelUniqueId = SetDialogLevelUniqueId,
+        .setImmersiveMode = SetDialogImmersiveMode,
+        .setLevelOrder = SetLevelOrder,
     };
+    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
 }
 
@@ -1959,53 +2013,52 @@ void ShowCrash(ArkUI_CharPtr message)
 
 /* clang-format off */
 ArkUIExtendedNodeAPI impl_extended = {
-    ARKUI_EXTENDED_API_VERSION,
-
-    NodeModifier::GetUtilsModifier, // getUtilsModifier
-    NodeModifier::GetCanvasRenderingContext2DModifier,
-
-    SetCallbackMethod,
-    SetCustomMethodFlag,
-    GetCustomMethodFlag,
-    RegisterCustomNodeAsyncEvent,
-    RegisterCustomSpanAsyncEvent,
-    UnregisterCustomNodeEvent,
-    RegisterCustomNodeEventReceiver,
-    SetCustomCallback, // setCustomCallback
-    MeasureLayoutAndDraw,
-    MeasureNode,
-    LayoutNode,
-    DrawNode,
-    SetAttachNodePtr,
-    GetAttachNodePtr,
-    SetMeasureWidth, // setMeasureWidth
-    GetMeasureWidth, // getMeasureWidth
-    SetMeasureHeight, // setMeasureHeight
-    GetMeasureHeight, // getMeasureHeight
-    SetX, // setX
-    SetY, // setY
-    GetX, // getX
-    GetY, // getY
-    GetLayoutConstraint,
-    SetAlignment,
-    GetAlignment,
-    nullptr, // indexerChecker
-    nullptr, // setRangeUpdater
-    nullptr, // setLazyItemIndexer
-    GetPipelineContext,
-    SetVsyncCallback,
-    UnblockVsyncWait,
-    NodeEvent::SendArkUISyncEvent, // sendEvent
-    nullptr, // callContinuation
-    nullptr, // setChildTotalCount
-    ShowCrash,
-    GetTopNodeByViewStack,
-    CreateCustomNode,
-    GetOrCreateCustomNode,
-    GetRSNodeByNode,
-    CreateNewScope,
-    RegisterOEMVisualEffect,
-    SetOnNodeDestroyCallback,
+    .version = ARKUI_EXTENDED_API_VERSION,
+    .getUtilsModifier = NodeModifier::GetUtilsModifier, // getUtilsModifier
+    .getCanvasRenderingContext2DModifier = NodeModifier::GetCanvasRenderingContext2DModifier,
+    .setCallbackMethod = SetCallbackMethod,
+    .setCustomMethodFlag = SetCustomMethodFlag,
+    .getCustomMethodFlag = GetCustomMethodFlag,
+    .registerCustomNodeAsyncEvent = RegisterCustomNodeAsyncEvent,
+    .registerCustomSpanAsyncEvent = RegisterCustomSpanAsyncEvent,
+    .unregisterCustomNodeAsyncEvent = UnregisterCustomNodeEvent,
+    .registerCustomNodeAsyncEventReceiver = RegisterCustomNodeEventReceiver,
+    .setCustomCallback = SetCustomCallback, // setCustomCallback
+    .measureLayoutAndDraw = MeasureLayoutAndDraw,
+    .measureNode = MeasureNode,
+    .layoutNode = LayoutNode,
+    .drawNode = DrawNode,
+    .setAttachNodePtr = SetAttachNodePtr,
+    .getAttachNodePtr = GetAttachNodePtr,
+    .setMeasureWidth = SetMeasureWidth, // setMeasureWidth
+    .getMeasureWidth = GetMeasureWidth, // getMeasureWidth
+    .setMeasureHeight = SetMeasureHeight, // setMeasureHeight
+    .getMeasureHeight = GetMeasureHeight, // getMeasureHeight
+    .setX = SetX, // setX
+    .setY = SetY, // setY
+    .getX = GetX, // getX
+    .getY = GetY, // getY
+    .getLayoutConstraint = GetLayoutConstraint,
+    .setAlignment = SetAlignment,
+    .getAlignment = GetAlignment,
+    .indexerChecker = nullptr, // indexerChecker
+    .setRangeUpdater = nullptr, // setRangeUpdater
+    .setLazyItemIndexer = nullptr, // setLazyItemIndexer
+    .getPipelineContext = GetPipelineContext,
+    .setVsyncCallback = SetVsyncCallback,
+    .unblockVsyncWait = UnblockVsyncWait,
+    .sendEvent = NodeEvent::SendArkUISyncEvent, // sendEvent
+    .callContinuation = nullptr, // callContinuation
+    .setChildTotalCount = nullptr, // setChildTotalCount
+    .showCrash = ShowCrash,
+    .getTopNodeFromViewStack = GetTopNodeByViewStack,
+    .createCustomNode = CreateCustomNode,
+    .getOrCreateCustomNode = GetOrCreateCustomNode,
+    .getRSNodeByNode = GetRSNodeByNode,
+    .isRightToLeft = IsRightToLeft,
+    .createNewScope = CreateNewScope,
+    .registerOEMVisualEffect = RegisterOEMVisualEffect,
+    .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
 };
 /* clang-format on */
 
@@ -2014,8 +2067,21 @@ void CanvasDrawRect(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 
 
 const ArkUIGraphicsCanvas* GetCanvasAPI()
 {
-    static const ArkUIGraphicsCanvas modifier = { nullptr, nullptr, nullptr, nullptr, nullptr, CanvasDrawRect,
-        nullptr };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGraphicsCanvas modifier = {
+        .finalize = nullptr,
+        .drawPoint = nullptr,
+        .drawPoints = nullptr,
+        .drawLine = nullptr,
+        .drawArc = nullptr,
+        .drawRect = CanvasDrawRect,
+        .drawOval = nullptr,
+        .drawCircle = nullptr,
+        .drawRRect = nullptr,
+        .drawDRRect = nullptr,
+        .drawString = nullptr,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -2036,22 +2102,41 @@ void PaintFinalize(ArkUIPaintHandle paintPtr)
 
 const ArkUIGraphicsPaint* GetPaintAPI()
 {
-    static const ArkUIGraphicsPaint modifier = { PaintMake, PaintFinalize, nullptr, nullptr, nullptr, nullptr };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGraphicsPaint modifier = {
+        .make = PaintMake,
+        .finalize = PaintFinalize,
+        .setColor = nullptr,
+        .getColor = nullptr,
+        .setAlpha = nullptr,
+        .getAlpha = nullptr
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const ArkUIGraphicsFont* GetFontAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIGraphicsFont modifier = {
-        nullptr,
+        .makeDefault = nullptr,
+        .finalize = nullptr,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const ArkUIGraphicsAPI* GetGraphicsAPI()
 {
-    static const ArkUIGraphicsAPI api = { ARKUI_NODE_GRAPHICS_API_VERSION, SetCallbackMethod, GetCanvasAPI, GetPaintAPI,
-        GetFontAPI };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGraphicsAPI api = {
+        .version = ARKUI_NODE_GRAPHICS_API_VERSION,
+        .setCallbackMethod = SetCallbackMethod,
+        .getCanvasAPI = GetCanvasAPI,
+        .getPaintAPI = GetPaintAPI,
+        .getFontAPI = GetFontAPI
+    };
+    CHECK_INITIALIZED_FIELDS_END(api, 0, 0, 0); // don't move this line
     return &api;
 }
 
@@ -2156,52 +2241,56 @@ void DisposeCurve(ArkUICurveHandle curve)
 
 const ArkUIAnimation* GetAnimationAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIAnimation modifier = {
-        nullptr,
-        nullptr,
-        nullptr,
-        AnimateTo,
-        KeyframeAnimateTo,
-        CreateAnimator,
-        DisposeAnimator,
-        AnimatorReset,
-        AnimatorPlay,
-        AnimatorFinish,
-        AnimatorPause,
-        AnimatorCancel,
-        AnimatorReverse,
-        CreateCurve,
-        CreateStepsCurve,
-        CreateCubicBezierCurve,
-        CreateSpringCurve,
-        CreateSpringMotion,
-        CreateResponsiveSpringMotion,
-        CreateInterpolatingSpring,
-        CreateCustomCurve,
-        DisposeCurve,
+        .startAnimation = nullptr,
+        .openImplicitAnimation = nullptr,
+        .closeImplicitAnimation = nullptr,
+        .animateTo = AnimateTo,
+        .keyframeAnimateTo = KeyframeAnimateTo,
+        .createAnimator = CreateAnimator,
+        .disposeAnimator = DisposeAnimator,
+        .animatorReset = AnimatorReset,
+        .animatorPlay = AnimatorPlay,
+        .animatorFinish = AnimatorFinish,
+        .animatorPause = AnimatorPause,
+        .animatorCancel = AnimatorCancel,
+        .animatorReverse = AnimatorReverse,
+        .initCurve = CreateCurve,
+        .stepsCurve = CreateStepsCurve,
+        .cubicBezierCurve = CreateCubicBezierCurve,
+        .springCurve = CreateSpringCurve,
+        .springMotion = CreateSpringMotion,
+        .responsiveSpringMotion = CreateResponsiveSpringMotion,
+        .interpolatingSpring = CreateInterpolatingSpring,
+        .customCurve = CreateCustomCurve,
+        .disposeCurve = DisposeCurve,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const ArkUINavigation* GetNavigationAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUINavigation modifier = {
-        nullptr,
-        nullptr,
-        GetNavigationId,
-        GetNavDestinationName,
-        GetStackLength,
-        GetNavDesNameByIndex,
-        GetNavDestinationId,
-        GetNavDestinationState,
-        GetNavDestinationIndex,
-        GetNavDestinationParam,
-        GetRouterPageIndex,
-        GetRouterPageName,
-        GetRouterPagePath,
-        GetRouterPageState,
-        GetRouterPageId,
+        .popPageToIndex = nullptr,
+        .setNavDestinationBackPressed = nullptr,
+        .getNavigationId = GetNavigationId,
+        .getNavDestinationName = GetNavDestinationName,
+        .getStackLength = GetStackLength,
+        .getNavDesNameByIndex = GetNavDesNameByIndex,
+        .getNavDestinationId = GetNavDestinationId,
+        .getNavDestinationState = GetNavDestinationState,
+        .getNavDestinationIndex = GetNavDestinationIndex,
+        .getNavDestinationParam = GetNavDestinationParam,
+        .getRouterPageIndex = GetRouterPageIndex,
+        .getRouterPageName = GetRouterPageName,
+        .getRouterPagePath = GetRouterPagePath,
+        .getRouterPageState = GetRouterPageState,
+        .getRouterPageId = GetRouterPageId,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -2240,7 +2329,8 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
     SpanString* spanString = new SpanString(u"");
-    spanString->DecodeTlvExt(vec, spanString);
+    std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
+    spanString->DecodeTlvExt(vec, spanString, std::move(unmarshallCallback));
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -2279,167 +2369,237 @@ const char* ConvertToHtml(ArkUI_StyledString_Descriptor* descriptor)
 
 const ArkUIStyledStringAPI* GetStyledStringAPI()
 {
-    static const ArkUIStyledStringAPI impl { CreateArkUIStyledStringDescriptor, DestroyArkUIStyledStringDescriptor,
-        UnmarshallStyledStringDescriptor, MarshallStyledStringDescriptor, ConvertToHtml };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIStyledStringAPI impl {
+        .createArkUIStyledStringDescriptor = CreateArkUIStyledStringDescriptor,
+        .destroyArkUIStyledStringDescriptor = DestroyArkUIStyledStringDescriptor,
+        .unmarshallStyledStringDescriptor = UnmarshallStyledStringDescriptor,
+        .marshallStyledStringDescriptor = MarshallStyledStringDescriptor,
+        .convertToHtml = ConvertToHtml
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
+    return &impl;
+}
+
+ArkUISnapshotOptions* CreateSnapshotOptions()
+{
+    ArkUISnapshotOptions* snapshotOptions = new ArkUISnapshotOptions();
+    snapshotOptions->scale = 1.0f;
+    return snapshotOptions;
+}
+
+void DestroySnapshotOptions(ArkUISnapshotOptions* snapshotOptions)
+{
+    if (snapshotOptions != nullptr) {
+        delete snapshotOptions;
+        snapshotOptions = nullptr;
+    }
+}
+
+ArkUI_Int32 SnapshotOptionsSetScale(ArkUISnapshotOptions* snapshotOptions, ArkUI_Float32 scale)
+{
+    if (snapshotOptions == nullptr || !OHOS::Ace::GreatNotEqual(scale, 0.0)) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    snapshotOptions->scale = scale;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshotOptions, void* mediaPixel)
+{
+    auto frameNode =
+        OHOS::Ace::AceType::Claim<OHOS::Ace::NG::FrameNode>(reinterpret_cast<OHOS::Ace::NG::FrameNode*>(node));
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    NG::SnapshotOptions options;
+    options.scale = snapshotOptions != nullptr ? snapshotOptions->scale : 1.0f;
+    options.waitUntilRenderFinished = true;
+    auto result = delegate->GetSyncSnapshot(frameNode, options);
+    *reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(mediaPixel) = result.second;
+    return result.first;
+}
+
+const ArkUISnapshotAPI* GetComponentSnapshotAPI()
+{
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUISnapshotAPI impl {
+        .createSnapshotOptions = CreateSnapshotOptions,
+        .destroySnapshotOptions = DestroySnapshotOptions,
+        .snapshotOptionsSetScale = SnapshotOptionsSetScale,
+        .getSyncSnapshot = GetNodeSnapshot
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 
 /* clang-format off */
 ArkUIFullNodeAPI impl_full = {
-    ARKUI_NODE_API_VERSION,
-    SetCallbackMethod,      // CallbackMethod
-    GetBasicAPI,            // BasicAPI
-    GetArkUINodeModifiers,  // NodeModifiers
-    GetAnimationAPI,        // Animation
-    GetNavigationAPI,       // Navigation
-    GetGraphicsAPI,         // Graphics
-    GetDialogAPI,
-    GetExtendedAPI,         // Extended
-    NodeAdapter::GetNodeAdapterAPI,         // adapter.
-    DragAdapter::GetDragAdapterAPI,        // drag adapter.
-    GetStyledStringAPI,     // StyledStringAPI
+    .version = ARKUI_NODE_API_VERSION,
+    .setCallbackMethod = SetCallbackMethod,      // CallbackMethod
+    .getBasicAPI = GetBasicAPI,            // BasicAPI
+    .getNodeModifiers = GetArkUINodeModifiers,  // NodeModifiers
+    .getAnimation = GetAnimationAPI,        // Animation
+    .getNavigation = GetNavigationAPI,       // Navigation
+    .getGraphicsAPI = GetGraphicsAPI,         // Graphics
+    .getDialogAPI = GetDialogAPI,
+    .getExtendedAPI = GetExtendedAPI,         // Extended
+    .getNodeAdapterAPI = NodeAdapter::GetNodeAdapterAPI,         // adapter.
+    .getDragAdapterAPI = DragAdapter::GetDragAdapterAPI,        // drag adapter.
+    .getStyledStringAPI = GetStyledStringAPI,     // StyledStringAPI
+    .getSnapshotAPI = GetComponentSnapshotAPI,     // SyncSnapshot
 };
 /* clang-format on */
 
 const CJUIAnimation* GetCJUIAnimationAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIAnimation modifier = {
-        nullptr,
-        nullptr,
-        nullptr,
-        AnimateTo,
-        KeyframeAnimateTo,
-        CreateAnimator,
-        DisposeAnimator,
-        AnimatorReset,
-        AnimatorPlay,
-        AnimatorFinish,
-        AnimatorPause,
-        AnimatorCancel,
-        AnimatorReverse,
-        CreateCurve,
-        CreateStepsCurve,
-        CreateCubicBezierCurve,
-        CreateSpringCurve,
-        CreateSpringMotion,
-        CreateResponsiveSpringMotion,
-        CreateInterpolatingSpring,
-        CreateCustomCurve,
-        DisposeCurve,
+        .startAnimation = nullptr,
+        .openImplicitAnimation = nullptr,
+        .closeImplicitAnimation = nullptr,
+        .animateTo = AnimateTo,
+        .keyframeAnimateTo = KeyframeAnimateTo,
+        .createAnimator = CreateAnimator,
+        .disposeAnimator = DisposeAnimator,
+        .animatorReset = AnimatorReset,
+        .animatorPlay = AnimatorPlay,
+        .animatorFinish = AnimatorFinish,
+        .animatorPause = AnimatorPause,
+        .animatorCancel = AnimatorCancel,
+        .animatorReverse = AnimatorReverse,
+        .initCurve = CreateCurve,
+        .stepsCurve = CreateStepsCurve,
+        .cubicBezierCurve = CreateCubicBezierCurve,
+        .springCurve = CreateSpringCurve,
+        .springMotion = CreateSpringMotion,
+        .responsiveSpringMotion = CreateResponsiveSpringMotion,
+        .interpolatingSpring = CreateInterpolatingSpring,
+        .customCurve = CreateCustomCurve,
+        .disposeCurve = DisposeCurve,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUINavigation* GetCJUINavigationAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUINavigation modifier = {
-        nullptr,
-        nullptr,
-        GetNavigationId,
-        GetNavDestinationName,
-        GetStackLength,
-        GetNavDesNameByIndex,
-        GetNavDestinationId,
-        GetNavDestinationState,
-        GetNavDestinationIndex,
-        GetNavDestinationParam,
-        GetRouterPageIndex,
-        GetRouterPageName,
-        GetRouterPagePath,
-        GetRouterPageState,
-        GetRouterPageId,
+        .popPageToIndex = nullptr,
+        .setNavDestinationBackPressed = nullptr,
+        .getNavigationId = GetNavigationId,
+        .getNavDestinationName = GetNavDestinationName,
+        .getStackLength = GetStackLength,
+        .getNavDesNameByIndex = GetNavDesNameByIndex,
+        .getNavDestinationId = GetNavDestinationId,
+        .getNavDestinationState = GetNavDestinationState,
+        .getNavDestinationIndex =GetNavDestinationIndex,
+        .getNavDestinationParam = GetNavDestinationParam,
+        .getRouterPageIndex = GetRouterPageIndex,
+        .getRouterPageName = GetRouterPageName,
+        .getRouterPagePath = GetRouterPagePath,
+        .getRouterPageState = GetRouterPageState,
+        .getRouterPageId = GetRouterPageId,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIGraphicsAPI* GetCJUIGraphicsAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIGraphicsAPI api = {
-        ARKUI_NODE_GRAPHICS_API_VERSION, SetCallbackMethod, GetCanvasAPI, GetPaintAPI, GetFontAPI
+        .version = ARKUI_NODE_GRAPHICS_API_VERSION,
+        .setCallbackMethod = SetCallbackMethod,
+        .getCanvasAPI = GetCanvasAPI,
+        .getPaintAPI = GetPaintAPI,
+        .getFontAPI = GetFontAPI
     };
+    CHECK_INITIALIZED_FIELDS_END(api, 0, 0, 0); // don't move this line
     return &api;
 }
 
 const CJUIDialogAPI* GetCJUIDialogAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIDialogAPI dialogImpl = {
-        CreateDialog,
-        DisposeDialog,
-        SetDialogContent,
-        RemoveDialogContent,
-        SetDialogContentAlignment,
-        ResetDialogContentAlignment,
-        SetDialogModalMode,
-        SetDialogAutoCancel,
-        SetDialogMask,
-        SetDialogBackgroundColor,
-        SetDialogCornerRadius,
-        SetDialogGridColumnCount,
-        EnableDialogCustomStyle,
-        EnableDialogCustomAnimation,
-        ShowDialog,
-        CloseDialog,
-        RegisterOnWillDialogDismiss,
+        .create = CreateDialog,
+        .dispose = DisposeDialog,
+        .setContent = SetDialogContent,
+        .removeContent = RemoveDialogContent,
+        .setContentAlignment = SetDialogContentAlignment,
+        .resetContentAlignment = ResetDialogContentAlignment,
+        .setModalMode = SetDialogModalMode,
+        .setAutoCancel = SetDialogAutoCancel,
+        .setMask = SetDialogMask,
+        .setBackgroundColor = SetDialogBackgroundColor,
+        .setCornerRadius = SetDialogCornerRadius,
+        .setGridColumnCount = SetDialogGridColumnCount,
+        .enableCustomStyle = EnableDialogCustomStyle,
+        .enableCustomAnimation = EnableDialogCustomAnimation,
+        .show = ShowDialog,
+        .close = CloseDialog,
+        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
     };
+    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
 }
 
 const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static CJUIExtendedNodeAPI impl_extended = {
-        ARKUI_EXTENDED_API_VERSION,
-
-        NodeModifier::GetUtilsModifier,
-        NodeModifier::GetCanvasRenderingContext2DModifier,
-
-        SetCallbackMethod,
-        SetCustomMethodFlag,
-        GetCustomMethodFlag,
-        RegisterCustomNodeAsyncEvent,
-        UnregisterCustomNodeEvent,
-        RegisterCustomNodeEventReceiver,
-        SetCustomCallback, // setCustomCallback
-        MeasureLayoutAndDraw,
-        MeasureNode,
-        LayoutNode,
-        DrawNode,
-        SetAttachNodePtr,
-        GetAttachNodePtr,
-        SetMeasureWidth, // setMeasureWidth
-        GetMeasureWidth, // getMeasureWidth
-        SetMeasureHeight, // setMeasureHeight
-        GetMeasureHeight, // getMeasureHeight
-        SetX, // setX
-        SetY, // setY
-        GetX, // getX
-        GetY, // getY
-        GetLayoutConstraint,
-        SetAlignment,
-        GetAlignment,
-        nullptr, // indexerChecker
-        nullptr, // setRangeUpdater
-        nullptr, // setLazyItemIndexer
-        GetPipelineContext,
-        SetVsyncCallback,
-        UnblockVsyncWait,
-        NodeEvent::SendArkUISyncEvent,
-        nullptr, // callContinuation
-        nullptr, // setChildTotalCount
-        ShowCrash,
+        .version = ARKUI_EXTENDED_API_VERSION,
+        .getUtilsModifier = NodeModifier::GetUtilsModifier,
+        .getCanvasRenderingContext2DModifier = NodeModifier::GetCanvasRenderingContext2DModifier,
+        .setCallbackMethod = SetCallbackMethod,
+        .setCustomMethodFlag = SetCustomMethodFlag,
+        .getCustomMethodFlag = GetCustomMethodFlag,
+        .registerCustomNodeAsyncEvent = RegisterCustomNodeAsyncEvent,
+        .unregisterCustomNodeAsyncEvent = UnregisterCustomNodeEvent,
+        .registerCustomNodeAsyncEventReceiver = RegisterCustomNodeEventReceiver,
+        .setCustomCallback = SetCustomCallback, // setCustomCallback
+        .measureLayoutAndDraw = MeasureLayoutAndDraw,
+        .measureNode = MeasureNode,
+        .layoutNode = LayoutNode,
+        .drawNode = DrawNode,
+        .setAttachNodePtr = SetAttachNodePtr,
+        .getAttachNodePtr = GetAttachNodePtr,
+        .setMeasureWidth = SetMeasureWidth, // setMeasureWidth
+        .getMeasureWidth = GetMeasureWidth, // getMeasureWidth
+        .setMeasureHeight = SetMeasureHeight, // setMeasureHeight
+        .getMeasureHeight = GetMeasureHeight, // getMeasureHeight
+        .setX = SetX, // setX
+        .setY = SetY, // setY
+        .getX = GetX, // getX
+        .getY = GetY, // getY
+        .getLayoutConstraint = GetLayoutConstraint,
+        .setAlignment = SetAlignment,
+        .getAlignment = GetAlignment,
+        .indexerChecker = nullptr, // indexerChecker
+        .setRangeUpdater = nullptr, // setRangeUpdater
+        .setLazyItemIndexer = nullptr, // setLazyItemIndexer
+        .getPipelineContext = GetPipelineContext,
+        .setVsyncCallback = SetVsyncCallback,
+        .unblockVsyncWait = UnblockVsyncWait,
+        .sendEvent = NodeEvent::SendArkUISyncEvent,
+        .callContinuation = nullptr, // callContinuation
+        .setChildTotalCount = nullptr, // setChildTotalCount
+        .showCrash = ShowCrash,
     };
+    CHECK_INITIALIZED_FIELDS_END(impl_extended, 0, 0, 0); // don't move this line
     return &impl_extended;
 }
 
 CJUIFullNodeAPI fullCJUIApi {
-    SetCallbackMethod,
-    GetCJUIBasicAPI,            // BasicAPI
-    GetCJUINodeModifiers,       // NodeModifiers
-    GetCJUIAnimationAPI,        // Animation
-    GetCJUINavigationAPI,       // Navigation
-    GetCJUIGraphicsAPI,         // Graphics
-    GetCJUIDialogAPI,
-    GetCJUIExtendedAPI,         // Extended
-    NodeAdapter::GetCJUINodeAdapterAPI,         // adapter.
+    .setCallbackMethod = SetCallbackMethod,
+    .getBasicAPI = GetCJUIBasicAPI,            // BasicAPI
+    .getNodeModifiers = GetCJUINodeModifiers,       // NodeModifiers
+    .getAnimation = GetCJUIAnimationAPI,        // Animation
+    .getNavigation = GetCJUINavigationAPI,       // Navigation
+    .getGraphicsAPI = GetCJUIGraphicsAPI,         // Graphics
+    .getDialogAPI = GetCJUIDialogAPI,
+    .getExtendedAPI = GetCJUIExtendedAPI,         // Extended
+    .getNodeAdapterAPI = NodeAdapter::GetCJUINodeAdapterAPI,         // adapter.
 };
 } // namespace
 

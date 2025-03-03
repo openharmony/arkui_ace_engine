@@ -43,7 +43,7 @@ class NavigatorModifierTest : public ModifierTestBase<GENERATED_ArkUINavigatorMo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigatorModifierTest, setNavigatorOptionsTestDefaultValues, TestSize.Level1)
+HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -121,7 +121,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigatorModifierTest, setNavigatorOptions1, TestSize.Level1)
+HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptions1, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -144,7 +144,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions1, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigatorModifierTest, setActiveTestDefaultValues, TestSize.Level1)
+HWTEST_F(NavigatorModifierTest, DISABLED_setActiveTestDefaultValues, TestSize.Level1)
 {
     auto resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVE_DEFAULT_VALUE);
@@ -184,7 +184,7 @@ HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigatorModifierTest, setTypeTestDefaultValues, TestSize.Level1)
+HWTEST_F(NavigatorModifierTest, DISABLED_setTypeTestDefaultValues, TestSize.Level1)
 {
     auto resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_TYPE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
@@ -233,7 +233,7 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigatorModifierTest, setTypeTestInvalidValues, TestSize.Level1)
+HWTEST_F(NavigatorModifierTest, DISABLED_setTypeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

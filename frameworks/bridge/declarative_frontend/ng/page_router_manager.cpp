@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
 #include "base/i18n/localization.h"
+#include "base/thread/task_dependency_manager.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -59,7 +60,8 @@ void ExitToDesktop()
             pipeline->SendEventToAccessibility(event);
             pipeline->Finish(false);
         },
-        TaskExecutor::TaskType::UI, "ArkUIPageRouterExitToDesktop");
+        TaskExecutor::TaskType::UI, "ArkUIPageRouterExitToDesktop",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 } // namespace
@@ -132,7 +134,8 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     CHECK_NULL_VOID(pageRouterManager);
     taskExecutor->PostTask(
         [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); },
-        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrlContent");
+        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrlContent",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 #endif
 }
 
@@ -237,7 +240,8 @@ bool PageRouterManager::TryPreloadNamedRouter(const std::string& name, std::func
                 if (finishCallback) {
                     finishCallback();
                 }
-            }, TaskExecutor::TaskType::JS, "ArkUIPageRouterPreloadNamedRouterFinishCallback");
+            }, TaskExecutor::TaskType::JS, "ArkUIPageRouterPreloadNamedRouterFinishCallback",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     preloadNamedRouter_(name, std::move(preloadFinishCallback));
     return true;
@@ -287,10 +291,14 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     CleanPageOverlay();
     UpdateSrcPage();
     if (target.routerMode == RouterMode::SINGLE) {
-        auto PageInfoByUrl = FindPageInStackByRouteName(target.url);
-        if (PageInfoByUrl.second) {
+        auto pageInfoByUrl = FindPageInStackByRouteName(target.url);
+        if (pageInfoByUrl.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(PageInfoByUrl.first, PageInfoByUrl.second, target, true);
+            auto pagePattern = pageInfoByUrl.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(target.params);
+            }
+            MovePageToFront(pageInfoByUrl.first, pageInfoByUrl.second, target, true);
             return;
         }
         auto index = FindPageInRestoreStack(target.url);
@@ -1144,6 +1152,10 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
@@ -1163,7 +1175,8 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterPushOhmUrl");
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterPushOhmUrl",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::HIGH));
 }
 
 void PageRouterManager::StartPush(const RouterPageInfo& target)
@@ -1216,6 +1229,10 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
@@ -1242,6 +1259,10 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(target.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             return;
         }
@@ -1261,7 +1282,8 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterReplaceOhmUrl");
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterReplaceOhmUrl",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::HIGH));
 }
 
 void PageRouterManager::StartReplace(const RouterPageInfo& target)
@@ -1429,6 +1451,9 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
     auto pageNode = CreatePage(pageId, target);
+
+    TaskDependencyManager::GetInstance()->Sync();
+
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
         return;
@@ -2103,6 +2128,11 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         }
         if (pageInfo.first == popIndex) {
             // replace top self in SINGLE mode, do nothing.
+            CHECK_NULL_VOID(pageInfo.second);
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             return;
         }
         if (pageInfo.second) {
@@ -2116,6 +2146,10 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #endif
             popIndex = popIndex - 1;
             findPage = true;
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
         } else {
             auto index = FindPageInRestoreStack(info.url);
             if (index != INVALID_PAGE_INDEX) {
@@ -2269,7 +2303,8 @@ void PageRouterManager::LoadOhmUrlPage(const std::string& url, std::function<voi
     CHECK_NULL_VOID(taskExecutor);
     auto callback = [taskExecutor, instanceId, task = std::move(finishCallback), finishCallbackTaskName]() {
             ContainerScope scope(instanceId);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::JS, finishCallbackTaskName);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::JS, finishCallbackTaskName,
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         };
 
     auto silentInstallErrorCallBack = [errorCb = errorCallback, taskExecutor, instanceId, errorCallbackTaskName](
@@ -2280,7 +2315,8 @@ void PageRouterManager::LoadOhmUrlPage(const std::string& url, std::function<voi
         }
         ContainerScope scope(instanceId);
         taskExecutor->PostTask([errorCb, errorCode, errorMsg]() { errorCb(errorMsg, errorCode); },
-            TaskExecutor::TaskType::JS, errorCallbackTaskName);
+            TaskExecutor::TaskType::JS, errorCallbackTaskName,
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
 }

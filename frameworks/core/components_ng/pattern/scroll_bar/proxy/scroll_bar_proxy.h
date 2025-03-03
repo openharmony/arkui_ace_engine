@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 class ScrollablePattern;
 struct ScrollableNodeInfo {
     WeakPtr<ScrollablePattern> scrollableNode;
-    std::function<bool(double, int32_t source, bool)> onPositionChanged;
+    std::function<bool(double, int32_t source, bool, bool)> onPositionChanged;
     std::function<bool(double, int32_t source, bool)> scrollStartCallback;
     std::function<void(bool)> scrollEndCallback;
     StartSnapAnimationCallback startSnapAnimationCallback;
@@ -59,7 +59,8 @@ public:
      * Notify scrollable node to update state, called by scroll bar.
      * @param distance absolute distance that scroll bar has scrolled.
      */
-    void NotifyScrollableNode(float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar) const;
+    void NotifyScrollableNode(float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar,
+        bool isMouseWheelScroll = false) const;
 
     /*
      * Notify scrollable node to callback scrollStart, called by scroll bar.
@@ -94,7 +95,7 @@ public:
 
     float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
 
-    void NotifyScrollBarNode(float distance, int32_t source) const;
+    void NotifyScrollBarNode(float distance, int32_t source, bool isMouseWheelScroll = false) const;
 
     void SetScrollSnapTrigger_(bool scrollSnapTrigger)
     {

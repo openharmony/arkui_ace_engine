@@ -557,7 +557,7 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node,
 
 void WindowSceneLayoutManager::RegisterScreenNode(uint64_t screenId, const RefPtr<FrameNode>& node)
 {
-    screenNodeMap_[screenId] = node;
+    screenNodeMap_[screenId] = WeakPtr<FrameNode>(node);
     TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "screenNode:%{public}" PRIu64 " register, size:%{public}d",
         screenId, static_cast<uint32_t>(screenNodeMap_.size()));
 }
@@ -572,11 +572,22 @@ void WindowSceneLayoutManager::UnregisterScreenNode(uint64_t screenId)
 void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
     int32_t parentId, std::ostringstream& oss)
 {
-    CHECK_NULL_VOID(node);
+    if (node == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "node null. parentId:%{public}d", parentId);
+        return;
+    }
     auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
-    CHECK_NULL_VOID(context);
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "context null. screenId:%{public}" PRIu64 " tag:%{public}s"
+            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
+        return;
+    }
     auto rsNode = context->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
+    if (rsNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "rsNode null. screenId:%{public}" PRIu64 " tag:%{public}s"
+            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
+        return;
+    }
     oss << " name: " << GetWindowName(node);
     oss << " isVisible: " << node->IsVisible();
     oss << " opacity: " << context->GetOpacityValue(1.0f);
@@ -593,6 +604,8 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         oss << " globalPos: [" << rsNode->GetGlobalPositionX() << ", " << rsNode->GetGlobalPositionY() << "],";
         oss << " pivot: [" << globalGeometry->GetPivotX() << ", " << globalGeometry->GetPivotY() << "],";
     } else {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "globalGeometry null. screenId:%{public}" PRIu64 " tag:%{public}s"
+            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
         oss << " globalGeometry: [null],";
     }
     if (localGeometry) {
@@ -607,6 +620,8 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         oss << " localPos: [" << localGeometry->GetX() << ", "
             << localGeometry->GetY() << "],";
     } else {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "localGeometry null. screenId:%{public}" PRIu64 " tag:%{public}s"
+            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
         oss << " localGeometry: [null],";
     }
     oss << " requestZIndex: " << context->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
@@ -625,10 +640,11 @@ void WindowSceneLayoutManager::GetTotalUITreeInfo(std::string& info)
         for (auto it = screenNodeMap_.begin(); it != screenNodeMap_.end(); ++it) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "begin task GetTotalUITreeInfo:%{public}" PRIu64, it->first);
             std::ostringstream oss;
-            GetUITreeInfo(it->second, 0, 0, oss);
+            auto screenNode = it->second.Upgrade();
+            GetUITreeInfo(screenNode, 0, 0, oss);
             oss << "--------------------------------PatternTree" << " screenId: " <<
                 it->first << "-----------------------------------" << std::endl;
-            GetRSNodeTreeInfo(GetRSNode(it->second), 0, oss);
+            GetRSNodeTreeInfo(GetRSNode(screenNode), 0, oss);
             info.append(oss.str());
         }
     };

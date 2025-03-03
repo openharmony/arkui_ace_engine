@@ -85,6 +85,7 @@ public:
     MOCK_METHOD(bool, EncodeTlv, (std::vector<uint8_t> & buff), (override));
     MOCK_METHOD(AllocatorType, GetAllocatorType, (), (const override));
     MOCK_METHOD(bool, IsHdr, (), (const override));
+    MOCK_METHOD(uint32_t, WritePixels, (const WritePixelsOptions& opts), (override));
 };
 
 class WebDelegateDummy : public WebDelegate {

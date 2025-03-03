@@ -39,8 +39,8 @@ public:
     MOCK_METHOD1(SetSurfaceRotation, void(bool));
     MOCK_METHOD1(SetRenderFit, void(RenderFit));
     MOCK_METHOD1(SetSecurityLayer, void(bool));
+    MOCK_METHOD1(SetHDRBrightness, void(float));
     MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
-    MOCK_METHOD(void, UpdateBackgroundEffect, (const std::optional<EffectOption>&), (override));
     MOCK_METHOD1(SetTransparentLayer, void(bool));
 
     void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) override
@@ -120,6 +120,12 @@ public:
         // see ./components_ng/render/adapter/rosen_render_context.cpp
         // RosenRenderContext::UpdateBackBlur
         backdropBlurOption = blurOption;
+    }
+
+    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propEffectOption = effectOption;
     }
 
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)

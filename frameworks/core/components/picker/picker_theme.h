@@ -28,6 +28,10 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -36,43 +40,59 @@ constexpr Dimension PICKER_FOCUS_PADDING = 2.0_vp;
 constexpr uint32_t FOCUS_AREA_TYPE_IMPL = 1;
 } // namespace
 
-class PickerTheme final : public virtual Theme {
+class PickerTheme : public virtual Theme {
     DECLARE_ACE_TYPE(PickerTheme, Theme);
 
 public:
-    class Builder final {
+    class Builder {
     public:
         Builder() = default;
         ~Builder() = default;
 
+        void SetDigitalCrownSensitivity(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
+        {
+#ifdef SUPPORT_DIGITAL_CROWN
+            CHECK_NULL_VOID(themeStyle);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (pattern) {
+                auto sensitivity = pattern->GetAttr<int>("picker_crown_sensitivity",
+                    OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY);
+                if (sensitivity >= static_cast<int32_t>(OHOS::Ace::CrownSensitivity::LOW)
+                    && sensitivity <= static_cast<int32_t>(OHOS::Ace::CrownSensitivity::HIGH)) {
+                    theme->crownSensitivity_ = sensitivity;
+                }
+            }
+#endif
+        }
+
         RefPtr<PickerTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<PickerTheme> theme = AceType::Claim(new PickerTheme());
-            if (!themeConstants) {
-                return theme;
-            }
+            InitTheme(theme, themeConstants);
+            return theme;
+        }
 
+    protected:
+        void InitTheme(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            CHECK_NULL_VOID(themeConstants);
             auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-
+            CHECK_NULL_VOID(themeStyle);
             InitializeTextStyles(theme, themeStyle);
             theme->optionSizeUnit_ = DimensionUnit::VP;
             theme->lunarWidth_ =
                 Dimension(36.0, DimensionUnit::VP); // 36.0: lunarWidth, this width do not need setting by outer.
             theme->lunarHeight_ =
                 Dimension(18.0, DimensionUnit::VP); // 18.0: lunarHeight, this height do not need setting by outer.
-            theme->rotateInterval_ = 15.0; // when rotate 15.0 angle handle scroll of picker column.
+            theme->rotateInterval_ = 15.0;          // when rotate 15.0 angle handle scroll of picker column.
             theme->dividerThickness_ = DIVIDER_THICKNESS;
             Parse(themeStyle, theme);
             InitializeSelectorItemStyles(theme, themeStyle);
-            return theme;
         }
 
+    private:
         void Parse(const RefPtr<ThemeStyle>& style, const RefPtr<PickerTheme>& theme) const;
 
-    private:
         void InitializeButtonTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
@@ -135,6 +155,9 @@ public:
                     FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("picker_focus_option_weight", 0.0))));
                 theme->focusOptionStyle_.SetAdaptTextSize(theme->focusOptionStyle_.GetFontSize(),
                     pattern->GetAttr<Dimension>("picker_select_option_min_font_size", 0.0_fp));
+                theme->backgroundColor_ = pattern->GetAttr<Color>("picker_background_color", Color(0xffffffff));
+                theme->showCircleDial_= static_cast<bool>(pattern->GetAttr<int>("picker_digital_circle", 0));
+                SetDigitalCrownSensitivity(theme, themeStyle);
             }
             theme->focusOptionStyle_.SetMaxLines(1);
             theme->focusOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
@@ -185,7 +208,7 @@ public:
     };
 
     ~PickerTheme() override = default;
-
+    PickerTheme() = default;
     RefPtr<PickerTheme> clone() const
     {
         auto theme = AceType::Claim(new PickerTheme());
@@ -259,6 +282,9 @@ public:
             return focusOptionStyle_;
         }
 
+        if (IsCircleDial()) {
+            return normalOptionStyle_;
+        }
         return selectedOptionStyle_;
     }
     void SetOptionStyle(bool selected, bool focus, const TextStyle& value)
@@ -493,6 +519,16 @@ public:
         return defaultEndDate_;
     }
 
+    const PickerTime& GetDefaultStartTime() const
+    {
+        return defaultStartTime_;
+    }
+
+    const PickerTime& GetDefaultEndTime() const
+    {
+        return defaultEndTime_;
+    }
+
     uint32_t GetShowCountLandscape() const
     {
         return showCountLandscape_;
@@ -607,13 +643,31 @@ public:
     {
         return selectorItemNormalBgColor_;
     }
+
+    const Color& GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
+
+    int32_t GetDigitalCrownSensitivity() const
+    {
+        return crownSensitivity_;
+    }
+
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
 private:
-    PickerTheme() = default;
 
     Color focusColor_;
     Color hoverColor_;
     Color pressColor_;
     Color lunarswitchTextColor_;
+    Color backgroundColor_;
+    int32_t crownSensitivity_ = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    bool showCircleDial_ = false;
 
     Radius focusRadius_;
     uint32_t showOptionCount_ = 0;
@@ -671,6 +725,8 @@ private:
 
     PickerDate defaultStartDate_ = PickerDate(1970, 1, 1);
     PickerDate defaultEndDate_ = PickerDate(2100, 12, 31);
+    PickerTime defaultStartTime_ = PickerTime(0, 0, 0);
+    PickerTime defaultEndTime_ = PickerTime(23, 59, 59);
 
     uint32_t showCountLandscape_ = 3;
     uint32_t showCountPortrait_ = 5;

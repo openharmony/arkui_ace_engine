@@ -236,8 +236,9 @@ HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconColorResource, Test
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
 }
@@ -258,8 +259,9 @@ HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconSrc, TestSize.Level
         modifier_->setCancelButton(node_, &attrs);
         auto jsonValue = GetJsonValue(node_);
         auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SRC_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+            CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SRC_ATTR);
         EXPECT_EQ(resultStr, expected);
     }
 }
@@ -290,9 +292,9 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchIconTestResources, TestS
                 modifier_->setSearchIcon(node_, &attrs);
                 fullJson = GetJsonValue(node_);
                 auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, SEARCH_ICON_ATTR);
-                auto customSearchIconSrc = customSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
-                auto customSearchIconColor = customSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
-                auto customSearchIconSize = customSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
+                auto customSearchIconSrc = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_SRC_ATTR);
+                auto customSearchIconColor = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_COLOR_ATTR);
+                auto customSearchIconSize = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_SIZE_ATTR);
                 EXPECT_EQ(customSearchIconSrc, resultSrc);
                 EXPECT_EQ(customSearchIconColor, resultColor);
                 EXPECT_EQ(customSearchIconSize, resultLength);
@@ -337,8 +339,8 @@ HWTEST_F(SearchModifierResourcesTest, setSearchButtonTestResources, TestSize.Lev
             modifier_->setSearchButton(node_, &checkText, &options);
             auto fullJson = GetJsonValue(node_);
             auto customButtonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUTTON_OPTIONS_ATTR);
-            auto searchButtonColor = customButtonOptions->GetString(BUTTON_OPTIONS_COLOR_ATTR);
-            auto searchButtonSize = customButtonOptions->GetString(BUTTON_OPTIONS_SIZE_ATTR);
+            auto searchButtonColor = GetAttrValue<std::string>(customButtonOptions, BUTTON_OPTIONS_COLOR_ATTR);
+            auto searchButtonSize = GetAttrValue<std::string>(customButtonOptions, BUTTON_OPTIONS_SIZE_ATTR);
             EXPECT_EQ(searchButtonColor, expectColor);
             EXPECT_EQ(searchButtonSize, expectLength);
         }
@@ -396,8 +398,8 @@ HWTEST_F(SearchModifierResourcesTest, setCaretStyleTestResources, TestSize.Level
             auto value = GetStringAttribute(node_, CARET_STYLE_ATTR);
             auto fullJson = GetJsonValue(node_);
             auto customCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CARET_STYLE_ATTR);
-            auto caretColor = customCaretStyle->GetString(CARET_STYLE_COLOR_ATTR);
-            auto caretWidth = customCaretStyle->GetString(CARET_STYLE_WIDTH_ATTR);
+            auto caretColor = GetAttrValue<std::string>(customCaretStyle, CARET_STYLE_COLOR_ATTR);
+            auto caretWidth = GetAttrValue<std::string>(customCaretStyle, CARET_STYLE_WIDTH_ATTR);
             EXPECT_EQ(caretColor, resultColor);
             EXPECT_EQ(caretWidth, resultLength);
         }
@@ -533,7 +535,7 @@ HWTEST_F(SearchModifierResourcesTest, setPlaceholderFontTestFamily, TestSize.Lev
         modifier_->setPlaceholderFont(node_, &fontOpt);
         jsonValue = GetJsonValue(node_);
         auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PLACEHOLDER_FONT_ATTRS);
-        auto checkFamily = placeholderFont->GetString(PLACEHOLDER_FONT_FAMILY);
+        auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
         EXPECT_EQ(checkFamily, expected);
     }
 }
@@ -553,7 +555,7 @@ HWTEST_F(SearchModifierResourcesTest, setPlaceholderFontTestSize, TestSize.Level
         modifier_->setPlaceholderFont(node_, &fontOpt);
         jsonValue = GetJsonValue(node_);
         auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PLACEHOLDER_FONT_ATTRS);
-        auto result = placeholderFont->GetString(PLACEHOLDER_FONT_SIZE);
+        auto result = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
         EXPECT_EQ(result, expected);
     }
 }
@@ -573,7 +575,7 @@ HWTEST_F(SearchModifierResourcesTest, setTextFontTestFontFamily, TestSize.Level1
         modifier_->setTextFont(node_, &fontOpt);
         jsonValue = GetJsonValue(node_);
         auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, TEXT_FONT_ATTRS);
-        auto result = placeholderFont->GetString(TEXT_FONT_FAMILY_ATTR);
+        auto result = GetAttrValue<std::string>(placeholderFont, TEXT_FONT_FAMILY_ATTR);
         EXPECT_EQ(result, expected);
     }
 }
@@ -593,7 +595,7 @@ HWTEST_F(SearchModifierResourcesTest, setTextFontTestFontSizeResource, TestSize.
         modifier_->setTextFont(node_, &fontOpt);
         jsonValue = GetJsonValue(node_);
         auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, TEXT_FONT_ATTRS);
-        auto result = placeholderFont->GetString(TEXT_FONT_SIZE_ATTR);
+        auto result = GetAttrValue<std::string>(placeholderFont, TEXT_FONT_SIZE_ATTR);
         EXPECT_EQ(result, expected);
     }
 }
@@ -642,7 +644,7 @@ HWTEST_F(SearchModifierResourcesTest, setDecorationTestResource, TestSize.Level1
         modifier_->setDecoration(node_, &options);
         auto decorationJSON = GetStringAttribute(node_, DECORATION_ATTRS);
         auto decoration = JsonUtil::ParseJsonString(decorationJSON);
-        auto result = decoration->GetString(DECORATION_COLOR_ATTR);
+        auto result = GetAttrValue<std::string>(decoration, DECORATION_COLOR_ATTR);
         EXPECT_EQ(result, expectColor);
     }
 }

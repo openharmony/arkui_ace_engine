@@ -164,7 +164,7 @@ void SvgFeColorMatrix::OnInitStyle()
 
 void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
-    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash, bool cropRect) const
 {
     imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
 
@@ -172,8 +172,14 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
     colorMatrix.SetArray(matrix_.data());
     auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix);
     CHECK_NULL_VOID(colorFilter);
-
-    imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
+    RSRect filterRect(effectFilterArea_.Left(), effectFilterArea_.Top(),
+        effectFilterArea_.Right(), effectFilterArea_.Bottom());
+    if (cropRect) {
+        imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter,
+            imageFilter, filterRect);
+    } else {
+        imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
+    }
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
     RegisterResult(feAttr_.result, imageFilter, resultHash);
 }

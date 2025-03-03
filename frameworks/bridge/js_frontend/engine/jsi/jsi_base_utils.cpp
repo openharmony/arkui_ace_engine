@@ -565,7 +565,8 @@ std::string JsiBaseUtils::GetRelativePath(const std::string& sources, std::strin
     return sources;
 }
 
-void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime)
+void JsiBaseUtils::ReportJsErrorEvent(
+    std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime, const std::string& uniqueId)
 {
     if (!runtime) {
         LOGI("ReportJsErrorEvent: jsi engine has been destroyed");
@@ -583,9 +584,11 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
 
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
-    EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), errorInfo.name, summaryBody);
+    EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), errorInfo.name, summaryBody, uniqueId);
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-    ExceptionHandler::HandleJsException(summaryBody, errorInfo);
+    auto container = Container::Current();
+    auto isStageModel = container ? container->IsUseStageModel() : false;
+    ExceptionHandler::HandleJsException(summaryBody, errorInfo, isStageModel);
 #endif
 }
 

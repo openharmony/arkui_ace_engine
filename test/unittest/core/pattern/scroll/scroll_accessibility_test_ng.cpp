@@ -85,36 +85,36 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().SetTicks(TICK);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(-HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(-HEIGHT));
 
     /**
      * @tc.steps: step2. ActActionScrollForward with SCROLL_HALF
      * @tc.expected: Scroll half page down
      */
     float currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_EQ(currentOffset, -SCROLL_HEIGHT);
+    EXPECT_EQ(currentOffset, -HEIGHT);
     accessibilityProperty_->ActActionScrollForward(AccessibilityScrollType::SCROLL_HALF);
     const int32_t scrollHalf = 2;
-    EXPECT_TRUE(TickPosition(currentOffset - SCROLL_HEIGHT / scrollHalf / TICK));
-    EXPECT_TRUE(TickPosition(currentOffset - SCROLL_HEIGHT / scrollHalf));
+    EXPECT_TRUE(TickPosition(currentOffset - HEIGHT / scrollHalf / TICK));
+    EXPECT_TRUE(TickPosition(currentOffset - HEIGHT / scrollHalf));
 
     /**
      * @tc.steps: step3. ActActionScrollBackward
      * @tc.expected: Scroll page up
      */
     currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_EQ(currentOffset, -(SCROLL_HEIGHT + SCROLL_HEIGHT / scrollHalf));
+    EXPECT_EQ(currentOffset, -(HEIGHT + HEIGHT / scrollHalf));
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(TickPosition(currentOffset + SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(TickPosition(currentOffset + SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(currentOffset + HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(currentOffset + HEIGHT));
 
     /**
      * @tc.steps: step4. ActActionScrollBackward with SCROLL_HALF
      * @tc.expected: Scroll half page up
      */
     currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_EQ(currentOffset, -SCROLL_HEIGHT / scrollHalf);
+    EXPECT_EQ(currentOffset, -HEIGHT / scrollHalf);
     accessibilityProperty_->ActActionScrollBackward(AccessibilityScrollType::SCROLL_HALF);
     EXPECT_TRUE(TickPosition(currentOffset / TICK));
     EXPECT_TRUE(TickPosition(0));
@@ -132,7 +132,7 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.expected: No scrollable distance
      */
     CreateScroll();
-    CreateContent(SCROLL_HEIGHT);
+    CreateContent(HEIGHT);
     CreateScrollDone();
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(pattern_->GetScrollableDistance(), 0);

@@ -73,6 +73,7 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
       smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true)),
       useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
       isRightToLeft_(AceType::MakeRefPtr<PropertyBool>(false)),
+      progressUpdate_(AceType::MakeRefPtr<PropertyBool>(false)),
       capsuleBorderRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0f))
 {
     AttachProperty(strokeWidth_);
@@ -99,6 +100,7 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
     AttachProperty(isItalic_);
     AttachProperty(smoothEffect_);
     AttachProperty(isRightToLeft_);
+    AttachProperty(progressUpdate_);
     AttachProperty(capsuleBorderRadius_);
 
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
@@ -153,6 +155,11 @@ void ProgressModifier::SetProgressType(ProgressType type)
 {
     CHECK_NULL_VOID(progressType_);
     progressType_->Set(static_cast<int32_t>(type));
+}
+
+void ProgressModifier::UpdateProgress()
+{
+    progressUpdate_->Set(!progressUpdate_->Get());
 }
 
 void ProgressModifier::ProcessSweepingAnimation(ProgressType type, float value)
@@ -297,7 +304,7 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
 {
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     AnimationOption optionHead = AnimationOption();
     auto curveHead = AceType::MakeRefPtr<TailingHeadCurve>();
     optionHead.SetDuration(LOADING_ANIMATION_DURATION);
@@ -319,7 +326,7 @@ void ProgressModifier::StartRingLoadingTailAnimation()
 {
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     AnimationOption optionTail = AnimationOption();
     auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.00f, 0.66f, 0.10f);
     optionTail.SetDuration(LOADING_ANIMATION_DURATION);
@@ -406,7 +413,7 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
 
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     isSweeping_ = true;
     AnimationOption option = AnimationOption();
     speed = NearZero(speed) ? 1.0f : speed;
@@ -574,7 +581,7 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
 
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     isSweeping_ = true;
     sweepingDate_->Set(0.0f);
     speed = NearZero(speed) ? 1.0f : speed;
@@ -747,7 +754,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
             radius, radius });
         canvas.DetachBrush();
         // progress selected part
-        CHECK_NULL_VOID(Positive(dateLength));
+        CHECK_NULL_VOID(Positive(value_->Get()));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
 #ifndef USE_ROSEN_DRAWING
@@ -778,7 +785,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
             radius, radius });
         canvas.DetachBrush();
         // progress selected part
-        CHECK_NULL_VOID(Positive(dateLength));
+        CHECK_NULL_VOID(Positive(value_->Get()));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
 #ifndef USE_ROSEN_DRAWING
@@ -1402,7 +1409,7 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     canvas.AttachPen(pen);
     if (isRightToLeft_->Get()) {
         canvas.Scale(-1, 1);
-        canvas.Translate(-radius * INT32_TWO, 0);
+        canvas.Translate(-(radius + ringProgressLeftPadding_.ConvertToPx()) * INT32_TWO, 0);
     }
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },

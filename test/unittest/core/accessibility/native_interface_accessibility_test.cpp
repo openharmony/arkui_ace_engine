@@ -85,6 +85,8 @@ std::vector<ArkUI_Accessibility_ActionType> actionTypeVector = {
     ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_SELECT_TEXT,
     ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_SET_TEXT,
     ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_SET_CURSOR_POSITION,
+    ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_NEXT_HTML_ITEM,
+    ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_PREVIOUS_HTML_ITEM,
 };
 
 } // namespace
@@ -666,7 +668,7 @@ HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest008, TestSize
     ret = OH_ArkUI_AccessibilityElementInfoSetOperationActions(elementInfo, 0, operationActions);
     EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
 
-    // add child
+    // add action
     auto now = std::chrono::system_clock::now();
     int64_t actionCount =
         std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch())
@@ -683,6 +685,50 @@ HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest008, TestSize
         operationActions[i].actionType = actionType;
         operationActions[i].description = string[i];
     }
+    ret = OH_ArkUI_AccessibilityElementInfoSetOperationActions(elementInfo, actionCount, operationActions);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL);
+
+    EXPECT_EQ(elementInfo->GetOperationActions().size(), actionCount);
+    auto afterActionVetor = elementInfo->GetOperationActions();
+    for (int64_t i = 0; i < actionCount; i++) {
+        EXPECT_EQ(afterActionVetor[i].actionType,
+            operationActions[i].actionType);
+        std::string str1(afterActionVetor[i].description);
+        std::string str2(operationActions[i].description);
+        EXPECT_EQ(str1, str2);
+    }
+    OH_ArkUI_DestoryAccessibilityElementInfo(elementInfo);
+}
+
+/**
+ * @tc.name: accessibilityTest009
+ * @tc.desc: OH_ArkUI_AccessibilityElementInfoSetOperationActions
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest009, TestSize.Level1)
+{
+    int64_t ret;
+    ArkUI_AccessibleAction operationActions[MAX_ACTION_COUNT];
+
+    // test OH_ArkUI_CreateAccessibilityElementInfo
+    ArkUI_AccessibilityElementInfo* elementInfo = OH_ArkUI_CreateAccessibilityElementInfo();
+    EXPECT_NE(elementInfo, nullptr);
+
+    // add support action
+    // ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_NEXT_HTML_ITEM
+    // and ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_PREVIOUS_HTML_ITEM
+    int32_t actionCount = 2;
+    char string[MAX_ACTION_COUNT][MAX_C_STR_CHAR_COUNT];
+    auto startIndex = actionCount;
+    auto content = std::to_string(startIndex);
+    (void)strcpy_s(string[0], MAX_C_STR_CHAR_COUNT, content.c_str());
+    operationActions[0].actionType = ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_NEXT_HTML_ITEM;
+    operationActions[0].description = string[1];
+    content = std::to_string(startIndex + 1);
+    (void)strcpy_s(string[1], MAX_C_STR_CHAR_COUNT, content.c_str());
+    operationActions[1].actionType = ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_PREVIOUS_HTML_ITEM;
+    operationActions[1].description = string[1];
+
     ret = OH_ArkUI_AccessibilityElementInfoSetOperationActions(elementInfo, actionCount, operationActions);
     EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL);
 

@@ -21,6 +21,7 @@
 #include "base/i18n/date_time_sequence.h"
 #include "base/i18n/localization.h"
 #include "base/i18n/time_format.h"
+#include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -31,10 +32,20 @@
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 #include "core/components_v2/inspector/utils.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+
 
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension TIME_FOCUS_PAINT_WIDTH = 2.0_vp;
+
+enum class TimeFormatChange {
+    HOUR_CHANGE,
+    HOUR_UNCHANGE,
+    UNKNOWN
+};
 }
 
 class TimePickerRowPattern : public LinearLayoutPattern {
@@ -107,7 +118,7 @@ public:
     {
         return showLunarSwitch_;
     }
-    
+
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
         weakButtonCancel_ = buttonCancelNode;
@@ -139,6 +150,10 @@ public:
     void HandleHourColumnBuilding();
 
     void HandleMinAndSecColumnBuilding();
+
+    void HandleHourColumnBuildingRange(const PickerTime& value);
+
+    void HandleMinAndSecColumnBuildingRange();
 
     void FlushColumn();
 
@@ -257,23 +272,39 @@ public:
 
     void ClearOptionsHour()
     {
-        // when switch IsUseMilitaryTime state, should clear options_[hourColumn]
-        // Hour24 : Index = [0, 23] -> hour = [0, 23]
-        // Hour12 : Index = [0, 11] -> hour = [1, 12]
-        auto hourColumn = allChildNode_["hour"];
-        options_[hourColumn].clear();
+        if (!IsStartEndTimeDefined()) {
+            // when switch IsUseMilitaryTime state, should clear options_[hourColumn]
+            // Hour24 : Index = [0, 23] -> hour = [0, 23]
+            // Hour12 : Index = [0, 11] -> hour = [1, 12]
+            auto hourColumn = allChildNode_["hour"];
+            options_[hourColumn].clear();
+        }
     }
 
-    void SetSelectedTime(const PickerTime& value)
-    {
-        selectedTime_ = value;
-        isFiredTimeChange_ = firedTimeStr_.has_value() && firedTimeStr_.value() == value.ToString(true, hasSecond_);
-        firedTimeStr_.reset();
-    }
-
+    void SetSelectedTime(const PickerTime& value);
     const PickerTime& GetSelectedTime()
     {
         return selectedTime_;
+    }
+
+    void SetStartTime(const PickerTime& value)
+    {
+        startTime_ = value;
+    }
+
+    const PickerTime& GetStartTime() const
+    {
+        return startTime_;
+    }
+
+    void SetEndTime(const PickerTime& value)
+    {
+        endTime_ = value;
+    }
+
+    const PickerTime& GetEndTime() const
+    {
+        return endTime_;
     }
 
     void SetDialogTitleDate(const PickerDate& value)
@@ -458,11 +489,15 @@ public:
             return;
         }
         json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
+        json->PutExtAttr("start", startTime_.ToString(false, false).c_str(), filter);
+        json->PutExtAttr("end", endTime_.ToString(false, false).c_str(), filter);
         json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
     }
 
     void CreateAmPmNode();
     void OnColorConfigurationUpdate() override;
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
@@ -523,7 +558,7 @@ public:
     {
         return hasUserDefinedSelectedFontFamily_;
     }
- 
+
     const PickerTextProperties& GetTextProperties() const
     {
         return textProperties_;
@@ -607,9 +642,6 @@ public:
 
     void SetEnableCascade(bool value)
     {
-        if (isEnableCascade_ != value) {
-            isEnableCascade_ = false;
-        }
         isEnableCascade_ = value;
     }
 
@@ -618,7 +650,21 @@ public:
         return isEnableCascade_;
     }
 
+    void ColumnPatternInitHapticController();
+    void ColumnPatternStopHaptic();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
+    void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
+        const std::string &id, bool focus, const std::function<void(const std::string&)>& call);
+    void ClearFocus();
+    void SetDefaultFocus();
+    bool IsCircle();
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
+    void UpdateTitleNodeContent();
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -641,7 +687,6 @@ private:
     void UpdateNodePositionForUg();
     void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
     void RemoveSecondNode();
-    void ColumnPatternInitHapticController();
     void UpdateConfirmButtonMargin(
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
@@ -650,6 +695,34 @@ private:
     bool CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
                           int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize);
+    void HandleAmPmColumnBuilding(const PickerTime& value);
+    void HandleAmPmColumnChange(uint32_t selectedHour);
+    void HandleAmToPmHourColumnBuilding(uint32_t selectedHour, uint32_t startHour, uint32_t endHour);
+    void HandleMinColumnBuilding();
+    void HandleMinColumnChange(const PickerTime& value);
+    uint32_t ParseHourOf24(uint32_t hourOf24) const;
+    PickerTime AdjustTime(const PickerTime& time);
+    bool IsStartEndTimeDefined();
+    void HourChangeBuildTimeRange();
+    void MinuteChangeBuildTimeRange(uint32_t hourOf24);
+    void RecordHourAndMinuteOptions();
+    void RecordHourMinuteValues();
+    bool GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value, uint32_t& columnIndex);
+    std::string GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode);
+    std::string GetOptionsValueWithIndex(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
+    void HandleColumnsChangeTimeRange(const RefPtr<FrameNode>& tag);
+    void UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>& tag);
+    void Hour24ChangeBuildTimeRange();
+    void Hour12ChangeBuildTimeRange();
+    void RecordHourOptions();
+    void UpdateSecondTimeRange();
+    void HandleSecondsChangeTimeRange(const RefPtr<FrameNode>& secondColumn);
+    void LimitSelectedTimeInRange();
+    bool IsAmJudgeByAmPmColumn(const RefPtr<FrameNode>& amPmColumn);
+    void MinOrSecColumnBuilding(
+        const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
+    void InitFocusEvent();
+    void SetCallBack();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -665,6 +738,8 @@ private:
     ZeroPrefixType prefixHour_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixMinute_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixSecond_ = ZeroPrefixType::AUTO;
+    PickerTime startTime_ = PickerTime(0, 0, 0);
+    PickerTime endTime_ = PickerTime(23, 59, 59);
     PickerTime selectedTime_ = PickerTime::Current();
     PickerDate dialogTitleDate_ = PickerDate::Current();
     std::optional<int32_t> amPmId_;
@@ -713,6 +788,13 @@ private:
     PickerTextProperties textProperties_;
     bool isShowInDatePickerDialog_ = false;
     bool isEnableCascade_ = false;
+
+    std::vector<std::string> definedAMHours_;
+    std::vector<std::string> definedPMHours_;
+    std::vector<std::string> defined24Hours_;
+    std::string oldHourValue_;
+    std::string oldMinuteValue_;
+    std::string selectedColumnId_;
 };
 } // namespace OHOS::Ace::NG
 

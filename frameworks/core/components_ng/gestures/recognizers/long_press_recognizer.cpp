@@ -26,8 +26,8 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 500;
 } // namespace
 
 LongPressRecognizer::LongPressRecognizer(
-    int32_t duration, int32_t fingers, bool repeat, bool isForDrag, bool isDisableMouseLeft)
-    : MultiFingersRecognizer(fingers), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
+    int32_t duration, int32_t fingers, bool repeat, bool isForDrag, bool isDisableMouseLeft, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
       isDisableMouseLeft_(isDisableMouseLeft)
 {
     if (fingers_ > MAX_LONGPRESS_FINGERS || fingers_ < DEFAULT_LONGPRESS_FINGERS) {
@@ -65,7 +65,11 @@ void LongPressRecognizer::OnAccepted()
     UpdateFingerListInfo();
     SendCallbackMsg(onActionUpdate_, false);
     SendCallbackMsg(onAction_, false, true);
+    if (isLimitFingerCount_ && hasRepeated_) {
+        return;
+    }
     if (repeat_) {
+        hasRepeated_ = true;
         StartRepeatTimer();
     }
 }
@@ -117,11 +121,6 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
-    if (!IsInAttachedNode(event)) {
-        extraInfo_ += "Reject: not in attached node.";
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     int32_t curDuration = duration_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!IsPostEventResult()) {
@@ -179,8 +178,12 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
+        if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+            SendCallbackMsg(onAction_, false, true);
+        }
         SendCallbackMsg(onActionUpdate_, false);
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
+            hasRepeated_ = false;
             SendCallbackMsg(onActionEnd_, false);
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
@@ -192,6 +195,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                     static_cast<long long>(inputTime), static_cast<long long>(overTime));
             }
             firstInputTime_.reset();
+            ResetStateVoluntarily();
         }
     } else {
         extraInfo_ += "Reject: received up but not succeed.";
@@ -215,6 +219,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    touchPoints_[event.id].operatingHand = event.operatingHand;
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     time_ = event.time;
@@ -276,6 +281,10 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
         }
         return;
     }
+    if (CheckLimitFinger()) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
 }
 
@@ -306,6 +315,9 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
 void LongPressRecognizer::DoRepeat()
 {
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
+    if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {

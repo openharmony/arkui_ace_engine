@@ -47,7 +47,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ToggleTheme>& theme) const
         {
             RefPtr<ThemeStyle> togglePattern = themeConstants->GetPatternByName(THEME_PATTERN_TOGGLE);
@@ -207,10 +207,10 @@ public:
 
 protected:
     ToggleTheme() = default;
-
-private:
     Color backgroundColor_;
     Color checkedColor_;
+
+private:
     Color pressedBlendColor_;
     TextStyle textStyle_;
     Dimension height_;

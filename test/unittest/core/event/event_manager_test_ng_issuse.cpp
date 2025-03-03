@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/event_manager_test_ng.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/common/mock_window.h"
 #include "test/mock/core/common/mock_frontend.h"
 
@@ -1600,5 +1601,51 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
         auto result = eventManager->DispatchMouseEventNG(event);
         EXPECT_EQ(result, mockMouseEvent.expectedResult) << static_cast<int32_t>(event.action);
     }
+}
+
+/**
+ * @tc.name: GetOrRefreshMatrixFromCache
+ * @tc.desc: Test GetOrRefreshMatrixFromCache func
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, GetOrRefreshMatrixFromCacheNGTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create
+     * @tc.expected: expect The function return value is true when width or height is nearZero.
+     */
+    MockPipelineContext::SetUp();
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("0", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    node->renderContext_ = mockRenderContext;
+    node->context_ = AceType::RawPtr(pipeline);
+
+    node->cacheMatrixInfo_ = CacheMatrixInfo();
+    mockRenderContext->paintRect_ = RectF(0, 0, 10, 0);
+    CacheMatrixInfo cacheMatrixInfo = node->GetOrRefreshMatrixFromCache();
+    EXPECT_EQ(cacheMatrixInfo.paintRectWithTransform.Width(), 0);
+
+    node->isTransformNotChanged_ = false;
+    mockRenderContext->rect_ = RectF(0, 0, 10, 0);
+    mockRenderContext->paintRect_ = RectF(0, 0, 10, 0);
+    cacheMatrixInfo = node->GetOrRefreshMatrixFromCache();
+    EXPECT_EQ(cacheMatrixInfo.paintRectWithTransform.Width(), 10);
+    EXPECT_EQ(node->isTransformNotChanged_, true);
+
+    node->isTransformNotChanged_ = false;
+    cacheMatrixInfo = node->GetOrRefreshMatrixFromCache(true);
+    EXPECT_EQ(cacheMatrixInfo.paintRectWithTransform.Width(), 10);
+    EXPECT_EQ(node->isTransformNotChanged_, true);
+
+    node->cacheMatrixInfo_ = CacheMatrixInfo();
+    node->isTransformNotChanged_ = false;
+    cacheMatrixInfo = node->GetOrRefreshMatrixFromCache();
+    EXPECT_EQ(cacheMatrixInfo.paintRectWithTransform.Width(), 10);
+    EXPECT_EQ(node->isTransformNotChanged_, true);
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

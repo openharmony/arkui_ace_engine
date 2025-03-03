@@ -31,6 +31,8 @@ public:
     void SetFontColor(std::vector<Color>& symbolColor) override;
     void SetSymbolRenderingStrategy(const uint32_t renderingStrategy) override;
     void SetSymbolEffect(const uint32_t effectStrategy) override;
+    void SetFontFamilies(std::vector<std::string>& familyNames) override;
+    void SetSymbolType(SymbolType value) override;
 
     static RefPtr<UINode> CreateFrameNode(int32_t nodeId);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
@@ -39,6 +41,7 @@ public:
     static void SetSymbolRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy);
     static void SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy);
     static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& symbolId);
+    static void InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode, const char* fontFamilyName);
 };
 } // namespace OHOS::Ace::NG
 

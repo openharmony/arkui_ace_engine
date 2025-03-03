@@ -27,6 +27,7 @@
 #include <utility>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_performance_monitor.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
@@ -175,10 +176,12 @@ public:
     virtual void RemoveScheduleTask(uint32_t id) = 0;
 
     // Called by view when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) = 0;
+    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) = 0;
 
     // Called by ohos AceContainer when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
+    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
+        bool isEventsPassThrough = false)
+    {}
 
     virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -241,6 +244,8 @@ public:
     virtual void OnHide() = 0;
 
     virtual void WindowFocus(bool isFocus) = 0;
+
+    virtual void WindowActivate(bool isActive) {}
 
     virtual void ContainerModalUnFocus() = 0;
 
@@ -361,6 +366,11 @@ public:
     void SetFormRenderingMode(int8_t renderMode)
     {
         renderingMode_ = renderMode;
+    }
+
+    void SetFormEnableBlurBackground(bool enableBlurBackground)
+    {
+        enableBlurBackground_ = enableBlurBackground;
     }
 
     const Color& GetAppBgColor() const
@@ -774,6 +784,11 @@ public:
         return isFormRender_;
     }
 
+    bool IsFormRenderExceptDynamicComponent() const
+    {
+        return isFormRender_ && !isDynamicRender_;
+    }
+
     void SetIsDynamicRender(bool isDynamicRender)
     {
         isDynamicRender_ = isDynamicRender;
@@ -817,6 +832,8 @@ public:
     {
         windowId_ = windowId;
     }
+
+    bool NeedTouchInterpolation();
 
     void SetFocusWindowId(uint32_t windowId)
     {
@@ -1038,11 +1055,12 @@ public:
     Rect GetCurrentWindowRect() const;
 
     using SafeAreaInsets = NG::SafeAreaInsets;
-    virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {}
 
-    virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
+    virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow = false) {}
 
-    virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {}
+    virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) {}
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
@@ -1079,11 +1097,12 @@ public:
     }
     virtual void NotifyMemoryLevel(int32_t level) {}
 
-    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
+    virtual void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
     {
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
+    virtual void SetIsWindowSizeChangeFlag(bool result) {}
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -1151,8 +1170,6 @@ public:
     {
         parentPipeline_ = pipeline;
     }
-
-    virtual void SetupSubRootElement() = 0;
 
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
@@ -1262,19 +1279,14 @@ public:
         return hasSupportedPreviewText_;
     }
 
-    void SetUseCutout(bool useCutout)
-    {
-        useCutout_ = useCutout;
-    }
-
-    bool GetUseCutout() const
-    {
-        return useCutout_;
-    }
-
     bool GetOnFoucs() const
     {
         return onFocus_;
+    }
+
+    bool GetOnActive() const
+    {
+        return onActive_;
     }
 
     uint64_t GetVsyncTime() const
@@ -1406,6 +1418,11 @@ public:
         return GetOnFoucs();
     }
 
+    virtual bool IsWindowActivated() const
+    {
+        return GetOnActive();
+    }
+
     void SetDragNodeGrayscale(float dragNodeGrayscale)
     {
         dragNodeGrayscale_ = dragNodeGrayscale;
@@ -1469,6 +1486,8 @@ public:
 
     virtual void SetEnableSwipeBack(bool isEnable) {}
 
+    std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor();
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1506,6 +1525,8 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
+    
+    bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
@@ -1551,6 +1572,7 @@ protected:
     Offset pluginEventOffset_ { 0, 0 };
     Color appBgColor_ = Color::WHITE;
     int8_t renderingMode_ = 0;
+    bool enableBlurBackground_ = false;
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
@@ -1596,6 +1618,7 @@ protected:
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
+    std::atomic<bool> onActive_ = false;
     uint64_t lastTouchTime_ = 0;
     uint64_t lastMouseTime_ = 0;
     uint64_t lastDragTime_ = 0;
@@ -1641,7 +1664,6 @@ private:
     bool halfLeading_ = false;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
-    bool useCutout_ = false;
     // whether visible area need to be calculate at each vsync after approximate timeout.
     bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
@@ -1661,6 +1683,7 @@ private:
     std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
+    std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

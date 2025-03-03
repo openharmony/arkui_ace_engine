@@ -57,6 +57,20 @@ const std::string AM = "上午";
 const std::string PM = "下午";
 const std::string COLON = ":";
 const std::string ZERO = "0";
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class DatePickerTestFour : public testing::Test {
@@ -107,18 +121,10 @@ void DatePickerTestFour::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else if (type == ButtonTheme::TypeId()) {
-            return AceType::MakeRefPtr<ButtonTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1144,4 +1150,106 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
     EXPECT_EQ(cancel, nodeInfo);
 }
 
+/**
+ * @tc.name: DatePickerColumnLayoutAlgorithmNeedAdaptForAging
+ * @tc.desc: Test NeedAdaptForAging.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerColumnLayoutAlgorithmNeedAdaptForAging, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    EXPECT_NE(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    EXPECT_NE(pickerTheme, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    EXPECT_NE(pickerProperty, nullptr);
+    auto dataPickerLayoutProperty = AceType::MakeRefPtr<DataPickerLayoutProperty>();
+    EXPECT_NE(dataPickerLayoutProperty, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    EXPECT_NE(datePickerPattern, nullptr);
+    auto yearId = datePickerPattern->GetYearId();
+    auto yearColumnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, yearId);
+    EXPECT_NE(yearColumnNode, nullptr);
+    auto subNode = AceType::DynamicCast<FrameNode>(yearColumnNode->GetFirstChild());
+    EXPECT_NE(subNode, nullptr);
+
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(yearColumnNode, yearColumnNode->GetGeometryNode(), dataPickerLayoutProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(subNode, subNode->GetGeometryNode(), nullptr);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+    layoutWrapper.AppendChild(std::move(subLayoutWrapper));
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
+    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
+    for (int32_t i = 0; i < layoutWrapper.GetTotalChildCount(); i++) {
+        datePickerColumnLayoutAlgorithm.currentOffset_.emplace_back(0.0f);
+    }
+    datePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+    pipeline->SetFontScale(0.5f);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 1.00;
+    EXPECT_FALSE(datePickerColumnLayoutAlgorithm.NeedAdaptForAging());
+    pipeline->SetFontScale(5.0f);
+    EXPECT_TRUE(datePickerColumnLayoutAlgorithm.NeedAdaptForAging());
+}
+
+/**
+ * @tc.name: DatePickerColumnLayoutAlgorithmAdjustFontSizeScale
+ * @tc.desc: Test NeedAdaptForAging.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerColumnLayoutAlgorithmAdjustFontSizeScale, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pipeline and pickerTheme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    EXPECT_NE(pickerTheme, nullptr);
+    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
+    /**
+     * @tc.steps: step2. Call AdjustFontSizeScale.
+     * @tc.expected: Adjust the fontScale is zero.
+     */
+    Dimension fontSizeValue = 10.0_vp;
+    pickerTheme->pickerDialogNormalFontScale_ = 0.00;
+    pickerTheme->pickerDialogMaxTwoFontScale_ = 0.00;
+    auto fontScale = 0;
+    auto res = datePickerColumnLayoutAlgorithm.AdjustFontSizeScale(fontSizeValue, fontScale);
+    Dimension resultValue = 0.0_vp;
+    EXPECT_EQ(res, resultValue);
+}
+
+/**
+ * @tc.name: HandleMonthChange
+ * @tc.desc: Test HandleMonthChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, HandleMonthChange, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pipeline and pickerTheme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    EXPECT_NE(pickerTheme, nullptr);
+    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
+    /**
+     * @tc.steps: step2. Call ReCalcItemHeightScale.
+     * @tc.expected: set fontScale is not zero.
+     */
+    Dimension userSetHeight = 10.0_vp;
+    pipeline->fontScale_ = 0.0f;
+    pickerTheme->pickerDialogNormalFontScale_ = 0.00;
+    pickerTheme->pickerDialogMaxTwoFontScale_ = 0.00;
+    bool isDividerSpacing = true;
+    auto res = datePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
+    EXPECT_NE(res, 1.0f);
+}
 } // namespace OHOS::Ace::NG

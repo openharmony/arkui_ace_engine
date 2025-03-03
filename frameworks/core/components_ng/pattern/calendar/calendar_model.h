@@ -43,7 +43,7 @@ public:
 
 private:
     static std::unique_ptr<CalendarModel> instance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 

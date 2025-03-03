@@ -22,7 +22,6 @@
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_provider.h"
 #include "core/accessibility/accessibility_utils.h"
-#include "core/pipeline/base/base_composed_component.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -32,9 +31,12 @@ class AccessibilityElementOperator;
 
 namespace OHOS::Ace::NG {
 class WebPattern;
+class FrameNode;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
+
+class ComposedElement;
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
@@ -82,6 +84,19 @@ struct AccessibilityParentRectInfo {
     int32_t centerX = 0;       // center X of parent interface relative to real window
     int32_t centerY = 0;       // center Y scale of parent interface relative to real window
     int32_t rotateDegree = 0;  // final rotate degree of parent interface
+    bool isChanged = false;    // only for uiextension, true means uec transfered translate params to uiextension
+};
+
+struct AccessibilityWorkMode {
+    bool isTouchExplorationEnabled = true;
+};
+
+struct AccessibilityWindowInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t innerWindowId = -1;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
 };
 
 enum class AccessibilityCallbackEventId : uint32_t {
@@ -155,6 +170,10 @@ public:
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
     virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) {}
+    virtual bool IsScreenReaderEnabled()
+    {
+        return false;
+    }
     virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
@@ -241,6 +260,12 @@ public:
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
 
+    virtual void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) {};
+
+    virtual void UpdateFrameNodeState(int32_t nodeId) {};
+
+    virtual void UpdatePageMode(const std::string& pageMode) {};
+
     virtual void RegisterAccessibilitySAObserverCallback(
         int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) {};
 
@@ -286,6 +311,19 @@ public:
     int64_t GetUiextensionId() const
     {
         return uiExtensionId_;
+    }
+
+    virtual AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+        const RefPtr<PipelineBase>& context)
+    {
+        return AccessibilityWindowInfo();
+    }
+
+    virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
+
+    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
+    {
+        return AccessibilityWorkMode();
     }
 
 protected:

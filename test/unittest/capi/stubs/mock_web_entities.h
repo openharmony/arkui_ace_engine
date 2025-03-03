@@ -40,6 +40,7 @@ public:
     MOCK_METHOD(std::vector<std::string>, GetAcceptType, ());
     MOCK_METHOD(std::string, GetDefaultFileName, ());
     MOCK_METHOD(bool, IsCapture, ());
+    MOCK_METHOD(std::vector<std::string>, GetMimeType, ());
 };
 
 class MockFileSelectorResult : public FileSelectorResult {

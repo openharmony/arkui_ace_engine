@@ -85,7 +85,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_CustomBuilderTest, TestSize.
     modifier_->setDragPreview(node_, &unionValue);
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
-    EXPECT_EQ(builderHelper.GetCustomNode(), reinterpret_cast<FrameNode*>(resultDragPreview.customNode.GetRawPtr()));
+    EXPECT_EQ(builderHelper.GetCustomNode(), Referenced::RawPtr(resultDragPreview.customNode));
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 }
 
@@ -121,7 +121,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_DragItemInfoTest, TestSize.L
     modifier_->setDragPreview(node_, &unionValue);
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
-    EXPECT_EQ(builderHelper.GetCustomNode(), reinterpret_cast<FrameNode*>(resultDragPreview.customNode.GetRawPtr()));
+    EXPECT_EQ(builderHelper.GetCustomNode(), Referenced::RawPtr(resultDragPreview.customNode));
     EXPECT_EQ(resultDragPreview.extraInfo, expectedExtraInfo);
     EXPECT_EQ(resultDragPreview.pixelMap, expectedPixelMapRefPtr);
     EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);

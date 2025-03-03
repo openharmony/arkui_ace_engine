@@ -47,6 +47,7 @@
 #include "test/mock/core/rosen/testing_scalar.h"
 #include "test/mock/core/rosen/testing_shader_effect.h"
 #include "test/mock/core/rosen/testing_shadowflags.h"
+#include "test/mock/core/rosen/testing_surface.h"
 #include "test/mock/core/rosen/testing_text_blob.h"
 #include "test/mock/core/rosen/testing_text_style.h"
 #include "test/mock/core/rosen/testing_typeface.h"
@@ -123,6 +124,7 @@ using RSTextEncoding = Testing::TestingTextEncoding;
 using RSSaveLayerOps = Testing::TestingSaveLayerOps;
 using RSSrcRectConstraint = Testing::SrcRectConstraint;
 using RSImageBlurType = Testing::ImageBlurType;
+using RSSurface = Testing::TestingSurface;
 #ifdef USE_ROSEN_DRAWING
 using RSRecordingColorFilter = Testing::TestingColorFilter;
 using RSRecordingImageFilter = Testing::TestingImageFilter;

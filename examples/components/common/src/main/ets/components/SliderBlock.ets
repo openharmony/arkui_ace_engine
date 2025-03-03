@@ -37,7 +37,7 @@ export struct SliderBlock {
     Column({ space: 0 }) {
       Block({ title: this.title, isEnabled: $isEnabled }) {
         Row({ space: 0 }) {
-          Text(`${this.value}`)
+          Text(`${this.step < 1 ? this.value == 0 ? 0 : this.value.toFixed(1) : this.value}`)
             .fontSize(16)
             .width(28)
           Slider({

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H
 
+#include <atomic>
 #include <cstdarg>
 #include <cstdint>
 #include <cstring>
@@ -86,6 +87,12 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define TAG_LOGF(tag, fmt, ...) PRINT_LOG(FATAL, tag, fmt, ##__VA_ARGS__)
 
 #define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
+
+#define LOGF_ABORT(fmt, ...)      \
+    do {                          \
+        LOGF(fmt, ##__VA_ARGS__); \
+        abort();                  \
+    } while (0)
 
 #define APP_LOGD(fmt, ...) PRINT_APP_LOG(DEBUG, fmt, ##__VA_ARGS__)
 #define APP_LOGI(fmt, ...) PRINT_APP_LOG(INFO, fmt, ##__VA_ARGS__)
@@ -214,10 +221,12 @@ enum AceLogTag : uint8_t {
     ACE_LAYOUT_INSPECTOR = 88,     // C03958
     ACE_LAYOUT = 89,               // C03959
     ACE_STYLUS = 90,               // C0395A
+    ACE_INDICATOR = 91,            // C0395B
     ACE_BADGE = 92,                // C0395C
     ACE_QRCODE = 93,               // C0395D
     ACE_PROGRESS = 94,             // C0395E
-    ACE_DYNAMIC_COMPONENT = 95,    // C0395E
+    ACE_DYNAMIC_COMPONENT = 95,    // C0395F
+    ACE_DRAWABLE_DESCRIPTOR = 96,  // C03960
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
@@ -301,6 +310,10 @@ private:
 
     static LogLevel level_;
 };
+
+static std::atomic<bool> skipBacktrace = false;
+
+void SetSkipBacktrace(bool inputFlag);
 
 bool LogBacktrace(size_t maxFrameNums = 256);
 } // namespace OHOS::Ace

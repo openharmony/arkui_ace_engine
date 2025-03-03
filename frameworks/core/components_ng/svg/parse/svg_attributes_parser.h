@@ -23,8 +23,34 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/svg_paint_state.h"
+#include "core/components_ng/svg/base/svg_length_scale_rule.h"
 
 namespace OHOS::Ace::NG {
+struct TransformInfo;
+
+enum class SvgAlign {
+    ALIGN_XMIN_YMIN,
+    ALIGN_XMIN_YMID,
+    ALIGN_XMIN_YMAX,
+    ALIGN_XMID_YMIN,
+    ALIGN_XMID_YMID,
+    ALIGN_XMID_YMAX,
+    ALIGN_XMAX_YMIN,
+    ALIGN_XMAX_YMID,
+    ALIGN_XMAX_YMAX,
+    ALIGN_NONE,
+};
+
+enum class SvgMeetOrSlice {
+    MEET,
+    SLICE,
+};
+
+struct SvgPreserveAspectRatio {
+    SvgAlign svgAlign = SvgAlign::ALIGN_XMID_YMID;
+    SvgMeetOrSlice meetOrSlice = SvgMeetOrSlice::MEET;
+};
+
 class SvgAttributesParser {
 public:
     static Color GetColor(const std::string& str);
@@ -36,6 +62,16 @@ public:
     static Dimension ParseDimension(const std::string& value, bool useVp = false);
     static double ParseDouble(const std::string& value);
     static bool CheckColorAlpha(const std::string& colorStr, Color& result);
+    static std::pair<Dimension, Dimension> GetTransformOrigin(const std::string& transformOrigin);
+    static std::vector<NG::TransformInfo> GetTransformInfo(const std::string& transform);
+    static SvgAlign ParseSvgAlign(const std::string& value);
+    static SvgMeetOrSlice ParseSvgMeetOrSlice(const std::string& value);
+    static void ComputeTranslate(const Size& viewBox, const Size& viewPort, const float scaleX, const float scaleY,
+        const SvgAlign& svgAlign, float& translateX, float& translateY);
+    static void ComputeScale(const Size& viewBox, const Size& viewPort,
+        const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY);
+    static Color GetColorFromHexString(const std::string& value);
+    static Color GetColorFrom4HexString(const std::string& value);
 };
 enum class SvgFeColorMatrixType {
     MATRIX,
@@ -96,6 +132,81 @@ struct SvgAttributes {
     Dimension width = -1.0_px;
     Dimension height = -1.0_px;
     bool autoMirror = false;
+    SvgPreserveAspectRatio preserveAspectRatio;
+};
+
+struct TransformInfo {
+    std::string funcType;
+    std::vector<std::string> paramVec;
+};
+
+enum SvgRuleType {
+    SVG_RULE_NONEZERO = 0,
+    SVG_RULE_EVENODD
+};
+
+constexpr float HALF_FLOAT = 0.5f;
+class SvgClipAttribute {
+public:
+    SvgClipAttribute() = default;
+    ~SvgClipAttribute() = default;
+    const SvgRuleType& GetClipRule() const
+    {
+        return clipRule_;
+    }
+
+    bool IsEvenodd() const
+    {
+        return clipRule_ == SvgRuleType::SVG_RULE_EVENODD;
+    }
+
+    void SetClipRule(const SvgRuleType& clipRule, bool isSelf = true)
+    {
+        clipRule_ = clipRule;
+        hasClipRule_ = isSelf;
+    }
+
+    const std::string& GetHref() const
+    {
+        return href_;
+    }
+
+    void SetHref(const std::string& href, bool isSelf = true)
+    {
+        href_ = href;
+        hasHref_ = isSelf;
+    }
+
+    SvgLengthScaleUnit GetClipPathUnits() const
+    {
+        return clipPathUnits_;
+    }
+
+    void SetClipPathUnits(SvgLengthScaleUnit clipPathUnits, bool isSelf = true)
+    {
+        clipPathUnits_ = clipPathUnits;
+        hasClipPathUnits_ = isSelf;
+    }
+
+    void Inherit(const SvgClipAttribute& svgClipAttribute)
+    {
+        if (!hasHref_) {
+            href_ = svgClipAttribute.GetHref();
+        }
+        if (!hasClipRule_) {
+            clipRule_ = svgClipAttribute.GetClipRule();
+        }
+        if (!hasClipPathUnits_) {
+            clipPathUnits_ = svgClipAttribute.GetClipPathUnits();
+        }
+    }
+private:
+    std::string href_;
+    SvgRuleType clipRule_ = SvgRuleType::SVG_RULE_NONEZERO;
+    SvgLengthScaleUnit clipPathUnits_ = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    bool hasHref_ = false;
+    bool hasClipRule_ = false;
+    bool hasClipPathUnits_ = false;
 };
 
 struct SvgBaseAttribute {
@@ -105,12 +216,13 @@ struct SvgBaseAttribute {
     StrokeState strokeState;
     SvgTextStyle textStyle;
     std::string transform;
-    std::string transformOrigin;
+    std::vector<NG::TransformInfo> transformVec;
+    std::pair<Dimension, Dimension> transformOrigin;
     std::string filterId;
     std::string maskId;
     std::string href;
     std::string id;
-    ClipState clipState;
+    SvgClipAttribute clipState;
 
     void InheritFromUse(const SvgBaseAttribute& parent)
     {
@@ -180,8 +292,8 @@ struct SvgMaskAttribute {
     Dimension y = Dimension(-0.1, DimensionUnit::PERCENT); // y-axis default value
     Dimension width = Dimension(1.2, DimensionUnit::PERCENT); // masking area width default value
     Dimension height = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default value
-    std::string maskContentUnits = "userSpaceOnUse";
-    std::string maskUnits = "objectBoundingBox";
+    SvgLengthScaleUnit maskContentUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    SvgLengthScaleUnit maskUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
 };
 
 struct SvgCircleAttribute {
@@ -213,8 +325,8 @@ struct SvgPatternAttribute {
     Dimension y; // y-axis default value
     Dimension width; // pattern area width default value
     Dimension height; // pattern area height default value
-    std::string patternUnits = "objectBoundingBox";
-    std::string patternContentUnits = "userSpaceOnUse";
+    SvgLengthScaleUnit patternUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    SvgLengthScaleUnit patternContentUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
     std::string patternTransform;
     Rect viewBox;
 };
@@ -232,6 +344,8 @@ struct SvgFilterAttribute {
     Dimension y = Dimension(-0.1, DimensionUnit::PERCENT); // y-axis default value
     Dimension width = Dimension(1.2, DimensionUnit::PERCENT); // masking area width default value
     Dimension height = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default value
+    SvgLengthScaleUnit filterUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    SvgLengthScaleUnit primitiveUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
 };
 
 struct SvgFeCommonAttribute {
@@ -242,6 +356,8 @@ struct SvgFeCommonAttribute {
     std::string result;
     SvgFeIn in;
     SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
+    std::optional<bool> isWidthValid;
+    std::optional<bool> isHeightValid;
 };
 
 struct SvgFeFloodAttribute {
@@ -277,6 +393,53 @@ struct SvgFeBlendAttribute {
 struct SvgFeColorMatrixAttribute {
     SvgFeColorMatrixType type = SvgFeColorMatrixType::MATRIX;
     std::string values;
+};
+
+enum class SvgSpreadMethod {
+    PAD = 0,
+    REPEAT,
+    REFLECT,
+};
+
+struct SvgLinearGradientInfo {
+    float x1;
+    float x2;
+    float y1;
+    float y2;
+    int32_t spreadMethod;
+    std::string gradientTransform;
+    std::vector<GradientColor> colors;
+};
+
+struct SvgLinearGradientAttribute {
+    Dimension x1 = Dimension(0.0, DimensionUnit::PERCENT);
+    Dimension y1 = Dimension(0.0, DimensionUnit::PERCENT);
+    Dimension x2 = Dimension(1.0, DimensionUnit::PERCENT);
+    Dimension y2 = Dimension(0.0, DimensionUnit::PERCENT);
+    std::string gradientTransform;
+    SvgLengthScaleUnit gradientUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    SvgSpreadMethod spreadMethod = SvgSpreadMethod::PAD;
+};
+
+struct SvgRadialGradientInfo {
+    float cx;
+    float cy;
+    float r;
+    float fx;
+    float fy;
+    int32_t spreadMethod;
+    std::string gradientTransform;
+    std::vector<GradientColor> colors;
+};
+struct SvgRadialGradientAttribute {
+    Dimension cx = Dimension(HALF_FLOAT, DimensionUnit::PERCENT);
+    Dimension cy = Dimension(HALF_FLOAT, DimensionUnit::PERCENT);
+    Dimension r = Dimension(HALF_FLOAT, DimensionUnit::PERCENT);
+    std::optional<Dimension> fx;
+    std::optional<Dimension> fy;
+    std::string gradientTransform;
+    SvgLengthScaleUnit gradientUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    SvgSpreadMethod spreadMethod = SvgSpreadMethod::PAD;
 };
 
 struct SvgGradientAttribute {
