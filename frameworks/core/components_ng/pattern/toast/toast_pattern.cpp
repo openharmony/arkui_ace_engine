@@ -62,7 +62,7 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     const auto& safeArea = toastProps->GetSafeAreaInsets();
     limitPos_ = Dimension(GreatNotEqual(safeAreaTop, 0) ? safeAreaTop : LIMIT_SPACING.ConvertToPx());
     // Default Toast need to avoid keyboard, but the Top mode doesn't need.
-    auto useOldSafeArea = safeArea && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+    auto useOldSafeArea = safeArea && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     float safeAreaBottom = useOldSafeArea ? safeArea->bottom_.Length() : safeAreaInsets.bottom_.Length();
 
     if (IsSystemTopMost()) {
@@ -275,7 +275,7 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     bool needResizeBottom = false;
     AdjustOffsetForKeyboard(offsetY, defaultBottom_.ConvertToPx(), textHeight, needResizeBottom);
     needResizeBottom = needResizeBottom || (!toastProp->HasToastAlignment() && toastInfo_.bottom.empty());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && needResizeBottom &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && needResizeBottom &&
         !GreatNotEqual(offsetY.Value(), 0)) {
         return limitPos_ + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
     }
@@ -316,7 +316,7 @@ void ToastPattern::AdjustOffsetForKeyboard(
             }
         }
     }
-    if (((IsDefaultToast() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) ||
+    if (((IsDefaultToast() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) ||
             IsTopMostToast()) &&
         GreatNotEqual(keyboardInset, 0) && (offsetY.Value() + textHeight > keyboardOffset)) {
         needResizeBottom = true;
@@ -352,7 +352,7 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         PopupBasePattern::BeforeCreateLayoutWrapper();
     }
 
