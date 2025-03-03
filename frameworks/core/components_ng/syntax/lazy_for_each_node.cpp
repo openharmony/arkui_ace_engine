@@ -327,11 +327,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (!child.second) {
         return nullptr;
     }
-    auto greatOrEqualApi16 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+    auto greatOrEqualApi18 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
-        if (greatOrEqualApi16) {
+        if (greatOrEqualApi18) {
             child.second->SetHostPageId(GetPageId());
         }
         child.second->SetJSViewActive(false, true);
@@ -350,7 +350,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     tempChildren_.clear();
     tempChildren_.swap(children_);
     child.second->SetParent(WeakClaim(this));
-    if (greatOrEqualApi16) {
+    if (greatOrEqualApi18) {
         child.second->SetHostPageId(GetPageId());
     }
     if (IsOnMainTree()) {
