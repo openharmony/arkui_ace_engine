@@ -158,7 +158,7 @@ class __RepeatImpl<T> {
     }
 
     private afterAddChild(): void {
-        if (this.onMoveHandler_ == undefined || this.onMoveHandler_ == null) {
+        if (this.onMoveHandler_ === undefined || this.onMoveHandler_ === null) {
             return;
         }
         RepeatNative.afterAddChild();
