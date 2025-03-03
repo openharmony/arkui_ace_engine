@@ -1435,6 +1435,10 @@ void JsRegisterFormViews(
     buttonType.Constant("Arc", (int)ButtonType::ARC);
     buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
+    JSObjectTemplate toolbaritemPlacement;
+    toolbaritemPlacement.Constant("TOP_BAR_LEADING", (int)ToolBarItemPlacement::TOP_BAR_LEADING);
+    toolbaritemPlacement.Constant("TOP_BAR_TRAILING", (int)ToolBarItemPlacement::TOP_BAR_TRAILING);
+
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
@@ -1451,6 +1455,7 @@ void JsRegisterFormViews(
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToolBarItemPlacement"), *toolbaritemPlacement);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
@@ -1649,6 +1654,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     buttonType.Constant("Arc", (int)ButtonType::ARC);
     buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
+    JSObjectTemplate toolbaritemPlacement;
+    toolbaritemPlacement.Constant("TOP_BAR_LEADING", (int)ToolBarItemPlacement::TOP_BAR_LEADING);
+    toolbaritemPlacement.Constant("TOP_BAR_TRAILING", (int)ToolBarItemPlacement::TOP_BAR_TRAILING);
+
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
@@ -1670,6 +1679,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToolBarItemPlacement"), *toolbaritemPlacement);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);

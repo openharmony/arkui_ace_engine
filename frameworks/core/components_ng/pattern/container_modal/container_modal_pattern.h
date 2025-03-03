@@ -23,9 +23,20 @@
 #include "core/components_ng/pattern/container_modal/container_modal_accessibility_property.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+
 namespace OHOS::Ace::NG {
+enum class ItemPlacementType {
+    NONE = -1,
+    SIDE_BAR_START = 0,
+    SIDE_BAR_END,
+    NAV_BAR_START,
+    NAV_BAR_END,
+    NAVDEST_START,
+    NAVDEST_END,
+};
 class ACE_EXPORT ContainerModalPattern : public Pattern {
     DECLARE_ACE_TYPE(ContainerModalPattern, Pattern);
 
@@ -123,7 +134,9 @@ public:
     {
         auto row = GetCustomTitleRow();
         CHECK_NULL_RETURN(row, nullptr);
-        return AceType::DynamicCast<CustomTitleNode>(row->GetChildren().front());
+        auto title= row->GetChildren().front();
+        CHECK_NULL_RETURN(title, nullptr);
+        return AceType::DynamicCast<CustomTitleNode>(title->GetChildren().front());
     }
 
     RefPtr<FrameNode> GetStackNode()
@@ -213,6 +226,33 @@ public:
     
     static void EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable);
 
+    void InitToolBarManager();
+    void SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>&& builder);
+    void PrasePlaceMentType();
+    bool HandleToolbarItemList(const RefPtr<FrameNode>& parentNode, std::list<RefPtr<UINode>>& list);
+    ItemPlacementType GetItemTypeFromTag(const std::string& tag, uint32_t placement);
+    void RemoveToolbarItem(const RefPtr<FrameNode>& frameNode);
+
+    void AddToolbarItemToContainer();
+    bool AddToolbarItemToRow(ItemPlacementType placeMent, const RefPtr<FrameNode>& node);
+    bool AddToolbarItemToSpecificRow(ItemPlacementType placeMent, const RefPtr<FrameNode>& frameNode);
+    bool AddToolbarItemToNavBarStart(const RefPtr<FrameNode>& frameNode);
+    bool AddToolbarItemToNavBarEnd(const RefPtr<FrameNode>& frameNode);
+    bool AddToolbarItemToNavDestStart(const RefPtr<FrameNode>& frameNode);
+    bool AddToolbarItemToNavDestEnd(const RefPtr<FrameNode>& frameNode);
+
+    void AddToolbarRowContainers();
+    void AddSideBarDivider(const RefPtr<FrameNode>& customTitleRow, const ToolbarInfo& sideBarInfo);
+    void AddNavBarRow(
+        const RefPtr<FrameNode>& customTitleRow, const ToolbarInfo& navBarInfo, const ToolbarInfo& sideBarInfo);
+    void AddNavBarDivider(const RefPtr<FrameNode>& customTitleRow);
+    void AddNavDestBarRow(const RefPtr<FrameNode>& customTitleRow, const ToolbarInfo& navDestInfo);
+
+    void OnToolBarLayoutChange();
+    void AdjustNavbarRowWidth();
+    void AdjustNavDestRowWidth();
+    void AdjustContainerModalTitleHeight();
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
@@ -252,6 +292,16 @@ protected:
     Color activeColor_;
     Color inactiveColor_;
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow, bool isFloating);
+
+    RefPtr<FrameNode> sideBarDivider_ = nullptr;
+    RefPtr<FrameNode> navbarRow_ = nullptr;
+    RefPtr<FrameNode> leftNavRow_ = nullptr;
+    RefPtr<FrameNode> rightNavRow_ = nullptr;
+    RefPtr<FrameNode> navBarDivider_ = nullptr;
+    RefPtr<FrameNode> navDestbarRow_ = nullptr;
+    RefPtr<FrameNode> leftNavDestRow_ = nullptr;
+    RefPtr<FrameNode> rightNavDestRow_ = nullptr;
+
 protected:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
@@ -271,6 +321,7 @@ protected:
 
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
+    float toolbarItemMaxHeight_ = 0.0f;
     bool hasDeco_ = true;
     bool isFocus_ = false;
     bool hideSplitButton_ = false;
@@ -279,6 +330,12 @@ protected:
     bool enableContainerModalCustomGesture_ = false;
     RRect windowPaintRect_;
     bool isCustomColor_;
+
+    RefPtr<ToolbarManager> toolbarManager_;
+
+    std::map<ItemPlacementType, std::list<RefPtr<FrameNode>>> itemWillAdd_;
+    std::map<RefPtr<FrameNode>, std::list<RefPtr<UINode>>> itemsWillOnTree_;
+    std::map<RefPtr<FrameNode>, std::list<RefPtr<UINode>>> itemsOnTree_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

@@ -44,6 +44,11 @@ enum class ButtonType {
     ROUNDED_RECTANGLE,
 };
 
+enum class ToolBarItemPlacement {
+    TOP_BAR_LEADING,
+    TOP_BAR_TRAILING
+};
+
 enum class RectWidthStyle {
     TIGHT,
     MAX,
