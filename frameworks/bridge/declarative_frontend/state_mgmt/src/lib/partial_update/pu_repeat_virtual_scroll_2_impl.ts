@@ -270,6 +270,9 @@ class __RepeatVirtualScroll2Impl<T> {
     // register drag drop manager, only used for List
     private onMoveHandler_?: OnMoveHandler;
 
+    // register drag drop Handler Class, only used for List onMove
+    private itemDragEventHandler_?: ItemDragEventHandler;
+
     // update from C++ when MoveData happens
     // reset from C++ when FireOnMove happens
     private moveFromTo_?: [number, number] = undefined;
@@ -343,6 +346,7 @@ class __RepeatVirtualScroll2Impl<T> {
         // params that can change
         this.arr_ = config.arr;
         this.onMoveHandler_ = config.onMoveHandler;
+        this.itemDragEventHandler_ = config.itemDragEventHandler;
 
         // if totalCountSpecified==false, then need to create dependency on array length
         // so when array length changes, will update totalCount. use totalCountFunc_ for this
@@ -416,7 +420,7 @@ class __RepeatVirtualScroll2Impl<T> {
         });
 
         // init onMove
-        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_);
+        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_, this.itemDragEventHandler_);
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) initialRender() data array length: `,
             `${this.arr_.length}, totalCount: ${this.totalCount_} - done`);
@@ -455,7 +459,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
         // update onMove
         // scenario: developers control whether onMove exists or not dynamically. 
-        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_);
+        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_, this.itemDragEventHandler_);
 
         const activeRangeFrom = this.activeRange_[0];
         const activeRangeTo = this.activeRange_[1];

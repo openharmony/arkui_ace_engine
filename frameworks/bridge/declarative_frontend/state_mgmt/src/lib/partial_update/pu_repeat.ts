@@ -145,6 +145,7 @@ interface __RepeatConfig<T> {
     templateOptions?: { [type: string]: RepeatTemplateImplOptions };
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     onMoveHandler?: OnMoveHandler;
+    itemDragEventHandler?: ItemDragEventHandler;
     reusable?: boolean;
 };
 
@@ -261,8 +262,9 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     // drag and drop API
-    public onMove(handler: OnMoveHandler): RepeatAPI<T> {
+    public onMove(handler: OnMoveHandler, eventHandler?: ItemDragEventHandler): RepeatAPI<T> {
         this.config.onMoveHandler = handler;
+        this.config.itemDragEventHandler = eventHandler;
         return this;
     }
 

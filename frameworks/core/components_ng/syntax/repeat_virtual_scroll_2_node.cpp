@@ -680,6 +680,18 @@ void RepeatVirtualScroll2Node::SetOnMove(std::function<void(int32_t, int32_t)>&&
     onMoveEvent_ = onMove;
 }
 
+void RepeatVirtualScroll2Node::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    if (onMoveEvent_) {
+        onLongPressEvent_ = onLongPress;
+        onDragStartEvent_ = onDragStart;
+        onMoveThroughEvent_ = onMoveThrough;
+        onDropEvent_ = onDrop;
+    }
+}
+
 void RepeatVirtualScroll2Node::MoveData(int32_t from, int32_t to)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "MoveData from: %{public}d to: %{public}d.", from, to);
