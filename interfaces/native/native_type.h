@@ -2261,7 +2261,7 @@ typedef enum {
     ARKUI_ERROR_CODE_INVALID_STYLED_STRING = 180101,
     /**
      * @error The gesture recognizer type is not supported.
-     * @since 16
+     * @since 18
      */
     ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED = 180102,
     /** The uiContext is invalid. */
@@ -2345,7 +2345,7 @@ typedef enum {
 /**
  * @brief Define an enum for the focus movement directions.
  *
- * @since 16
+ * @since 18
 */
 typedef enum {
     /** Move focus forward. */
@@ -4753,7 +4753,7 @@ bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageO
 /**
  * @brief Defines the parameters for visible area change events.
  *
- * @since 16
+ * @since 18
  */
 typedef struct ArkUI_VisibleAreaEventOptions ArkUI_VisibleAreaEventOptions;
 
@@ -4761,7 +4761,7 @@ typedef struct ArkUI_VisibleAreaEventOptions ArkUI_VisibleAreaEventOptions;
 * @brief Creates an instance of visible area change event parameters
 *
 * @return Returns the created instance of visible area change event parameters.
-* @since 16
+* @since 18
 */
 ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create();
 
@@ -4769,7 +4769,7 @@ ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create();
 * @brief Disposes of an instance of visible area change event parameters.
 *
 * @param option Instance to be destroyed.
-* @since 16
+* @since 18
 */
 void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* option);
 
@@ -4787,7 +4787,7 @@ void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* opt
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         If an error code is returned, it may be due to a failure in parameter validation;
 *         the parameter must not be null.
-* @since 16
+* @since 18
 */
 int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t size);
 
@@ -4801,7 +4801,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         If an error code is returned, it may be due to a failure in parameter validation;
 *         the parameter must not be null.
-* @since 16
+* @since 18
 */
 int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
     ArkUI_VisibleAreaEventOptions *option, int32_t value);
@@ -4818,7 +4818,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
  *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
  *         If an error code is returned, it may be due to a failure in parameter validation;
  *         the parameter must not be null.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t* size);
 
@@ -4827,7 +4827,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions
  *
  * @param option Instance of visible area change event parameters.
  * @return Returns the expected update interval, in ms.  Default value: <b>1000</b>.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option);
 #ifdef __cplusplus
