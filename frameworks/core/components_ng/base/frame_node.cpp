@@ -1303,7 +1303,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     }
     bool forceMeasure =
         !(GetPattern()->ReusedNodeSkipMeasure() ||
-            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN));
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN));
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess() && forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
