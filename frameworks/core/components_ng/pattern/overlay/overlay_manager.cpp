@@ -6359,6 +6359,7 @@ void OverlayManager::RemoveFilterAnimation()
             BlurStyleOption styleOption;
             styleOption.blurStyle = BlurStyle::NO_MATERIAL;
             filterContext->UpdateBackBlurStyle(styleOption);
+            filterContext->UpdateBackgroundColor(Color::TRANSPARENT);
         },
         option.GetOnFinishEvent());
 }
@@ -7408,6 +7409,9 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
         manager->SetFilterActive(false);
     });
     filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
+    if (!menuTheme->GetHasBackBlur()) {
+        filterRenderContext->UpdateBackgroundColor(maskColor.ChangeOpacity(0.0f));
+    }
     AnimationUtils::Animate(
         option,
         [filterRenderContext, styleOption, maskColor, menuTheme]() {
