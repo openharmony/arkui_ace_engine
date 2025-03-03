@@ -218,7 +218,7 @@ public:
 
     void SetDefaultTextAlign()
     {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             // The default value of TextAlign is TextAlign::START.
             SetTextAlign(TextAlign::START);
         }
@@ -419,7 +419,7 @@ protected:
 
     RSBitmapFormat GetBitmapFormat()
     {
-        if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+        if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
             return RSBitmapFormat { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL };
         } else {
             return RSBitmapFormat { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
