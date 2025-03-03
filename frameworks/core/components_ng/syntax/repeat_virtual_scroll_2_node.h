@@ -121,7 +121,10 @@ public:
     // called from TS upon Repeat rerender
     // tell the Container to invalid its layout
     // incl re-layout of children start from startIndex
-    void RequestContainerReLayout(IndexType startIndex);
+    void RequestContainerReLayout(IndexType startIndex = INT_MIN);
+
+    // trigger FrameNode::NotifyChangeWithCount()
+    void NotifyContainerLayoutChange(int32_t startIndex, int32_t count, NG::UINode::NotificationType notificationType);
 
     /**
      * GetChildren re-assembles children_ and cleanup the L1 cache

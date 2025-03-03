@@ -100,6 +100,8 @@ class ObserveV2 {
 
   // flag to indicate change observation is disabled
   private disabled_: boolean = false;
+  // flag to indicate dependency recording is disabled
+  private disableRecording_: boolean = false;
 
   // flag to indicate ComputedV2 calculation is ongoing
   private calculatingComputedProp_: boolean = false;
@@ -296,7 +298,7 @@ class ObserveV2 {
   // to current this.bindId
   public addRef(target: object, attrName: string): void {
     const bound = this.stackOfRenderedComponents_.top();
-    if (!bound) {
+    if (!bound || this.disableRecording_) {
       return;
     }
     if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
@@ -397,12 +399,35 @@ class ObserveV2 {
     return ret;
   }
 
+  /**
+   * Execute given task while state dependency recording is disabled
+   * Any property read during task execution will not be recorded as
+   * a dependency
+   * 
+   * !!! Use with Caution !!!
+   *
+   * @param task a function to execute without monitoring state changes
+   * @param unobserved flag to disable also change observation
+   * @returns task function return value
+   */
+  public executeUnrecorded<Z>(task: () => Z, unobserved: boolean = false): Z {
+    stateMgmtConsole.propertyAccess(`executeUnrecorded - start`);
+    this.disableRecording_ = true;
+    // store current value of disabled_ so that we can later restore it properly
+    const oldDisabledValue = this.disabled_;
+    unobserved && (this.disabled_ = true);
+    let ret: Z = task();
+    this.disableRecording_ = false;
+    unobserved && (this.disabled_ = oldDisabledValue);
+    stateMgmtConsole.propertyAccess(`executeUnrecorded - done`);
+    return ret;
+  }
 
 
 
   /**
   * mark view model object 'target' property 'attrName' as changed
-  * notify affected watchIds and elmtIds
+  * notify affected watchIds and elmtIds but exclude given elmtIds
   *
   * @param propName ObservedV2 or ViewV2 target
   * @param attrName attrName
@@ -410,7 +435,8 @@ class ObserveV2 {
   * If the fireChange is invoked before the data changed, it needs to be ignored on the profiler.
   * The default value is false.
   */
-  public fireChange(target: object, attrName: string, ignoreOnProfiler: boolean = false): void {
+  public fireChange(target: object, attrName: string, excludeElmtIds?: Set<number>,
+    ignoreOnProfiler: boolean = false): void {
     // enable to get more fine grained traces
     // including 2 (!) .end calls.
 
@@ -438,6 +464,12 @@ class ObserveV2 {
     for (const id of changedIdSet) {
       // Cannot fireChange the object that is being created.
       if (bound && id === bound[0]) {
+        continue;
+      }
+
+      // exclude given elementIds
+      if (excludeElmtIds?.has(id)) {
+        stateMgmtConsole.propertyAccess(`... exclude id ${id}`);
         continue;
       }
 
