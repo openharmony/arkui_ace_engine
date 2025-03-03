@@ -593,6 +593,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     pickerProperty->UpdateDisappearColor(
         GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
+        OnModifyDone();
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
