@@ -16,49 +16,111 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimationExtenderAccessor {
 void DestroyPeerImpl(Ark_AnimationExtender peer)
 {
+    LOGE("AnimationExtenderAccessor destructor is not implemented and not supported. Use static methods.");
 }
 Ark_AnimationExtender CtorImpl()
 {
+    LOGE("AnimationExtenderAccessor constructor is not implemented and not supported. Use static methods.");
     return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetClipRectImpl(Ark_NativePointer peer,
-                     const Ark_Float32 left,
-                     const Ark_Float32 top,
-                     const Ark_Float32 right,
-                     const Ark_Float32 bottom)
+void SetClipRectImpl(Ark_NativePointer node,
+                     Ark_Float32 x,
+                     Ark_Float32 y,
+                     Ark_Float32 width,
+                     Ark_Float32 height)
 {
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    renderContext->ClipWithRRect(RectF(x, y, width, height), RadiusF(EdgeF(0.0f, 0.0f)));
 }
-void OpenImplicitAnimationImpl(Ark_NativePointer peer,
-                               const Ark_AnimateParam* param)
-{
-}
-void CloseImplicitAnimationImpl(Ark_NativePointer node)
-{
-}
+
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
 }
 void CloseImplicitAnimationImpl()
 {
 }
+
 void StartDoubleAnimationImpl(Ark_NativePointer node,
                               const Ark_DoubleAnimationParam* param)
 {
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(param);
+
+    auto curve = Converter::OptConvert<RefPtr<Curve>>(param->curve).value_or(Framework::CreateCurve(-1, true));
+    auto duration = Converter::Convert<int32_t>(param->duration);
+    auto delay = Converter::Convert<int32_t>(param->delay);
+    auto propertyName = Converter::Convert<std::string>(param->propertyName);
+    auto startValue = Converter::Convert<float>(param->startValue);
+    auto endValue = Converter::Convert<float>(param->endValue);
+
+    auto progressFunction = Converter::OptConvert<Callback_Extender_OnProgress>(param->onProgress);
+    if (progressFunction) {
+        auto progressCallbackFn = [cb = CallbackHelper(progressFunction.value())](float progress) {
+            cb.Invoke(static_cast<Ark_Float32>(progress));
+        };
+
+        frameNode->CreateAnimatablePropertyFloat(propertyName, startValue, progressCallbackFn);
+        progressCallbackFn(startValue);
+    }
+
+    AnimationOption option(curve, duration);
+    option.SetDelay(delay);
+
+    auto finishFunction = Converter::OptConvert<Callback_Extender_OnFinish>(param->onFinish);
+    if (finishFunction) {
+        auto finishCallbackFn = [cb = CallbackHelper(finishFunction.value()), frameNode, propertyName]() {
+            frameNode->DeleteAnimatablePropertyFloat(propertyName);
+            cb.Invoke();
+        };
+
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), finishCallbackFn);
+    } else {
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    }
+
+    frameNode->UpdateAnimatablePropertyFloat(propertyName, endValue);
+    AnimationUtils::CloseImplicitAnimation();
 }
 void AnimationTranslateImpl(Ark_NativePointer node,
-                            const Ark_TranslateOptions* options)
+                            const Ark_TranslateOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+
+    TranslateOptions options = Converter::Convert<TranslateOptions>(*value);
+
+    if (options.x.Unit() == DimensionUnit::PERCENT) {
+        options.x = Dimension(options.x.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX(),
+                              DimensionUnit::PX);
+    }
+
+    if (options.y.Unit() == DimensionUnit::PERCENT) {
+        options.x = Dimension(options.y.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY(),
+                              DimensionUnit::PX);
+    }
+
+    ViewAbstract::SetTranslate(frameNode, options);
 }
 } // AnimationExtenderAccessor
+
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
 {
     static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
