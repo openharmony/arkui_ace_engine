@@ -58,6 +58,7 @@ const DEFAULT_FONT_WEIGHT_SCALE = 1;
 const DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 8;
 const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 16;
 const ENTER_EXIT_ICON_DURATION = 200;
+const SEND_EVENT_DURATION = 10;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1);
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38);
 const REMOVE_ADD_SPRING = curves.interpolatingSpring(0, 1, 150, 24);
@@ -1219,16 +1220,18 @@ export class GridObjectSortComponent extends ViewPU {
         if (this.isPointToEditTitleBarSaveButton) {
             let d103 = this.getUIContext().getFrameNodeById(EDIT_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
             let e103 = ({
-                type: 'requestFocusForAccessibility',
+                type: 'requestFocusForAccessibilityNotInterrupt',
                 bundleName: this.bundleName,
                 triggerAction: 'common',
                 customId: `ImageMenuItem_${d103}_0`
             });
-            accessibility.sendAccessibilityEvent(e103).then(() => {
-                setTimeout(() => {
-                    this.isPointToEditTitleBarSaveButton = false;
-                }, ENTER_EXIT_ICON_DURATION);
-            });
+            setTimeout(() => {
+                accessibility.sendAccessibilityEvent(e103).then(() => {
+                    setTimeout(() => {
+                        this.isPointToEditTitleBarSaveButton = false;
+                    }, ENTER_EXIT_ICON_DURATION);
+                });
+            }, SEND_EVENT_DURATION);
         }
     }
 
