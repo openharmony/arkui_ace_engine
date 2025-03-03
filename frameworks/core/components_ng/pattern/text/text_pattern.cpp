@@ -190,6 +190,17 @@ void TextPattern::InitSelection(const Offset& pos)
         selectionOffset.SetY(pManager_->GetHeight());
     }
     int32_t extend = pManager_->GetGlyphIndexByCoordinate(selectionOffset, true);
+    if (pManager_->GetParagraphs().size() > 1) {
+        // paragraph may contain only newlines, look forward for non-newlines characters.
+        auto selectRects = pManager_->GetRects(extend, extend + 1);
+        if (selectRects.size() == 1 && NearZero(selectRects.back().Width())) {
+            auto selectStr = GetSelectedText(extend, extend + 1);
+            while (selectStr == u"\n" && extend > 0) {
+                --extend;
+                selectStr = GetSelectedText(extend, extend + 1);
+            }
+        }
+    }
     int32_t start = 0;
     int32_t end = 0;
     if (!pManager_->GetWordBoundary(extend, start, end)) {
