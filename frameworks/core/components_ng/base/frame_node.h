@@ -1280,6 +1280,7 @@ public:
     {
         topWindowBoundary_ = topWindowBoundary;
     }
+    bool CheckVisibleOrActive() override;
 
 protected:
     void DumpInfo() override;

@@ -3222,8 +3222,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
+        LOGI("start collect simplify dump info");
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutByCompress();
+        LOGI("end collect simplify dump info");
     } else if (params[0] == "-resource") {
         DumpResLoadError();
     } else if (params[0] == "-start") {
