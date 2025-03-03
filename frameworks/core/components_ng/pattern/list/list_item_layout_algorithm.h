@@ -46,6 +46,26 @@ public:
         curOffset_ = curOffset;
     }
 
+    float GetCurOffset() const
+    {
+        return curOffset_;
+    }
+
+    void SetCanUpdateCurOffset()
+    {
+        canUpdateCurOffset_ = true;
+    }
+
+    bool GetCurOffsetUpdated() const
+    {
+        return isCurOffsetUpdated_;
+    }
+
+    void SetItemChildCrossSize(float size)
+    {
+        childNodeSize_ = size;
+    }
+
     void SetStartNodeSize(float startNodeSize)
     {
         startNodeSize_ = startNodeSize;
@@ -100,6 +120,12 @@ public:
     float SetReverseValue(LayoutWrapper* layoutWrapper, float offset);
 
 private:
+    void MeasureItemChild(LayoutWrapper* layoutWrapper);
+
+    void CheckAndUpdateCurOffset(LayoutWrapper* layoutWrapper);
+
+    SizeF GetContentSize(LayoutWrapper* layoutWrapper) const;
+
     int32_t startNodeIndex_;
     int32_t endNodeIndex_;
     int32_t childNodeIndex_;
@@ -110,6 +136,9 @@ private:
     float curOffset_ = 0.0f;
     float startNodeSize_ = 0.0f;
     float endNodeSize_ = 0.0f;
+    float childNodeSize_ = 0.0f;
+    bool canUpdateCurOffset_ = false;
+    bool isCurOffsetUpdated_ = false;
     bool hasStartDeleteArea_ = false;
     bool hasEndDeleteArea_ = false;
 
