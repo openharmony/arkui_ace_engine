@@ -484,6 +484,30 @@ void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
     }
 }
 
+void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src)
+{
+    dst.radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(src.GetBlurRadius());
+    dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
+    dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
+        src.GetColor().ColorToString());
+    auto offset = src.GetOffset();
+    dst.offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(offset.GetX());
+    dst.offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(offset.GetY());
+    dst.fill = Converter::ArkValue<Opt_Boolean>(src.GetIsFilled());
+}
+
+void AssignArkValue(Ark_ShadowType& dst, const ShadowType& src)
+{
+    switch (src) {
+        case ShadowType::COLOR: dst = ARK_SHADOW_TYPE_COLOR; break;
+        case ShadowType::BLUR: dst = ARK_SHADOW_TYPE_BLUR; break;
+        default:
+            dst = static_cast<Ark_ShadowType>(-1);
+            LOGE("Unexpected enum value in ShadowType: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src)
 {
     switch (src) {
