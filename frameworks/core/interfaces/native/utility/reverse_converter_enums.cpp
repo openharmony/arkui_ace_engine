@@ -454,6 +454,18 @@ void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
     }
 }
 
+void AssignArkValue(Ark_ShadowType& dst, const ShadowType& src)
+{
+    switch (src) {
+        case ShadowType::COLOR: dst = ARK_SHADOW_TYPE_COLOR; break;
+        case ShadowType::BLUR: dst = ARK_SHADOW_TYPE_BLUR; break;
+        default:
+            dst = static_cast<Ark_ShadowType>(-1);
+            LOGE("Unexpected enum value in ShadowType: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src)
 {
     switch (src) {
