@@ -98,7 +98,7 @@ function isResource(variable) {
   return (variable === null || variable === void 0 ? void 0 : variable.bundleName) !== undefined;
 }
 function isResourceEqual(stageValue, value) {
-  if (Utils.isApiVersionEQAbove(16)) {
+  if (Utils.isApiVersionEQAbove(18)) {
     return false;
   }
   return (stageValue.bundleName === value.bundleName) &&
