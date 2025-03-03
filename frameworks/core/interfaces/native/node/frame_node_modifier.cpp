@@ -434,7 +434,7 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
     if (!AceType::InstanceOf<NG::FrameNode>(node) || AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
         auto parent = node->GetParent();
         if (parent && parent->GetTag() == V2::RECYCLE_VIEW_ETS_TAG) {
-            parent = node->GetParent();
+            parent = parent->GetParent();
         }
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;

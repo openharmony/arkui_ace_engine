@@ -178,7 +178,7 @@ void JSMock::JSBind(BindingTarget globalObj)
 void JSLoadV2Decorator(const shared_ptr<JsValue> globalPtr, const shared_ptr<JsRuntime> runtime)
 {
     shared_ptr<JsValue> decoratorPtr = runtime->NewFunction(JsMockFunc::CreatFunction);
-    globalPtr->SetProperty(runtime, "Provioder", decoratorPtr);
+    globalPtr->SetProperty(runtime, "Provider", decoratorPtr);
     globalPtr->SetProperty(runtime, "Consumer", decoratorPtr);
     globalPtr->SetProperty(runtime, "Monitor", decoratorPtr);
     globalPtr->SetProperty(runtime, "__Type__", decoratorPtr);
