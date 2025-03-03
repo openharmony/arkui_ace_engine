@@ -762,14 +762,15 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
     model.SetBarOverlap(true);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPaintProperty_->UpdateBarBackgroundColor(Color::RED);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::RED);
     EXPECT_TRUE(layoutProperty_->GetBarOverlap().value());
 
     model = CreateTabs();
     model.SetBarOverlap(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPaintProperty_->UpdateBarBackgroundColor(Color::RED);
+    renderContext->UpdateBackgroundColor(Color::RED);
     EXPECT_FALSE(layoutProperty_->GetBarOverlap().value());
 }
 
@@ -788,7 +789,8 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
     model.SetBarBackgroundColor(Color::RED);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    EXPECT_EQ(tabBarPaintProperty_->GetBarBackgroundColor().value_or(Color::BLACK), Color::RED);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::BLACK), Color::RED);
 }
 
 /**

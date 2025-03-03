@@ -304,7 +304,7 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level
     std::vector<bool> gradientRegions = { true, true, true, true, true };
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
     auto paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(
-        tabBarModifier, gradientRegions, Color::BLACK, indicator, OffsetF(), true);
+        tabBarModifier, RectF(), gradientRegions, Color::BLACK, indicator, OffsetF(), true);
 
     PaintWrapper paintWrapper(tabBarNode_->GetRenderContext(), tabBarNode_->GetGeometryNode(), tabBarPaintProperty_);
     auto drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper);
@@ -318,7 +318,7 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level
 
     gradientRegions[0] = false;
     paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(
-        tabBarModifier, gradientRegions, Color::BLACK, indicator, OffsetF(), true);
+        tabBarModifier, RectF(), gradientRegions, Color::BLACK, indicator, OffsetF(), true);
     PaintWrapper paintWrapper2(tabBarNode_->GetRenderContext(), tabBarNode_->GetGeometryNode(), tabBarPaintProperty_);
     drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper2);
     drawFunction(rsCanvas);
@@ -529,28 +529,5 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetForegroundDrawFunction002, Te
     ASSERT_EQ(drawFunction, nullptr);
     auto clone = tabBarPaintProperty_->Clone();
     EXPECT_NE(clone, nullptr);
-}
-
-/**
- * @tc.name: TabBarPatternGetInnerFocusPaintRect001
- * @tc.desc: test GetInnerFocusPaintRect
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarModifierTestNg, TabBarPatternGetInnerFocusPaintRect001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2. Test function InitOnKeyEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-    tabBarPattern_->isFirstFocus_ = true;
-    auto event = KeyEvent();
-    auto paintRect = RoundRect();
-    tabBarPattern_->GetInnerFocusPaintRect(paintRect);
-    EXPECT_TRUE(tabBarPattern_->isFirstFocus_);
 }
 } // namespace OHOS::Ace::NG

@@ -159,6 +159,8 @@ public:
             layoutAlgorithm->SetTargetIndex(targetIndex_);
         } else if (jumpIndex_) {
             layoutAlgorithm->SetJumpIndex(jumpIndex_);
+        } else if (focusIndex_) {
+            layoutAlgorithm->SetFocusIndex(focusIndex_);
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
@@ -179,16 +181,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        FocusPaintParam focusPaintParams;
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
-        CHECK_NULL_RETURN(focusTheme, FocusPattern());
-        auto tabTheme = pipeline->GetTheme<TabTheme>();
-        CHECK_NULL_RETURN(tabTheme, FocusPattern());
-        focusPaintParams.SetPaintWidth(tabTheme->GetActiveIndicatorWidth());
-        focusPaintParams.SetPaintColor(focusTheme->GetColor());
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+        return { FocusType::SCOPE, true };
     }
 
     void SetIndicator(int32_t indicator)
@@ -249,6 +242,8 @@ public:
     }
 
     void TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex);
+
+    RectF GetOriginalPaintRect(int32_t currentIndex);
 
     void HandleBottomTabBarChange(int32_t index);
 
@@ -385,11 +380,6 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
-    void SetFirstFocus(bool isFirstFocus)
-    {
-        isFirstFocus_ = isFirstFocus;
-    }
-
     void ResetIndicatorAnimationState()
     {
         isAnimating_ = false;
@@ -460,6 +450,7 @@ public:
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
     void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
+    void AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem);
 
     void RemoveTabBarItemInfo(int32_t tabBarItemId)
     {
@@ -470,6 +461,11 @@ public:
     void SetIsExecuteBuilder(bool isExecuteBuilder)
     {
         isExecuteBuilder_ = isExecuteBuilder;
+    }
+
+    void SetFocusIndicator(int32_t focusIndicator)
+    {
+        focusIndicator_ = focusIndicator;
     }
 
 private:
@@ -496,10 +492,10 @@ private:
     void HandleHoverEvent(bool isHover);
     void HandleHoverOnEvent(int32_t index);
     void HandleMoveAway(int32_t index);
-    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
-    bool OnKeyEventWithoutClick(const KeyEvent& event);
-    bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
+    RefPtr<FocusHub> GetCurrentFocusNode();
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step);
+    std::optional<int32_t> GetNextFocusIndicator(int32_t indicator, FocusStep step);
     void HandleLongPressEvent(const GestureEvent& info);
     void ShowDialogWithNode(int32_t index);
     void CloseDialog();
@@ -537,6 +533,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState(bool needMarkDirty = true);
     void FocusIndexChange(int32_t index);
+    void FocusCurrentOffset(int32_t index);
     void UpdateGradientRegions(bool needMarkDirty = true);
 
     float GetSpace(int32_t indicator);
@@ -552,10 +549,11 @@ private:
     bool CheckSwiperDisable() const;
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
     void InitTurnPageRateEvent();
-    void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
+    void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset, RectF& tabBarItemRect);
     void CalculateIndicatorStyle(
         int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     Color GetTabBarBackgroundColor() const;
+    SizeF GetContentSize() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
@@ -563,11 +561,11 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     bool CanScroll() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     RefPtr<SwiperPattern> GetSwiperPattern() const;
+    void UpdateChildrenClipEdge();
 
     void StartShowTabBar(int32_t delay = 0);
     void StopShowTabBar();
@@ -575,6 +573,13 @@ private:
     void UpdateTabBarHiddenRatio(float ratio);
     void SetTabBarTranslate(const TranslateOptions& options);
     void SetTabBarOpacity(float opacity);
+
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void InitFocusEvent();
+    void UpdateFocusToSelectedNode(bool isFocusActive);
 
     RefPtr<NodeAnimatablePropertyFloat> showTabBarProperty_;
     bool isTabBarShowing_ = false;
@@ -609,6 +614,7 @@ private:
     bool translateAnimationIsRunning_ = false;
 
     bool isRTL_ = false;
+    bool clipEdge_ = true;
 
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
@@ -627,7 +633,6 @@ private:
     std::unordered_map<int32_t, LabelStyle> labelStyles_;
     std::vector<IconStyle> iconStyles_;
     std::vector<TabBarSymbol> symbolArray_;
-    bool isFirstFocus_ = true;
     bool isTouchingSwiper_ = false;
     float indicatorStartPos_ = 0.0f;
     float indicatorEndPos_ = 0.0f;
@@ -651,10 +656,14 @@ private:
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> focusIndex_;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
+    float barGridMargin_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
+    bool accessibilityScroll_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG
