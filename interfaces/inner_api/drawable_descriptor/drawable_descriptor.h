@@ -47,6 +47,7 @@
 
 namespace OHOS::Ace::Napi {
 using OptionalPixelMap = std::optional<std::shared_ptr<Media::PixelMap>>;
+using OptionalDecodeSize  = std::optional<std::pair<int32_t, int32_t>>;
 struct DrawableItem {
     using RState = Global::Resource::RState;
     std::unique_ptr<uint8_t[]> data_;
@@ -69,6 +70,10 @@ public:
     virtual ~DrawableDescriptor() = default;
     virtual std::shared_ptr<Media::PixelMap> GetPixelMap();
     virtual DrawableType GetDrawableType();
+    virtual void SetDecodeSize(int32_t width, int32_t height)
+    {
+        return;
+    }
     void SetPixelMap(std::shared_ptr<Media::PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
@@ -151,6 +156,11 @@ public:
         return customized_;
     }
 
+    void SetDecodeSize(int32_t width, int32_t height) override
+    {
+        decodeSize_ = { width, height };
+    }
+
     void InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
     bool GetDefaultMask();
 
@@ -205,6 +215,7 @@ private:
     OptionalPixelMap mask_;
     OptionalPixelMap layeredPixelMap_;
     bool customized_ = false;
+    OptionalDecodeSize decodeSize_ = std::nullopt;
 };
 
 class ACE_EXPORT AnimatedDrawableDescriptor : public DrawableDescriptor {
