@@ -616,14 +616,12 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
 {
     // fill current line first
     auto mainIter = gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_);
-    auto nextMain = gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_ + 1);
-    if (mainIter != gridLayoutInfo_.gridMatrix_.end() && mainIter->second.size() < crossCount_ &&
-        nextMain == gridLayoutInfo_.gridMatrix_.end()) {
+    if (mainIter != gridLayoutInfo_.gridMatrix_.end() && mainIter->second.size() < crossCount_) {
         auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
         cellAveLength_ = -1.0f;
         bool hasNormalItem = false;
         lastCross_ = 0;
-        for (uint32_t i = (mainIter->second.empty() ? 0 : mainIter->second.rbegin()->first); i < crossCount_; i++) {
+        for (uint32_t i = mainIter->second.size(); i < crossCount_; i++) {
             // Step1. Get wrapper of [GridItem]
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
@@ -762,6 +760,11 @@ void GridScrollLayoutAlgorithm::AdjustRowColSpan(
     }
     if (currentItemRowSpan_ > 1 || currentItemColSpan_ > 1) {
         gridLayoutInfo_.hasBigItem_ = true;
+    }
+
+    int32_t mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
+    if (mainSpan > 1) {
+        gridLayoutInfo_.hasMultiLineItem_ = true;
     }
 
     itemLayoutProperty->UpdateRealRowSpan(currentItemRowSpan_);
@@ -1298,9 +1301,6 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     CHECK_NULL_VOID(itemWrapper);
     AdjustRowColSpan(itemWrapper, layoutWrapper, firstItem);
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
-    if (mainSpan > 1) {
-        gridLayoutInfo_.hasMultiLineItem_ = true;
-    }
     auto measureNumber = 0;
     currentMainLineIndex_ = (firstItem == 0 ? 0 : gridLayoutInfo_.startMainLineIndex_) - 1;
     gridLayoutInfo_.endIndex_ = firstItem - 1;
@@ -1580,9 +1580,6 @@ int32_t GridScrollLayoutAlgorithm::MeasureNewChild(const SizeF& frameSize, int32
     auto crossCount = static_cast<int32_t>(crossCount_);
     AdjustRowColSpan(childLayoutWrapper, layoutWrapper, itemIndex);
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
-    if (mainSpan > 1) {
-        gridLayoutInfo_.hasMultiLineItem_ = true;
-    }
     auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
     auto crossStart = axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
     if (crossSpan > crossCount) {
@@ -1851,8 +1848,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
     // if it fails to fill a new line backward, do [currentLine--]
     auto line = gridLayoutInfo_.gridMatrix_.find(currentLine);
     if (gridLayoutInfo_.gridMatrix_.find(currentLine) != gridLayoutInfo_.gridMatrix_.end()) {
-        auto nextMain = gridLayoutInfo_.gridMatrix_.find(currentLine + 1);
-        if (line->second.size() < crossCount_ && nextMain == gridLayoutInfo_.gridMatrix_.end()) {
+        if (line->second.size() < crossCount_) {
             bool hasNormalItem = false;
             lastCross_ = 0;
             for (const auto& elem : line->second) {
@@ -1861,11 +1857,11 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
-            for (uint32_t i = (line->second.empty() ? 0 : line->second.rbegin()->first); i < crossCount_ - 1; i++) {
+            for (uint32_t i = line->second.size() ; i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
-                    for (uint32_t y = i; y < crossCount_ - 1 && currentIndex < gridLayoutInfo_.childrenCount_; y++) {
+                    for (uint32_t y = i; y < crossCount_ && currentIndex < gridLayoutInfo_.childrenCount_; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
                     }
                     if (GreatOrEqual(cellAveLength_, 0.0f) &&
@@ -2200,6 +2196,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.ResetPositionFlags();
         gridLayoutInfo_.clearStretch_ = true;
+        gridLayoutInfo_.hasMultiLineItem_ = false;
         isChildrenUpdated_ = true;
         if (gridLayoutInfo_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
