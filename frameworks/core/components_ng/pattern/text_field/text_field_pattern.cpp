@@ -4898,9 +4898,8 @@ void TextFieldPattern::NotifyImfFinishTextPreview()
         return;
     }
 #if defined(ENABLE_STANDARD_INPUT)
-    int32_t caretIndex = selectController_->GetCaretIndex();
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-        u"", caretIndex, caretIndex);
+        u"", 0, 0);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "notify imf that textfield exit textPreview");
 #endif
 }
