@@ -43,7 +43,7 @@ public:
 
     std::string GetAccessibilityLevel() const override
     {
-        return Level::NO_STR;
+        return accessibilityLevel_.value_or(Level::NO_STR);
     }
 
 protected:

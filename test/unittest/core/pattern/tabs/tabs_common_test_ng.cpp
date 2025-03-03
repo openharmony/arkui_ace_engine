@@ -62,11 +62,15 @@ HWTEST_F(TabsCommonTestNg, FocusStep001, TestSize.Level1)
     model.SetIsVertical(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, tabBarNode_, swiperNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, swiperNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, nullptr));
 
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, swiperNode_, tabBarNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, swiperNode_, tabBarNode_));
@@ -100,15 +104,29 @@ HWTEST_F(TabsCommonTestNg, FocusStep002, TestSize.Level1)
     model.SetIsVertical(true);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, tabBarNode_, swiperNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, swiperNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, nullptr));
 
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, swiperNode_, tabBarNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, swiperNode_, tabBarNode_));
+
+    /**
+     * @tc.cases: TextDirection::RTL
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, swiperNode_));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, tabBarNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, swiperNode_, nullptr));
 }
 
 /**
@@ -125,11 +143,15 @@ HWTEST_F(TabsCommonTestNg, FocusStep003, TestSize.Level1)
     model.SetIsVertical(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, tabBarNode_, swiperNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, swiperNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, nullptr));
 
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, swiperNode_, tabBarNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, swiperNode_, tabBarNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, swiperNode_, nullptr));
@@ -150,15 +172,180 @@ HWTEST_F(TabsCommonTestNg, FocusStep004, TestSize.Level1)
     model.SetIsVertical(true);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, tabBarNode_, swiperNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, swiperNode_));
 
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, swiperNode_, tabBarNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, tabBarNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, swiperNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, swiperNode_, nullptr));
+
+    /**
+     * @tc.cases: TextDirection::RTL
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, swiperNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, swiperNode_, tabBarNode_));
+}
+
+/**
+ * @tc.name: TabsFocusTest001
+ * @tc.desc: test onGetNextFocusNodeFunc_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabsFocusTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::START);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. Call onGetNextFocusNodeFunc_ use FocusReason::DEFAULT
+     * @tc.expected: expect The function is run ok.
+     */
+    auto tabsFocusHub = frameNode_->GetFocusHub();
+    auto nextFocusHub = tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::DEFAULT, FocusIntension::TAB);
+    EXPECT_EQ(nextFocusHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Call onGetNextFocusNodeFunc_ use FocusReason::FOCUS_TRAVEL and different FocusIntension
+     * @tc.expected: expect The function is run ok.
+     */
+    auto tabBarFocusHub = tabBarNode_->GetOrCreateFocusHub();
+    auto swiperFocusHub = swiperNode_->GetOrCreateFocusHub();
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::SELECT), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::HOME), tabBarFocusHub);
+    EXPECT_EQ(
+        tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::SHIFT_TAB), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::END), swiperFocusHub);
+
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::LEFT), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::RIGHT), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::DOWN), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::UP), swiperFocusHub);
+
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::NONE), nullptr);
+
+    /**
+     * @tc.steps: step4. Set tabbar focusable to false, call onGetNextFocusNodeFunc_
+     * @tc.expected: expect The function is run ok.
+     */
+    tabBarFocusHub->SetFocusable(false, false);
+    nextFocusHub = tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB);
+    EXPECT_EQ(nextFocusHub, nullptr);
+}
+
+/**
+ * @tc.name: TabsFocusTest002
+ * @tc.desc: test onGetNextFocusNodeFunc_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabsFocusTest002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step3. Call onGetNextFocusNodeFunc_ use different FocusIntension
+     * @tc.expected: expect The function is run ok.
+     */
+    auto tabsFocusHub = frameNode_->GetFocusHub();
+    auto tabBarFocusHub = tabBarNode_->GetOrCreateFocusHub();
+    auto swiperFocusHub = swiperNode_->GetOrCreateFocusHub();
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::SELECT), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::HOME), swiperFocusHub);
+    EXPECT_EQ(
+        tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::SHIFT_TAB), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::END), tabBarFocusHub);
+
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::LEFT), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::RIGHT), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::DOWN), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::UP), tabBarFocusHub);
+}
+
+/**
+ * @tc.name: TabsFocusTest003
+ * @tc.desc: test onGetNextFocusNodeFunc_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabsFocusTest003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::START);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. Call onGetNextFocusNodeFunc_ use different FocusIntension
+     * @tc.expected: expect The function is run ok.
+     */
+    auto tabsFocusHub = frameNode_->GetFocusHub();
+    auto tabBarFocusHub = tabBarNode_->GetOrCreateFocusHub();
+    auto swiperFocusHub = swiperNode_->GetOrCreateFocusHub();
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::LEFT), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::RIGHT), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::DOWN), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::UP), tabBarFocusHub);
+
+    /**
+     * @tc.steps: step3. Set direction to RTL, call onGetNextFocusNodeFunc_ use different FocusIntension
+     * @tc.expected: expect The function is run ok.
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::LEFT), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::RIGHT), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::DOWN), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::UP), tabBarFocusHub);
+}
+
+/**
+ * @tc.name: TabsFocusTest004
+ * @tc.desc: test onGetNextFocusNodeFunc_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabsFocusTest004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. Call onGetNextFocusNodeFunc_ use different FocusIntension
+     * @tc.expected: expect The function is run ok.
+     */
+    auto tabsFocusHub = frameNode_->GetFocusHub();
+    auto tabBarFocusHub = tabBarNode_->GetOrCreateFocusHub();
+    auto swiperFocusHub = swiperNode_->GetOrCreateFocusHub();
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::LEFT), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::RIGHT), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::DOWN), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::UP), swiperFocusHub);
+
+    /**
+     * @tc.steps: step3. Set direction to RTL, call onGetNextFocusNodeFunc_ use different FocusIntension
+     * @tc.expected: expect The function is run ok.
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::LEFT), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::RIGHT), tabBarFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::DOWN), swiperFocusHub);
+    EXPECT_EQ(tabsFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::UP), swiperFocusHub);
 }
 
 /**

@@ -5432,14 +5432,6 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
 
 void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex)
 {
-    if (customAnimationToIndex_.value_or(toIndex) != toIndex) {
-        TAG_LOGW(AceLogTag::ACE_SWIPER,
-            "Swiper TriggerCustomContentTransitionEvent, fromIndex:%{public}d, toIndex:%{public}d", fromIndex, toIndex);
-        needUnmountIndexs_.insert(toIndex);
-        indexsInAnimation_.erase(toIndex);
-        MarkDirtyNodeSelf();
-        return;
-    }
     CHECK_NULL_VOID(onTabsCustomContentTransition_);
 
     auto tabContentAnimatedTransition = (*onTabsCustomContentTransition_)(fromIndex, toIndex);

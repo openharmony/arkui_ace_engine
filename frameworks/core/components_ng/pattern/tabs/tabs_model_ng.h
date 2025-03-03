@@ -67,6 +67,7 @@ public:
     void SetAnimateMode(TabAnimateMode mode) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
+    void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

@@ -135,7 +135,7 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
         dividerWrapper->Layout();
 
-        auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetFrameSize().Width();
+        auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
         OffsetF tabBarOffset =
             OffsetF((tabsWidth - offsetList[TAB_BAR_INDEX].GetX() - tabBarWidth), offsetList[TAB_BAR_INDEX].GetY());
         tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(tabBarOffset);
