@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import LoadingProgressBootcampTest from './InformationDisplay/LoadingProgressBootcamp.test'
 
 export default function testsuite() {
   abilityTest();
+  LoadingProgressBootcampTest();
 }
