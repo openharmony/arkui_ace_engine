@@ -1316,4 +1316,84 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightBloomInvalidValues, TestS
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
 }
+
+static const std::vector<std::pair<Ark_Length, std::string>> testResizableSliceValidValues = {
+    { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
+    { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
+    { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
+    { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp" },
+    { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
+    { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
+    { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
+    { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
+};
+
+/*
+ * @tc.name: setResizableTestResizableSliceValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setResizableTestResizableSliceValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setResizable, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto renderProps = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProps, nullptr);
+    ASSERT_NE(renderProps->GetOrCreateImagePaintStyle(), nullptr);
+
+    for (const auto &[arkLength, expected]: testResizableSliceValidValues) {
+        Ark_EdgeWidths edgeWidths = {
+            .top = Converter::ArkValue<Opt_Length>(arkLength),
+            .right = Converter::ArkValue<Opt_Length>(arkLength),
+            .bottom = Converter::ArkValue<Opt_Length>(arkLength),
+            .left = Converter::ArkValue<Opt_Length>(arkLength),
+        };
+        Ark_ResizableOptions value = { .slice = Converter::ArkValue<Opt_EdgeWidths>(edgeWidths) };
+        modifier_->setResizable(node_, &value);
+        auto resizableSlice = renderProps->GetImagePaintStyle()->GetImageResizableSlice();
+        ASSERT_TRUE(resizableSlice.has_value());
+        EXPECT_EQ(resizableSlice->top.ToString(), expected);
+        EXPECT_EQ(resizableSlice->right.ToString(), expected);
+        EXPECT_EQ(resizableSlice->bottom.ToString(), expected);
+        EXPECT_EQ(resizableSlice->left.ToString(), expected);
+    }
+}
+
+static const std::vector<std::pair<Ark_Length, std::string>> testResizableSliceInvalidValues = {
+    { Converter::ArkValue<Ark_Length>(-2.45f), "0.00px" },
+    { Converter::ArkValue<Ark_Length>(-5.0_px), "0.00px" },
+    { Converter::ArkValue<Ark_Length>(-22.35_px), "0.00px" },
+    { Converter::ArkValue<Ark_Length>(-7.0_vp), "0.00px" },
+};
+
+/*
+ * @tc.name: setResizableTestResizableSliceInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setResizableTestResizableSliceInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setResizable, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto renderProps = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProps, nullptr);
+    ASSERT_NE(renderProps->GetOrCreateImagePaintStyle(), nullptr);
+
+    for (const auto &[arkLength, expected]: testResizableSliceInvalidValues) {
+        Ark_EdgeWidths edgeWidths = {
+            .top = Converter::ArkValue<Opt_Length>(arkLength),
+            .right = Converter::ArkValue<Opt_Length>(arkLength),
+            .bottom = Converter::ArkValue<Opt_Length>(arkLength),
+            .left = Converter::ArkValue<Opt_Length>(arkLength),
+        };
+        Ark_ResizableOptions value = { .slice = Converter::ArkValue<Opt_EdgeWidths>(edgeWidths) };
+        modifier_->setResizable(node_, &value);
+        auto resizableSlice = renderProps->GetImagePaintStyle()->GetImageResizableSlice();
+        ASSERT_TRUE(resizableSlice.has_value());
+        EXPECT_EQ(resizableSlice->top.ToString(), expected);
+        EXPECT_EQ(resizableSlice->right.ToString(), expected);
+        EXPECT_EQ(resizableSlice->bottom.ToString(), expected);
+        EXPECT_EQ(resizableSlice->left.ToString(), expected);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -867,17 +867,6 @@ OverlayOptions Convert(const Ark_OverlayOptions& src)
 }
 
 template<>
-ImageResizableSlice Convert(const Ark_EdgeWidths& src)
-{
-    ImageResizableSlice dst;
-    dst.left = OptConvert<Dimension>(src.left).value_or(dst.left);
-    dst.right = OptConvert<Dimension>(src.right).value_or(dst.right);
-    dst.top = OptConvert<Dimension>(src.top).value_or(dst.top);
-    dst.bottom = OptConvert<Dimension>(src.bottom).value_or(dst.bottom);
-    return dst;
-}
-
-template<>
 BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
 {
     BorderWidthProperty dst;
