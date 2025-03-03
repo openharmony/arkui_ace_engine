@@ -48,6 +48,8 @@ const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
 const std::string SHEET_HEIGHT_AUTO = "auto";
 const std::string SHEET_HEIGHT_FITCONTENT = "fit_content";
+constexpr int HAPTIC_FEEDBACK_MODE_ENABLED = 1;
+constexpr int HAPTIC_FEEDBACK_MODE_AUTO = 2;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 }
@@ -775,6 +777,19 @@ void JSViewPopups::ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG:
     }
 }
 
+void JSViewPopups::ParseMenuHapticFeedbackMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto hapticFeedbackMode = menuOptions->GetProperty("hapticFeedbackMode");
+    if (!hapticFeedbackMode->IsNumber()) {
+        return;
+    }
+    if (hapticFeedbackMode->ToNumber<int32_t>() == HAPTIC_FEEDBACK_MODE_ENABLED) {
+        menuParam.hapticFeedbackMode = HapticFeedbackMode::ENABLED;
+    } else if (hapticFeedbackMode->ToNumber<int32_t>() == HAPTIC_FEEDBACK_MODE_AUTO) {
+        menuParam.hapticFeedbackMode = HapticFeedbackMode::AUTO;
+    }
+}
+
 void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
@@ -905,6 +920,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuBlurStyleOption(menuOptions, menuParam);
     JSViewPopups::ParseMenuEffectOption(menuOptions, menuParam);
+    JSViewPopups::ParseMenuHapticFeedbackMode(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)

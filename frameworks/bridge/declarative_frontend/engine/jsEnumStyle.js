@@ -1144,6 +1144,13 @@ let MenuPreviewMode;
   MenuPreviewMode[MenuPreviewMode.IMAGE = 1] = 'IMAGE';
 })(MenuPreviewMode || (MenuPreviewMode = {}));
 
+let HapticFeedbackMode;
+(function (HapticFeedbackMode) {
+  HapticFeedbackMode[HapticFeedbackMode.DISABLED = 0] = 'DISABLED';
+  HapticFeedbackMode[HapticFeedbackMode.ENABLED = 1] = 'ENABLED';
+  HapticFeedbackMode[HapticFeedbackMode.AUTO = 2] = 'AUTO';
+})(HapticFeedbackMode || (HapticFeedbackMode = {}));
+
 let DismissReason;
 (function (DismissReason) {
   DismissReason[DismissReason.PRESS_BACK = 0] = 'PRESS_BACK';

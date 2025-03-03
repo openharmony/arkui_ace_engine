@@ -93,6 +93,12 @@ enum class SpreadMethod {
     REPEAT,
 };
 
+enum class HapticFeedbackMode {
+    DISABLED,
+    ENABLED,
+    AUTO,
+};
+
 struct MenuPreviewAnimationOptions {
     float scaleFrom { -1.0f };
     float scaleTo { -1.0f };
