@@ -187,7 +187,7 @@ public:
         springVelocityScale_ = scale;
     }
 
-    void HandleTouchDown();
+    void HandleTouchDown(bool fromcrown = false);
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
