@@ -322,7 +322,23 @@ RefPtr<NodeAnimatablePropertyFloat> CreateVisibleAreaClipAnimationWhenDisappear(
         RoundRect roundRectInstance;
         roundRectInstance.SetRect(RectF(OffsetF(rate * clipOffset.GetX(), rate * clipOffset.GetY()),
             SizeF(curentClipAreaWidth, curentClipAreaHeight)));
-        roundRectInstance.SetCornerRadius((1 - rate) * radius);
+        auto menuWrapper = previewPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
+        roundRectInstance.SetCornerRadius(RoundRect::TOP_LEFT_POS,
+            (1 - rate) * animationInfo.borderRadius.radiusTopLeft->ConvertToPx(),
+            (1 - rate) * animationInfo.borderRadius.radiusTopLeft->ConvertToPx());
+        roundRectInstance.SetCornerRadius(RoundRect::TOP_RIGHT_POS,
+            (1 - rate) * animationInfo.borderRadius.radiusTopRight->ConvertToPx(),
+            (1 - rate) * animationInfo.borderRadius.radiusTopRight->ConvertToPx());
+        roundRectInstance.SetCornerRadius(RoundRect::BOTTOM_LEFT_POS,
+            (1 - rate) * animationInfo.borderRadius.radiusBottomLeft->ConvertToPx(),
+            (1 - rate) * animationInfo.borderRadius.radiusBottomLeft->ConvertToPx());
+        roundRectInstance.SetCornerRadius(RoundRect::BOTTOM_RIGHT_POS,
+            (1 - rate) * animationInfo.borderRadius.radiusBottomRight->ConvertToPx(),
+            (1 - rate) * animationInfo.borderRadius.radiusBottomRight->ConvertToPx());
         clipContext->ClipWithRoundRect(roundRectInstance);
     };
     return AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
