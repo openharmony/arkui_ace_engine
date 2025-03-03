@@ -1028,6 +1028,9 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
             DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
         }
     }
+    if (!CheckVisibleOrActive()) {
+        return;
+    }
     for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1, hasJson);
     }
