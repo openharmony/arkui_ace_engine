@@ -1001,7 +1001,7 @@ class __RepeatVirtualScroll2Impl<T> {
         }
         if (this.moveFromTo_) {
             this.moveFromTo_[1] = moveTo;
-            if (this.moveFromTo_[1] == this.moveFromTo_[0]) {
+            if (this.moveFromTo_[1] === this.moveFromTo_[0]) {
                 this.moveFromTo_ = undefined;
             }
         } else {
@@ -1055,7 +1055,7 @@ class __RepeatVirtualScroll2Impl<T> {
         if (!this.moveFromTo_) {
             return index;
         }
-        if (this.moveFromTo_[1] == index) {
+        if (this.moveFromTo_[1] === index) {
             return this.moveFromTo_[0];
         }
         if (this.moveFromTo_[0] <= index && index < this.moveFromTo_[1]) {
@@ -1072,7 +1072,7 @@ class __RepeatVirtualScroll2Impl<T> {
         if (!this.moveFromTo_) {
             return index;
         }
-        if (this.moveFromTo_[0] == index) {
+        if (this.moveFromTo_[0] === index) {
             return this.moveFromTo_[1];
         }
         if (this.moveFromTo_[0] < index && index <= this.moveFromTo_[1]) {
