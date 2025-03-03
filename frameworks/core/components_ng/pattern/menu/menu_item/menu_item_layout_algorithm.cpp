@@ -596,7 +596,7 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
 float MenuItemLayoutAlgorithm::CalcRowTopSpace(float rowsHeight, float itemHeight,
     LayoutWrapper* layoutWrapper, float leftOrRightRowHeight)
 {
-    float topSpace;
+    float topSpace = 0.0f;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         topSpace = (rowsHeight - leftOrRightRowHeight) / 2.0f + padding_.top.value_or(0.0f);
     } else {

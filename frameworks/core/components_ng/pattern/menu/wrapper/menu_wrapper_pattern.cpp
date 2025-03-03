@@ -380,6 +380,18 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
                     CHECK_NULL_VOID(subMenuNode);
                     auto menuWrapper = weak.Upgrade();
                     CHECK_NULL_VOID(menuWrapper);
+
+                    auto subMenuFrameNode = DynamicCast<FrameNode>(subMenuNode);
+                    CHECK_NULL_VOID(subMenuFrameNode);
+                    auto accessibilityProperty =
+                        subMenuFrameNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+                    CHECK_NULL_VOID(accessibilityProperty);
+                    accessibilityProperty->SetAccessibilityIsShow(false);
+                    subMenuFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
+                        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+                    TAG_LOGI(AceLogTag::ACE_MENU, "Send event to %{public}d",
+                        static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
+
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
@@ -397,13 +409,6 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     auto subMenuPattern = subMenuFrameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(subMenuPattern);
     subMenuPattern->SetSubMenuShow(false);
-    auto accessibilityProperty = subMenuFrameNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityIsShow(false);
-    subMenuFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
-        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    TAG_LOGI(AceLogTag::ACE_MENU, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
 }
 
 void MenuWrapperPattern::RegisterOnTouch()
