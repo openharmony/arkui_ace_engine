@@ -53,6 +53,10 @@ public:
     {
         return currentFocus_;
     }
+    void SetCurrentFocus(bool currentFocus)
+    {
+        currentFocus_ = currentFocus;
+    }
     void SetTabStop(bool tabStop)
     {
         tabStop_ = tabStop;

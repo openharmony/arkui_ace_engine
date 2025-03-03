@@ -97,11 +97,12 @@ public:
     {
         return ScopeFocusAlgorithm(true, true, ScopeType::OTHERS,
             [wp = WeakClaim(this)](
-                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
                 auto stepper = wp.Upgrade();
                 if (stepper) {
                     nextFocusNode = stepper->GetFocusNode(step, currFocusNode);
                 }
+                return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
             });
     }
 

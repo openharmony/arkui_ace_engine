@@ -339,7 +339,7 @@ bool FocusView::RequestDefaultFocus()
     }
     if (isViewRootScopeFocused_ && IsViewRootScopeHasLastFocus()) {
         SetIsViewRootScopeFocused(true);
-        auto ret = viewRootScope->RequestFocusImmediatelyInner();
+        auto ret = viewRootScope->RequestFocusImmediatelyInner(FocusReason::VIEW_SWITCH);
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on view root scope: %{public}s/%{public}d return: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
@@ -352,7 +352,7 @@ bool FocusView::RequestDefaultFocus()
         focusViewHub->InheritFocus();
         ret = true;
     } else {
-        ret = lastViewFocusNode->RequestFocusImmediatelyInner();
+        ret = lastViewFocusNode->RequestFocusImmediatelyInner(FocusReason::VIEW_SWITCH);
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
     return ret;

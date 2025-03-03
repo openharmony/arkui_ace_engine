@@ -102,11 +102,11 @@ public:
         }
         return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS,
             [wp = WeakClaim(this)](
-                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
                 auto grid = wp.Upgrade();
-                if (grid) {
-                    nextFocusNode = grid->GetNextFocusNode(step, currFocusNode);
-                }
+                CHECK_NULL_RETURN(grid, false);
+                nextFocusNode = grid->GetNextFocusNode(step, currFocusNode);
+                return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
             });
     }
 

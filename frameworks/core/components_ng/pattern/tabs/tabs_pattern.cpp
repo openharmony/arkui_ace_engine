@@ -410,6 +410,7 @@ ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()
             if (tabs) {
                 nextFocusNode = tabs->GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
 
