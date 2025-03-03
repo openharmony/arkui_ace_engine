@@ -374,7 +374,18 @@ void ResizableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    ImageResizableSlice defSliceValue {};
+    if (!value) {
+        ImageModelNG::SetResizableSlice(frameNode, defSliceValue);
+        return;
+    }
+    auto convSliceValue = Converter::OptConvert<ImageResizableSlice>(value->slice).value_or(defSliceValue);
+    if (convSliceValue.bottom.IsValid() && convSliceValue.right.IsValid()) {
+        ImageModelNG::SetResizableSlice(frameNode, convSliceValue);
+    } else {
+        ImageModelNG::SetResizableSlice(frameNode, defSliceValue);
+    }
+    // lattice .. This parameter will need to be implemented when Ark_DrawingLattice is supported.
     LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
