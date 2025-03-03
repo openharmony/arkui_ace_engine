@@ -26,12 +26,16 @@ void DestroyPeerImpl(Ark_DecorationStyle peer)
 }
 Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
 {
-    CHECK_NULL_RETURN(value, {});
-    auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
-    auto aceColorOpt = Converter::OptConvert<Color>(value->color);
-    auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
-    auto span = AceType::MakeRefPtr<DecorationSpan>(aceTypeOpt.value_or(TextDecoration::NONE),
-        aceColorOpt, aceStyleOpt);
+    RefPtr<DecorationSpan> span;
+    if (value) {
+        auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
+        auto aceColorOpt = Converter::OptConvert<Color>(value->color);
+        auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
+        span = AceType::MakeRefPtr<DecorationSpan>(aceTypeOpt.value_or(TextDecoration::NONE),
+            aceColorOpt, aceStyleOpt);
+    } else {
+        span = AceType::MakeRefPtr<DecorationSpan>();
+    }
     return new DecorationStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
