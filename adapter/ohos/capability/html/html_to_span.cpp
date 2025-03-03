@@ -965,9 +965,13 @@ void HtmlToSpan::ToSpan(
     ParaseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
     if (curNode->type == XML_ELEMENT_NODE) {
         if (htmlTag == "p") {
-            allContent += "\n";
-            childPos++;
-            ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+            if (curNode->parent == nullptr || curNode->parent->type != XML_ELEMENT_NODE ||
+                xmlStrcmp(curNode->parent->name, (const xmlChar*)"span") != 0) {
+                // The <p> contained in <span> is discarded. It is not considered as a standard writing method.
+                allContent += "\n";
+                childPos++;
+                ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+            }
         } else if (htmlTag == "img") {
             childPos++;
             ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);
