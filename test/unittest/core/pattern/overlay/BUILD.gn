@@ -37,5 +37,6 @@ ace_unittest("overlay_manager_test_ng") {
     "sheet_popup_test_ng.cpp",
     "sheet_presentation_test_ng.cpp",
     "sheet_presentation_test_two_ng.cpp",
+    "sheet_wrapper_test_ng.cpp",
   ]
 }
