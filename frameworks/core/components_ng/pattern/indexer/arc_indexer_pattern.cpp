@@ -356,15 +356,16 @@ bool ArcIndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     strokeWidth_ = lastItemSize_;
     arcCenter_ = layoutAlgorithm->GetArcCenter();
-    startAngle_ = layoutAlgorithm->GetStartAngle();
     sweepAngle_ = layoutAlgorithm->GetSweepAngle();
     arcRadius_ = layoutAlgorithm->GetArcRadius();
     itemRadius_ = layoutAlgorithm->GetitemRadius();
     auto size = layoutAlgorithm->GetArcSize();
     auto stepAngle = layoutAlgorithm->GetstepAngle();
-    if ((arcIndexerSize_ != size && autoCollapse_) || (stepAngle_ != stepAngle)) {
+    auto startAngle = layoutAlgorithm->GetStartAngle();
+    if ((arcIndexerSize_ != size && autoCollapse_) || (stepAngle_ != stepAngle) || (startAngle_ != startAngle)) {
         arcIndexerSize_ = size;
         stepAngle_ = stepAngle;
+        startAngle_ = startAngle;
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
         StartCollapseDelayTask(hostNode, ARC_INDEXER_COLLAPSE_WAIT_DURATION);
@@ -801,6 +802,30 @@ void ArcIndexerPattern::OnSelect()
         ItemSelectedOutAnimation(lastFrameNode);
     }
     lastSelected_ = selected_;
+}
+
+void ArcIndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
+{
+    CHECK_NULL_VOID(itemNode);
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    Color selectedBackgroundColor =
+        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColorArc());
+    AnimationOption option;
+    option.SetDuration(INDEXER_SELECT_DURATION);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), selectedBackgroundColor]() {
+        ContainerScope scope(id);
+        renderContext->UpdateBackgroundColor(selectedBackgroundColor);
+    });
 }
 
 int32_t ArcIndexerPattern::GetFocusIndex(int32_t selected)
