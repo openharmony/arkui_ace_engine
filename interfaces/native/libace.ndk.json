@@ -2884,39 +2884,39 @@
         "name": "OH_ArkUI_FocusSetKeyProcessingMode"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_CreateClonedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_DestroyClonedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventLocalPosition"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventActionType"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_PostClonedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_NodeUtils_GetPositionToParent"
     },
     {
