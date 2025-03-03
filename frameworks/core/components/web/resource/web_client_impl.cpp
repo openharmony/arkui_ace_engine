@@ -1080,6 +1080,14 @@ void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visib
     delegate->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
 }
 
+void WebClientImpl::RestoreRenderFit()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->RestoreRenderFit();
+}
+
 void WebClientImpl::OnPopupShow(bool show)
 {
     auto delegate = webDelegate_.Upgrade();

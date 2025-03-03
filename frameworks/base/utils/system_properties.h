@@ -690,6 +690,8 @@ public:
 
     static double GetScrollableDistance();
 
+    static bool GetWebDebugMaximizeResizeOptimize();
+
     static bool IsNeedResampleTouchPoints();
 
     static bool GetAsyncInitializeEnabled()

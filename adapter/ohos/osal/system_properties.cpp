@@ -1053,6 +1053,11 @@ double SystemProperties::GetScrollableDistance()
     return scrollableDistance_;
 }
 
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
