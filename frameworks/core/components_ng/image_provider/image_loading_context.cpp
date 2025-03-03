@@ -55,7 +55,7 @@ ImageLoadingContext::ImageLoadingContext(
     const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
     : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
       imageDfxConfig_(imageDfxConfig),
-      usePreload_(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN))
+      usePreload_(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
     src_.SetImageDfxConfig(imageDfxConfig_);

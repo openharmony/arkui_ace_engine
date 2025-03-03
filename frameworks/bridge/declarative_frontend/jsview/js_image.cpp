@@ -930,7 +930,7 @@ void JSImage::JSBind(BindingTarget globalObj)
 
 void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 {
-    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         draggable = info[0]->ToBoolean();
     }
