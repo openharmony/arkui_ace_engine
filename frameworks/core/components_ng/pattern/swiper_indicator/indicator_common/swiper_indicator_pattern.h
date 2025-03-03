@@ -71,7 +71,7 @@ public:
             indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
             indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
 
-            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
                 swiperPattern->DisplayIndicatorTotalCount() : swiperPattern->TotalCount();
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
@@ -119,7 +119,7 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
-        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
             swiperLayoutProperty->GetSwipeByGroup().value_or(false) ?
             swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate(true);
         paintMethod->SetTouchBottomPageRate(currentTurnPageRate);

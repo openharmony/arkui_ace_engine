@@ -1494,7 +1494,7 @@ void JSSwiperController::NewPreloadItems(const JSCallbackInfo& args)
 
 void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && args.Length() == 1) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && args.Length() == 1) {
         NewPreloadItems(args);
         return;
     }
