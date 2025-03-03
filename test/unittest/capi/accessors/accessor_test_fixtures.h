@@ -120,6 +120,7 @@ extern const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixture
 extern const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
     testFixtureEnumDragBehaviorValues;
 extern const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues;
+extern const std::vector<float> testFixtureFloatValues;
 extern const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues;
 extern const std::vector<std::tuple<std::string, Ark_Number, int32_t>> testFixtureNumberInt32Values;
 extern const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberDoubleRoundValues;
