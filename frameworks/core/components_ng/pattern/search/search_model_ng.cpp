@@ -248,7 +248,7 @@ void SearchModelNG::SetSearchButton(const std::string& text)
     } else {
         searchButtonEvent->SetEnabled(false);
         searchButtonRenderContext->UpdateOpacity(0.0);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton);
         }
     }

@@ -1205,7 +1205,7 @@ HWTEST_F(SelectOverlayTestTwoNg, CreateMenuNode, TestSize.Level1)
         }
         return AceType::MakeRefPtr<TextOverlayTheme>();
     });
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     /**
      * @tc.steps: step2. call CreateMenuNode.
      */

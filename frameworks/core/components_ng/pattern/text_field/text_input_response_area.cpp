@@ -240,7 +240,7 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
 
 void PasswordResponseArea::AddIconHotZoneRect()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     CHECK_NULL_VOID(stackNode_);
@@ -480,7 +480,7 @@ float PasswordResponseArea::GetIconSize()
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto iconSize = textFieldTheme->GetIconSize().ConvertToPx();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         iconSize = textFieldTheme->GetPasswordIconSize().ConvertToPx();
     }
     return static_cast<float>(iconSize);
@@ -498,7 +498,7 @@ float PasswordResponseArea::GetIconRightOffset()
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = textFieldTheme->GetPadding();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto passwordIconPadding = textFieldTheme->GetPasswordIconPadding();
         return static_cast<float>(passwordIconPadding.ConvertToPx());
     }
@@ -605,7 +605,7 @@ void PasswordResponseArea::UpdateSymbolSource()
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(currentSymbolId));
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         symbolProperty->UpdateFontSize(textFieldTheme->GetPasswordIconSize());
     }
     UpdateSymbolColor();
@@ -760,7 +760,7 @@ SizeF CleanNodeResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
 
 void CleanNodeResponseArea::AddIconHotZoneRect()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     CHECK_NULL_VOID(cleanNode_);
@@ -796,7 +796,7 @@ float GetCancelButtonPadding(const RefPtr<TextFieldTheme>& textFieldTheme)
 {
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = textFieldTheme->GetPadding();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto cancelButtonPadding = textFieldTheme->GetCancelIconPadding();
         return static_cast<float>(cancelButtonPadding.ConvertToPx());
     }
@@ -929,7 +929,7 @@ void CleanNodeResponseArea::SetCancelSymbolIconSize()
     auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         symbolProperty->UpdateFontSize(textFieldTheme->GetCancelIconSize());
     }
 }
@@ -977,7 +977,7 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     symbolProperty->UpdateMinFontScale(layoutProperty->GetMinFontScale().value_or(0.0f));
 
     auto iconSymbol = layoutProperty->GetCancelIconSymbol();
-    if (iconSymbol && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (iconSymbol && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolFrameNode)));
         // reset symbol effect
         auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
@@ -986,7 +986,7 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     }
 
     Dimension fontSize;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetCancelIconSize());
     } else {
         fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
