@@ -191,6 +191,7 @@ public:
     virtual int32_t AddText(std::u16string text, int32_t offset) { return 0; }
     virtual void DeleteText(int32_t start, int32_t end) {}
     virtual SelectionInfo GetSelection() { return {}; }
+    virtual void ClearPreviewText() {}
 
     void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
     {
