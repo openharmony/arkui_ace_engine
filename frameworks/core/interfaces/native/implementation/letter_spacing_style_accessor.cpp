@@ -26,9 +26,13 @@ void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 }
 Ark_LetterSpacingStyle CtorImpl(Ark_LengthMetrics value)
 {
-    CHECK_NULL_RETURN(value, {});
-    auto spacing = Converter::Convert<Dimension>(value);
-    auto span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing);
+    RefPtr<LetterSpacingSpan> span;
+    if (value) {
+        auto spacing = Converter::Convert<Dimension>(value);
+        span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing);
+    } else {
+        span = AceType::MakeRefPtr<LetterSpacingSpan>();
+    }
     return new LetterSpacingStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
