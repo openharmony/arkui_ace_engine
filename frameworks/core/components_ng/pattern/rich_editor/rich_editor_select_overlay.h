@@ -41,7 +41,6 @@ public:
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
-    RectF GetSelectArea() override;
     std::string GetSelectedText() override;
 
     // override SelectOverlayCallback
@@ -78,6 +77,9 @@ public:
     }
     float GetHandleHotZoneRadius();
     RectF GetVisibleRect();
+
+protected:
+    RectF GetSelectAreaFromRects(SelectRectsType pos) override;
 
 private:
     void RemoveAreaChangeInner();

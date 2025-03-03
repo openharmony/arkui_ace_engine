@@ -263,11 +263,11 @@ std::string RichEditorSelectOverlay::GetSelectedText()
     return TextSelectOverlay::GetSelectedText();
 }
 
-RectF RichEditorSelectOverlay::GetSelectArea()
+RectF RichEditorSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
-    auto intersectRect = pattern->GetSelectArea();
+    auto intersectRect = pattern->GetSelectArea(pos);
 
     if (hasTransform_) {
         auto textPaintOffset = GetPaintOffsetWithoutTransform();
@@ -291,6 +291,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showCut = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showPaste = IsShowPaste();
     menuInfo.menuIsShow = IsShowMenu();
+    menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
     pattern->UpdateSelectMenuInfo(menuInfo);
 }
@@ -390,6 +391,9 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             pattern->isMousePressed_ = usingMouse;
             pattern->HandleMenuCallbackOnSelectAll();
             break;
+        case OptionMenuActionId::TRANSLATE:
+            HandleOnTranslate();
+            return;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
             break;
