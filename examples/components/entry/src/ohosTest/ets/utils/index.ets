@@ -111,7 +111,7 @@ export async function radioClick(radioOperate: radioOperateType, blockStr?: stri
     if (typeof radioOperate.radioClickObj === 'string') {
       await searchRadio(radioOperate.radioClickObj)
     } else {
-      let radio: Array<Component> =
+      let radio: Component[] =
         await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable(true))
       await radio[radioOperate.radioClickObj].click(); // 等待点击操作完成
       await driver.delayMs(1500);
@@ -179,7 +179,7 @@ export async function sliderDrag(sliderOperate: sliderOperateType) {
 // 根据参数点击ButtonBlock项
 export async function buttonClick(buttonOperate: buttonOperateType) {
   await getToggle(ToggleClick.Open, buttonOperate.toggleClick?.toggleClickObj)
-  let button: Array<Component> =
+  let button: Component[] =
     await driver.findComponents(ON.type('Button').within(ON.id('scroll')).clickable(true))
 
   await button[buttonOperate.buttonClickObj].click()
@@ -270,10 +270,10 @@ export async function Search(category: string, compText: string, listText?: stri
 }
 
 //LastCompText为可选参数，当scroller触底之后LastCompText为你要控制toggle的前面一个toggle文本
-export async function getToggle(isClose: ToggleClick = ToggleClick.Open, LastCompText?: string) {
+export async function getToggle(isClose: ToggleClick = ToggleClick.Open, lastCompText?: string) {
   let toggle: Component =
-    await driver.findComponent(LastCompText ?
-    ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(LastCompText)) :
+    await driver.findComponent(lastCompText ?
+    ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(lastCompText)) :
     ON.type('Toggle').within(ON.type('Scroll')));
   if (await toggle.isChecked() === (isClose === ToggleClick.Close)) {
     await toggle.click();
