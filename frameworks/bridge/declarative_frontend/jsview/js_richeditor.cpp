@@ -2988,7 +2988,12 @@ JSRef<JSVal> JSRichEditorStyledStringController::CreateJsOnWillChange(const NG::
     jsSpanString->SetController(spanString);
     onWillChangeObj->SetPropertyObject("range", rangeObj);
     onWillChangeObj->SetPropertyObject("replacementString", replacementStringObj);
-    onWillChangeObj->SetPropertyObject("previewText", JSRef<JSVal>::Make(ToJSValue(changeValue.GetPreviewText())));
+    if (changeValue.GetPreviewText()) {
+        JSRef<JSObject> previewTextObj = JSClass<JSSpanString>::NewInstance();
+        auto jsPreviewTextSpanString = Referenced::Claim(previewTextObj->Unwrap<JSSpanString>());
+        jsPreviewTextSpanString->SetController(AceType::DynamicCast<SpanString>(changeValue.GetPreviewText()));
+        onWillChangeObj->SetPropertyObject("previewText", previewTextObj);
+    }
     return JSRef<JSVal>::Cast(onWillChangeObj);
 }
 

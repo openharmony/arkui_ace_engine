@@ -517,8 +517,10 @@ bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, 
     auto changeEnd = std::clamp(changeStart + length, 0, GetTextContentLength());
     changeValue.SetRangeBefore({ changeStart, changeEnd });
     changeValue.SetReplacementString(replaceMentString);
-    IF_TRUE(!previewTextRecord_.newPreviewContent.empty(),
-        changeValue.SetPreviewText(previewTextRecord_.newPreviewContent));
+    if (!previewTextRecord_.newPreviewContent.empty()) {
+        auto previewTextStyledString = AceType::MakeRefPtr<MutableSpanString>(previewTextRecord_.newPreviewContent);
+        changeValue.SetPreviewText(previewTextStyledString);
+    }
     return eventHub->FireOnStyledStringWillChange(changeValue);
 }
 
