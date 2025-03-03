@@ -753,7 +753,7 @@ void JSXComponent::JsHdrBrightness(const JSCallbackInfo& args)
 void JSXComponent::JsBlendMode(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type == XComponentType::TEXTURE && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (type == XComponentType::TEXTURE && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
