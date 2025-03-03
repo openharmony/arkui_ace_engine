@@ -204,6 +204,8 @@ private:
     void UpdateBubbleListItemContext(
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
+    void ReportSelectEvent();
+    void ReportPoupSelectEvent();
     std::vector<int32_t> collapsedItemNums_;
     int32_t collapsedIndex_ = 0;
     int32_t lastCollapsedIndex_ = 0;
