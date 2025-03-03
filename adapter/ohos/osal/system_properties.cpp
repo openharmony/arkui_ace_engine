@@ -183,7 +183,7 @@ bool IsFocusCanBeActive()
 
 bool IsCacheNavigationNodeEnable()
 {
-    return system::GetParameter("persist.ace.navigation.groupnode.cached", "false") == "true";
+    return system::GetParameter("persist.ace.navigation.groupnode.cached", "true") == "true";
 }
 
 bool IsHookModeEnabled()
