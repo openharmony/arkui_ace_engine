@@ -500,8 +500,6 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    int32_t GetTransformRotateRelativeToWindow(bool excludeSelf = false);
-
     RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
