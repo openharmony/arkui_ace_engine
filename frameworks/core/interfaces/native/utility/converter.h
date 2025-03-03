@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -74,9 +75,6 @@
 #define ARK_TAG_INT32 INTEROP_TAG_INT32
 #define ARK_TAG_FLOAT32 INTEROP_TAG_FLOAT32
 #define ARK_TAG_LENGTH INTEROP_TAG_LENGTH
-namespace OHOS::Ace {
-struct TextDetectConfig;
-}
 
 namespace OHOS::Ace::NG {
 std::optional<double> FloatToDouble(const std::optional<float>& src);
@@ -557,6 +555,7 @@ namespace Converter {
     template<> DimensionOffset Convert(const Ark_ActionSheetOffset& src);
     template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
+    template<> PathShapeOptions Convert(const Ark_PathShapeOptions& value);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
