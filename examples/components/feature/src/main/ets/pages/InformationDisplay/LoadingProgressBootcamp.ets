@@ -93,7 +93,7 @@ class MyModifier implements AttributeModifier<TextAttribute> {
 }
 
 class MyLoadingProgressStyle implements ContentModifier<LoadingProgressConfiguration> {
-  enableLoading: boolean = false
+  public  enableLoading: boolean = false
 
   constructor(enableLoading: boolean) {
     this.enableLoading = enableLoading
