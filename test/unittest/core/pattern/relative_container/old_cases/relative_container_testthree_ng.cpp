@@ -157,10 +157,10 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm003, TestSi
     relativeContainerLayoutAlgorithm->guidelines_["RIGHT"] = std::make_pair(LineDirection::VERTICAL, 50.0f);
     relativeContainerLayoutAlgorithm->guidelines_["TOP"] = std::make_pair(LineDirection::HORIZONTAL, 10.0f);
     relativeContainerLayoutAlgorithm->guidelines_["BOTTOM"] = std::make_pair(LineDirection::VERTICAL, 50.0f);
-    relativeContainerLayoutAlgorithm->recordOffsetMap_["LEFT"] = OffsetF(50, 10);
-    relativeContainerLayoutAlgorithm->recordOffsetMap_["RIGHT"] = OffsetF(100, 50);
-    relativeContainerLayoutAlgorithm->recordOffsetMap_["TOP"] = OffsetF(50, 10);
-    relativeContainerLayoutAlgorithm->recordOffsetMap_["BOTTOM"] = OffsetF(50, 100);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["LEFT"] = OffsetF(0, 10);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["RIGHT"] = OffsetF(100, 0);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["TOP"] = OffsetF(0, 10);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["BOTTOM"] = OffsetF(50, 0);
     BarrierParams bp1(BarrierDirection::LEFT, referencedIds);
     relativeContainerLayoutAlgorithm->barriers_["test"] = bp1;
     relativeContainerLayoutAlgorithm->barriers_["vertical"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
@@ -170,9 +170,9 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm003, TestSi
     relativeContainerLayoutAlgorithm->barriers_["DEFAULT"] = std::make_pair(BarrierDirection::END, referencedIds);
     relativeContainerLayoutAlgorithm->MeasureBarrier("DEFAULT");
     auto barrierRect = relativeContainerLayoutAlgorithm->GetBarrierRectByReferencedIds(referencedIds);
-    EXPECT_EQ(barrierRect.minLeft, 0);
+    EXPECT_EQ(barrierRect.minLeft, 50);
     EXPECT_EQ(barrierRect.maxRight, 100);
-    EXPECT_EQ(barrierRect.minTop, 0);
+    EXPECT_EQ(barrierRect.minTop, 10);
     EXPECT_EQ(barrierRect.maxBottom, 10);
 }
 
@@ -322,8 +322,8 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm008, TestSi
     relativeContainerLayoutAlgorithm->versionGreatorOrEqualToEleven_ = true;
     relativeContainerLayoutAlgorithm->guidelines_["test"] = std::make_pair(LineDirection::HORIZONTAL, 0.0f);
     relativeContainerLayoutAlgorithm->guidelines_["vertical"] = std::make_pair(LineDirection::VERTICAL, 0.0f);
-    relativeContainerLayoutAlgorithm->guidelines_["LEFT"] = std::make_pair(LineDirection::VERTICAL, 10.0f);
-    relativeContainerLayoutAlgorithm->recordOffsetMap_["LEFT"] = OffsetF(50, 10);
+    relativeContainerLayoutAlgorithm->guidelines_["LEFT"] = std::make_pair(LineDirection::VERTICAL, 11.0f);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["LEFT"] = OffsetF(11, 0);
     relativeContainerLayoutAlgorithm->barriers_["LEFT"] = std::make_pair(BarrierDirection::LEFT, referencedIds);
     relativeContainerLayoutAlgorithm->barriers_["vertical"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
     relativeContainerLayoutAlgorithm->barriers_["TOP"] = std::make_pair(BarrierDirection::TOP, referencedIds);
@@ -332,9 +332,9 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm008, TestSi
     relativeContainerLayoutAlgorithm->barriers_["DEFAULT"] = std::make_pair(BarrierDirection::END, referencedIds);
     relativeContainerLayoutAlgorithm->MeasureBarrier("DEFAULT");
     auto barrierRect = relativeContainerLayoutAlgorithm->GetBarrierRectByReferencedIds(referencedIds);
-    EXPECT_EQ(barrierRect.minLeft, 0);
-    EXPECT_EQ(barrierRect.maxRight, 50);
-    EXPECT_EQ(barrierRect.minTop, 0);
+    EXPECT_EQ(barrierRect.minLeft, 1);
+    EXPECT_EQ(barrierRect.maxRight, 11);
+    EXPECT_EQ(barrierRect.minTop, Infinity<float>());
     EXPECT_EQ(barrierRect.maxBottom, 0);
 }
 
@@ -693,5 +693,40 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm017, TestSi
     EXPECT_EQ(childFlexItemProperty->GetAlignRight(), 100);
     relativeAlg2->CalcVerticalLayoutParam(AlignDirection::RIGHT, alignRule, nullptr, "nextNode");
     EXPECT_EQ(childFlexItemProperty->GetAlignRight(), 0);
+}
+
+/**
+ * @tc.name: RelativeContainerLayoutAlgorithm018
+ * @tc.desc: test RelativeContainerLayout Algorithm IsNodeInChain();.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm018, TestSize.Level1)
+{
+    auto algorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
+    std::string nodeName = "testNodeName1";
+    algorithm->horizontalChainNodeMap_[nodeName] = "horizontalChainName";
+    algorithm->horizontalChains_["horizontalChainName"] = *new RelativeContainerLayoutAlgorithm::ChainParam();
+    algorithm->versionGreatorOrEqualToEleven_ = true;
+    std::string chainName;
+    auto nodeInHChainResult = algorithm->IsNodeInChain(nodeName, chainName, LineDirection::HORIZONTAL);
+    EXPECT_EQ(nodeInHChainResult, true);
+    auto nodeNotInVChainResult = algorithm->IsNodeInChain(nodeName, chainName, LineDirection::VERTICAL);
+    EXPECT_EQ(nodeNotInVChainResult, false);
+    algorithm->versionGreatorOrEqualToEleven_ = false;
+    auto nodeInHChainResultApi10 = algorithm->IsNodeInChain(nodeName, chainName, LineDirection::HORIZONTAL);
+    EXPECT_EQ(nodeInHChainResultApi10, false);
+    auto nodeInVChainResultApi10 = algorithm->IsNodeInChain(nodeName, chainName, LineDirection::VERTICAL);
+    EXPECT_EQ(nodeInVChainResultApi10, false);
+    algorithm->versionGreatorOrEqualToEleven_ = true;
+    std::string nodeNameNotExist = "testNodeNameNotExist";
+    auto nodeNotInHChainResult = algorithm->IsNodeInChain(nodeNameNotExist, chainName, LineDirection::HORIZONTAL);
+    EXPECT_EQ(nodeNotInHChainResult, false);
+    algorithm->horizontalChainNodeMap_[nodeNameNotExist] = "horizontalChainNameNotExist";
+    auto nodeInMapNotInHChainResult = algorithm->IsNodeInChain(nodeNameNotExist, chainName, LineDirection::HORIZONTAL);
+    EXPECT_EQ(nodeInMapNotInHChainResult, false);
+    algorithm->verticalChainNodeMap_[nodeName] = "verticalChainName";
+    algorithm->verticalChains_["verticalChainName"] = *new RelativeContainerLayoutAlgorithm::ChainParam();
+    auto nodeInVChainResult = algorithm->IsNodeInChain(nodeName, chainName, LineDirection::VERTICAL);
+    EXPECT_EQ(nodeInVChainResult, true);
 }
 } // namespace OHOS::Ace::NG

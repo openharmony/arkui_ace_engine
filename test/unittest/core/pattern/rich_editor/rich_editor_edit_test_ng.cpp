@@ -190,31 +190,6 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestRichEditorMoveCaretAnywhere001
- * @tc.desc: test MoveCaretAnywhere
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorMoveCaretAnywhere001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richOffset = Offset(50, 30);
-    auto tempCaretOffset_ =
-        AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)->caretOffset_;
-    richEditorPattern->isMoveCaretAnywhere_ = true;
-    richEditorPattern->MoveCaretAnywhere(richOffset);
-    auto caretOffsetNew = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)->caretOffset_;
-    EXPECT_TRUE(richEditorPattern->isMoveCaretAnywhere_);
-}
-
-/**
  * @tc.name: TestRichEditorUpdateSelectionByTouchMove001
  * @tc.desc: test UpdateSelectionByTouchMove
  * @tc.type: FUNC
@@ -235,27 +210,6 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorUpdateSelectionByTouchMove001, Test
     auto host = richEditorPattern->GetHost();
     ASSERT_NE(host, nullptr);
     ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_RENDER, 0);
-}
-
-/**
- * @tc.name: TestRichEditorShowCaretNoTwinkling001
- * @tc.desc: test ShowCaretNoTwinkling
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorShowCaretNoTwinkling001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richOffset = Offset(44, 50);
-    richEditorPattern->ShowCaretNoTwinkling(richOffset);
-    EXPECT_EQ(richEditorPattern->caretVisible_, true);
 }
 
 /**
@@ -1499,7 +1453,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder002, TestSize.Level1)
     options.fontWeight = FontWeight::BOLD;
     options.fontColor = Color::BLACK;
     options.fontFamilies = { "Arial", "Helvetica" };
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetPlaceholder(), value);
@@ -1521,7 +1475,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder003, TestSize.Level1)
     options.fontWeight = FontWeight::BOLD;
     options.fontColor = Color::BLACK;
     options.fontFamilies = { "Arial", "Helvetica" };
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetPlaceholderFontSize(), Dimension(12.0));
@@ -1543,7 +1497,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder004, TestSize.Level1)
     options.fontWeight = FontWeight::BOLD;
     options.fontColor = Color::BLACK;
     options.fontFamilies = { "Arial", "Helvetica" };
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetPlaceholderItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
@@ -1565,7 +1519,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder005, TestSize.Level1)
     options.fontWeight = FontWeight::BOLD;
     options.fontColor = Color::BLACK;
     options.fontFamilies = { "Arial", "Helvetica" };
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetPlaceholderFontWeight(), FontWeight::BOLD);
@@ -1587,7 +1541,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder006, TestSize.Level1)
     options.fontWeight = FontWeight::BOLD;
     options.fontColor = Color::BLACK;
     options.fontFamilies = { "Arial", "Helvetica" };
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetPlaceholderTextColor(), Color::BLACK);
@@ -1603,7 +1557,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder007, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_FALSE(options.fontColor.has_value());
@@ -1619,7 +1573,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder008, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_FALSE(options.value.has_value());
@@ -1635,7 +1589,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder009, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_FALSE(options.fontSize.has_value());
@@ -1651,7 +1605,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder010, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_FALSE(options.fontStyle.has_value());
@@ -1667,7 +1621,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder011, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_FALSE(options.fontWeight.has_value());

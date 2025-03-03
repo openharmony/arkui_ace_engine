@@ -550,32 +550,32 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign003, TestSize.Level1)
      * @tc.steps: step4. Drag end with velocity and over the edge
      * @tc.expected: Align center
      */
-    DragAction(frameNode_, startOffset, -100, -1000);
+    DragAction(frameNode_, startOffset, -100, -500);
+    EXPECT_TRUE(TickPosition(-310.0f));
     EXPECT_TRUE(TickPosition(-560.0f));
-    EXPECT_TRUE(TickPosition(-760.0f));
 
     /**
      * @tc.steps: step5. Scroll Up, the delta less than half of ITEM_MAIN_SIZE
      * @tc.expected: Align item not change
      */
     DragAction(frameNode_, startOffset, 50, velocity);
-    EXPECT_TRUE(TickPosition(-735.0f));
-    EXPECT_TRUE(TickPosition(-760.0f));
+    EXPECT_TRUE(TickPosition(-535.0f));
+    EXPECT_TRUE(TickPosition(-560.0f));
 
     /**
      * @tc.steps: step6. Scroll Up, the delta greater than half of ITEM_MAIN_SIZE
      * @tc.expected: The item(index:4) align to start
      */
     DragAction(frameNode_, startOffset, 51, velocity);
-    EXPECT_TRUE(TickPosition(-684.5f));
-    EXPECT_TRUE(TickPosition(-660.0f));
+    EXPECT_TRUE(TickPosition(-484.5f));
+    EXPECT_TRUE(TickPosition(-460.0f));
 
     /**
      * @tc.steps: step7. Drag end with velocity and over the edge
      * @tc.expected: Align center
      */
-    DragAction(frameNode_, startOffset, 100, 1000);
-    EXPECT_TRUE(TickPosition(-60.0f));
+    DragAction(frameNode_, startOffset, 100, 500);
+    EXPECT_TRUE(TickPosition(-110.0f));
     EXPECT_TRUE(TickPosition(140.0f));
 }
 
@@ -1244,5 +1244,34 @@ HWTEST_F(ListEventTestNg, CenterSnapAnimation001, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 0);
+}
+
+/**
+ * @tc.name: HandleBoxSelectDragStart
+ * @tc.desc: Handle drag start for box select
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleBoxSelectDragStart, TestSize.Level1)
+{
+    const int32_t itemNumber = 20;
+    const float contentStartOffset = 0;
+    const float contentEndOffset = 100;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    CreateListItems(itemNumber);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetRawGlobalLocation(Offset(20, 50));
+    info.SetOffsetX(5);
+    info.SetOffsetY(10);
+    pattern_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->canMultiSelect_);
+    EXPECT_FALSE(pattern_->IsItemSelected(20, 50));
+    pattern_->HandleDragEnd();
+
+    GetChildPattern<ListItemPattern>(frameNode_, 0)->SetSelected(true);
+    EXPECT_TRUE(pattern_->IsItemSelected(20, 50));
 }
 } // namespace OHOS::Ace::NG

@@ -698,8 +698,12 @@ HWTEST_F(DatePickerTestThree, DatePickerPatternTest005, TestSize.Level1)
     datePickerPattern->GetInnerFocusPaintRect(paintRect);
     auto rect = paintRect.GetRect();
     Dimension offset = 2.0_vp;
-    EXPECT_EQ(rect.GetX(), offset.ConvertToPx());
-    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2);
+    Dimension focusLineWidth = 1.5_vp;
+    EXPECT_EQ(rect.GetX(), offset.ConvertToPx() + focusLineWidth.ConvertToPx());
+
+    auto expectWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2 -
+        focusLineWidth.ConvertToPx() * 2;
+    EXPECT_EQ(rect.Width(), expectWidth);
 }
 
 /**

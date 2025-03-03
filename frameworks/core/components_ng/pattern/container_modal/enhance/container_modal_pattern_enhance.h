@@ -56,6 +56,7 @@ public:
         RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
     void EnableTapGestureOnNode(
         RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    void HandleGestureRowHitTestMode(RefPtr<FrameNode>& gestureRow);
     bool GetFloatingTitleVisible() override;
     bool GetCustomTitleVisible() override;
     bool GetControlButtonVisible() override;

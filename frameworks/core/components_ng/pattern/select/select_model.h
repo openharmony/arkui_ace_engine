@@ -98,9 +98,14 @@ public:
     virtual void SetMenuBackgroundColor(const Color& color);
     virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
     virtual void SetDivider(const NG::SelectDivider& divider);
+    virtual void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode);
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
     virtual void SetLayoutDirection(TextDirection value);
     virtual ControlSize GetControlSize();
+    virtual void BackgroundColor(const Color& color) = 0;
+    virtual void ResetBackgroundColor() = 0;
+    virtual void ResetFontColor() {};
+
 private:
     static std::unique_ptr<SelectModel> instance_;
     static std::mutex mutex_;

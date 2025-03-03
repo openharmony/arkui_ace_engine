@@ -38,6 +38,130 @@ SwiperItemInfo ArcSwiperPatternAdvancedTestNg::CreateSwiperItemInfo(float startP
 }
 
 /**
+ * @tc.name: PlayVerticalAnimation001
+ * @tc.desc: Test for method of PlayVerticalAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternAdvancedTestNg, PlayVerticalAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->itemPosition_.size(), 2);
+    OffsetF offset(0.0f, 0.0f);
+    auto frameNode = CreateFrameNode();
+    bool rollBack = true;
+    pattern->PlayVerticalAnimation(offset, 1, frameNode, rollBack);
+    EXPECT_EQ(pattern->animationVector_.size(), 5);
+    pattern->animationVector_.clear();
+    EXPECT_EQ(pattern->animationVector_.size(), 0);
+    pattern->PlayVerticalAnimation(offset, 0, frameNode, rollBack);
+    EXPECT_EQ(pattern->animationVector_.size(), 4);
+}
+
+/**
+ * @tc.name: AnimationFinish001
+ * @tc.desc: Test for method of AnimationFinish.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternAdvancedTestNg, AnimationFinish001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->itemPosition_.size(), 2);
+    pattern->propertyAnimationIsRunning_ = false;
+    pattern->targetIndex_ = std::make_optional<int>(2);
+    EXPECT_EQ(pattern->targetIndex_, 2);
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    pattern->AnimationFinish();
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_TRUE(pattern->targetIndex_);
+
+    pattern->propertyAnimationIsRunning_ = true;
+    pattern->AnimationFinish();
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+    EXPECT_FALSE(pattern->targetIndex_);
+}
+
+/**
+ * @tc.name: AnimationFinish002
+ * @tc.desc: Test for method of AnimationFinish.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternAdvancedTestNg, AnimationFinish002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->itemPosition_.size(), 2);
+    pattern->targetIndex_ = std::make_optional<int>(2);
+    EXPECT_EQ(pattern->targetIndex_, 2);
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    pattern->SetHasTabsAncestor(true);
+    pattern->propertyAnimationIsRunning_ = false;
+    pattern->AnimationFinish();
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_TRUE(pattern->targetIndex_);
+
+    pattern->propertyAnimationIsRunning_ = true;
+    pattern->AnimationFinish();
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+    EXPECT_FALSE(pattern->targetIndex_);
+}
+
+/**
+ * @tc.name: AnimationFinish003
+ * @tc.desc: Test for method of AnimationFinish.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternAdvancedTestNg, AnimationFinish003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->itemPosition_.size(), 2);
+    pattern->targetIndex_ = std::make_optional<int>(2);
+    EXPECT_EQ(pattern->targetIndex_, 2);
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    pattern->itemPosition_.clear();
+    EXPECT_EQ(pattern->itemPosition_.size(), 0);
+    pattern->propertyAnimationIsRunning_ = false;
+    pattern->AnimationFinish();
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_TRUE(pattern->targetIndex_);
+
+    pattern->propertyAnimationIsRunning_ = true;
+    pattern->AnimationFinish();
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+    EXPECT_FALSE(pattern->targetIndex_);
+}
+
+/**
  * @tc.name: PlayPropertyTranslateDefaultAnimation001
  * @tc.desc: Test for method of PlayPropertyTranslateDefaultAnimation.
  * @tc.type: FUNC
@@ -501,6 +625,45 @@ HWTEST_F(ArcSwiperPatternAdvancedTestNg, PlayHorizontalAnimation, TestSize.Level
     rollBack = false;
     pattern->PlayHorizontalAnimation(offset, index, frameNode, rollBack);
     EXPECT_EQ(pattern->animationVector_.size(), 0);
+}
+
+/**
+ * @tc.name: AddFinishAnimation
+ * @tc.desc: Test for method of AddFinishAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternAdvancedTestNg, AddFinishAnimation, TestSize.Level1)
+{
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->animationFinishList_.clear();
+    auto animationType = ArcSwiperPattern::AnimationFinishType::EXIT_BACKGROUND;
+    for (int i = 0; i < 8; i++) {
+        pattern->animationFinishList_.push_back(animationType);
+    }
+    pattern->propertyAnimationIsRunning_ = false;
+    pattern->targetIndex_ = std::make_optional<int>(2);
+    pattern->AddFinishAnimation(animationType, true, false);
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+
+    pattern->propertyAnimationIsRunning_ = true;
+    pattern->animationFinishList_.clear();
+    for (int i = 0; i < 7; i++) {
+        pattern->animationFinishList_.push_back(animationType);
+    }
+    pattern->targetIndex_ = std::make_optional<int>(2);
+    pattern->AddFinishAnimation(animationType, false, false);
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+
+    pattern->targetIndex_ = std::make_optional<int>(2);
+    pattern->animationFinishList_.pop_back();
+    ASSERT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 2);
 }
 
 /**

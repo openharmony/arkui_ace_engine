@@ -27,16 +27,16 @@ const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 const RESOURCE_TYPE_SYMBOL = 40000;
 class ButtonGestureModifier {
-    constructor(k11) {
+    constructor(y47) {
         this.fontSize = 1;
         this.controller = null;
-        this.controller = k11;
+        this.controller = y47;
     }
-    applyGesture(j11) {
+    applyGesture(x47) {
         if (this.fontSize >= ButtonGestureModifier.minFontSize) {
-            j11.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+            x47.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
                 .onAction(() => {
-                    if (j11) {
+                    if (x47) {
                         this.controller?.open();
                     }
                 })
@@ -45,17 +45,17 @@ class ButtonGestureModifier {
                 }));
         }
         else {
-            j11.clearGestures();
+            x47.clearGestures();
         }
     }
 }
 ButtonGestureModifier.longPressTime = 500;
 ButtonGestureModifier.minFontSize = 1.75;
 export class TabTitleBar extends ViewPU {
-    constructor(d11, e11, f11, g11 = -1, h11 = undefined, i11) {
-        super(d11, f11, g11, i11);
-        if (typeof h11 === 'function') {
-            this.paramsGenerator_ = h11;
+    constructor(r47, s47, t47, u47 = -1, v47 = undefined, w47) {
+        super(r47, t47, u47, w47);
+        if (typeof v47 === 'function') {
+            this.paramsGenerator_ = v47;
         }
         this.tabItems = [];
         this.menuItems = [];
@@ -71,59 +71,59 @@ export class TabTitleBar extends ViewPU {
         this.settings = new RenderingContextSettings(true);
         this.leftContext2D = new CanvasRenderingContext2D(this.settings);
         this.rightContext2D = new CanvasRenderingContext2D(this.settings);
-        this.setInitiallyProvidedValue(e11);
+        this.setInitiallyProvidedValue(s47);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(c11) {
-        if (c11.tabItems !== undefined) {
-            this.tabItems = c11.tabItems;
+    setInitiallyProvidedValue(q47) {
+        if (q47.tabItems !== undefined) {
+            this.tabItems = q47.tabItems;
         }
-        if (c11.menuItems !== undefined) {
-            this.menuItems = c11.menuItems;
+        if (q47.menuItems !== undefined) {
+            this.menuItems = q47.menuItems;
         }
-        if (c11.swiperContent !== undefined) {
-            this.swiperContent = c11.swiperContent;
+        if (q47.swiperContent !== undefined) {
+            this.swiperContent = q47.swiperContent;
         }
-        if (c11.tabWidth !== undefined) {
-            this.tabWidth = c11.tabWidth;
+        if (q47.tabWidth !== undefined) {
+            this.tabWidth = q47.tabWidth;
         }
-        if (c11.currentIndex !== undefined) {
-            this.currentIndex = c11.currentIndex;
+        if (q47.currentIndex !== undefined) {
+            this.currentIndex = q47.currentIndex;
         }
-        if (c11.fontSize !== undefined) {
-            this.fontSize = c11.fontSize;
+        if (q47.fontSize !== undefined) {
+            this.fontSize = q47.fontSize;
         }
-        if (c11.menuSectionWidth !== undefined) {
-            this.menuSectionWidth = c11.menuSectionWidth;
+        if (q47.menuSectionWidth !== undefined) {
+            this.menuSectionWidth = q47.menuSectionWidth;
         }
-        if (c11.tabOffsets !== undefined) {
-            this.tabOffsets = c11.tabOffsets;
+        if (q47.tabOffsets !== undefined) {
+            this.tabOffsets = q47.tabOffsets;
         }
-        if (c11.imageWidths !== undefined) {
-            this.imageWidths = c11.imageWidths;
+        if (q47.imageWidths !== undefined) {
+            this.imageWidths = q47.imageWidths;
         }
-        if (c11.scroller !== undefined) {
-            this.scroller = c11.scroller;
+        if (q47.scroller !== undefined) {
+            this.scroller = q47.scroller;
         }
-        if (c11.swiperController !== undefined) {
-            this.swiperController = c11.swiperController;
+        if (q47.swiperController !== undefined) {
+            this.swiperController = q47.swiperController;
         }
-        if (c11.settings !== undefined) {
-            this.settings = c11.settings;
+        if (q47.settings !== undefined) {
+            this.settings = q47.settings;
         }
-        if (c11.leftContext2D !== undefined) {
-            this.leftContext2D = c11.leftContext2D;
+        if (q47.leftContext2D !== undefined) {
+            this.leftContext2D = q47.leftContext2D;
         }
-        if (c11.rightContext2D !== undefined) {
-            this.rightContext2D = c11.rightContext2D;
+        if (q47.rightContext2D !== undefined) {
+            this.rightContext2D = q47.rightContext2D;
         }
     }
-    updateStateVars(b11) {
+    updateStateVars(p47) {
     }
-    purgeVariableDependenciesOnElmtId(a11) {
-        this.__tabWidth.purgeDependencyOnElmtId(a11);
-        this.__currentIndex.purgeDependencyOnElmtId(a11);
-        this.__fontSize.purgeDependencyOnElmtId(a11);
+    purgeVariableDependenciesOnElmtId(o47) {
+        this.__tabWidth.purgeDependencyOnElmtId(o47);
+        this.__currentIndex.purgeDependencyOnElmtId(o47);
+        this.__fontSize.purgeDependencyOnElmtId(o47);
     }
     aboutToBeDeleted() {
         this.__tabWidth.aboutToBeDeleted();
@@ -135,106 +135,106 @@ export class TabTitleBar extends ViewPU {
     get tabWidth() {
         return this.__tabWidth.get();
     }
-    set tabWidth(z10) {
-        this.__tabWidth.set(z10);
+    set tabWidth(n47) {
+        this.__tabWidth.set(n47);
     }
     get currentIndex() {
         return this.__currentIndex.get();
     }
-    set currentIndex(y10) {
-        this.__currentIndex.set(y10);
+    set currentIndex(m47) {
+        this.__currentIndex.set(m47);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(x10) {
-        this.__fontSize.set(x10);
+    set fontSize(l47) {
+        this.__fontSize.set(l47);
     }
-    GradientMask(m10, n10, o10, p10, q10, r10 = null) {
-        this.observeComponentCreation2((v10, w10) => {
+    GradientMask(a47, b47, c47, d47, e47, f47 = null) {
+        this.observeComponentCreation2((j47, k47) => {
             Column.create();
             Column.blendMode(BlendMode.DST_OUT);
             Column.width(TabTitleBar.gradientMaskWidth);
             Column.height(TabTitleBar.totalHeight);
         }, Column);
-        this.observeComponentCreation2((s10, t10) => {
-            Canvas.create(m10);
+        this.observeComponentCreation2((g47, h47) => {
+            Canvas.create(a47);
             Canvas.width(TabTitleBar.gradientMaskWidth);
             Canvas.height(TabTitleBar.totalHeight);
             Canvas.onReady(() => {
-                let u10 = m10.createLinearGradient(n10, o10, p10, q10);
-                u10.addColorStop(0.0, '#ffffffff');
-                u10.addColorStop(1, '#00ffffff');
-                m10.fillStyle = u10;
-                m10.fillRect(0, 0, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight);
+                let i47 = a47.createLinearGradient(b47, c47, d47, e47);
+                i47.addColorStop(0.0, '#ffffffff');
+                i47.addColorStop(1, '#00ffffff');
+                a47.fillStyle = i47;
+                a47.fillRect(0, 0, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight);
             });
         }, Canvas);
         Canvas.pop();
         Column.pop();
     }
-    emptyBuilder(l10 = null) {
+    emptyBuilder(z46 = null) {
     }
     aboutToAppear() {
         if (!this.swiperContent) {
             this.swiperContent = this.emptyBuilder;
         }
-        this.tabItems.forEach((k10) => {
+        this.tabItems.forEach((y46) => {
             this.imageWidths.push(0);
         });
         this.loadOffsets();
     }
     loadOffsets() {
         this.tabOffsets.length = 0;
-        let h10 = 0;
-        this.tabOffsets.push(h10);
-        h10 += TabContentItem.marginFirst;
-        this.tabItems.forEach((i10, j10) => {
-            if (i10.icon !== undefined || i10.symbolStyle !== undefined) {
-                if (Math.abs(this.imageWidths[j10]) > TabContentItem.imageHotZoneWidth) {
-                    h10 += this.imageWidths[j10];
+        let v46 = 0;
+        this.tabOffsets.push(v46);
+        v46 += TabContentItem.marginFirst;
+        this.tabItems.forEach((w46, x46) => {
+            if (w46.icon !== undefined || w46.symbolStyle !== undefined) {
+                if (Math.abs(this.imageWidths[x46]) > TabContentItem.imageHotZoneWidth) {
+                    v46 += this.imageWidths[x46];
                 }
                 else {
-                    h10 += TabContentItem.imageHotZoneWidth;
+                    v46 += TabContentItem.imageHotZoneWidth;
                 }
             }
             else {
-                h10 += TabContentItem.paddingLeft;
-                h10 += px2vp(MeasureText.measureText({
-                    textContent: i10.title.toString(),
+                v46 += TabContentItem.paddingLeft;
+                v46 += px2vp(MeasureText.measureText({
+                    textContent: w46.title.toString(),
                     fontSize: 18,
                     fontWeight: FontWeight.Medium,
                 }));
-                h10 += TabContentItem.paddingRight;
+                v46 += TabContentItem.paddingRight;
             }
-            this.tabOffsets.push(h10);
+            this.tabOffsets.push(v46);
         });
     }
     initialRender() {
-        this.observeComponentCreation2((f10, g10) => {
+        this.observeComponentCreation2((t46, u46) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((b10, c10) => {
+        this.observeComponentCreation2((p46, q46) => {
             Flex.create({
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Stretch
             });
             Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Flex.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
-            Flex.onAreaChange((d10, e10) => {
-                this.tabWidth = Number(e10.width) - this.menuSectionWidth;
+            Flex.onAreaChange((r46, s46) => {
+                this.tabWidth = Number(s46.width) - this.menuSectionWidth;
             });
         }, Flex);
-        this.observeComponentCreation2((z9, a10) => {
+        this.observeComponentCreation2((n46, o46) => {
             Stack.create({ alignContent: Alignment.End });
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
         }, Stack);
-        this.observeComponentCreation2((x9, y9) => {
+        this.observeComponentCreation2((l46, m46) => {
             Stack.create({ alignContent: Alignment.Start });
         }, Stack);
-        this.observeComponentCreation2((v9, w9) => {
+        this.observeComponentCreation2((j46, k46) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((t9, u9) => {
+        this.observeComponentCreation2((h46, i46) => {
             List.create({ initialIndex: 0, scroller: this.scroller, space: 0 });
             List.width('100%');
             List.height(TabTitleBar.totalHeight);
@@ -243,56 +243,56 @@ export class TabTitleBar extends ViewPU {
             List.listDirection(Axis.Horizontal);
             List.scrollBar(BarState.Off);
         }, List);
-        this.observeComponentCreation2((w8, x8) => {
+        this.observeComponentCreation2((k45, l45) => {
             ForEach.create();
-            const y8 = (z8, a9) => {
-                const b9 = z8;
+            const i = (n45, o45) => {
+                const p45 = n45;
                 {
-                    const c9 = (r9, s9) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(r9);
-                        d9(r9, s9);
-                        if (!s9) {
+                    const j = (f46, g46) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(f46);
+                        k(f46, g46);
+                        if (!g46) {
                             ListItem.pop();
                         }
                         ViewStackProcessor.StopGetAccessRecording();
                     };
-                    const d9 = (p9, q9) => {
-                        ListItem.create(e9, true);
+                    const k = (d46, e46) => {
+                        ListItem.create(l, true);
                     };
-                    const e9 = (f9, g9) => {
-                        c9(f9, g9);
+                    const l = (t45, u45) => {
+                        j(t45, u45);
                         {
-                            this.observeComponentCreation2((h9, i9) => {
-                                if (i9) {
-                                    let j9 = new TabContentItem(this, {
-                                        item: b9,
-                                        index: a9,
+                            this.observeComponentCreation2((v45, w45) => {
+                                if (w45) {
+                                    let x45 = new TabContentItem(this, {
+                                        item: p45,
+                                        index: o45,
                                         maxIndex: this.tabItems.length - 1,
                                         currentIndex: this.currentIndex,
-                                        onCustomClick: (o9) => this.currentIndex = o9,
-                                        onImageComplete: (n9) => {
-                                            this.imageWidths[a9] = n9;
+                                        onCustomClick: (c46) => this.currentIndex = c46,
+                                        onImageComplete: (b46) => {
+                                            this.imageWidths[o45] = b46;
                                             this.loadOffsets();
                                         }
-                                    }, undefined, h9, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 174, col: 21 });
-                                    ViewPU.create(j9);
-                                    let k9 = () => {
+                                    }, undefined, v45, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 174, col: 21 });
+                                    ViewPU.create(x45);
+                                    let m = () => {
                                         return {
-                                            item: b9,
-                                            index: a9,
+                                            item: p45,
+                                            index: o45,
                                             maxIndex: this.tabItems.length - 1,
                                             currentIndex: this.currentIndex,
-                                            onCustomClick: (m9) => this.currentIndex = m9,
-                                            onImageComplete: (l9) => {
-                                                this.imageWidths[a9] = l9;
+                                            onCustomClick: (a46) => this.currentIndex = a46,
+                                            onImageComplete: (z45) => {
+                                                this.imageWidths[o45] = z45;
                                                 this.loadOffsets();
                                             }
                                         };
                                     };
-                                    j9.paramsGenerator_ = k9;
+                                    x45.paramsGenerator_ = m;
                                 }
                                 else {
-                                    this.updateStateVarsOfChildByElmtId(h9, {
+                                    this.updateStateVarsOfChildByElmtId(v45, {
                                         currentIndex: this.currentIndex
                                     });
                                 }
@@ -300,11 +300,11 @@ export class TabTitleBar extends ViewPU {
                         }
                         ListItem.pop();
                     };
-                    this.observeComponentCreation2(d9, ListItem);
+                    this.observeComponentCreation2(k, ListItem);
                     ListItem.pop();
                 }
             };
-            this.forEachUpdateFunction(w8, this.tabItems, y8, undefined, true, false);
+            this.forEachUpdateFunction(k45, this.tabItems, i, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         List.pop();
@@ -313,32 +313,32 @@ export class TabTitleBar extends ViewPU {
         Stack.pop();
         this.GradientMask.bind(this)(this.rightContext2D, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2);
         Stack.pop();
-        this.observeComponentCreation2((m8, n8) => {
+        this.observeComponentCreation2((a45, b45) => {
             If.create();
             if (this.menuItems !== undefined && this.menuItems.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((s8, t8) => {
+                    this.observeComponentCreation2((g45, h45) => {
                         __Common__.create();
                         __Common__.height(TabTitleBar.totalHeight);
-                        __Common__.onAreaChange((u8, v8) => {
-                            this.menuSectionWidth = Number(v8.width);
+                        __Common__.onAreaChange((i45, j45) => {
+                            this.menuSectionWidth = Number(j45.width);
                         });
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((o8, p8) => {
-                            if (p8) {
-                                let q8 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, o8, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 204, col: 11 });
-                                ViewPU.create(q8);
-                                let r8 = () => {
+                        this.observeComponentCreation2((c45, d45) => {
+                            if (d45) {
+                                let e45 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, c45, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 204, col: 11 });
+                                ViewPU.create(e45);
+                                let h = () => {
                                     return {
                                         menuItems: this.menuItems,
                                         index: 1 + TabTitleBar.instanceCount++
                                     };
                                 };
-                                q8.paramsGenerator_ = r8;
+                                e45.paramsGenerator_ = h;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(o8, {});
+                                this.updateStateVarsOfChildByElmtId(c45, {});
                             }
                         }, { name: 'CollapsibleMenuSection' });
                     }
@@ -352,10 +352,10 @@ export class TabTitleBar extends ViewPU {
         }, If);
         If.pop();
         Flex.pop();
-        this.observeComponentCreation2((k8, l8) => {
+        this.observeComponentCreation2((y44, z44) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((g8, h8) => {
+        this.observeComponentCreation2((u44, v44) => {
             Swiper.create(this.swiperController);
             Swiper.index(this.currentIndex);
             Swiper.itemSpace(0);
@@ -363,11 +363,11 @@ export class TabTitleBar extends ViewPU {
             Swiper.width('100%');
             Swiper.height('100%');
             Swiper.curve(Curve.Friction);
-            Swiper.onChange((i8) => {
-                const j8 = this.tabOffsets[i8] + TabTitleBar.correctionOffset;
-                this.currentIndex = i8;
+            Swiper.onChange((w44) => {
+                const x44 = this.tabOffsets[w44] + TabTitleBar.correctionOffset;
+                this.currentIndex = w44;
                 this.scroller.scrollTo({
-                    xOffset: j8 > 0 ? j8 : 0,
+                    xOffset: x44 > 0 ? x44 : 0,
                     yOffset: 0,
                     animation: {
                         duration: 300,
@@ -394,10 +394,10 @@ TabTitleBar.correctionOffset = -40.0;
 TabTitleBar.gradientMaskWidth = 24;
 TabTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
-    constructor(y7, z7, a8, b8 = -1, c8 = undefined, d8) {
-        super(y7, a8, b8, d8);
-        if (typeof c8 === 'function') {
-            this.paramsGenerator_ = c8;
+    constructor(m44, n44, o44, p44 = -1, q44 = undefined, r44) {
+        super(m44, o44, p44, r44);
+        if (typeof q44 === 'function') {
+            this.paramsGenerator_ = q44;
         }
         this.menuItems = [];
         this.index = 0;
@@ -415,10 +415,10 @@ class CollapsibleMenuSection extends ViewPU {
         this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
         this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
         this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
-        this.__fontSize = new SynchedPropertySimpleOneWayPU(z7.fontSize, this, 'fontSize');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(n44.fontSize, this, 'fontSize');
         this.dialogController = new CustomDialogController({
             builder: () => {
-                let e8 = new TabTitleBarDialog(this, {
+                let s44 = new TabTitleBarDialog(this, {
                     cancel: () => {
                     },
                     confirm: () => {
@@ -427,9 +427,9 @@ class CollapsibleMenuSection extends ViewPU {
                     tabTitleBarDialog: this.item.label ? this.item.label : '',
                     fontSize: this.fontSize,
                 }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 273, col: 14 });
-                e8.setController(this.dialogController);
-                ViewPU.create(e8);
-                let f8 = () => {
+                s44.setController(this.dialogController);
+                ViewPU.create(s44);
+                let g = () => {
                     return {
                         cancel: () => {
                         },
@@ -440,74 +440,74 @@ class CollapsibleMenuSection extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                e8.paramsGenerator_ = f8;
+                s44.paramsGenerator_ = g;
             },
             maskColor: Color.Transparent,
             isModal: true,
             customStyle: true
         }, this);
         this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
-        this.setInitiallyProvidedValue(z7);
+        this.setInitiallyProvidedValue(n44);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(x7) {
-        if (x7.menuItems !== undefined) {
-            this.menuItems = x7.menuItems;
+    setInitiallyProvidedValue(l44) {
+        if (l44.menuItems !== undefined) {
+            this.menuItems = l44.menuItems;
         }
-        if (x7.index !== undefined) {
-            this.index = x7.index;
+        if (l44.index !== undefined) {
+            this.index = l44.index;
         }
-        if (x7.item !== undefined) {
-            this.item = x7.item;
+        if (l44.item !== undefined) {
+            this.item = l44.item;
         }
-        if (x7.minFontSize !== undefined) {
-            this.minFontSize = x7.minFontSize;
+        if (l44.minFontSize !== undefined) {
+            this.minFontSize = l44.minFontSize;
         }
-        if (x7.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = x7.isFollowingSystemFontScale;
+        if (l44.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = l44.isFollowingSystemFontScale;
         }
-        if (x7.maxFontScale !== undefined) {
-            this.maxFontScale = x7.maxFontScale;
+        if (l44.maxFontScale !== undefined) {
+            this.maxFontScale = l44.maxFontScale;
         }
-        if (x7.systemFontScale !== undefined) {
-            this.systemFontScale = x7.systemFontScale;
+        if (l44.systemFontScale !== undefined) {
+            this.systemFontScale = l44.systemFontScale;
         }
-        if (x7.firstFocusableIndex !== undefined) {
-            this.firstFocusableIndex = x7.firstFocusableIndex;
+        if (l44.firstFocusableIndex !== undefined) {
+            this.firstFocusableIndex = l44.firstFocusableIndex;
         }
-        if (x7.isPopupShown !== undefined) {
-            this.isPopupShown = x7.isPopupShown;
+        if (l44.isPopupShown !== undefined) {
+            this.isPopupShown = l44.isPopupShown;
         }
-        if (x7.isMoreIconOnFocus !== undefined) {
-            this.isMoreIconOnFocus = x7.isMoreIconOnFocus;
+        if (l44.isMoreIconOnFocus !== undefined) {
+            this.isMoreIconOnFocus = l44.isMoreIconOnFocus;
         }
-        if (x7.isMoreIconOnHover !== undefined) {
-            this.isMoreIconOnHover = x7.isMoreIconOnHover;
+        if (l44.isMoreIconOnHover !== undefined) {
+            this.isMoreIconOnHover = l44.isMoreIconOnHover;
         }
-        if (x7.isMoreIconOnClick !== undefined) {
-            this.isMoreIconOnClick = x7.isMoreIconOnClick;
+        if (l44.isMoreIconOnClick !== undefined) {
+            this.isMoreIconOnClick = l44.isMoreIconOnClick;
         }
-        if (x7.fontSize === undefined) {
+        if (l44.fontSize === undefined) {
             this.__fontSize.set(1);
         }
-        if (x7.dialogController !== undefined) {
-            this.dialogController = x7.dialogController;
+        if (l44.dialogController !== undefined) {
+            this.dialogController = l44.dialogController;
         }
-        if (x7.buttonGestureModifier !== undefined) {
-            this.buttonGestureModifier = x7.buttonGestureModifier;
+        if (l44.buttonGestureModifier !== undefined) {
+            this.buttonGestureModifier = l44.buttonGestureModifier;
         }
     }
-    updateStateVars(w7) {
-        this.__fontSize.reset(w7.fontSize);
+    updateStateVars(k44) {
+        this.__fontSize.reset(k44.fontSize);
     }
-    purgeVariableDependenciesOnElmtId(v7) {
-        this.__isPopupShown.purgeDependencyOnElmtId(v7);
-        this.__isMoreIconOnFocus.purgeDependencyOnElmtId(v7);
-        this.__isMoreIconOnHover.purgeDependencyOnElmtId(v7);
-        this.__isMoreIconOnClick.purgeDependencyOnElmtId(v7);
-        this.__fontSize.purgeDependencyOnElmtId(v7);
-        this.__buttonGestureModifier.purgeDependencyOnElmtId(v7);
+    purgeVariableDependenciesOnElmtId(j44) {
+        this.__isPopupShown.purgeDependencyOnElmtId(j44);
+        this.__isMoreIconOnFocus.purgeDependencyOnElmtId(j44);
+        this.__isMoreIconOnHover.purgeDependencyOnElmtId(j44);
+        this.__isMoreIconOnClick.purgeDependencyOnElmtId(j44);
+        this.__fontSize.purgeDependencyOnElmtId(j44);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(j44);
     }
     aboutToBeDeleted() {
         this.__isPopupShown.aboutToBeDeleted();
@@ -522,38 +522,38 @@ class CollapsibleMenuSection extends ViewPU {
     get isPopupShown() {
         return this.__isPopupShown.get();
     }
-    set isPopupShown(u7) {
-        this.__isPopupShown.set(u7);
+    set isPopupShown(i44) {
+        this.__isPopupShown.set(i44);
     }
     get isMoreIconOnFocus() {
         return this.__isMoreIconOnFocus.get();
     }
-    set isMoreIconOnFocus(t7) {
-        this.__isMoreIconOnFocus.set(t7);
+    set isMoreIconOnFocus(h44) {
+        this.__isMoreIconOnFocus.set(h44);
     }
     get isMoreIconOnHover() {
         return this.__isMoreIconOnHover.get();
     }
-    set isMoreIconOnHover(s7) {
-        this.__isMoreIconOnHover.set(s7);
+    set isMoreIconOnHover(g44) {
+        this.__isMoreIconOnHover.set(g44);
     }
     get isMoreIconOnClick() {
         return this.__isMoreIconOnClick.get();
     }
-    set isMoreIconOnClick(r7) {
-        this.__isMoreIconOnClick.set(r7);
+    set isMoreIconOnClick(f44) {
+        this.__isMoreIconOnClick.set(f44);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(q7) {
-        this.__fontSize.set(q7);
+    set fontSize(e44) {
+        this.__fontSize.set(e44);
     }
     get buttonGestureModifier() {
         return this.__buttonGestureModifier.get();
     }
-    set buttonGestureModifier(p7) {
-        this.__buttonGestureModifier.set(p7);
+    set buttonGestureModifier(d44) {
+        this.__buttonGestureModifier.set(d44);
     }
     getMoreIconFgColor() {
         return this.isMoreIconOnClick
@@ -572,26 +572,26 @@ class CollapsibleMenuSection extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let o7 = this.getUIContext();
-            this.isFollowingSystemFontScale = o7.isFollowingSystemFontScale();
-            this.maxFontScale = o7.getMaxFontScale();
+            let c44 = this.getUIContext();
+            this.isFollowingSystemFontScale = c44.isFollowingSystemFontScale();
+            this.maxFontScale = c44.getMaxFontScale();
         }
-        catch (l7) {
-            let m7 = l7.code;
-            let n7 = l7.message;
-            hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${m7}, message: ${n7}`);
+        catch (z43) {
+            let a44 = z43.code;
+            let b44 = z43.message;
+            hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${a44}, message: ${b44}`);
         }
-        this.menuItems.forEach((j7, k7) => {
-            if (j7.isEnabled && this.firstFocusableIndex === -1 &&
-                k7 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-                this.firstFocusableIndex = this.index * 1000 + k7 + 1;
+        this.menuItems.forEach((x43, y43) => {
+            if (x43.isEnabled && this.firstFocusableIndex === -1 &&
+                y43 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+                this.firstFocusableIndex = this.index * 1000 + y43 + 1;
             }
         });
         this.fontSize = this.decideFontScale();
     }
     decideFontScale() {
-        let i7 = this.getUIContext();
-        this.systemFontScale = i7.getHostContext()?.config?.fontSizeScale ?? 1;
+        let w43 = this.getUIContext();
+        this.systemFontScale = w43.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
@@ -601,75 +601,75 @@ class CollapsibleMenuSection extends ViewPU {
         this.buttonGestureModifier.fontSize = this.fontSize;
     }
     initialRender() {
-        this.observeComponentCreation2((g7, h7) => {
+        this.observeComponentCreation2((u43, v43) => {
             Column.create();
             Column.height('100%');
             Column.justifyContent(FlexAlign.Center);
         }, Column);
-        this.observeComponentCreation2((e7, f7) => {
+        this.observeComponentCreation2((s43, t43) => {
             Row.create();
         }, Row);
-        this.observeComponentCreation2((a6, b6) => {
+        this.observeComponentCreation2((o42, p42) => {
             If.create();
             if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((u6, v6) => {
+                    this.observeComponentCreation2((i43, j43) => {
                         ForEach.create();
-                        const w6 = (x6, y6) => {
-                            const z6 = x6;
+                        const e = (l43, m43) => {
+                            const n43 = l43;
                             {
-                                this.observeComponentCreation2((a7, b7) => {
-                                    if (b7) {
-                                        let c7 = new ImageMenuItem(this, { item: z6, index: this.index * 1000 + y6 + 1 }, undefined, a7, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 342, col: 13 });
-                                        ViewPU.create(c7);
-                                        let d7 = () => {
+                                this.observeComponentCreation2((o43, p43) => {
+                                    if (p43) {
+                                        let q43 = new ImageMenuItem(this, { item: n43, index: this.index * 1000 + m43 + 1 }, undefined, o43, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 342, col: 13 });
+                                        ViewPU.create(q43);
+                                        let f = () => {
                                             return {
-                                                item: z6,
-                                                index: this.index * 1000 + y6 + 1
+                                                item: n43,
+                                                index: this.index * 1000 + m43 + 1
                                             };
                                         };
-                                        c7.paramsGenerator_ = d7;
+                                        q43.paramsGenerator_ = f;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(a7, {});
+                                        this.updateStateVarsOfChildByElmtId(o43, {});
                                     }
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(u6, this.menuItems, w6, undefined, true, false);
+                        this.forEachUpdateFunction(i43, this.menuItems, e, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((k6, l6) => {
+                    this.observeComponentCreation2((y42, z42) => {
                         ForEach.create();
-                        const m6 = (n6, o6) => {
-                            const p6 = n6;
+                        const c = (b43, c43) => {
+                            const d43 = b43;
                             {
-                                this.observeComponentCreation2((q6, r6) => {
-                                    if (r6) {
-                                        let s6 = new ImageMenuItem(this, { item: p6, index: this.index * 1000 + o6 + 1 }, undefined, q6, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 347, col: 15 });
-                                        ViewPU.create(s6);
-                                        let t6 = () => {
+                                this.observeComponentCreation2((e43, f43) => {
+                                    if (f43) {
+                                        let g43 = new ImageMenuItem(this, { item: d43, index: this.index * 1000 + c43 + 1 }, undefined, e43, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 347, col: 15 });
+                                        ViewPU.create(g43);
+                                        let d = () => {
                                             return {
-                                                item: p6,
-                                                index: this.index * 1000 + o6 + 1
+                                                item: d43,
+                                                index: this.index * 1000 + c43 + 1
                                             };
                                         };
-                                        s6.paramsGenerator_ = t6;
+                                        g43.paramsGenerator_ = d;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(q6, {});
+                                        this.updateStateVarsOfChildByElmtId(e43, {});
                                     }
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(k6, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), m6, undefined, true, false);
+                        this.forEachUpdateFunction(y42, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), c, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
-                    this.observeComponentCreation2((e6, f6) => {
+                    this.observeComponentCreation2((s42, t42) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: true });
                         Button.accessibilityText({ 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Button.width(ImageMenuItem.imageHotZoneWidth);
@@ -692,23 +692,23 @@ class CollapsibleMenuSection extends ViewPU {
                         ViewStackProcessor.visualState();
                         Button.onFocus(() => this.isMoreIconOnFocus = true);
                         Button.onBlur(() => this.isMoreIconOnFocus = false);
-                        Button.onHover((j6) => this.isMoreIconOnHover = j6);
-                        Button.onKeyEvent((i6) => {
-                            if (i6.keyCode !== KeyCode.KEYCODE_ENTER && i6.keyCode !== KeyCode.KEYCODE_SPACE) {
+                        Button.onHover((x42) => this.isMoreIconOnHover = x42);
+                        Button.onKeyEvent((w42) => {
+                            if (w42.keyCode !== KeyCode.KEYCODE_ENTER && w42.keyCode !== KeyCode.KEYCODE_SPACE) {
                                 return;
                             }
-                            if (i6.type === KeyType.Down) {
+                            if (w42.type === KeyType.Down) {
                                 this.isMoreIconOnClick = true;
                             }
-                            if (i6.type === KeyType.Up) {
+                            if (w42.type === KeyType.Up) {
                                 this.isMoreIconOnClick = false;
                             }
                         });
-                        Button.onTouch((h6) => {
-                            if (h6.type === TouchType.Down) {
+                        Button.onTouch((v42) => {
+                            if (v42.type === TouchType.Down) {
                                 this.isMoreIconOnClick = true;
                             }
-                            if (h6.type === TouchType.Up || h6.type === TouchType.Cancel) {
+                            if (v42.type === TouchType.Up || v42.type === TouchType.Cancel) {
                                 this.isMoreIconOnClick = false;
                                 if (this.fontSize >= this.minFontSize) {
                                     this.dialogController?.close();
@@ -722,15 +722,15 @@ class CollapsibleMenuSection extends ViewPU {
                             placement: Placement.Bottom,
                             popupColor: Color.White,
                             enableArrow: false,
-                            onStateChange: (g6) => {
-                                this.isPopupShown = g6.isVisible;
-                                if (!g6.isVisible) {
+                            onStateChange: (u42) => {
+                                this.isPopupShown = u42.isVisible;
+                                if (!u42.isVisible) {
                                     this.isMoreIconOnClick = false;
                                 }
                             }
                         });
                     }, Button);
-                    this.observeComponentCreation2((c6, d6) => {
+                    this.observeComponentCreation2((q42, r42) => {
                         SymbolGlyph.create(PUBLIC_MORE);
                         SymbolGlyph.fontSize(TabContentItem.symbolSize);
                         SymbolGlyph.draggable(false);
@@ -745,14 +745,14 @@ class CollapsibleMenuSection extends ViewPU {
         Row.pop();
         Column.pop();
     }
-    onPlaceChildren(w5, x5, y5) {
-        x5.forEach((z5) => {
-            z5.layout({ x: 0, y: 0 });
+    onPlaceChildren(k42, l42, m42) {
+        l42.forEach((n42) => {
+            n42.layout({ x: 0, y: 0 });
         });
         this.fontSize = this.decideFontScale();
     }
-    popupBuilder(j5 = null) {
-        this.observeComponentCreation2((u5, v5) => {
+    popupBuilder(x41 = null) {
+        this.observeComponentCreation2((i42, j42) => {
             Column.create();
             Column.width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
             Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
@@ -760,32 +760,32 @@ class CollapsibleMenuSection extends ViewPU {
                 focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
             });
         }, Column);
-        this.observeComponentCreation2((k5, l5) => {
+        this.observeComponentCreation2((y41, z41) => {
             ForEach.create();
-            const m5 = (n5, o5) => {
-                const p5 = n5;
+            const a = (b42, c42) => {
+                const d42 = b42;
                 {
-                    this.observeComponentCreation2((q5, r5) => {
-                        if (r5) {
-                            let s5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 +
-                            CollapsibleMenuSection.maxCountOfVisibleItems + o5 }, undefined, q5, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 437, col: 11 });
-                            ViewPU.create(s5);
-                            let t5 = () => {
+                    this.observeComponentCreation2((e42, f42) => {
+                        if (f42) {
+                            let g42 = new ImageMenuItem(this, { item: d42, index: this.index * 1000 +
+                            CollapsibleMenuSection.maxCountOfVisibleItems + c42 }, undefined, e42, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 437, col: 11 });
+                            ViewPU.create(g42);
+                            let b = () => {
                                 return {
-                                    item: p5,
+                                    item: d42,
                                     index: this.index * 1000 +
-                                    CollapsibleMenuSection.maxCountOfVisibleItems + o5
+                                    CollapsibleMenuSection.maxCountOfVisibleItems + c42
                                 };
                             };
-                            s5.paramsGenerator_ = t5;
+                            g42.paramsGenerator_ = b;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(q5, {});
+                            this.updateStateVarsOfChildByElmtId(e42, {});
                         }
                     }, { name: 'ImageMenuItem' });
                 }
             };
-            this.forEachUpdateFunction(k5, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), m5, undefined, true, false);
+            this.forEachUpdateFunction(y41, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), a, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Column.pop();
@@ -798,72 +798,72 @@ CollapsibleMenuSection.maxCountOfVisibleItems = 1;
 CollapsibleMenuSection.focusPadding = 4;
 CollapsibleMenuSection.marginsNum = 2;
 class TabContentItem extends ViewPU {
-    constructor(d5, e5, f5, g5 = -1, h5 = undefined, i5) {
-        super(d5, f5, g5, i5);
-        if (typeof h5 === 'function') {
-            this.paramsGenerator_ = h5;
+    constructor(r41, s41, t41, u41 = -1, v41 = undefined, w41) {
+        super(r41, t41, u41, w41);
+        if (typeof v41 === 'function') {
+            this.paramsGenerator_ = v41;
         }
         this.item = { title: '' };
         this.index = 0;
         this.maxIndex = 0;
         this.onCustomClick = undefined;
         this.onImageComplete = undefined;
-        this.__currentIndex = new SynchedPropertySimpleOneWayPU(e5.currentIndex, this, 'currentIndex');
+        this.__currentIndex = new SynchedPropertySimpleOneWayPU(s41.currentIndex, this, 'currentIndex');
         this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
         this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
         this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
         this.__tabWidth = new ObservedPropertySimplePU(0, this, 'tabWidth');
         this.__imageWidth = new ObservedPropertySimplePU(24, this, 'imageWidth');
         this.__imageHeight = new ObservedPropertySimplePU(24, this, 'imageHeight');
-        this.setInitiallyProvidedValue(e5);
+        this.setInitiallyProvidedValue(s41);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(c5) {
-        if (c5.item !== undefined) {
-            this.item = c5.item;
+    setInitiallyProvidedValue(q41) {
+        if (q41.item !== undefined) {
+            this.item = q41.item;
         }
-        if (c5.index !== undefined) {
-            this.index = c5.index;
+        if (q41.index !== undefined) {
+            this.index = q41.index;
         }
-        if (c5.maxIndex !== undefined) {
-            this.maxIndex = c5.maxIndex;
+        if (q41.maxIndex !== undefined) {
+            this.maxIndex = q41.maxIndex;
         }
-        if (c5.onCustomClick !== undefined) {
-            this.onCustomClick = c5.onCustomClick;
+        if (q41.onCustomClick !== undefined) {
+            this.onCustomClick = q41.onCustomClick;
         }
-        if (c5.onImageComplete !== undefined) {
-            this.onImageComplete = c5.onImageComplete;
+        if (q41.onImageComplete !== undefined) {
+            this.onImageComplete = q41.onImageComplete;
         }
-        if (c5.isOnFocus !== undefined) {
-            this.isOnFocus = c5.isOnFocus;
+        if (q41.isOnFocus !== undefined) {
+            this.isOnFocus = q41.isOnFocus;
         }
-        if (c5.isOnHover !== undefined) {
-            this.isOnHover = c5.isOnHover;
+        if (q41.isOnHover !== undefined) {
+            this.isOnHover = q41.isOnHover;
         }
-        if (c5.isOnClick !== undefined) {
-            this.isOnClick = c5.isOnClick;
+        if (q41.isOnClick !== undefined) {
+            this.isOnClick = q41.isOnClick;
         }
-        if (c5.tabWidth !== undefined) {
-            this.tabWidth = c5.tabWidth;
+        if (q41.tabWidth !== undefined) {
+            this.tabWidth = q41.tabWidth;
         }
-        if (c5.imageWidth !== undefined) {
-            this.imageWidth = c5.imageWidth;
+        if (q41.imageWidth !== undefined) {
+            this.imageWidth = q41.imageWidth;
         }
-        if (c5.imageHeight !== undefined) {
-            this.imageHeight = c5.imageHeight;
+        if (q41.imageHeight !== undefined) {
+            this.imageHeight = q41.imageHeight;
         }
     }
-    updateStateVars(b5) {
-        this.__currentIndex.reset(b5.currentIndex);
+    updateStateVars(p41) {
+        this.__currentIndex.reset(p41.currentIndex);
     }
-    purgeVariableDependenciesOnElmtId(a5) {
-        this.__currentIndex.purgeDependencyOnElmtId(a5);
-        this.__isOnFocus.purgeDependencyOnElmtId(a5);
-        this.__isOnHover.purgeDependencyOnElmtId(a5);
-        this.__isOnClick.purgeDependencyOnElmtId(a5);
-        this.__tabWidth.purgeDependencyOnElmtId(a5);
-        this.__imageWidth.purgeDependencyOnElmtId(a5);
-        this.__imageHeight.purgeDependencyOnElmtId(a5);
+    purgeVariableDependenciesOnElmtId(o41) {
+        this.__currentIndex.purgeDependencyOnElmtId(o41);
+        this.__isOnFocus.purgeDependencyOnElmtId(o41);
+        this.__isOnHover.purgeDependencyOnElmtId(o41);
+        this.__isOnClick.purgeDependencyOnElmtId(o41);
+        this.__tabWidth.purgeDependencyOnElmtId(o41);
+        this.__imageWidth.purgeDependencyOnElmtId(o41);
+        this.__imageHeight.purgeDependencyOnElmtId(o41);
     }
     aboutToBeDeleted() {
         this.__currentIndex.aboutToBeDeleted();
@@ -879,44 +879,44 @@ class TabContentItem extends ViewPU {
     get currentIndex() {
         return this.__currentIndex.get();
     }
-    set currentIndex(z4) {
-        this.__currentIndex.set(z4);
+    set currentIndex(n41) {
+        this.__currentIndex.set(n41);
     }
     get isOnFocus() {
         return this.__isOnFocus.get();
     }
-    set isOnFocus(y4) {
-        this.__isOnFocus.set(y4);
+    set isOnFocus(m41) {
+        this.__isOnFocus.set(m41);
     }
     get isOnHover() {
         return this.__isOnHover.get();
     }
-    set isOnHover(x4) {
-        this.__isOnHover.set(x4);
+    set isOnHover(l41) {
+        this.__isOnHover.set(l41);
     }
     get isOnClick() {
         return this.__isOnClick.get();
     }
-    set isOnClick(w4) {
-        this.__isOnClick.set(w4);
+    set isOnClick(k41) {
+        this.__isOnClick.set(k41);
     }
     get tabWidth() {
         return this.__tabWidth.get();
     }
-    set tabWidth(v4) {
-        this.__tabWidth.set(v4);
+    set tabWidth(j41) {
+        this.__tabWidth.set(j41);
     }
     get imageWidth() {
         return this.__imageWidth.get();
     }
-    set imageWidth(u4) {
-        this.__imageWidth.set(u4);
+    set imageWidth(i41) {
+        this.__imageWidth.set(i41);
     }
     get imageHeight() {
         return this.__imageHeight.get();
     }
-    set imageHeight(t4) {
-        this.__imageHeight.set(t4);
+    set imageHeight(h41) {
+        this.__imageHeight.set(h41);
     }
     getBgColor() {
         if (this.isOnClick) {
@@ -946,54 +946,54 @@ class TabContentItem extends ViewPU {
     getImageLayoutWidth() {
         return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth;
     }
-    toStringFormat(o4) {
-        if (typeof o4 === 'string') {
-            return o4;
+    toStringFormat(c41) {
+        if (typeof c41 === 'string') {
+            return c41;
         }
-        else if (typeof o4 === 'undefined') {
+        else if (typeof c41 === 'undefined') {
             return '';
         }
         else {
-            let p4 = '';
+            let d41 = '';
             try {
-                p4 = getContext()?.resourceManager?.getStringSync(o4);
+                d41 = getContext()?.resourceManager?.getStringSync(c41);
             }
-            catch (q4) {
-                let r4 = q4?.code;
-                let s4 = q4?.message;
-                hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${r4},message:${s4}`);
+            catch (e41) {
+                let f41 = e41?.code;
+                let g41 = e41?.message;
+                hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${f41},message:${g41}`);
             }
-            return p4;
+            return d41;
         }
     }
     initialRender() {
-        this.observeComponentCreation2((m4, n4) => {
+        this.observeComponentCreation2((a41, b41) => {
             Stack.create();
             Stack.margin({
                 left: this.index === 0 ? TabContentItem.marginFirst : 0,
                 right: this.index === this.maxIndex ? 12 : 0
             });
         }, Stack);
-        this.observeComponentCreation2((i4, j4) => {
+        this.observeComponentCreation2((w40, x40) => {
             Row.create();
             Row.height(TabTitleBar.totalHeight);
             Row.alignItems(VerticalAlign.Center);
             Row.justifyContent(FlexAlign.Center);
             Row.borderRadius(TabContentItem.buttonBorderRadius);
             Row.backgroundColor(this.getBgColor());
-            Row.onAreaChange((k4, l4) => {
-                this.tabWidth = Number(l4.width);
+            Row.onAreaChange((y40, z40) => {
+                this.tabWidth = Number(z40.width);
             });
         }, Row);
-        this.observeComponentCreation2((g4, h4) => {
+        this.observeComponentCreation2((u40, v40) => {
             Column.create();
             Column.justifyContent(FlexAlign.Center);
         }, Column);
-        this.observeComponentCreation2((i3, j3) => {
+        this.observeComponentCreation2((w39, x39) => {
             If.create();
             if (this.item.icon === undefined && this.item.symbolStyle === undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((b4, c4) => {
+                    this.observeComponentCreation2((p40, q40) => {
                         Text.create(this.item.title);
                         Context.animation({ duration: 300 });
                         Text.fontSize(this.index === this.currentIndex
@@ -1011,23 +1011,23 @@ class TabContentItem extends ViewPU {
                         });
                         Text.onFocus(() => this.isOnFocus = true);
                         Text.onBlur(() => this.isOnFocus = false);
-                        Text.onHover((f4) => this.isOnHover = f4);
-                        Text.onKeyEvent((e4) => {
-                            if (e4.keyCode !== KeyCode.KEYCODE_ENTER && e4.keyCode !== KeyCode.KEYCODE_SPACE) {
+                        Text.onHover((t40) => this.isOnHover = t40);
+                        Text.onKeyEvent((s40) => {
+                            if (s40.keyCode !== KeyCode.KEYCODE_ENTER && s40.keyCode !== KeyCode.KEYCODE_SPACE) {
                                 return;
                             }
-                            if (e4.type === KeyType.Down) {
+                            if (s40.type === KeyType.Down) {
                                 this.isOnClick = true;
                             }
-                            if (e4.type === KeyType.Up) {
+                            if (s40.type === KeyType.Up) {
                                 this.isOnClick = false;
                             }
                         });
-                        Text.onTouch((d4) => {
-                            if (d4.type === TouchType.Down) {
+                        Text.onTouch((r40) => {
+                            if (r40.type === TouchType.Down) {
                                 this.isOnClick = true;
                             }
-                            if (d4.type === TouchType.Up || d4.type === TouchType.Cancel) {
+                            if (r40.type === TouchType.Up || r40.type === TouchType.Cancel) {
                                 this.isOnClick = false;
                             }
                         });
@@ -1039,7 +1039,7 @@ class TabContentItem extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((w3, x3) => {
+                    this.observeComponentCreation2((k40, l40) => {
                         Row.create();
                         Context.animation({ duration: 300 });
                         Row.width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
@@ -1052,34 +1052,34 @@ class TabContentItem extends ViewPU {
                         Row.justifyContent(FlexAlign.Center);
                         Row.onFocus(() => this.isOnFocus = true);
                         Row.onBlur(() => this.isOnFocus = false);
-                        Row.onHover((a4) => this.isOnHover = a4);
-                        Row.onKeyEvent((z3) => {
-                            if (z3.keyCode !== KeyCode.KEYCODE_ENTER && z3.keyCode !== KeyCode.KEYCODE_SPACE) {
+                        Row.onHover((o40) => this.isOnHover = o40);
+                        Row.onKeyEvent((n40) => {
+                            if (n40.keyCode !== KeyCode.KEYCODE_ENTER && n40.keyCode !== KeyCode.KEYCODE_SPACE) {
                                 return;
                             }
-                            if (z3.type === KeyType.Down) {
+                            if (n40.type === KeyType.Down) {
                                 this.isOnClick = true;
                             }
-                            if (z3.type === KeyType.Up) {
+                            if (n40.type === KeyType.Up) {
                                 this.isOnClick = false;
                             }
                         });
-                        Row.onTouch((y3) => {
-                            if (y3.type === TouchType.Down) {
+                        Row.onTouch((m40) => {
+                            if (m40.type === TouchType.Down) {
                                 this.isOnClick = true;
                             }
-                            if (y3.type === TouchType.Up || y3.type === TouchType.Cancel) {
+                            if (m40.type === TouchType.Up || m40.type === TouchType.Cancel) {
                                 this.isOnClick = false;
                             }
                         });
                         Row.onClick(() => this.onCustomClick && this.onCustomClick(this.index));
                         Row.accessibilitySelected(this.index === this.currentIndex);
                     }, Row);
-                    this.observeComponentCreation2((k3, l3) => {
+                    this.observeComponentCreation2((y39, z39) => {
                         If.create();
                         if (this.item.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((u3, v3) => {
+                                this.observeComponentCreation2((i40, j40) => {
                                     SymbolGlyph.create();
                                     Context.animation({ duration: 300 });
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
@@ -1101,11 +1101,11 @@ class TabContentItem extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((m3, n3) => {
+                                this.observeComponentCreation2((a40, b40) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.item.icon)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((s3, t3) => {
+                                            this.observeComponentCreation2((g40, h40) => {
                                                 SymbolGlyph.create(this.item.icon);
                                                 Context.animation({ duration: 300 });
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
@@ -1125,7 +1125,7 @@ class TabContentItem extends ViewPU {
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((o3, p3) => {
+                                            this.observeComponentCreation2((c40, d40) => {
                                                 Image.create(this.item.icon);
                                                 Context.animation({ duration: 300 });
                                                 Image.alt(this.item.title);
@@ -1140,20 +1140,20 @@ class TabContentItem extends ViewPU {
                                                 Context.animation(null);
                                                 Image.hitTestBehavior(HitTestMode.None);
                                                 Image.focusable(true);
-                                                Image.onComplete((r3) => {
+                                                Image.onComplete((f40) => {
                                                     if (!this.onImageComplete) {
                                                         return;
                                                     }
-                                                    this.imageWidth = px2vp(r3?.width);
-                                                    this.imageHeight = px2vp(r3?.height);
-                                                    this.onImageComplete(px2vp(r3?.componentWidth) +
+                                                    this.imageWidth = px2vp(f40?.width);
+                                                    this.imageHeight = px2vp(f40?.height);
+                                                    this.onImageComplete(px2vp(f40?.componentWidth) +
                                                     TabContentItem.paddingLeft + TabContentItem.paddingRight);
                                                 });
-                                                Image.onError((q3) => {
+                                                Image.onError((e40) => {
                                                     if (!this.onImageComplete) {
                                                         return;
                                                     }
-                                                    this.onImageComplete(px2vp(q3.componentWidth) +
+                                                    this.onImageComplete(px2vp(e40.componentWidth) +
                                                     TabContentItem.paddingLeft + TabContentItem.paddingRight);
                                                 });
                                             }, Image);
@@ -1172,11 +1172,11 @@ class TabContentItem extends ViewPU {
         If.pop();
         Column.pop();
         Row.pop();
-        this.observeComponentCreation2((e3, f3) => {
+        this.observeComponentCreation2((s39, t39) => {
             If.create();
             if (this.isOnFocus && this.tabWidth > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((g3, h3) => {
+                    this.observeComponentCreation2((u39, v39) => {
                         Row.create();
                         Row.width(this.tabWidth);
                         Row.height(TabTitleBar.totalHeight);
@@ -1216,42 +1216,42 @@ TabContentItem.paddingLeft = 8;
 TabContentItem.paddingRight = 8;
 TabContentItem.marginFirst = 16;
 class ImageMenuItem extends ViewPU {
-    constructor(y2, z2, a3, b3 = -1, c3 = undefined, d3) {
-        super(y2, a3, b3, d3);
-        if (typeof c3 === 'function') {
-            this.paramsGenerator_ = c3;
+    constructor(m39, n39, o39, p39 = -1, q39 = undefined, r39) {
+        super(m39, o39, p39, r39);
+        if (typeof q39 === 'function') {
+            this.paramsGenerator_ = q39;
         }
         this.item = { value: '' };
         this.index = 0;
         this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
         this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
         this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
-        this.setInitiallyProvidedValue(z2);
+        this.setInitiallyProvidedValue(n39);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(x2) {
-        if (x2.item !== undefined) {
-            this.item = x2.item;
+    setInitiallyProvidedValue(l39) {
+        if (l39.item !== undefined) {
+            this.item = l39.item;
         }
-        if (x2.index !== undefined) {
-            this.index = x2.index;
+        if (l39.index !== undefined) {
+            this.index = l39.index;
         }
-        if (x2.isOnFocus !== undefined) {
-            this.isOnFocus = x2.isOnFocus;
+        if (l39.isOnFocus !== undefined) {
+            this.isOnFocus = l39.isOnFocus;
         }
-        if (x2.isOnHover !== undefined) {
-            this.isOnHover = x2.isOnHover;
+        if (l39.isOnHover !== undefined) {
+            this.isOnHover = l39.isOnHover;
         }
-        if (x2.isOnClick !== undefined) {
-            this.isOnClick = x2.isOnClick;
+        if (l39.isOnClick !== undefined) {
+            this.isOnClick = l39.isOnClick;
         }
     }
-    updateStateVars(w2) {
+    updateStateVars(k39) {
     }
-    purgeVariableDependenciesOnElmtId(v2) {
-        this.__isOnFocus.purgeDependencyOnElmtId(v2);
-        this.__isOnHover.purgeDependencyOnElmtId(v2);
-        this.__isOnClick.purgeDependencyOnElmtId(v2);
+    purgeVariableDependenciesOnElmtId(j39) {
+        this.__isOnFocus.purgeDependencyOnElmtId(j39);
+        this.__isOnHover.purgeDependencyOnElmtId(j39);
+        this.__isOnClick.purgeDependencyOnElmtId(j39);
     }
     aboutToBeDeleted() {
         this.__isOnFocus.aboutToBeDeleted();
@@ -1263,20 +1263,20 @@ class ImageMenuItem extends ViewPU {
     get isOnFocus() {
         return this.__isOnFocus.get();
     }
-    set isOnFocus(u2) {
-        this.__isOnFocus.set(u2);
+    set isOnFocus(i39) {
+        this.__isOnFocus.set(i39);
     }
     get isOnHover() {
         return this.__isOnHover.get();
     }
-    set isOnHover(t2) {
-        this.__isOnHover.set(t2);
+    set isOnHover(h39) {
+        this.__isOnHover.set(h39);
     }
     get isOnClick() {
         return this.__isOnClick.get();
     }
-    set isOnClick(s2) {
-        this.__isOnClick.set(s2);
+    set isOnClick(g39) {
+        this.__isOnClick.set(g39);
     }
     getFgColor() {
         return this.isOnClick
@@ -1293,24 +1293,24 @@ class ImageMenuItem extends ViewPU {
             return Color.Transparent;
         }
     }
-    toStringFormat(n2) {
-        if (typeof n2 === 'string') {
-            return n2;
+    toStringFormat(b39) {
+        if (typeof b39 === 'string') {
+            return b39;
         }
-        else if (typeof n2 === 'undefined') {
+        else if (typeof b39 === 'undefined') {
             return '';
         }
         else {
-            let o2 = '';
+            let c39 = '';
             try {
-                o2 = getContext()?.resourceManager?.getStringSync(n2);
+                c39 = getContext()?.resourceManager?.getStringSync(b39);
             }
-            catch (p2) {
-                let q2 = p2?.code;
-                let r2 = p2?.message;
-                hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${q2},message:${r2}`);
+            catch (d39) {
+                let e39 = d39?.code;
+                let f39 = d39?.message;
+                hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${e39},message:${f39}`);
             }
-            return o2;
+            return c39;
         }
     }
     getAccessibilityReadText() {
@@ -1326,7 +1326,7 @@ class ImageMenuItem extends ViewPU {
         return ' ';
     }
     initialRender() {
-        this.observeComponentCreation2((i2, j2) => {
+        this.observeComponentCreation2((w38, x38) => {
             Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
             Button.accessibilityText(this.getAccessibilityReadText());
             Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
@@ -1337,6 +1337,7 @@ class ImageMenuItem extends ViewPU {
             Button.foregroundColor(this.getFgColor());
             Button.backgroundColor(this.getBgColor());
             Button.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
+            Button.enabled(this.item.isEnabled ? this.item.isEnabled : false);
             ViewStackProcessor.visualState('focused');
             Button.border({
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
@@ -1357,44 +1358,44 @@ class ImageMenuItem extends ViewPU {
                 this.isOnFocus = true;
             });
             Button.onBlur(() => this.isOnFocus = false);
-            Button.onHover((m2) => {
+            Button.onHover((a39) => {
                 if (!this.item.isEnabled) {
                     return;
                 }
-                this.isOnHover = m2;
+                this.isOnHover = a39;
             });
-            Button.onKeyEvent((l2) => {
+            Button.onKeyEvent((z38) => {
                 if (!this.item.isEnabled) {
                     return;
                 }
-                if (l2.keyCode !== KeyCode.KEYCODE_ENTER && l2.keyCode !== KeyCode.KEYCODE_SPACE) {
+                if (z38.keyCode !== KeyCode.KEYCODE_ENTER && z38.keyCode !== KeyCode.KEYCODE_SPACE) {
                     return;
                 }
-                if (l2.type === KeyType.Down) {
+                if (z38.type === KeyType.Down) {
                     this.isOnClick = true;
                 }
-                if (l2.type === KeyType.Up) {
+                if (z38.type === KeyType.Up) {
                     this.isOnClick = false;
                 }
             });
-            Button.onTouch((k2) => {
+            Button.onTouch((y38) => {
                 if (!this.item.isEnabled) {
                     return;
                 }
-                if (k2.type === TouchType.Down) {
+                if (y38.type === TouchType.Down) {
                     this.isOnClick = true;
                 }
-                if (k2.type === TouchType.Up || k2.type === TouchType.Cancel) {
+                if (y38.type === TouchType.Up || y38.type === TouchType.Cancel) {
                     this.isOnClick = false;
                 }
             });
             Button.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
         }, Button);
-        this.observeComponentCreation2((y1, z1) => {
+        this.observeComponentCreation2((m38, n38) => {
             If.create();
             if (this.item.symbolStyle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((g2, h2) => {
+                    this.observeComponentCreation2((u38, v38) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                         SymbolGlyph.attributeModifier.bind(this)(this.item.symbolStyle);
@@ -1408,11 +1409,11 @@ class ImageMenuItem extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((a2, b2) => {
+                    this.observeComponentCreation2((o38, p38) => {
                         If.create();
                         if (Util.isSymbolResource(this.item.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((e2, f2) => {
+                                this.observeComponentCreation2((s38, t38) => {
                                     SymbolGlyph.create(this.item.value);
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.fontSize(TabContentItem.symbolSize);
@@ -1424,7 +1425,7 @@ class ImageMenuItem extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((c2, d2) => {
+                                this.observeComponentCreation2((q38, r38) => {
                                     Image.create(this.item.value);
                                     Image.width(ImageMenuItem.imageSize);
                                     Image.height(ImageMenuItem.imageSize);
@@ -1453,10 +1454,10 @@ ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = 0.4;
 ImageMenuItem.focusablePrefix = 'Id-TabTitleBar-ImageMenuItem-';
 class TabTitleBarDialog extends ViewPU {
-    constructor(s1, t1, u1, v1 = -1, w1 = undefined, x1) {
-        super(s1, u1, v1, x1);
-        if (typeof w1 === 'function') {
-            this.paramsGenerator_ = w1;
+    constructor(g38, h38, i38, j38 = -1, k38 = undefined, l38) {
+        super(g38, i38, j38, l38);
+        if (typeof k38 === 'function') {
+            this.paramsGenerator_ = k38;
         }
         this.tabTitleDialog = { value: '' };
         this.callbackId = undefined;
@@ -1476,60 +1477,60 @@ class TabTitleBarDialog extends ViewPU {
         };
         this.confirm = () => {
         };
-        this.setInitiallyProvidedValue(t1);
+        this.setInitiallyProvidedValue(h38);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(r1) {
-        if (r1.tabTitleDialog !== undefined) {
-            this.tabTitleDialog = r1.tabTitleDialog;
+    setInitiallyProvidedValue(f38) {
+        if (f38.tabTitleDialog !== undefined) {
+            this.tabTitleDialog = f38.tabTitleDialog;
         }
-        if (r1.callbackId !== undefined) {
-            this.callbackId = r1.callbackId;
+        if (f38.callbackId !== undefined) {
+            this.callbackId = f38.callbackId;
         }
-        if (r1.tabTitleBarDialog !== undefined) {
-            this.tabTitleBarDialog = r1.tabTitleBarDialog;
+        if (f38.tabTitleBarDialog !== undefined) {
+            this.tabTitleBarDialog = f38.tabTitleBarDialog;
         }
-        if (r1.mainWindowStage !== undefined) {
-            this.mainWindowStage = r1.mainWindowStage;
+        if (f38.mainWindowStage !== undefined) {
+            this.mainWindowStage = f38.mainWindowStage;
         }
-        if (r1.controller !== undefined) {
-            this.controller = r1.controller;
+        if (f38.controller !== undefined) {
+            this.controller = f38.controller;
         }
-        if (r1.minFontSize !== undefined) {
-            this.minFontSize = r1.minFontSize;
+        if (f38.minFontSize !== undefined) {
+            this.minFontSize = f38.minFontSize;
         }
-        if (r1.maxFontSize !== undefined) {
-            this.maxFontSize = r1.maxFontSize;
+        if (f38.maxFontSize !== undefined) {
+            this.maxFontSize = f38.maxFontSize;
         }
-        if (r1.screenWidth !== undefined) {
-            this.screenWidth = r1.screenWidth;
+        if (f38.screenWidth !== undefined) {
+            this.screenWidth = f38.screenWidth;
         }
-        if (r1.verticalScreenLines !== undefined) {
-            this.verticalScreenLines = r1.verticalScreenLines;
+        if (f38.verticalScreenLines !== undefined) {
+            this.verticalScreenLines = f38.verticalScreenLines;
         }
-        if (r1.horizontalsScreenLines !== undefined) {
-            this.horizontalsScreenLines = r1.horizontalsScreenLines;
+        if (f38.horizontalsScreenLines !== undefined) {
+            this.horizontalsScreenLines = f38.horizontalsScreenLines;
         }
-        if (r1.fontSize !== undefined) {
-            this.fontSize = r1.fontSize;
+        if (f38.fontSize !== undefined) {
+            this.fontSize = f38.fontSize;
         }
-        if (r1.maxLines !== undefined) {
-            this.maxLines = r1.maxLines;
+        if (f38.maxLines !== undefined) {
+            this.maxLines = f38.maxLines;
         }
-        if (r1.cancel !== undefined) {
-            this.cancel = r1.cancel;
+        if (f38.cancel !== undefined) {
+            this.cancel = f38.cancel;
         }
-        if (r1.confirm !== undefined) {
-            this.confirm = r1.confirm;
+        if (f38.confirm !== undefined) {
+            this.confirm = f38.confirm;
         }
     }
-    updateStateVars(q1) {
+    updateStateVars(e38) {
     }
-    purgeVariableDependenciesOnElmtId(p1) {
-        this.__mainWindow.purgeDependencyOnElmtId(p1);
-        this.__fontSize.purgeDependencyOnElmtId(p1);
-        this.__maxLines.purgeDependencyOnElmtId(p1);
-        this.__windowStandardHeight.purgeDependencyOnElmtId(p1);
+    purgeVariableDependenciesOnElmtId(d38) {
+        this.__mainWindow.purgeDependencyOnElmtId(d38);
+        this.__fontSize.purgeDependencyOnElmtId(d38);
+        this.__maxLines.purgeDependencyOnElmtId(d38);
+        this.__windowStandardHeight.purgeDependencyOnElmtId(d38);
     }
     aboutToBeDeleted() {
         this.__mainWindow.aboutToBeDeleted();
@@ -1539,39 +1540,39 @@ class TabTitleBarDialog extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    setController(o1) {
-        this.controller = o1;
+    setController(c38) {
+        this.controller = c38;
     }
     get mainWindow() {
         return this.__mainWindow.get();
     }
-    set mainWindow(n1) {
-        this.__mainWindow.set(n1);
+    set mainWindow(b38) {
+        this.__mainWindow.set(b38);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(m1) {
-        this.__fontSize.set(m1);
+    set fontSize(a38) {
+        this.__fontSize.set(a38);
     }
     get maxLines() {
         return this.__maxLines.get();
     }
-    set maxLines(l1) {
-        this.__maxLines.set(l1);
+    set maxLines(z37) {
+        this.__maxLines.set(z37);
     }
     get windowStandardHeight() {
         return this.__windowStandardHeight.get();
     }
-    set windowStandardHeight(k1) {
-        this.__windowStandardHeight.set(k1);
+    set windowStandardHeight(y37) {
+        this.__windowStandardHeight.set(y37);
     }
     initialRender() {
-        this.observeComponentCreation2((g, h) => {
+        this.observeComponentCreation2((u36, v36) => {
             If.create();
             if (this.tabTitleBarDialog) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i1, j1) => {
+                    this.observeComponentCreation2((w37, x37) => {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
@@ -1579,11 +1580,11 @@ class TabTitleBarDialog extends ViewPU {
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Column);
-                    this.observeComponentCreation2((y, z) => {
+                    this.observeComponentCreation2((m37, n37) => {
                         If.create();
                         if (this.tabTitleDialog.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((g1, h1) => {
+                                this.observeComponentCreation2((u37, v37) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.symbolStyle);
@@ -1600,11 +1601,11 @@ class TabTitleBarDialog extends ViewPU {
                         }
                         else if (this.tabTitleDialog.value) {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((a1, b1) => {
+                                this.observeComponentCreation2((o37, p37) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.tabTitleDialog.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((e1, f1) => {
+                                            this.observeComponentCreation2((s37, t37) => {
                                                 SymbolGlyph.create(this.tabTitleDialog.value);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(IMAGE_SIZE);
@@ -1619,7 +1620,7 @@ class TabTitleBarDialog extends ViewPU {
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((c1, d1) => {
+                                            this.observeComponentCreation2((q37, r37) => {
                                                 Image.create(this.tabTitleDialog.value);
                                                 Image.width(IMAGE_SIZE);
                                                 Image.height(IMAGE_SIZE);
@@ -1641,7 +1642,7 @@ class TabTitleBarDialog extends ViewPU {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((w, x) => {
+                    this.observeComponentCreation2((k37, l37) => {
                         Column.create();
                         Column.width('100%');
                         Column.padding({
@@ -1650,7 +1651,7 @@ class TabTitleBarDialog extends ViewPU {
                             bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                     }, Column);
-                    this.observeComponentCreation2((u, v) => {
+                    this.observeComponentCreation2((i37, j37) => {
                         Text.create(this.tabTitleBarDialog);
                         Text.fontSize(TEXT_EDITABLE_DIALOG);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1666,7 +1667,7 @@ class TabTitleBarDialog extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((s, t) => {
+                    this.observeComponentCreation2((g37, h37) => {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
@@ -1675,11 +1676,11 @@ class TabTitleBarDialog extends ViewPU {
                         Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Column.justifyContent(FlexAlign.Center);
                     }, Column);
-                    this.observeComponentCreation2((i, j) => {
+                    this.observeComponentCreation2((w36, x36) => {
                         If.create();
                         if (this.tabTitleDialog.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((q, r) => {
+                                this.observeComponentCreation2((e37, f37) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.symbolStyle);
@@ -1692,11 +1693,11 @@ class TabTitleBarDialog extends ViewPU {
                         }
                         else if (this.tabTitleDialog.value) {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((k, l) => {
+                                this.observeComponentCreation2((y36, z36) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.tabTitleDialog.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((o, p) => {
+                                            this.observeComponentCreation2((c37, d37) => {
                                                 SymbolGlyph.create(this.tabTitleDialog.value);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(IMAGE_SIZE);
@@ -1711,7 +1712,7 @@ class TabTitleBarDialog extends ViewPU {
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((m, n) => {
+                                            this.observeComponentCreation2((a37, b37) => {
                                                 Image.create(this.tabTitleDialog.value);
                                                 Image.width(IMAGE_SIZE);
                                                 Image.height(IMAGE_SIZE);
@@ -1736,11 +1737,11 @@ class TabTitleBarDialog extends ViewPU {
         If.pop();
     }
     async aboutToAppear() {
-        let d = this.getUIContext().getHostContext();
-        this.mainWindowStage = d.windowStage.getMainWindowSync();
-        let e = this.mainWindowStage.getWindowProperties();
-        let f = e.windowRect;
-        if (px2vp(f.height) > this.screenWidth) {
+        let r36 = this.getUIContext().getHostContext();
+        this.mainWindowStage = r36.windowStage.getMainWindowSync();
+        let s36 = this.mainWindowStage.getWindowProperties();
+        let t36 = s36.windowRect;
+        if (px2vp(t36.height) > this.screenWidth) {
             this.maxLines = this.verticalScreenLines;
         }
         else {
@@ -1752,18 +1753,18 @@ class TabTitleBarDialog extends ViewPU {
     }
 }
 class Util {
-    static isSymbolResource(b) {
-        if (!Util.isResourceType(b)) {
+    static isSymbolResource(p36) {
+        if (!Util.isResourceType(p36)) {
             return false;
         }
-        let c = b;
-        return c.type === RESOURCE_TYPE_SYMBOL;
+        let q36 = p36;
+        return q36.type === RESOURCE_TYPE_SYMBOL;
     }
-    static isResourceType(a) {
-        if (!a) {
+    static isResourceType(o36) {
+        if (!o36) {
             return false;
         }
-        if (typeof a === 'string' || typeof a === 'undefined') {
+        if (typeof o36 === 'string' || typeof o36 === 'undefined') {
             return false;
         }
         return true;

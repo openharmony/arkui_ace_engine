@@ -14,7 +14,6 @@
 import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_dialog_abc") {
@@ -25,10 +24,25 @@ es2abc_gen_abc("gen_dialog_abc") {
   extra_args = [ "--module" ]
 }
 
+es2abc_gen_abc("gen_dialog_v16_abc") {
+  src_js = rebase_path("dialog_v16.js")
+  dst_file = rebase_path(target_out_dir + "/dialog_v16.abc")
+  in_puts = [ "dialog_v16.js" ]
+  out_puts = [ target_out_dir + "/dialog_v16.abc" ]
+  extra_args = [ "--module" ]
+}
+
 gen_js_obj("dialog_abc") {
   input = get_label_info(":gen_dialog_abc", "target_out_dir") + "/dialog.abc"
   output = target_out_dir + "/dialog_abc.o"
   dep = ":gen_dialog_abc"
+}
+
+gen_js_obj("dialog_v16_abc") {
+  input = get_label_info(":gen_dialog_v16_abc", "target_out_dir") +
+          "/dialog_v16.abc"
+  output = target_out_dir + "/dialog_v16_abc.o"
+  dep = ":gen_dialog_v16_abc"
 }
 
 gen_obj("dialog_abc_preview") {
@@ -37,21 +51,72 @@ gen_obj("dialog_abc_preview") {
   snapshot_dep = [ ":gen_dialog_abc" ]
 }
 
-ohos_shared_library("dialog") {
-  sources = [ "dialog.cpp" ]
+gen_obj("dialog_v16_abc_preview") {
+  input = get_label_info(":gen_dialog_v16_abc", "target_out_dir") +
+          "/dialog_v16.abc"
+  output = target_out_dir + "/dialog_v16_abc.c"
+  snapshot_dep = [ ":gen_dialog_v16_abc" ]
+}
 
-  if (use_mingw_win || use_mac || use_linux) {
-    deps = [ ":gen_obj_src_dialog_abc_preview" ]
-  } else {
-    deps = [ ":dialog_abc" ]
+template("dialog_static") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
+    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
+
+    sources = [ "dialog.cpp" ]
+    deps =
+        [ "$ace_root/interfaces/napi/kits/utils:napi_utils_static_${platform}" ]
+    external_deps = []
+
+    if (platform != "" && is_arkui_x) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+      include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+    } else {
+      external_deps += [ "napi:ace_napi" ]
+    }
+
+    if (defined(config.libace_target)) {
+      deps += [ config.libace_target ]
+    }
+
+    if (use_mingw_win || use_mac || use_linux) {
+      deps += [
+        ":gen_obj_src_dialog_abc_preview",
+        ":gen_obj_src_dialog_v16_abc_preview",
+      ]
+    } else {
+      deps += [
+        ":dialog_abc",
+        ":dialog_v16_abc",
+      ]
+    }
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
   }
+}
 
-  external_deps = [
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
+foreach(item, ace_platforms) {
+  dialog_static("dialog_static_" + item.name) {
+    defines = []
+    cflags_cc = []
+    config = {
+    }
+    platform = item.name
 
-  relative_install_dir = "module/arkui/advanced"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    }
+  }
 }

@@ -93,9 +93,16 @@ public:
         LOGE("jsViewFunction_ is null");
     }
 
-    void RenderJSExecution(int64_t deadline, bool& isTimeout);
+    void FireOnNewParam(const std::string &newParam)
+    {
+        if (jsViewFunction_) {
+            ACE_SCORING_EVENT("OnNewParam");
+            return jsViewFunction_->ExecuteOnNewParam(newParam);
+        }
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "fire onNewParam failed, jsViewFunction_ is null!");
+    }
 
-    virtual void DoRenderJSExecution(int64_t deadline, bool& isTimeout);
+    virtual void RenderJSExecution();
 
     virtual void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) {};
 
@@ -183,6 +190,7 @@ protected:
     // set on the root JSView of the card and inherited by all child JSViews
     // -1 means not part of a card
     int64_t cardId_ = -1;
+    std::function<void()> notifyRenderDone_;
 
 private:
     int32_t instanceId_ = -1;
@@ -193,9 +201,6 @@ private:
     // This can avoid crashing when the pointer in vector is corrupted.
     std::array<int32_t, PRIMARY_ID_STACK_SIZE> primaryIdStack_{};
     bool isStatic_ = false;
-    std::function<void()> notifyRenderDone_;
-    bool executedAboutToRender_ = false;
-    bool executedOnRenderDone_ = false;
 };
 
 class JSViewFullUpdate : public JSView {
@@ -314,7 +319,17 @@ public:
 
     void Destroy(JSView* parentCustomView) override;
 
-    void DoRenderJSExecution(int64_t deadline, bool& isTimeout) override;
+    void DoRenderJSExecution(int64_t deadline, bool& isTimeout);
+
+    /**
+     * RenderJSExecutionForPrebuild is only applicable to the PreBuild of components.
+     * Unlike RenderJSExecution, when RenderJSExecutionForPrebuild is repeatedly called,
+     * it will not execute the logic that was previously executed
+     * deadline is the input parameter. It represents the expected completion time of this function
+     * isTimeout is the output parameter. When the function is not completed before the deadline, isTimeout = true
+     * We will repeatedly call this function in the next frame until isTimeout = false
+     */
+    void RenderJSExecutionForPrebuild(int64_t deadline, bool& isTimeout);
 
     RefPtr<AceType> InitialRender(int64_t deadline, bool& isTimeout);
 
@@ -469,6 +484,8 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
+    bool executedAboutToRender_ = false;
+    bool executedOnRenderDone_ = false;
     bool executedRender_ = false;
 };
 

@@ -1144,6 +1144,13 @@ let MenuPreviewMode;
   MenuPreviewMode[MenuPreviewMode.IMAGE = 1] = 'IMAGE';
 })(MenuPreviewMode || (MenuPreviewMode = {}));
 
+let HapticFeedbackMode;
+(function (HapticFeedbackMode) {
+  HapticFeedbackMode[HapticFeedbackMode.DISABLED = 0] = 'DISABLED';
+  HapticFeedbackMode[HapticFeedbackMode.ENABLED = 1] = 'ENABLED';
+  HapticFeedbackMode[HapticFeedbackMode.AUTO = 2] = 'AUTO';
+})(HapticFeedbackMode || (HapticFeedbackMode = {}));
+
 let DismissReason;
 (function (DismissReason) {
   DismissReason[DismissReason.PRESS_BACK = 0] = 'PRESS_BACK';
@@ -1940,8 +1947,16 @@ class Indicator {
     this.rightValue = value;
     return this;
   }
-  bottom(value) {
-    this.bottomValue = value;
+  bottom(...args) {
+    if (args.length === 1) {
+      this.bottomValue = args[0];
+      this.setIgnoreSizeValue = false;
+    }
+    if (args.length === 2) {
+      this.bottomValue = args[0];
+      this.ignoreSizeValue = args[1];
+      this.setIgnoreSizeValue = true;
+    }
     return this;
   }
   start(value) {
@@ -1995,6 +2010,10 @@ class DotIndicator extends Indicator {
   }
   maxDisplayCount(value) {
     this.maxDisplayCountValue = value;
+    return this;
+  }
+  space(value) {
+    this.spaceValue = value;
     return this;
   }
 }
@@ -2252,6 +2271,7 @@ class NavPathInfo {
     this.isEntry = isEntry;
     this.fromRecovery = false;
     this.mode = undefined;
+    this.singletonMoved = false;
   }
 }
 
@@ -2273,6 +2293,7 @@ class NavPathStack {
     this.parentStack = undefined;
     this.popArray = [];
     this.interception = undefined;
+    this.hasSingletonMoved = false;
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {
@@ -2395,6 +2416,8 @@ class NavPathStack {
         this.pathArray[index].onPop = info.onPop;
         this.pathArray[index].needUpdate = true;
         this.pathArray[index].isEntry = info.isEntry;
+        this.pathArray[index].singletonMoved = true;
+        this.hasSingletonMoved = true;
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {
@@ -3423,6 +3446,12 @@ let ImageAnalyzerType;
   ImageAnalyzerType[ImageAnalyzerType.OBJECT_LOOKUP = 2] = 'OBJECT_LOOKUP';
 })(ImageAnalyzerType || (ImageAnalyzerType = {}));
 
+let DividerMode;
+(function (DividerMode) {
+  DividerMode[DividerMode.FLOATING_ABOVE_MENU = 0] = 'FLOATING_ABOVE_MENU';
+  DividerMode[DividerMode.EMBEDDED_IN_MENU = 1] = 'EMBEDDED_IN_MENU';
+})(DividerMode || (DividerMode = {}));
+
 function wrapBuilder(builder) {
   return new WrappedBuilder(builder);
 }
@@ -3818,14 +3847,29 @@ let AccessibilitySamePageMode;
   AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
 })(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));
 
+let FocusDrawLevel;
+(function (FocusDrawLevel) {
+  FocusDrawLevel[FocusDrawLevel.SELF = 0] = 'SELF';
+  FocusDrawLevel[FocusDrawLevel.TOP = 1] = 'TOP';
+})(FocusDrawLevel || (FocusDrawLevel = {}));
+
 let TextMenuShowMode;
 (function (TextMenuShowMode) {
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
   TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
 })(TextMenuShowMode || (TextMenuShowMode = {}));
 
-let KeyProcessingMode ;
-(function (KeyProcessingMode ) {
-  KeyProcessingMode [KeyProcessingMode.FOCUS_NAVIGATION = 0] = "FOCUS_NAVIGATION";
-  KeyProcessingMode [KeyProcessingMode.ANCESTOR_EVENT = 1] = "ANCESTOR_EVENT";
-})(KeyProcessingMode  || (KeyProcessingMode  = {}));
+let KeyProcessingMode;
+(function (KeyProcessingMode) {
+  KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
+  KeyProcessingMode[KeyProcessingMode.ANCESTOR_EVENT = 1] = 'ANCESTOR_EVENT';
+})(KeyProcessingMode || (KeyProcessingMode = {}));
+
+let AxisAction;
+(function (AxisAction) {
+  AxisAction[AxisAction.NONE = 0] = 'NONE';
+  AxisAction[AxisAction.BEGIN = 1] = 'BEGIN';
+  AxisAction[AxisAction.UPDATE = 2] = 'UPDATE';
+  AxisAction[AxisAction.END = 3] = 'END';
+  AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
+})(AxisAction || (AxisAction = {}));

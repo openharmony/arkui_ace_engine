@@ -114,6 +114,11 @@ void SwiperHelper::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicator
     if (digitalParams->dimBottom.has_value()) {
         indicatorProps->UpdateBottom(digitalParams->dimBottom.value());
     }
+    if (digitalParams->ignoreSizeValue.has_value()) {
+        indicatorProps->UpdateIgnoreSize(digitalParams->ignoreSizeValue.value());
+    } else {
+        indicatorProps->UpdateIgnoreSize(false);
+    }
     indicatorProps->UpdateFontColor(
         digitalParams->fontColor.value_or(theme->GetDigitalIndicatorTextStyle().GetTextColor()));
     indicatorProps->UpdateSelectedFontColor(
@@ -154,6 +159,14 @@ void SwiperHelper::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNo
     }
     if (params->dimBottom.has_value()) {
         indicatorProps->UpdateBottom(params->dimBottom.value());
+    }
+    if (params->dimSpace.has_value()) {
+        indicatorProps->UpdateSpace(params->dimSpace.value());
+    }
+    if (params->ignoreSizeValue.has_value()) {
+        indicatorProps->UpdateIgnoreSize(params->ignoreSizeValue.value());
+    } else {
+        indicatorProps->UpdateIgnoreSize(false);
     }
     const bool isRtl = swiper.GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (params->dimStart.has_value()) {
@@ -416,6 +429,9 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
     jsonValue->Put("mask", params->maskValue.value_or(false) ? "true" : "false");
     jsonValue->Put(
         "maxDisplayCount", (params->maxDisplayCountVal.has_value()) ? params->maxDisplayCountVal.value() : 0);
+    jsonValue->Put("space", params->dimSpace.value_or(8.0_vp).ToString().c_str());
+    jsonValue->Put("ignoreSize", params->ignoreSizeValue.value_or(false) ? "true" : "false");
+    jsonValue->Put("setIgnoreSize", params->setIgnoreSizeValue.value_or(false) ? "true" : "false");
     return jsonValue->ToString();
 }
 
@@ -446,6 +462,8 @@ std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDig
                                  .c_str());
     jsonValue->Put("selectedFontWeight",
         V2::ConvertWrapFontWeightToStirng(params->selectedFontWeight.value_or(FontWeight::NORMAL)).c_str());
+    jsonValue->Put("ignoreSize", params->ignoreSizeValue.value_or(false) ? "true" : "false");
+    jsonValue->Put("setIgnoreSize", params->setIgnoreSizeValue.value_or(false) ? "true" : "false");
     return jsonValue->ToString();
 }
 

@@ -79,13 +79,9 @@ void IfElseNode::FlushUpdateAndMarkDirty()
 {
     if (branchIdChanged_) {
         auto parent = GetParent();
-        while (parent) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-            if (frameNode) {
-                frameNode->ChildrenUpdatedFrom(0);
-                break;
-            }
-            parent = parent->GetParent();
+        int64_t accessibilityId = GetAccessibilityId();
+        if (parent) {
+            parent->NotifyChange(0, 0, accessibilityId, NotificationType::START_CHANGE_POSITION);
         }
         // mark parent dirty to flush measure.
         MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);

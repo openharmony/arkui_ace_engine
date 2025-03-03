@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
@@ -252,6 +253,8 @@ struct DialogProperties {
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;
@@ -279,6 +282,8 @@ struct DialogProperties {
     WeakPtr<NG::UINode> windowScene;
     std::optional<DimensionRect> maskRect;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr; // Used for AlertDialog and ActionSheet transition
+    RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;
 
     WeakPtr<NG::UINode> contentNode;
     std::function<void()> onDidAppear;
@@ -293,9 +298,11 @@ struct DialogProperties {
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
     std::optional<double> levelOrder;
+    bool focusable = true;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
+    WeakPtr<NG::UINode> customCNode;
 };
 
 struct PromptDialogAttr {
@@ -315,6 +322,8 @@ struct PromptDialogAttr {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;
@@ -328,6 +337,8 @@ struct PromptDialogAttr {
     bool customStyle = false;
     std::optional<Color> maskColor;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
+    RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;
     std::function<void()> onDidAppear;
     std::function<void()> onDidDisappear;
     std::function<void()> onWillAppear;
@@ -337,6 +348,7 @@ struct PromptDialogAttr {
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
     std::optional<double> levelOrder;
+    bool focusable = true;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;

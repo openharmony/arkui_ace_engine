@@ -141,6 +141,7 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
             CHECK_NULL_VOID(endLine != gridMatrix_.end());
             CHECK_NULL_VOID(!endLine->second.empty());
             endIndex_ = endLine->second.rbegin()->second;
+            endMainLineIndex_ = i;
             break;
         }
     }

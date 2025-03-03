@@ -50,7 +50,6 @@ public:
 private:
     Ace::RefPtr<Ace::UIDisplaySync> uiDisplaySync_;
     std::mutex mutex_;
-    std::function<void(CIntervalInfo)> callbackRef_;
 };
 
 class DisplaySyncImpl : public OHOS::FFI::FFIData {

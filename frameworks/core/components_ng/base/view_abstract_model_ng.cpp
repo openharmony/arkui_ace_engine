@@ -16,6 +16,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 
 #include "core/common/ace_engine.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
@@ -36,6 +38,20 @@ constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
 } // namespace
+
+void StartVirator(const MenuParam& menuParam, bool isMenu)
+{
+    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::ENABLED) {
+        VibratorUtils::StartViratorDirectly("haptic.long_press_medium");
+        return;
+    }
+    if (isMenu) {
+        return;
+    }
+    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO && menuParam.previewMode != MenuPreviewMode::NONE) {
+        VibratorUtils::StartViratorDirectly("haptic.long_press_medium");
+    }
+}
 
 void ViewAbstractModelNG::BindMenuGesture(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
@@ -50,6 +66,7 @@ void ViewAbstractModelNG::BindMenuGesture(
             CHECK_NULL_VOID(targetNode);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+            StartVirator(menuParam, true);
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
         };
     } else if (buildFunc) {
@@ -58,6 +75,7 @@ void ViewAbstractModelNG::BindMenuGesture(
             CHECK_NULL_VOID(targetNode);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+            StartVirator(menuParam, true);
             std::function<void()> previewBuildFunc;
             NG::ViewAbstract::BindMenuWithCustomNode(
                 std::move(builderFunc), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
@@ -74,7 +92,8 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
 {
     RefPtr<NG::PipelineContext> pipeline = nullptr;
     if (menuParam.isShowInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            Container::CurrentId(), SubwindowType::TYPE_MENU);
         CHECK_NULL_RETURN(subwindow, false);
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -96,7 +115,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->UpdateChainedTransition(menuParam.transition);
     }
-    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow && !wrapperPattern->GetIsOpenMenu()) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
         overlayManager->HideMenu(menuNode, targetId, false);
     }
@@ -113,6 +132,7 @@ void ViewAbstractModelNG::BindMenu(
     if (CheckMenuIsShow(menuParam, targetId, targetNode)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
     } else if (menuParam.isShow) {
+        StartVirator(menuParam, true);
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
         } else if (buildFunc) {
@@ -146,7 +166,7 @@ void ViewAbstractModelNG::BindMenu(
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId(), params]() mutable {
             params.clear();
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
             CHECK_NULL_VOID(subwindow);
             auto childContainerId = subwindow->GetChildContainerId();
             auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -175,13 +195,15 @@ void CreateCustomMenuWithPreview(
         gestureHub->SetPixelMap(pixelMap);
     }
     auto refTargetNode = AceType::Claim<NG::FrameNode>(targetNode);
+    StartVirator(menuParam, false);
     NG::ViewAbstract::BindMenuWithCustomNode(
         std::move(buildFunc), refTargetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
 }
 
 void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
 {
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        Container::CurrentId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subwindow);
     auto overlayManager = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -200,7 +222,8 @@ void BindContextMenuSingle(
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
     auto targetId = targetNode->GetId();
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "target %{public}d menu isShow %{public}d", targetId, menuParam.isShow);
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -253,7 +276,8 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
 {
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -293,6 +317,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
                             std::function<void()> previewBuildFunc;
                             TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
+                            StartVirator(menuParam, false);
                             NG::ViewAbstract::BindMenuWithCustomNode(
                                 std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
                         },
@@ -333,6 +358,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         }
                         NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                             info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                        StartVirator(menuParam, false);
                         NG::ViewAbstract::BindMenuWithCustomNode(
                             std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
                     },
@@ -350,7 +376,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
 
     // delete menu when target node destroy
     auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
         CHECK_NULL_VOID(subwindow);
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -510,7 +536,8 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
-    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    auto instanceId = sheetStyle.instanceId.has_value() && !sheetStyle.showInSubWindow.value_or(false) ?
+        sheetStyle.instanceId.value() : Container::CurrentId();
     auto buildNodeFunc = [buildFunc, instanceId]() -> RefPtr<UINode> {
         NG::ScopedViewStackProcessor builderViewStackProcess(instanceId);
         buildFunc();
@@ -533,22 +560,21 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    auto destructor = [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
-                          rootNodeType = targetNode->GetRootNodeType(),
-                          showInPage = sheetStyle.showInPage.value_or(false), instanceId]() {
-        ContainerScope scope(instanceId);
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        if (showInPage) {
-            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-            overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType);
+    SheetManager::GetInstance().RegisterDestroyCallback(targetNode, sheetStyle, instanceId);
+    
+    if (sheetStyle.showInSubWindow.value_or(false)) {
+        if (isShow) {
+            SubwindowManager::GetInstance()->ShowBindSheetNG(isShow, std::move(callback), std::move(buildNodeFunc),
+                std::move(buildTitleNodeFunc), sheetStyle, std::move(onAppear), std::move(onDisappear),
+                std::move(shouldDismiss), std::move(onWillDismiss),
+                std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+                std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+                std::move(sheetSpringBack), targetNode);
+        } else {
+            SheetManager::GetInstance().CloseSheetInSubWindow(SheetKey(targetNode->GetId()));
         }
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteModal(id);
-        SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType);
-    };
-    targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
+        return;
+    }
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
@@ -649,7 +675,7 @@ void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importan
     accessibilityProperty->SetAccessibilityLevel(importance);
 }
 
-void ViewAbstractModelNG::SetAccessibilityDefaultFocus()
+void ViewAbstractModelNG::SetAccessibilityDefaultFocus(bool isFocus)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -657,17 +683,26 @@ void ViewAbstractModelNG::SetAccessibilityDefaultFocus()
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->SendFrameNodeToAccessibility(AceType::Claim(frameNode), false);
+    accessibilityManager->AddFrameNodeToDefaultFocusList(AceType::Claim(frameNode), isFocus);
 }
 
-void ViewAbstractModelNG::SetAccessibilityUseSamePage(bool isFullSilent)
+void ViewAbstractModelNG::SetAccessibilityUseSamePage(const std::string& pageMode)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    std::string pageMode = isFullSilent ? "FULL_SILENT" : "SEMI_SILENT";
+    if (pageMode == accessibilityProperty->GetAccessibilitySamePage()) {
+        return;
+    }
     accessibilityProperty->SetAccessibilitySamePage(pageMode);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->SendPageModeToProvider(frameNode->GetId(), pageMode);
+#endif
 }
 
 void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::string& text)
@@ -736,6 +771,28 @@ void ViewAbstractModelNG::SetAccessibilityChecked(bool checked, bool resetValue)
     }
 }
 
+void ViewAbstractModelNG::SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserScrollTriggerable();
+    } else {
+        accessibilityProperty->SetUserScrollTriggerable(triggerable);
+    }
+}
+
+void ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetFocusDrawLevel(drawLevel);
+}
+
 void ViewAbstractModelNG::SetAccessibilityRole(const std::string& role, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -802,26 +859,30 @@ void ViewAbstractModelNG::SetAccessibilityTextPreferred(FrameNode* frameNode, bo
 
 void ViewAbstractModelNG::SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus)
 {
-    if (!isFocus) {
-        return;
-    }
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->SendFrameNodeToAccessibility(AceType::Claim(frameNode), false);
+    accessibilityManager->AddFrameNodeToDefaultFocusList(AceType::Claim(frameNode), isFocus);
 }
 
 void ViewAbstractModelNG::SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode)
 {
-    if (pageMode.empty()) {
-        return;
-    }
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    if (pageMode == accessibilityProperty->GetAccessibilitySamePage()) {
+        return;
+    }
     accessibilityProperty->SetAccessibilitySamePage(pageMode);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->SendPageModeToProvider(frameNode->GetId(), pageMode);
+#endif
 }
 
 bool ViewAbstractModelNG::GetAccessibilityGroup(FrameNode* frameNode)
@@ -880,6 +941,26 @@ void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool che
         accessibilityProperty->SetUserCheckedType(checked);
         accessibilityProperty->SetUserCheckable(true);
     }
+}
+
+void ViewAbstractModelNG::SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserScrollTriggerable();
+    } else {
+        accessibilityProperty->SetUserScrollTriggerable(triggerable);
+    }
+}
+
+void ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetFocusDrawLevel(drawLevel);
 }
 
 void ViewAbstractModelNG::SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue)

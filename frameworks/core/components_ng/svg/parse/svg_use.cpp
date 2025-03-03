@@ -59,12 +59,19 @@ RSRecordingPath SvgUse::AsPath(const SvgLengthScaleRule& lengthRule)
         LOGE("href is empty");
         return {};
     }
+    if (isDrawingPath_) {
+        LOGW("SvgUse::AsPath draw path is still in processing");
+        return RSRecordingPath();
+    }
+    isDrawingPath_ = true;
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
 
     AttributeScope scope(refSvgNode);
     refSvgNode->InheritAttr(attributes_);
-    return refSvgNode->AsPath(lengthRule);
+    auto path = refSvgNode->AsPath(lengthRule);
+    isDrawingPath_ = false;
+    return path;
 }
 
 void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)

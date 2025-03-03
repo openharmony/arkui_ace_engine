@@ -33,6 +33,7 @@ constexpr float MAX_SEARCH_BUTTON_RATE = 0.4f;
 constexpr float AGING_MIN_SCALE = 1.75f;
 constexpr float MAX_FONT_SCALE = 2.0f;
 constexpr int TWO = 2;
+constexpr Dimension DEFAULT_DIVIDER_HEIGHT = 12.0_vp;
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -297,12 +298,12 @@ CalcSize SearchLayoutAlgorithm::searchButtonCalcSize(const RefPtr<SearchTheme>& 
 {
     // calculate theme space from search button to font
     auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-                       searchTheme->GetFontSize().ConvertToPxDistribute(minFontScale, maxFontScale);
+                       searchTheme->GetButtonFontSize().ConvertToPxDistribute(minFontScale, maxFontScale);
     // calculate search button height
     auto defaultButtonHeight =
         searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
     auto searchButtonHeight = std::max(defaultButtonHeight,
-        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPxDistribute(
+        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetButtonFontSize()).ConvertToPxDistribute(
             minFontScale, maxFontScale) + spaceHeight);
     searchButtonHeight = std::min(searchButtonHeight, searchHeight_);
     CalcSize searchButtonCalcSize;
@@ -377,6 +378,10 @@ void SearchLayoutAlgorithm::DividerMeasure(LayoutWrapper* layoutWrapper)
 
     auto iconHeight = searchTheme->GetIconHeight().ConvertToPx();
     auto dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(iconHeight));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        auto defaultDividerHeight = DEFAULT_DIVIDER_HEIGHT.ConvertToPx();
+        dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(defaultDividerHeight));
+    }
     auto dividerWidth = searchTheme->GetSearchDividerWidth();
 
     CalcSize dividerSize;
@@ -710,6 +715,10 @@ void SearchLayoutAlgorithm::LayoutSearchIcon(const LayoutSearchParams& params)
     auto iconUserHeight =
         searchIconConstraint->selfIdealSize.Height().value_or(params.searchTheme->GetIconHeight().ConvertToPx());
     float imageVerticalOffset = topPadding;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        // height is rounded in framenode's measure function, iconFrameHeight has no fractional part
+        iconUserHeight = std::floor(iconUserHeight + 0.5f);
+    }
     if (NearEqual(iconUserHeight, iconFrameHeight)) {
         float iconInterval = (params.searchFrameHeight - iconUserHeight) / 2;
         if (topPadding <= iconInterval && bottomPadding <= iconInterval) {

@@ -39,6 +39,7 @@ public:
 
     void CreateNewChildStart(const std::string& key) override;
     void CreateNewChildFinish(const std::string& key) override;
+    void AfterAddChild() override;
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override;
 };
 } // namespace OHOS::Ace::NG

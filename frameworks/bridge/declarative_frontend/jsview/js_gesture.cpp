@@ -662,7 +662,7 @@ void JSPanGestureOption::GetDistance(const JSCallbackInfo& args)
         CHECK_NULL_VOID(context);
         distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
     }
-    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(distance_new))));
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<double>(distance_new))));
 }
 
 void JSPanGestureOption::Constructor(const JSCallbackInfo& args)

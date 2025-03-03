@@ -87,7 +87,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetMeasureCallback001, TestSize.Level
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -96,7 +96,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetMeasureCallback001, TestSize.Level
      * @tc.expected: measureCallback_ has value.
      */
     auto onMeasureFunction = [](LayoutConstraintF layoutConstraint){};
-    CustomNodeExtModelNG::SetMeasureCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetMeasureCallback(AceType::RawPtr(customExtFrameNode),
         std::move(onMeasureFunction));
     ASSERT_NE(pattern->measureCallback_, nullptr);
 }
@@ -112,7 +112,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetLayoutCallback001, TestSize.Level1
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -121,7 +121,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetLayoutCallback001, TestSize.Level1
      * @tc.expected: layoutCallback_ has value.
      */
     auto onLayoutFunction = [](RectF rect){};
-    CustomNodeExtModelNG::SetLayoutCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetLayoutCallback(AceType::RawPtr(customExtFrameNode),
         std::move(onLayoutFunction));
     ASSERT_NE(pattern->layoutCallback_, nullptr);
 }
@@ -138,7 +138,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetContentDrawCallback001, TestSize.L
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -147,7 +147,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetContentDrawCallback001, TestSize.L
      * @tc.expected: contentModifier_ has value.
      */
     auto drawFunction = [](DrawingContext context){};
-    CustomNodeExtModelNG::SetContentDrawCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetContentDrawCallback(AceType::RawPtr(customExtFrameNode),
         std::move(drawFunction));
     ASSERT_NE(pattern->contentModifier_, nullptr);
 }
@@ -163,7 +163,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetForegroundDrawCallback001, TestSiz
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -172,7 +172,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetForegroundDrawCallback001, TestSiz
      * @tc.expected: foregroundModifier_ has value.
      */
     auto drawFunction = [](DrawingContext context){};
-    CustomNodeExtModelNG::SetForegroundDrawCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetForegroundDrawCallback(AceType::RawPtr(customExtFrameNode),
         std::move(drawFunction));
     ASSERT_NE(pattern->foregroundModifier_, nullptr);
 }
@@ -188,7 +188,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOverlayDrawCallback001, TestSize.L
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -197,7 +197,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOverlayDrawCallback001, TestSize.L
      * @tc.expected: overlayModifier_ has value.
      */
     auto drawFunction = [](DrawingContext context){};
-    CustomNodeExtModelNG::SetOverlayDrawCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetOverlayDrawCallback(AceType::RawPtr(customExtFrameNode),
         std::move(drawFunction));
     ASSERT_NE(pattern->overlayModifier_, nullptr);
 }
@@ -213,7 +213,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnConfigUpdateCallback001, TestSiz
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -222,7 +222,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnConfigUpdateCallback001, TestSiz
      * @tc.expected: onConfigUpdate_ has value.
      */
     auto onConfigUpdateFunction = [](ConfigurationType configType){};
-    CustomNodeExtModelNG::SetOnConfigUpdateCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetOnConfigUpdateCallback(AceType::RawPtr(customExtFrameNode),
         std::move(onConfigUpdateFunction));
     ASSERT_NE(pattern->onConfigUpdate_, nullptr);
 }
@@ -238,7 +238,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnModifyDoneCallback001, TestSize.
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -247,7 +247,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnModifyDoneCallback001, TestSize.
      * @tc.expected: onModifyDoneCallback_ has value.
      */
     auto onModifyDonFunction = [](){};
-    CustomNodeExtModelNG::SetOnModifyDoneCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetOnModifyDoneCallback(AceType::RawPtr(customExtFrameNode),
         std::move(onModifyDonFunction));
     ASSERT_NE(pattern->onModifyDoneCallback_, nullptr);
 }
@@ -263,7 +263,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnDirtyLayoutWrapperSwap001, TestS
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -272,7 +272,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnDirtyLayoutWrapperSwap001, TestS
      * @tc.expected: onDirtySwap_ has value.
      */
     auto onDirtyLayoutWrapperSwapfunction = [](const DirtySwapConfig& config){};
-    CustomNodeExtModelNG::SetOnDirtyLayoutWrapperSwap(customExtFrameNode,
+    CustomNodeExtModelNG::SetOnDirtyLayoutWrapperSwap(AceType::RawPtr(customExtFrameNode),
         std::move(onDirtyLayoutWrapperSwapfunction));
     ASSERT_NE(pattern->onDirtySwap_, nullptr);
 }
@@ -288,7 +288,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetIsAtomic001, TestSize.Level1)
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -296,7 +296,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetIsAtomic001, TestSize.Level1)
      * @tc.steps: step2. CustomNodeExtPattern set Atomic.
      * @tc.expected: isAtomic_ is true.
      */
-    CustomNodeExtModelNG::SetIsAtomic(customExtFrameNode, true);
+    CustomNodeExtModelNG::SetIsAtomic(AceType::RawPtr(customExtFrameNode), true);
     ASSERT_EQ(pattern->isAtomic_, true);
 }
 
@@ -311,7 +311,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtGetModifier001, TestSize.Level1)
      * @tc.steps: step1. Invoke CustomNodeExt Create function.
      * @tc.expected: Create CustomNodeExt.
      */
-    FrameNode* customExtFrameNode = CreateNode().GetRawPtr();
+    auto customExtFrameNode = CreateNode();
     ASSERT_NE(customExtFrameNode, nullptr);
     auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
 
@@ -329,7 +329,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtGetModifier001, TestSize.Level1)
      * @tc.expected: contentModifier_ has value.
      */
     auto drawFunction = [](DrawingContext context){};
-    CustomNodeExtModelNG::SetContentDrawCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetContentDrawCallback(AceType::RawPtr(customExtFrameNode),
         std::move(drawFunction));
     ASSERT_NE(pattern->contentModifier_, nullptr);
 
@@ -337,7 +337,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtGetModifier001, TestSize.Level1)
      * @tc.steps: step3. CustomNodeExtPattern set ContentDrawCallback.
      * @tc.expected: foregroundModifier_ has value.
      */
-    CustomNodeExtModelNG::SetForegroundDrawCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetForegroundDrawCallback(AceType::RawPtr(customExtFrameNode),
         std::move(drawFunction));
     ASSERT_NE(pattern->foregroundModifier_, nullptr);
 
@@ -345,7 +345,7 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtGetModifier001, TestSize.Level1)
      * @tc.steps: step4. CustomNodeExtPattern set OverlayDrawCallback.
      * @tc.expected: overlayModifier_ has value.
      */
-    CustomNodeExtModelNG::SetOverlayDrawCallback(customExtFrameNode,
+    CustomNodeExtModelNG::SetOverlayDrawCallback(AceType::RawPtr(customExtFrameNode),
         std::move(drawFunction));
     ASSERT_NE(pattern->overlayModifier_, nullptr);
 

@@ -1075,7 +1075,103 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
     MockContainer::Current()->SetIsScenceBoardWindow(true);
-    overlayManager->OpenDialogAnimation(dialogNode_);
+    overlayManager->OpenDialogAnimation(dialogNode_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_OpenDialogAnimation002
+ * @tc.desc: Test OverlayManager::OpenDialogAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    overlayManager->OpenDialogAnimation(dialogNode_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    auto contentNode1_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode1_, nullptr);
+    auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
+    EXPECT_NE(dialogNode1_, nullptr);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    props.levelOrder = std::make_optional(1.0);
+    overlayManager->OpenDialogAnimation(dialogNode1_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_OpenDialogAnimation003
+ * @tc.desc: Test OverlayManager::OpenDialogAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    overlayManager->OpenDialogAnimation(dialogNode_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    auto contentNode1_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode1_, nullptr);
+    auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
+    EXPECT_NE(dialogNode1_, nullptr);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    props.levelOrder = std::make_optional(1.0);
+    overlayManager->OpenDialogAnimation(dialogNode1_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode2_, nullptr);
+    auto dialogNode2_ = DialogView::CreateDialogNode(props, contentNode2_);
+    EXPECT_NE(dialogNode2_, nullptr);
+    props.levelOrder = std::make_optional(0.0);
+    overlayManager->OpenDialogAnimation(dialogNode2_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -1110,8 +1206,795 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
     MockContainer::Current()->SetIsScenceBoardWindow(true);
-    overlayManager->SetDialogTransitionEffect(dialogNode_);
+    overlayManager->SetDialogTransitionEffect(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_SetDialogTransitionEffect002
+ * @tc.desc: Test OverlayManager::SetDialogTransitionEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    overlayManager->SetDialogTransitionEffect(dialogNode_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    auto contentNode1_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode1_, nullptr);
+    auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
+    EXPECT_NE(dialogNode1_, nullptr);
+    props.levelOrder = std::make_optional(1.0);
+    overlayManager->SetDialogTransitionEffect(dialogNode1_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_SetDialogTransitionEffect003
+ * @tc.desc: Test OverlayManager::SetDialogTransitionEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    overlayManager->SetDialogTransitionEffect(dialogNode_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    auto contentNode1_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode1_, nullptr);
+    auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
+    EXPECT_NE(dialogNode1_, nullptr);
+    props.levelOrder = std::make_optional(1.0);
+    overlayManager->SetDialogTransitionEffect(dialogNode1_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+    overlayManager->PutLevelOrder(dialogNode1_, props.levelOrder);
+
+    auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode2_, nullptr);
+    auto dialogNode2_ = DialogView::CreateDialogNode(props, contentNode2_);
+    EXPECT_NE(dialogNode2_, nullptr);
+    props.levelOrder = std::make_optional(0.0);
+    overlayManager->SetDialogTransitionEffect(dialogNode2_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_PutLevelOrder001
+ * @tc.desc: Test OverlayManager::PutLevelOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, PutLevelOrder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->PutLevelOrder(dialogNode_, std::nullopt);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_PutLevelOrder002
+ * @tc.desc: Test OverlayManager::PutLevelOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, PutLevelOrder002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_PopLevelOrder001
+ * @tc.desc: Test OverlayManager::PopLevelOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, PopLevelOrder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->PopLevelOrder(dialogNode_);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_PopLevelOrder002
+ * @tc.desc: Test OverlayManager::PopLevelOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, PopLevelOrder002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->dialogOrderMap_[dialogNode_->GetId()] = 0.0;
+    overlayManager->PopLevelOrder(dialogNode_);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
+
+    overlayManager->dialogOrderMap_[dialogNode_->GetId()] = 0.0;
+    overlayManager->PopLevelOrder(dialogNode_);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
+    overlayManager->dialogOrderMap_.erase(dialogNode_->GetId());
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_PopLevelOrder003
+ * @tc.desc: Test OverlayManager::PopLevelOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, PopLevelOrder003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->PopLevelOrder(dialogNode_);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+
+    overlayManager->dialogOrderMap_[dialogNode_->GetId()] = 0.0;
+    overlayManager->PopLevelOrder(dialogNode_);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
+    overlayManager->dialogOrderMap_.erase(dialogNode_->GetId());
+
+    overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+    overlayManager->PopLevelOrder(dialogNode_);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetPrevNodeWithOrder001
+ * @tc.desc: Test OverlayManager::GetPrevNodeWithOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->dialogLevelOrderMap_[0.0] = {};
+    auto prevNode = overlayManager->GetPrevNodeWithOrder(std::nullopt);
+    EXPECT_EQ(prevNode, nullptr);
+    overlayManager->dialogLevelOrderMap_.erase(0.0);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetPrevNodeWithOrder002
+ * @tc.desc: Test OverlayManager::GetPrevNodeWithOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    auto levelOrder1 = std::make_optional(1.0);
+    overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+    auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
+    EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetPrevNodeWithOrder003
+ * @tc.desc: Test OverlayManager::GetPrevNodeWithOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    auto levelOrder1 = std::make_optional(1.0);
+    overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+    auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
+    EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
+
+    auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode2_, nullptr);
+    auto dialogNode2_ = DialogView::CreateDialogNode(props, contentNode2_);
+    EXPECT_NE(dialogNode2_, nullptr);
+
+    auto levelOrder2 = std::make_optional(2.0);
+    overlayManager->PutLevelOrder(dialogNode2_, levelOrder2);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 2);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 2);
+    auto prevNode2 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
+    EXPECT_EQ(prevNode2->GetId(), dialogNode_->GetId());
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetPrevNodeWithOrder004
+ * @tc.desc: Test OverlayManager::GetPrevNodeWithOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->dialogLevelOrderMap_[0.0] = {};
+    auto prevNode = overlayManager->GetPrevNodeWithOrder(std::nullopt);
+    EXPECT_EQ(prevNode, nullptr);
+    overlayManager->dialogLevelOrderMap_.erase(0.0);
+
+    auto levelOrder1 = std::make_optional(1.0);
+    overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+    auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
+    EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
+
+    auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode2_, nullptr);
+    auto dialogNode2_ = DialogView::CreateDialogNode(props, contentNode2_);
+    EXPECT_NE(dialogNode2_, nullptr);
+
+    auto levelOrder2 = std::make_optional(2.0);
+    overlayManager->PutLevelOrder(dialogNode2_, levelOrder2);
+    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 2);
+    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 2);
+    auto prevNode2 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
+    EXPECT_EQ(prevNode2->GetId(), dialogNode_->GetId());
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_IsNeedChangeFocus001
+ * @tc.desc: Test OverlayManager::IsNeedChangeFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, IsNeedChangeFocus001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    bool needFocus = overlayManager->IsNeedChangeFocus(std::nullopt);
+    EXPECT_TRUE(needFocus);
+    needFocus = overlayManager->IsNeedChangeFocus(std::make_optional(1.0));
+    EXPECT_TRUE(needFocus);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_IsNeedChangeFocus002
+ * @tc.desc: Test OverlayManager::IsNeedChangeFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, IsNeedChangeFocus002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    auto needFocus = overlayManager->IsNeedChangeFocus(std::make_optional(1.0));
+    EXPECT_TRUE(needFocus);
+
+    overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
+    needFocus = overlayManager->IsNeedChangeFocus(std::make_optional(1.0));
+    EXPECT_TRUE(needFocus);
+
+    needFocus = overlayManager->IsNeedChangeFocus(std::make_optional(-1.0));
+    EXPECT_FALSE(needFocus);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetTopOrder001
+ * @tc.desc: Test OverlayManager::GetTopOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetTopOrder001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    auto topOrder = overlayManager->GetTopOrder();
+    EXPECT_EQ(topOrder, std::nullopt);
+
+    overlayManager->dialogLevelOrderMap_[0.0] = {};
+    topOrder = overlayManager->GetTopOrder();
+    EXPECT_EQ(topOrder, std::nullopt);
+    overlayManager->dialogLevelOrderMap_.erase(0.0);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetTopOrder002
+ * @tc.desc: Test OverlayManager::GetTopOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetTopOrder002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
+    auto topOrder = overlayManager->GetTopOrder();
+    EXPECT_EQ(topOrder, std::make_optional(0.0));
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetTopOrder003
+ * @tc.desc: Test OverlayManager::GetTopOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetTopOrder003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
+    auto topOrder = overlayManager->GetTopOrder();
+    EXPECT_EQ(topOrder, std::make_optional(0.0));
+
+    auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode2_, nullptr);
+    auto dialogNode2_ = DialogView::CreateDialogNode(props, contentNode2_);
+    EXPECT_NE(dialogNode2_, nullptr);
+
+    overlayManager->PutLevelOrder(dialogNode2_, std::make_optional(1.0));
+    topOrder = overlayManager->GetTopOrder();
+    EXPECT_EQ(topOrder, std::make_optional(1.0));
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetBottomOrder001
+ * @tc.desc: Test OverlayManager::GetBottomOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetBottomOrder001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    auto bottomOrder = overlayManager->GetBottomOrder();
+    EXPECT_EQ(bottomOrder, std::nullopt);
+
+    overlayManager->dialogLevelOrderMap_[0.0] = {};
+    bottomOrder = overlayManager->GetBottomOrder();
+    EXPECT_EQ(bottomOrder, std::nullopt);
+    overlayManager->dialogLevelOrderMap_.erase(0.0);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetBottomOrder002
+ * @tc.desc: Test OverlayManager::GetBottomOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetBottomOrder002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
+    auto bottomOrder = overlayManager->GetBottomOrder();
+    EXPECT_EQ(bottomOrder, std::make_optional(0.0));
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_GetBottomOrder003
+ * @tc.desc: Test OverlayManager::GetBottomOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, GetBottomOrder003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+
+    overlayManager->dialogOrderMap_.clear();
+    overlayManager->dialogLevelOrderMap_.clear();
+
+    overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
+    auto bottomOrder = overlayManager->GetBottomOrder();
+    EXPECT_EQ(bottomOrder, std::make_optional(0.0));
+
+    auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode2_, nullptr);
+    auto dialogNode2_ = DialogView::CreateDialogNode(props, contentNode2_);
+    EXPECT_NE(dialogNode2_, nullptr);
+
+    overlayManager->PutLevelOrder(dialogNode2_, std::make_optional(-1.0));
+    bottomOrder = overlayManager->GetBottomOrder();
+    EXPECT_EQ(bottomOrder, std::make_optional(-1.0));
 }
 
 /**

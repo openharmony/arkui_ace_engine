@@ -17,6 +17,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -456,6 +457,20 @@ void ResetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node)
     TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
 }
 
+void SetTimepickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    TimePickerModelNG::SetOnChange(frameNode, std::move(*onChange));
+}
+
+void ResetTimepickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetOnChange(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -497,7 +512,9 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .setTimepickerEnableCascade = SetTimepickerEnableCascade,
         .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
         .setTimePickerDigitalCrownSensitivity = SetTimePickerDigitalCrownSensitivity,
-        .resetTimePickerDigitalCrownSensitivity = ResetTimePickerDigitalCrownSensitivity
+        .resetTimePickerDigitalCrownSensitivity = ResetTimePickerDigitalCrownSensitivity,
+        .setTimepickerOnChange = SetTimepickerOnChangeExt,
+        .resetTimepickerOnChange = ResetTimepickerOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

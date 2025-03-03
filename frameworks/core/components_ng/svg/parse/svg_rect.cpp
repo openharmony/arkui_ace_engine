@@ -56,7 +56,8 @@ RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
 
 RSRecordingPath SvgRect::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    if (path_.has_value() && lengthRule_ == lengthRule) {
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
         return path_.value();
     }
     auto rx = GreatNotEqual(rectAttr_.rx.Value(), 0.0) ?
@@ -74,6 +75,10 @@ RSRecordingPath SvgRect::AsPath(const SvgLengthScaleRule& lengthRule)
     RSRecordingPath path;
     path.AddRoundRect(roundRect);
     path_ = path;
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(path);
+    }
     return path;
 }
 

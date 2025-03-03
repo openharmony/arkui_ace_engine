@@ -36,6 +36,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -622,7 +624,7 @@ HWTEST_F(XComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
 
-    PipelineContext* context = frameNode->GetContextRefPtr().GetRawPtr();
+    PipelineContext* context = frameNode->GetContext();
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
                 SetInstanceId(context->GetInstanceId())).WillOnce(Return());
     pattern->OnAttachContext(context);

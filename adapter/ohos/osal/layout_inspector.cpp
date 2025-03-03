@@ -15,34 +15,18 @@
 
 #include "core/common/layout_inspector.h"
 
-#include <mutex>
-#include <string>
-
 #include "include/core/SkImage.h"
 #include "include/core/SkString.h"
-#include "include/core/SkColorSpace.h"
 #include "include/utils/SkBase64.h"
-
-#include "wm/window.h"
-#include "dm/display_manager.h"
 
 #include "connect_server_manager.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
-#include "base/json/json_util.h"
-#include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -130,7 +114,6 @@ constexpr static char RECNODE_NAME[] = "value";
 constexpr static char RECNODE_DEBUGLINE[] = "debugLine";
 constexpr static char RECNODE_CHILDREN[] = "RSNode";
 constexpr static char ARK_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
-using SetArkUICallback = void (*)(const std::function<void(const char*)>& arkuiCallback);
 
 bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
@@ -140,6 +123,9 @@ ProfilerStatusCallback LayoutInspector::jsStateProfilerStatusCallback_ = nullptr
 RsProfilerNodeMountCallback LayoutInspector::rsProfilerNodeMountCallback_ = nullptr;
 const char PNG_TAG[] = "png";
 NG::InspectorTreeMap LayoutInspector::recNodeInfos_;
+std::once_flag LayoutInspector::loadFlag;
+void* LayoutInspector::handlerConnectServerSo = nullptr;
+LayoutInspector::SetArkUICallback LayoutInspector::setArkUICallback = nullptr;
 
 void LayoutInspector::SupportInspector()
 {
@@ -367,21 +353,26 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
 
 void LayoutInspector::RegisterConnectCallback()
 {
-    auto handlerConnectServerSo = dlopen(ARK_DEBUGGER_LIB_PATH, RTLD_NOLOAD | RTLD_NOW);
-    if (handlerConnectServerSo == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null handlerConnectServerSo: %{public}s", dlerror());
-        return;
-    }
+    std::call_once(loadFlag, []() {
+        handlerConnectServerSo = dlopen(ARK_DEBUGGER_LIB_PATH, RTLD_NOLOAD | RTLD_NOW);
+        if (handlerConnectServerSo == nullptr) {
+            handlerConnectServerSo = dlopen(ARK_DEBUGGER_LIB_PATH, RTLD_NOW);
+            if (handlerConnectServerSo == nullptr) {
+                TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null handlerConnectServerSo: %{public}s", dlerror());
+                return;
+            }
+        }
 
-    auto setArkUICallback = reinterpret_cast<SetArkUICallback>(dlsym(handlerConnectServerSo, "SetArkUICallback"));
-    if (setArkUICallback == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null setArkUICallback: %{public}s", dlerror());
-        return;
-    }
+        setArkUICallback = reinterpret_cast<SetArkUICallback>(dlsym(handlerConnectServerSo, "SetArkUICallback"));
+        if (setArkUICallback == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null setArkUICallback: %{public}s", dlerror());
+            return;
+        }
+    });
 
-    setArkUICallback([](const char* message) { ProcessMessages(message); });
-    dlclose(handlerConnectServerSo);
-    handlerConnectServerSo = nullptr;
+    if (setArkUICallback != nullptr) {
+        setArkUICallback([](const char* message) { ProcessMessages(message); });
+    }
 }
 
 void LayoutInspector::ProcessMessages(const std::string& message)

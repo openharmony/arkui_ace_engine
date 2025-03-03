@@ -62,12 +62,9 @@ public:
     {
         return ptr.rawPtr_;
     }
-
+    // Forbid getting raw pointer from rvalue 'RefPtr'.
     template<class T>
-    static T* UnsafeRawPtr(const WeakPtr<T>& ptr)
-    {
-        return ptr.unsafeRawPtr_;
-    }
+    static T* RawPtr(const RefPtr<T>&& ptr) = delete;
 
     void IncRefCount()
     {
@@ -116,9 +113,6 @@ private:
     friend class RefPtr;
     template<class T>
     friend class WeakPtr;
-    // Forbid getting raw pointer from rvalue 'RefPtr'.
-    template<class T>
-    static T* RawPtr(const RefPtr<T>&& ptr) = delete;
 
     RefCounter* refCounter_ { nullptr };
 
@@ -182,11 +176,6 @@ public:
     operator bool() const
     {
         return rawPtr_ != nullptr;
-    }
-
-    T* GetRawPtr() const
-    {
-        return rawPtr_;
     }
 
     // Use 'Swap' to implement overloaded operator '='.
@@ -451,14 +440,6 @@ public:
     bool operator<(const WeakPtr<O>& other) const
     {
         return refCounter_ < other.refCounter_;
-    }
-
-    inline T* GetRawPtr() const
-    {
-        if (Invalid()) {
-            return nullptr;
-        }
-        return unsafeRawPtr_;
     }
 
 private:

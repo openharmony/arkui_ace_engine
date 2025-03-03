@@ -29,15 +29,21 @@ void CheckBoxGroupPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, c
         PaintProperty::ToJsonValue(json, filter);
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkboxTheme);
 
     PaintProperty::ToJsonValue(json, filter);
     json->PutExtAttr("selectAll", GetCheckBoxGroupSelect().value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("selectedColor",
         GetCheckBoxGroupSelectedColor().value_or(DEFAULT_GROUP_SELECTED_COLOR).ColorToString().c_str(), filter);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        json->PutExtAttr("checkboxShape",
+            std::to_string((int)(GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE))).c_str(), filter);
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(checkboxTheme);
     json->PutExtAttr("unselectedColor", GetCheckBoxGroupUnSelectedColor().value_or(
         checkboxTheme->GetInactiveColor()).ColorToString().c_str(), filter);
     auto markJsValue = JsonUtil::Create(true);
@@ -48,9 +54,5 @@ void CheckBoxGroupPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, c
     markJsValue->Put("strokeWidth", GetCheckBoxGroupCheckMarkWidth().value_or(
         checkboxTheme->GetCheckStroke()).ToString().c_str());
     json->PutExtAttr("mark", markJsValue->ToString().c_str(), filter);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        json->PutExtAttr("checkboxShape",
-            std::to_string((int)(GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE))).c_str(), filter);
-    }
 }
 } // namespace OHOS::Ace::NG

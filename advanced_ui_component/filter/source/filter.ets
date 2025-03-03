@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -159,6 +159,7 @@ struct ListFilterRow {
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
   bundleName: string = '';
+  filterId: number = this.getUniqueId();
 
   aboutToAppear() {
     try {
@@ -249,6 +250,7 @@ struct ListFilterRow {
               this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_TEXT))
             .accessibilityDescription(this.getAccessibilityText(option,
               this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_DESC))
+            .id(`filterListFilterRow_${this.filterId}_${this.rowIndex}`)
             .height(PERCENT_100)
             .onClick(() => {
               this.onItemClick(colIndex)
@@ -308,7 +310,7 @@ struct ListFilterRow {
               }
             })
             .margin({ start: LengthMetrics.vp(colIndex === 0 ? -TEXT_HOT_AREA_WIDTH : 0) })
-            .tabIndex(colIndex === 0 ? this.rowIndex : -1)
+            .tabIndex(colIndex === 0 ? 1 : -1)
           })
         }
         .listDirection(Axis.Horizontal)
@@ -676,7 +678,7 @@ struct MultiFilterRow {
           })
           .constraintSize({ maxWidth: '50%' })
           .flexShrink(0)
-          .tabIndex(this.rowIndex)
+          .tabIndex(1)
       }
       Row() {
         Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
@@ -1071,13 +1073,23 @@ export struct Filter {
     });
     accessibility.sendAccessibilityEvent(eventInfo);
     if (this.multiFilters && this.multiFilters.length > 0) {
-      let requestFocusEventInfo: accessibility.EventInfo = ({
-        type: 'requestFocusForAccessibility',
-        bundleName: this.bundleName,
-        triggerAction: 'common',
-        customId: `filterMultiFilterRow_${this.filterId}_0`,
-      });
-      accessibility.sendAccessibilityEvent(requestFocusEventInfo);
+      if (this.filterType === FilterType.LIST_FILTER) {
+        let requestFocusEventInfo: accessibility.EventInfo = ({
+          type: 'requestFocusForAccessibility',
+          bundleName: this.bundleName,
+          triggerAction: 'common',
+          customId: `filterListFilterRow_${this.filterId}_0`,
+        });
+        accessibility.sendAccessibilityEvent(requestFocusEventInfo);
+      } else if (this.filterType === FilterType.MULTI_LINE_FILTER) {
+        let requestFocusEventInfo: accessibility.EventInfo = ({
+          type: 'requestFocusForAccessibility',
+          bundleName: this.bundleName,
+          triggerAction: 'common',
+          customId: `filterMultiFilterRow_${this.filterId}_0`,
+        });
+        accessibility.sendAccessibilityEvent(requestFocusEventInfo);
+      }
     } else if (this.additionFilters && this.additionFilters.name) {
       let requestFocusEventInfo: accessibility.EventInfo = ({
         type: 'requestFocusForAccessibility',
@@ -1377,7 +1389,7 @@ export struct Filter {
                 this.additionItemClick(index)
                 this.sendAccessibility(option, this.getSelected(index));
               })
-              .tabIndex(index === 0 ? this.multiFilters.length : -1)
+              .tabIndex(index === 0 ? 1 : -1)
             })
           }
           .listDirection(Axis.Horizontal)

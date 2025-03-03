@@ -68,9 +68,7 @@
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "bridge/declarative_frontend/engine/functions/js_crown_function.h"
 #endif
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -94,6 +92,7 @@ constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 } // namespace
 
 ViewAbstractModel* ViewAbstractModel::GetInstance()
@@ -1054,7 +1053,8 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
         }
         resObjParamsList.push_back(resObjParams);
     }
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        id, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -1062,7 +1062,7 @@ RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>&
 {
     auto bundleName = jsObj->GetPropertyValue<std::string>(static_cast<int32_t>(ArkUIIndex::BUNDLE_NAME), "");
     auto moduleName = jsObj->GetPropertyValue<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), "");
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -1090,7 +1090,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper()
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
         if (!resourceAdapter) {
             return nullptr;
         }
@@ -1197,9 +1197,9 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRender()));
+            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
         // The maximum of the form-animation-playback duration value is 1000 ms.
-        if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
+        if (pipelineContext->IsFormRenderExceptDynamicComponent() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
             // If the duration exceeds 1000ms, init it to 0 ms.
             if (formAnimationTimeInterval > DEFAULT_DURATION) {
@@ -2347,7 +2347,7 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 #endif
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
     }
-    if (info.Length() == 2) {
+    if (info.Length() == 2) { // 2 is background image info length
         auto jsImageRepeat = info[1];
         if (jsImageRepeat->IsNumber()) {
             repeatIndex = jsImageRepeat->ToNumber<int32_t>();
@@ -4773,6 +4773,52 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
     return false;
 }
 
+void JSViewAbstract::ParseJsSymbolCustomFamilyNames(std::vector<std::string>& customFamilyNames,
+    const JSRef<JSVal>& jsValue)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        return;
+    }
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    CompleteResourceObject(jsObj);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return;
+    }
+    auto resourceObject = GetResourceObject(jsObj);
+    std::string bundleName = resourceObject->GetBundleName();
+    std::string moduleName = resourceObject->GetModuleName();
+    auto customSymbolFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
+    std::replace(customSymbolFamilyName.begin(), customSymbolFamilyName.end(), '.', '_');
+    customFamilyNames.push_back(customSymbolFamilyName);
+}
+
+bool JSViewAbstract::CheckResource(RefPtr<ResourceObject> resourceObject, RefPtr<ResourceWrapper> resourceWrapper)
+{
+    if (!resourceWrapper) {
+        return false;
+    }
+    if (!resourceObject) {
+        return false;
+    }
+    return true;
+}
+
+bool JSViewAbstract::CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
+    std::uint32_t& symbolId)
+{
+    auto strValue = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
+    if (!strValue.empty()) {
+        auto customSymbolId = static_cast<uint32_t>(strtol(strValue.c_str(), nullptr, 16));
+        symbolId = customSymbolId;
+        return true;
+    }
+    return false;
+}
+
 bool JSViewAbstract::ParseJsSymbolId(
     const JSRef<JSVal>& jsValue, std::uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject)
 {
@@ -4792,13 +4838,12 @@ bool JSViewAbstract::ParseJsSymbolId(
     auto resourceObject = GetResourceObject(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     symbolResourceObject = resourceObject;
-    if (!resourceWrapper) {
+    if (CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
+        return true;
+    }
+    if (!CheckResource(resourceObject, resourceWrapper)) {
         return false;
     }
-    if (!resourceObject) {
-        return false;
-    }
-
     auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
@@ -6987,6 +7032,10 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityFocus", &JSViewAbstract::JsOnAccessibilityFocus);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDefaultFocus", &JSViewAbstract::JsAccessibilityDefaultFocus);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityUseSamePage", &JSViewAbstract::JsAccessibilityUseSamePage);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityScrollTriggerable",
+                                          &JSViewAbstract::JsAccessibilityScrollTriggerable);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityFocusDrawLevel",
+                                          &JSViewAbstract::JsAccessibilityFocusDrawLevel);
 
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
@@ -7047,31 +7096,37 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
         }
 
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(weak->weakRef.Upgrade());
-        if (frameNode) {
-            const auto& extensionHandler = frameNode->GetExtensionHandler();
-            if (extensionHandler) {
-                extensionHandler->InvalidateRender();
-            } else {
-                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
-            }
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        const auto& extensionHandler = frameNode->GetExtensionHandler();
+        if (extensionHandler) {
+            extensionHandler->InvalidateRender();
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_RETURN(renderContext, panda::JSValueRef::Undefined(vm));
+            renderContext->RequestNextFrame();
+        } else {
+            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
         }
 
         return panda::JSValueRef::Undefined(vm);
     };
+
     auto jsInvalidate = JSRef<JSFunc>::New<FunctionCallback>(invalidate);
-    if (frameNode) {
-        const auto& extensionHandler = frameNode->GetExtensionHandler();
-        if (extensionHandler) {
-            extensionHandler->InvalidateRender();
-        } else {
-            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
-        }
-    }
     auto vm = jsInvalidate->GetEcmaVM();
     auto* weak = new NG::NativeWeakRef(static_cast<AceType*>(frameNode));
     jsInvalidate->GetHandle()->SetNativePointerFieldCount(vm, 1);
     jsInvalidate->GetHandle()->SetNativePointerField(vm, 0, weak, &NG::DestructorInterceptor<NG::NativeWeakRef>);
     jsDrawModifier->SetPropertyObject("invalidate", jsInvalidate);
+
+    CHECK_NULL_VOID(frameNode);
+    const auto& extensionHandler = frameNode->GetExtensionHandler();
+    if (extensionHandler) {
+        extensionHandler->InvalidateRender();
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RequestNextFrame();
+    } else {
+        frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
@@ -7097,7 +7152,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
         auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(
             JSRef<JSObject>(jsDrawModifier), JSRef<JSFunc>::Cast(drawMethod));
 
-        return GetDrawCallback(jsDrawFunc, execCtx);
+        return GetDrawCallback(jsDrawFunc, execCtx, jsDrawModifier);
     };
 
     drawModifier->drawBehindFunc = getDrawModifierFunc("drawBehind");
@@ -7591,7 +7646,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
 
 bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
@@ -8335,6 +8390,9 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
     if (expectedUpdateIntervalVal->IsNumber()) {
         JSViewAbstract::ParseJsInteger(expectedUpdateIntervalVal, expectedUpdateInterval);
     }
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -8929,12 +8987,14 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
 }
 
 std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(
-    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier)
 {
-    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx](
+    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx, modifier](
                                                                          NG::DrawingContext& context) -> void {
         JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
+        if (modifier->IsEmpty()) {
+            return;
+        }
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         objectTemplate->SetInternalFieldCount(1);
         JSRef<JSObject> contextObj = objectTemplate->NewInstance();

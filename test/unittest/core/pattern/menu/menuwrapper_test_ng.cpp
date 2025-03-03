@@ -910,15 +910,15 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     ASSERT_NE(menuItemPattern2, nullptr);
 
     wrapperPattern->IncreaseEmbeddedSubMenuCount();
-    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
     subMenu->MountToParent(wrapperNode);
 
     menu->GetLayoutProperty<MenuLayoutProperty>()->UpdateExpandingMode(SubMenuExpandingMode::STACK);
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 }
 
@@ -1853,7 +1853,8 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg001, TestSize.Level1)
     function(canvas);
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     function(canvas);
-    wrapperNode->context_ = PipelineContext::GetCurrentContext().GetRawPtr();
+    auto context = PipelineContext::GetCurrentContext();
+    wrapperNode->context_ = AceType::RawPtr(context);
     auto pipline = wrapperNode->GetContext();
     ASSERT_NE(pipline, nullptr);
     auto menuTheme = pipline->GetTheme<MenuTheme>();

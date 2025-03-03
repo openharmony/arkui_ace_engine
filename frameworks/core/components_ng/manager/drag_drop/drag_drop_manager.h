@@ -46,11 +46,17 @@ struct GatherAnimationInfo {
     std::optional<BorderRadiusProperty> borderRadius;
 };
 
+struct ScaleDataInfo {
+    bool isNeedScale = false;
+    double scale = 1.0f;
+    float shortSide = 0.0f;
+};
+
 class ACE_EXPORT DragDropManager : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropManager, AceType);
 
 public:
-    DragDropManager() = default;
+    DragDropManager();
     ~DragDropManager() override = default;
 
     RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
@@ -117,6 +123,11 @@ public:
     void OnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& node = nullptr);
     void OnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
+        const RefPtr<FrameNode>& node = nullptr, const bool keyEscape = false);
+    bool HandleUIExtensionComponentDragCancel(const RefPtr<FrameNode>& preTargetFrameNode,
+        const RefPtr<FrameNode>& dragFrameNode, const bool keyEscape, const DragPointerEvent& pointerEvent,
+        const Point& point);
+    void OnDragPullCancel(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& node = nullptr);
     void HandleOnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& dragFrameNode);
@@ -533,6 +544,11 @@ public:
     }
     static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
 
+    static std::shared_ptr<ScaleDataInfo> GetScaleInfo(float width, float height, bool textDraggable);
+
+    static std::shared_ptr<ScaleDataInfo> CalculateScale(
+        float width, float height, float widthLimit, float heightLimit);
+
     RefPtr<FrameNode> GetMenuWrapperNode()
     {
         return menuWrapperNode_.Upgrade();
@@ -583,7 +599,21 @@ public:
 
     bool IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, int32_t pointId);
 
+    RefPtr<FrameNode> GetRootNode();
+
     int32_t CancelUDMFDataLoading(const std::string& key);
+
+    const DragPointerEvent& GetPreDragPointerEvent() const
+    {
+        return preDragPointerEvent_;
+    }
+
+    void SetIsReDragStart(bool isReDragStart)
+    {
+        isReDragStart_ = isReDragStart;
+    }
+
+    bool CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId);
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -599,6 +629,7 @@ private:
     const RefPtr<NG::OverlayManager> GetDragAnimationOverlayManager(int32_t containerId);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY,
         const RefPtr<FrameNode>& node = nullptr);
+    RefPtr<FrameNode> FilterSubwindowDragRootNode(const RefPtr<FrameNode>& node);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const DragPointerEvent& pointerEvent,
         DragEventType type, const std::string& extraInfo);
@@ -641,6 +672,7 @@ private:
     RefPtr<FrameNode> itemDragOverlayNode_;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
+    DragPointerEvent preDragPointerEvent_;
     uint64_t preTimeStamp_ = 0L;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
     std::function<void(const std::string&)> getDataCallback_ = nullptr;
@@ -669,6 +701,7 @@ private:
     bool isDragWindowSubWindow_ = false;
     bool isDragNodeNeedClean_ = false;
     bool isAnyDraggableHit_ = false;
+    bool isReDragStart_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };

@@ -64,6 +64,11 @@ int32_t SetLevelMode(ArkUI_NativeDialogHandle handle, ArkUI_LevelMode levelMode)
 int32_t SetLevelUniqueId(ArkUI_NativeDialogHandle handle, int32_t uniqueId);
 int32_t SetImmersiveMode(ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMode immersiveMode);
 int32_t SetLevelOrder(ArkUI_NativeDialogHandle handle, double levelOrder);
+int32_t RegisterOnWillAppear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+int32_t RegisterOnDidAppear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+int32_t RegisterOnWillDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+int32_t RegisterOnDidDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable);
 } // namespace OHOS::Ace::NG::DialogModel
 
 #endif // ARKUI_NATIVE_NODE_DIALOG_MODEL_H

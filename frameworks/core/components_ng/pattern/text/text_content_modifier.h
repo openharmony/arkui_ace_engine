@@ -100,6 +100,7 @@ public:
     }
 
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
+    void AnimationMeasureUpdate(const RefPtr<FrameNode>& host);
 
     void SetClip(bool clip);
 

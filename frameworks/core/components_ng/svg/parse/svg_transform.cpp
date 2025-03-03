@@ -27,9 +27,9 @@ const char TRANSFORM_SCALE[] = "scale";
 const char TRANSFORM_SKEWX[] = "skewX";
 const char TRANSFORM_SKEWY[] = "skewY";
 const char TRANSFORM_TRANSLATE[] = "translate";
-constexpr int32_t AMOUNT1 = 1;
-constexpr int32_t AMOUNT2 = 2;
-constexpr int32_t AMOUNT3 = 3;
+constexpr int32_t PARAM_COUNT1 = 1;
+constexpr int32_t PARAM_COUNT2 = 2;
+constexpr int32_t PARAM_COUNT3 = 3;
 constexpr int32_t TRANSFORM_MATRIX_PARA_AMOUNT = 6;
 constexpr int32_t NUM0 = 0;
 constexpr int32_t NUM1 = 1;
@@ -54,9 +54,9 @@ bool CreateFromTranslate(const std::vector<std::string>& paramVec, Matrix4& matr
 {
     double tx = 0.0f;
     double ty = 0.0f;
-    if (paramVec.size() == AMOUNT1) {
+    if (paramVec.size() == PARAM_COUNT1) {
         tx = StringToDouble(paramVec[NUM0]);
-    } else if (paramVec.size() == AMOUNT2) {
+    } else if (paramVec.size() == PARAM_COUNT2) {
         tx = StringToDouble(paramVec[NUM0]);
         ty = StringToDouble(paramVec[NUM1]);
     } else {
@@ -70,10 +70,10 @@ bool CreateFromScale(const std::vector<std::string>& paramVec, Matrix4& matrix)
 {
     double sx = 0.0f;
     double sy = 0.0f;
-    if (paramVec.size() == AMOUNT1) {
+    if (paramVec.size() == PARAM_COUNT1) {
         sx = StringToDouble(paramVec[NUM0]);
         sy = sx;
-    } else if (paramVec.size() == AMOUNT2) {
+    } else if (paramVec.size() == PARAM_COUNT2) {
         sx = StringToDouble(paramVec[NUM0]);
         sy = StringToDouble(paramVec[NUM1]);
     } else {
@@ -85,7 +85,7 @@ bool CreateFromScale(const std::vector<std::string>& paramVec, Matrix4& matrix)
 
 bool CreateFromRotate(const std::vector<std::string>& paramVec, Matrix4& matrix)
 {
-    if ((paramVec.size() != AMOUNT1) && (paramVec.size() != AMOUNT3)) {
+    if ((paramVec.size() != PARAM_COUNT1) && (paramVec.size() != PARAM_COUNT3)) {
         return false;
     }
     double rotateAngle = StringToDouble(paramVec[NUM0]);
@@ -95,7 +95,7 @@ bool CreateFromRotate(const std::vector<std::string>& paramVec, Matrix4& matrix)
 
 bool CreateFromSkewx(const std::vector<std::string>& paramVec, Matrix4& matrix)
 {
-    if (paramVec.size() != AMOUNT1) {
+    if (paramVec.size() != PARAM_COUNT1) {
         return false;
     }
     double skewAngleAxisX = StringToDouble(paramVec[NUM0]);
@@ -106,7 +106,7 @@ bool CreateFromSkewx(const std::vector<std::string>& paramVec, Matrix4& matrix)
 
 bool CreateFromSkewy(const std::vector<std::string>& paramVec, Matrix4& matrix)
 {
-    if (paramVec.size() != AMOUNT1) {
+    if (paramVec.size() != PARAM_COUNT1) {
         return false;
     }
     double skewAngleAxisX = 0.0f;
@@ -152,7 +152,7 @@ bool NGSvgTransform::UpdateSingleTransform(
 
 void UpdateTransformPivot(const std::string& funcType, const std::vector<std::string>& paramVec, Offset& finalPivot)
 {
-    if ((funcType == TRANSFORM_ROTATE) && (paramVec.size() == AMOUNT3)) {
+    if ((funcType == TRANSFORM_ROTATE) && (paramVec.size() == PARAM_COUNT3)) {
         Offset localPivot = Offset(StringToDouble(paramVec[NUM1]), StringToDouble(paramVec[NUM2]));
         finalPivot += localPivot;
     }
@@ -175,5 +175,20 @@ Matrix4 NGSvgTransform::CreateMatrix4(const std::vector<NG::TransformInfo>& tran
         retMatrix = retMatrix * funcMatrix;
     }
     return retMatrix;
+}
+
+bool NGSvgTransform::CreateTranslate(const std::vector<std::string>& paramVec, RSMatrix& matrix)
+{
+    if (paramVec.size() > PARAM_COUNT2 || paramVec.size() == 0) {
+        return false;
+    }
+    double tx = 0.0f;
+    double ty = 0.0f;
+    tx = StringToDouble(paramVec[NUM0]);
+    if (paramVec.size() > PARAM_COUNT1) {
+        ty = StringToDouble(paramVec[NUM1]);
+    }
+    matrix.Translate(tx, ty);
+    return true;
 }
 } // namespace OHOS::Ace::NG

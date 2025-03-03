@@ -149,13 +149,14 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto listNode = AceType::DynamicCast<FrameNode>(element);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
 
     /**
      * @tc.steps: step2. Trigger the drag event.
      * @tc.expected: The position of axisAnimator is correct.
      */
     auto scrollable = GetScrollable(listNode);
+    scrollable->InitAxisAnimator();
     ASSERT_NE(scrollable, nullptr);
     scrollable->context_ = PipelineContext::GetCurrentContext();
     auto context = scrollable->context_.Upgrade();
@@ -215,7 +216,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest002, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto listNode = AceType::DynamicCast<FrameNode>(element);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     ASSERT_NE(listNode, nullptr);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     ASSERT_NE(listLayoutProperty, nullptr);
@@ -228,6 +229,7 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest002, TestSize.Level1)
      */
     auto scrollable = GetScrollable(listNode);
     ASSERT_NE(scrollable, nullptr);
+    scrollable->InitAxisAnimator();
     scrollable->context_ = PipelineContext::GetCurrentContext();
     auto context = scrollable->context_.Upgrade();
     ASSERT_NE(context, nullptr);
@@ -288,7 +290,7 @@ HWTEST_F(ScrollableAxisTestNg, DragEnd001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto listNode = AceType::DynamicCast<FrameNode>(element);
-    FlushLayoutTask(listNode);
+    FlushUITasks(listNode);
     auto scrollable = GetScrollable(listNode);
     ASSERT_NE(scrollable, nullptr);
     EXPECT_EQ(scrollable->lastMainDelta_, 0.0);

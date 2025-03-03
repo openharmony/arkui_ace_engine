@@ -61,24 +61,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
 
-std::string XComponentTypeToString(XComponentType type)
-{
-    switch (type) {
-        case XComponentType::UNKNOWN:
-            return "unknown";
-        case XComponentType::SURFACE:
-            return "surface";
-        case XComponentType::COMPONENT:
-            return "component";
-        case XComponentType::TEXTURE:
-            return "texture";
-        case XComponentType::NODE:
-            return "node";
-        default:
-            return "unknown";
-    }
-}
-
 std::string XComponentRenderFitToString(RenderFit renderFit)
 {
     static const std::string renderFitStyles[] = { "RenderFit.CENTER", "RenderFit.TOP", "RenderFit.BOTTOM",
@@ -199,6 +181,52 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
     RegisterSurfaceCallbackModeEvent();
 }
 
+std::string XComponentPattern::XComponentTypeToString(XComponentType type)
+{
+    switch (type) {
+        case XComponentType::UNKNOWN:
+            return "unknown";
+        case XComponentType::SURFACE:
+            return "surface";
+        case XComponentType::COMPONENT:
+            return "component";
+        case XComponentType::TEXTURE:
+            return "texture";
+        case XComponentType::NODE:
+            return "node";
+        default:
+            return "unknown";
+    }
+}
+
+std::string XComponentPattern::XComponentNodeTypeToString(XComponentNodeType type)
+{
+    switch (type) {
+        case XComponentNodeType::UNKNOWN:
+            return "unknown";
+        case XComponentNodeType::TYPE_NODE:
+            return "type_node";
+        case XComponentNodeType::DECLARATIVE_NODE:
+            return "declarative_node";
+        case XComponentNodeType::CNODE:
+            return "cnode";
+        default:
+            return "unknown";
+    }
+}
+
+void XComponentPattern::AdjustNativeWindowSize(float width, float height)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto viewScale = context->GetViewScale();
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->AdjustNativeWindowSize(
+        static_cast<uint32_t>(width * viewScale), static_cast<uint32_t>(height * viewScale));
+}
+
 void XComponentPattern::InitNativeXComponent()
 {
     if ((type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) && libraryname_.has_value()) {
@@ -264,7 +292,7 @@ void XComponentPattern::InitSurface()
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->RegisterBufferCallback();
     }
-    if (isTypedNode_) {
+    if (isTypedNode_ || isCNode_) {
         InitNativeWindow(initSize_.Width(), initSize_.Height());
     }
     surfaceId_ = renderSurface_->GetUniqueId();
@@ -317,11 +345,13 @@ void XComponentPattern::OnAttachToMainTree()
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
-    if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
-        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: %{public}s(%{public}" PRIu64 ")",
-            GetId().c_str(), displaySync_->GetId());
-        displaySync_->AddToPipelineOnContainer();
-        needRecoverDisplaySync_ = false;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
+            TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "
+                "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+            displaySync_->AddToPipelineOnContainer();
+            needRecoverDisplaySync_ = false;
+        }
     }
 }
 
@@ -333,11 +363,13 @@ void XComponentPattern::OnDetachFromMainTree()
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
     }
-    if (displaySync_ && displaySync_->IsOnPipeline()) {
-        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: %{public}s(%{public}" PRIu64 ")",
-            GetId().c_str(), displaySync_->GetId());
-        displaySync_->DelFromPipelineOnContainer();
-        needRecoverDisplaySync_ = true;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (displaySync_ && displaySync_->IsOnPipeline()) {
+            TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: "
+                "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+            displaySync_->DelFromPipelineOnContainer();
+            needRecoverDisplaySync_ = true;
+        }
     }
 }
 
@@ -729,6 +761,10 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(renderSurface_);
+    if (renderSurface_->GetNativeWindow()) {
+        return;
+    }
     if (renderSurface_->IsSurfaceValid() && (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE)) {
         float viewScale = context->GetViewScale();
         renderSurface_->CreateNativeWindow();
@@ -743,7 +779,12 @@ void XComponentPattern::XComponentSizeInit()
     CHECK_RUN_ON(UI);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    InitNativeWindow(initSize_.Width(), initSize_.Height());
+    if (!isCNode_) {
+        InitNativeWindow(initSize_.Width(), initSize_.Height());
+    } else {
+        AdjustNativeWindowSize(initSize_.Width(), initSize_.Height());
+    }
+    
 #ifdef RENDER_EXTRACT_SUPPORTED
     if (xcomponentController_ && renderSurface_) {
         xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
@@ -1742,12 +1783,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     auto width = surfaceRect.Width();
     auto height = surfaceRect.Height();
     if (needResizeNativeWindow) {
-        CHECK_NULL_VOID(renderSurface_);
-        auto context = host->GetContextRefPtr();
-        CHECK_NULL_VOID(context);
-        auto viewScale = context->GetViewScale();
-        renderSurface_->AdjustNativeWindowSize(
-            static_cast<uint32_t>(width * viewScale), static_cast<uint32_t>(height * viewScale));
+        AdjustNativeWindowSize(width, height);
     }
     if (isNativeXComponent_) {
         CHECK_NULL_VOID(nativeXComponent_);
@@ -1940,7 +1976,7 @@ void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onA
             CHECK_NULL_VOID(pattern);
             pattern->CreateAnalyzerOverlay();
         },
-        "ArkUIXComponentCreateAnalyzerOverlay", PriorityType::VIP);
+        "ArkUIXComponentCreateAnalyzerOverlay");
 }
 
 void XComponentPattern::StopImageAnalyzer()

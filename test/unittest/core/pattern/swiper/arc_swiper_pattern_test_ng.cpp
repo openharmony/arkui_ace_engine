@@ -1341,6 +1341,53 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayScrollAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PlayScrollAnimation002
+ * @tc.desc: Test for PlayScrollAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayScrollAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    ASSERT_NE(frameNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern
+     */
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->contentMainSize_ = 80;
+
+    /**
+     * @tc.steps: step3. test for isDragging_ is false
+     */
+    float currentDelta = 0.0f;
+    float currentIndexOffset = 0.0f;
+    pattern->canChangeDirectionFlag_ = true;
+    pattern->PlayScrollAnimation(currentDelta, currentIndexOffset);
+    EXPECT_FALSE(pattern->canChangeDirectionFlag_);
+    
+    /**
+     * @tc.steps: step4. test for isDragging_ is true but itemPositon size is 1
+     */
+    pattern->isDragging_ = true;
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto node1 = CreateFrameNode();
+    auto item1 = CreateSwiperItemInfo(0, 20, node1);
+    pattern->itemPosition_.clear();
+    pattern->itemPosition_.insert(std::make_pair(0, item1));
+    EXPECT_EQ(pattern->itemPosition_.size(), 1);
+    pattern->PlayScrollAnimation(-10.0f, -10.0f);
+    EXPECT_FALSE(pattern->canChangeDirectionFlag_);
+}
+
+/**
  * @tc.name: InitialFrameNodePropertyAnimation001
  * @tc.desc: Test for InitialFrameNodePropertyAnimation
  * @tc.type: FUNC
@@ -1558,65 +1605,6 @@ HWTEST_F(ArcSwiperPatternTestNg, ResetAnimationParam002, TestSize.Level1)
 }
 
 /**
- * @tc.name: PlayHorizontalScrollAnimation001
- * @tc.desc: Test for PlayHorizontalScrollAnimation001
- * @tc.type: FUNC
- */
-HWTEST_F(ArcSwiperPatternTestNg, PlayHorizontalScrollAnimation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create node
-     */
-    SwiperModelNG model = CreateArcSwiper();
-    model.SetDirection(Axis::HORIZONTAL);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    ASSERT_NE(frameNode_, nullptr);
-    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->contentMainSize_ = SWIPER_WIDTH;
-    /**
-     * @tc.steps: step2. frameNode is nullptr
-     */
-    pattern->PlayHorizontalScrollExitAnimation(0, 0, nullptr);
-    EXPECT_EQ(pattern->horizontalExitNodeScale_, 0);
-
-    pattern->PlayHorizontalScrollEntryAnimation(0, 0, nullptr);
-    EXPECT_EQ(pattern->horizontalEntryNodeScale_, 0);
-    /**
-     * @tc.steps: step3. context is 0
-     */
-    auto frameNode = CreateFrameNode();
-    frameNode->renderContext_ = nullptr;
-    pattern->PlayHorizontalScrollExitAnimation(0, 0, frameNode);
-    EXPECT_EQ(pattern->horizontalExitNodeScale_, 0);
-
-    pattern->PlayHorizontalScrollEntryAnimation(0, 0, frameNode);
-    EXPECT_EQ(pattern->horizontalEntryNodeScale_, 0);
-
-    /**
-     * @tc.steps: step4. swiperWidth is 0
-     */
-    frameNode = CreateFrameNode();
-    pattern->PlayHorizontalScrollExitAnimation(0, 0, frameNode);
-    EXPECT_EQ(pattern->horizontalExitNodeScale_, 0);
-
-    pattern->PlayHorizontalScrollEntryAnimation(0, 0, frameNode);
-    EXPECT_EQ(pattern->horizontalEntryNodeScale_, 0);
-
-    /**
-     * @tc.steps: step5. swiperWidth is not 0, but exitNodePercent is 0
-     */
-    frameNode = CreateFrameNode();
-    pattern->PlayHorizontalScrollExitAnimation(100, 0, frameNode);
-    EXPECT_EQ(pattern->horizontalExitNodeScale_, 1);
-
-    pattern->PlayHorizontalScrollEntryAnimation(100, 100, frameNode);
-    EXPECT_EQ(pattern->horizontalEntryNodeScale_, HORIZONTAL_ENTRY_SCALE_INITIAL_VALUE);
-}
-
-/**
  * @tc.name: PlayHorizontalScrollAnimation002
  * @tc.desc: Test for PlayHorizontalScrollAnimation002
  * @tc.type: FUNC
@@ -1687,64 +1675,6 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayHorizontalScrollAnimation002, TestSize.Leve
 }
 
 /**
- * @tc.name: PlayVerticalScrollAnimation001
- * @tc.desc: Test for PlayVerticalScrollAnimation error value
- * @tc.type: FUNC
- */
-HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollAnimation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create node
-     */
-    SwiperModelNG model = CreateArcSwiper();
-    model.SetDirection(Axis::VERTICAL);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    ASSERT_NE(frameNode_, nullptr);
-    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->contentMainSize_ = SWIPER_WIDTH;
-    /**
-     * @tc.steps: step2. frameNode is nullptr
-     */
-    pattern->PlayVerticalScrollExitAnimation(0, 0, nullptr);
-    EXPECT_EQ(pattern->verticalExitNodeScale_, 0);
-
-    pattern->PlayVerticalScrollEntryAnimation(0, 0, nullptr);
-    EXPECT_EQ(pattern->verticalEntryNodeScale_, 0);
-    /**
-     * @tc.steps: step3. context is 0
-     */
-    auto frameNode = CreateFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->renderContext_ = nullptr;
-    pattern->PlayVerticalScrollExitAnimation(0, 0, frameNode);
-    EXPECT_EQ(pattern->verticalExitNodeScale_, 0);
-
-    pattern->PlayVerticalScrollEntryAnimation(0, 0, frameNode);
-    EXPECT_EQ(pattern->verticalEntryNodeScale_, 0);
-
-    /**
-     * @tc.steps: step4. swiperWidth is 0
-     */
-    frameNode = CreateFrameNode();
-    pattern->PlayVerticalScrollExitAnimation(0, 0, frameNode);
-    EXPECT_EQ(pattern->verticalExitNodeScale_, 0);
-
-    pattern->PlayVerticalScrollEntryAnimation(0, 0, frameNode);
-    EXPECT_EQ(pattern->verticalEntryNodeScale_, 0);
-
-    /**
-     * @tc.steps: step5. swiperWidth is not 0, but exitNodePercent is 0
-     */
-    pattern->PlayVerticalScrollExitAnimation(100, 0, frameNode);
-    EXPECT_EQ(pattern->verticalExitNodeScale_, 1.0f);
-    pattern->PlayVerticalScrollEntryAnimation(100, 100, frameNode);
-    EXPECT_EQ(pattern->verticalEntryNodeScale_, 0.0f);
-}
-
-/**
  * @tc.name: PlayVerticalScrollAnimation002
  * @tc.desc: Test for PlayVerticalScrollExitAnimation
  * @tc.type: FUNC
@@ -1790,63 +1720,6 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollAnimation002, TestSize.Level1
     startPos = CalcVerticalScrollStartPosByAlpha(-0.1f, swiperWidth, exit);
     pattern->PlayVerticalScrollExitAnimation(swiperWidth, startPos, frameNode);
     EXPECT_EQ(pattern->verticalExitNodeOpacity_, 0.0f);
-}
-
-/**
- * @tc.name: PlayVerticalScrollAnimation003
- * @tc.desc: Test for PlayVerticalScrollEntryAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollAnimation003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create node
-     */
-    SwiperModelNG model = CreateArcSwiper();
-    model.SetDirection(Axis::VERTICAL);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    ASSERT_NE(frameNode_, nullptr);
-    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->contentMainSize_ = SWIPER_WIDTH;
-    auto frameNode = CreateFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. swiperWidth is not 0, and exitNodePercent is more than 0
-     */
-    float swiperWidth = 100.0f;
-    float startPos = 50.0f;
-    bool exit = false;
-    auto childNode = CreateFrameNode();
-    auto parentNode = CreateFrameNode();
-    childNode->MountToParent(parentNode);
-    pattern->PlayVerticalScrollEntryAnimation(swiperWidth, startPos, childNode);
-    EXPECT_EQ(pattern->verticalEntryNodeScale_, CalcVerticalScrollScale(swiperWidth, startPos, exit));
-    EXPECT_EQ(pattern->verticalEntryNodeOpacity_, CalcVerticalScrollAlpha(swiperWidth, startPos, exit));
-    EXPECT_EQ(pattern->verticalEntryNodeBlur_, CalcVerticalScrollBlur(swiperWidth, startPos, exit));
-
-    startPos = CalcStartByPercent(VERTICAL_ENTRY_OFFSET_PART - 0.1f, swiperWidth, exit);
-    pattern->PlayVerticalScrollEntryAnimation(swiperWidth, startPos, frameNode);
-    EXPECT_EQ(pattern->verticalEntryNodeScale_, 0.0f);
-    EXPECT_EQ(pattern->verticalEntryNodeBlur_, 0.0f);
-    EXPECT_EQ(pattern->verticalEntryNodeOpacity_, 0.0f);
-
-    startPos = CalcStartByPercent(0.6f, swiperWidth, exit);
-    pattern->PlayVerticalScrollEntryAnimation(swiperWidth, startPos, frameNode);
-    auto scale1 = pattern->verticalEntryNodeScale_;
-    auto scale2 = CalcVerticalScrollScale(swiperWidth, startPos, exit);
-    EXPECT_EQ(scale1, scale2);
-
-    auto blur1 = pattern->verticalEntryNodeBlur_;
-    auto blur2 = CalcVerticalScrollBlur(swiperWidth, startPos, exit);
-    EXPECT_EQ(blur1, blur2);
-
-    auto alpha1 = pattern->verticalEntryNodeOpacity_;
-    auto alpha2 = CalcVerticalScrollAlpha(swiperWidth, startPos, exit);
-    EXPECT_EQ(alpha1, alpha2);
 }
 
 /**
@@ -2131,6 +2004,34 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalExitAnimation001, TestSize.Level1)
     pattern->animationVector_.clear();
     EXPECT_EQ(pattern->animationVector_.size(), 0);
     pattern->PlayVerticalExitAnimation(offset, nullptr, rollBack);
+    EXPECT_EQ(pattern->animationVector_.size(), 0);
+}
+
+/**
+ * @tc.name: PlayVerticalEntryAnimation
+ * @tc.desc: Test for method of PlayVerticalEntryAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalEntryAnimation, TestSize.Level1)
+{
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->itemPosition_.size(), 2);
+    OffsetF offset(0.0f, 0.0f);
+    auto frameNode = CreateFrameNode();
+    bool rollBack = true;
+    pattern->PlayVerticalEntryAnimation(offset, frameNode, rollBack);
+    EXPECT_EQ(pattern->animationVector_.size(), 5);
+    pattern->animationVector_.clear();
+    EXPECT_EQ(pattern->animationVector_.size(), 0);
+    pattern->PlayVerticalEntryAnimation(offset, nullptr, rollBack);
     EXPECT_EQ(pattern->animationVector_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

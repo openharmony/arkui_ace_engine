@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -346,6 +346,7 @@ public:
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
+    static ColorMode CurrentColorMode();
 
     void SetUseNewPipeline()
     {
@@ -503,6 +504,11 @@ public:
     }
 
     virtual bool IsScenceBoardWindow()
+    {
+        return false;
+    }
+
+    virtual bool IsCrossAxisWindow()
     {
         return false;
     }
@@ -711,6 +717,16 @@ public:
         return currentDisplayId_;
     }
 
+    virtual void SetColorMode(ColorMode mode)
+    {
+        colorMode_ = mode;
+    }
+
+    virtual ColorMode GetColorMode() const
+    {
+        return colorMode_;
+    }
+
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
 
     void DestroySelectOverlaySubwindow(int32_t instanceId);
@@ -728,6 +744,8 @@ public:
     {
         return Rect();
     }
+
+    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);
@@ -748,6 +766,7 @@ protected:
     bool isDynamicRender_ = false;
     // for common handler
     WeakPtr<ContainerHandler> containerHandler_;
+    RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:
     std::string bundleName_;
@@ -766,6 +785,7 @@ private:
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     uint64_t currentDisplayId_ = 0;
+    ColorMode colorMode_ = ColorMode::LIGHT;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

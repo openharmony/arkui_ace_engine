@@ -47,6 +47,8 @@ public:
     static void TearDown();
     static RefPtr<MockContainer> Current();
     static RefPtr<MockContainer> GetContainer(int32_t containerId);
+    static void SetMockColorMode(ColorMode mode);
+    static ColorMode GetMockColorMode();
     void SetDisplayInfo(RefPtr<DisplayInfo> displayInfo);
 
     void SetIsFormRender(bool isFormRender) override
@@ -77,6 +79,21 @@ public:
     void SetIsScenceBoardWindow(bool isScenceBoardWindow)
     {
         isScenceBoardWindow_ = isScenceBoardWindow;
+    }
+
+    bool IsCrossAxisWindow()
+    {
+        return isCrossAxisWindow_;
+    }
+
+    void SetColorMode(ColorMode mode) override
+    {
+        mockColorMode_ = mode;
+    }
+
+    ColorMode GetColorMode() const override
+    {
+        return mockColorMode_;
     }
 
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
@@ -111,6 +128,7 @@ public:
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
     static RefPtr<MockContainer> container_;
+    static ColorMode mockColorMode_;
 
 private:
     RefPtr<TaskExecutor> taskExecutor_;
@@ -118,6 +136,7 @@ private:
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
     bool isScenceBoardWindow_ = false;
+    bool isCrossAxisWindow_ = false;
     RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
 };
 } // namespace OHOS::Ace

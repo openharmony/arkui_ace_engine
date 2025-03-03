@@ -15,10 +15,7 @@
 
 #include "image_source_ohos.h"
 
-#include "image_type.h"
 #include "media_errors.h"
-
-#include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
 namespace {

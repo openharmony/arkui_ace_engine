@@ -16,8 +16,10 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H
 
+#include "base/utils/device_config.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
@@ -107,11 +109,12 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject);
     static void SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& it);
+    static void SetJSUrlStyle(const std::u16string& urlAddress, JSRef<JSObject>& resultObj);
 };
 
 class JSRichEditorBaseController : public Referenced {
 public:
-    void SetController(const RefPtr<RichEditorBaseControllerBase>& controller)
+    virtual void SetController(const RefPtr<RichEditorBaseControllerBase>& controller)
     {
         controllerWeak_ = controller;
     }
@@ -152,6 +155,13 @@ public:
         return isStyledStringMode_;
     }
 
+    ColorMode GetColorMode()
+    {
+        auto controller = controllerWeak_.Upgrade();
+        CHECK_NULL_RETURN(controller, ColorMode::COLOR_MODE_UNDEFINED);
+        return controller->GetColorMode();
+    }
+
 protected:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     WeakPtr<RichEditorBaseControllerBase> controllerWeak_;
@@ -165,6 +175,7 @@ protected:
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseTextBackgroundStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseTextUrlStyle(const JSRef<JSObject>& styleObject, std::optional<std::u16string>& urlAddressOpt);
     JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
     void ParseJsSelectionOptions(const JSCallbackInfo& args, std::optional<SelectionOptions>& options);
     JSRef<JSObject> CreateJSPreviewTextInfo(const PreviewTextInfo& info);
@@ -199,6 +210,7 @@ public:
     void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
+    void ParseJsCustomSymbolStyle(const JSRef<JSVal>& jsValue, TextStyle& style, uint32_t& symbolId);
     void ParseJsSymbolSpanStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
@@ -254,16 +266,29 @@ public:
         }
     }
 
+    void SetController(const RefPtr<RichEditorBaseControllerBase>& controller) override;
+
     void GetSelection(const JSCallbackInfo& args);
     void SetStyledString(const JSCallbackInfo& args);
     void GetStyledString(const JSCallbackInfo& args);
     void OnContentChanged(const JSCallbackInfo& args);
+
+    void SetStyledStringCache(RefPtr<SpanString> styledString)
+    {
+        styledStringCache_ = styledString;
+    }
+
+    RefPtr<SpanString> GetStyledStringCache() const
+    {
+        return styledStringCache_;
+    }
 
 private:
     void SetOnWillChange(const JSCallbackInfo& args);
     void SetOnDidChange(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJsOnWillChange(const NG::StyledStringChangeValue& changeValue);
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorStyledStringController);
+    RefPtr<SpanString> styledStringCache_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H

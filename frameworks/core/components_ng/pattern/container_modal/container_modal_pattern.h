@@ -206,6 +206,13 @@ public:
 
     void InitAllTitleRowLayoutProperty();
 
+    void SetEnableContainerModalCustomGesture(bool enable)
+    {
+        this->enableContainerModalCustomGesture_ = enable;
+    }
+    
+    static void EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable);
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
@@ -269,6 +276,7 @@ protected:
     bool hideSplitButton_ = false;
     bool isHoveredMenu_ = false;
     bool isTitleShow_ = false;
+    bool enableContainerModalCustomGesture_ = false;
     RRect windowPaintRect_;
     bool isCustomColor_;
 };

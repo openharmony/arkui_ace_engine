@@ -102,9 +102,9 @@ class UINodeRegisterProxy {
             stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds needs to purgeDelete. } .`);
             return;
         }
-        let owningView : IView | undefined;
+        let owningView : ViewBuildNodeBase | undefined;
         this.removeElementsInfo_.forEach((elmtId: number) => {
-            const owningViewPUWeak : WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
+            const owningViewPUWeak : WeakRef<ViewBuildNodeBase> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
             if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
@@ -129,5 +129,5 @@ class UINodeRegisterProxy {
 
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
     public removeElementsInfo_: Array<number> = new Array<number>();
-    public static ElementIdToOwningViewPU_: Map<number, WeakRef<IView>> = new Map<number, WeakRef<IView>>();
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<ViewBuildNodeBase>> = new Map<number, WeakRef<ViewBuildNodeBase>>();
 }

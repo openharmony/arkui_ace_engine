@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components/image/image_theme.h"
+#include "core/components_ng/pattern/image_animator/controlled_animator.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,28 +32,30 @@ constexpr int32_t DEFAULT_ITERATIONS = 1;
 
 ImageAnimatorPattern::ImageAnimatorPattern()
 {
-    animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    animator_->SetFillMode(FillMode::FORWARDS);
-    animator_->SetDuration(DEFAULT_DURATION);
+    controlledAnimator_ = AceType::MakeRefPtr<ControlledAnimator>();
+    controlledAnimator_->SetFillMode(FillMode::FORWARDS);
+    controlledAnimator_->SetDuration(DEFAULT_DURATION);
     ResetFormAnimationFlag();
 }
 
-RefPtr<PictureAnimation<int32_t>> ImageAnimatorPattern::CreatePictureAnimation(int32_t size)
+std::vector<PictureInfo> ImageAnimatorPattern::CreatePictureAnimation(int32_t size)
 {
-    auto pictureAnimation = MakeRefPtr<PictureAnimation<int32_t>>();
+    auto pictureAnimation = std::vector<PictureInfo>();
 
     if (durationTotal_ > 0) {
         for (int32_t index = 0; index < size; ++index) {
-            pictureAnimation->AddPicture(images_[index].duration / static_cast<float>(durationTotal_), index);
+            if (images_[index].duration) {
+                pictureAnimation.emplace_back(images_[index].duration / static_cast<float>(durationTotal_), index);
+            }
         }
-        animator_->SetDuration(durationTotal_);
+        controlledAnimator_->SetDuration(durationTotal_);
     } else {
         for (int32_t index = 0; index < size; ++index) {
-            pictureAnimation->AddPicture(NORMALIZED_DURATION_MAX / static_cast<float>(size), index);
+            pictureAnimation.emplace_back(NORMALIZED_DURATION_MAX / static_cast<float>(size), index);
         }
     }
 
-    pictureAnimation->AddListener([weak = WeakClaim(this)](int32_t index) {
+    controlledAnimator_->AddListener([weak = WeakClaim(this)](int32_t index) {
         auto imageAnimator = weak.Upgrade();
         CHECK_NULL_VOID(imageAnimator);
         imageAnimator->SetShowingIndex(index);
@@ -224,7 +227,7 @@ std::list<ImageAnimatorPattern::CacheImageStruct>::iterator ImageAnimatorPattern
 void ImageAnimatorPattern::GenerateCachedImages()
 {
     CHECK_NULL_VOID(images_.size());
-    auto averageShowTime = animator_->GetDuration() / static_cast<int32_t>(images_.size());
+    auto averageShowTime = controlledAnimator_->GetDuration() / static_cast<int32_t>(images_.size());
     size_t cacheImageNum = static_cast<uint32_t>(averageShowTime) >= CRITICAL_TIME ? 1 : 2;
     cacheImageNum = std::min(images_.size() - 1, cacheImageNum);
     if (cacheImages_.size() > cacheImageNum) {
@@ -264,17 +267,18 @@ bool ImageAnimatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
 void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
 {
     switch (status_) {
-        case Animator::Status::IDLE:
-            animator_->Cancel();
+        case ControlledAnimator::ControlStatus::IDLE:
+            controlledAnimator_->Cancel();
             ResetFormAnimationFlag();
             SetShowingIndex(index);
+            controlledAnimator_->SetRunningIdx(index);
             break;
-        case Animator::Status::PAUSED:
-            animator_->Pause();
+        case ControlledAnimator::ControlStatus::PAUSED:
+            controlledAnimator_->Pause();
             ResetFormAnimationFlag();
             break;
-        case Animator::Status::STOPPED:
-            animator_->Finish();
+        case ControlledAnimator::ControlStatus::STOPPED:
+            controlledAnimator_->Finish();
             ResetFormAnimationFlag();
             break;
         default:
@@ -283,7 +287,7 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
                 ResetFormAnimationFlag();
                 return;
             }
-            isReverse_ ? animator_->Backward() : animator_->Forward();
+            isReverse_ ? controlledAnimator_->Backward() : controlledAnimator_->Forward();
     }
 }
 
@@ -317,17 +321,21 @@ void ImageAnimatorPattern::OnModifyDone()
     }
     GenerateCachedImages();
     auto index = nowImageIndex_;
-    if ((status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) && !firstUpdateEvent_) {
+    if ((status_ == ControlledAnimator::ControlStatus::IDLE || status_ == ControlledAnimator::ControlStatus::STOPPED) &&
+        !firstUpdateEvent_) {
         index = isReverse_ ? (size - 1) : 0;
     }
 
     if (imagesChangedFlag_) {
-        animator_->ClearInterpolators();
-        animator_->AddInterpolator(CreatePictureAnimation(size));
+        controlledAnimator_->ClearInterpolators();
+        controlledAnimator_->AddInterpolator(CreatePictureAnimation(size));
         AdaptSelfSize();
         imagesChangedFlag_ = false;
+    } else if (isImagesSame_) {
+        AdaptSelfSize();
+        isImagesSame_ = false;
     }
-    animator_->SetIteration(GetIteration());
+    controlledAnimator_->SetIteration(GetIteration());
     if (firstUpdateEvent_) {
         UpdateEventCallback();
         firstUpdateEvent_ = false;
@@ -404,30 +412,30 @@ void ImageAnimatorPattern::UpdateEventCallback()
     auto eventHub = GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    animator_->ClearAllListeners();
+    controlledAnimator_->ClearAllListeners();
     auto startEvent = eventHub->GetStartEvent();
     if (startEvent != nullptr) {
-        animator_->AddStartListener([startEvent] { startEvent(); });
+        controlledAnimator_->AddStartListener([startEvent] { startEvent(); });
     }
 
     auto stopEvent = eventHub->GetStopEvent();
     if (stopEvent != nullptr) {
-        animator_->AddStopListener([stopEvent] { stopEvent(); });
+        controlledAnimator_->AddStopListener([stopEvent] { stopEvent(); });
     }
 
     auto pauseEvent = eventHub->GetPauseEvent();
     if (pauseEvent != nullptr) {
-        animator_->AddPauseListener([pauseEvent] { pauseEvent(); });
+        controlledAnimator_->AddPauseListener([pauseEvent] { pauseEvent(); });
     }
 
     auto repeatEvent = eventHub->GetRepeatEvent();
     if (repeatEvent != nullptr) {
-        animator_->AddRepeatListener([repeatEvent] { repeatEvent(); });
+        controlledAnimator_->AddRepeatListener([repeatEvent] { repeatEvent(); });
     }
 
     auto cancelEvent = eventHub->GetCancelEvent();
     if (cancelEvent != nullptr) {
-        animator_->AddIdleListener([cancelEvent] { cancelEvent(); });
+        controlledAnimator_->AddCancelListener([cancelEvent] { cancelEvent(); });
     }
 }
 
@@ -441,12 +449,12 @@ void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const I
     static const char* STATUS_MODE[] = { "AnimationStatus.Initial", "AnimationStatus.Running", "AnimationStatus.Paused",
         "AnimationStatus.Stopped" };
     json->PutExtAttr("state", STATUS_MODE[static_cast<int32_t>(status_)], filter);
-    json->PutExtAttr("duration", std::to_string(animator_->GetDuration()).c_str(), filter);
+    json->PutExtAttr("duration", std::to_string(controlledAnimator_->GetDuration()).c_str(), filter);
     json->PutExtAttr("reverse", isReverse_ ? "true" : "false", filter);
     json->PutExtAttr("fixedSize", fixedSize_ ? "true" : "false", filter);
     static const char* FILL_MODE[] = { "FillMode.None", "FillMode.Forwards", "FillMode.Backwards", "FillMode.Both" };
-    json->PutExtAttr("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())], filter);
-    json->PutExtAttr("iterations", std::to_string(animator_->GetIteration()).c_str(), filter);
+    json->PutExtAttr("fillMode", FILL_MODE[static_cast<int32_t>(controlledAnimator_->GetFillMode())], filter);
+    json->PutExtAttr("iterations", std::to_string(controlledAnimator_->GetIteration()).c_str(), filter);
     json->PutExtAttr("images", ImagesToString().c_str(), filter);
     json->PutExtAttr("monitorInvisibleArea", isAutoMonitorInvisibleArea_ ? "true" : "false", filter);
 }
@@ -582,7 +590,11 @@ bool ImageAnimatorPattern::IsFormRender()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->IsFormRender();
+
+    auto container = Container::Current();
+    bool isDynamicComponent = container && container->IsDynamicRender() &&
+                              container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    return pipeline->IsFormRender() && !isDynamicComponent;
 }
 
 void ImageAnimatorPattern::UpdateFormDurationByRemainder()
@@ -592,8 +604,8 @@ void ImageAnimatorPattern::UpdateFormDurationByRemainder()
             formAnimationRemainder_ =
                 DEFAULT_DURATION - (GetMicroTickCount() - formAnimationStartTime_) / MICROSEC_TO_MILLISEC;
         }
-        if ((formAnimationRemainder_ > 0) && (animator_->GetDuration() > formAnimationRemainder_)) {
-            animator_->SetDuration(formAnimationRemainder_);
+        if ((formAnimationRemainder_ > 0) && (controlledAnimator_->GetDuration() > formAnimationRemainder_)) {
+            controlledAnimator_->SetDuration(formAnimationRemainder_);
         }
         if (formAnimationRemainder_ <= 0) {
             isFormAnimationEnd_ = true;
@@ -632,21 +644,22 @@ void ImageAnimatorPattern::SetDuration(int32_t duration)
     if (IsFormRender()) {
         finalDuration = finalDuration < DEFAULT_DURATION ? finalDuration : DEFAULT_DURATION;
     }
-    if (animator_->GetDuration() == finalDuration) {
-        animator_->RemoveRepeatListener(repeatCallbackId_);
+    if (controlledAnimator_->GetDuration() == finalDuration) {
+        controlledAnimator_->RemoveInnerRepeatListener();
         return;
     }
-    if (animator_->GetStatus() == Animator::Status::IDLE || animator_->GetStatus() == Animator::Status::STOPPED) {
-        animator_->SetDuration(finalDuration);
-        animator_->RemoveRepeatListener(repeatCallbackId_);
+    if (controlledAnimator_->GetControlStatus() == ControlledAnimator::ControlStatus::IDLE ||
+        controlledAnimator_->GetControlStatus() == ControlledAnimator::ControlStatus::STOPPED) {
+        controlledAnimator_->SetDuration(finalDuration);
+        controlledAnimator_->RemoveInnerRepeatListener();
         return;
     }
     // if animator is running or paused, duration will work next time
-    animator_->RemoveRepeatListener(repeatCallbackId_);
-    repeatCallbackId_ = animator_->AddRepeatListener([weak = WeakClaim(this), finalDuration]() {
+    controlledAnimator_->RemoveInnerRepeatListener();
+    controlledAnimator_->AddInnerRepeatListener([weak = WeakClaim(this), finalDuration]() {
         auto imageAnimator = weak.Upgrade();
         CHECK_NULL_VOID(imageAnimator);
-        imageAnimator->animator_->SetDuration(finalDuration);
+        imageAnimator->controlledAnimator_->SetDuration(finalDuration);
     });
 }
 void ImageAnimatorPattern::EnableFirstAnimatedImageAnimation()

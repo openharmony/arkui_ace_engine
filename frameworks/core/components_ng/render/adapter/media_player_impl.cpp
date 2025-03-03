@@ -120,10 +120,21 @@ void MediaPlayerImpl::InitListener()
             }, "ArkUIVideoPlayerCompletion");
     };
 
+    auto onSeekDone = [weak = WeakClaim(this), uiTaskExecutor](uint32_t currentPos) {
+        uiTaskExecutor.PostSyncTask([weak, currentPos] {
+                auto player = weak.Upgrade();
+                CHECK_NULL_VOID(player);
+                if (player->seekDoneCallback_) {
+                    player->seekDoneCallback_(currentPos);
+                }
+            }, "ArkUIVideoPlayerSeekDone");
+    };
+
     player_->AddPreparedListener(onPrepared);
     player_->AddPlayStatusListener(onPlayerStatus);
     player_->AddCurrentPosListener(onCurrentTimeChange);
     player_->AddCompletionListener(onCompletion);
+    player_->AddSeekDoneListener(onSeekDone);
 }
 
 void MediaPlayerImpl::ResetMediaPlayer() {}
@@ -173,6 +184,11 @@ void MediaPlayerImpl::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUp
     errorCallback_ = errorEvent;
     resolutionChangeCallback_ = resolutionChangeEvent;
     startRenderFrameCallback_ = startRenderFrameEvent;
+}
+
+void MediaPlayerImpl::RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent)
+{
+    seekDoneCallback_ = seekDoneEvent;
 }
 
 void MediaPlayerImpl::RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent)

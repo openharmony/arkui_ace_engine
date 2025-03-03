@@ -266,6 +266,7 @@ RectF RichEditorSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
         GetGlobalRectWithTransform(intersectRect);
     }
+    ApplySelectAreaWithKeyboard(intersectRect);
     return intersectRect;
 }
 
@@ -346,7 +347,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     }
 }
 
-void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectInfo)
+void RichEditorSelectOverlay::OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
 {
     BaseTextSelectOverlay::OnUpdateOnCreateMenuCallback(selectInfo);
     selectInfo.menuCallback.showMenuOnMoveDone = [weak = WeakClaim(this)]() {
@@ -581,6 +582,18 @@ void RichEditorSelectOverlay::UpdateHandleOffset()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE);
+}
+
+void RichEditorSelectOverlay::UpdateFirstHandleOffset()
+{
+    CHECK_NULL_VOID(dragHandleIndex_ != DragHandleIndex::FIRST);
+    BaseTextSelectOverlay::UpdateFirstHandleOffset();
+}
+
+void RichEditorSelectOverlay::UpdateSecondHandleOffset()
+{
+    CHECK_NULL_VOID(dragHandleIndex_ != DragHandleIndex::SECOND);
+    BaseTextSelectOverlay::UpdateSecondHandleOffset();
 }
 
 void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()

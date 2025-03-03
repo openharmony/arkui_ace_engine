@@ -15,7 +15,6 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
-#include "input_manager.h"
 
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -98,6 +97,7 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
             continue;
         }
         auto touchPoint = ConvertTouchPoint(item);
+        touchPoint.CovertId();
         touchEvent.pointers.emplace_back(std::move(touchPoint));
     }
     touchEvent.CovertId();
@@ -327,10 +327,6 @@ MouseButton GetMouseEventButton(int32_t button)
             return MouseButton::RIGHT_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
             return MouseButton::MIDDLE_BUTTON;
-        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_SIDE:
-            return MouseButton::SIDE_BUTTON;
-        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_EXTRA:
-            return MouseButton::EXTRA_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_FORWARD:
             return MouseButton::FORWARD_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_BACK:
@@ -614,6 +610,9 @@ void GetPointerEventAction(int32_t action, DragPointerEvent& event)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
             event.action = PointerAction::PULL_OUT_WINDOW;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL:
+            event.action = PointerAction::PULL_CANCEL;
+            break;
         default:
             event.action = PointerAction::UNKNOWN;
             break;
@@ -633,6 +632,9 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
     }
     if (action == PointerAction::UP) {
         pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    }
+    if (action == PointerAction::PULL_CANCEL) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
     }
 }
 

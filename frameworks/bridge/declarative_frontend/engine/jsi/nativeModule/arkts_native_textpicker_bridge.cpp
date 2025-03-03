@@ -35,6 +35,9 @@ constexpr int32_t END_MARGIN_INDEX = 4;
 constexpr int32_t NUM_1 = 1;
 
 constexpr int32_t ARG_GROUP_LENGTH = 3;
+constexpr int PARAM_ARR_LENGTH_2 = 2;
+constexpr int NUM_0 = 0;
+constexpr int NUM_2 = 2;
 bool ParseDividerDimension(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& valueDim)
 {
     return !ArkTSUtils::ParseJsDimensionVpNG(vm, value, valueDim, false) || LessNotEqual(valueDim.Value(), 0.0f) ||
@@ -636,6 +639,136 @@ ArkUINativeModuleValue TextPickerBridge::ResetDigitalCrownSensitivity(ArkUIRunti
     auto modifier = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
     modifier->getTextPickerModifier()->resetTextPickerDigitalCrownSensitivity(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+template<typename T>
+panda::Local<panda::JSValueRef> StringToStringValueWithVM(const EcmaVM* vm, T val)
+{
+    if constexpr (std::is_same_v<T, std::string>) {
+        return panda::StringRef::NewFromUtf8(vm, val.c_str());
+    } else if constexpr (std::is_same_v<T, const char*>) {
+        return panda::StringRef::NewFromUtf8(vm, val);
+    } else if constexpr (std::is_same_v<T, std::u16string>) {
+        return panda::StringRef::NewFromUtf16(vm, val.c_str());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextPickerBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::vector<std::string>&, const std::vector<double>&)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+            const std::vector<std::string>& value, const std::vector<double>& index) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            if (value.size() == NUM_1 && index.size() == NUM_1) {
+                panda::Local<panda::NumberRef> paramIndex = panda::NumberRef::New(vm, index[NUM_0]);
+                panda::Local<panda::StringRef> paramVaule = StringToStringValueWithVM(vm, value[NUM_0].c_str());
+                panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { paramVaule, paramIndex };
+                func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+            } else {
+                int32_t i = NUM_0;
+                int32_t j = NUM_0;
+                auto valueArray = panda::ArrayRef::New(vm);
+                auto indexArray = panda::ArrayRef::New(vm);
+                for (const double& it : index) {
+                    panda::Local<panda::NumberRef> item = panda::NumberRef::New(vm, it);
+                    panda::ArrayRef::SetValueAt(vm, indexArray, i++, item);
+                }
+                for (const std::string& str : value) {
+                    panda::Local<panda::StringRef> item = StringToStringValueWithVM(vm, str.c_str());
+                    panda::ArrayRef::SetValueAt(vm, valueArray, j++, item);
+                }
+                panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { valueArray, indexArray };
+                func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+            }
+        };
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerOnChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextPickerBridge::ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerOnChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextPickerBridge::SetOnScrollStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerOnScrollStop(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::vector<std::string>&, const std::vector<double>&)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+            const std::vector<std::string>& value, const std::vector<double>& index) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            if (value.size() == NUM_1 && index.size() == NUM_1) {
+                panda::Local<panda::NumberRef> paramIndex = panda::NumberRef::New(vm, index[NUM_0]);
+                panda::Local<panda::StringRef> paramVaule = StringToStringValueWithVM(vm, value[NUM_0].c_str());
+                panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { paramVaule, paramIndex };
+                func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+            } else {
+                int32_t i = NUM_0;
+                int32_t j = NUM_0;
+                auto valueArray = panda::ArrayRef::New(vm);
+                auto indexArray = panda::ArrayRef::New(vm);
+                for (const double& it : index) {
+                    panda::Local<panda::NumberRef> item = panda::NumberRef::New(vm, it);
+                    panda::ArrayRef::SetValueAt(vm, indexArray, i++, item);
+                }
+                for (const std::string& str : value) {
+                    panda::Local<panda::StringRef> item = StringToStringValueWithVM(vm, str.c_str());
+                    panda::ArrayRef::SetValueAt(vm, valueArray, j++, item);
+                }
+                panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { valueArray, indexArray };
+                func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+            }
+        };
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerOnScrollStop(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextPickerBridge::ResetOnScrollStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerOnScrollStop(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

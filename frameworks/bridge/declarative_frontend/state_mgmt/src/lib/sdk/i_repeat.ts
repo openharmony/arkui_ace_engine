@@ -23,7 +23,7 @@ interface RepeatItem<T> {
 }
 
 type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
-type RepeatTypeGenFunc<T> = (item: T, index: number) => string;
+type RepeatTTypeGenFunc<T> = (item: T, index: number) => string;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
 type RepeatTemplateOptions =  { cachedCount?: number };
 type RepeatTemplateImplOptions = { cachedCountSpecified: boolean, cachedCount?: number };
@@ -58,7 +58,7 @@ interface RepeatAPI<T> {
     virtualScroll: (options?: { totalCount?: number, reusable?: boolean }) => RepeatAPI<T>;
 
     // function to decide which template to use, each template has an id
-    templateId: (typeFunc: RepeatTypeGenFunc<T>) => RepeatAPI<T>;
+    templateId: (typeFunc: RepeatTTypeGenFunc<T>) => RepeatAPI<T>;
 
     // template: id + builder function to render specific type of data item
     template: (type: string, itemGenFunc: RepeatItemGenFunc<T>, options?: RepeatTemplateOptions) => RepeatAPI<T>;

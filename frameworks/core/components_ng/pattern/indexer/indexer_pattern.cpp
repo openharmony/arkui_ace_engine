@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
@@ -1030,9 +1028,9 @@ void IndexerPattern::UpdateBubbleView(std::vector<std::string>& currentListData)
 Shadow IndexerPattern::GetPopupShadow()
 {
     Shadow shadow;
-    auto colorMode = SystemProperties::GetColorMode();
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, shadow);
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
     shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultLG, colorMode);
@@ -1655,9 +1653,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected) {
         onPopupSelected(index);
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPopupSelected");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected");
     }
     ChangeListItemsSelectedStyle(index);
 }

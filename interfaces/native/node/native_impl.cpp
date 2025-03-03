@@ -25,6 +25,10 @@
 namespace {
 
 constexpr int32_t CURRENT_NATIVE_NODE_API_VERSION = 1;
+constexpr int32_t NATIVE_DIALOG_VERSION_0 = 0;
+constexpr int32_t NATIVE_DIALOG_VERSION_1 = 1;
+constexpr int32_t NATIVE_DIALOG_VERSION_2 = 2;
+constexpr int32_t NATIVE_DIALOG_VERSION_3 = 3;
 
 ArkUI_NativeNodeAPI_Compatible nodeImpl_compatible = {
     CURRENT_NATIVE_NODE_API_VERSION,
@@ -116,7 +120,17 @@ ArkUI_NativeDialogAPI_2 dialogImpl_2 = {
     OHOS::Ace::DialogModel::SetLevelMode,
     OHOS::Ace::DialogModel::SetLevelUniqueId,
     OHOS::Ace::DialogModel::SetImmersiveMode,
+};
+
+ArkUI_NativeDialogAPI_3 dialogImpl_3 = {
+    dialogImpl_1,
+    dialogImpl_2,
     OHOS::Ace::DialogModel::SetLevelOrder,
+    OHOS::Ace::DialogModel::RegisterOnWillAppear,
+    OHOS::Ace::DialogModel::RegisterOnDidAppear,
+    OHOS::Ace::DialogModel::RegisterOnWillDisappear,
+    OHOS::Ace::DialogModel::RegisterOnDidDisappear,
+    OHOS::Ace::DialogModel::SetFocusable,
 };
 
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
@@ -182,11 +196,13 @@ void* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t ver
         }
         case ARKUI_NATIVE_DIALOG: {
             switch (version) {
-                case 0:
-                case 1:
+                case NATIVE_DIALOG_VERSION_0:
+                case NATIVE_DIALOG_VERSION_1:
                     return &dialogImpl_1;
-                case 2:
+                case NATIVE_DIALOG_VERSION_2:
                     return &dialogImpl_2;
+                case NATIVE_DIALOG_VERSION_3:
+                    return &dialogImpl_3;
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "fail to get dialog api family, version is incorrect: %{public}d", version);
@@ -240,6 +256,8 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
                 return &dialogImpl_1;
             } else if (strcmp(structName, "ArkUI_NativeDialogAPI_2") == 0) {
                 return &dialogImpl_2;
+            } else if (strcmp(structName, "ArkUI_NativeDialogAPI_3") == 0) {
+                return &dialogImpl_3;
             }
             break;
         case ARKUI_NATIVE_GESTURE:

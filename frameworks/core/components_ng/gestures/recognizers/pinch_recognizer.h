@@ -70,6 +70,8 @@ private:
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
+    bool ProcessAxisAbnormalCondition(const AxisEvent& event);
+    bool ProcessAxisReject();
 
     double distance_ = 0.0;
     double initialDev_ = 0.0;

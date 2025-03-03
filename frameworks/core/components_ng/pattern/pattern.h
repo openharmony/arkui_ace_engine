@@ -34,7 +34,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
-
+#include "core/common/container_consts.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -124,7 +124,9 @@ public:
 
     void DetachFromFrameNode(FrameNode* frameNode)
     {
+        onDetach_ = true;
         OnDetachFromFrameNode(frameNode);
+        onDetach_ = false;
         frameNode_.Reset();
     }
 
@@ -192,7 +194,7 @@ public:
     virtual void OnModifyDone()
     {
         CheckLocalized();
-        auto* frameNode = GetUnsafeHostPtr();
+        auto frameNode = GetHost();
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {
             return;
@@ -203,7 +205,7 @@ public:
         }
         std::list<RefPtr<FrameNode>> childrenList {};
         std::queue<RefPtr<FrameNode>> queue {};
-        queue.emplace(Claim(frameNode));
+        queue.emplace(frameNode);
         RefPtr<FrameNode> parentNode;
         while (!queue.empty()) {
             parentNode = queue.front();
@@ -357,23 +359,21 @@ public:
 
     RefPtr<FrameNode> GetHost() const
     {
+        if (onDetach_ && SystemProperties::DetectGetHostOnDetach()) {
+            LOGF_ABORT("fatal: can't GetHost at detaching period");
+        }
         return frameNode_.Upgrade();
     }
 
     int32_t GetHostInstanceId() const
     {
         auto host = GetHost();
-        CHECK_NULL_RETURN(host, -1); // -1 means no valid id exists
+        CHECK_NULL_RETURN(host, INSTANCE_ID_UNDEFINED);
         return host->GetInstanceId();
     }
 
-    FrameNode* GetUnsafeHostPtr() const
-    {
-        return UnsafeRawPtr(frameNode_);
-    }
-
     PipelineContext* GetContext() {
-        auto frameNode = GetUnsafeHostPtr();
+        auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode->GetContext();
     }
@@ -665,6 +665,11 @@ public:
         return host->GetThemeScopeId();
     }
 
+    virtual bool ReusedNodeSkipMeasure()
+    {
+        return false;
+    }
+
     virtual void OnFocusNodeChange(FocusReason focusReason) {}
     virtual void OnCollectRemoved() {}
     virtual std::string GetCurrentLanguage()
@@ -684,6 +689,7 @@ protected:
     WeakPtr<FrameNode> frameNode_;
 
 private:
+    bool onDetach_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG

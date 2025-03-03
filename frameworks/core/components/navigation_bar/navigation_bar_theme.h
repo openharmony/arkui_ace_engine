@@ -38,9 +38,14 @@ public:
         RefPtr<NavigationBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<NavigationBarTheme> theme = AceType::Claim(new NavigationBarTheme());
-            if (!themeConstants) {
-                return theme;
-            }
+            InitTheme(theme, themeConstants);
+            return theme;
+        }
+
+    protected:
+        void InitTheme(const RefPtr<NavigationBarTheme>& theme, const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            CHECK_NULL_VOID(themeConstants);
             SetSymbolTheme(themeConstants, theme);
             theme->backBtnResourceId_ = InternalResource::ResourceId::TITLEBAR_BACK;
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
@@ -61,16 +66,16 @@ public:
                 theme->mostMenuItemCountInBar_ =
                     menuCount < 0 ? theme->mostMenuItemCountInBar_ : static_cast<uint32_t>(menuCount);
                 theme->titleColor_ = pattern->GetAttr<Color>("title_color", Color::WHITE);
-                theme->titleFontSize_  = pattern->GetAttr<Dimension>("title_text_font_size", 0.0_vp);
+                theme->titleFontSize_ = pattern->GetAttr<Dimension>("title_text_font_size", 0.0_vp);
                 theme->titleFontSizeMin_ = pattern->GetAttr<Dimension>("title_text_font_size_min", 0.0_vp);
-                theme->titleFontSizeBig_  = pattern->GetAttr<Dimension>("title_text_font_size_big", 0.0_vp);
+                theme->titleFontSizeBig_ = pattern->GetAttr<Dimension>("title_text_font_size_big", 0.0_vp);
                 theme->subTitleColor_ = pattern->GetAttr<Color>("sub_title_text_color", Color::WHITE);
-                theme->subTitleFontSize_  = pattern->GetAttr<Dimension>("sub_title_text_font_size", 0.0_vp);
+                theme->subTitleFontSize_ = pattern->GetAttr<Dimension>("sub_title_text_font_size", 0.0_vp);
                 theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", Color::WHITE);
                 theme->buttonPressedColor_ = pattern->GetAttr<Color>("button_bg_color_pressed", Color::WHITE);
                 theme->buttonFocusColor_ = pattern->GetAttr<Color>("button_bg_color_focused", Color::WHITE);
                 theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color::WHITE);
-                theme->buttonCornerRadius_  = pattern->GetAttr<Dimension>("button_corner_radius", 0.0_vp);
+                theme->buttonCornerRadius_ = pattern->GetAttr<Dimension>("button_corner_radius", 0.0_vp);
                 theme->maxPaddingStart_ = pattern->GetAttr<Dimension>("title_left_spacing", 0.0_vp);
                 theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("title_right_spacing", 0.0_vp);
                 theme->defaultPaddingStart_ = pattern->GetAttr<Dimension>("back_button_left_spacing", 0.0_vp);
@@ -80,19 +85,18 @@ public:
                 theme->dividerShadowEnable_ = static_cast<uint32_t>(StringUtils::StringToInt(dividerShadowEnable));
                 theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
                 auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
-                theme->navBarUnfocusEffectEnable_ = static_cast<uint32_t>(
-                    StringUtils::StringToInt(navBarUnfocusEffectEnable));
+                theme->navBarUnfocusEffectEnable_ =
+                    static_cast<uint32_t>(StringUtils::StringToInt(navBarUnfocusEffectEnable));
                 theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
                 theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
                 theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
                 theme->moreMessage_ = pattern->GetAttr<std::string>("navigation_general_more", "null");
             }
             ParsePattern(themeConstants, theme);
-            return theme;
         }
 
     private:
-        void SetSymbolTheme(const RefPtr<ThemeConstants>& themeConstants, RefPtr<NavigationBarTheme>& theme) const
+        void SetSymbolTheme(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<NavigationBarTheme>& theme) const
         {
             theme->backSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_backward");
             theme->moreSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.dot_grid_2x2");
@@ -143,7 +147,6 @@ public:
                 pattern->GetAttr<Dimension>("toolbar_item_focus_border_size_api_sixteen", 2.0_vp);
             theme->toolbarItemFocusBorderColor_ =
                 pattern->GetAttr<Color>("toolbar_item_focus_color_api_sixteen", Color(0x007dff));
-            theme->toolbarItemFontSize_ = pattern->GetAttr<Dimension>("toolbar_item_font_size_api_sixteen", 10.0_fp);
             theme->toolbarItemFontColor_ =
                 pattern->GetAttr<Color>("toolbar_item_font_color_api_sixteen", Color(0x66182431));
             theme->toolbarItemBorderRadiusValue_ =
@@ -162,6 +165,7 @@ public:
             theme->toolbarItemTopPadding_ = 2.0_vp;
             theme->toolbarItemLeftOrRightPadding_ = 2.0_vp;
             theme->toolbarItemBottomPadding_ = 2.0_vp;
+            theme->toolbarItemTextMaxLines_ = 1;
         }
 
         void SetNavigationTokenTheme(RefPtr<ThemeStyle> pattern, const RefPtr<NavigationBarTheme>& theme) const
@@ -242,10 +246,21 @@ public:
         return titleColor_;
     }
 
+    void SetTitleColor(const Color& color)
+    {
+        titleColor_ = color;
+    }
+
     const Color& GetSubTitleColor() const
     {
         return subTitleColor_;
     }
+
+    void SetSubTitleColor(const Color& color)
+    {
+        subTitleColor_ = color;
+    }
+
     const Dimension& GetTitleFontSizeBig() const
     {
         return titleFontSizeBig_;
@@ -309,6 +324,10 @@ public:
     {
         return menuIconColor_;
     }
+    void SetMenuIconColor(const Color& color)
+    {
+        menuIconColor_ = color;
+    }
     const Color& GetButtonNormalColor() const
     {
         return buttonNormalColor_;
@@ -363,6 +382,11 @@ public:
         return backButtonIconColor_;
     }
 
+    void SetBackButtonIconColor(const Color& color)
+    {
+        backButtonIconColor_ = color;
+    }
+
     double GetAlphaDisabled() const
     {
         return alphaDisabled_;
@@ -380,9 +404,17 @@ public:
     {
         return toolbarDividerColor_;
     }
+    void SetToolBarDividerColor(const Color& color)
+    {
+        toolbarDividerColor_ = color;
+    }
     const Color& GetToolBarItemFocusColor() const
     {
         return toolbarItemFocusBorderColor_;
+    }
+    void SetToolBarItemFocusColor(const Color& color)
+    {
+        toolbarItemFocusBorderColor_ = color;
     }
     const Dimension& GetToolBarItemFocusBorderWidth() const
     {
@@ -404,6 +436,10 @@ public:
     {
         return toolbarItemFontColor_;
     }
+    void SetToolBarItemFontColor(const Color& color)
+    {
+        toolbarItemFontColor_ = color;
+    }
     double GetToolbarItemDisabledAlpha() const
     {
         return toolbarItemDisabledAlpha_;
@@ -412,21 +448,29 @@ public:
     {
         return toolbarIconColor_;
     }
+    void SetToolbarIconColor(const Color& color)
+    {
+        toolbarIconColor_ = color;
+    }
     const Dimension& GetToolbarIconSize() const
     {
         return toolbarIconSize_;
-    }
-    const Dimension& GetToolbarHideTextIconSize() const
-    {
-        return toolbarHideTextIconSize_;
     }
     const Color& GetToolbarActiveIconColor() const
     {
         return toolbarActiveIconColor_;
     }
+    void SetToolbarActiveIconColor(const Color& color)
+    {
+        toolbarActiveIconColor_ = color;
+    }
     const Color& GetToolBarItemActiveFontColor() const
     {
         return toolbarActiveTextColor_;
+    }
+    void SetToolBarItemActiveFontColor(const Color& color)
+    {
+        toolbarActiveTextColor_ = color;
     }
     uint32_t GetToolbarItemTextMaxLines() const
     {
@@ -468,6 +512,10 @@ public:
     {
         return toolbarItemBottomPadding_;
     }
+    const Dimension& GetToolbarItemIconHideTextTopPadding() const
+    {
+        return toolbarItemIconTopHideTextPadding_;
+    }
     const Dimension& GetToolbarItemIconTopPadding() const
     {
         return toolbarItemIconTopPadding_;
@@ -491,6 +539,10 @@ public:
     const Color& GetNavigationDividerColor() const
     {
         return navigationDividerColor_;
+    }
+    void SetNavigationDividerColor(const Color& color)
+    {
+        navigationDividerColor_ = color;
     }
     const Dimension& GetMarginLeft() const
     {
@@ -544,9 +596,17 @@ public:
     {
         return mainTitleFontColor_;
     }
+    void SetMainTitleFontColor(const Color& color)
+    {
+        mainTitleFontColor_ = color;
+    }
     const Color& GetSubTitleFontColor() const
     {
         return subTitleFontColor_;
+    }
+    void SetSubTitleFontColor(const Color& color)
+    {
+        subTitleFontColor_ = color;
     }
     const FontWeight& GetMainTitleFontWeight() const
     {
@@ -567,6 +627,10 @@ public:
     const Color& GetIconColor() const
     {
         return iconColor_;
+    }
+    void SetIconColor(const Color& color)
+    {
+        iconColor_ = color;
     }
     const Dimension& GetCompPadding() const
     {
@@ -664,6 +728,12 @@ public:
     {
         return moreMessage_;
     }
+    void SetToolbarBgColor(const Color& color)
+    {
+        toolbarBgColor_ = color;
+        toolbarBgColorWithOpacity_ = toolbarBgColor_.BlendOpacity(toolbarBgAlpha_);
+    }
+
 protected:
     NavigationBarTheme() = default;
 
@@ -714,7 +784,6 @@ private:
     double toolbarBgAlpha_ = 0.95;
     Color toolbarIconColor_;
     Dimension toolbarIconSize_ = 24.0_vp;
-    Dimension toolbarHideTextIconSize_ = 36.0_vp;
     Color toolbarActiveIconColor_;
     Color toolbarActiveTextColor_;
     uint32_t toolbarItemTextMaxLines_ = 2;
@@ -727,7 +796,8 @@ private:
     Dimension toolbarItemHeight_ = 56.0_vp;
     Dimension toolbarHeight_ = 56.0_vp;
     Dimension toolbarItemBottomPadding_ = 4.0_vp;
-    Dimension toolbarItemIconTopPadding_ = 4.0_vp;
+    Dimension toolbarItemIconTopPadding_ = 2.0_vp;
+    Dimension toolbarItemIconTopHideTextPadding_ = 8.0_vp;
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
     std::string moreMessage_ = "";

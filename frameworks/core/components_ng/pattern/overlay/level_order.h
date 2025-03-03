@@ -25,9 +25,11 @@ public:
     LevelOrder() = default;
     ~LevelOrder() = default;
 
+    static constexpr double ORDER_DEFAULT = 0.0;
+
     void SetOrder(const double order)
     {
-        order_ = order;
+        order_ = order < ORDER_MIN ? ORDER_MIN : (order > ORDER_MAX ? ORDER_MAX : order);
     }
 
     double GetOrder() const
@@ -36,7 +38,10 @@ public:
     }
 
 private:
-    double order_ = 0.0;
+    double order_ = ORDER_DEFAULT;
+
+    static constexpr double ORDER_MIN = -100000.0;
+    static constexpr double ORDER_MAX = 100000.0;
 };
 
 } // namespace OHOS::Ace::NG

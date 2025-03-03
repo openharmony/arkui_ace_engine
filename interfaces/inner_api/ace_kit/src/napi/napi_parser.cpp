@@ -172,10 +172,11 @@ RefPtr<ResourceAdapter> CreateResourceWrapper(const ResourceInfo& info)
 
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (bundleName.has_value() && moduleName.has_value()) {
-        auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName.value_or(""), moduleName.value_or(""));
+        auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+            bundleName.value_or(""), moduleName.value_or(""), Container::CurrentIdSafely());
         resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     } else {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
     }
     return resourceAdapter;
 }

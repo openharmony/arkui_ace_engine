@@ -22,7 +22,7 @@ class __RepeatVirtualScrollImpl<T> {
     private arr_: Array<T>;
     private itemGenFuncs_: { [type: string]: RepeatItemGenFunc<T> };
     private keyGenFunc_?: RepeatKeyGenFunc<T>;
-    private typeGenFunc_: RepeatTypeGenFunc<T>;
+    private ttypeGenFunc_?: RepeatTTypeGenFunc<T>;
 
     private totalCount_: number;
     private totalCountSpecified : boolean = false;
@@ -50,14 +50,14 @@ class __RepeatVirtualScrollImpl<T> {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.keyGenFunc_ = config.keyGenFunc;
-        this.typeGenFunc_ = config.typeGenFunc;
+        this.ttypeGenFunc_ = config.ttypeGenFunc;
 
         // if totalCountSpecified==false, then need to create dependency on array length 
         // so when array length changes, will update totalCount
         this.totalCountSpecified = config.totalCountSpecified;
-        this.totalCount_ = (!this.totalCountSpecified || config.totalCount < 0) 
+        this.totalCount_ = (!this.totalCountSpecified || (config.totalCount as number) < 0) 
             ? this.arr_.length
-            : config.totalCount;
+            : config.totalCount as number;
 
         this.templateOptions_ = config.templateOptions;
 
@@ -75,6 +75,25 @@ class __RepeatVirtualScrollImpl<T> {
         } else {
             this.reRender();
         }
+    }
+
+    // wraps a type gen function with validation logic
+    private ttypeGenFunc(item: T, index: number): string {
+        if (this.ttypeGenFunc_ === undefined) {
+            return RepeatEachFuncTtype;
+        }
+        let ttype = RepeatEachFuncTtype;
+        try {
+            ttype = this.ttypeGenFunc_(item, index);
+        } catch (e) {
+            stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl. Error generating ttype at index: ${index}`,
+                e?.message);
+        }
+        if (ttype in this.itemGenFuncs_ === false) {
+            stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl. No template found for ttype '${ttype}'`);
+            ttype = RepeatEachFuncTtype;
+        }
+        return ttype;
     }
 
     /**/
@@ -211,7 +230,7 @@ class __RepeatVirtualScrollImpl<T> {
             ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
 
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                let ttype = this.typeGenFunc_(this.arr_[i], i);
+                let ttype = this.ttypeGenFunc(this.arr_[i], i);
                 result.push(ttype);
             } // for
             ObserveV2.getObserve().stopRecordDependencies();
@@ -230,18 +249,18 @@ class __RepeatVirtualScrollImpl<T> {
             if (from <= to) {
                 for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
                     const item = this.arr_[i];
-                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    const ttype = this.ttypeGenFunc(this.arr_[i], i);
                     this.lastActiveRangeData_[i] = { item, ttype };
                 }
             } else {
                 for (let i = 0; i <= to && i < this.arr_.length; i++) {
                     const item = this.arr_[i];
-                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    const ttype = this.ttypeGenFunc(this.arr_[i], i);
                     this.lastActiveRangeData_[i] = { item, ttype };
                 }
                 for (let i = Math.max(0, from); i < this.arr_.length; i++) {
                     const item = this.arr_[i];
-                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    const ttype = this.ttypeGenFunc(this.arr_[i], i);
                     this.lastActiveRangeData_[i] = { item, ttype };
                 }
             }
@@ -281,7 +300,7 @@ class __RepeatVirtualScrollImpl<T> {
 
     private initialRenderItem(repeatItem: __RepeatItemFactoryReturn<T>): void {
         // execute the itemGen function
-        const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index);
+        const itemType = this.ttypeGenFunc(repeatItem.item, repeatItem.index);
         const isTemplate: boolean = (itemType !== '');
         const itemFunc = this.itemGenFuncs_[itemType];
         itemFunc(repeatItem);
@@ -297,7 +316,7 @@ class __RepeatVirtualScrollImpl<T> {
             const oldItem = this.lastActiveRangeData_[+i]?.item;
             const oldType = this.lastActiveRangeData_[+i]?.ttype;
             const newItem = this.arr_[+i];
-            const newType = this.typeGenFunc_(this.arr_[+i], +i);
+            const newType = this.ttypeGenFunc(this.arr_[+i], +i);
 
             if (oldItem !== newItem) {
                 stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() i:#${i} item changed => true`);

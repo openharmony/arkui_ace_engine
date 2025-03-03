@@ -46,7 +46,6 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
-#include "core/components/font/constants_converter.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
@@ -200,15 +199,16 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     }
     JSRef<JSVal> args = info[0];
     std::string fontWeight;
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    ParseJsInt32(args, variableFontWeight);
+    TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+
     if (args->IsNumber()) {
         fontWeight = args->ToString();
     } else {
         ParseJsString(args, fontWeight);
     }
-    FontWeight formatFontWeight = ConvertStrToFontWeight(fontWeight);
-    TextModel::GetInstance()->SetFontWeight(formatFontWeight);
-    int32_t fontWeightValue = static_cast<int32_t>(Constants::GetVariableFontWeight(formatFontWeight));
-    TextModel::GetInstance()->SetVariableFontWeight(fontWeightValue);
+    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 
     if (info.Length() < 2) { // 2 : two args
         return;
@@ -629,7 +629,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     if (!ParseJsColor(colorValue, result)) {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (Container::CurrentColorMode() == ColorMode::DARK) {
             result = theme->GetTextStyle().GetTextColor();
         } else {
             result = theme->GetTextStyle().GetTextDecorationColor();
@@ -682,8 +682,9 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             func->Execute(*clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::u16string label = u"";
-            if (!node.Invalid()) {
-                auto pattern = node.GetRawPtr()->GetPattern();
+            auto frameNode = node.Upgrade();
+            if (frameNode) {
+                auto pattern = frameNode->GetPattern();
                 CHECK_NULL_VOID(pattern);
                 auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
                 CHECK_NULL_VOID(layoutProperty);
@@ -785,9 +786,12 @@ void JSText::Create(const JSCallbackInfo& info)
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
     if (jsController) {
         jsController->SetController(controller);
-        auto styledString = jsController->GetStyledString();
-        if (styledString) {
-            controller->SetStyledString(styledString, false);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            auto styledString = jsController->GetStyledString();
+            if (styledString) {
+                controller->SetStyledString(styledString, false);
+                jsController->ClearStyledString();
+            }
         }
     }
 }
@@ -925,7 +929,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     // TextResponseType
-    int32_t resquiredParameterCount = 3;
+    uint32_t resquiredParameterCount = 3;
     JSRef<JSVal> argsResponse = info[resquiredParameterCount - 1];
     NG::TextResponseType responseType = NG::TextResponseType::LONG_PRESS;
     if (argsResponse->IsNumber()) {
@@ -945,7 +949,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     // SelectionMenuOptions
     NG::SelectMenuParam menuParam;
     menuParam.isValid = isValidTextSpanType;
-    if (info.Length() > resquiredParameterCount) {
+    if (info.Length() > static_cast<uint32_t>(resquiredParameterCount)) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
         if (argsMenuOptions->IsObject()) {
             ParseMenuParam(info, argsMenuOptions, menuParam);
@@ -1119,8 +1123,10 @@ void JSTextController::SetStyledString(const JSCallbackInfo& info)
     }
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
-    styledString_ = spanStringController;
     auto controller = controllerWeak_.Upgrade();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) && !controller) {
+        styledString_ = spanStringController;
+    }
     CHECK_NULL_VOID(controller);
     controller->SetStyledString(spanStringController, true);
     auto thisObj = info.This();

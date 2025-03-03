@@ -60,6 +60,7 @@ struct PopupInfo {
     SizeF targetSize;
     OffsetF targetOffset;
     bool focusable = false;
+    bool isAvoidKeyboard = false;
 };
 
 struct GatherNodeChildInfo {
@@ -95,6 +96,7 @@ struct CustomKeyboardOffsetInfo {
     float inAniStartOffset = 0.0f;
     float outAniEndOffset = 0.0f;
 };
+
 struct OverlayManagerInfo {
     bool renderRootOverlay = true;
 };
@@ -109,7 +111,7 @@ public:
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
-    void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
+    void HidePopup(int32_t targetId, const PopupInfo& popupInfo, bool isEraseFromMap = false);
     RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
@@ -231,13 +233,6 @@ public:
     void SetMaskNodeId(int32_t dialogId, int32_t maskId)
     {
         maskNodeIdMap_[dialogId] = maskId;
-    }
-
-    void SetModalDialogDisplayId(uint64_t displayId)
-    {
-        if (displayId != -1ULL) {
-            dialogDisplayId_ = displayId;
-        }
     }
     bool isMaskNode(int32_t maskId);
     int32_t GetMaskNodeIdWithDialogId(int32_t dialogId);
@@ -496,8 +491,23 @@ public:
     }
     RefPtr<FrameNode> GetModalStackTop();
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
+    void CreateSheetWapperNode(const RefPtr<FrameNode>& sheetPageNode,
+        const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
+    void CreateMaskNode(const RefPtr<FrameNode>& sheetPageNode,
+        const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
+    void RemoveSheet(RefPtr<FrameNode> sheetNode);
+    void InitSheetWrapperAction(const RefPtr<FrameNode>& sheetNode,
+        const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
+    RefPtr<FrameNode> MountSheetWrapperAndChildren(const RefPtr<FrameNode>& sheetNode,
+        const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
+    std::unordered_map<SheetKey, WeakPtr<FrameNode>, SheetKeyHash> GetSheetMap()
+    {
+        return sheetMap_;
+    }
+    void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
+        std::optional<double> levelOrder = std::nullopt);
+    void OnMainWindowSizeChange(int32_t instanceId);
 
-    void DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
     void CleanSheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
 
     RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
@@ -543,7 +553,7 @@ public:
     float GetRootHeight() const;
     float GetRootWidth() const;
 
-    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn);
+    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, RefPtr<FrameNode> sheetNode, bool isTransitionIn);
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
@@ -676,7 +686,7 @@ public:
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
-    bool isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
+    bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
     static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode);
 
 private:
@@ -698,12 +708,10 @@ private:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack);
-    void SaveSheePageNode(
+    void SaveSheetPageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
     bool CheckTargetIdIsValid(int32_t targetId);
-    RefPtr<FrameNode> CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
-        const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
     void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
     void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
         int32_t targetId, bool isStartByUIContext = false, bool isPartialUpdate = false,
@@ -762,10 +770,10 @@ private:
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
     bool IsContextMenuBindedOnOrigNode();
-    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
-    void OpenDialogAnimation(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
+    void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
-    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void CloseDialogMatchTransition(const RefPtr<FrameNode>& node);
     void SetContainerButtonEnable(bool isEnabled);
 
@@ -791,7 +799,9 @@ private:
     void PopLevelOrder(const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetPrevNodeWithOrder(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetPrevOverlayNodeWithOrder(std::optional<double> levelOrder);
-    bool IsNeedChangeFocus(std::optional<double> levelOrder);
+    RefPtr<FrameNode> GetBottomOrderFirstNode(std::optional<double> levelOrder);
+    RefPtr<FrameNode> GetBottomOrderFirstOverlayNode(std::optional<double> levelOrder);
+    bool IsNeedChangeFocus(std::optional<double> levelOrder, bool focusable = true);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);
     bool DialogInMapHoldingFocus();
@@ -802,6 +812,7 @@ private:
     void CheckReturnFocus(RefPtr<FrameNode> node);
     void MountPopup(int32_t targetId, const PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
+    bool IsContentUpdatePopup(const RefPtr<Pattern>& pattern);
 
     int32_t GetPopupIdByNode(const RefPtr<FrameNode>& overlay);
     bool PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay);
@@ -861,8 +872,6 @@ private:
     bool SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node,
         std::optional<double> levelOrder = std::nullopt);
     RefPtr<FrameNode> GetOverlayFrameNode();
-    void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
-        std::optional<double> levelOrder = std::nullopt);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
@@ -896,7 +905,6 @@ private:
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
-    uint64_t dialogDisplayId_ = 0;
     bool hasPixelMap_ { false };
     bool hasDragPixelMap_ { false };
     bool hasFilter_ { false };

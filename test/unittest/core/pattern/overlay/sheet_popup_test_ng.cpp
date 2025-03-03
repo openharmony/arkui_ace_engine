@@ -185,7 +185,7 @@ void SheetPopupTestNg::InitSheetAndWrapperLayoutInfo(
 /**
  * @tc.name: GetPopupStyleSheetOffset001
  * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
- *                      (CheckDirectionBottomNew) == True;
+ *                      (CheckDirectionBottomNew == True);
  *           Condition: placement == Bottom, placemenntOnTarget == true
  * @tc.type: FUNC
  */
@@ -199,6 +199,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
     SizeF rootSize = SizeF(3000.f, 3000.f);
     OffsetF rootOffset = OffsetF(0.f, 0.f);
     SizeF targetSize = SizeF(200.f, 80.f);
+    // targetOffset determines bottom space is enough to layout sheetPage
     OffsetF targetOffset = OffsetF(1450.f, 200.f);
 
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
@@ -263,6 +264,282 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
     auto expectedOffsetX = targetOffset.GetX() + targetSize.Width() / 2.0 - sheetPageWidth.ConvertToPx() / 2.0;
     EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX, expectedOffsetX));
     auto expectedOffsetY = targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx();
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY, expectedOffsetY));
+
+    /**
+     * @tc.steps: step4. recover container and pipeline info.
+     */
+    SheetPopupTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetPopupStyleSheetOffset002
+ * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ *                      (CheckDirectionBottomNew == False);
+ *           Condition: placement == Bottom, placemenntOnTarget == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create root and target node, init builder func
+     * @tc.expected: targetNode != nullptr
+     */
+    SheetPopupTestNg::SetUpTestCase();
+    SizeF rootSize = SizeF(3000.f, 3000.f);
+    OffsetF rootOffset = OffsetF(0.f, 0.f);
+    SizeF targetSize = SizeF(200.f, 80.f);
+    // targetOffset determines every space is not enough to layout sheetPage
+    OffsetF targetOffset = OffsetF(1450.f, 1500.f);
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetCurrentWindowRect(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetRootSize(rootSize.Width(), rootSize.Height());
+
+    RefPtr<FrameNode> rootNode;
+    auto targetNode = InitTargetNodeEnv(rootNode, rootSize, rootOffset, targetSize, targetOffset);
+    ASSERT_NE(targetNode, nullptr);
+    
+    CreateSheetBuilder();
+
+    /**
+     * @tc.steps: step2: init sheet size and bind sheet
+     * @tc.expected: bindSheet create success
+     */
+    SheetStyle sheetStyle;
+    Dimension sheetPageWidth = Dimension(1600.f, DimensionUnit::PX);
+    Dimension sheetPageHeight = Dimension(1600.f, DimensionUnit::PX);
+    CreateSheetStyle(sheetStyle, sheetPageWidth, sheetPageHeight);
+    sheetStyle.placement = Placement::BOTTOM;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+
+    /**
+     * @tc.steps: step3: measure and layout sheet page
+     * @tc.expected: finalPlacement == Bottom and showArrow == false
+     */
+    auto sheetPageNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetPageNode, nullptr);
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetThemeType_ = "popup";
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
+    RefPtr<SheetWrapperLayoutAlgorithm> sheetWrapperLayoutAlgorithm;
+    InitSheetAndWrapperLayoutInfo(sheetPageNode, sheetWrapperNode,
+        sheetPageLayoutAlgorithm, sheetWrapperLayoutAlgorithm);
+    auto layoutProperty = sheetPageNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+
+    sheetWrapperNode->Measure(sheetWrapperNode->GetLayoutConstraint());
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetHeight_, sheetPageHeight.ConvertToPx()));
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->placement_, Placement::BOTTOM);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.placementOnTarget, true);
+
+    sheetWrapperNode->Layout();
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement, Placement::BOTTOM);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow, false);
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetHeight_, sheetPageHeight.ConvertToPx()));
+    auto expectedOffsetX = targetOffset.GetX() + targetSize.Width() / 2.0 - sheetPageWidth.ConvertToPx() / 2.0;
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX, expectedOffsetX));
+    auto expectedOffsetY = sheetWrapperLayoutAlgorithm->windowGlobalRect_.Height() +
+        sheetWrapperLayoutAlgorithm->windowGlobalRect_.Top() -
+        sheetWrapperLayoutAlgorithm->sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx();
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY, expectedOffsetY));
+
+    /**
+     * @tc.steps: step4. recover container and pipeline info.
+     */
+    SheetPopupTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetPopupStyleSheetOffset003
+ * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ *                      (CheckDirectionBottomNew == False);
+ *           Condition: placement == Bottom, placemenntOnTarget == false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create root and target node, init builder func
+     * @tc.expected: targetNode != nullptr
+     */
+    SheetPopupTestNg::SetUpTestCase();
+    SizeF rootSize = SizeF(3000.f, 3000.f);
+    OffsetF rootOffset = OffsetF(0.f, 0.f);
+    SizeF targetSize = SizeF(200.f, 80.f);
+    // targetOffset determines every space is not enough to layout sheetPage, but bottom height is biggest
+    OffsetF targetOffset = OffsetF(1450.f, 1400.f);
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetCurrentWindowRect(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetRootSize(rootSize.Width(), rootSize.Height());
+
+    RefPtr<FrameNode> rootNode;
+    auto targetNode = InitTargetNodeEnv(rootNode, rootSize, rootOffset, targetSize, targetOffset);
+    ASSERT_NE(targetNode, nullptr);
+    
+    CreateSheetBuilder();
+
+    /**
+     * @tc.steps: step2: init sheet size and bind sheet
+     * @tc.expected: bindSheet create success
+     */
+    SheetStyle sheetStyle;
+    Dimension sheetPageWidth = Dimension(1600.f, DimensionUnit::PX);
+    Dimension sheetPageHeight = Dimension(1600.f, DimensionUnit::PX);
+    CreateSheetStyle(sheetStyle, sheetPageWidth, sheetPageHeight);
+    sheetStyle.placement = Placement::BOTTOM;
+    sheetStyle.placementOnTarget = false;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+
+    /**
+     * @tc.steps: step3: measure and layout sheet page
+     * @tc.expected: finalPlacement == Bottom and showArrow == false
+     */
+    auto sheetPageNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetPageNode, nullptr);
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetThemeType_ = "popup";
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
+    RefPtr<SheetWrapperLayoutAlgorithm> sheetWrapperLayoutAlgorithm;
+    InitSheetAndWrapperLayoutInfo(sheetPageNode, sheetWrapperNode,
+        sheetPageLayoutAlgorithm, sheetWrapperLayoutAlgorithm);
+    auto layoutProperty = sheetPageNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+
+    sheetWrapperNode->Measure(sheetWrapperNode->GetLayoutConstraint());
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetHeight_, sheetPageHeight.ConvertToPx()));
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->placement_, Placement::BOTTOM);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.placementOnTarget, false);
+
+    sheetWrapperNode->Layout();
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement, Placement::BOTTOM);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow, true);
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    auto resizeHeight = sheetWrapperLayoutAlgorithm->windowGlobalRect_.Height() +
+        sheetWrapperLayoutAlgorithm->windowGlobalRect_.Top() - targetOffset.GetY() - targetSize.Height() -
+        (SHEET_TARGET_SPACE + WINDOW_EDGE_SPACE).ConvertToPx();
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetHeight_, resizeHeight));
+    auto expectedOffsetX = targetOffset.GetX() + targetSize.Width() / 2.0 - sheetPageWidth.ConvertToPx() / 2.0;
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX, expectedOffsetX));
+    auto expectedOffsetY = targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx();
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY, expectedOffsetY));
+
+    /**
+     * @tc.steps: step4. recover container and pipeline info.
+     */
+    SheetPopupTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetPopupStyleSheetOffset004
+ * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ *                      (CheckDirectionBottomNew == False);
+ *           Condition: placement == Bottom, placemenntOnTarget == false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create root and target node, init builder func
+     * @tc.expected: targetNode != nullptr
+     */
+    SheetPopupTestNg::SetUpTestCase();
+    SizeF rootSize = SizeF(3000.f, 3000.f);
+    OffsetF rootOffset = OffsetF(0.f, 0.f);
+    SizeF targetSize = SizeF(200.f, 80.f);
+    // targetOffset determines every space is not enough to layout sheetPage, but top height is biggest
+    OffsetF targetOffset = OffsetF(1450.f, 1500.f);
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetCurrentWindowRect(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetRootSize(rootSize.Width(), rootSize.Height());
+
+    RefPtr<FrameNode> rootNode;
+    auto targetNode = InitTargetNodeEnv(rootNode, rootSize, rootOffset, targetSize, targetOffset);
+    ASSERT_NE(targetNode, nullptr);
+    
+    CreateSheetBuilder();
+
+    /**
+     * @tc.steps: step2: init sheet size and bind sheet
+     * @tc.expected: bindSheet create success
+     */
+    SheetStyle sheetStyle;
+    Dimension sheetPageWidth = Dimension(1600.f, DimensionUnit::PX);
+    Dimension sheetPageHeight = Dimension(1600.f, DimensionUnit::PX);
+    CreateSheetStyle(sheetStyle, sheetPageWidth, sheetPageHeight);
+    sheetStyle.placement = Placement::BOTTOM;
+    sheetStyle.placementOnTarget = false;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+
+    /**
+     * @tc.steps: step3: measure and layout sheet page
+     * @tc.expected: finalPlacement == Bottom and showArrow == false
+     */
+    auto sheetPageNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetPageNode, nullptr);
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetThemeType_ = "popup";
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
+    RefPtr<SheetWrapperLayoutAlgorithm> sheetWrapperLayoutAlgorithm;
+    InitSheetAndWrapperLayoutInfo(sheetPageNode, sheetWrapperNode,
+        sheetPageLayoutAlgorithm, sheetWrapperLayoutAlgorithm);
+    auto layoutProperty = sheetPageNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+
+    sheetWrapperNode->Measure(sheetWrapperNode->GetLayoutConstraint());
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetHeight_, sheetPageHeight.ConvertToPx()));
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->placement_, Placement::BOTTOM);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.placementOnTarget, false);
+
+    sheetWrapperNode->Layout();
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement, Placement::TOP);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow, true);
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    auto resizeHeight = targetOffset.GetY() - sheetWrapperLayoutAlgorithm->windowGlobalRect_.Top() -
+        (SHEET_TARGET_SPACE + WINDOW_EDGE_SPACE).ConvertToPx();
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetHeight_, resizeHeight));
+    auto expectedOffsetX = targetOffset.GetX() + targetSize.Width() / 2.0 - sheetPageWidth.ConvertToPx() / 2.0;
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX, expectedOffsetX));
+    auto expectedOffsetY = sheetWrapperLayoutAlgorithm->windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx();
     EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY, expectedOffsetY));
 
     /**

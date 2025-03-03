@@ -196,7 +196,7 @@ public:
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
-    void ProcessAxisUpdateEvent(float mainDelta);
+    void ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar = false);
     void ProcessAxisEndEvent();
     void LayoutDirectionEst(double correctVelocity, double velocityScale, bool isScrollFromTouchPad);
     void ReportToDragFRCScene(double velocity, NG::SceneStatus sceneStatus);
@@ -714,6 +714,7 @@ private:
     bool nestedScrolling_ = false;
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
+    bool isSlow_ = false;
 
     RefPtr<AxisAnimator> axisAnimator_;
 #ifdef SUPPORT_DIGITAL_CROWN

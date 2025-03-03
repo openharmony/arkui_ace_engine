@@ -60,6 +60,18 @@ void SetStarStyle(ArkUINodeHandle node,
     }
 }
 
+void SetOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        RatingModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        RatingModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
 void ResetStars(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -89,6 +101,12 @@ void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool ind
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetRatingOptions(frameNode, rating, static_cast<bool>(indicator));
 }
+void ResetOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RatingModelNG::SetOnChange(frameNode, nullptr);
+}
 
 namespace NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier()
@@ -98,10 +116,12 @@ const ArkUIRatingModifier* GetRatingModifier()
         .setStars = SetStars,
         .setRatingStepSize = SetRatingStepSize,
         .setStarStyle = SetStarStyle,
+        .setOnChange = SetOnChange,
         .resetStars = ResetStars,
         .resetRatingStepSize = ResetRatingStepSize,
         .resetStarStyle = ResetStarStyle,
         .setRatingOptions = SetRatingOptions,
+        .resetOnChange = ResetOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

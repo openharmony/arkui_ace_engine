@@ -89,7 +89,7 @@ HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest1, TestSiz
     };
     relativeContainer->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.UpdateSizeWhenChildrenEmpty(relativeContainer.GetRawPtr());
+    layoutAlgorithm.UpdateSizeWhenChildrenEmpty(Referenced::RawPtr(relativeContainer));
     // expect: widht/height > parentIdealSize > percentReference
     EXPECT_EQ(relativeContainer->GetGeometryNode()->GetFrameSize(), SizeF(20, 20))
         << relativeContainer->GetGeometryNode()->GetFrameSize().ToString();
@@ -110,7 +110,7 @@ HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest2, TestSiz
     };
     relativeContainer->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.UpdateSizeWhenChildrenEmpty(relativeContainer.GetRawPtr());
+    layoutAlgorithm.UpdateSizeWhenChildrenEmpty(Referenced::RawPtr(relativeContainer));
     // expect: widht/height > parentIdealSize > percentReference
     EXPECT_EQ(relativeContainer->GetGeometryNode()->GetFrameSize(), SizeF(40, 40))
         << relativeContainer->GetGeometryNode()->GetFrameSize().ToString();
@@ -133,7 +133,7 @@ HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest3, TestSiz
     };
     relativeContainer->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.UpdateSizeWhenChildrenEmpty(relativeContainer.GetRawPtr());
+    layoutAlgorithm.UpdateSizeWhenChildrenEmpty(Referenced::RawPtr(relativeContainer));
     // expect: width = left paddingg + right padding = 3 + 3 = 6
     EXPECT_EQ(relativeContainer->GetGeometryNode()->GetFrameSize(), SizeF(6, 30))
         << relativeContainer->GetGeometryNode()->GetFrameSize().ToString();
@@ -157,7 +157,7 @@ HWTEST_F(RelativeContainerMeasureTest, InitializeTest, TestSize.Level1)
     };
     relativeContainer->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.Initialize(relativeContainer.GetRawPtr());
+    layoutAlgorithm.Initialize(Referenced::RawPtr(relativeContainer));
     EXPECT_EQ(relativeContainer->GetGeometryNode()->GetFrameSize(), SizeF(20, 20))
         << relativeContainer->GetGeometryNode()->GetFrameSize().ToString();
     // expect containerSizeWithoutPaddingBorder_.width = width - border.left - border.right = 20 - 6 = 14
@@ -178,7 +178,7 @@ HWTEST_F(RelativeContainerMeasureTest, InitializeTest2, TestSize.Level1)
     LayoutConstraintF constraint = { .parentIdealSize = { 30, 30 }, .maxSize = { 25, 25 } };
     relativeContainer->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.Initialize(relativeContainer.GetRawPtr());
+    layoutAlgorithm.Initialize(Referenced::RawPtr(relativeContainer));
     // expect: (maxSize.width, height)
     EXPECT_EQ(relativeContainer->GetGeometryNode()->GetFrameSize(), SizeF(25, 20))
         << relativeContainer->GetGeometryNode()->GetFrameSize().ToString();
@@ -198,7 +198,7 @@ HWTEST_F(RelativeContainerMeasureTest, CollectNodesByIdTest, TestSize.Level1)
     ASSERT_EQ(children.size(), 3);
 
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
-    layoutAlgorithm.CollectNodesById(relativeContainer.GetRawPtr());
+    layoutAlgorithm.CollectNodesById(Referenced::RawPtr(relativeContainer));
 
     auto&& idNodeMap = layoutAlgorithm.idNodeMap_;
     // expect: text is added to idNodeMap_ , id = "text1".
@@ -238,7 +238,7 @@ HWTEST_F(RelativeContainerMeasureTest, GetDependencyRelationshipTest, TestSize.L
 
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
     // create idNodeMap_
-    layoutAlgorithm.CollectNodesById(relativeContainer.GetRawPtr());
+    layoutAlgorithm.CollectNodesById(Referenced::RawPtr(relativeContainer));
     // run GetDependencyRelationship()
     layoutAlgorithm.GetDependencyRelationship();
     auto& reliedOnMap = layoutAlgorithm.reliedOnMap_;
@@ -282,12 +282,12 @@ HWTEST_F(RelativeContainerMeasureTest, PreTopologicalLoopDetectionTest, TestSize
 
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
     // create idNodeMap_
-    layoutAlgorithm.CollectNodesById(relativeContainer.GetRawPtr());
+    layoutAlgorithm.CollectNodesById(Referenced::RawPtr(relativeContainer));
     // create reliedOnMap_
     layoutAlgorithm.GetDependencyRelationship();
     // run and test PreTopologicalLoopDetection
     // expect: !incomingDegreeMapCopy.empty() == true
-    EXPECT_TRUE(!layoutAlgorithm.PreTopologicalLoopDetection(relativeContainer.GetRawPtr()));
+    EXPECT_TRUE(!layoutAlgorithm.PreTopologicalLoopDetection(Referenced::RawPtr(relativeContainer)));
 }
 
 /**
@@ -324,12 +324,12 @@ HWTEST_F(RelativeContainerMeasureTest, TopologicalSortTest, TestSize.Level1)
 
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
     // create idNodeMap_
-    layoutAlgorithm.CollectNodesById(relativeContainer.GetRawPtr());
+    layoutAlgorithm.CollectNodesById(Referenced::RawPtr(relativeContainer));
     // create reliedOnMap_
     layoutAlgorithm.GetDependencyRelationship();
     // run PreTopologicalLoopDetection, create incomingDegreeMap_
     // expect: incomingDegreeMapCopy.empty() == true
-    EXPECT_TRUE(layoutAlgorithm.PreTopologicalLoopDetection(relativeContainer.GetRawPtr()));
+    EXPECT_TRUE(layoutAlgorithm.PreTopologicalLoopDetection(Referenced::RawPtr(relativeContainer)));
 
     std::list<std::string> renderList;
     // run TopologicalSort
@@ -392,10 +392,10 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest, TestSize.Level1)
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
 
     // dependence: renderList_, reliedOnMap_ , incomingDegreeMap_
-    PrepareMeasureChild(relativeContainer.GetRawPtr(), layoutAlgorithm);
+    PrepareMeasureChild(Referenced::RawPtr(relativeContainer), layoutAlgorithm);
 
     // run MeasureChild
-    layoutAlgorithm.MeasureChild(relativeContainer.GetRawPtr());
+    layoutAlgorithm.MeasureChild(Referenced::RawPtr(relativeContainer));
     // expect: when child has alignRules and position, the universal-attribute position property do not work.
     EXPECT_FALSE(row1->GetLayoutProperty()->IsUsingPosition());
     EXPECT_FALSE(row2->GetLayoutProperty()->IsUsingPosition());

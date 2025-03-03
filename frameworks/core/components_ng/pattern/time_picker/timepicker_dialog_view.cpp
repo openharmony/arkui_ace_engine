@@ -37,10 +37,10 @@ constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
-bool TimePickerDialogView::switchFlag_ = false;
-Dimension TimePickerDialogView::selectedTextStyleFont_ = 40.0_fp;
-Dimension TimePickerDialogView::normalTextStyleFont_ = 32.0_fp;
-Dimension TimePickerDialogView::disappearTextStyleFont_ = 28.0_fp;
+thread_local bool TimePickerDialogView::switchFlag_ = false;
+thread_local Dimension TimePickerDialogView::selectedTextStyleFont_ = 40.0_fp;
+thread_local Dimension TimePickerDialogView::normalTextStyleFont_ = 32.0_fp;
+thread_local Dimension TimePickerDialogView::disappearTextStyleFont_ = 28.0_fp;
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
     const TimePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,

@@ -58,13 +58,14 @@ void SetMenuDivider(ArkUINodeHandle node, ArkUIMenuDividerOptions* dividerInfo, 
         static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->strokeWidth.units));
     divider.color = Color(dividerInfo->color);
     divider.startMargin = Dimension(dividerInfo->startMargin.value,
-        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->startMargin.units));;
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->startMargin.units));
     divider.endMargin = Dimension(dividerInfo->endMargin.value,
-        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->endMargin.units));;
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->endMargin.units));
+    DividerMode mode = dividerInfo->mode == 1 ? DividerMode::EMBEDDED_IN_MENU: DividerMode::FLOATING_ABOVE_MENU;
     if (isGroupDivider) {
-        MenuModelNG::SetItemGroupDivider(frameNode, divider);
+        MenuModelNG::SetItemGroupDivider(frameNode, divider, mode);
     } else {
-        MenuModelNG::SetItemDivider(frameNode, divider);
+        MenuModelNG::SetItemDivider(frameNode, divider, mode);
     }
 }
 
@@ -78,9 +79,9 @@ void ResetMenuDivider(ArkUINodeHandle node, bool isGroupDivider)
     divider.startMargin = Dimension(0.0);
     divider.endMargin = Dimension(0.0);
     if (isGroupDivider) {
-        MenuModelNG::SetItemGroupDivider(frameNode, divider);
+        MenuModelNG::SetItemGroupDivider(frameNode, divider, DividerMode::FLOATING_ABOVE_MENU);
     } else {
-        MenuModelNG::SetItemDivider(frameNode, divider);
+        MenuModelNG::SetItemDivider(frameNode, divider, DividerMode::FLOATING_ABOVE_MENU);
     }
 }
 
@@ -225,6 +226,22 @@ void ResetSubMenuExpandingMode(ArkUINodeHandle node)
     MenuModelNG::SetExpandingMode(frameNode, SubMenuExpandingMode::SIDE);
 }
 
+void SetMenuFontSize(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension fontSize = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    MenuModelNG::SetFontSize(frameNode, fontSize);
+}
+
+void ResetMenuFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::CalcDimension reset;
+    MenuModelNG::SetFontSize(frameNode, reset);
+}
+
 namespace NodeModifier {
 const ArkUIMenuModifier* GetMenuModifier()
 {
@@ -244,6 +261,8 @@ const ArkUIMenuModifier* GetMenuModifier()
         .resetMenuItemGroupDivider = ResetMenuItemGroupDivider,
         .setSubMenuExpandingMode = SetSubMenuExpandingMode,
         .resetSubMenuExpandingMode = ResetSubMenuExpandingMode,
+        .setMenuFontSize = SetMenuFontSize,
+        .resetMenuFontSize = ResetMenuFontSize,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -100,6 +100,8 @@ public:
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+    void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
@@ -363,8 +365,6 @@ public:
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
 
-    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
-
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
         destructCallbacks_.emplace(key, callback);
@@ -399,6 +399,7 @@ public:
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+    void EnableContainerModalCustomGesture(bool enable) override;
 
 private:
     UIContentErrorCode InitializeInner(
@@ -420,6 +421,7 @@ private:
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
     void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
+    bool IfNeedTouchOutsideListener(const std::string& windowName);
 
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
@@ -430,6 +432,7 @@ private:
     void UnSubscribeEventsPassThroughMode();
     bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
         OHOS::Rosen::WindowSizeChangeReason reason);
+    void ChangeDisplayAvailableAreaListener(uint64_t displayId);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;

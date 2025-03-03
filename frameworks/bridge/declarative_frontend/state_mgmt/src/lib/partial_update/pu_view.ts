@@ -174,7 +174,7 @@ abstract class ViewPU extends PUV2ViewBase
 
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
-    PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this)
+    ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this)
 
     if (localStorage) {
       this.localStorage_ = localStorage;
@@ -183,17 +183,6 @@ abstract class ViewPU extends PUV2ViewBase
 
     SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
-  }
-
-  onGlobalThemeChanged(): void {
-    this.onWillApplyThemeInternally();
-    this.forceCompleteRerender(false)
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (child) {
-        child.onGlobalThemeChanged();
-      }
-    });
   }
 
   // inform the subscribed property
@@ -205,14 +194,6 @@ abstract class ViewPU extends PUV2ViewBase
 
   aboutToRecycle(): void { }
 
-  private onWillApplyThemeInternally(): void {
-    const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this)
-    if (theme) {
-        this.onWillApplyTheme(theme)
-    }
-  }
-
-  onWillApplyTheme(theme: Theme): void {}
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
@@ -260,7 +241,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.getParent()) {
       this.getParent().removeChild(this);
     }
-    PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
+    ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
     PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
   }
@@ -769,7 +750,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV2 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
-      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
@@ -783,6 +764,7 @@ abstract class ViewPU extends PUV2ViewBase
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
       if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
+        stateMgmtConsole.debug(`${this.debugInfo__()}: V2 dependency recording is enabled (uses ObserveV2.getObserve().startRecordDependencies, enables addRef)`)
         // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startRecordDependencies(this, elmtId);
@@ -807,7 +789,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       ViewStackProcessor.StopGetAccessRecording();
 
-      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
       this.restoreInstanceId();

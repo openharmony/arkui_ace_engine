@@ -52,7 +52,7 @@ void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)
         return;
     }
 
-    uv_loop_t *loop;
+    uv_loop_t *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     uv_update_time(loop);
     uv_timer_t *timer = new uv_timer_t;
@@ -62,9 +62,9 @@ void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)
         timer,
         [](uv_timer_t *timer) {
             UVTimerWorkWrapper* workWrapper = reinterpret_cast<UVTimerWorkWrapper*>(timer->data);
-            LOGD("Start work delayTime: %{public}u, taskTime: %{public}" PRId64 ", curTime: %{public}" PRId64,
-                workWrapper->GetDelayTime(), workWrapper->GetTaskTime(), GetCurrentTimestamp());
             if (workWrapper) {
+                LOGD("Start work delayTime: %{public}u, taskTime: %{public}" PRId64 ", curTime: %{public}" PRId64,
+                    workWrapper->GetDelayTime(), workWrapper->GetTaskTime(), GetCurrentTimestamp());
                 (*workWrapper)();
                 delete workWrapper;
             }
@@ -72,7 +72,7 @@ void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)
             uv_close(
                 reinterpret_cast<uv_handle_t *>(timer),
                 [](uv_handle_t *timer) {
-                    delete timer;
+                    delete reinterpret_cast<uv_timer_t *>(timer);
             });
         },
         delayTime, 0);

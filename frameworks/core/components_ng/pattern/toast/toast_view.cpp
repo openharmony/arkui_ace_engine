@@ -155,7 +155,7 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     CHECK_NULL_VOID(toastContext);
     auto pattern = toastNode->GetPattern<ToastPattern>();
     CHECK_NULL_VOID(pattern);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
@@ -164,7 +164,7 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(shadowStyle));
 
     if (toastInfo.isTypeStyleShadow) {
-        auto colorMode = SystemProperties::GetColorMode();
+        auto colorMode = pipelineContext->GetColorMode();
         auto shadowStyle = shadow.GetStyle();
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
         if (shadowTheme) {

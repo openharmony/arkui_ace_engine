@@ -18,6 +18,7 @@
 
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
 namespace {
@@ -65,6 +66,15 @@ ArkUIDialogHandle CreateDialog()
         .levelUniqueId = ARKUI_DEFAULT_LEVEL_UNIQUEID,
         .immersiveMode = ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE,
         .levelOrder = 0.0f,
+        .focusable = true,
+        .onWillAppearData = nullptr,
+        .onDidAppearData = nullptr,
+        .onWillDisappearData = nullptr,
+        .onDidDisappearData = nullptr,
+        .onWillAppear = nullptr,
+        .onDidAppear = nullptr,
+        .onWillDisappear = nullptr,
+        .onDidDisappear = nullptr,
     });
 }
 
@@ -150,6 +160,39 @@ void ParseDialogOnWillDismiss(DialogProperties& dialogProperties, ArkUIDialogHan
     };
 }
 
+void ParseDialogLife(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (controllerHandler->onWillAppear) {
+        dialogProperties.onWillAppear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onWillAppear);
+            (*(controllerHandler->onWillAppear))(controllerHandler->onWillAppearData);
+        };
+    }
+    if (controllerHandler->onDidAppear) {
+        dialogProperties.onDidAppear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onDidAppear);
+            (*(controllerHandler->onDidAppear))(controllerHandler->onDidAppearData);
+        };
+    }
+    if (controllerHandler->onWillDisappear) {
+        dialogProperties.onWillDisappear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onWillDisappear);
+            (*(controllerHandler->onWillDisappear))(controllerHandler->onWillDisappearData);
+        };
+    }
+    if (controllerHandler->onDidDisappear) {
+        dialogProperties.onDidDisappear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onDidDisappear);
+            (*(controllerHandler->onDidDisappear))(controllerHandler->onDidDisappearData);
+        };
+    }
+}
+
 void ParseDialogCornerRadiusRect(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
@@ -202,10 +245,12 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     if (!dialogProperties.isShowInSubWindow) {
         dialogProperties.levelOrder = std::make_optional(controllerHandler->levelOrder);
     }
+    dialogProperties.focusable = controllerHandler->focusable;
 
     ParseDialogMask(dialogProperties, controllerHandler);
     ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
     ParseDialogOnWillDismiss(dialogProperties, controllerHandler);
+    ParseDialogLife(dialogProperties, controllerHandler);
 
     if (controllerHandler->onWillDismissCallByNDK) {
         dialogProperties.onWillDismissCallByNDK = [controllerHandler](int32_t reason) {
@@ -414,6 +459,92 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle controllerHandler, ArkUI_Float64 lev
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->levelOrder = levelOrder;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->focusable = focusable;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 RegisterOnWillAppearDialog(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onWillAppear = callback;
+    controllerHandler->onWillAppearData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 RegisterOnDidAppearDialog(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onDidAppear = callback;
+    controllerHandler->onDidAppearData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 RegisterOnWillDisappearDialog(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onWillDisappear = callback;
+    controllerHandler->onWillDisappearData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 RegisterOnDidDisappearDialog(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onDidDisappear = callback;
+    controllerHandler->onDidDisappearData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
+{
+    CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
+    DialogProperties dialogProperties;
+    ParseDialogProperties(dialogProperties, handle);
+    dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, ERROR_CODE_PARAM_INVALID);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_PARAM_INVALID);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_PARAM_INVALID);
+    if (!dialogProperties.isShowInSubWindow && dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
+    overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, ERROR_CODE_PARAM_INVALID);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_PARAM_INVALID);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_PARAM_INVALID);
+    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
+    if (currentOverlay) {
+        overlayManager = currentOverlay;
+    }
+    overlayManager->CloseCustomDialog(dialogId);
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NG::ViewModel

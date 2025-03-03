@@ -114,6 +114,11 @@ void JSRepeat::OnMove(const JSCallbackInfo& info)
     }
 }
 
+void JSRepeat::AfterAddChild()
+{
+    RepeatModel::GetInstance()->AfterAddChild();
+}
+
 void JSRepeat::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeat>::Declare("RepeatNative");
@@ -122,6 +127,7 @@ void JSRepeat::JSBind(BindingTarget globalObj)
     JSClass<JSRepeat>::StaticMethod("moveChild", &JSRepeat::MoveChild);
     JSClass<JSRepeat>::StaticMethod("createNewChildStart", &JSRepeat::CreateNewChildStart);
     JSClass<JSRepeat>::StaticMethod("createNewChildFinish", &JSRepeat::CreateNewChildFinish);
+    JSClass<JSRepeat>::StaticMethod("afterAddChild", &JSRepeat::AfterAddChild);
     JSClass<JSRepeat>::StaticMethod("onMove", &JSRepeat::OnMove);
     JSClass<JSRepeat>::Bind<>(globalObj);
 }

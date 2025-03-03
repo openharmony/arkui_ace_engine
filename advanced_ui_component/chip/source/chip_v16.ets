@@ -192,127 +192,6 @@ interface ChipTheme {
   chipNode: ChipNodeTheme;
 }
 
-export const defaultTheme: ChipTheme = {
-  prefixIcon: {
-    normalSize: {
-      width: $r('sys.float.chip_normal_icon_size'),
-      height: $r('sys.float.chip_normal_icon_size')
-    },
-    smallSize: {
-      width: $r('sys.float.chip_small_icon_size'),
-      height: $r('sys.float.chip_small_icon_size')
-    },
-    fillColor: $r('sys.color.chip_usually_icon_color'),
-    activatedFillColor: $r('sys.color.chip_active_icon_color'),
-    focusFillColor: $r('sys.color.chip_icon_focus_fill'),
-    focusActivatedColor: $r('sys.color.chip_icon_activated_focus_color'),
-  },
-  label: {
-    normalFontSize: $r('sys.float.chip_normal_font_size'),
-    smallFontSize: $r('sys.float.chip_small_font_size'),
-    focusFontColor: $r('sys.color.chip_focus_text'),
-    focusActiveFontColor: $r('sys.color.chip_activated_focus_font_color'),
-    fontColor: $r('sys.color.chip_font_color'),
-    activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
-    fontFamily: 'HarmonyOS Sans',
-    fontWeight: $r('sys.float.chip_text_font_weight'),
-    normalMargin: {
-      left: 6,
-      right: 6,
-      top: 0,
-      bottom: 0
-    },
-    smallMargin: {
-      left: 4,
-      right: 4,
-      top: 0,
-      bottom: 0
-    },
-    defaultFontSize: 14,
-    localizedNormalMargin: {
-      start: LengthMetrics.resource($r('sys.float.chip_normal_text_margin')),
-      end: LengthMetrics.resource($r('sys.float.chip_normal_text_margin')),
-      top: LengthMetrics.vp(0),
-      bottom: LengthMetrics.vp(0)
-    },
-    localizedSmallMargin: {
-      start: LengthMetrics.resource($r('sys.float.chip_small_text_margin')),
-      end: LengthMetrics.resource($r('sys.float.chip_small_text_margin')),
-      top: LengthMetrics.vp(0),
-      bottom: LengthMetrics.vp(0),
-    }
-  },
-  suffixIcon: {
-    normalSize: {
-      width: $r('sys.float.chip_normal_icon_size'),
-      height: $r('sys.float.chip_normal_icon_size')
-    },
-    smallSize: {
-      width: $r('sys.float.chip_small_icon_size'),
-      height: $r('sys.float.chip_small_icon_size')
-    },
-    fillColor: $r('sys.color.chip_usually_icon_color'),
-    activatedFillColor: $r('sys.color.chip_active_icon_color'),
-    focusFillColor: $r('sys.color.chip_icon_focus_fill'),
-    focusActivatedColor: $r('sys.color.chip_icon_activated_focus_color'),
-    defaultDeleteIcon: $r('sys.media.ohos_ic_public_cancel', 16, 16),
-    focusable: false,
-    isShowMargin: $r('sys.float.chip_show_close_icon_margin'),
-  },
-  defaultSymbol: {
-    normalFontColor: [$r('sys.color.chip_usually_icon_color')],
-    activatedFontColor: [$r('sys.color.chip_active_icon_color')],
-    normalSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_normal_icon_size')).value as Length,
-    smallSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_small_icon_size')).value as Length,
-    defaultEffect: -1,
-  },
-  chipNode: {
-    suitAgeScale: 1.75,
-    minLabelWidth: 12,
-    normalHeight: $r('sys.float.chip_normal_height'),
-    smallHeight: $r('sys.float.chip_small_height'),
-    enabled: true,
-    activated: false,
-    backgroundColor: $r('sys.color.chip_background_color'),
-    activatedBackgroundColor: $r('sys.color.chip_container_activated_color'),
-    focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
-    focusOutlineMargin: 2,
-    borderColor: $r('sys.color.chip_border_color'),
-    defaultBorderWidth: $r('sys.float.chip_border_width'),
-    activatedBorderColor: $r('sys.color.chip_activated_border_color'),
-    normalBorderRadius: $r('sys.float.chip_border_radius_normal'),
-    smallBorderRadius: $r('sys.float.chip_border_radius_small'),
-    borderWidth: 2,
-    focusBtnScaleX: $r('sys.float.chip_focused_btn_scale'),
-    focusBtnScaleY: $r('sys.float.chip_focused_btn_scale'),
-    localizedNormalPadding: {
-      start: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
-      end: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4)
-    },
-    localizedSmallPadding: {
-      start: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
-      end: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4)
-    },
-    hoverBlendColor: $r('sys.color.chip_hover_color'),
-    pressedBlendColor: $r('sys.color.chip_press_color'),
-    focusBgColor: $r('sys.color.chip_focus_color'),
-    focusActivatedBgColor: $r('sys.color.chip_container_activated_focus_color'),
-    opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
-    normalShadowStyle: $r('sys.float.chip_normal_shadow_style'),
-    smallShadowStyle: $r('sys.float.chip_small_shadow_style'),
-    breakPointConstraintWidth: {
-      breakPointMinWidth: 128,
-      breakPointSmMaxWidth: 156,
-      breakPointMdMaxWidth: 280,
-      breakPointLgMaxWidth: 400
-    }
-  }
-};
-
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
@@ -369,7 +248,126 @@ export function Chip(options: ChipOptions) {
 
 @Component
 export struct ChipComponent {
-  private theme: ChipTheme = defaultTheme;
+  private theme: ChipTheme = {
+    prefixIcon: {
+      normalSize: {
+        width: $r('sys.float.chip_normal_icon_size'),
+        height: $r('sys.float.chip_normal_icon_size')
+      },
+      smallSize: {
+        width: $r('sys.float.chip_small_icon_size'),
+        height: $r('sys.float.chip_small_icon_size')
+      },
+      fillColor: $r('sys.color.chip_usually_icon_color'),
+      activatedFillColor: $r('sys.color.chip_active_icon_color'),
+      focusFillColor: $r('sys.color.chip_icon_focus_fill'),
+      focusActivatedColor: $r('sys.color.chip_icon_activated_focus_color'),
+    },
+    label: {
+      normalFontSize: $r('sys.float.chip_normal_font_size'),
+      smallFontSize: $r('sys.float.chip_small_font_size'),
+      focusFontColor: $r('sys.color.chip_focus_text'),
+      focusActiveFontColor: $r('sys.color.chip_activated_focus_font_color'),
+      fontColor: $r('sys.color.chip_font_color'),
+      activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
+      fontFamily: 'HarmonyOS Sans',
+      fontWeight: $r('sys.float.chip_text_font_weight'),
+      normalMargin: {
+        left: 6,
+        right: 6,
+        top: 0,
+        bottom: 0
+      },
+      smallMargin: {
+        left: 4,
+        right: 4,
+        top: 0,
+        bottom: 0
+      },
+      defaultFontSize: 14,
+      localizedNormalMargin: {
+        start: LengthMetrics.resource($r('sys.float.chip_normal_text_margin')),
+        end: LengthMetrics.resource($r('sys.float.chip_normal_text_margin')),
+        top: LengthMetrics.vp(0),
+        bottom: LengthMetrics.vp(0)
+      },
+      localizedSmallMargin: {
+        start: LengthMetrics.resource($r('sys.float.chip_small_text_margin')),
+        end: LengthMetrics.resource($r('sys.float.chip_small_text_margin')),
+        top: LengthMetrics.vp(0),
+        bottom: LengthMetrics.vp(0),
+      }
+    },
+    suffixIcon: {
+      normalSize: {
+        width: $r('sys.float.chip_normal_icon_size'),
+        height: $r('sys.float.chip_normal_icon_size')
+      },
+      smallSize: {
+        width: $r('sys.float.chip_small_icon_size'),
+        height: $r('sys.float.chip_small_icon_size')
+      },
+      fillColor: $r('sys.color.chip_usually_icon_color'),
+      activatedFillColor: $r('sys.color.chip_active_icon_color'),
+      focusFillColor: $r('sys.color.chip_icon_focus_fill'),
+      focusActivatedColor: $r('sys.color.chip_icon_activated_focus_color'),
+      defaultDeleteIcon: $r('sys.media.ohos_ic_public_cancel', 16, 16),
+      focusable: false,
+      isShowMargin: $r('sys.float.chip_show_close_icon_margin'),
+    },
+    defaultSymbol: {
+      normalFontColor: [$r('sys.color.chip_usually_icon_color')],
+      activatedFontColor: [$r('sys.color.chip_active_icon_color')],
+      normalSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_normal_icon_size')).value as Length,
+      smallSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_small_icon_size')).value as Length,
+      defaultEffect: -1,
+    },
+    chipNode: {
+      suitAgeScale: 1.75,
+      minLabelWidth: 12,
+      normalHeight: $r('sys.float.chip_normal_height'),
+      smallHeight: $r('sys.float.chip_small_height'),
+      enabled: true,
+      activated: false,
+      backgroundColor: $r('sys.color.chip_background_color'),
+      activatedBackgroundColor: $r('sys.color.chip_container_activated_color'),
+      focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
+      focusOutlineMargin: 2,
+      borderColor: $r('sys.color.chip_border_color'),
+      defaultBorderWidth: $r('sys.float.chip_border_width'),
+      activatedBorderColor: $r('sys.color.chip_activated_border_color'),
+      normalBorderRadius: $r('sys.float.chip_border_radius_normal'),
+      smallBorderRadius: $r('sys.float.chip_border_radius_small'),
+      borderWidth: 2,
+      focusBtnScaleX: $r('sys.float.chip_focused_btn_scale'),
+      focusBtnScaleY: $r('sys.float.chip_focused_btn_scale'),
+      localizedNormalPadding: {
+        start: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
+        end: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
+        top: LengthMetrics.vp(4),
+        bottom: LengthMetrics.vp(4)
+      },
+      localizedSmallPadding: {
+        start: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
+        end: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
+        top: LengthMetrics.vp(4),
+        bottom: LengthMetrics.vp(4)
+      },
+      hoverBlendColor: $r('sys.color.chip_hover_color'),
+      pressedBlendColor: $r('sys.color.chip_press_color'),
+      focusBgColor: $r('sys.color.chip_focus_color'),
+      focusActivatedBgColor: $r('sys.color.chip_container_activated_focus_color'),
+      opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
+      normalShadowStyle: $r('sys.float.chip_normal_shadow_style'),
+      smallShadowStyle: $r('sys.float.chip_small_shadow_style'),
+      breakPointConstraintWidth: {
+        breakPointMinWidth: 128,
+        breakPointSmMaxWidth: 156,
+        breakPointMdMaxWidth: 280,
+        breakPointLgMaxWidth: 400
+      }
+    }
+  };
   @Prop chipSize?: ChipSize | SizeOptions = ChipSize.NORMAL;
   @Prop allowClose?: boolean;
   @Prop closeOptions?: CloseOptions;
@@ -614,8 +612,8 @@ export struct ChipComponent {
         return;
       }
       let isDeleteChip = event.keyCode === KeyCode.KEYCODE_FORWARD_DEL;
-      let isEnterDeleteChip = event.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose && !this.suffixIcon?.src &&
-      this.isSuffixIconFocusStyleCustomized;
+      let isEnterDeleteChip = event.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose !== false &&
+        !this.suffixIcon?.src && this.isSuffixIconFocusStyleCustomized;
       if (isDeleteChip || isEnterDeleteChip) {
         this.deleteChip();
       }

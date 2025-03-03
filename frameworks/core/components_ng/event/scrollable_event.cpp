@@ -63,6 +63,8 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
                     coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
                 event->CollectScrollableTouchTarget(
                     coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                event->BarRectCollectTouchTarget(
+                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
             } else {
                 event->CollectScrollableTouchTarget(
                     coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);

@@ -157,6 +157,22 @@ public:
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
 
+protected:
+    ParagraphStyle paraStyle_;
+#ifndef USE_GRAPHIC_TEXT_GINE
+    txt::Paragraph* GetParagraph();
+    std::unique_ptr<txt::Paragraph> paragraph_;
+    std::unique_ptr<txt::ParagraphBuilder> builder_;
+    std::shared_ptr<txt::FontCollection> fontCollection_;
+#else
+    RSParagraph* GetParagraph();
+    Rosen::RSSymbolAnimation rsSymbolAnimation_;
+    std::unique_ptr<RSParagraph> paragraph_;
+    RSParagraph* externalParagraph_ = nullptr;
+    std::unique_ptr<RSParagraphBuilder> builder_;
+    std::shared_ptr<RSFontCollection> fontCollection_;
+#endif
+
 private:
     void CreateBuilder();
     bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);
@@ -177,20 +193,6 @@ private:
     bool IsTargetCharAtIndex(char16_t targetChar, int32_t index);
     bool IsIndexAtLineEnd(const Offset& offset, int32_t index);
 
-    ParagraphStyle paraStyle_;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    txt::Paragraph* GetParagraph();
-    std::unique_ptr<txt::Paragraph> paragraph_;
-    std::unique_ptr<txt::ParagraphBuilder> builder_;
-    std::shared_ptr<txt::FontCollection> fontCollection_;
-#else
-    RSParagraph* GetParagraph();
-    Rosen::RSSymbolAnimation rsSymbolAnimation_;
-    std::unique_ptr<RSParagraph> paragraph_;
-    RSParagraph* externalParagraph_ = nullptr;
-    std::unique_ptr<RSParagraphBuilder> builder_;
-    std::shared_ptr<RSFontCollection> fontCollection_;
-#endif
     std::u16string text_;
     int32_t placeholderCnt_ = 0;
     TextAlign textAlign_ = TextAlign::START;

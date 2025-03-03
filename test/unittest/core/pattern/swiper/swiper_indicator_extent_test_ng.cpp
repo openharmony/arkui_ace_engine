@@ -2028,10 +2028,30 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, Tes
     paintMethod->mouseClickIndex_ = 10;
     LinearVector<float> itemHalfSizes = { 5.0f, 5.0f, 10.0f, 10.0f };
     Dimension paddingSide = Dimension(5.0f);
+    Dimension indicatorDotItemSpace = Dimension(8.0f);
     /**
      * @tc.expected: PaintHoverIndicator longPointCenterX_ first eq 177.0f
      */
-    paintMethod->PaintHoverIndicator(itemHalfSizes, paddingSide);
+    paintMethod->PaintHoverIndicator(itemHalfSizes, paddingSide, indicatorDotItemSpace);
     EXPECT_NEAR(paintMethod->longPointCenterX_.first, 177.0f, 0.001f);
+}
+
+/**
+ * @tc.name: SwiperDigitIndicatorLayoutAlgorithmCalcFrameHeight0001
+ * @tc.desc: Test Swiper DigitIndicatorLayoutAlgorithm::CalcFrameHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmCalcFrameHeight0001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->OnModifyDone();
+    auto algorithm = AceType::DynamicCast<DigitIndicatorLayoutAlgorithm>(indicatorPattern->CreateLayoutAlgorithm());
+    float indicatorHeight = 20.0f;
+    auto frameHeight = algorithm->CalcFrameHeight(indicatorNode_, indicatorHeight);
+    EXPECT_EQ(frameHeight, 20.0f);
 }
 } // namespace OHOS::Ace::NG

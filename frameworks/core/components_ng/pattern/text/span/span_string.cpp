@@ -20,6 +20,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "core/text/text_emoji_processor.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {
 
@@ -880,16 +881,67 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
 RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
 {
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
-    SpanString* spanString = spanStr.GetRawPtr();
-    DecodeTlvExt(buff, spanString);
+    SpanString* spanString = Referenced::RawPtr(spanStr);
+    std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
+    DecodeTlvExt(buff, spanString, std::move(unmarshallCallback));
     return spanStr;
 }
 
-void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString)
+RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff,
+    const std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)>&& unmarshallCallback,
+    int32_t instanceId)
+{
+    RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
+    SpanString* spanString = Referenced::RawPtr(spanStr);
+    DecodeTlvExt(buff, spanString, std::move(unmarshallCallback), instanceId);
+    return spanStr;
+}
+
+void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString,
+    const std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)>&& unmarshallCallback,
+    int32_t instanceId)
+{
+    CHECK_NULL_VOID(spanString);
+    int32_t cursor = 0;
+    DecodeTlvOldExt(buff, spanString, cursor);
+    if (!unmarshallCallback) {
+        return;
+    }
+    for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
+        auto buffLength = TLVUtil::ReadInt32(buff, cursor);
+        if (buffLength == 0) {
+            continue;
+        }
+        auto lastCursor = cursor;
+        switch (tag) {
+            case TLV_CUSTOM_MARSHALL_BUFFER_START: {
+                auto start = TLVUtil::ReadInt32(buff, cursor);
+                auto length = TLVUtil::ReadInt32(buff, cursor);
+                auto endOfUserDataArrBuff = buffLength + cursor + cursor - lastCursor;
+                std::vector<uint8_t> bufferSubVec(buff.begin() + cursor, buff.begin() + endOfUserDataArrBuff);
+                ContainerScope scope(instanceId);
+                auto container = AceEngine::Get().GetContainer(instanceId);
+                CHECK_NULL_VOID(container);
+                auto taskExecutor = container->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostSyncTask([spanString, start, length, bufferSubVec, unmarshallCallback]() mutable {
+                        auto extSpan = unmarshallCallback(bufferSubVec, start, length);
+                        spanString->AddSpan(extSpan);
+                    }, TaskExecutor::TaskType::UI, "SpanstringDecodeTlvExt", PriorityType::IMMEDIATE);
+                cursor = lastCursor + buffLength;
+                break;
+            }
+            default:
+                break;
+        }
+        cursor = lastCursor + buffLength;
+    }
+}
+
+void SpanString::DecodeTlvOldExt(std::vector<uint8_t>& buff, SpanString* spanString, int32_t& cursor)
 {
     CHECK_NULL_VOID(spanString);
     spanString->ClearSpans();
-    int32_t cursor = 0;
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
         switch (tag) {
             case TLV_SPAN_STRING_CONTENT: {
@@ -927,7 +979,7 @@ void SpanString::DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& curs
 void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr)
 {
     CHECK_NULL_VOID(spanStr);
-    DecodeSpanItemListExt(buff, cursor, spanStr.GetRawPtr());
+    DecodeSpanItemListExt(buff, cursor, Referenced::RawPtr(spanStr));
 }
 
 void SpanString::UpdateSpansMap()

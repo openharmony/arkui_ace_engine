@@ -31,6 +31,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 #include "frameworks/bridge/common/utils/componentInfo.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "interfaces/inner_api/ace/constants.h"
@@ -156,10 +157,8 @@ public:
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
-    virtual void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priority) = 0;
-    virtual void PostUITask(
-        std::function<void()>&& task, const std::string& name, PriorityType priority = PriorityType::LOW)
-    {}
+    virtual void PostJsTask(std::function<void()>&& task, const std::string& name) = 0;
+    virtual void PostUITask(std::function<void()>&& task, const std::string& name) {}
 
     // ----------------
     // system.app
@@ -371,6 +370,15 @@ public:
     }
 
     virtual void CallNativeHandler(const std::string& event, const std::string& params) {}
+
+    virtual void GetBackgroundBlurStyleOption(napi_value value, BlurStyleOption& styleOption)
+    {
+        JSViewAbstractBridge::GetBackgroundBlurStyleOption(value, styleOption);
+    }
+    virtual void GetBackgroundEffect(napi_value value, EffectOption& styleOption)
+    {
+        JSViewAbstractBridge::GetBackgroundEffect(value, styleOption);
+    }
 
 protected:
     RefPtr<AssetManager> assetManager_;

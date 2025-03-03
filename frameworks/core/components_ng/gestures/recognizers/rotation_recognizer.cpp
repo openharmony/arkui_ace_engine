@@ -311,6 +311,9 @@ void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 
 double RotationRecognizer::ComputeAngle()
 {
+    if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS) {
+        return 0.0;
+    }
     auto sId = activeFingers_.begin();
     auto fId = sId++;
 

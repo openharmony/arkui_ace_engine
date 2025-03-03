@@ -44,6 +44,7 @@ public:
     virtual int32_t ResetTranslateTextAll() override;
     virtual int32_t ResetTranslateText(int32_t nodeId) override;
     virtual int32_t GetWebViewCurrentLanguage(const EventCallback& eventCallback) override;
+    virtual int32_t GetCurrentPageName(const std::function<void(std::string)>& finishCallback) override;
     virtual int32_t StartWebViewTranslate(
         const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback) override;
     virtual int32_t SendTranslateResult(

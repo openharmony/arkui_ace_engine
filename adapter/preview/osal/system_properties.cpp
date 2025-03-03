@@ -76,6 +76,9 @@ ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::windowAnimationEnabled_ = false;
+bool SystemProperties::debugEnabled_ = false;
+DebugFlags SystemProperties::debugFlags_ = 0;
+bool SystemProperties::layoutDetectEnabled_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
 bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
@@ -101,6 +104,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(true);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
@@ -212,12 +216,12 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
 
 bool SystemProperties::GetDebugEnabled()
 {
-    return false;
+    return debugEnabled_;
 }
 
 bool SystemProperties::GetLayoutDetectEnabled()
 {
-    return false;
+    return layoutDetectEnabled_;
 }
 
 std::string SystemProperties::GetLanguage()
@@ -378,6 +382,11 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return true;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

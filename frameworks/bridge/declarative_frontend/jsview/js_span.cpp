@@ -20,9 +20,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -220,7 +218,7 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (Container::CurrentColorMode() == ColorMode::DARK) {
             colorVal = theme->GetTextStyle().GetTextColor();
         } else {
             colorVal = Color::BLACK;

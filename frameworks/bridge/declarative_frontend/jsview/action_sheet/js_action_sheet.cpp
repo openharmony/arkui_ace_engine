@@ -366,6 +366,7 @@ void ParseLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
         return;
     }
 
+    properties.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
     auto levelOrderValue = obj->GetProperty("levelOrder");
     if (!levelOrderValue->IsObject()) {
         return;
@@ -479,6 +480,8 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     ParseDialogCallback(obj, onWillDismissFunc);
     ActionSheetModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
 
+    JSViewAbstract::ParseAppearDialogCallback(args, properties);
+
     // Parse sheets
     auto sheetsVal = obj->GetProperty("sheets");
     if (sheetsVal->IsArray()) {
@@ -533,6 +536,8 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     ParseLevelOrder(properties, obj);
     JSViewAbstract::SetDialogProperties(obj, properties);
     JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
+    JSViewAbstract::SetDialogBlurStyleOption(obj, properties);
+    JSViewAbstract::SetDialogEffectOption(obj, properties);
     ActionSheetModel::GetInstance()->ShowActionSheet(properties);
     args.SetReturnValue(args.This());
 #endif

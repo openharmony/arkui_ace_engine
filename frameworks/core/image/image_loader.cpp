@@ -529,11 +529,12 @@ bool ResourceImageLoader::GetResourceName(const std::string& uri, std::string& r
 std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
+    int32_t instanceId = Container::CurrentIdSafely();
     auto uri = imageSourceInfo.GetSrc();
     auto bundleName = imageSourceInfo.GetBundleName();
     auto moudleName = imageSourceInfo.GetModuleName();
 
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName, instanceId);
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
@@ -543,7 +544,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
         if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
             resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
         } else {
-            resConfig.SetColorMode(SystemProperties::GetColorMode());
+            resConfig.SetColorMode(Container::CurrentColorMode());
         }
         ConfigurationChange configChange { .colorModeUpdate = true };
         resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
@@ -619,6 +620,7 @@ std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageS
 
     // check image orientation
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;
@@ -807,6 +809,7 @@ std::string AstcImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
     CHECK_NULL_RETURN(fd >= 0, "");
 
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;

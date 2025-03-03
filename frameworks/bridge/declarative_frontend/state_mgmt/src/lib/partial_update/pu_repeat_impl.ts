@@ -19,7 +19,7 @@ class __RepeatImpl<T> {
     private arr_: Array<T>;
     private itemGenFuncs_: { [type: string]: RepeatItemGenFunc<T> };
     private keyGenFunction_?: RepeatKeyGenFunc<T>;
-    private typeGenFunc_: RepeatTypeGenFunc<T>;
+    private ttypeGenFunc_: RepeatTTypeGenFunc<T>;
     //
     private mkRepeatItem_: (item: T, index?: number) =>__RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
@@ -34,7 +34,7 @@ class __RepeatImpl<T> {
     public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
-        this.typeGenFunc_ = config.typeGenFunc;
+        this.ttypeGenFunc_ = config.ttypeGenFunc;
         this.keyGenFunction_ = config.keyGenFunc;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
@@ -135,6 +135,7 @@ class __RepeatImpl<T> {
                 // render new UINode children
                 itemInfo.repeatItem = this.mkRepeatItem_(item, index);
                 this.initialRenderItem(key, itemInfo.repeatItem);
+                this.afterAddChild();
             }
 
             index++;
@@ -156,6 +157,13 @@ class __RepeatImpl<T> {
         stateMgmtConsole.debug(`__RepeatImpl: reRender elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
     }
 
+    private afterAddChild(): void {
+        if (this.onMoveHandler_ == undefined || this.onMoveHandler_ == null) {
+            return;
+        }
+        RepeatNative.afterAddChild();
+    }
+
     private initialRenderItem(key: string, repeatItem: __RepeatItemFactoryReturn<T>): void {
         //console.log('__RepeatImpl initialRenderItem()')
         // render new UINode children
@@ -165,8 +173,8 @@ class __RepeatImpl<T> {
         RepeatNative.createNewChildStart(key);
 
         // execute the itemGen function
-        const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index) ?? '';
-        const itemFunc = this.itemGenFuncs_[itemType] ?? this.itemGenFuncs_[''];
+        const itemType = this.ttypeGenFunc_?.(repeatItem.item, repeatItem.index) ?? RepeatEachFuncTtype;
+        const itemFunc = this.itemGenFuncs_[itemType] ?? this.itemGenFuncs_[RepeatEachFuncTtype];
         itemFunc(repeatItem);
 
         RepeatNative.createNewChildFinish(key);

@@ -38,6 +38,7 @@ constexpr float MAX_FONT_WEIGHT = 900.0f;
 constexpr int32_t SCALE_EFFECT = 2;
 constexpr int32_t NONE_EFFECT = 0;
 constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 } // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -131,6 +132,24 @@ Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
     return convertValue;
 }
 #endif
+
+Rosen::SymbolType ConvertTxtSymbolType(SymbolType symbolType)
+{
+    Rosen::SymbolType txtSymbolType;
+    switch (symbolType) {
+        case SymbolType::SYSTEM:
+            txtSymbolType = Rosen::SymbolType::SYSTEM;
+            break;
+        case SymbolType::CUSTOM:
+            txtSymbolType = Rosen::SymbolType::CUSTOM;
+            break;
+        default:
+            LOGE("SymbolType setting error! Now using default SymbolType.");
+            txtSymbolType = Rosen::SymbolType::SYSTEM;
+            break;
+    }
+    return txtSymbolType;
+}
 
 #ifndef USE_GRAPHIC_TEXT_GINE
 txt::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
@@ -619,7 +638,7 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle)
         txtStyle.symbol.SetSymbolEffect(effectStrategy);
         txtStyle.symbol.SetAnimationStart(true);
     }
-    txtStyle.fontFamilies.push_back("HM Symbol");
+    txtStyle.fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
 }
 #else
 double NormalizeToPx(const Dimension& dimension)
@@ -716,6 +735,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
+    txtStyle.symbol.SetSymbolType(ConvertTxtSymbolType(textStyle.GetSymbolType()));
     auto fontWeightValue = (static_cast<int32_t>(
             ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
@@ -895,7 +915,9 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
         txtStyle.symbol.SetSymbolEffect(effectStrategyValue);
         txtStyle.symbol.SetAnimationStart(true);
     }
-    txtStyle.fontFamilies.push_back("HM Symbol");
+    if (txtStyle.symbol.GetSymbolType() != Rosen::SymbolType::CUSTOM) {
+        txtStyle.fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+    }
 }
 #endif
 

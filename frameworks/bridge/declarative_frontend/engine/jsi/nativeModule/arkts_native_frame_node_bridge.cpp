@@ -43,6 +43,7 @@ constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t INDEX_OF_INTERVAL = 4;
 constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
+constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
 
 ArkUI_Bool GetIsExpanded(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
 {
@@ -50,6 +51,13 @@ ArkUI_Bool GetIsExpanded(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 inde
     Local<JSValueRef> isExpandedArg = runtimeCallInfo->GetCallArgRef(index);
     CHECK_NULL_RETURN(!isExpandedArg.IsNull(), true);
     return isExpandedArg->IsBoolean() ? isExpandedArg->ToBoolean(vm)->Value() : true;
+}
+ArkUI_Int32 GetExpandMode(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> expandModeArg = runtimeCallInfo->GetCallArgRef(index);
+    CHECK_NULL_RETURN(!expandModeArg.IsNull(), 1);
+    return expandModeArg->IsNumber() || expandModeArg->IsBoolean() ? expandModeArg->ToNumber(vm)->Value() : 1;
 }
 } // namespace
 ArkUI_Bool FrameNodeBridge::IsCustomFrameNode(FrameNode* node)
@@ -162,6 +170,10 @@ ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* ru
     auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     node->SetExclusiveEventForChild(true);
     node->SetIsArkTsFrameNode(true);
+    auto renderContext = node->GetRenderContext();
+    if (renderContext) {
+        renderContext->SetNeedDebugBoundary(true);
+    }
     FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
     FrameNodeBridge::SetCustomFunc(node, runtimeCallInfo);
     const char* keys[] = { "nodeId", "nativeStrongRef" };
@@ -458,8 +470,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetChild(ArkUIRuntimeCallInfo* runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     int index = secondArg->ToNumber(vm)->Value();
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 : index of the expand mode
-    int expandMode = thirdArg->ToNumber(vm)->Value();
+    int expandMode = GetExpandMode(runtimeCallInfo, 2);
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getChild(nativeNode, index, expandMode);
     CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
     return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
@@ -1754,6 +1765,9 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t intervalMs = static_cast<int32_t>(intervalArg->ToNumber(vm)->Value());
+    if (intervalMs < 0) {
+        intervalMs = DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
     NG::ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs);
     return panda::JSValueRef::Undefined(vm);

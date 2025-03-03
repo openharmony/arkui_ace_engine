@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
+#include "core/components_ng/pattern/progress/progress_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/render_context.h"
@@ -102,6 +103,7 @@ const LinearColor TEST_LINEARCOLOR = LinearColor(TEST_COLOR);
 constexpr float VALUE_OF_SET_VALUE = 10.0f;
 const std::vector<std::string> FONT_FAMILY = { "serif" };
 constexpr Dimension DEFAULT_SPACE = 3.0_vp;
+constexpr bool ACTIVE_SETTING_FALSE = false;
 
 class ProgressTestNg : public TestNG {
 public:

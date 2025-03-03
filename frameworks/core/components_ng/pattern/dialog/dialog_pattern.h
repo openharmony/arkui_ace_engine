@@ -293,6 +293,7 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void UpdateHostWindowRect();
     void UpdateFontScale();
 
     bool GetIsSuitOldMeasure()
@@ -312,6 +313,7 @@ public:
 
     bool IsShowInFreeMultiWindow();
     bool IsShowInFloatingWindow();
+    void AddExtraMaskNode(const DialogProperties& props);
 
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
@@ -337,6 +339,7 @@ private:
     void HandleFocusEvent();
 
     void PopDialog(int32_t buttonIdx);
+    bool NeedUpdateHostWindowRect();
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);

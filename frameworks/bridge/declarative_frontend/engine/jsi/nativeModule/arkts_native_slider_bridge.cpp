@@ -26,6 +26,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_8 = 8;
 constexpr int SLIDER_MIN = 0;
 constexpr int SLIDER_MAX = 100;
+constexpr int PARAM_ARR_LENGTH_2 = 2;
 const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsSliderChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
@@ -636,6 +637,49 @@ ArkUINativeModuleValue SliderBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             CHECK_NULL_RETURN(frameNode, nullptr);
             return AceType::Claim(frameNode);
         });
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(float, int32_t)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                       float number, int32_t mode) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+
+        panda::Local<panda::NumberRef> numberParam = panda::NumberRef::New(vm, number);
+        panda::Local<panda::NumberRef> modeParam = panda::NumberRef::New(vm, mode);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { numberParam, modeParam };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+    };
+    GetArkUINodeModifiers()->getSliderModifier()->setOnChange(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetOnChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

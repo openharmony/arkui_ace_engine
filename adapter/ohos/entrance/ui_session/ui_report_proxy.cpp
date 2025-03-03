@@ -120,7 +120,7 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t pa
 
 void UiReportProxy::OnComponentChange(const std::string& key, const std::string& value)
 {
-    if (UiSessionManager::GetInstance().GetComponentChangeEventRegistered()) {
+    if (UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         auto result = InspectorJsonUtil::Create(true);
         result->Put(key.c_str(), value.c_str());
         ReportComponentChangeEvent(result->ToString());
@@ -182,6 +182,24 @@ void UiReportProxy::SendCurrentLanguage(const std::string& data)
     }
     if (Remote()->SendRequest(SEND_CURRENT_LANGUAGE, messageData, reply, option) != ERR_NONE) {
         LOGW("SendCurrentLanguage send request failed");
+    }
+}
+
+void UiReportProxy::SendCurrentPageName(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCurrentPageName write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("SendCurrentPageName write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_CURRENT_PAGE_NAME, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendCurrentPageName send request failed");
     }
 }
 

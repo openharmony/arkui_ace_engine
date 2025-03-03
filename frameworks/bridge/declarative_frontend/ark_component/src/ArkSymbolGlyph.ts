@@ -139,6 +139,50 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
 
+  class SymbolMinFontScaleModifier extends ModifierWithKey<Optional<number | Resource>> {
+    constructor(value: Optional<number | Resource>) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphMinFontScale');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetMinFontScale(node);
+      } else {
+        getUINativeModule().symbolGlyph.setMinFontScale(node, this.value);
+      }
+    }
+
+    checkObjectDiff(): boolean {
+      if (isResource(this.stageValue) && isResource(this.value)) {
+        return !isResourceEqual(this.stageValue, this.value);
+      } else {
+        return true;
+      }
+    }
+  }
+
+  class SymbolMaxFontScaleModifier extends ModifierWithKey<Optional<number | Resource>> {
+    constructor(value: Optional<number | Resource>) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphMaxFontScale');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetMaxFontScale(node);
+      } else {
+        getUINativeModule().symbolGlyph.setMaxFontScale(node, this.value);
+      }
+    }
+
+    checkObjectDiff(): boolean {
+      if (isResource(this.stageValue) && isResource(this.value)) {
+        return !isResourceEqual(this.stageValue, this.value);
+      } else {
+        return true;
+      }
+    }
+  }
+
   class SymbolContentModifier extends ModifierWithKey<Resource> {
     constructor(value: Resource) {
       super(value);

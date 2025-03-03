@@ -275,31 +275,24 @@ void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, 
     }
     if (foreground) {
         containerId_ = id;
-        containerCount_++;
-    } else {
-        containerCount_--;
-    }
-    if (containerCount_ <= 0) {
-        containerCount_ = 0;
-        containerId_ = -1;
     }
 }
 
 void EventRecorder::SetFocusContainerInfo(const std::string& windowName, int32_t id)
 {
-    isFocusContainerChanged_ = focusContainerId_ != id;
     if (windowName == IGNORE_WINDOW_NAME) {
         return;
     }
     focusContainerId_ = id;
 }
 
-int32_t EventRecorder::GetContainerId()
+int32_t EventRecorder::GetContainerId(bool isFoucs)
 {
-    if (containerId_ == -1) {
-        return -1;
+    if (isFoucs) {
+        return focusContainerId_;
+    } else {
+        return containerId_;
     }
-    return focusContainerId_;
 }
 
 const std::string& EventRecorder::GetPageUrl()
@@ -344,7 +337,8 @@ void EventRecorder::FillWebJsCode(std::optional<WebJsItem>& scriptItems) const
     }
 }
 
-void EventRecorder::SaveJavascriptItems(const std::map<std::string, std::vector<std::string>>& scriptItems)
+void EventRecorder::SaveJavascriptItems(const std::map<std::string, std::vector<std::string>>& scriptItems,
+    const std::vector<std::string>& orderScriptItems)
 {
     if (scriptItems.empty()) {
         return;
@@ -353,19 +347,30 @@ void EventRecorder::SaveJavascriptItems(const std::map<std::string, std::vector<
         return;
     }
     cacheScriptItems_ = std::make_optional<std::map<std::string, std::vector<std::string>>>(scriptItems);
+    if (!orderScriptItems.empty()) {
+        cacheOrderScriptItems_ = std::make_optional<std::vector<std::string>>(orderScriptItems);
+    }
 }
 
-void EventRecorder::HandleJavascriptItems(std::optional<std::map<std::string, std::vector<std::string>>>& scriptItems)
+void EventRecorder::HandleJavascriptItems(
+    std::optional<WebJsItem>& scriptItems, std::optional<std::vector<std::string>>& orderScriptItems)
 {
     if (scriptItems.has_value()) {
         cacheScriptItems_ = std::nullopt;
+        cacheOrderScriptItems_ = std::nullopt;
         return;
     }
+    FillWebJsCode(cacheScriptItems_);
     if (!cacheScriptItems_.has_value()) {
+        cacheOrderScriptItems_ = std::nullopt;
         return;
     }
     scriptItems.swap(cacheScriptItems_);
     cacheScriptItems_ = std::nullopt;
+    if (cacheOrderScriptItems_.has_value()) {
+        orderScriptItems.swap(cacheOrderScriptItems_);
+        cacheOrderScriptItems_ = std::nullopt;
+    }
 }
 
 bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::string& identifier)
@@ -375,6 +380,12 @@ bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::st
         return false;
     }
     return iter->second == identifier;
+}
+
+void EventRecorder::NotifyEventCacheEnd()
+{
+    cacheScriptItems_ = std::nullopt;
+    cacheOrderScriptItems_ = std::nullopt;
 }
 
 void EventRecorder::OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name)
@@ -477,5 +488,42 @@ void EventRecorder::OnExposure(EventParamsBuilder&& builder)
     auto params = builder.build();
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_EXPOSURE, static_cast<int32_t>(EventType::EXPOSURE), std::move(params));
+}
+
+void EventRecorder::OnWebEvent(const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& params)
+{
+    CHECK_NULL_VOID(node);
+    if (params.empty()) {
+        return;
+    }
+    if (params.size() == WEB_PARAM_SIZE) {
+        if (!IsRecordEnable(EventCategory::CATEGORY_WEB)) {
+            return;
+        }
+        if (!IsMessageValid(params[WEB_PARAM_INDEX_CATEGORY], params[WEB_PARAM_INDEX_IDENTIFIER])) {
+            return;
+        }
+        EventParamsBuilder builder;
+        builder.SetId(node->GetInspectorIdValue(""))
+            .SetType(node->GetHostTag())
+            .SetEventType(EventType::WEB_ACTION)
+            .SetEventCategory(EventCategory::CATEGORY_WEB)
+            .SetExtra(KEY_WEB_CATEGORY, params[WEB_PARAM_INDEX_CATEGORY])
+            .SetText(params[WEB_PARAM_INDEX_CONTENT])
+            .SetHost(node)
+            .SetDescription(node->GetAutoEventParamValue(""));
+        OnEvent(std::move(builder));
+    }
+}
+
+void EventRecorder::OnAttachWeb(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    weakNodeCache_[node->GetId()] = Referenced::WeakClaim(Referenced::RawPtr(node));
+}
+
+void EventRecorder::OnDetachWeb(int32_t nodeId)
+{
+    weakNodeCache_.erase(nodeId);
 }
 } // namespace OHOS::Ace::Recorder

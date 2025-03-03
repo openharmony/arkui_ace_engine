@@ -51,6 +51,7 @@
 #endif
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -86,9 +87,6 @@ constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 constexpr int32_t DEFAULT_PRECISION = 2;
 } // namespace
 namespace OHOS::Ace::NG {
-
-const std::set<std::string> FrameNode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
-    "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
@@ -167,9 +165,10 @@ public:
         }
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(UiNode);
         auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(UiNode);
+        auto repeatVirtualScroll2Node = AceType::DynamicCast<RepeatVirtualScroll2Node>(UiNode);
         if (lazyForEachNode) {
             lazyForEachNode->BuildAllChildren();
-        } else if (repeatVirtualScrollNode) {
+        } else if (repeatVirtualScrollNode || repeatVirtualScroll2Node) {
             TAG_LOGE(AceLogTag::ACE_REPEAT, "repeatVirtualScroll not support in non scoll container!");
         } else {
             auto customNode = AceType::DynamicCast<CustomNode>(UiNode);
@@ -256,12 +255,12 @@ public:
     void ResetChildren(bool needResetChild = false)
     {
         if (inUse_) {
-            LOGF(
-                "[%{public}d:%{public}s] reset children while in use", hostNode_->GetId(), hostNode_->GetTag().c_str());
             if (SystemProperties::GetLayoutDetectEnabled()) {
-                abort();
+                LOGF_ABORT("[%{public}d:%{public}s] reset children while in use",
+                    hostNode_->GetId(), hostNode_->GetTag().c_str());
             } else {
-                LogBacktrace();
+                LOGW("[%{public}d:%{public}s] reset children while in use",
+                    hostNode_->GetId(), hostNode_->GetTag().c_str());
             }
             delayReset_ = true;
             needResetChild_ = needResetChild;
@@ -773,6 +772,9 @@ void FrameNode::DumpCommonInfo()
     }
     if (IsFreeze()) {
         DumpLog::GetInstance().AddDesc(std::string("Freeze: 1"));
+        if (IsUserFreeze()) {
+            DumpLog::GetInstance().AddDesc(std::string("UserFreeze: 1"));
+        }
     }
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")
@@ -890,6 +892,24 @@ void FrameNode::DumpOnSizeChangeInfo()
                                            .append(" currFrameRect: ")
                                            .append(it->currFrameRect.ToString()));
     }
+}
+
+void FrameNode::DumpKeyboardShortcutInfo()
+{
+    auto eventHub = GetEventHubOnly<EventHub>();
+    if (!eventHub) {
+        return;
+    }
+    auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
+    std::string result;
+    for (auto& keyboardShortcut : keyboardShortcuts) {
+        result.append("KeyboardShortcut: ")
+            .append("keys: ")
+            .append(std::to_string(keyboardShortcut.keys))
+            .append(" value: ")
+            .append(keyboardShortcut.value);
+    }
+    DumpLog::GetInstance().AddDesc(result);
 }
 
 void FrameNode::DumpOverlayInfo()
@@ -1044,6 +1064,7 @@ void FrameNode::DumpInfo()
 {
     DumpCommonInfo();
     DumpOnSizeChangeInfo();
+    DumpKeyboardShortcutInfo();
     if (pattern_) {
         pattern_->DumpInfo();
     }
@@ -1056,6 +1077,7 @@ void FrameNode::DumpAdvanceInfo()
 {
     DumpCommonInfo();
     DumpOnSizeChangeInfo();
+    DumpKeyboardShortcutInfo();
     if (pattern_) {
         pattern_->DumpInfo();
         pattern_->DumpAdvanceInfo();
@@ -1279,8 +1301,11 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
         PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
     }
+    bool forceMeasure =
+        !(GetPattern()->ReusedNodeSkipMeasure() ||
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN));
     // node may have been measured before AttachToMainTree
-    if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
+    if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess() && forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
     UINode::OnAttachToMainTree(recursive);
@@ -1388,8 +1413,19 @@ void FrameNode::FireColorNDKCallback()
     std::shared_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
     if (ndkColorModeUpdateCallback_) {
         auto colorModeChange = ndkColorModeUpdateCallback_;
-        colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        colorModeChange(context->GetColorMode() == ColorMode::DARK);
     }
+}
+
+void FrameNode::SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
+{
+    std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
+    ndkColorModeUpdateCallback_ = callback;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    colorMode_ = context->GetColorMode();
 }
 
 void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChange)
@@ -2348,6 +2384,13 @@ void FrameNode::RebuildRenderContextTree()
     }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
+    if (isDeleteRsNode_) {
+        auto parentFrameNode = GetParentFrameNode();
+        if (parentFrameNode) {
+            parentFrameNode->MarkNeedSyncRenderTree();
+            parentFrameNode->RebuildRenderContextTree();
+        }
+    }
     needSyncRenderTree_ = false;
 }
 
@@ -3088,7 +3131,7 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-    auto offset = GetPositionToScreen();
+    auto offset = GetPositionToScreenWithTransform();
     if (gestureHub->GetResponseRegion().empty()) {
         RectF rectToScreen{round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height())};
         responseRegionList.emplace_back(rectToScreen);
@@ -3119,7 +3162,7 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto offset = GetPositionToScreen();
+    auto offset = GetPositionToScreenWithTransform();
     RectF rectToScreen{offset.GetX(), offset.GetY(), origRect.Width(), origRect.Height()};
     auto window = pipelineContext->GetCurrentWindowRect();
     RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
@@ -3547,17 +3590,39 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
     return finalScale;
 }
 
+int32_t FrameNode::GetTransformRotateRelativeToWindow(bool excludeSelf)
+{
+    int32_t FULL_CIRCLE_ANGLE = 360;
+    int32_t rotateDegree = 0;
+    auto context = GetRenderContext();
+    if (context && !excludeSelf) {
+        rotateDegree = context->GetRotateDegree();
+    }
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto contextParent = parent->GetRenderContext();
+        if (contextParent) {
+            rotateDegree += contextParent->GetRotateDegree();
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return rotateDegree %= FULL_CIRCLE_ANGLE;
+}
+
 // returns a node's rect relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
-RectF FrameNode::GetTransformRectRelativeToWindow() const
+RectF FrameNode::GetTransformRectRelativeToWindow(bool checkBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, RectF());
     RectF rect = context->GetPaintRectWithTransform();
     auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
+        if (checkBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
         rect = ApplyFrameNodeTranformToRect(rect, parent);
         parent = parent->GetAncestorNodeOfFrame(true);
     }
@@ -4370,9 +4435,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         auto height = width / aspectRatio;
         geometryNode_->SetFrameSize(SizeF({ width, height }));
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         auto size = geometryNode_->GetFrameSize();
-        geometryNode_->SetFrameSize(SizeF({ (int)(size.Width() + 0.5), (int)(size.Height() + 0.5) }));
+        geometryNode_->SetFrameSize(SizeF({ round(size.Width()), round(size.Height()) }));
     }
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
@@ -5064,7 +5129,7 @@ void FrameNode::RecordExposureInner()
     if (!pipeline) {
         auto piplineRef = PipelineContext::GetContextByContainerId(exposureProcessor_->GetContainerId());
         if (!piplineRef) {
-            pipeline = piplineRef.GetRawPtr();
+            pipeline = Referenced::RawPtr(piplineRef);
         }
     }
     CHECK_NULL_VOID(pipeline);
@@ -5632,7 +5697,8 @@ bool FrameNode::IsContextTransparent()
     if (renderContext_->GetOpacity().has_value() && renderContext_->GetOpacity().value() <= MIN_OPACITY) {
         return true;
     }
-    if (layoutTags_.find(GetTag()) == layoutTags_.end()) {
+    auto layoutTags = GetLayoutTags();
+    if (layoutTags.find(GetTag()) == layoutTags.end()) {
         if (width > MIN_WIDTH && height > MIN_HEIGHT &&
             static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) == 0) {
             return false;
@@ -5926,12 +5992,12 @@ void FrameNode::GetInspectorValue()
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (GetTag() == V2::WEB_ETS_TAG) {
-        UiSessionManager::GetInstance().WebTaskNumsChange(1);
+        UiSessionManager::GetInstance()->WebTaskNumsChange(1);
         auto pattern = GetPattern<NG::WebPattern>();
         CHECK_NULL_VOID(pattern);
         auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
-            UiSessionManager::GetInstance().AddValueForTree(webId, value->ToString());
-            UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+            UiSessionManager::GetInstance()->AddValueForTree(webId, value->ToString());
+            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
         };
         pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
     }
@@ -5968,12 +6034,17 @@ void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
 
 void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
 {
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddFrameNodeChangeListener(WeakClaim(this));
     if (changeInfoFlag_ == FRAME_NODE_CHANGE_INFO_NONE) {
-        auto context = GetContext();
-        CHECK_NULL_VOID(context);
         if (!context->AddChangedFrameNode(WeakClaim(this))) {
             return;
         }
+    }
+    if (changeFlag == FRAME_NODE_CHANGE_GEOMETRY_CHANGE || changeFlag == FRAME_NODE_CHANGE_TRANSITION_START ||
+        changeFlag == FRAME_NODE_CHANGE_TRANSFORM_CHANGE) {
+        context->SetIsTransFlag(true);
     }
     changeInfoFlag_ = changeInfoFlag_ | changeFlag;
 }
@@ -6035,7 +6106,7 @@ void FrameNode::NotifyWebPattern(bool isRegister)
         CHECK_NULL_VOID(pattern);
         if (isRegister) {
             auto callback = [](int64_t accessibilityId, const std::string data) {
-                UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+                UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data);
             };
             pattern->RegisterTextBlurCallback(callback);
         } else {

@@ -777,7 +777,8 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::LAUNCHER_APP_BACK_TO_HOME ||
         sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
         sceneId == PerfConstants::APP_SWIPER_FLING ||
-        sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
+        sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH ||
+        sceneId == PerfConstants::SCREENLOCK_SCREEN_OFF_ANIM) {
             return true;
         }
     return false;

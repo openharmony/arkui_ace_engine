@@ -98,6 +98,7 @@ protected:
     static void TearDownTestSuite();
     void TearDown() override;
 
+    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     static void ExpectCallParagraphMethods(ExpectParagraphParams params);

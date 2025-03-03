@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="./custom_dialog_controller_native.d.ts" />
 class CustomDialogController extends NativeCustomDialogController {
   // hold arg so NativeCustomDialogController can make use of the functions
   // contained in it without root (global) cycle dependency problems. like

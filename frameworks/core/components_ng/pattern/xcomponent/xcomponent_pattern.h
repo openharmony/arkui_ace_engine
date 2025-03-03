@@ -61,9 +61,6 @@ public:
         float initHeight = 0.0f, bool isTypedNode = false);
     ~XComponentPattern() override = default;
 
-    void OnAttachToMainTree() override;
-    void OnDetachFromMainTree() override;
-
     bool IsAtomicNode() const override
     {
         return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;
@@ -115,6 +112,7 @@ public:
             nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
             nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
         }
+        hasGotNativeXComponent_ = true;
         return std::make_pair(nativeXComponentImpl_, nativeXComponent_);
     }
 
@@ -282,6 +280,21 @@ public:
         return isTypedNode_ && isNativeXComponent_ && hasLoadNativeDone_;
     }
 
+    bool HasGotSurfaceHolder() const
+    {
+        return hasGotSurfaceHolder_;
+    }
+
+    bool HasGotNativeXComponent() const
+    {
+        return hasGotNativeXComponent_;
+    }
+
+    virtual bool IsBindNative()
+    {
+        return false;
+    }
+
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
@@ -330,18 +343,44 @@ public:
     bool GetEnableAnalyzer();
     void NativeStartImageAnalyzer(std::function<void(int32_t)>& callback);
 
-private:
+protected:
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
-    void OnAreaChangedInner() override;
     void OnWindowHide() override;
     void OnWindowShow() override;
     void OnModifyDone() override;
+    void AddAfterLayoutTaskForExportTexture();
+    void UpdateTransformHint();
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    static std::string XComponentTypeToString(XComponentType type);
+    static std::string XComponentNodeTypeToString(XComponentNodeType type);
+    void AdjustNativeWindowSize(float width, float height);
+
+    std::optional<std::string> id_;
+    XComponentType type_;
+    bool hasGotSurfaceHolder_ = false;
+    bool hasGotNativeXComponent_ = false;
+    bool isCNode_ = false;
+    RefPtr<RenderSurface> renderSurface_;
+    OffsetF localPosition_;
+    OffsetF surfaceOffset_;
+    SizeF drawSize_;
+    SizeF surfaceSize_;
+    RectF paintRect_;
+    void* nativeWindow_ = nullptr;
+    bool hasReleasedSurface_ = false;
+    RefPtr<RenderContext> renderContextForSurface_;
+    std::optional<int32_t> transformHintChangedCallbackId_;
+    std::string surfaceId_;
+
+private:
+    void OnAreaChangedInner() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void OnAttachContext(PipelineContext *context) override;
@@ -386,7 +425,6 @@ private:
     void HandleOnFrameEvent();
     void HandleUnregisterOnFrameEvent();
     bool ExportTextureAvailable();
-    void AddAfterLayoutTaskForExportTexture();
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
@@ -397,7 +435,6 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
-    void UpdateTransformHint();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
 
@@ -408,14 +445,10 @@ private:
 #endif
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
-    std::optional<std::string> id_;
-    XComponentType type_;
     std::optional<std::string> libraryname_;
     std::shared_ptr<InnerXComponentController> xcomponentController_;
     std::optional<std::string> soPath_;
 
-    RefPtr<RenderSurface> renderSurface_;
-    RefPtr<RenderContext> renderContextForSurface_;
     RefPtr<RenderContext> handlingSurfaceRenderContext_;
     WeakPtr<XComponentPattern> extPattern_;
 
@@ -432,20 +465,13 @@ private:
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
     SizeF initSize_;
-    OffsetF localPosition_;
     OffsetF globalPosition_;
-    OffsetF surfaceOffset_;
-    SizeF drawSize_;
-    SizeF surfaceSize_;
-    RectF paintRect_;
     RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
 
     std::optional<float> selfIdealSurfaceWidth_;
     std::optional<float> selfIdealSurfaceHeight_;
     std::optional<float> selfIdealSurfaceOffsetX_;
     std::optional<float> selfIdealSurfaceOffsetY_;
-    std::string surfaceId_;
-    void* nativeWindow_ = nullptr;
 
     bool isSurfaceLock_ = false;
     uint32_t windowId_ = 0;
@@ -457,10 +483,8 @@ private:
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
-    bool hasReleasedSurface_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
-    std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;

@@ -56,7 +56,8 @@ public:
         value->propShowIndicator_ = CloneShowIndicator();
         value->propIndicatorType_ = CloneIndicatorType();
         value->propLoop_ = CloneLoop();
-
+        value->propIgnoreSize_ = CloneIgnoreSize();
+        value->propSpace_ = CloneSpace();
         return value;
     }
 
@@ -72,6 +73,8 @@ public:
         json->PutExtAttr(
             "vertical", propDirection_.value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "true" : "false", filter);
         json->PutExtAttr("loop", propLoop_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("ignoreSize", propIgnoreSize_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("space", propSpace_.value_or(Dimension(8.0, DimensionUnit::VP)).ToString().c_str(), filter);
     }
 
     void Reset() override
@@ -85,6 +88,8 @@ public:
         ResetShowIndicator();
         ResetIndicatorType();
         ResetLoop();
+        ResetIgnoreSize();
+        ResetSpace();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);
@@ -93,6 +98,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowIndicator, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorType, SwiperIndicatorType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreSize, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(IndicatorLayoutStyle, IndicatorLayoutStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(IndicatorLayoutStyle, Left, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(IndicatorLayoutStyle, Top, Dimension, PROPERTY_UPDATE_MEASURE_SELF);

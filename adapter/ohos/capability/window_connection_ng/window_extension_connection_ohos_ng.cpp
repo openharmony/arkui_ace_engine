@@ -14,7 +14,6 @@
  */
 #include "window_extension_connection_ohos_ng.h"
 
-#include "element_name.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
 #include "base/memory/ace_type.h"
@@ -60,8 +59,7 @@ public:
                 pattern->FireConnect();
             }
         };
-        PostTaskToUI(
-            std::move(task), "ArkUIWindowExtensionConnect", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        PostTaskToUI(std::move(task), "ArkUIWindowExtensionConnect");
     }
 
     void OnExtensionDisconnected() override
@@ -77,8 +75,7 @@ public:
                 pattern->FireDisConnect();
             }
         };
-        PostTaskToUI(std::move(task), "ArkUIWindowExtensionDisconnect",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        PostTaskToUI(std::move(task), "ArkUIWindowExtensionDisconnect");
     }
 
     void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) override {}
@@ -86,7 +83,7 @@ public:
     void OnBackPress() override {}
 
 private:
-    void PostTaskToUI(const std::function<void()>&& task, const std::string& name, PriorityType priorityType) const
+    void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const
     {
         CHECK_NULL_VOID(task);
         auto container = AceEngine::Get().GetContainer(instanceId_);

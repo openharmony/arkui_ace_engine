@@ -27,6 +27,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
@@ -342,9 +343,15 @@ void PipelineContext::OnHide() {}
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId) {}
 
-void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
+void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId)
+{
+    onWindowStateChangedCallbacks_.emplace(nodeId);
+}
 
-void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId) {}
+void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId)
+{
+    onWindowStateChangedCallbacks_.erase(nodeId);
+}
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
@@ -789,7 +796,7 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
         safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
         return;
     }
-    safeAreaManager_->UpdateNavArea(navSafeArea);
+    safeAreaManager_->UpdateNavSafeArea(navSafeArea);
 }
 
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
@@ -991,6 +998,11 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
     return true;
+}
+
+ColorMode PipelineContext::GetColorMode() const
+{
+    return MockContainer::mockColorMode_;
 }
 
 } // namespace OHOS::Ace::NG
@@ -1263,5 +1275,28 @@ RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}
+
+void NG::PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
+{
+    auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();
+    auto offSetPosY_ = displayWindowRectInfo_.Top() - displayWindowRectInfo.Top();
+    if (!NearZero(offSetPosX_) || !NearZero(offSetPosY_)) {
+        if (lastMouseEvent_) {
+            lastMouseEvent_->x += offSetPosX_;
+            lastMouseEvent_->y += offSetPosY_;
+        }
+    }
+    displayWindowRectInfo_ = displayWindowRectInfo;
+}
+
+void NG::PipelineContext::SetIsTransFlag(bool result)
+{
+    isTransFlag_ = result;
+}
+
+void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
+{
+    windowSizeChangeReason_ = reason;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

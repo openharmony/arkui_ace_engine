@@ -19,6 +19,7 @@
 
 #include "base/error/error_code.h"
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
+#include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -361,25 +362,200 @@ int32_t OH_NativeXComponent_RegisterKeyEventCallbackWithResult(
 int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* userData,
     void (*callback)(ArkUI_NodeHandle node, ArkUI_XComponent_ImageAnalyzerState statusCode, void* userData))
 {
-    if (node == nullptr || (node->type != ARKUI_NODE_XCOMPONENT
+    if ((!OHOS::Ace::NodeModel::IsValidArkUINode(node)) || (node->type != ARKUI_NODE_XCOMPONENT
         && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE) || callback == nullptr) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();
     nodeModifiers->getXComponentModifier()->startImageAnalyzer(node->uiNodeHandle, node, userData,
         reinterpret_cast<XComponentAnalyzerCallback>(callback));
-    return ARKUI_ERROR_CODE_NO_ERROR;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_XComponent_StopImageAnalyzer(ArkUI_NodeHandle node)
 {
-    if (node == nullptr || (node->type != ARKUI_NODE_XCOMPONENT
+    if ((!OHOS::Ace::NodeModel::IsValidArkUINode(node)) || (node->type != ARKUI_NODE_XCOMPONENT
         && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();
     nodeModifiers->getXComponentModifier()->stopImageAnalyzer(node->uiNodeHandle);
-    return ARKUI_ERROR_CODE_NO_ERROR;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+OH_ArkUI_SurfaceHolder* OH_ArkUI_SurfaceHolder_Create(ArkUI_NodeHandle node)
+{
+    if (!OHOS::Ace::NodeModel::IsValidArkUINode(node) ||
+        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
+        return nullptr;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, nullptr);
+    auto nodeModifiers = impl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, nullptr);
+    auto xComponentModifier = nodeModifiers->getXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, nullptr);
+    auto* surfaceHolder =
+        reinterpret_cast<OH_ArkUI_SurfaceHolder*>(xComponentModifier->createSurfaceHolder(node->uiNodeHandle));
+    CHECK_NULL_RETURN(surfaceHolder, nullptr);
+    surfaceHolder->node_ = node;
+    return surfaceHolder;
+}
+
+void OH_ArkUI_SurfaceHolder_Dispose(OH_ArkUI_SurfaceHolder* surfaceHolder)
+{
+    if (surfaceHolder) {
+        auto node = surfaceHolder->node_;
+        if (OHOS::Ace::NodeModel::IsValidArkUINode(node)) {
+            const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+            CHECK_NULL_VOID(impl);
+            auto nodeModifiers = impl->getNodeModifiers();
+            CHECK_NULL_VOID(nodeModifiers);
+            auto xComponentModifier = nodeModifiers->getXComponentModifier();
+            CHECK_NULL_VOID(xComponentModifier);
+            xComponentModifier->dispose(node->uiNodeHandle);
+        }
+    }
+    delete surfaceHolder;
+}
+
+int32_t OH_ArkUI_SurfaceHolder_SetUserData(OH_ArkUI_SurfaceHolder* surfaceHolder, void* userData)
+{
+    if (surfaceHolder == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    surfaceHolder->userData_ = userData;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+void* OH_ArkUI_SurfaceHolder_GetUserData(OH_ArkUI_SurfaceHolder* surfaceHolder)
+{
+    if (surfaceHolder == nullptr) {
+        return nullptr;
+    }
+    return surfaceHolder->userData_;
+}
+
+OH_ArkUI_SurfaceCallback* OH_ArkUI_SurfaceCallback_Create(void)
+{
+    OH_ArkUI_SurfaceCallback* surfaceCallback = new OH_ArkUI_SurfaceCallback();
+    return surfaceCallback;
+}
+
+void OH_ArkUI_SurfaceCallback_Dispose(OH_ArkUI_SurfaceCallback* callback)
+{
+    delete callback;
+}
+
+void OH_ArkUI_SurfaceCallback_SetSurfaceCreatedEvent(
+    OH_ArkUI_SurfaceCallback* callback, void (*onSurfaceCreated)(OH_ArkUI_SurfaceHolder* surfaceHolder))
+{
+    CHECK_NULL_VOID(callback);
+    callback->OnSurfaceCreated = onSurfaceCreated;
+}
+
+void OH_ArkUI_SurfaceCallback_SetSurfaceChangedEvent(OH_ArkUI_SurfaceCallback* callback,
+    void (*onSurfaceChanged)(OH_ArkUI_SurfaceHolder* surfaceHolder, uint64_t width, uint64_t height))
+{
+    CHECK_NULL_VOID(callback);
+    callback->OnSurfaceChanged = onSurfaceChanged;
+}
+
+void OH_ArkUI_SurfaceCallback_SetSurfaceDestroyedEvent(
+    OH_ArkUI_SurfaceCallback* callback,
+    void (*onSurfaceDestroyed)(OH_ArkUI_SurfaceHolder* surfaceHolder))
+{
+    CHECK_NULL_VOID(callback);
+    callback->OnSurfaceDestroyed = onSurfaceDestroyed;
+}
+
+int32_t OH_ArkUI_SurfaceHolder_AddSurfaceCallback(
+    OH_ArkUI_SurfaceHolder* surfaceHolder, OH_ArkUI_SurfaceCallback* callback)
+{
+    if ((surfaceHolder == nullptr) || (callback == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return surfaceHolder->AddSurfaceCallback(callback);
+}
+
+int32_t OH_ArkUI_SurfaceHolder_RemoveSurfaceCallback(
+    OH_ArkUI_SurfaceHolder* surfaceHolder, OH_ArkUI_SurfaceCallback* callback)
+{
+    if ((surfaceHolder == nullptr) || (callback == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return surfaceHolder->RemoveSurfaceCallback(callback);
+}
+
+OHNativeWindow* OH_ArkUI_XComponent_GetNativeWindow(OH_ArkUI_SurfaceHolder* surfaceHolder)
+{
+    if (surfaceHolder == nullptr) {
+        return nullptr;
+    }
+    return surfaceHolder->nativeWindow_;
+}
+
+int32_t OH_ArkUI_XComponent_SetAutoInitialize(ArkUI_NodeHandle node, bool autoInitialize)
+{
+    if (!OHOS::Ace::NodeModel::IsValidArkUINode(node) ||
+        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = impl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto xComponentModifier = nodeModifiers->getXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return xComponentModifier->setAutoInitialize(node->uiNodeHandle, autoInitialize);
+}
+
+int32_t OH_ArkUI_XComponent_Initialize(ArkUI_NodeHandle node)
+{
+    if (!OHOS::Ace::NodeModel::IsValidArkUINode(node) ||
+        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = impl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto xComponentModifier = nodeModifiers->getXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return xComponentModifier->initialize(node->uiNodeHandle);
+}
+
+int32_t OH_ArkUI_XComponent_Finalize(ArkUI_NodeHandle node)
+{
+    if (!OHOS::Ace::NodeModel::IsValidArkUINode(node) ||
+        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = impl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto xComponentModifier = nodeModifiers->getXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return xComponentModifier->finalize(node->uiNodeHandle);
+}
+
+int32_t OH_ArkUI_XComponent_IsInitialized(ArkUI_NodeHandle node, bool* isInitialized)
+{
+    if (!OHOS::Ace::NodeModel::IsValidArkUINode(node) ||
+        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = impl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto xComponentModifier = nodeModifiers->getXComponentModifier();
+    CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    ArkUI_Bool* value = 0;
+    auto res = xComponentModifier->isInitialized(node->uiNodeHandle, value);
+    (*isInitialized) = reinterpret_cast<bool*>(value);
+    return res;
 }
 
 #ifdef __cplusplus

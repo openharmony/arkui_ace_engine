@@ -21,7 +21,11 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_stub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #undef private
 #undef protected
@@ -57,6 +61,20 @@ const std::string AM = "上午";
 const std::string PM = "下午";
 const std::string COLON = ":";
 const std::string ZERO = "0";
+
+RefPtr<UINode> FindNodeByTag(const RefPtr<UINode>& uiNode, const std::string& tag)
+{
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    for (int32_t index = 0; index < uiNode->TotalChildCount(); index++) {
+        auto childNode = uiNode->GetChildAtIndex(index);
+        CHECK_NULL_CONTINUE(childNode);
+        CHECK_EQUAL_RETURN(childNode->GetTag(), tag, childNode);
+        auto findNode = FindNodeByTag(childNode, tag);
+        CHECK_NULL_RETURN(!findNode, findNode);
+    }
+    return nullptr;
+}
+
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -1151,6 +1169,90 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDateChangeEvent001
+ * @tc.desc: Test Get DateChangeEvent Function for DatePickerDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, GetDateChangeEvent001, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto callback = DatePickerDialogView::GetDateChangeEvent(nullptr, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+
+    callback = DatePickerDialogView::GetDateChangeEvent(datePickerNode, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+
+    bool result = false;
+    auto dateChangeEvent = [&result](const std::string& info) {
+        result = true;
+    };
+    dialogEvent["dateChangeId"] = dateChangeEvent;
+
+    callback = DatePickerDialogView::GetDateChangeEvent(nullptr, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+    EXPECT_TRUE(result);
+
+    result = false;
+    callback = DatePickerDialogView::GetDateChangeEvent(datePickerNode, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportDateChangeEvent001
+ * @tc.desc: Test ReportDateChangeEvent Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, ReportDateChangeEvent001, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto ret = datePickerPattern->ReportDateChangeEvent("DatePicker", "onDateChange", "");
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ReportDateChangeEvent002
+ * @tc.desc: Test ReportDateChangeEvent Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, ReportDateChangeEvent002, TestSize.Level1)
+{
+    DialogProperties dialogProperties;
+    DatePickerSettingData settingData;
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    auto datePickerNode = FindNodeByTag(dialogNode, V2::DATE_PICKER_ETS_TAG);
+    ASSERT_NE(datePickerNode, nullptr);
+    auto dateNode = AceType::DynamicCast<FrameNode>(datePickerNode);
+    ASSERT_NE(dateNode, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto ret = datePickerPattern->ReportDateChangeEvent("DatePickerDialog", "onDateChange", "");
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: DatePickerColumnLayoutAlgorithmNeedAdaptForAging
  * @tc.desc: Test NeedAdaptForAging.
  * @tc.type: FUNC
@@ -1251,5 +1353,390 @@ HWTEST_F(DatePickerTestFour, HandleMonthChange, TestSize.Level1)
     bool isDividerSpacing = true;
     auto res = datePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
     EXPECT_NE(res, 1.0f);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeTest001
+ * @tc.desc: Test OnDetachFromFrameNode  UnregisterWindowStateChangedCallback  .
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, OnDetachFromFrameNodeTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    FrameNode& ref = *columnNode_;
+    columnPattern_->hapticController_ = nullptr;
+    auto pipeline = columnNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    columnPattern_->OnDetachFromFrameNode(&ref);
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeTest002
+ * @tc.desc: Test OnDetachFromFrameNode hapticController_->stop and UnregisterWindowStateChangedCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, OnDetachFromFrameNodeTest002, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    FrameNode& ref = *columnNode_;
+    columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    auto pipeline = columnNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    columnPattern_->OnDetachFromFrameNode(&ref);
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest001
+ * @tc.desc: Test InitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, InitHapticControllerTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->hapticController_ = nullptr;
+    columnPattern_->InitHapticController();
+    EXPECT_NE(columnPattern_->hapticController_, nullptr);
+    columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    columnPattern_->InitHapticController();
+    EXPECT_TRUE(columnPattern_->isEnableHaptic_);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest002
+ * @tc.desc: Test InitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, InitHapticControllerTest002, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode_->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->isEnableHaptic_ = false;
+    columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    columnPattern_->InitHapticController();
+    EXPECT_FALSE(columnPattern_->isEnableHaptic_);
+    datePickerPattern->isEnableHaptic_ = false;
+    columnPattern_->hapticController_ = nullptr;
+    columnPattern_->InitHapticController();
+    EXPECT_EQ(columnPattern_->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: RegisterWindowStateChangedCallbackTest001
+ * @tc.desc: Test RegisterWindowStateChangedCallback & UnregisterWindowStateChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, RegisterWindowStateChangedCallbackTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto pipeline = columnPattern_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->onWindowStateChangedCallbacks_.clear();
+    columnPattern_->RegisterWindowStateChangedCallback();
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), 1);
+    columnPattern_->UnregisterWindowStateChangedCallback(columnNode_.rawPtr_);
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), 0);
+}
+
+/**
+ * @tc.name: OnWindowHideTest001
+ * @tc.desc: Test OnWindowHide &  OnWindowShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, OnWindowHideTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->hapticController_ = nullptr;
+    columnPattern_->OnWindowHide();
+    EXPECT_FALSE(columnPattern_->isShow_);
+    columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    columnPattern_->OnWindowHide();
+    EXPECT_FALSE(columnPattern_->isShow_);
+    columnPattern_->OnWindowShow();
+    EXPECT_TRUE(columnPattern_->isShow_);
+}
+
+/**
+ * @tc.name: HandleDragEndTest001
+ * @tc.desc: Test HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, HandleDragEndTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->hapticController_ = nullptr;
+    columnPattern_->HandleDragEnd();
+    EXPECT_FALSE(columnPattern_->pressed_);
+    columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    columnPattern_->HandleDragEnd();
+    EXPECT_FALSE(columnPattern_->pressed_);
+}
+
+/**
+ * @tc.name: TossAnimationStopedTest001
+ * @tc.desc: Test TossAnimationStoped
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, TossAnimationStopedTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->hapticController_ = nullptr;
+    columnPattern_->TossAnimationStoped();
+    EXPECT_EQ(columnPattern_->yLast_, 0.0f);
+    columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    columnPattern_->TossAnimationStoped();
+    EXPECT_EQ(columnPattern_->yLast_, 0.0f);
+}
+
+/**
+ * @tc.name: UpdateColumnChildPositionTest001
+ * @tc.desc: Test UpdateColumnChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    double offset = 50.0;
+    columnPattern_->hapticController_ = nullptr;
+    columnPattern_->UpdateColumnChildPosition(offset);
+    EXPECT_EQ(columnPattern_->hapticController_, nullptr);
+    EXPECT_EQ(columnPattern_->yLast_, 50.0f);
+    columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    columnPattern_->isShow_ = false;
+    ASSERT_NE(columnPattern_->hapticController_, nullptr);
+    auto pickerAudioHapticStub = std::static_pointer_cast<PickerAudioHapticStub>(columnPattern_->hapticController_);
+    ASSERT_NE(pickerAudioHapticStub, nullptr);
+    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    columnPattern_->UpdateColumnChildPosition(offset);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    columnPattern_->isShow_ = true;
+    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    columnPattern_->UpdateColumnChildPosition(offset);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::HANDLE_DELTA);
+    columnPattern_->isEnableHaptic_ = false;
+    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    columnPattern_->UpdateColumnChildPosition(offset);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewTest002
+ * @tc.desc: Test DatePickerDialogView::Show for api16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerDialogViewTest002, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    DatePickerSettingData settingData;
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = true;
+    settingData.isEnableHapticFeedback = false;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto customNode = dialogPattern->GetCustomNode();
+    ASSERT_NE(customNode, nullptr);
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    ASSERT_NE(pickerStack, nullptr);
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    ASSERT_NE(pickerRow, nullptr);
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    EXPECT_FALSE(datePickerPattern->isEnableHaptic_);
+}
+/**
+ * @tc.name: CreateSingleDateNode001
+ * @tc.desc: Test DatePickerDialogView CreateSingleDateNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, CreateSingleDateNode001, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    DatePickerSettingData settingData;
+    auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(
+        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    EXPECT_NE(datePickerNode, nullptr);
+}
+
+/**
+ * @tc.name: SetEnableHapticFeedbackTest001
+ * @tc.desc: Test SetEnableHapticFeedback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, SetEnableHapticFeedbackTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerModelNG.SetEnableHapticFeedback(false);
+    EXPECT_FALSE(datePickerPattern->isEnableHaptic_);
+    datePickerModelNG.SetEnableHapticFeedback(frameNode, false);
+    EXPECT_FALSE(datePickerPattern->isEnableHaptic_);
+    auto result = datePickerModelNG.GetEnableHapticFeedback(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: InnerHandleScrollTest001
+ * @tc.desc: Test InnerHandleScroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, InnerHandleScrollTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto pickerAudioHapticStub = std::static_pointer_cast<PickerAudioHapticStub>(columnPattern_->hapticController_);
+    ASSERT_NE(pickerAudioHapticStub, nullptr);
+    auto result = columnPattern_->InnerHandleScroll(true, true, true);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::PLAY_ONCE);
+    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    EXPECT_TRUE(result);
+    columnPattern_->isEnableHaptic_ = false;
+    result = columnPattern_->InnerHandleScroll(true, true, true);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    columnPattern_->hapticController_ = nullptr;
+    result = columnPattern_->InnerHandleScroll(true, true, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ColumnPatternInitHapticControllerTest001
+ * @tc.desc: Test ColumnPatternInitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, ColumnPatternInitHapticControllerTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode_->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    columnPattern_->hapticController_ = nullptr;
+    datePickerPattern->isHapticChanged_ = false;
+    datePickerPattern->ColumnPatternInitHapticController();
+    EXPECT_EQ(columnPattern_->hapticController_, nullptr);
+    datePickerPattern->isHapticChanged_ = true;
+    datePickerPattern->ColumnPatternInitHapticController();
+    EXPECT_NE(columnPattern_->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: ColumnPatternInitHapticControllerTest002
+ * @tc.desc: Test ColumnPatternInitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, ColumnPatternInitHapticControllerTest002, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode_->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    columnPattern_->hapticController_ = nullptr;
+    datePickerPattern->isHapticChanged_ = false;
+    datePickerPattern->ColumnPatternInitHapticController(columnNode_);
+    EXPECT_EQ(columnPattern_->hapticController_, nullptr);
+    datePickerPattern->isHapticChanged_ = true;
+    datePickerPattern->ColumnPatternInitHapticController(columnNode_);
+    EXPECT_NE(columnPattern_->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest001
+ * @tc.desc: Test OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternTest112, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    const std::string language = "en";
+    const std::string countryOrRegion = "US";
+    const std::string script = "Latn";
+    const std::string keywordsAndValues = "";
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    datePickerNode->MountToParent(pickerStack);
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NG::ButtonPattern>(); });
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textConfirmNode->MountToParent(buttonConfirmNode);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->isHapticChanged_ = true;
+    datePickerPattern->OnModifyDone();
+    EXPECT_FALSE(datePickerPattern->isHapticChanged_);
 }
 } // namespace OHOS::Ace::NG

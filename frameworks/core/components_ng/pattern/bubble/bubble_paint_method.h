@@ -21,6 +21,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
+#include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shadow_config.h"

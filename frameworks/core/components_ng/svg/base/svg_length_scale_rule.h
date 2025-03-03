@@ -49,9 +49,19 @@ public:
     {
         return baseRect_ == lengthRule.GetBaseRect() && lengthScaleUnit_ == lengthRule.GetLengthScaleUnit();
     }
+    void SetPathTransform(bool transform)
+    {
+        pathTransform_ = transform;
+        return ;
+    }
+    bool GetPathTransform() const
+    {
+        return pathTransform_;
+    }
 private:
     Rect baseRect_;
     SvgLengthScaleUnit lengthScaleUnit_;
+    bool pathTransform_ = false;
 };
 }
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_BASE_LENGTH_SCALE_RULE_H

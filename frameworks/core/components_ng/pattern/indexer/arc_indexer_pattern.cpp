@@ -395,7 +395,12 @@ RefPtr<FrameNode> ArcIndexerPattern::BuildIcon()
     // size
     iconLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(lastItemSize_), CalcLength(lastItemSize_)));
+    auto iconPadding = Dimension(2.0f, DimensionUnit::VP).ConvertToPx(); // set icon padding 2.0f
+    iconLayoutProperty->UpdatePadding({ CalcLength(iconPadding), CalcLength(iconPadding), CalcLength(iconPadding),
+        CalcLength(iconPadding), CalcLength(iconPadding), CalcLength(iconPadding) });
+
     icon->MarkModifyDone();
+    icon->MarkDirtyNode();
     return icon;
 }
 
@@ -408,6 +413,7 @@ void ArcIndexerPattern::BuildArrayValueItems()
     CHECK_NULL_VOID(layoutProperty);
     auto children = host->GetChildren();
     auto lastChildCount = static_cast<int32_t>(children.size());
+    bool hasIconNode = false;
     if (layoutProperty->GetIsPopupValue(false)) {
         lastChildCount -= 1;
     }
@@ -415,8 +421,9 @@ void ArcIndexerPattern::BuildArrayValueItems()
     if (indexerSize != lastChildCount) {
         host->Clean();
         layoutProperty->UpdateIsPopup(false);
-        if (autoCollapse) {
+        if (autoCollapse && (indexerSize > ARC_INDEXER_COLLAPSE_ITEM_COUNT)) {
             indexerSize -= 1;
+            hasIconNode = true;
         }
         for (int32_t index = 0; index < indexerSize; index++) {
             auto indexerChildNode = FrameNode::CreateFrameNode(
@@ -424,7 +431,7 @@ void ArcIndexerPattern::BuildArrayValueItems()
             CHECK_NULL_VOID(indexerChildNode);
             host->AddChild(indexerChildNode);
         }
-        if (autoCollapse) {
+        if (hasIconNode) {
             auto icon = BuildIcon();
             CHECK_NULL_VOID(icon);
             host->AddChild(icon);
@@ -433,7 +440,7 @@ void ArcIndexerPattern::BuildArrayValueItems()
     std::vector<std::string> arrayValueStrs;
     auto it = arcArrayValue_.begin();
     while (it != arcArrayValue_.end()) {
-        if (autoCollapse && (it == arcArrayValue_.end() - 1)) {
+        if (hasIconNode && (it == arcArrayValue_.end() - 1)) {
             break;
         }
         arrayValueStrs.push_back(it->first);

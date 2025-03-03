@@ -383,6 +383,26 @@ public:
         return static_cast<int32_t>(itemPosition_.size());
     }
 
+    void SetPrevTotalItemCount(int32_t prevTotalItemCount)
+    {
+        prevTotalItemCount_ = prevTotalItemCount;
+    }
+
+    void SetPrevTotalMainSize(float prevTotalMainSize)
+    {
+        prevTotalMainSize_ = prevTotalMainSize;
+    }
+
+    bool GetStackFromEnd() const
+    {
+        return isStackFromEnd_;
+    }
+
+    void ReverseItemPosition(ListItemGroupLayoutAlgorithm::PositionMap &itemPosition, int32_t totalItemCount,
+        float mainSize);
+
+    void ReverseLayoutedItemInfo(int32_t totalItemCount, float mainSize);
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -393,9 +413,14 @@ private:
     void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
     void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
         float crossSize, float startPos);
-    inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
+    RefPtr<LayoutWrapper> GetListItem(LayoutWrapper *layoutWrapper, int32_t index, bool addToRenderTree = true,
+                                      bool isCache = false) const
     {
-        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
+        index = !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
+        if (index < 0) {
+            return nullptr;
+        }
+        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_, addToRenderTree, isCache);
     }
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
@@ -466,9 +491,11 @@ private:
     std::optional<int32_t> targetIndex_;
     ScrollAlign scrollAlign_ = ScrollAlign::NONE;
     int32_t totalItemCount_ = 0;
+    int32_t prevTotalItemCount_ = 0;
     int32_t forwardCachedIndex_ = -1;
     int32_t backwardCachedIndex_ = INT_MAX;
     float totalMainSize_ = 0.0f;
+    float prevTotalMainSize_ = 0.0f;
     float headerMainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float startPos_ = 0.0f;
@@ -497,6 +524,9 @@ private:
 
     std::optional<ListItemGroupCacheParam> cacheParam_;
     PositionMap cachedItemPosition_;
+
+    bool isStackFromEnd_ = false;
+    bool isLayouted_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -527,7 +527,7 @@ private:
     double GetDragDeltaLessThanJumpInterval(
         double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
     void RegisterWindowStateChangedCallback();
-    void UnregisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
 
     void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, ScrollDirection dir);
 
@@ -614,6 +614,7 @@ private:
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     uint32_t currentEnterIndex_ = 0;
+    double enterDelta_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 

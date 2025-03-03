@@ -78,6 +78,13 @@ typedef bool (*ArkUI_OnWillDismissEvent)(int32_t reason);
 typedef struct ArkUI_DialogDismissEvent ArkUI_DialogDismissEvent;
 
 /**
+ * @brief Defines a struct for the content object of a custom dialog box.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_CustomDialogOptions ArkUI_CustomDialogOptions;
+
+/**
  * @brief Provides the custom dialog box APIs for the native side.
  *
  * @version 1
@@ -263,9 +270,14 @@ typedef struct {
  * @brief Provides the custom dialog box APIs for the native side.
  *
  * @version 2
- * @since 16
+ * @since 15
  */
 typedef struct {
+    /**
+     * @brief Provides the custom dialog box APIs for the native side. The API scope is {@link ArkUI_NativeDialogAPI_1}
+     *
+     * @since 15
+     */
     ArkUI_NativeDialogAPI_1 nativeDialogAPI1;
     /**
      * @brief Defines the distance between the customDialog and system keyboard.
@@ -278,7 +290,7 @@ typedef struct {
      *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
      *         Returns {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
      *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
-     * @since 16
+     * @since 15
      */
     int32_t (*setKeyboardAvoidDistance)(ArkUI_NativeDialogHandle handle, float distance, ArkUI_LengthMetricUnit unit);
 
@@ -291,7 +303,7 @@ typedef struct {
      * @return Returns the error code.
      *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
      *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
-     * @since 16
+     * @since 15
      */
     int32_t (*setLevelMode)(ArkUI_NativeDialogHandle handle, ArkUI_LevelMode levelMode);
  
@@ -304,7 +316,7 @@ typedef struct {
      * @return Returns the error code.
      *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
      *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
-     * @since 16
+     * @since 15
      */
     int32_t (*setLevelUniqueId)(ArkUI_NativeDialogHandle handle, int32_t uniqueId);
  
@@ -317,10 +329,30 @@ typedef struct {
      * @return Returns the error code.
      *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
      *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
-     * @since 16
+     * @since 15
      */
     int32_t (*setImmersiveMode)(ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMode immersiveMode);
+} ArkUI_NativeDialogAPI_2;
 
+/**
+ * @brief Provides the custom dialog box APIs for the native side.
+ *
+ * @version 3
+ * @since 16
+ */
+typedef struct {
+    /**
+     * @brief Provides the custom dialog box APIs for the native side. The API scope is {@link ArkUI_NativeDialogAPI_1}
+     *
+     * @since 16
+     */
+    ArkUI_NativeDialogAPI_1 nativeDialogAPI1;
+    /**
+     * @brief Provides the custom dialog box APIs for the native side. The API scope is {@link ArkUI_NativeDialogAPI_2}
+     *
+     * @since 16
+     */
+    ArkUI_NativeDialogAPI_2 nativeDialogAPI2;
     /**
      * @brief Sets the display order for a custom dialog box.
      *
@@ -333,7 +365,75 @@ typedef struct {
      * @since 16
      */
     int32_t (*setLevelOrder)(ArkUI_NativeDialogHandle handle, double levelOrder);
-} ArkUI_NativeDialogAPI_2;
+
+    /**
+     * @brief Registers a listener callback before the dialog openAnimation starts.
+     *
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param userData Indicates the pointer to the custom data.
+     * @param callback Indicates the callback before the dialog openAnimation starts.
+     * @return Returns the result code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 16
+     */
+    int32_t (*registerOnWillAppear)(
+        ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+
+    /**
+     * @brief Registers a listener callback when the dialog appears.
+     *
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param userData Indicates the pointer to the custom data.
+     * @param callback Indicates the callback when the dialog appears.
+     * @return Returns the result code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 16
+     */
+    int32_t (*registerOnDidAppear)(
+        ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+
+    /**
+     * @brief Registers a listener callback before the dialog closeAnimation starts.
+     *
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param userData Indicates the pointer to the custom data.
+     * @param callback Indicates the callback before the dialog closeAnimation starts.
+     * @return Returns the result code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 16
+     */
+    int32_t (*registerOnWillDisappear)(
+        ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+
+    /**
+     * @brief Registers a listener callback when the dialog disappears.
+     *
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param userData Indicates the pointer to the custom data.
+     * @param callback Indicates the callback when the dialog disappears.
+     * @return Returns the result code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 16
+     */
+    int32_t (*registerOnDidDisappear)(
+        ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
+
+    /**
+     * @brief Sets whether to get focus when the custom dialog is displayed.
+     *
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param focusable Specifies whether to get focus when the custom dialog is displayed. The default value is true.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 16
+     */
+    int32_t (*setFocusable)(ArkUI_NativeDialogHandle handle, bool focusable);
+} ArkUI_NativeDialogAPI_3;
 
 /**
  * @brief Sets whether to block the system behavior of dismissing a dialog box.
@@ -369,6 +469,85 @@ void* OH_ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event);
  * @since 12
  */
 int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event);
+
+/**
+ * @brief Displays a custom dialog box.
+ *
+ * @param options Dialog box parameters.
+ * @param callback Indicates the callback for creating dialog. The dialog id is returned.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_OpenDialog(ArkUI_CustomDialogOptions* options, void (*callback)(int32_t dialogId));
+
+/**
+ * @brief Closes a custom dialog box.
+ *
+ * @param dialogId Dialog id.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_CloseDialog(int32_t dialogId);
+
+/**
+ * @brief Creates custom dialog box options.
+ *
+ * @param content Content of the custom dialog box.
+ * @return Returns the pointer to the custom dialog box options.
+ * @since 16
+ */
+ArkUI_CustomDialogOptions* OH_ArkUI_CustomDialog_CreateOptions(ArkUI_NodeHandle content);
+
+/**
+ * @brief Destroys the custom dialog box options.
+ *
+ * @param options The pointer to the custom dialog box options.
+ * @since 16
+ */
+void OH_ArkUI_CustomDialog_DisposeOptions(ArkUI_CustomDialogOptions* options);
+
+/**
+ * @brief Sets the level mode for a custom dialog box.
+ *
+ * @note This method must be called before the <b>OH_ArkUI_CustomDialog_OpenDialog</b> method.
+ * @param options Indicates the pointer to the custom dialog options.
+ * @param levelMode Indicates the level mode. The parameter type is {@link ArkUI_LevelMode}.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_SetLevelMode(ArkUI_CustomDialogOptions* options, ArkUI_LevelMode levelMode);
+
+/**
+ * @brief Sets the level uniqueId for a custom dialog box.
+ *
+ * @note This method must be called before the <b>OH_ArkUI_CustomDialog_OpenDialog</b> method.
+ * @param options Indicates the pointer to the custom dialog options.
+ * @param uniqueId Indicates the unique id of any nodes in router or navigation pages.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_SetLevelUniqueId(ArkUI_CustomDialogOptions* options, int32_t uniqueId);
+
+/**
+ * @brief Sets the immersive mode for a custom dialog box.
+ *
+ * @note This method must be called before the <b>OH_ArkUI_CustomDialog_OpenDialog</b> method.
+ * @param options Indicates the pointer to the custom dialog options.
+ * @param immersiveMode Indicates the immersive mode. The parameter type is {@link ArkUI_ImmersiveMode}.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_CustomDialog_SetImmersiveMode(ArkUI_CustomDialogOptions* options, ArkUI_ImmersiveMode immersiveMode);
 
 #ifdef __cplusplus
 };

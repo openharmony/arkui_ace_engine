@@ -79,7 +79,8 @@ HWTEST_F(DragAndDropTest, DragAndDropTest001, TestSize.Level1)
     auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
     auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
-    frameNode->context_ = NG::MockPipelineContext::GetCurrent().GetRawPtr();
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
     auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
     EXPECT_NE(dragAction, nullptr);
     EXPECT_EQ(OH_ArkUI_DragAction_SetPointerId(dragAction, 0), ARKUI_ERROR_CODE_NO_ERROR);

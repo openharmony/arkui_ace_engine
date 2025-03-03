@@ -16,6 +16,7 @@
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 
 #include "base/ressched/ressched_report.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 
@@ -123,6 +124,16 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     }
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch axis start, state: %{public}d", event.touchEventId,
         refereeState_);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (refereeState_ == RefereeState::READY &&
+            (NearEqual(event.pinchAxisScale, 1.0) ||
+                (IsCtrlBeingPressed(event) && event.sourceTool != SourceTool::TOUCHPAD))) {
+            scale_ = 1.0f;
+            pinchCenter_ = Offset(event.x, event.y);
+            refereeState_ = RefereeState::DETECTING;
+        }
+        return;
+    }
     if (refereeState_ == RefereeState::READY && (NearEqual(event.pinchAxisScale, 1.0) || IsCtrlBeingPressed(event))) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
@@ -272,17 +283,8 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     if (event.isRotationEvent || isPinchEnd_) {
         return;
     }
-    if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed(event)) {
-        if (refereeState_ == RefereeState::DETECTING) {
-            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-            return;
-        }
-        if (refereeState_ == RefereeState::SUCCEED) {
-            refereeState_ = RefereeState::READY;
-            SendCallbackMsg(onActionEnd_);
-            isPinchEnd_ = true;
-            return;
-        }
+    if (ProcessAxisAbnormalCondition(event)) {
+        return;
     }
     UpdateTouchPointWithAxisEvent(event);
     lastTouchEvent_ = touchPoints_[event.id];
@@ -522,6 +524,40 @@ RefPtr<GestureSnapshot> PinchRecognizer::Dump() const
         << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
+}
+
+bool PinchRecognizer::ProcessAxisAbnormalCondition(const AxisEvent& event)
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (NearZero(event.pinchAxisScale) &&
+            (!IsCtrlBeingPressed(event) || event.sourceTool == SourceTool::TOUCHPAD)) {
+            if (ProcessAxisReject()) {
+                return true;
+            }
+        }
+    } else {
+        if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed(event)) {
+            if (ProcessAxisReject()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool PinchRecognizer::ProcessAxisReject()
+{
+    if (refereeState_ == RefereeState::DETECTING) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return true;
+    }
+    if (refereeState_ == RefereeState::SUCCEED) {
+        refereeState_ = RefereeState::READY;
+        SendCallbackMsg(onActionEnd_);
+        isPinchEnd_ = true;
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

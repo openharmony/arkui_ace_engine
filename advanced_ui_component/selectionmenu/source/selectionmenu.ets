@@ -104,14 +104,14 @@ const defaultTheme: SelectionMenuTheme = {
   borderColor: $r('sys.color.ohos_id_menu_inner_border_color'),
   outlineWidth: $r('sys.float.ohos_id_menu_outer_border_width'),
   outlineColor: $r('sys.color.ohos_id_menu_outer_border_color'),
-  cutIcon: $r("sys.media.ohos_ic_public_cut"),
-  copyIcon: $r("sys.media.ohos_ic_public_copy"),
-  pasteIcon: $r("sys.media.ohos_ic_public_paste"),
-  selectAllIcon: $r("sys.media.ohos_ic_public_select_all"),
-  shareIcon: $r("sys.media.ohos_ic_public_share"),
-  translateIcon: $r("sys.media.ohos_ic_public_translate_c2e"),
-  searchIcon: $r("sys.media.ohos_ic_public_search_filled"),
-  arrowDownIcon: $r("sys.media.ohos_ic_public_arrow_down"),
+  cutIcon: $r('sys.media.ohos_ic_public_cut'),
+  copyIcon: $r('sys.media.ohos_ic_public_copy'),
+  pasteIcon: $r('sys.media.ohos_ic_public_paste'),
+  selectAllIcon: $r('sys.media.ohos_ic_public_select_all'),
+  shareIcon: $r('sys.media.ohos_ic_public_share'),
+  translateIcon: $r('sys.media.ohos_ic_public_translate_c2e'),
+  searchIcon: $r('sys.media.ohos_ic_public_search_filled'),
+  arrowDownIcon: $r('sys.media.ohos_ic_public_arrow_down'),
   iconPanelShadowStyle: ShadowStyle.OUTER_DEFAULT_SM,
   defaultSymbolTheme: {
     fontSize: `${SYMBOL_SIZE}vp`,
@@ -154,8 +154,8 @@ struct SelectionMenuComponent {
   @State horizontalMenuHeight: number = 0
   @State horizontalMenuWidth: number = this.theme.defaultMenuWidth
   private fontWeightTable: string[] =
-    ["100", "200", "300", "400", "500", "600", "700", "800", "900", "bold", "normal", "bolder", "lighter", "medium",
-      "regular"]
+    ['100', '200', '300', '400', '500', '600', '700', '800', '900', 'bold', 'normal', 'bolder', 'lighter', 'medium',
+      'regular']
   private isFollowingSystemFontScale: boolean = false
   private appMaxFontScale: number = 3.2
 
@@ -249,9 +249,9 @@ struct SelectionMenuComponent {
     }
     sysBoard.clearData()
     sysBoard.setData(pasteData).then(() => {
-      hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Succeeded in setting PasteData.');
+      hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Succeeded in setting PasteData.');
     }).catch((err: BusinessError) => {
-      hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
+      hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
     })
   }
 
@@ -277,7 +277,7 @@ struct SelectionMenuComponent {
           fontWeight: FontWeight.Normal,
           fontFamily: "HarmonyOS Sans",
           fontStyle: FontStyle.Normal,
-          decoration: { type: TextDecorationType.None, color: "#FF000000" }
+          decoration: { type: TextDecorationType.None, color: '#FF000000' }
         }
         if (data.getProperty() && data.getProperty().additions[i]) {
           const tmp = data.getProperty().additions[i] as Record<string, Object | undefined>;
@@ -579,7 +579,17 @@ struct SelectionMenuComponent {
             })
           }
         }
-        .onVisibleAreaChange([0.0, 1.0], () => {
+        .radius(this.theme.containerBorderRadius)
+        .clip(true)
+        .width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth)
+        .constraintSize({
+          minWidth: this.theme.defaultMenuWidth
+        })
+        .onAreaChange((oldValue: Area, newValue: Area) => {
+          let newValueWidth = newValue.width as number
+          this.customMenuWidth =
+            this.fontScale > MAX_FONT_SCALE && newValueWidth > this.theme.defaultMenuWidth ? newValueWidth :
+            this.theme.defaultMenuWidth
           if (!this.controller) {
             return
           }
@@ -594,18 +604,6 @@ struct SelectionMenuComponent {
           } else {
             this.visibilityValue = Visibility.Visible
           }
-        })
-        .radius(this.theme.containerBorderRadius)
-        .clip(true)
-        .width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth)
-        .constraintSize({
-          minWidth: this.theme.defaultMenuWidth
-        })
-        .onAreaChange((oldValue: Area, newValue: Area) => {
-          let newValueWidth = newValue.width as number
-          this.customMenuWidth =
-            this.fontScale > MAX_FONT_SCALE && newValueWidth > this.theme.defaultMenuWidth ? newValueWidth :
-            this.theme.defaultMenuWidth
         })
       } else if (this.showCustomerIndex > -1 && this.builder) {
         Column() {

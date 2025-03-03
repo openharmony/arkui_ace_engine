@@ -338,7 +338,6 @@ bool SliderPattern::InitAccessibilityVirtualNode()
     FrameNode::ProcessOffscreenNode(parentAccessibilityNode_);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SaveAccessibilityVirtualNode(parentAccessibilityNode_);
-    accessibilityProperty->SetAccessibilityText(" ");
     ModifyAccessibilityVirtualNode();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     return true;
@@ -530,7 +529,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);
             auto offsetStep = index - pattern->GetCurrentStepIndex();
-            pattern->MoveStep(reverse ? -offsetStep : offsetStep);
+            pattern->MoveStep(offsetStep);
             pattern->FireChangeEvent(SliderChangeMode::End);
             if (pattern->showTips_) {
                 pattern->bubbleFlag_ = true;

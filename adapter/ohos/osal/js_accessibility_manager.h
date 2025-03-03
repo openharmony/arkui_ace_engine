@@ -60,6 +60,9 @@ struct CommonProperty {
     std::vector<std::string> pagePaths;
     std::vector<RefPtr<NG::FrameNode>> pageNodes;
     bool isReduceMode = false;
+    RotateTransform rotateTransform;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
 };
 
 struct ActionTable {
@@ -163,6 +166,16 @@ public:
         lastFrameNode_ = node;
     }
 
+    void SetReentrantLimit(const bool reentrantLimit)
+    {
+        reentrantLimit_ = reentrantLimit;
+    }
+
+    bool IsReentrantLimit() const
+    {
+        return reentrantLimit_;
+    }
+
     void SaveCurrentFocusNodeSize(const RefPtr<NG::FrameNode>& currentFocusNode)
     {
         if (currentFocusNode->IsAccessibilityVirtualNode()) {
@@ -182,20 +195,25 @@ public:
     bool IsSendAccessibilityEvent(const AccessibilityEvent& accessibilityEvent);
     bool IsSendAccessibilityEventForUEA(
         const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId);
-    bool IsSendAccessibilityEventForHost(AccessibilityEvent accessibilityEvent, const int32_t pageId,
-        const std::string componentType);
+    bool IsSendAccessibilityEventForHost(
+        const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId);
     void GetComponentTypeAndPageIdByNodeId(const int64_t nodeId, const RefPtr<PipelineBase>& context,
         std::string& componentType, int32_t& pageId);
 
     void SendCacheAccessibilityEvent(int32_t instanceId);
     void SendCacheAccessibilityEventForHost(const int32_t pageId);
-    void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) override;
+
+    void AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node) override;
+    void AddFrameNodeToDefaultFocusList(const RefPtr<NG::FrameNode>& node, bool isFocus) override;
+    void AddDefaultFocusNode(const RefPtr<NG::FrameNode>& defaultFocusNode);
+    void EraseDefaultFocusNode(const RefPtr<NG::FrameNode>& defaultFocusNode);
 
     std::list<WeakPtr<NG::FrameNode>>& GetDefaultFocusList()
     {
         return defaultFocusList_;
     }
 
+    void RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager) override;
     void UpdateFrameNodeState(int32_t nodeId) override;
 
     void UpdatePageMode(const std::string& pageMode) override
@@ -242,6 +260,7 @@ public:
         const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset = 0) override;
     bool ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
+    Rect GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node) override;
 #ifdef WEB_SUPPORTED
     void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) override;
@@ -328,7 +347,7 @@ public:
         const RefPtr<PipelineBase>& context) override;
     void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
 
-    AccessibilityWorkMode GetAccessibilityWorkMode() override;
+    AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
 
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
     void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
@@ -674,7 +693,7 @@ private:
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
     std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;
-
+    bool reentrantLimit_ = false;
     std::string pageMode_;
     std::vector<AccessibilityEvent> cacheEventVec_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;

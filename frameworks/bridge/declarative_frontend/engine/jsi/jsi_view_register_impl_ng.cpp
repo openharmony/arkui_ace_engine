@@ -107,6 +107,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
@@ -608,7 +609,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRotationRecognizer::JSBind(globalObj);
 }
 
-void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
+void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runtime,
+    void* nativeEngine, const shared_ptr<JsValue> globalPtr)
 {
     JSCanvasGradient::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
@@ -620,6 +622,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSPath2D::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
+    JSMock::JSBind(globalObj, runtime, globalPtr);
 }
 
 } // namespace OHOS::Ace::Framework

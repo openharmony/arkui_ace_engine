@@ -248,11 +248,11 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected(const GestureEvent& info)
+bool GridPattern::IsItemSelected(float offsetX, float offsetY)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    auto node = host->FindChildByPosition(offsetX, offsetY);
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);
@@ -490,7 +490,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     info_.reachStart_ = info_.startIndex_ == 0 && GreatOrEqual(info_.currentOffset_, 0.0f);
 
+    auto curDelta = info_.currentOffset_ - info_.prevOffset_;
     info_.currentHeight_ = EstimateHeight();
+    bool sizeDiminished =
+        IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
+
     if (!offsetEnd && info_.offsetEnd_) {
         endHeight_ = info_.currentHeight_;
     }
@@ -505,7 +509,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
     }
     if (!preSpring_) {
-        CheckRestartSpring(false);
+        CheckRestartSpring(sizeDiminished);
     }
     CheckScrollable();
     MarkSelectedItems();
@@ -559,6 +563,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     FireOnReachEnd(onReachEnd);
     OnScrollStop(gridEventHub->GetOnScrollStop());
+    if (isSmoothScrolling_ && scrollStop_) {
+        isSmoothScrolling_ = false;
+    }
     CHECK_NULL_VOID(isConfigScrollable_);
     focusHandler_.ProcessFocusEvent(keyEvent_, indexChanged);
 }
@@ -1395,6 +1402,10 @@ bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgo
         ResetExtraOffset();
     } else {
         ACE_SCOPED_TRACE("AnimateToTargetImpl, targetPos:%f", targetPos);
+    }
+    if (NearEqual(targetPos, GetTotalOffset())) {
+        isSmoothScrolling_ = false;
+        return false;
     }
     AnimateTo(targetPos, -1, nullptr, true);
     return true;

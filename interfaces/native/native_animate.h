@@ -253,6 +253,20 @@ int32_t OH_ArkUI_KeyframeAnimateOption_SetDelay(ArkUI_KeyframeAnimateOption* opt
 int32_t OH_ArkUI_KeyframeAnimateOption_SetIterations(ArkUI_KeyframeAnimateOption* option, int32_t value);
 int32_t OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback(
     ArkUI_KeyframeAnimateOption* option, void* userData, void (*onFinish)(void* userData));
+
+/**
+ * @brief Sets the expected frame rate range of a keyframe animation.
+ *
+ * @param option Indicates the pointer to a keyframe animation configuration.
+ * @param frameRate Indicates the expected frame rate range.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate(
+    ArkUI_KeyframeAnimateOption* option, ArkUI_ExpectedFrameRateRange* frameRate);
+
 int32_t OH_ArkUI_KeyframeAnimateOption_SetDuration(ArkUI_KeyframeAnimateOption* option, int32_t value, int32_t index);
 int32_t OH_ArkUI_KeyframeAnimateOption_SetCurve(
     ArkUI_KeyframeAnimateOption* option, ArkUI_CurveHandle value, int32_t index);
@@ -260,6 +274,16 @@ int32_t OH_ArkUI_KeyframeAnimateOption_RegisterOnEventCallback(
     ArkUI_KeyframeAnimateOption* option, void* userData, void (*event)(void* userData), int32_t index);
 int32_t OH_ArkUI_KeyframeAnimateOption_GetDelay(ArkUI_KeyframeAnimateOption* option);
 int32_t OH_ArkUI_KeyframeAnimateOption_GetIterations(ArkUI_KeyframeAnimateOption* option);
+
+/**
+ * @brief Obtains the expected frame rate range of a keyframe animation configuration.
+ *
+ * @param option Indicates the pointer to a keyframe animation configuration.
+ * @return Returns the expected frame rate range of the keyframe animation.
+ * @since 16
+ */
+ArkUI_ExpectedFrameRateRange* OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate(ArkUI_KeyframeAnimateOption* option);
+
 int32_t OH_ArkUI_KeyframeAnimateOption_GetDuration(ArkUI_KeyframeAnimateOption* option, int32_t index);
 ArkUI_CurveHandle OH_ArkUI_KeyframeAnimateOption_GetCurve(ArkUI_KeyframeAnimateOption* option, int32_t index);
 ArkUI_AnimatorOption* OH_ArkUI_AnimatorOption_Create(int32_t keyframeSize);

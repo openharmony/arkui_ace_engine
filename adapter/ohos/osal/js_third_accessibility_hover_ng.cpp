@@ -14,30 +14,9 @@
  */
 #include "js_third_provider_interaction_operation.h"
 
-#include <algorithm>
-
-#include "accessibility_constants.h"
-#include "accessibility_event_info.h"
 #include "accessibility_system_ability_client.h"
-#include "adapter/ohos/entrance/ace_application_info.h"
-#include "adapter/ohos/entrance/ace_container.h"
-#include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
-#include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/accessibility/accessibility_manager_ng.h"
-#include "core/components_ng/base/inspector.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
-#include "js_accessibility_manager.h"
 #include "js_third_accessibility_hover_ng.h"
-#include "nlohmann/json.hpp"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -45,6 +24,17 @@ using namespace std;
 
 namespace OHOS::Ace::Framework {
 constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
+
+namespace {
+bool IsTouchExplorationEnabled(const RefPtr<NG::PipelineContext>& context)
+{
+    CHECK_NULL_RETURN(context, true);
+    auto jsAccessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_RETURN(jsAccessibilityManager, true);
+    auto accessibilityWorkMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
+    return accessibilityWorkMode.isTouchExplorationEnabled;
+}
+} // namespace
 
 bool AccessibilityHoverManagerForThirdNG::GetElementInfoForThird(
     int64_t elementId,
@@ -283,6 +273,11 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
     const RefPtr<NG::PipelineContext>& context,
     bool isNeedClear)
 {
+    if (!isNeedClear && !IsTouchExplorationEnabled(context)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "third Accessibility focus or update focus but is not in touch mode");
+        return true;
+    }
+
     CHECK_NULL_RETURN(hostNode, false);
     RefPtr<NG::RenderContext> renderContext = nullptr;
     renderContext = hostNode->GetRenderContext();
@@ -300,6 +295,14 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
     auto right = rectInScreen.GetLeftTopYScreenPostion();
     auto width = rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion();
     auto height = rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion();
+    if ((width == 0) && (height == 0)) {
+        renderContext->UpdateAccessibilityFocus(false);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "third act Accessibility element Id %{public}" PRId64 "Focus clear by null rect",
+            nodeInfo.GetAccessibilityId());
+        return true;
+    }
+
     NG::RectT<int32_t> rectInt { static_cast<int32_t>(left), static_cast<int32_t>(right),
         static_cast<int32_t>(width), static_cast<int32_t>(height) };
     

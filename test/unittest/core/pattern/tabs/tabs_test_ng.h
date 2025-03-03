@@ -19,6 +19,8 @@
 #include "test/unittest/core/pattern/test_ng.h"
 #define private public
 #define protected public
+#include "test/mock/core/animation/mock_animation_manager.h"
+
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
@@ -59,7 +61,7 @@ constexpr double BIG_DIALOG_WIDTH = 216.0;
 constexpr double MAX_DIALOG_WIDTH = 256.0;
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 constexpr int8_t MASK_COUNT = 2;
-constexpr float DRAG_DELTA = 400.0f;
+constexpr float DRAG_DELTA = TABS_WIDTH;
 
 class TabsTestNg : public TestNG {
 public:
@@ -70,18 +72,22 @@ public:
     void GetTabs();
     TabsModelNG CreateTabs(BarPosition barPosition = BarPosition::START, int32_t index = 0);
     TabContentModelNG CreateTabContent();
+    TabContentModelNG CreateTabContentWithDeepRender(std::function<void()>&& deepRenderFunc);
     void CreateTabContents(int32_t itemNumber = TABCONTENT_NUMBER);
     void CreateTabContentsWithBuilder(int32_t itemNumber = TABCONTENT_NUMBER);
     void CreateTabsDone(TabsModelNG model);
     TabBarBuilderFunc TabBarItemBuilder();
     void CreateTabContentTabBarStyle(TabBarStyle tabBarStyle);
     void CreateTabContentTabBarStyleWithBuilder(TabBarStyle tabBarStyle);
-    void SwipeToWithoutAnimation(int32_t index);
-    void HandleClick(Offset offset, int32_t index);
+    void ChangeIndex(int32_t index);
+    void HandleClick(int32_t index);
     void HandleMouseEvent(MouseAction action, Offset location);
     void HandleHoverEvent(bool isHover);
     GestureEvent CreateDragInfo(bool moveDirection);
+    void MockPaintRect(const RefPtr<FrameNode>& frameNode);
+    RefPtr<TabBarModifier> OnDraw();
     AssertionResult CurrentIndex(int32_t expectIndex);
+    AssertionResult VerifyBackgroundColor(int32_t itemIndex, Color expectColor);
 
     RefPtr<TabsNode> frameNode_;
     RefPtr<TabsPattern> pattern_;

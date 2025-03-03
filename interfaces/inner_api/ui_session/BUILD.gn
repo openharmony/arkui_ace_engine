@@ -21,6 +21,9 @@ config("uisession_manager_public_config") {
     "include/",
     "$ace_root/interfaces/inner_api/ui_session",
   ]
+  if (current_os == "ohos") {
+    defines = [ "OHOS_PLATFORM" ]
+  }
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -42,7 +45,7 @@ ohos_shared_library("ui_session") {
     "$ace_root/adapter/ohos/entrance/ui_session/ui_report_proxy.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_report_stub.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
-    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_manager.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp",
   ]
 
   configs = [ "$ace_root:ace_config" ]
@@ -56,6 +59,7 @@ ohos_shared_library("ui_session") {
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]

@@ -604,6 +604,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, ShiftMultipleSelection001, TestSize.Level
     keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_DPAD_RIGHT);
     richEditorPattern->UpdateShiftFlag(keyEvent);
     EXPECT_TRUE(richEditorPattern->shiftFlag_);
 
@@ -634,6 +635,10 @@ HWTEST_F(RichEditorPatternTestSevenNg, ShiftMultipleSelection001, TestSize.Level
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
 
     keyEvent.action = KeyAction::UP;
+    keyEvent.pressedCodes.pop_back();
+    richEditorPattern->UpdateShiftFlag(keyEvent);
+    EXPECT_TRUE(richEditorPattern->shiftFlag_);
+    keyEvent.pressedCodes.pop_back();
     richEditorPattern->UpdateShiftFlag(keyEvent);
     EXPECT_FALSE(richEditorPattern->shiftFlag_);
 }

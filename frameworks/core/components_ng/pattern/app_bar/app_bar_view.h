@@ -50,6 +50,8 @@ public:
     void AddContentToJSContainer();
     void OnMenuClick();
     void OnCloseClick();
+    void CreateServicePanel(const std::string& appGalleryBundleName, const std::string& abilityName,
+        std::map<std::string, std::string>& params);
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();

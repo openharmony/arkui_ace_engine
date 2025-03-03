@@ -39,10 +39,11 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/focus_box.h"
+#include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/menu_property.h"
@@ -878,9 +879,6 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
-    static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
-    static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
-    static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

@@ -46,6 +46,11 @@ enum class FillStyle {
     ITERATIVE,
 };
 
+enum class SymbolType {
+    SYSTEM = 0,
+    CUSTOM,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

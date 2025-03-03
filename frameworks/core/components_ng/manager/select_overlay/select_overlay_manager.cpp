@@ -16,6 +16,8 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/event/event_info_convertor.h"
+
 namespace OHOS::Ace::NG {
 RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation)
@@ -280,6 +282,11 @@ void SelectOverlayManager::HandleGlobalEvent(
     if ((touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) && !acceptTouchUp) {
         return;
     }
+    if (EventInfoConvertor::MatchCompatibleCondition() &&
+        (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::MOUSE) && !acceptTouchUp) {
+        return;
+    }
+
     if (!IsInSelectedOrSelectOverlayArea(point)) {
         NotifyOverlayClosed(true);
         DestroySelectOverlay();

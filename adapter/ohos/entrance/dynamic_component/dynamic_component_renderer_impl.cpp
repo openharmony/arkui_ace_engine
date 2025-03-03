@@ -15,27 +15,14 @@
 
 #include "dynamic_component_renderer_impl.h"
 
-#include <iterator>
-#include <memory>
-
 #include "accessibility_element_info.h"
 
-#include "interfaces/inner_api/ace/ui_content.h"
-#include "native_engine/native_engine.h"
-
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -798,5 +785,41 @@ void DynamicComponentRendererImpl::InitializeDynamicAccessibility()
     auto pattern = AceType::DynamicCast<DynamicPattern>(dynamicHost->GetPattern());
     CHECK_NULL_VOID(pattern);
     pattern->InitializeAccessibility();
+}
+
+void DynamicComponentRendererImpl::NotifyForeground()
+{
+    if (isForeground_) {
+        return;
+    }
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    isForeground_ = true;
+    taskExecutor->PostTask(
+        [uiContent = uiContent_, aceLogTag = aceLogTag_]() {
+            CHECK_NULL_VOID(uiContent);
+            ContainerScope scope(uiContent->GetInstanceId());
+            TAG_LOGI(aceLogTag, "NotifyForeground");
+            uiContent->Foreground();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentNotifyForeground");
+}
+
+void DynamicComponentRendererImpl::NotifyBackground()
+{
+    if (!isForeground_) {
+        return;
+    }
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    isForeground_ = false;
+    taskExecutor->PostTask(
+        [uiContent = uiContent_, aceLogTag = aceLogTag_]() {
+            CHECK_NULL_VOID(uiContent);
+            ContainerScope scope(uiContent->GetInstanceId());
+            TAG_LOGI(aceLogTag, "NotifyBackground");
+            uiContent->Background();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentNotifyBackground");
 }
 } // namespace OHOS::Ace::NG

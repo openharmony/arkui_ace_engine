@@ -295,10 +295,8 @@ void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animat
         };
         option.SetOnFinishEvent(onFinishEvent);
     }
-
     option.SetDelay(animateOption->delay);
     option.SetIteration(animateOption->iterations);
-
     int duration = 0;
     for (int32_t i = 0; i < animateOption->keyframeSize; i++) {
         duration += animateOption->keyframes[i].duration;
@@ -306,6 +304,16 @@ void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animat
     option.SetDuration(duration);
     // actual curve is in keyframe, this curve will not be effective
     option.SetCurve(Curves::EASE_IN_OUT);
+    if (animateOption->expectedFrameRateRange) {
+        auto fRRmin = animateOption->expectedFrameRateRange->min;
+        auto fRRmax = animateOption->expectedFrameRateRange->max;
+        auto fRRExpected = animateOption->expectedFrameRateRange->expected;
+        RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[nodeAnimate:keyframe] SetExpectedFrameRateRange"
+            "{%{public}d, %{public}d, %{public}d}", fRRmin, fRRmax, fRRExpected);
+        option.SetFrameRateRange(frameRateRange);
+    }
     AceScopedTrace trace("nodeAnimate:KeyframeAnimateTo iteration:%d, delay:%d",
                          option.GetIteration(), option.GetDelay());
     PrintNodeAnimationInfo(option, AnimationInterface::KEYFRAME_ANIMATE_TO, std::nullopt);

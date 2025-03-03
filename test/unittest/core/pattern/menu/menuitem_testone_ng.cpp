@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -79,6 +80,10 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
+constexpr float MENU_ITEM_SIZE_HEIGHT = 100.0f;
+constexpr int32_t TARGET_ID = 3;
+constexpr MenuType TYPE = MenuType::MENU;
 
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -108,6 +113,7 @@ void MenuItemTestOneNg::SetUp()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     menuItemLayoutAlgorithm_ = AceType::MakeRefPtr<MenuItemLayoutAlgorithm>();
+    MockContainer::SetUp();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
@@ -119,6 +125,7 @@ void MenuItemTestOneNg::TearDown()
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> MenuItemTestOneNg::GetPreviewMenuWrapper(
@@ -379,5 +386,260 @@ HWTEST_F(MenuItemTestOneNg, Measure003, TestSize.Level1)
     geometryNode->parentLayoutConstraint_ = LayoutConstraintF();
     menuItemLayoutAlgorithm_->Measure(&layoutWrapper);
     ASSERT_FALSE(layoutWrapper.GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize.has_value());
+}
+
+/**
+ * @tc.name: CheckNeedMatchParent001
+ * @tc.desc: Test CheckNeedMatchParent func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CheckNeedMatchParent001, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(16);
+
+    /**
+     * @tc.steps: step1. build frame node tree
+     */
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() {
+                return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
+            });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>()
+    );
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>()
+    );
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() {return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE);});
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode1);
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+
+    auto innerMenuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    innerMenuPattern->isEmbedded_ = true;
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    auto layoutConstraint = props->GetLayoutConstraint();
+    menuItemLayoutAlgorithm_->CheckNeedMatchParent(&layoutWrapper, layoutConstraint);
+
+    EXPECT_EQ(menuItemPattern->GetExpandingMode(), SubMenuExpandingMode::EMBEDDED);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CheckUserHeight001
+ * @tc.desc: Test CheckUserHeight func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CheckUserHeight001, TestSize.Level1)
+{
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    SizeF value(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT);
+    props->UpdateMarginSelfIdealSize(value);
+    props->UpdateContentConstraint();
+    props->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), CalcLength(MENU_ITEM_SIZE_HEIGHT))
+    );
+    menuItemLayoutAlgorithm_->CheckUserHeight(&layoutWrapper);
+}
+
+/**
+ * @tc.name: CalcItemHeight001
+ * @tc.desc: Test CalcItemHeight func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CalcItemHeight001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(16);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    menuItemLayoutAlgorithm_->userSetPadding_ = true;
+    menuItemLayoutAlgorithm_->userHeight_ = 48.0f;
+    menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
+
+    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 30.0f), 40.0f);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalcItemHeight002
+ * @tc.desc: Test CalcItemHeight func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CalcItemHeight002, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(16);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    menuItemLayoutAlgorithm_->userSetPadding_ = true;
+    menuItemLayoutAlgorithm_->userHeight_ = 0.0f;
+    menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
+
+    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 32.0f), 32.0f);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalcItemHeight003
+ * @tc.desc: Test CalcItemHeight func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CalcItemHeight003, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(16);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    menuItemLayoutAlgorithm_->userSetPadding_ = false;
+    menuItemLayoutAlgorithm_->userHeight_ = 48.0f;
+    menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
+
+    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 32.0f), 48.0f);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalcItemHeight004
+ * @tc.desc: Test CalcItemHeight func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CalcItemHeight004, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(16);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    menuItemLayoutAlgorithm_->userSetPadding_ = false;
+    menuItemLayoutAlgorithm_->userHeight_ = 0.0f;
+    menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
+
+    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 32.0f), 40.0f);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalcContentExpandWidth001
+ * @tc.desc: Test CalcContentExpandWidth func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CalcContentExpandWidth001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(16);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    auto layoutConstraint = props->GetLayoutConstraint();
+
+    menuItemLayoutAlgorithm_->minRowWidth_ = 50.0f;
+    menuItemLayoutAlgorithm_->userSetPadding_ = true;
+    menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
+    menuItemLayoutAlgorithm_->CalcContentExpandWidth(layoutConstraint, 49.0f, 32.0f, 32.0f);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

@@ -39,6 +39,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"

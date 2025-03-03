@@ -31,7 +31,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -41,6 +40,7 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 namespace OHOS::Ace::NG {
@@ -65,7 +65,6 @@ constexpr float MAX_FLING_VELOCITY = 4200.0f;
 
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const auto TRANSLATE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
-const auto TRANSLATE_DELAY = 2000;
 const auto TRANSLATE_THRESHOLD = 26.0f;
 const auto TRANSLATE_FRAME_RATE = 120;
 const auto TRANSLATE_FRAME_RATE_RANGE =
@@ -142,21 +141,6 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
 
     if (delay == 0) {
         StartShowTabBarImmediately();
-    } else {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        showTabBarTask_.Reset([weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto pipeline = pattern->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            pattern->showTabBarTask_.Reset(nullptr);
-            pattern->StartShowTabBarImmediately();
-            pipeline->RequestFrame();
-        });
-        taskExecutor->PostDelayedTask(showTabBarTask_, TaskExecutor::TaskType::UI, delay, "ArkUITabBarTranslate");
     }
 }
 
@@ -241,9 +225,6 @@ void TabBarPattern::StartHideTabBar()
         CHECK_NULL_VOID(pattern);
         pattern->isTabBarHiding_ = false;
         pattern->tabBarState_ = TabBarState::HIDE;
-        if (pattern->showTabBarTask_) {
-            pattern->StartShowTabBar(TRANSLATE_DELAY);
-        }
     };
     AnimationUtils::Animate(option, propertyCallback, finishCallback);
     isTabBarHiding_ = true;
@@ -1330,7 +1311,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(host, false);
     auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_RETURN(swiperPattern, false);
-    int32_t indicator = swiperPattern->GetCurrentIndex();
+    int32_t indicator = swiperPattern->IsInFastAnimation() ? indicator_ : swiperPattern->GetCurrentIndex();
     int32_t totalCount = swiperPattern->TotalCount();
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
@@ -3584,15 +3565,6 @@ void TabBarPattern::RemoveIsFocusActiveUpdateEvent()
 void TabBarPattern::UpdateFocusToSelectedNode(bool isFocusActive)
 {
     if (!isFocusActive) {
-        return;
-    }
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE ||
-        (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && !tabTheme->GetIsChangeFocusTextStyle())) {
-        FocusCurrentOffset(focusIndicator_);
         return;
     }
     auto childFocusNode = GetCurrentFocusNode();

@@ -155,17 +155,6 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateScrollableWrapper(
     return std::make_pair(frameNode, layoutWrapper);
 }
 
-PaddingPropertyT<CalcLength> MakePadding()
-{
-    PaddingPropertyT<CalcLength> paddingProperty;
-    paddingProperty.left = { CalcLength(5.0f) };
-    paddingProperty.right = { CalcLength(10.0f) };
-    paddingProperty.top = { CalcLength(15.0f) };
-    paddingProperty.bottom = { CalcLength(20.0f) };
-
-    return paddingProperty;
-}
-
 std::optional<LayoutConstraintF> MakeLayoutConstraintF()
 {
     std::optional<LayoutConstraintF> constraint;
@@ -380,7 +369,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level1)
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
     EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(), -70.0f);
     EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(), -70.0f);
@@ -411,7 +400,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest007, TestSize.Level1)
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
     pipeline->safeAreaManager_->UpdateKeyboardOffset(50.0f);
 
@@ -458,7 +447,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest008, TestSize.Level1)
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
 
     EXPECT_FALSE(layoutWrapper->CheckValidSafeArea());
@@ -503,7 +492,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest009, TestSize.Level1)
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
     pipeline->safeAreaManager_->SetIgnoreSafeArea(true);
     layoutWrapper->AdjustNotExpandNode();
@@ -513,7 +502,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest009, TestSize.Level1)
         NG::SafeAreaInsets({40.0f, 10.0f}, {50.0f, 20.0f}, {710.0f, 680.0f}, {1260.0f, 1230.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({30.0f, 0.0f}, {30.0f, 0.0f}, {720.0f, 690.0f}, {1280.0f, 1250.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({50.0f, 20.0f}, {70.0f, 40.0f}, {700.0f, 670.0f}, {1240.0f, 1210.0f}));
     pipeline->safeAreaManager_->SetIgnoreSafeArea(true);
     layoutWrapper->AdjustNotExpandNode();
@@ -654,51 +643,6 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: LayoutWrapperTest013
- * @tc.desc: Test GetAccumulatedSafeAreaExpand.
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest013, TestSize.Level1)
-{
-    auto node = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
-    EXPECT_EQ(layoutWrapper->GetAccumulatedSafeAreaExpand(), ExpandEdges());
-
-    node->geometryNode_ = nullptr;
-    EXPECT_EQ(node->GetAccumulatedSafeAreaExpand(), ExpandEdges());
-
-    RefPtr<GeometryNode> gn = AceType::MakeRefPtr<GeometryNode>();
-    gn->frame_.rect_ = RectF{10.0f, 20.0f, 1200.0f, 1200.0f};
-    layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(node, gn, nullptr);
-    EXPECT_EQ(layoutWrapper->GetAccumulatedSafeAreaExpand(), ExpandEdges());
-
-    gn = AceType::MakeRefPtr<GeometryNode>();
-    gn->frame_.rect_ = RectF{10.0f, 20.0f, 1200.0f, 1200.0f};
-    node->geometryNode_ = gn;
-    layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(node, gn, node->GetLayoutProperty());
-
-    EXPECT_EQ(layoutWrapper->GetAccumulatedSafeAreaExpand(), ExpandEdges());
-
-    EXPECT_EQ(layoutWrapper->GetAccumulatedSafeAreaExpand(true), ExpandEdges());
-    PaddingPropertyF safeAreaPadding;
-    safeAreaPadding.left = std::make_optional<float>(10.0f);
-    safeAreaPadding.right = std::make_optional<float>(20.0f);
-    safeAreaPadding.top = std::make_optional<float>(30.0f);
-    safeAreaPadding.bottom = std::make_optional<float>(40.0f);
-    node->geometryNode_->SetResolvedSingleSafeAreaPadding(safeAreaPadding);
-
-    EXPECT_EQ(layoutWrapper->GetAccumulatedSafeAreaExpand(), ExpandEdges());
-    EXPECT_EQ(layoutWrapper->GetAccumulatedSafeAreaExpand(true), ExpandEdges());
-
-    auto paddingProperty = MakePadding();
-    node->GetLayoutProperty()->UpdateMargin(paddingProperty);
-    
-    EXPECT_EQ(layoutWrapper->GetAccumulatedSafeAreaExpand(), ExpandEdges());
-    EXPECT_EQ(layoutWrapper->GetAccumulatedSafeAreaExpand(true), ExpandEdges());
-}
-
-/**
  * @tc.name: LayoutWrapperTest014
  * @tc.desc: Test GetAccumulatedSafeAreaExpandHelper.
  * @tc.type: FUNC
@@ -748,17 +692,13 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest014, TestSize.Level1)
  */
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
 {
-    //AvoidKeyboard() can get page node from host instead of relying on the stageManager.
     auto node = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(node);
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->currentFocus_ = false;
     node->focusHub_ = focusHub;
     node->eventHub_ = eventHub;
-
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(node, geometryNode, node->GetLayoutProperty());
 
     RefPtr<SafeAreaManager> safeAreamanager = AceType::MakeRefPtr<SafeAreaManager>();
     safeAreamanager->keyboardOffset_ = -1.0f;
@@ -946,17 +886,13 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level1)
  */
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
 {
-    //AvoidKeyboard() can get overlay node from host instead of relying on the stageManager.
     auto node = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(node);
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->currentFocus_ = false;
     node->focusHub_ = focusHub;
     node->eventHub_ = eventHub;
-
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(node, geometryNode, node->GetLayoutProperty());
 
     RefPtr<SafeAreaManager> safeAreamanager = AceType::MakeRefPtr<SafeAreaManager>();
     safeAreamanager->keyboardOffset_ = -1.0f;

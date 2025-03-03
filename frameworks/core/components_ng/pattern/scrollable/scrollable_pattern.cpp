@@ -932,9 +932,14 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         CHECK_NULL_VOID(host);
         host->MarkNeedRenderOnly();
     });
-    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
+    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source, bool isMouseWheelScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        auto scrollable = pattern->GetScrollable();
+        if (isMouseWheelScroll && scrollable) {
+            scrollable->ProcessAxisUpdateEvent(offset, true);
+            return true;
+        }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
     scrollBar_->SetScrollPositionCallback(std::move(scrollCallback));
@@ -1141,7 +1146,6 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         UpdateBorderRadius();
         scrollBar_->SetReverse(IsReverse());
-        scrollBar_->SetIsOutOfBoundary(IsOutOfBoundary());
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight, GetScrollSource());
         scrollBar_->MarkNeedRender();
         CreateScrollBarOverlayModifier();
@@ -1177,10 +1181,16 @@ void ScrollablePattern::ScrollEndCallback(bool nestedScroll, float velocity)
 void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
     CHECK_NULL_VOID(scrollBarProxy);
-    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll) {
+    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll,
+        bool isMouseWheelScroll) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern && pattern->GetAxis() != Axis::NONE, false);
+            auto scrollable = pattern->GetScrollable();
+            if (isMouseWheelScroll && scrollable) {
+                scrollable->ProcessAxisUpdateEvent(offset, true);
+                return true;
+            }
             if (!nestedScroll) {
                 return pattern->UpdateCurrentOffset(offset, source);
             }
@@ -1230,8 +1240,15 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
 {
 #ifdef ARKUI_CIRCLE_FEATURE
-    if (isRoundScroll_) {
-        return AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+    if (isRoundScroll_ && scrollBar_) {
+        auto arcScrollBarOverlayModifier = AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_);
+        if (arcScrollBar) {
+            arcScrollBarOverlayModifier->SetPositionMode(arcScrollBar->GetPositionMode());
+            arcScrollBarOverlayModifier->SetArcRect(arcScrollBar->GetArcActiveRect());
+            arcScrollBarOverlayModifier->SetBackgroundArcRect(arcScrollBar->GetArcBarRect());
+        }
+        return arcScrollBarOverlayModifier;
     }
 #endif
     return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
@@ -1696,7 +1713,8 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     mouseOffsetX -= info.GetOffsetX();
     mouseOffsetY -= info.GetOffsetY();
     SuggestOpIncGroup(true);
-    if (!IsItemSelected(info)) {
+    if (!IsItemSelected(static_cast<float>(info.GetGlobalLocation().GetX()) - info.GetOffsetX(),
+        static_cast<float>(info.GetGlobalLocation().GetY()) - info.GetOffsetY())) {
         ClearMultiSelect();
         ClearInvisibleItemsSelectedStatus();
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);

@@ -27,11 +27,27 @@ const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color(0XFFFFFF00);
 namespace {} // namespace
 class ArcScrollBarTestNg : public ScrollTestNg {
 public:
+    void FlushUITasks(const RefPtr<FrameNode>& frameNode);
     void DragScrollBarStart(GestureEvent& gesture);
     void DragScrollBarUpdate(GestureEvent& gesture);
     void DragScrollBarEnd(GestureEvent& gesture);
     void DragScrollBarAction(Offset startOffset, float dragDelta, float velocity = 0);
 };
+
+void ArcScrollBarTestNg::FlushUITasks(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
 
 void ArcScrollBarTestNg::DragScrollBarStart(GestureEvent& gesture)
 {
@@ -53,7 +69,7 @@ void ArcScrollBarTestNg::DragScrollBarUpdate(GestureEvent& gesture)
     gesture.SetMainVelocity(velocity);
     auto HandleDragUpdate = *(scrollBar_->panRecognizer_->onActionUpdate_);
     HandleDragUpdate(gesture);
-    FlushLayoutTask(ScrollTestNg::frameNode_);
+    FlushUITasks(ScrollTestNg::frameNode_);
 }
 
 void ArcScrollBarTestNg::DragScrollBarEnd(GestureEvent& gesture)
@@ -64,7 +80,7 @@ void ArcScrollBarTestNg::DragScrollBarEnd(GestureEvent& gesture)
     gesture.SetLocalLocation(gesture.GetLocalLocation());
     auto HandleDragEnd = *(scrollBar_->panRecognizer_->onActionEnd_);
     HandleDragEnd(gesture);
-    FlushLayoutTask(ScrollTestNg::frameNode_);
+    FlushUITasks(ScrollTestNg::frameNode_);
 }
 
 void ArcScrollBarTestNg::DragScrollBarAction(Offset startOffset, float dragDelta, float velocity)
@@ -213,7 +229,7 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg005, TestSize.Level1)
     GestureEvent info;
     info.SetMainDelta(10.f);
     pattern_->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, 0);
     auto scrollBar = AceType::MakeRefPtr<ArcScrollBar>();
     EXPECT_NE(scrollBar, nullptr);
@@ -223,7 +239,7 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg005, TestSize.Level1)
     info.SetMainDelta(10.f);
     auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, 0);
 
     scrollBar->PlayScrollBarAppearAnimation();
@@ -376,4 +392,188 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg010, TestSize.Level1)
     EXPECT_EQ(modifer.startAngle_->Get(), 10.f);
     EXPECT_EQ(modifer.sweepAngle_->Get(), 20.f);
 }
+
+/**
+ * @tc.name: ArcScrollBarTestNg011
+ * @tc.desc: Test ArcScrollTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg011, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    /**
+     * @tc.steps: step1. ScrollBar at top, call SetBarRegion/SetRoundTrickRegion
+     */
+    Offset paintOffset_(5, 15);
+    Size size { 10, 10 };
+    auto scrollBar = AceType::MakeRefPtr<ArcScrollBar>();
+    EXPECT_NE(scrollBar, nullptr);
+    scrollBar->SetBarRegion(paintOffset_, size);
+    scrollBar->SetRoundTrickRegion(paintOffset_, size, paintOffset_, 5.0);
+    EXPECT_EQ(scrollBar->centerDeviation_, 2);
+    EXPECT_LT(scrollBar->trickStartAngle_, 2);
+    scrollBar->SetActiveWidth(scrollBar->normalWidth_);
+    scrollBar->positionMode_ = PositionMode::RIGHT;
+    scrollBar->SetBarRegion(paintOffset_, size);
+    EXPECT_NE(scrollBar->arcAarRect_.startAngle_, 0.0);
+    scrollBar->positionMode_ = PositionMode::LEFT;
+    scrollBar->SetBarRegion(paintOffset_, size);
+    EXPECT_NE(scrollBar->arcAarRect_.startAngle_, 0.0);
+
+    scrollBar->SetRoundTrickRegion(100.0, 0.0, 0.0, 0.0, 0.0, size);
+    EXPECT_EQ(scrollBar->arcHoverRegion_.startAngle_, scrollBar->arcActiveRect_.startAngle_);
+
+    scrollBar->SetRoundTrickRegion(10.001, 0.0, 0.0, 0.0, 0.0, size);
+    EXPECT_EQ(scrollBar->arcHoverRegion_.startAngle_, scrollBar->arcActiveRect_.startAngle_);
+}
+
+/**
+ * @tc.name: ArcScrollBarTestNg012
+ * @tc.desc: Test ArcScrollTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg012, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    ArcScrollBarOverlayModifier modifier;
+    auto hoverType = HoverAnimationType::NONE;
+    /**
+     * @tc.steps: step1. Create modifier, call onDraw/DrawArc/DrawBackgroundArc
+     */
+    RSCanvas canvas;
+    DrawingContext context { canvas, 240.f, 400.f };
+    modifier.onDraw(context);
+    modifier.DrawArc(context);
+    modifier.DrawBackgroundArc(context);
+    EXPECT_EQ(modifier.lastMainModeHeight_, 0.0f);
+    EXPECT_EQ(modifier.lastMainModeOffset_, 0.0f);
+    EXPECT_EQ(modifier.positionMode_, PositionMode::RIGHT);
+    EXPECT_EQ(modifier.hoverAnimatingType_, hoverType);
+    EXPECT_TRUE(modifier.isNavDestinationShow_);
+
+    modifier.backgroundBarColor_ = nullptr;
+    ContainerScope::UpdateCurrent(-1);
+    modifier.DrawBackgroundArc(context);
+    EXPECT_EQ(modifier.hoverAnimatingType_, HoverAnimationType::NONE);
+
+    modifier.onDraw(context);
+    EXPECT_EQ(modifier.hoverAnimatingType_, HoverAnimationType::NONE);
+
+    modifier.backgroundCurveRadius_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_NE(modifier.curveRadius_, 0.0f);
+
+    modifier.backgroundStrokeWidth_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_NE(modifier.strokeWidth_, 0.0f);
+
+    modifier.backgroundSweepAngle_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_NE(modifier.sweepAngle_, 0.0f);
+
+    modifier.backgroundStartAngle_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_NE(modifier.startAngle_, 0.0f);
+
+    modifier.curveRadius_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_EQ(modifier.backgroundCurveRadius_, 0.0f);
+
+    modifier.sweepAngle_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_EQ(modifier.backgroundSweepAngle_, 0.0f);
+
+    modifier.startAngle_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_EQ(modifier.backgroundStartAngle_, 0.0f);
+
+    modifier.curveCenter_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_EQ(modifier.backgroundStartAngle_, 0.0f);
+
+    modifier.strokeWidth_ = nullptr;
+    modifier.onDraw(context);
+    EXPECT_EQ(modifier.backgroundStrokeWidth_, 0.0f);
+}
+
+/**
+ * @tc.name: ArcScrollBarTestNg013
+ * @tc.desc: Test ArcScrollTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg013, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    /**
+     * @tc.steps: step1. Create modifer, call StartArcBarAnimation
+     * @tc.expected: expect backgroundStrokeWidth_->Get() is 5
+     */
+    bool needAdaptAnimation = true;
+    Point centerPoint(1, 1);
+    float radius = 5;
+    ArcRound arcBarRect(centerPoint, radius, radius, radius, radius);
+    ArcScrollBarOverlayModifier modifer;
+    modifer.StartArcBarAnimation(HoverAnimationType::GROW,
+        OpacityAnimationType::APPEAR, needAdaptAnimation, arcBarRect, arcBarRect);
+    EXPECT_EQ(modifer.backgroundStrokeWidth_->Get(), 5);
+    EXPECT_EQ(modifer.backgroundCurveRadius_->Get(), 5);
+    EXPECT_EQ(modifer.backgroundStartAngle_->Get(), 5);
+    EXPECT_EQ(modifer.backgroundSweepAngle_->Get(), 5);
+    modifer.SetScrollable(true);
+    modifer.StartArcBarAnimation(HoverAnimationType::NONE,
+        OpacityAnimationType::APPEAR, true, arcBarRect, arcBarRect);
+    EXPECT_EQ(modifer.backgroundStrokeWidth_->Get(), 5);
+}
+
+/**
+ * @tc.name: ArcScrollBarTestNg014
+ * @tc.desc: Test ArcScrollTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg014, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    /**
+     * @tc.steps: step1. Create arcmodifer, call StartHoverAnimation and HoverAnimationType is GROW
+     */
+    Point centerPoint(1, 1);
+    float radius = 20;
+    ArcRound arcBarRect(centerPoint, radius, radius, radius, radius);
+    ArcScrollBarOverlayModifier arcmodifer;
+    arcmodifer.StartHoverAnimation(arcBarRect, arcBarRect, HoverAnimationType::GROW);
+    arcmodifer.SetBackgroundBarColor(BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
+    arcmodifer.SetCurveCenter(centerPoint);
+    EXPECT_EQ(arcmodifer.backgroundStrokeWidth_->Get(), 20);
+    EXPECT_EQ(arcmodifer.backgroundCurveRadius_->Get(), 20);
+    EXPECT_EQ(arcmodifer.backgroundStartAngle_->Get(), 20);
+    EXPECT_EQ(arcmodifer.backgroundSweepAngle_->Get(), 20);
+    EXPECT_EQ(arcmodifer.curveCenter_->Get().GetX(), 1);
+    EXPECT_EQ(arcmodifer.curveCenter_->Get().GetY(), 1);
+
+    arcmodifer.curveCenter_ = nullptr;
+    arcmodifer.SetCurveCenter(centerPoint);
+    EXPECT_NE(arcmodifer.backgroundCurveRadius_->Get(), 0);
+
+    arcmodifer.StartHoverAnimation(arcBarRect, arcBarRect, HoverAnimationType::NONE);
+    EXPECT_NE(arcmodifer.hoverAnimatingType_, HoverAnimationType::NONE);
+    arcmodifer.StartHoverAnimation(arcBarRect, arcBarRect, arcmodifer.hoverAnimatingType_);
+    EXPECT_EQ(arcmodifer.hoverAnimatingType_, HoverAnimationType::GROW);
+    arcmodifer.StartHoverAnimation(arcBarRect, arcBarRect, HoverAnimationType::GROW);
+    EXPECT_EQ(arcmodifer.hoverAnimatingType_, HoverAnimationType::GROW);
+    arcmodifer.StartHoverAnimation(arcBarRect, arcBarRect, HoverAnimationType::SHRINK);
+    EXPECT_EQ(arcmodifer.hoverAnimatingType_, HoverAnimationType::SHRINK);
+
+    arcmodifer.backgroundBarColor_ = nullptr;
+    arcmodifer.SetBackgroundBarColor(BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
+    EXPECT_EQ(arcmodifer.hoverAnimatingType_, HoverAnimationType::SHRINK);
+}
+
 } // namespace OHOS::Ace::NG

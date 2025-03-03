@@ -66,6 +66,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
         UPDATE_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
+        UPDATE_TEXT_STYLE(fontStyle, SymbolType, SetSymbolType);
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);

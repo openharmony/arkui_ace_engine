@@ -193,4 +193,8 @@ void CJPageRouterAbstract::ReplacePageWithCallback(const RouterPageInfo& target,
     StartReplacePageWithCallback(target, params);
 }
 
+RefPtr<NG::FrameNode> CJPageRouterAbstract::GetCurrentPageNode()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

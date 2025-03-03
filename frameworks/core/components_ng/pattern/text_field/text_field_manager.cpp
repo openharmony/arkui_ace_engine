@@ -37,9 +37,9 @@ void TextFieldManagerNG::ClearOnFocusTextField()
 
 void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
 {
-    if (onFocusTextFieldId == id) {
+    if (onFocusTextFieldId_ == id) {
         onFocusTextField_ = nullptr;
-        focusFieldIsInline = false;
+        focusFieldIsInline_ = false;
         optionalPosition_ = std::nullopt;
         usingCustomKeyboardAvoid_ = false;
         isScrollableChild_ = false;
@@ -195,7 +195,7 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
 
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     if (isShowKeyboard) {
-        CHECK_NULL_RETURN(scrollableRect.Top() < bottomInset.start, false);
+        CHECK_NULL_RETURN(LessNotEqual(scrollableRect.Top(), bottomInset.start), false);
     }
 
     auto pipeline = frameNode->GetContext();
@@ -209,13 +209,13 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     auto caretRect = textBase->GetCaretRect() + frameNode->GetPositionToWindowWithTransform();
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     // caret height larger scroll's content region
-    if (isShowKeyboard && diffTop <= 0 && LessNotEqual(bottomInset.start,
+    if (isShowKeyboard && LessOrEqual(diffTop, 0) && LessNotEqual(bottomInset.start,
         (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
         return false;
     }
 
     // caret above scroll's content region
-    if (diffTop < 0) {
+    if (LessNotEqual(diffTop, 0)) {
         TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffTop=%{public}f",
             scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffTop);
         scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
@@ -386,7 +386,7 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
     return nullptr;
 }
 
-void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navNode, float avoidKeyboardOffset)
+void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(const RefPtr<FrameNode>& navNode, float avoidKeyboardOffset)
 {
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navNode);
     if (navDestinationNode) {
@@ -492,6 +492,48 @@ bool TextFieldManagerNG::IsAutoFillPasswordType(const TextFieldInfo& textFieldIn
            textFieldInfo.inputType == TextInputType::NUMBER_PASSWORD ||
            textFieldInfo.contentType == TextContentType::VISIBLE_PASSWORD ||
            textFieldInfo.contentType == TextContentType::NEW_PASSWORD;
+}
+
+void TextFieldManagerNG::SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField)
+{
+    const auto& pattern = onFocusTextField.Upgrade();
+    if (pattern && pattern->GetHost()) {
+        onFocusTextFieldId_ = pattern->GetHost()->GetId();
+    }
+    if (onFocusTextField_ != onFocusTextField) {
+        SetImeAttached(false);
+        GetOnFocusTextFieldInfo(onFocusTextField);
+    }
+    onFocusTextField_ = onFocusTextField;
+}
+
+bool TextFieldManagerNG::GetImeShow() const
+{
+    if (!imeShow_ && imeAttachCalled_) {
+        TAG_LOGI(ACE_KEYBOARD, "imeNotShown but attach called, still consider that as shown");
+    }
+    return imeShow_ || imeAttachCalled_;
+}
+
+void TextFieldManagerNG::AddAvoidKeyboardCallback(
+    int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
+{
+    if (isCustomKeyboard) {
+        avoidCustomKeyboardCallbacks_.insert({ id, std::move(callback) });
+    } else {
+        avoidSystemKeyboardCallbacks_.insert({ id, std::move(callback) });
+    }
+}
+
+void TextFieldManagerNG::OnAfterAvoidKeyboard(bool isCustomKeyboard)
+{
+    auto callbacks =
+        isCustomKeyboard ? std::move(avoidCustomKeyboardCallbacks_) : std::move(avoidSystemKeyboardCallbacks_);
+    for (const auto& pair : callbacks) {
+        if (pair.second) {
+            pair.second();
+        }
+    }
 }
 
 TextFieldManagerNG::~TextFieldManagerNG()

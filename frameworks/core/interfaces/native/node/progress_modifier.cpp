@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,7 @@ void SetProgressColor(ArkUINodeHandle node, uint32_t color)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
+    ProgressModelNG::SetModifierInitiatedColor(frameNode, true);
     ProgressModelNG::SetColor(frameNode, Color(color));
 }
 
@@ -157,9 +158,9 @@ void ResetProgressColor(ArkUINodeHandle node)
         endColor = progressTheme->GetRingProgressEndSideColor();
         beginColor = progressTheme->GetRingProgressBeginSideColor();
     } else if (progresstype == ProgressType::CAPSULE) {
-        colorVal = progressTheme->GetCapsuleSelectColor();
+        colorVal = progressTheme->GetCapsuleParseFailedSelectColor();
     } else {
-        colorVal = progressTheme->GetTrackSelectedColor();
+        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
     }
 
     OHOS::Ace::NG::Gradient gradient;
@@ -172,6 +173,7 @@ void ResetProgressColor(ArkUINodeHandle node)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
+    ProgressModelNG::SetModifierInitiatedColor(frameNode, false);
     ProgressModelNG::SetColor(frameNode, colorVal);
 }
 
@@ -363,6 +365,7 @@ void SetProgressBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetModifierInitiatedBgColor(frameNode, true);
     ProgressModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
@@ -380,13 +383,14 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
 
     Color backgroundColor;
     if (progresstype == ProgressType::CAPSULE) {
-        backgroundColor = theme->GetCapsuleBgColor();
+        backgroundColor = theme->GetCapsuleParseFailedBgColor();
     } else if (progresstype == ProgressType::RING) {
-        backgroundColor = theme->GetRingProgressBgColor();
+        backgroundColor = theme->GetRingProgressParseFailedBgColor();
     } else {
-        backgroundColor = theme->GetTrackBgColor();
+        backgroundColor = theme->GetTrackParseFailedBgColor();
     }
 
+    ProgressModelNG::SetModifierInitiatedBgColor(frameNode, false);
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
