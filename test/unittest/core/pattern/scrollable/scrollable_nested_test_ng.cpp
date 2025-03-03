@@ -840,9 +840,7 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    auto scrollNode = sheetPattern->GetSheetScrollNode();
-    ASSERT_NE(scrollNode, nullptr);
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    auto scrollPattern = GetChildPattern<ScrollPattern>(sheetNode, 1);
     ASSERT_NE(scrollPattern, nullptr);
     FlushUITasks(sheetNode);
 
@@ -850,7 +848,7 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
      * @tc.steps: step2. Scroll 100
      * @tc.expected: Scroll offset is 100
      */
-    auto scrollable = GetScrollable(scrollNode);
+    auto scrollable = GetScrollable(GetChildFrameNode(sheetNode, 1));
     DragStart(scrollable);
     DragUpdate(scrollable, -100);
     FlushUITasks(sheetNode);
