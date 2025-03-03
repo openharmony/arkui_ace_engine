@@ -133,7 +133,7 @@ void StartDoubleAnimationImpl(Ark_NativePointer node,
     auto progressFunction = Converter::OptConvert<Callback_Extender_OnProgress>(param->onProgress);
     if (progressFunction) {
         auto progressCallbackFn = [cb = CallbackHelper(progressFunction.value())](float progress) {
-            cb.Invoke(progress);
+            cb.Invoke(static_cast<Ark_Float32>(progress));
         };
 
         frameNode->CreateAnimatablePropertyFloat(propertyName, startValue, progressCallbackFn);
