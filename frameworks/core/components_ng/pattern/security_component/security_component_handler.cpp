@@ -885,6 +885,7 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
         if (node && (IsContextTransparent(node) || !node->IsActive())) {
             continue;
         }
+        NG::RectF bakClipRect = clipRect;
         if (frameNode && frameNode->GetRenderContext() &&
             frameNode->GetRenderContext()->GetClipEdge().has_value() && frameNode->GetRenderContext()->GetClipEdge()) {
             if (NearEqual(clipRect.Width(), -1.0) && NearEqual(clipRect.Height(), -1.0)) {
@@ -894,6 +895,7 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
             }
         }
         res |= CheckSecurityComponentStatus(*child, maps, secNodeId, clipRect);
+        clipRect = bakClipRect;
     }
 
     if (frameNode && frameNode->GetTag() != V2::SHEET_WRAPPER_TAG && !CheckContainerTags(frameNode)) {
