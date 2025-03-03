@@ -28,7 +28,8 @@ import { TextAreaBootcamp } from './TextAreaBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextInputBootcamp } from './TextInputBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
-
+import { TextInputLineBootcamp } from './TextInputLineBootcamp';
+import { SearchCancelBootcamp } from './SearchCancelBootcamp';
 
 export const textAndInputRoute: RouteGroup = {
   name: 'textAndInput',
@@ -37,6 +38,7 @@ export const textAndInputRoute: RouteGroup = {
     { name: 'Text', label: '文本显示/Text' },
     { name: 'TextArea', label: '多行文本框/TextArea' },
     { name: 'TextInput', label: '单行文本框/TextInput' },
+    { name: 'TextInputLine', label: '下划线文本/TextInputLine' },
     { name: 'RichEditor', label: '富文本/RichEditor' },
     { name: 'Search', label: '搜索框/Search' },
     { name: 'Span', label: 'Span' },
@@ -47,8 +49,8 @@ export const textAndInputRoute: RouteGroup = {
     { name: 'Hyperlink', label: '超链接/Hyperlink' },
     { name: 'SelectionMenu', label: '文本选择菜单/SelectionMenu'},
     { name: 'richeditorSpanurl', label: '富文本超链接/RichEditor' },
-    { name: 'TextSpanUrl', label: '超链接/TextSpanUrl' }
-
+    { name: 'TextSpanUrl', label: '超链接/TextSpanUrl' },
+    { name: 'SearchCancel', label: '搜索框关闭/SearchCancel' },
   ]
 };
 
@@ -60,6 +62,8 @@ export function textAndInputDestination(name: string, route: Route) {
     TextAreaBootcamp({title: route.label})
   }else if (name === 'TextAndInput/TextInput'){
     TextInputBootcamp({title: route.label})
+  } else if (name === 'TextAndInput/TextInputLine') {
+    TextInputLineBootcamp({title: route.label})
   }else if (name === 'TextAndInput/RichEditor'){
     RichEditorBootcamp({title: route.label})
   }else if (name === 'TextAndInput/Search'){
@@ -82,6 +86,8 @@ export function textAndInputDestination(name: string, route: Route) {
     RichEditorSpanUrlBootcamp({title: route.label})
   }else if (name === 'TextAndInput/TextSpanUrl'){
     TextSpanUrlBootcamp({title: route.label})
+  } else if (name === 'TextAndInput/SearchCancel') {
+    SearchCancelBootcamp({ title: route.label })
   }
 
 }
