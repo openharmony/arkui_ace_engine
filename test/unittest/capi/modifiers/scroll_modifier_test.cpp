@@ -1352,7 +1352,7 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
 
     auto apiCall = Converter::ArkValue<Opt_ScrollOnWillScrollCallback>(
         Converter::ArkValue<ScrollOnWillScrollCallback>(nullptr, callback, id));
-    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+    ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
 
     ASSERT_NE(modifier_->setOnWillScroll, nullptr);
     modifier_->setOnWillScroll(node_, &apiCall);
@@ -1385,6 +1385,58 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetNullptrCallback, testing::ext::Test
     ASSERT_NE(modifier_->setOnWillScroll, nullptr);
     modifier_->setOnWillScroll(node_, nullptr);
     ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
+}
+
+/**
+ * @tc.name: OnWillScroll_Callback_Void_return
+ * @tc.desc: Test OnWillScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnWillScroll_Callback_Void_return, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct ScrollData
+    {
+        Ark_ScrollState state;
+        Ark_ScrollSource source;
+        Ark_Int32 nodeId;
+    };
+    static std::optional<ScrollData> otherState;
+
+    auto callback = [](
+        Ark_VMContext context,
+        const Ark_Int32 resourceId,
+        const Ark_Number xOffset,
+        const Ark_Number yOffset,
+        Ark_ScrollState scrollState,
+        Ark_ScrollSource scrollSource,
+        const Callback_OffsetResult_Void continuation) {
+        otherState = {scrollState, scrollSource, resourceId};
+    };
+
+    auto id = Converter::ArkValue<Ark_Int32>(123);
+
+    auto apiCall = Converter::ArkValue<Opt_ScrollOnWillScrollCallback>(
+        Converter::ArkValue<ScrollOnWillScrollCallback>(nullptr, callback, id));
+    ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
+
+    ASSERT_NE(modifier_->setOnWillScroll, nullptr);
+    modifier_->setOnWillScroll(node_, &apiCall);
+
+    ASSERT_TRUE(eventHub->GetOnWillScrollEvent());
+    Dimension x(1102);
+    Dimension y(9);
+    auto returnValue = eventHub->GetOnWillScrollEvent()(x, y, ScrollState::FLING, ScrollSource::SCROLL_BAR);
+    EXPECT_EQ(returnValue.xOffset.Value(), x.Value());
+    EXPECT_EQ(returnValue.yOffset.Value(), y.Value());
+    ASSERT_TRUE(otherState.has_value());
+    EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_FLING, otherState->state);
+    EXPECT_EQ(Ark_ScrollSource::ARK_SCROLL_SOURCE_SCROLL_BAR, otherState->source);
+    EXPECT_EQ(id, otherState->nodeId);
 }
 
 /*
