@@ -372,7 +372,7 @@ HWTEST_F(MenuAnimationTestNg, InitPreviewMenuAnimationInfo002, TestSize.Level1)
 
     menuWrapperPattern->hasTransitionEffect_ = false;
     menuPattern->isShowHoverImage_ = true;
-    menuPattern->previewMode_ = MenuPreviewMode::IMAGE:
+    menuPattern->previewMode_ = MenuPreviewMode::IMAGE;
     menuPattern->InitPreviewMenuAnimationInfo(menuTheme);
     EXPECT_EQ(menuPattern->disappearOffset_, menuPattern->endOffset_);
 }
