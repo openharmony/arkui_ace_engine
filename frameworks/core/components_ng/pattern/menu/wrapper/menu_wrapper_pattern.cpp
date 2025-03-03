@@ -1021,7 +1021,7 @@ bool MenuWrapperPattern::CheckPointInMenuZone(const RefPtr<FrameNode>& node, con
     auto geometryNode = node->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto childOffset = node->GetPaintRectOffset(false, true);
-    auto childSize = node->GetPaintRectWithTransform();
+    auto childSize = geometryNode->GetFrameSize();
     auto menuZone = RectF(childOffset.GetX(), childOffset.GetY(), childSize.Width(), childSize.Height());
     return menuZone.IsInRegion(point);
 }
