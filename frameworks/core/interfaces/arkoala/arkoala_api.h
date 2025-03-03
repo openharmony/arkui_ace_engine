@@ -93,6 +93,8 @@ struct ArkUI_ListChildrenMainSize;
 struct ArkUI_StyledString_Descriptor;
 struct _ArkUIRSNode;
 struct _ArkUI_OEMVisualEffectFunc;
+struct ArkUI_TextPickerRangeContentArray;
+struct ArkUI_TextCascadePickerRangeContentArray;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -107,7 +109,20 @@ typedef _ArkUINodeContent* ArkUINodeContentHandle;
 typedef _ArkUIRSNode* ArkUIRSNodeHandle;
 typedef _ArkUI_OEMVisualEffectFunc* ArkUIOEMVisualEffectFuncHandle;
 
+struct RangeContent {
+    ArkUI_CharPtr icon;
+    ArkUI_CharPtr text;
+};
 
+struct ArkUI_TextPickerRangeContentArray {
+    RangeContent* rangeContent;
+    int32_t rangeContentArraySize;
+};
+struct ArkUI_TextCascadePickerRangeContentArray {
+    ArkUI_CharPtr text;
+    ArkUI_Int32 rangeContentArraySize;
+    ArkUI_TextCascadePickerRangeContentArray* children;
+};
 struct ArkUICanvasArcOptions {
     ArkUI_Float32 x;
     ArkUI_Float32 y;
@@ -121,6 +136,8 @@ typedef ArkUI_ListItemSwipeActionOption* ArkUIListItemSwipeActionOptionHandle;
 typedef ArkUI_ListItemSwipeActionItem* ArkUIListItemSwipeActionItemHandle;
 typedef ArkUI_ListChildrenMainSize* ArkUIListChildrenMainSize;
 
+typedef ArkUI_TextPickerRangeContentArray* ArkUITextPickerRangeContentArray;
+typedef ArkUI_TextCascadePickerRangeContentArray* ArkUITextCascadePickerRangeContentArray;
 struct _ArkUICurve;
 typedef _ArkUICurve* ArkUICurveHandle;
 
@@ -4900,6 +4917,10 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerOnChange)(ArkUINodeHandle node);
     void (*setTextPickerOnScrollStop)(ArkUINodeHandle node, void* callback);
     void (*resetTextPickerOnScrollStop)(ArkUINodeHandle node);
+    void (*setTextPickerIconRangeStr)(
+        ArkUINodeHandle node, ArkUITextPickerRangeContentArray arry, ArkUI_Bool isSingleRange, ArkUI_Int32 rangeType);
+    void (*setTextCascadePickRangeContent)(
+        ArkUINodeHandle node, ArkUITextCascadePickerRangeContentArray arry, ArkUI_Int32 rangeType);
 };
 
 struct ArkUITextTimerModifier {

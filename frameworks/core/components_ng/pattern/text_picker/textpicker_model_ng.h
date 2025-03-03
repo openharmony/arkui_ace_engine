@@ -108,6 +108,8 @@ public:
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
     static void SetHasSelectAttr(FrameNode* frameNode, bool value);
+    static void SetIsCascade(FrameNode* frameNode, bool isCascade);
+    static void SetColumnKind(FrameNode* frameNode, uint32_t columnKind);
     static void SetNormalTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
     static void SetSelectedTextStyle(
@@ -177,6 +179,7 @@ private:
     static inline std::mutex optionsMutex_;
     static inline std::mutex isCascadeMutex_;
     static inline std::mutex isSingleMutex_;
+    static inline uint32_t columnkind_ = TEXT;
 };
 
 class ACE_EXPORT TextPickerDialogModelNG : public TextPickerDialogModel {
