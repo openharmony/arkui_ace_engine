@@ -107,6 +107,7 @@ private:
     void RecordSizeInChain(const std::string& nodeName);
     bool IsNodeInHorizontalChain(const std::string& nodeName, std::string& chainName);
     bool IsNodeInVerticalChain(const std::string& nodeName, std::string& chainName);
+    bool IsNodeInChain(const std::string& nodeName, std::string& chainName, LineDirection direction);
     float GetHorizontalAnchorValueByAlignRule(AlignRule& alignRule);
     float GetVerticalAnchorValueByAlignRule(AlignRule& alignRule);
     std::pair<float, float> CalcOffsetInChainGetStart(const float& anchorDistance, const float& contentSize,
@@ -145,10 +146,10 @@ private:
     bool IsAnchorLegal(const std::string& anchorName);
     void MeasureChild(LayoutWrapper* layoutWrapper);
     void MeasureChainWeight(LayoutWrapper* layoutWrapper);
-    void InitRemainingSpace(const std::string & chainName, LineDirection direction);
+    void InitRemainingSpace(ChainParam& chainParam, LineDirection direction);
     BarrierDirection BarrierDirectionRtl(BarrierDirection barrierDirection);
     void CalcChainWeightSize(const std::unique_ptr<FlexItemProperty>& flexItem,
-        LayoutConstraintF& childConstraint, const std::string & chainName, LineDirection direction);
+        LayoutConstraintF& childConstraint, const std::string & nodeName, LineDirection direction);
     bool HasWeight(const std::unique_ptr<FlexItemProperty>& flexItem, LineDirection direction);
     void AdjustOffsetRtl(LayoutWrapper* layoutWrapper);
     void UpdateDegreeMapWithBarrier(std::queue<std::string>& layoutQueue);
