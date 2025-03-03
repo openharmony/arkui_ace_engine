@@ -321,13 +321,14 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = true;
     }
-    selectInfo.menuInfo.showTranslate = true;
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
         selectInfo.menuInfo.showSearch = true;
+        selectInfo.menuInfo.showTranslate = true;
     } else {
         selectInfo.menuInfo.showSearch = false;
+        selectInfo.menuInfo.showTranslate = false;
     }
 }
 
@@ -1060,10 +1061,14 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
         webSelectInfo_.menuInfo.showSearch = true;
+        webSelectInfo_.menuInfo.showTranslate = true;
     } else {
         webSelectInfo_.menuInfo.showSearch = false;
+        webSelectInfo_.menuInfo.showTranslate = false;
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectInfo MenuInfo ShowSearch is %{public}d", webSelectInfo_.menuInfo.showSearch);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectInfo MenuInfo ShowTranslate is %{public}d",
+        webSelectInfo_.menuInfo.showTranslate);
     OnUpdateMenuInfo(webSelectInfo_.menuInfo, DIRTY_FIRST_HANDLE);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
