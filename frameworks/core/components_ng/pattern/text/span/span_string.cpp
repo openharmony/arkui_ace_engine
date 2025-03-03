@@ -159,41 +159,40 @@ void SpanString::ApplyToSpans(
             span->ApplyToSpanItem(*it, operation);
             continue;
         }
-
         auto wContent = (*it)->content;
         auto newSpan = (*it)->GetSameStyleSpanItem();
+        auto firstStartIdx = std::clamp(intersection->first - oldStart, 0, static_cast<int32_t>(wContent.length()));
+        auto secondStartIdx = std::clamp(intersection->second - oldStart, 0, static_cast<int32_t>(wContent.length()));
         if (oldStart < intersection->first && intersection->second < oldEnd) {
             (*it)->interval = { oldStart, intersection->first };
-            (*it)->content = wContent.substr(0, intersection->first - oldStart);
+            (*it)->content = wContent.substr(0, firstStartIdx);
 
             newSpan->interval = { intersection->first, intersection->second };
-            newSpan->content = wContent.substr(intersection->first - oldStart,
+            newSpan->content = wContent.substr(firstStartIdx,
                 intersection->second - intersection->first);
             span->ApplyToSpanItem(newSpan, operation);
 
             auto newSpan2 = (*it)->GetSameStyleSpanItem();
             newSpan2->interval = { intersection->second, oldEnd };
-            newSpan2->content = wContent.substr(intersection->second - oldStart);
+            newSpan2->content = wContent.substr(secondStartIdx);
             it = spans_.insert(std::next(it), newSpan);
             it = spans_.insert(std::next(it), newSpan2);
             continue;
         }
-
         if (oldEnd > intersection->second) {
-            (*it)->content = wContent.substr(0, intersection->second - oldStart);
+            (*it)->content = wContent.substr(0, secondStartIdx);
             (*it)->interval = { oldStart, intersection->second };
             span->ApplyToSpanItem(*it, operation);
             newSpan->interval = { intersection->second, oldEnd };
-            newSpan->content = wContent.substr(intersection->second - oldStart);
+            newSpan->content = wContent.substr(secondStartIdx);
             it = spans_.insert(std::next(it), newSpan);
             continue;
         }
-
         if (intersection->first > oldStart) {
-            (*it)->content = wContent.substr(0, intersection->first - oldStart);
+            (*it)->content = wContent.substr(0, firstStartIdx);
             (*it)->interval = { oldStart, intersection->first };
             newSpan->interval = { intersection->first, oldEnd };
-            newSpan->content = wContent.substr(intersection->first - oldStart);
+            newSpan->content = wContent.substr(firstStartIdx);
             span->ApplyToSpanItem(newSpan, operation);
             it = spans_.insert(std::next(it), newSpan);
         }
@@ -282,7 +281,7 @@ int32_t SpanString::GetStepsByPosition(int32_t pos)
             spanItem->interval.second = (*iter)->interval.second;
             auto wStr = spanItem->content;
             auto start = (*iter)->interval.first;
-            spanItem->content = wStr.substr(pos - start);
+            spanItem->content = wStr.substr(std::clamp(pos - start, 0, static_cast<int32_t>(wStr.length())));
             spans_.insert(std::next(iter), spanItem);
             (*iter)->interval.second = pos;
             (*iter)->content = wStr.substr(0, pos - start);
@@ -295,6 +294,7 @@ int32_t SpanString::GetStepsByPosition(int32_t pos)
 
 void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type, int32_t start)
 {
+    start = std::clamp(start, 0, static_cast<int32_t>(GetU16string().length()));
     text_ = GetU16string().substr(0, start) + u" " + GetU16string().substr(start);
     auto iter = spans_.begin();
     auto step = GetStepsByPosition(start);
@@ -554,6 +554,7 @@ RefPtr<SpanString> SpanString::GetSubSpanString(int32_t start, int32_t length, b
         end = range.endIndex;
         length = end - start;
     }
+    start = std::clamp(start, 0, static_cast<int32_t>(text_.length()));
     RefPtr<SpanString> span =
         AceType::MakeRefPtr<SpanString>(text_.substr(start, length));
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> subMap;

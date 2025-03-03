@@ -203,7 +203,9 @@ std::string RosenFontLoader::RemovePathHead(const std::string& uri)
         // the file uri format is like "file:///data/data...",
         // the memory uri format is like "memory://font.ttf" for example,
         // iter + 3 to get the absolutely file path substring : "/data/data..." or the font file name: "font.ttf"
-        return uri.substr(iter + 3);
+        auto startIndex = iter + 3;
+        startIndex = std::clamp(startIndex, static_cast<size_t>(0), uri.length());
+        return uri.substr(startIndex);
     }
     TAG_LOGW(AceLogTag::ACE_FONT, "Wrong scheme, not a valid File!");
     return std::string();

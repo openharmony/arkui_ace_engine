@@ -486,12 +486,16 @@ void SpanItem::UpdateTextStyleForAISpan(const std::u16string& spanContent, const
         */
         int32_t contentStart = preEnd - spanStart;
         if (preEnd < aiSpanStartInSpan) {
-            UpdateTextStyle(spanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd),
+            contentStart = std::clamp(contentStart, 0, static_cast<int32_t>(spanContent.length()));
+            UpdateTextStyle(spanContent.substr(contentStart, aiSpanStartInSpan - preEnd),
                 builder, textStyle, this->selectedStart - contentStart, this->selectedEnd - contentStart);
             contentStart = contentStart + aiSpanStartInSpan - preEnd; // aiSpan's relative offset from span
         }
+        auto startIndex = aiSpanStartInSpan - aiSpan.start;
+        startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(
+            UtfUtils::Str8DebugToStr16(aiSpan.content).length()));
         auto displayContent = UtfUtils::Str8DebugToStr16(aiSpan.content)
-            .substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
+            .substr(startIndex, aiSpanEndInSpan - aiSpanStartInSpan);
         UpdateTextStyle(displayContent, builder, aiSpanStyle,
             this->selectedStart - contentStart, this->selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
@@ -503,7 +507,8 @@ void SpanItem::UpdateTextStyleForAISpan(const std::u16string& spanContent, const
     }
     if (preEnd < position) {
         int32_t contentStart = preEnd - spanStart;
-        UpdateTextStyle(spanContent.substr(preEnd - spanStart, position - preEnd),
+        contentStart = std::clamp(contentStart, 0, static_cast<int32_t>(spanContent.length()));
+        UpdateTextStyle(spanContent.substr(contentStart, position - preEnd),
             builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
     }
 }
