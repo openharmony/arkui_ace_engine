@@ -38,14 +38,6 @@ inline void AssignArkValue(Ark_Literal_Number_offsetRemain& dst, const ScrollFra
 
 namespace {
     const float TEST_OFFSET = 10.0f;
-    struct EventsTracker {
-        static inline GENERATED_ArkUIWaterFlowEventsReceiver waterFlowEventReceiver {};
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getWaterFlowEventsReceiver = [] () -> const GENERATED_ArkUIWaterFlowEventsReceiver* {
-                return &waterFlowEventReceiver;
-            }
-        };
-    }; // EventsTracker
 }
 
 class WaterFlowModifierTest : public ModifierTestBase<GENERATED_ArkUIWaterFlowModifier,
@@ -54,7 +46,6 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

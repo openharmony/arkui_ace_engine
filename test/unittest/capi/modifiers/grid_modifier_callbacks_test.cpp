@@ -450,15 +450,6 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
         std::optional<ScrollState> scrollState;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridEventsReceiver.onScroll = [](
-        Ark_Int32 nodeId, const Ark_Number scrollOffset, const Ark_ScrollState scrollState)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .scrollOffset = Converter::Convert<Dimension>(scrollOffset),
-            .scrollState = Converter::OptConvert<ScrollState>(scrollState)
-        };
-    };
 
     auto onScroll = eventHub->GetOnScroll();
     EXPECT_EQ(onScroll, nullptr);

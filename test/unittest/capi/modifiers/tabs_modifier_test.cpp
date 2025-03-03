@@ -168,40 +168,6 @@ const int32_t TO(16);
 const int32_t CURRENT_INDEX(18);
 const int32_t COMING_INDEX(20);
 const auto CONTEXT_ID = 123;
-
-GENERATED_ArkUITabsEventsReceiver recv {
-    .onChange =
-        [](Ark_Int32 nodeId, const Ark_Number index) {
-            g_indexValue = Converter::Convert<int32_t>(index);
-        },
-    .onTabBarClick =
-        [](Ark_Int32 nodeId, const Ark_Number index) {
-            g_indexValue = Converter::Convert<int32_t>(index);
-        },
-    .onAnimationStart =
-        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_Number targetIndex,
-            const Ark_TabsAnimationEvent event) {
-            g_indexValue = Converter::Convert<int32_t>(index);
-            g_targetIndexValue = Converter::Convert<int32_t>(targetIndex);
-            g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
-            g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
-            g_velocityValue = Converter::Convert<float>(event.velocity);
-        },
-    .onAnimationEnd =
-        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_TabsAnimationEvent event) {
-            g_indexValue = Converter::Convert<int32_t>(index);
-            g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
-            g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
-            g_velocityValue = Converter::Convert<float>(event.velocity);
-        },
-    .onGestureSwipe =
-        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_TabsAnimationEvent event) {
-            g_indexValue = Converter::Convert<int32_t>(index);
-            g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
-            g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
-            g_velocityValue = Converter::Convert<float>(event.velocity);
-        },
-};
 } // namespace
 
 
@@ -577,7 +543,11 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle0Test, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto func = Converter::ArkValue<Callback_Number_Void>(recv.onChange, CONTEXT_ID);
+    auto onChange =
+        [](Ark_Int32 nodeId, const Ark_Number index) {
+            g_indexValue = Converter::Convert<int32_t>(index);
+        };
+    auto func = Converter::ArkValue<Callback_Number_Void>(onChange, CONTEXT_ID);
     ASSERT_NE(frameNode, nullptr);
     auto context = reinterpret_cast<PipelineContext*>(MockPipelineContext::GetCurrent().GetRawPtr());
     frameNode->AttachToMainTree(true, context);
@@ -603,7 +573,16 @@ HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto func = Converter::ArkValue<OnTabsAnimationStartCallback>(recv.onAnimationStart, CONTEXT_ID);
+    auto onAnimationStart =
+        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_Number targetIndex,
+            const Ark_TabsAnimationEvent event) {
+            g_indexValue = Converter::Convert<int32_t>(index);
+            g_targetIndexValue = Converter::Convert<int32_t>(targetIndex);
+            g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
+            g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
+            g_velocityValue = Converter::Convert<float>(event.velocity);
+        };
+    auto func = Converter::ArkValue<OnTabsAnimationStartCallback>(onAnimationStart, CONTEXT_ID);
     modifier_->setOnAnimationStart(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -643,7 +622,14 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto func = Converter::ArkValue<OnTabsAnimationEndCallback>(recv.onAnimationEnd, CONTEXT_ID);
+    auto onAnimationEnd =
+        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_TabsAnimationEvent event) {
+            g_indexValue = Converter::Convert<int32_t>(index);
+            g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
+            g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
+            g_velocityValue = Converter::Convert<float>(event.velocity);
+        };
+    auto func = Converter::ArkValue<OnTabsAnimationEndCallback>(onAnimationEnd, CONTEXT_ID);
     modifier_->setOnAnimationEnd(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -682,7 +668,14 @@ HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto func = Converter::ArkValue<OnTabsGestureSwipeCallback>(recv.onGestureSwipe, CONTEXT_ID);
+    auto onGestureSwipe =
+        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_TabsAnimationEvent event) {
+            g_indexValue = Converter::Convert<int32_t>(index);
+            g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
+            g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
+            g_velocityValue = Converter::Convert<float>(event.velocity);
+        };
+    auto func = Converter::ArkValue<OnTabsGestureSwipeCallback>(onGestureSwipe, CONTEXT_ID);
     modifier_->setOnGestureSwipe(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -782,7 +775,11 @@ HWTEST_F(TabsModifierTest, setOnContentWillChangeTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnTabBarClickTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto func = Converter::ArkValue<Callback_Number_Void>(recv.onTabBarClick, CONTEXT_ID);
+    auto onTabBarClick =
+        [](Ark_Int32 nodeId, const Ark_Number index) {
+            g_indexValue = Converter::Convert<int32_t>(index);
+        };
+    auto func = Converter::ArkValue<Callback_Number_Void>(onTabBarClick, CONTEXT_ID);
     modifier_->setOnTabBarClick(node_, &func);
     EXPECT_EQ(g_indexValue, 0);
 

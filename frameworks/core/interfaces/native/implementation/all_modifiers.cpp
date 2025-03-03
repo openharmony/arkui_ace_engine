@@ -80,11 +80,6 @@ namespace GeneratedBridge {
     Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags);
 }
 
-namespace GeneratedEvents {
-    const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI();
-    void GENERATED_SetArkUiEventsAPI(const GENERATED_ArkUIEventsAPI* api);
-}
-
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -212,6 +207,7 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
 const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
+const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor();
 const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor();
@@ -264,7 +260,6 @@ const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
 const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor();
 const GENERATED_ArkUIViewAccessor* GetViewAccessor();
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor();
-const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor();
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor();
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor();
@@ -494,6 +489,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetSystemOpsAccessor,
         GetDrawingCanvasAccessor,
         GetLengthMetricsAccessor,
+        GetColorMetricsAccessor,
         GetWebviewControllerAccessor,
         GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
         GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
@@ -546,7 +542,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetMeasurableAccessor,
         GetViewAccessor,
         GetTextContentControllerBaseAccessor,
-        GetDynamicNodeAccessor,
         GetChildrenMainSizeAccessor,
         GetUICommonEventAccessor,
         GetGestureModifierAccessor,
@@ -717,9 +712,6 @@ const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
         GENERATED_ARKUI_FULL_API_VERSION, // version
         GENERATED_GetArkUINodeModifiers,
         GENERATED_GetArkUIAccessors,
-        nullptr,
-        OHOS::Ace::NG::GeneratedEvents::GENERATED_GetArkUiEventsAPI,
-        OHOS::Ace::NG::GeneratedEvents::GENERATED_SetArkUiEventsAPI
     };
     return &fullAPIImpl;
 }

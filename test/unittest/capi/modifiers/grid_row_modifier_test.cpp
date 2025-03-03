@@ -136,15 +136,6 @@ const auto ATTRIBUTE_DIRECTION_NAME = "gridRowDirection";
 const auto ATTRIBUTE_DIRECTION_DEFAULT_VALUE = "GridRowDirection.Row";
 const auto ATTRIBUTE_ALIGN_ITEMS_NAME = "itemAlign"; // "alignSelf" ???
 const auto ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE = "ItemAlign.Start";
-// Structure for tracking events (Auto generated)
-struct EventsTracker {
-    static inline GENERATED_ArkUIGridRowEventsReceiver gridRowEventReceiver {};
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getGridRowEventsReceiver = []() -> const GENERATED_ArkUIGridRowEventsReceiver* {
-            return &gridRowEventReceiver;
-        }
-    };
-}; // EventsTracker
 } // namespace
 
 class GridRowModifierTest : public ModifierTestBase<GENERATED_ArkUIGridRowModifier,
@@ -154,7 +145,6 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

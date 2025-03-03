@@ -154,10 +154,6 @@ HWTEST_F(SearchModifierCallbackTest, setInputFilterTest, TestSize.Level1)
     g_EventTestString = "";
     g_EventErrorTestString = "";
     ASSERT_NE(modifier_->setInputFilter, nullptr);
-    EventsTracker::eventsReceiver.inputFilter = [](Ark_Int32 nodeId, const Ark_String data) {
-        g_EventErrorTestString = Convert<std::string>(data);
-        g_EventTestString = g_EventErrorTestString;
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Opt_Callback_String_Void func{};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());

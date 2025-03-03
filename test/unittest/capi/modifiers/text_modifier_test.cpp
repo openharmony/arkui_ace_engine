@@ -112,16 +112,6 @@ struct CheckCBEvent {
 static std::optional<CheckCBEvent> checkCBEvent = std::nullopt;
 static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 
-struct EventsTracker {
-    static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getTextEventsReceiver = [] () -> const GENERATED_ArkUITextEventsReceiver* {
-            return &textEventReceiver;
-        }
-    };
-};
-
 struct SelectionRange {
     int32_t start;
     int32_t end;
@@ -145,9 +135,6 @@ public:
         AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_VALUE);
         AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_VALUE);
         AddResource(FLOAT_RES_2_ID, FLOAT_RES_2_STORED_VALUE);
-
-        // setup the test event handler
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
     CustomNodeBuilder getBuilderCb()
     {
