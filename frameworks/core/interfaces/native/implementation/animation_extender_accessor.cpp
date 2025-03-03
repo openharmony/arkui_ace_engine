@@ -145,7 +145,7 @@ void StartDoubleAnimationImpl(Ark_NativePointer node,
 
     auto finishFunction = Converter::OptConvert<Callback_Extender_OnFinish>(param->onFinish);
     if (finishFunction) {
-        auto finishCallbackFn = [cb = CallbackHelper(finishFunction.value()), frameNode, propertyName](){
+        auto finishCallbackFn = [cb = CallbackHelper(finishFunction.value()), frameNode, propertyName]() {
             frameNode->DeleteAnimatablePropertyFloat(propertyName);
             cb.Invoke();
         };
@@ -169,12 +169,12 @@ void AnimationTranslateImpl(Ark_NativePointer node,
 
     if (options.x.Unit() == DimensionUnit::PERCENT) {
         options.x = Dimension(options.x.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX(),
-                               DimensionUnit::PX);
+                              DimensionUnit::PX);
     }
 
     if (options.y.Unit() == DimensionUnit::PERCENT) {
         options.x = Dimension(options.y.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY(),
-                               DimensionUnit::PX);
+                              DimensionUnit::PX);
     }
 
     ViewAbstract::SetTranslate(frameNode, options);
