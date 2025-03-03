@@ -1198,8 +1198,8 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()) ||
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()
         && !info[0]->IsEmpty())) {
         return;
     }
@@ -1783,8 +1783,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()) ||
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()
         && !info[0]->IsEmpty())) {
         return;
     }

@@ -159,7 +159,7 @@ void TextPickerColumnPattern::OnModifyDone()
 
 void TextPickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     CHECK_NULL_VOID(host);

@@ -1558,7 +1558,7 @@ HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionTest001, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestFour, DatePickerDialogViewTest002, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     DatePickerSettingData settingData;
     settingData.isLunar = false;
     settingData.showTime = true;
@@ -1600,7 +1600,7 @@ HWTEST_F(DatePickerTestFour, DatePickerDialogViewTest002, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestFour, CreateSingleDateNode001, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     DatePickerSettingData settingData;
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto datePickerNode = DatePickerDialogView::CreateDateNode(
@@ -1715,7 +1715,7 @@ HWTEST_F(DatePickerTestFour, ColumnPatternInitHapticControllerTest002, TestSize.
  */
 HWTEST_F(DatePickerTestFour, DatePickerPatternTest112, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     const std::string language = "en";
     const std::string countryOrRegion = "US";
     const std::string script = "Latn";
