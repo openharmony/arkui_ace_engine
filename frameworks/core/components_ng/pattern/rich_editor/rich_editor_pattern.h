@@ -1555,6 +1555,7 @@ private:
 #endif
     const bool isAPI14Plus;
     const bool isAPI16Plus;
+    const bool isAPI18Plus;
     bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
