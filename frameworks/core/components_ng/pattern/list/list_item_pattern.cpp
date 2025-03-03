@@ -110,6 +110,10 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetCurOffset(curOffset_);
     layoutAlgorithm->SetHasStartDeleteArea(hasStartDeleteArea_);
     layoutAlgorithm->SetHasEndDeleteArea(hasEndDeleteArea_);
+    if (swipeActionState_ == SwipeActionState::ACTIONING && !isSpringMotionRunning_) {
+        layoutAlgorithm->SetCanUpdateCurOffset();
+        layoutAlgorithm->SetItemChildCrossSize(GetContentSize().CrossSize(axis_));
+    }
     return layoutAlgorithm;
 }
 
@@ -130,6 +134,10 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     endNodeSize_ = layoutAlgorithm->GetEndNodeSize();
     if (axis_ != GetAxis()) {
         ChangeAxis(GetAxis());
+    } else if (layoutAlgorithm->GetCurOffsetUpdated()) {
+        float newOffset = layoutAlgorithm->GetCurOffset();
+        FireSwipeActionOffsetChange(curOffset_, newOffset);
+        curOffset_ = newOffset;
     }
     return false;
 }
@@ -442,6 +450,7 @@ void ListItemPattern::HandleDragStart(const GestureEvent& info)
         springController_->Stop();
     }
     isDragging_ = true;
+    isSpringMotionRunning_ = false;
     SetSwiperItemForList();
 }
 
@@ -636,8 +645,8 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
             listItem->springController_->Stop();
             position = end;
         }
-        if (NearEqual(position, listItem->curOffset_, 1.0) && !listItem->springMotionTraceFlag_) {
-            listItem->springMotionTraceFlag_ = true;
+        if (NearEqual(position, listItem->curOffset_, 1.0) && !listItem->isSpringMotionRunning_) {
+            listItem->isSpringMotionRunning_ = true;
             AceAsyncTraceBegin(0, TRAILING_ANIMATION);
         }
         float delta = listItem->IsRTLAndVertical() ? listItem->curOffset_ - position : position - listItem->curOffset_;
@@ -653,8 +662,8 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
             listItem->ResetNodeSize();
             listItem->FireSwipeActionOffsetChange(SWIPE_SPRING_MASS, listItem->curOffset_);
         }
-        if (listItem->springMotionTraceFlag_) {
-            listItem->springMotionTraceFlag_ = false;
+        if (listItem->isSpringMotionRunning_) {
+            listItem->isSpringMotionRunning_ = false;
             AceAsyncTraceEnd(0, TRAILING_ANIMATION);
         }
         listItem->MarkDirtyNode();
