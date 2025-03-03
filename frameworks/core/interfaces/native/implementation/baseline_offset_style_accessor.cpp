@@ -26,9 +26,13 @@ void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 }
 Ark_BaselineOffsetStyle CtorImpl(Ark_LengthMetrics value)
 {
-    CHECK_NULL_RETURN(value, {});
-    auto offset = Converter::Convert<Dimension>(value);
-    auto span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset);
+    RefPtr<BaselineOffsetSpan> span;
+    if (value) {
+        auto offset = Converter::Convert<Dimension>(value);
+        span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset);
+    } else {
+        span = AceType::MakeRefPtr<BaselineOffsetSpan>();
+    }
     return new BaselineOffsetStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
