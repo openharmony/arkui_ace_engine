@@ -1917,7 +1917,7 @@ HWTEST_F(SliderPatternTestNg, InitHapticControllerTest001, TestSize.Level1)
     ASSERT_NE(sliderNode, nullptr);
     sliderPattern->InitHapticController();
     EXPECT_EQ(sliderPattern->hapticController_, nullptr);
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sliderPattern->isEnableHaptic_ = true;
     sliderPattern->InitHapticController();
     EXPECT_NE(sliderPattern->hapticController_, nullptr);
