@@ -187,7 +187,6 @@ public:
         isLimitFingerCount_ = isLimitFingerCount;
     }
 
-
     bool GetIsLimitFingerCount() const
     {
         return isLimitFingerCount_;
