@@ -992,12 +992,12 @@ float GridPattern::GetEndOffset()
     const bool irregular = UseIrregularLayout();
     float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
-    if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
+    const float totalHeight = GetTotalHeight();
+    if (GetAlwaysEnabled() && LessNotEqual(totalHeight, contentHeight)) {
         // overScroll with contentHeight < viewport
         if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
         }
-        float totalHeight = info.GetTotalLineHeight(mainGap);
         return totalHeight - heightInView;
     }
 
