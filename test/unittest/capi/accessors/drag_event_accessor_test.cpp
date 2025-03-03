@@ -101,12 +101,12 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, DISABLED_GetWindowXTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, GetWindowXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
-        dragEvent_->SetX(Convert<int32_t>(value));
-        auto windowX = accessor_->getWindowX(peer_);
-        EXPECT_EQ(Convert<int32_t>(windowX), expected) <<
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
+        dragEvent_->SetX(value);
+        auto windowX = Convert<float>(accessor_->getWindowX(peer_));
+        EXPECT_EQ(windowX, Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetWindowXTest";
     }
 }
@@ -116,12 +116,12 @@ HWTEST_F(DragEventAccessorTest, DISABLED_GetWindowXTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, DISABLED_GetWindowYTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
-        dragEvent_->SetY(Convert<int32_t>(value));
-        auto windowY = accessor_->getWindowY(peer_);
-        EXPECT_EQ(Convert<int32_t>(windowY), expected) <<
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
+        dragEvent_->SetY(value);
+        auto windowY = Convert<float>(accessor_->getWindowY(peer_));
+        EXPECT_EQ(windowY, Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetWindowYTest";
     }
 }
@@ -131,12 +131,12 @@ HWTEST_F(DragEventAccessorTest, DISABLED_GetWindowYTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, DISABLED_GetXTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, GetXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
-        dragEvent_->SetX(Convert<int32_t>(value));
-        auto x = accessor_->getX(peer_);
-        EXPECT_EQ(Convert<int32_t>(x), expected) <<
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
+        dragEvent_->SetX(value);
+        auto x = Convert<float>(accessor_->getX(peer_));
+        EXPECT_EQ(x, Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetXTest";
     }
 }
@@ -146,12 +146,12 @@ HWTEST_F(DragEventAccessorTest, DISABLED_GetXTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, DISABLED_GetYTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, GetYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureInt32WithNegativeValues) {
-        dragEvent_->SetY(Convert<int32_t>(value));
-        auto y = accessor_->getY(peer_);
-        EXPECT_EQ(Convert<int32_t>(y), expected) <<
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
+        dragEvent_->SetY(value);
+        auto y = Convert<float>(accessor_->getY(peer_));
+        EXPECT_EQ(y, Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetYTest";
     }
 }

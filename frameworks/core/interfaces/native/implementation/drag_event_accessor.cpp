@@ -83,9 +83,6 @@ Ark_Number GetDisplayXImpl(Ark_DragEvent peer)
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenX());
-    auto arkScreenX = Converter::ArkValue<Ark_Number>(value);
-    LOGE("Arkoala method DragEventAccessor.GetDisplayXImpl return int32_t value, instead of %{public}f",
-        arkScreenX.f32);
     return Converter::ArkValue<Ark_Number>(value);
 }
 Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
@@ -95,9 +92,6 @@ Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenY());
-    auto arkScreenY = Converter::ArkValue<Ark_Number>(value);
-    LOGE("Arkoala method DragEventAccessor.GetDisplayYImpl return int32_t value, instead of %{public}f",
-        arkScreenY.f32);
     return Converter::ArkValue<Ark_Number>(value);
 }
 Ark_Number GetWindowXImpl(Ark_DragEvent peer)
@@ -105,7 +99,6 @@ Ark_Number GetWindowXImpl(Ark_DragEvent peer)
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
-    LOGE("Arkoala method DragEventAccessor.GetWindowXImpl return int32_t value");
     return ArkValue<Ark_Number>(peer->dragInfo->GetX());
 }
 Ark_Number GetWindowYImpl(Ark_DragEvent peer)
@@ -113,7 +106,6 @@ Ark_Number GetWindowYImpl(Ark_DragEvent peer)
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
-    LOGE("Arkoala method DragEventAccessor.GetWindowYImpl return int32_t value");
     return ArkValue<Ark_Number>(peer->dragInfo->GetY());
 }
 Ark_Number GetXImpl(Ark_DragEvent peer)
@@ -183,9 +175,6 @@ Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityX());
-    auto arkVelocityX = Converter::ArkValue<Ark_Number>(value);
-    LOGE("Arkoala method DragEventAccessor.GetVelocityXImpl return int32_t value, instead of %{public}f",
-        arkVelocityX.f32);
     return Converter::ArkValue<Ark_Number>(value);
 }
 Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
@@ -195,9 +184,6 @@ Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityY());
-    auto arkVelocityY = Converter::ArkValue<Ark_Number>(value);
-    LOGE("Arkoala method DragEventAccessor.GetVelocityYImpl return int32_t value, instead of %{public}f",
-        arkVelocityY.f32);
     return Converter::ArkValue<Ark_Number>(value);
 }
 Ark_Number GetVelocityImpl(Ark_DragEvent peer)
@@ -207,9 +193,6 @@ Ark_Number GetVelocityImpl(Ark_DragEvent peer)
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityValue());
-    auto arkVelocity = Converter::ArkValue<Ark_Number>(value);
-    LOGE("Arkoala method DragEventAccessor.GetVelocityImpl return int32_t value, instead of %{public}f",
-        arkVelocity.f32);
     return Converter::ArkValue<Ark_Number>(value);
 }
 Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
