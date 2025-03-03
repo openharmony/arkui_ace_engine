@@ -25,11 +25,15 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/text_style.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
+
+using ComposeId = std::string;
 
 struct ButtonProperties {
     bool showButton = false;

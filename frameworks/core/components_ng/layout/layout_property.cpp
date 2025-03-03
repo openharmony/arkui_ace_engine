@@ -17,6 +17,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/grid_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -133,6 +134,10 @@ void TruncateSafeAreaPadding(const std::optional<float>& range, std::optional<fl
     }
 }
 } // namespace
+
+LayoutProperty::LayoutProperty() = default;
+
+LayoutProperty::~LayoutProperty() = default;
 
 void LayoutProperty::Reset()
 {
@@ -2023,5 +2028,10 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     borderImageProperty->SetEdgeOutset(BorderImageDirection::LEFT, leftOutset);
     borderImageProperty->SetEdgeOutset(BorderImageDirection::RIGHT, rightOutset);
     target->UpdateBorderImage(borderImageProperty);
+}
+
+RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
+{
+    return geometryTransition_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "bridge/common/plugin_adapter/plugin_bridge.h"
 
 #include "core/common/container.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {
 void PluginBridge::ProcessSystemParam(std::unique_ptr<JsonValue>& infoList)

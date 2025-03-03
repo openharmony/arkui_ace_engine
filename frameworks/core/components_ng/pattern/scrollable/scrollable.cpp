@@ -1737,4 +1737,10 @@ void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<Fram
         responseLinkResult.emplace_back(panRecognizerNG_);
     }
 }
+
+void Scrollable::SetMaxFlingVelocity(double max)
+{
+    double density = PipelineBase::GetCurrentDensity();
+    maxFlingVelocity_ = max * density;
+}
 } // namespace OHOS::Ace::NG

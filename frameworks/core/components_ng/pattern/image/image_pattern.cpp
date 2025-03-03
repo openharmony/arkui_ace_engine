@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2621,5 +2622,31 @@ void ImagePattern::AddPixelMapToUiManager()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddPixelMap(host->GetId(), pixmap);
+}
+
+FocusPattern ImagePattern::GetFocusPattern() const
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+    } else {
+        return { FocusType::NODE, false };
+    }
+}
+
+void ImagePattern::OnActive()
+{
+    if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (!animator_->HasScheduler()) {
+            auto context = host->GetContextRefPtr();
+            if (context) {
+                animator_->AttachScheduler(context);
+            } else {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+            }
+        }
+        animator_->Forward();
+    }
 }
 } // namespace OHOS::Ace::NG

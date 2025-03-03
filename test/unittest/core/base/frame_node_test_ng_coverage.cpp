@@ -17,10 +17,11 @@
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
 #include "core/common/recorder/event_definition.h"
-#include "frameworks/core/common/recorder/event_recorder.h"
-#include "frameworks/core/common/recorder/node_data_cache.h"
-#include "frameworks/core/components_ng/pattern/image/image_pattern.h"
-#include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/property/grid_property.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

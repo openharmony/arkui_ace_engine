@@ -20,8 +20,10 @@
 #include <map>
 #include <optional>
 
+#include "core/components/common/layout/position_param.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
 

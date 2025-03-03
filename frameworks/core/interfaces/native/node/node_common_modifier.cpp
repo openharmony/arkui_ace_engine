@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"

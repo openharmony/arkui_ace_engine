@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

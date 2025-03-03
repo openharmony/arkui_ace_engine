@@ -26,6 +26,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {

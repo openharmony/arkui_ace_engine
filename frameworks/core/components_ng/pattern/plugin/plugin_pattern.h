@@ -25,6 +25,7 @@
 namespace OHOS::Ace {
 class PluginSubContainer;
 class PluginManagerDelegate;
+class DrawDelegate;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {

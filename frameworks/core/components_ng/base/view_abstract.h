@@ -51,7 +51,21 @@
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
 
+namespace OHOS::Rosen {
+class VisualEffect;
+class Filter;
+class BrightnessBlender;
+} // namespace OHOS::Rosen
+
+namespace OHOS::Ace {
+class ImageSourceInfo;
+class BasicShape;
+}
+
 namespace OHOS::Ace::NG {
+struct AttractionEffect;
+using TransitionFinishCallback = std::function<void(bool)>;
+
 struct OptionParam {
     std::string value;
     std::string icon;

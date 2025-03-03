@@ -492,11 +492,7 @@ public:
         return endPos_;
     }
 
-    void SetMaxFlingVelocity(double max)
-    {
-        double density = PipelineBase::GetCurrentDensity();
-        maxFlingVelocity_ = max * density;
-    }
+    void SetMaxFlingVelocity(double max);
 
     double GetMaxFlingVelocity() const
     {

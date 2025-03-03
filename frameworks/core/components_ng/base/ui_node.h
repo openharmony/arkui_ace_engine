@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/window_animation_config.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;

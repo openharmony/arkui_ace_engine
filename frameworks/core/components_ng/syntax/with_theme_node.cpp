@@ -16,6 +16,7 @@
 #include "core/components_ng/syntax/with_theme_node.h"
 
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 

@@ -24,10 +24,9 @@
 #include "base/image/image_defines.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
-#include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
+#include "core/common/clipboard/clipboard.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
@@ -38,6 +37,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/image/image_properties.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
@@ -86,14 +86,7 @@ public:
     // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
-        } else {
-            return { FocusType::NODE, false };
-        }
-    }
+    FocusPattern GetFocusPattern() const override;
 
     const RefPtr<CanvasImage>& GetCanvasImage()
     {
@@ -311,22 +304,7 @@ public:
         }
     }
 
-    void OnActive() override
-    {
-        if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            if (!animator_->HasScheduler()) {
-                auto context = host->GetContextRefPtr();
-                if (context) {
-                    animator_->AttachScheduler(context);
-                } else {
-                    TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
-                }
-            }
-            animator_->Forward();
-        }
-    }
+    void OnActive() override;
 
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);

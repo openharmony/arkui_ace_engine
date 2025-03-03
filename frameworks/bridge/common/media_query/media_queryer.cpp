@@ -17,6 +17,7 @@
 
 #include "bridge/common/media_query/media_query_info.h"
 #include "bridge/common/utils/utils.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::Framework {
