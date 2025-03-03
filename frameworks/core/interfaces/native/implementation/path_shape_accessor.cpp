@@ -26,16 +26,13 @@ void DestroyPeerImpl(Ark_PathShape peer)
 }
 Ark_PathShape CtorImpl(const Opt_PathShapeOptions* options)
 {
-    auto optOptions = options ? Converter::OptConvert<PathShapeOptions>(*options) : std::nullopt;
     auto peer = new PathShapePeer();
-    CHECK_NULL_RETURN(peer, nullptr);
     peer->shape = OHOS::Ace::AceType::MakeRefPtr<Path>();
-    CHECK_NULL_RETURN(peer->shape, peer);
-    if (optOptions.has_value()) {
-        peer->shape->SetValue(optOptions.value().commands.value_or(""));
-    } else {
-        peer->shape->SetValue("");
-    }
+    CHECK_NULL_RETURN(options, peer);
+    auto optOptions = Converter::OptConvert<PathShapeOptions>(*options);
+    CHECK_EQUAL_RETURN(optOptions.has_value(), false, peer);
+    CHECK_EQUAL_RETURN(optOptions.value().commands.has_value(), false, peer);
+    peer->shape->SetValue(optOptions.value().commands.value());
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -45,59 +42,41 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_PathShape OffsetImpl(Ark_PathShape peer,
                          const Ark_Position* offset)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->shape, peer);
-    if (!offset) {
-        peer->shape->SetOffset({});
-        return peer;
-    }
+    CHECK_NULL_RETURN(offset, peer);
     peer->shape->SetOffset(Converter::Convert<DimensionOffset>(*offset));
     return peer;
 }
 Ark_PathShape FillImpl(Ark_PathShape peer,
                        const Ark_ResourceColor* color)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->shape, peer);
-    if (!color) {
-        peer->shape->SetColor({});
-        return peer;
-    }
+    CHECK_NULL_RETURN(color, peer);
     auto optColor = Converter::OptConvert<Color>(*color);
-    if (!optColor.has_value()) {
-        peer->shape->SetColor({});
-        return peer;
-    }
+    CHECK_EQUAL_RETURN(optColor.has_value(), false, peer);
     peer->shape->SetColor(optColor.value());
     return peer;
 }
 Ark_PathShape PositionImpl(Ark_PathShape peer,
                            const Ark_Position* position)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->shape, peer);
-    if (!position) {
-        peer->shape->SetPosition({});
-        return peer;
-    }
+    CHECK_NULL_RETURN(position, peer);
     peer->shape->SetPosition(Converter::Convert<DimensionOffset>(*position));
     return peer;
 }
 Ark_PathShape CommandsImpl(Ark_PathShape peer,
                            const Ark_String* commands)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->shape, peer);
-    if (!commands) {
-        peer->shape->SetValue("");
-        return peer;
-    }
-    auto optOptions = commands ? Converter::OptConvert<std::string>(*commands) : std::nullopt;
-    if (!optOptions.has_value()) {
-        peer->shape->SetValue("");
-        return peer;
-    }
-    peer->shape->SetValue(optOptions.value_or(""));
+    CHECK_NULL_RETURN(commands, peer);
+    auto optOptions = Converter::OptConvert<std::string>(*commands);
+    CHECK_EQUAL_RETURN(optOptions.has_value(), false, peer);
+    peer->shape->SetValue(optOptions.value());
     return peer;
 }
 } // PathShapeAccessor
