@@ -2496,11 +2496,14 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(const RefPtr<FrameNode>
 void DragEventActuator::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(gestureHub);
-    auto callback = [id = Container::CurrentId(), gestureHub](const RefPtr<PixelMap>& pixelMap) {
+    auto callback = [id = Container::CurrentId(), weakGestureHub = AceType::WeakClaim(AceType::RawPtr(gestureHub))](
+                        const RefPtr<PixelMap>& pixelMap) {
         ContainerScope scope(id);
         if (pixelMap != nullptr) {
             auto taskScheduler = Container::CurrentTaskExecutor();
             CHECK_NULL_VOID(taskScheduler);
+            auto gestureHub = weakGestureHub.Upgrade();
+            CHECK_NULL_VOID(gestureHub);
             taskScheduler->PostTask(
                 [gestureHub, pixelMap]() {
                     CHECK_NULL_VOID(gestureHub);
