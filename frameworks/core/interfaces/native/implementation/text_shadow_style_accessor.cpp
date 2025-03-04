@@ -15,16 +15,41 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "text_shadow_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextShadowStyleAccessor {
 void DestroyPeerImpl(Ark_TextShadowStyle peer)
 {
+    delete peer;
 }
 Ark_TextShadowStyle CtorImpl(const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
 {
-    return {};
+    RefPtr<OHOS::Ace::TextShadowSpan> span;
+    if (value) {
+        Converter::VisitUnion(*value,
+            [&span](const Array_ShadowOptions& array) {
+                auto shadowsOpt = Converter::OptConvert<std::vector<Shadow>>(array);
+                if (shadowsOpt) {
+                    span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>(shadowsOpt.value());
+                }
+            },
+            [&span](const Ark_ShadowOptions& arkValue) {
+                auto shadowOpt = Converter::OptConvert<Shadow>(arkValue);
+                std::vector<Shadow> shadows;
+                if (shadowOpt) {
+                    shadows.push_back(shadowOpt.value());
+                }
+                span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>(shadows);
+            },
+            []() {});
+    }
+    if (!span) {
+        span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>();
+    }
+    return new TextShadowStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +57,8 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Array_ShadowOptions GetTextShadowImpl(Ark_TextShadowStyle peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->span, {});
+    return Converter::ArkValue<Array_ShadowOptions>(peer->span->GetTextShadow(), Converter::FC);
 }
 } // TextShadowStyleAccessor
 const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
@@ -45,8 +71,4 @@ const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     };
     return &TextShadowStyleAccessorImpl;
 }
-
-struct TextShadowStylePeer {
-    virtual ~TextShadowStylePeer() = default;
-};
 }
