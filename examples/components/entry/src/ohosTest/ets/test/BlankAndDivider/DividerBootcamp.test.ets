@@ -986,22 +986,6 @@ export default function DividerBootcampTest() {
 
       done();
     })
-    /**
-     * 测试关闭offset
-     */
-    it('ArkUI_Divider_Comp_0024', 0, async (done: Function) => {
-      // 无断言
-      await titleSearch('基础属性', 'offset');
-      let toggle: Array<Component> =
-        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')));
-      if (await toggle[0].isChecked() === true) {
-        await toggle[0].click()
-      }
-      await driver.delayMs(1000);
-
-      done();
-    })
-
 
   })
 }
