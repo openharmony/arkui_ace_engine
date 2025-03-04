@@ -636,7 +636,7 @@ void ToggleButtonPattern::InitButtonAndText()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         layoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         layoutProperty->UpdateType(ButtonType::CAPSULE);
