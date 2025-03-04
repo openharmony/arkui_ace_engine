@@ -89,6 +89,8 @@ public:
 
     MockSwiperController *mockSwiperController_ = nullptr;
     RefPtr<MockSwiperController> mockSwiperControllerKeeper_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
+    Ark_AsyncWorkerPtr asyncWorker_ = nullptr;
 };
 
 /**
@@ -132,13 +134,13 @@ HWTEST_F(TabsControllerAccessorTest, preloadItemsTest, TestSize.Level1)
     Converter::ArkArrayHolder<Array_Number> arrayHolder(indexList);
     auto validValue = arrayHolder.OptValue<Opt_Array_Number>();
     Callback_Opt_Array_String_Void cont{};
-    accessor_->preloadItems(peer_, &validValue, &cont);
+    accessor_->preloadItems(vmContext_, asyncWorker_, peer_, &validValue, &cont);
 
     // nothing calls expected when there are invalid params
     EXPECT_CALL(*mockSwiperController_, PreloadItems(expectedIndexSet)).Times(0);
     auto invalidValue = Converter::ArkValue<Opt_Array_Number>();
-    accessor_->preloadItems(peer_, &invalidValue, &cont);
-    accessor_->preloadItems(peer_, nullptr, &cont);
+    accessor_->preloadItems(vmContext_, asyncWorker_, peer_, &invalidValue, &cont);
+    accessor_->preloadItems(vmContext_, asyncWorker_, peer_, nullptr, &cont);
 }
 
 /**

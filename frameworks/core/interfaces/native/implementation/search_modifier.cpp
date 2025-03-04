@@ -54,7 +54,7 @@ struct SearchOptions {
     std::optional<std::string> value;
     std::optional<std::string> placeholder;
     std::optional<std::string> icon;
-    std::optional<Ark_NativePointer> controller;
+    std::optional<Ark_SearchController> controller;
 };
 
 using UnionButtonOptions = std::variant<Ark_CancelButtonOptions, Ark_CancelButtonSymbolOptions>;
@@ -70,7 +70,7 @@ SearchOptions Convert(const Ark_SearchOptions& src)
     options.value = Converter::OptConvert<std::string>(src.value);
     options.placeholder= Converter::OptConvert<std::string>(src.placeholder);
     options.icon = Converter::OptConvert<std::string>(src.icon);
-    options.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    options.controller = Converter::OptConvert<Ark_SearchController>(src.controller);
     return options;
 }
 
@@ -602,12 +602,12 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     SearchModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SearchModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGE("ARKOALA SearchAttributeModifier.EditMenuOptionsImpl -> Method is not implemented.");
 }
@@ -689,8 +689,8 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
     SearchModelNG::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_String_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_String_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -753,7 +753,7 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::InputFilterImpl,
         SearchAttributeModifier::CustomKeyboardImpl,
-        SearchAttributeModifier::__onChangeEvent_valueImpl,
+        SearchAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISearchModifierImpl;
 }

@@ -22,13 +22,13 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AccessibilityHoverEventAccessor {
 namespace {
-const Ark_Int32 DefaultValueInt32 = Converter::ArkValue<Ark_Int32>(0);
-}  // namespace
-void DestroyPeerImpl(AccessibilityHoverEventPeer* peer)
+const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
+} // namespace
+void DestroyPeerImpl(Ark_AccessibilityHoverEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_AccessibilityHoverEvent CtorImpl()
 {
     return new AccessibilityHoverEventPeer();
 }
@@ -36,12 +36,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetTypeImpl(AccessibilityHoverEventPeer* peer)
+Ark_AccessibilityHoverType GetTypeImpl(Ark_AccessibilityHoverEvent peer)
 {
     LOGE("ARKOALA AccessibilityHoverEventAccessor::GetTypeImpl is not implemented.");
-    return nullptr;
+    return {};
 }
-void SetTypeImpl(AccessibilityHoverEventPeer* peer,
+void SetTypeImpl(Ark_AccessibilityHoverEvent peer,
                  Ark_AccessibilityHoverType type)
 {
     CHECK_NULL_VOID(peer);
@@ -52,17 +52,17 @@ void SetTypeImpl(AccessibilityHoverEventPeer* peer,
         info->SetActionType(optValue.value());
     }
 }
-Ark_Int32 GetXImpl(AccessibilityHoverEventPeer* peer)
+Ark_Number GetXImpl(Ark_AccessibilityHoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& localLocation = info->GetLocalLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetXImpl(AccessibilityHoverEventPeer* peer,
+void SetXImpl(Ark_AccessibilityHoverEvent peer,
               const Ark_Number* x)
 {
     CHECK_NULL_VOID(peer);
@@ -76,17 +76,17 @@ void SetXImpl(AccessibilityHoverEventPeer* peer,
     localLocation.SetX(xConvert, animation);
     info->SetLocalLocation(localLocation);
 }
-Ark_Int32 GetYImpl(AccessibilityHoverEventPeer* peer)
+Ark_Number GetYImpl(Ark_AccessibilityHoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& localLocation = info->GetLocalLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetYImpl(AccessibilityHoverEventPeer* peer,
+void SetYImpl(Ark_AccessibilityHoverEvent peer,
               const Ark_Number* y)
 {
     CHECK_NULL_VOID(peer);
@@ -100,17 +100,17 @@ void SetYImpl(AccessibilityHoverEventPeer* peer,
     localLocation.SetY(yConvert, animation);
     info->SetLocalLocation(localLocation);
 }
-Ark_Int32 GetDisplayXImpl(AccessibilityHoverEventPeer* peer)
+Ark_Number GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& screenLocation = info->GetScreenLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetDisplayXImpl(AccessibilityHoverEventPeer* peer,
+void SetDisplayXImpl(Ark_AccessibilityHoverEvent peer,
                      const Ark_Number* displayX)
 {
     CHECK_NULL_VOID(peer);
@@ -124,17 +124,17 @@ void SetDisplayXImpl(AccessibilityHoverEventPeer* peer,
     screenLocation.SetX(xConvert, animation);
     info->SetScreenLocation(screenLocation);
 }
-Ark_Int32 GetDisplayYImpl(AccessibilityHoverEventPeer* peer)
+Ark_Number GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& screenLocation = info->GetScreenLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetDisplayYImpl(AccessibilityHoverEventPeer* peer,
+void SetDisplayYImpl(Ark_AccessibilityHoverEvent peer,
                      const Ark_Number* displayY)
 {
     CHECK_NULL_VOID(peer);
@@ -148,17 +148,17 @@ void SetDisplayYImpl(AccessibilityHoverEventPeer* peer,
     screenLocation.SetY(yConvert, animation);
     info->SetScreenLocation(screenLocation);
 }
-Ark_Int32 GetWindowXImpl(AccessibilityHoverEventPeer* peer)
+Ark_Number GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& globalLocation = info->GetGlobalLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetWindowXImpl(AccessibilityHoverEventPeer* peer,
+void SetWindowXImpl(Ark_AccessibilityHoverEvent peer,
                     const Ark_Number* windowX)
 {
     CHECK_NULL_VOID(peer);
@@ -172,17 +172,17 @@ void SetWindowXImpl(AccessibilityHoverEventPeer* peer,
     globalLocation.SetX(xConvert, animation);
     info->SetGlobalLocation(globalLocation);
 }
-Ark_Int32 GetWindowYImpl(AccessibilityHoverEventPeer* peer)
+Ark_Number GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, 0);
+    CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& globalLocation = info->GetGlobalLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetWindowYImpl(AccessibilityHoverEventPeer* peer,
+void SetWindowYImpl(Ark_AccessibilityHoverEvent peer,
                     const Ark_Number* windowY)
 {
     CHECK_NULL_VOID(peer);

@@ -22,7 +22,7 @@ namespace LazyForEachOpsAccessor {
 void DestroyPeerImpl(LazyForEachOpsPeer* peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_LazyForEachOps CtorImpl()
 {
     return nullptr;
 }
@@ -60,13 +60,23 @@ void SetCurrentIndexImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(node); // for enums
     //undefinedModelNG::SetSetCurrentIndex(frameNode, convValue);
 }
-void PrepareImpl(Ark_NativePointer node)
+void PrepareImpl(Ark_NativePointer node,
+                 Ark_Int32,
+                 Ark_Int32)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(node);
     //auto convValue = Converter::OptConvert<type>(node); // for enums
     //undefinedModelNG::SetPrepare(frameNode, convValue);
+}
+void NotifyChangeImpl(Ark_NativePointer node,
+                      int32_t startIdx,
+                      int32_t endIdx,
+                      int32_t changeCnt)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
 }
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
@@ -79,6 +89,7 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
         LazyForEachOpsAccessor::SetCurrentIndexImpl,
         LazyForEachOpsAccessor::PrepareImpl,
+        LazyForEachOpsAccessor::NotifyChangeImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }

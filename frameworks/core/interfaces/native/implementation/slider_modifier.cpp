@@ -83,7 +83,7 @@ struct SliderBlockImageInfo {
 struct SliderBlockStyle {
     std::optional<SliderModel::BlockStyleType> type;
     std::optional<ImageSourceInfo> image;
-    std::optional<void*> shape;
+    std::optional<std::string> shape;
 };
 
 template<>
@@ -92,32 +92,8 @@ SliderBlockStyle Convert(const Ark_SliderBlockStyle& src)
     return {
         .type = Converter::OptConvert<SliderModel::BlockStyleType>(src.type),
         .image = Converter::OptConvert<ImageSourceInfo>(src.image),
-        .shape = Converter::OptConvert<void*>(src.shape)
+        .shape = Converter::OptConvert<std::string>(src.shape)
     };
-}
-
-template<>
-void* Convert(const Ark_CircleAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_EllipseAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_PathAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_RectAttribute& src)
-{
-    return src.handle;
 }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -170,7 +146,7 @@ void BlockColorImpl(Ark_NativePointer node,
     SliderModelNG::SetBlockColor(frameNode, convValue);
 }
 void TrackColorImpl(Ark_NativePointer node,
-                    const Ark_Union_ResourceColor_LinearGradient_common* value)
+                    const Ark_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -369,8 +345,8 @@ void ShowTipsImpl(Ark_NativePointer node,
     auto convContent = content ? Converter::OptConvert<std::string>(*content) : std::nullopt;
     SliderModelNG::SetShowTips(frameNode, convValue, convContent);
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -409,7 +385,7 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::ContentModifierImpl,
         SliderAttributeModifier::SlideRangeImpl,
         SliderAttributeModifier::ShowTipsImpl,
-        SliderAttributeModifier::__onChangeEvent_valueImpl,
+        SliderAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISliderModifierImpl;
 }

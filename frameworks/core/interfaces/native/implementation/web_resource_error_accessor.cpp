@@ -15,16 +15,17 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceErrorAccessor {
-void DestroyPeerImpl(WebResourceErrorPeer* peer)
+void DestroyPeerImpl(Ark_WebResourceError peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_WebResourceError CtorImpl()
 {
     return new WebResourceErrorPeer();
 }
@@ -32,17 +33,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetErrorInfoImpl(WebResourceErrorPeer* peer)
+Ark_String GetErrorInfoImpl(Ark_WebResourceError peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetInfo();
     // info need to be returned
     LOGE("WebResourceErrorAccessor::GetErrorInfoImpl - return value need to be supported");
+    return {};
 }
-Ark_Int32 GetErrorCodeImpl(WebResourceErrorPeer* peer)
+Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    return static_cast<Ark_Int32>(peer->handler->GetCode());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetCode());
 }
 } // WebResourceErrorAccessor
 const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()

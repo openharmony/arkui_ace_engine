@@ -114,13 +114,11 @@ HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNotCustomNode2, TestSize.Level1)
 HWTEST_F(FrameNodeAccessorTest, AppendChildTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->appendChild, nullptr);
-    auto childPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
-    Ark_FrameNode arkChild;
-    arkChild.ptr = Referenced::RawPtr(childPeer->node);
+    auto childPeer = CreatePeer();
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_0);
     EXPECT_EQ(childPeer->node->GetParentFrameNode(), nullptr);
-    accessor_->appendChild(peer_, &arkChild);
+    accessor_->appendChild(peer_, childPeer);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_1);
     auto childUINodeRef = AceType::DynamicCast<UINode>(childPeer->node);
@@ -140,28 +138,22 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest1, TestSize.Level1)
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
     auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-    Ark_FrameNode arkChild2;
-    arkChild2.ptr = Referenced::RawPtr(childPeer2->node);
 
-    auto childPeer3 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer3 = CreatePeer();
     auto childUINodeRef3 = AceType::DynamicCast<UINode>(childPeer3->node);
-    Ark_FrameNode arkChild3;
-    arkChild3.ptr = Referenced::RawPtr(childPeer3->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
-    accessor_->appendChild(peer_, &arkChild2);
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(peer_, childPeer2);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_1);
-    accessor_->insertChildAfter(peer_, &arkChild3, &arkChild1);
+    accessor_->insertChildAfter(peer_, childPeer3, childPeer1);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
@@ -183,28 +175,22 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest2, TestSize.Level1)
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
     auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-    Ark_FrameNode arkChild2;
-    arkChild2.ptr = Referenced::RawPtr(childPeer2->node);
 
-    auto childPeer3 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer3 = CreatePeer();
     auto childUINodeRef3 = AceType::DynamicCast<UINode>(childPeer3->node);
-    Ark_FrameNode arkChild3;
-    arkChild3.ptr = Referenced::RawPtr(childPeer3->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
+    accessor_->appendChild(peer_, childPeer1);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_INVALID);
     
-    accessor_->insertChildAfter(peer_, &arkChild3, &arkChild2);
+    accessor_->insertChildAfter(peer_, childPeer3, childPeer2);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_1);
@@ -226,24 +212,20 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest3, TestSize.Level1)
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
 
-    auto childPeer3 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer3 = CreatePeer();
     auto childUINodeRef3 = AceType::DynamicCast<UINode>(childPeer3->node);
-    Ark_FrameNode arkChild3;
-    arkChild3.ptr = Referenced::RawPtr(childPeer3->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
-    accessor_->appendChild(childPeer2, &arkChild3);
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(childPeer2, childPeer3);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
-    accessor_->insertChildAfter(peer_, &arkChild3, &arkChild1);
+    accessor_->insertChildAfter(peer_, childPeer3, childPeer1);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
@@ -264,30 +246,24 @@ HWTEST_F(FrameNodeAccessorTest, RemoveChildTest1, TestSize.Level1)
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
     auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-    Ark_FrameNode arkChild2;
-    arkChild2.ptr = Referenced::RawPtr(childPeer2->node);
 
-    auto childPeer3 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer3 = CreatePeer();
     auto childUINodeRef3 = AceType::DynamicCast<UINode>(childPeer3->node);
-    Ark_FrameNode arkChild3;
-    arkChild3.ptr = Referenced::RawPtr(childPeer3->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
-    accessor_->appendChild(peer_, &arkChild2);
-    accessor_->appendChild(peer_, &arkChild3);
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(peer_, childPeer2);
+    accessor_->appendChild(peer_, childPeer3);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef3), POS_2);
-    accessor_->removeChild(peer_, &arkChild2);
+    accessor_->removeChild(peer_, childPeer2);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
@@ -309,29 +285,23 @@ HWTEST_F(FrameNodeAccessorTest, RemoveChildTest2, TestSize.Level1)
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
     auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-    Ark_FrameNode arkChild2;
-    arkChild2.ptr = Referenced::RawPtr(childPeer2->node);
 
-    auto childPeer3 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer3 = CreatePeer();
     auto childUINodeRef3 = AceType::DynamicCast<UINode>(childPeer3->node);
-    Ark_FrameNode arkChild3;
-    arkChild3.ptr = Referenced::RawPtr(childPeer3->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
-    accessor_->appendChild(peer_, &arkChild3);
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(peer_, childPeer3);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_INVALID);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef3), POS_1);
-    accessor_->removeChild(peer_, &arkChild2);
+    accessor_->removeChild(peer_, childPeer2);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
@@ -354,24 +324,18 @@ HWTEST_F(FrameNodeAccessorTest, ClearChildrenTest, TestSize.Level1)
     accessor_->clearChildren(peer_);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
     auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-    Ark_FrameNode arkChild2;
-    arkChild2.ptr = Referenced::RawPtr(childPeer2->node);
 
-    auto childPeer3 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer3 = CreatePeer();
     auto childUINodeRef3 = AceType::DynamicCast<UINode>(childPeer3->node);
-    Ark_FrameNode arkChild3;
-    arkChild3.ptr = Referenced::RawPtr(childPeer3->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
-    accessor_->appendChild(peer_, &arkChild2);
-    accessor_->appendChild(peer_, &arkChild3);
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(peer_, childPeer2);
+    accessor_->appendChild(peer_, childPeer3);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     accessor_->clearChildren(peer_);
@@ -393,18 +357,14 @@ HWTEST_F(FrameNodeAccessorTest, GetChildTest, TestSize.Level1)
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
     auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-    Ark_FrameNode arkChild2;
-    arkChild2.ptr = Referenced::RawPtr(childPeer2->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
-    accessor_->appendChild(peer_, &arkChild2);
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(peer_, childPeer2);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
@@ -413,9 +373,9 @@ HWTEST_F(FrameNodeAccessorTest, GetChildTest, TestSize.Level1)
     Ark_Number pos1 = Converter::ArkValue<Ark_Number>(POS_1);
     Ark_Number pos2 = Converter::ArkValue<Ark_Number>(POS_2);
 
-    EXPECT_EQ(accessor_->getChild(peer_, &pos0), arkChild1.ptr);
-    EXPECT_EQ(accessor_->getChild(peer_, &pos1), arkChild2.ptr);
-    EXPECT_EQ(accessor_->getChild(peer_, &pos2), nullptr);
+    EXPECT_EQ(accessor_->getChild(peer_, &pos0)->node, childPeer1->node);
+    EXPECT_EQ(accessor_->getChild(peer_, &pos1)->node, childPeer2->node);
+    EXPECT_EQ(accessor_->getChild(peer_, &pos2)->node, nullptr);
     DestroyPeer(childPeer1);
     DestroyPeer(childPeer2);
 }
@@ -431,23 +391,19 @@ HWTEST_F(FrameNodeAccessorTest, GetFirstChildTest, TestSize.Level1)
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
     auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-    Ark_FrameNode arkChild2;
-    arkChild2.ptr = Referenced::RawPtr(childPeer2->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
-    accessor_->appendChild(peer_, &arkChild2);
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(peer_, childPeer2);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_1);
-    EXPECT_EQ(accessor_->getFirstChild(peer_), arkChild1.ptr);
+    EXPECT_EQ(accessor_->getFirstChild(peer_)->node, childPeer1->node);
     DestroyPeer(childPeer1);
     DestroyPeer(childPeer2);
 }
@@ -462,30 +418,22 @@ HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest1, TestSize.Level1)
     ASSERT_NE(accessor_->getNextSibling, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
-    Ark_FrameNode arkCurrent;
-    arkCurrent.ptr = Referenced::RawPtr(peer_->node);
 
-    auto rootPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto rootPeer = CreatePeer();
     auto rootUINodeRef = AceType::DynamicCast<UINode>(rootPeer->node);
-    Ark_FrameNode arkRoot;
-    arkRoot.ptr = Referenced::RawPtr(rootPeer->node);
 
-    auto nextPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto nextPeer = CreatePeer();
     auto nextUINodeRef = AceType::DynamicCast<UINode>(nextPeer->node);
-    Ark_FrameNode arkNext;
-    arkNext.ptr = Referenced::RawPtr(nextPeer->node);
 
-    auto prevPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto prevPeer = CreatePeer();
     auto prevUINodeRef = AceType::DynamicCast<UINode>(prevPeer->node);
-    Ark_FrameNode arkPrev;
-    arkPrev.ptr = Referenced::RawPtr(prevPeer->node);
 
-    accessor_->appendChild(rootPeer, &arkPrev);
-    accessor_->appendChild(rootPeer, &arkCurrent);
-    accessor_->appendChild(rootPeer, &arkNext);
+    accessor_->appendChild(rootPeer, prevPeer);
+    accessor_->appendChild(rootPeer, peer_);
+    accessor_->appendChild(rootPeer, nextPeer);
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
-    EXPECT_EQ(accessor_->getNextSibling(peer_), arkNext.ptr);
+    EXPECT_EQ(accessor_->getNextSibling(peer_)->node, nextPeer->node);
     DestroyPeer(nextPeer);
     DestroyPeer(prevPeer);
     DestroyPeer(rootPeer);
@@ -501,30 +449,22 @@ HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest2, TestSize.Level1)
     ASSERT_NE(accessor_->getNextSibling, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
-    Ark_FrameNode arkCurrent;
-    arkCurrent.ptr = Referenced::RawPtr(peer_->node);
 
-    auto rootPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto rootPeer = CreatePeer();
     auto rootUINodeRef = AceType::DynamicCast<UINode>(rootPeer->node);
-    Ark_FrameNode arkRoot;
-    arkRoot.ptr = Referenced::RawPtr(rootPeer->node);
 
-    auto nextPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto nextPeer = CreatePeer();
     auto nextUINodeRef = AceType::DynamicCast<UINode>(nextPeer->node);
-    Ark_FrameNode arkNext;
-    arkNext.ptr = Referenced::RawPtr(nextPeer->node);
 
-    auto prevPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto prevPeer = CreatePeer();
     auto prevUINodeRef = AceType::DynamicCast<UINode>(prevPeer->node);
-    Ark_FrameNode arkPrev;
-    arkPrev.ptr = Referenced::RawPtr(prevPeer->node);
 
-    accessor_->appendChild(rootPeer, &arkPrev);
-    accessor_->appendChild(rootPeer, &arkNext);
-    accessor_->appendChild(rootPeer, &arkCurrent);
+    accessor_->appendChild(rootPeer, prevPeer);
+    accessor_->appendChild(rootPeer, nextPeer);
+    accessor_->appendChild(rootPeer, peer_);
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
-    EXPECT_EQ(accessor_->getNextSibling(peer_), nullptr);
+    EXPECT_EQ(accessor_->getNextSibling(peer_)->node, nullptr);
     DestroyPeer(nextPeer);
     DestroyPeer(prevPeer);
     DestroyPeer(rootPeer);
@@ -540,30 +480,22 @@ HWTEST_F(FrameNodeAccessorTest, GetPreviousSiblingTest1, TestSize.Level1)
     ASSERT_NE(accessor_->getPreviousSibling, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
-    Ark_FrameNode arkCurrent;
-    arkCurrent.ptr = Referenced::RawPtr(peer_->node);
 
-    auto rootPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto rootPeer = CreatePeer();
     auto rootUINodeRef = AceType::DynamicCast<UINode>(rootPeer->node);
-    Ark_FrameNode arkRoot;
-    arkRoot.ptr = Referenced::RawPtr(rootPeer->node);
 
-    auto nextPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto nextPeer = CreatePeer();
     auto nextUINodeRef = AceType::DynamicCast<UINode>(nextPeer->node);
-    Ark_FrameNode arkNext;
-    arkNext.ptr = Referenced::RawPtr(nextPeer->node);
 
-    auto prevPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto prevPeer = CreatePeer();
     auto prevUINodeRef = AceType::DynamicCast<UINode>(prevPeer->node);
-    Ark_FrameNode arkPrev;
-    arkPrev.ptr = Referenced::RawPtr(prevPeer->node);
 
-    accessor_->appendChild(rootPeer, &arkPrev);
-    accessor_->appendChild(rootPeer, &arkCurrent);
-    accessor_->appendChild(rootPeer, &arkNext);
+    accessor_->appendChild(rootPeer, prevPeer);
+    accessor_->appendChild(rootPeer, peer_);
+    accessor_->appendChild(rootPeer, nextPeer);
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
-    EXPECT_EQ(accessor_->getPreviousSibling(peer_), arkPrev.ptr);
+    EXPECT_EQ(accessor_->getPreviousSibling(peer_)->node, prevPeer->node);
     DestroyPeer(nextPeer);
     DestroyPeer(prevPeer);
     DestroyPeer(rootPeer);
@@ -579,27 +511,19 @@ HWTEST_F(FrameNodeAccessorTest, GetPreviousSiblingTest2, TestSize.Level1)
     ASSERT_NE(accessor_->getPreviousSibling, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
-    Ark_FrameNode arkCurrent;
-    arkCurrent.ptr = Referenced::RawPtr(peer_->node);
 
-    auto rootPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto rootPeer = CreatePeer();
     auto rootUINodeRef = AceType::DynamicCast<UINode>(rootPeer->node);
-    Ark_FrameNode arkRoot;
-    arkRoot.ptr = Referenced::RawPtr(rootPeer->node);
 
-    auto nextPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto nextPeer = CreatePeer();
     auto nextUINodeRef = AceType::DynamicCast<UINode>(nextPeer->node);
-    Ark_FrameNode arkNext;
-    arkNext.ptr = Referenced::RawPtr(nextPeer->node);
 
-    auto prevPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto prevPeer = CreatePeer();
     auto prevUINodeRef = AceType::DynamicCast<UINode>(prevPeer->node);
-    Ark_FrameNode arkPrev;
-    arkPrev.ptr = Referenced::RawPtr(prevPeer->node);
 
-    accessor_->appendChild(rootPeer, &arkCurrent);
-    accessor_->appendChild(rootPeer, &arkPrev);
-    accessor_->appendChild(rootPeer, &arkNext);
+    accessor_->appendChild(rootPeer, peer_);
+    accessor_->appendChild(rootPeer, prevPeer);
+    accessor_->appendChild(rootPeer, nextPeer);
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(accessor_->getPreviousSibling(peer_), nullptr);
@@ -620,24 +544,18 @@ HWTEST_F(FrameNodeAccessorTest, GetChildrenCountTest, TestSize.Level1)
     EXPECT_EQ(accessor_->getChildrenCount(peer_), 0);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
-    auto childPeer1 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer1 = CreatePeer();
     auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-    Ark_FrameNode arkChild1;
-    arkChild1.ptr = Referenced::RawPtr(childPeer1->node);
 
-    auto childPeer2 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer2 = CreatePeer();
     auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-    Ark_FrameNode arkChild2;
-    arkChild2.ptr = Referenced::RawPtr(childPeer2->node);
 
-    auto childPeer3 = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto childPeer3 = CreatePeer();
     auto childUINodeRef3 = AceType::DynamicCast<UINode>(childPeer3->node);
-    Ark_FrameNode arkChild3;
-    arkChild3.ptr = Referenced::RawPtr(childPeer3->node);
 
-    accessor_->appendChild(peer_, &arkChild1);
-    accessor_->appendChild(peer_, &arkChild2);
-    accessor_->appendChild(peer_, &arkChild3);
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(peer_, childPeer2);
+    accessor_->appendChild(peer_, childPeer3);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(accessor_->getChildrenCount(peer_), childList.size());
@@ -655,29 +573,23 @@ HWTEST_F(FrameNodeAccessorTest, GetParentTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getParent, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
-    EXPECT_EQ(accessor_->getParent(peer_), nullptr);
+    EXPECT_EQ(accessor_->getParent(peer_)->node, nullptr);
     EXPECT_EQ(accessor_->getParent(nullptr), nullptr);
-    auto invalidPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto invalidPeer = CreatePeer();
     invalidPeer->node = nullptr;
     EXPECT_EQ(accessor_->getParent(invalidPeer), nullptr);
 
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
-    Ark_FrameNode arkCurrent;
-    arkCurrent.ptr = Referenced::RawPtr(peer_->node);
 
-    auto rootPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto rootPeer = CreatePeer();
     auto rootUINodeRef = AceType::DynamicCast<UINode>(rootPeer->node);
-    Ark_FrameNode arkRoot;
-    arkRoot.ptr = Referenced::RawPtr(rootPeer->node);
 
-    auto otherPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto otherPeer = CreatePeer();
     auto otherUINodeRef = AceType::DynamicCast<UINode>(otherPeer->node);
-    Ark_FrameNode arkOther;
-    arkOther.ptr = Referenced::RawPtr(otherPeer->node);
 
-    accessor_->appendChild(rootPeer, &arkCurrent);
-    accessor_->appendChild(rootPeer, &arkOther);
-    EXPECT_EQ(accessor_->getParent(peer_), arkRoot.ptr);
+    accessor_->appendChild(rootPeer, peer_);
+    accessor_->appendChild(rootPeer, otherPeer);
+    EXPECT_EQ(accessor_->getParent(peer_)->node, rootPeer->node);
     DestroyPeer(otherPeer);
     DestroyPeer(rootPeer);
 }
@@ -693,21 +605,15 @@ HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
     ASSERT_NE(accessor_->dispose, nullptr);
     
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
-    Ark_FrameNode arkCurrent;
-    arkCurrent.ptr = Referenced::RawPtr(peer_->node);
 
-    auto rootPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto rootPeer = CreatePeer();
     auto rootUINodeRef = AceType::DynamicCast<UINode>(rootPeer->node);
-    Ark_FrameNode arkRoot;
-    arkRoot.ptr = Referenced::RawPtr(rootPeer->node);
 
-    auto otherPeer = static_cast<FrameNodePeer*>(CreatePeerInstance());
+    auto otherPeer = CreatePeer();
     auto otherUINodeRef = AceType::DynamicCast<UINode>(otherPeer->node);
-    Ark_FrameNode arkOther;
-    arkOther.ptr = Referenced::RawPtr(otherPeer->node);
 
-    accessor_->appendChild(rootPeer, &arkCurrent);
-    accessor_->appendChild(rootPeer, &arkOther);
+    accessor_->appendChild(rootPeer, peer_);
+    accessor_->appendChild(rootPeer, otherPeer);
     auto childList = rootPeer->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
     EXPECT_EQ(rootUINodeRef->GetChildIndex(currentUINodeRef), POS_0);
@@ -720,6 +626,37 @@ HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
     EXPECT_EQ(rootUINodeRef->GetChildIndex(otherUINodeRef), POS_0);
     DestroyPeer(otherPeer);
     DestroyPeer(rootPeer);
+}
+
+/**
+ * @tc.name: GetOpacityTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, DISABLED_GetOpacityTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getOpacity, nullptr);
+    // wait for a correct return type
+    auto opacity = Converter::Convert<float>(accessor_->getOpacity(peer_));
+    EXPECT_FLOAT_EQ(opacity, 1.00);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetOpacity(fnode, 0.55f);
+    opacity = Converter::Convert<float>(accessor_->getOpacity(peer_));
+    EXPECT_FLOAT_EQ(opacity, 0.55);
+}
+
+/**
+ * @tc.name: GetPositionToWindowWithTransformTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, DISABLED_GetPositionToWindowWithTransformTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
+    // wait for a correct return type
+    accessor_->getPositionToWindowWithTransform(peer_);
 }
 
 } // namespace OHOS::Ace::NG

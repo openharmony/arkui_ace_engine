@@ -107,7 +107,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_DragItemInfoTest, TestSize.L
     Ace::RefPtr<Ace::PixelMap> expectedPixelMapRefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
-    Ark_PixelMap expectedPixelMap{.ptr = reinterpret_cast<Ark_NativePointer>(&pixelMapPeer)};
+    Ark_PixelMap expectedPixelMap = &pixelMapPeer;
     // ExtraInfo
     std::string expectedExtraInfo{"extraInfo"};
     // struct DragItemInfo

@@ -81,4 +81,6 @@ private:
     std::vector<Ace::WeakPtr<SwiperController>> handlers_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct SwiperControllerPeer : public OHOS::Ace::NG::GeneratedModifier::SwiperControllerPeerImpl {};
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H

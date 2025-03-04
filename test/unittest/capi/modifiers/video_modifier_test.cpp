@@ -260,7 +260,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
     options.currentProgressRate = Converter::ArkValue<Opt_Union_Number_String_PlaybackSpeed>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
 
-    Ark_NativePointer controllerPtr =
+    auto controllerPtr =
         fullAPI_->getAccessors()->getVideoControllerAccessor()->ctor();
     auto peerImplPtr = reinterpret_cast<GeneratedModifier::VideoControllerPeerImpl*>(controllerPtr);
     EXPECT_NE(peerImplPtr, nullptr);
@@ -270,9 +270,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
     auto pattern = frameNode->GetPattern<VideoPattern>();
     EXPECT_NE(pattern, nullptr);
 
-    Ark_VideoController arkController;
-    arkController.ptr = controllerPtr;
-    options.controller = Converter::ArkValue<Opt_VideoController>(arkController);
+    options.controller = Converter::ArkValue<Opt_VideoController>(controllerPtr);
     modifier_->setVideoOptions(node_, &options);
 
     RefPtr<VideoControllerV2> controller = pattern->GetVideoController();

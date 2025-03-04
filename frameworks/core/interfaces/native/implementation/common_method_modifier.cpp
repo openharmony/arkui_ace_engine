@@ -117,13 +117,6 @@ using BackgroundImagePositionType = std::variant<
     Ark_Position,
     Ark_Alignment
 >;
-using ClipType = std::variant<
-    Ark_Boolean,
-    Ark_CircleAttribute,
-    Ark_EllipseAttribute,
-    Ark_PathAttribute,
-    Ark_RectAttribute
->;
 
 auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
     auto targetId = frameNode->GetId();
@@ -1496,6 +1489,7 @@ GeometryTransitionOptions Convert(const Ark_GeometryTransitionOptions& src)
     dst.hierarchyStrategy = OptConvert<TransitionHierarchyStrategy>(src.hierarchyStrategy);
     return dst;
 }
+
 template<>
 RefPtr<PopupParam> Convert(const Ark_PopupOptions& src)
 {
@@ -1606,8 +1600,8 @@ void AssignCast(std::optional<NG::TouchResult> &dst, const Ark_TouchResult& src)
 template<>
 RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
 {
-    if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(src.ptr); peer) {
-        return peer->GetRecognizer();
+    if (src) {
+        return src->GetRecognizer();
     }
     return nullptr;
 }
@@ -1635,9 +1629,9 @@ void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecogn
 {
     auto accessor = GeneratedModifier::GetGestureRecognizerAccessor();
     CHECK_NULL_VOID(accessor);
-    dst.ptr = accessor->ctor();
-    if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(dst.ptr); peer) {
-        peer->SetRecognizer(src);
+    dst = accessor->ctor();
+    if (dst) {
+        dst->SetRecognizer(src);
     }
 }
 void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src)
@@ -1710,7 +1704,7 @@ namespace CommonMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
 {
@@ -1769,7 +1763,7 @@ void DrawModifierImpl(Ark_NativePointer node,
     if (!convValue) {
         return;
     }
-    auto peer = reinterpret_cast<DrawModifierPeer*>(convValue.value().ptr);
+    auto peer = convValue.value();
     CHECK_NULL_VOID(peer);
     if (!peer->drawModifier) {
         peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
@@ -2813,7 +2807,7 @@ void Transition0Impl(Ark_NativePointer node,
     );
 }
 void Transition1Impl(Ark_NativePointer node,
-                     const Ark_TransitionEffect* effect,
+                     Ark_TransitionEffect effect,
                      const Opt_TransitionFinishCallback* onFinish)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2828,7 +2822,7 @@ void Transition1Impl(Ark_NativePointer node,
                 };
         }
     }
-    auto effectPeer = reinterpret_cast<TransitionEffectPeer*>(effect->ptr);
+    auto effectPeer = effect;
     if (effectPeer && effectPeer->handler) {
         ViewAbstract::SetChainedTransition(frameNode, effectPeer->handler, std::move(finishCallback));
     } else {
@@ -3807,11 +3801,11 @@ void Shadow1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetShadow1(frameNode, convValue);
 }
 void Clip0Impl(Ark_NativePointer node,
-               Ark_Boolean value)
+               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetClipEdge(frameNode, Converter::Convert<bool>(value));
+    ViewAbstract::SetClipEdge(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
 }
 void Clip1Impl(Ark_NativePointer node,
                const Opt_Boolean* value)
@@ -3822,32 +3816,12 @@ void Clip1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetClip1(frameNode, convValue);
 }
 void Clip2Impl(Ark_NativePointer node,
-               const Ark_Type_CommonMethod_clip_value* value)
+               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    LOGE("ARKOALA CommonMethod::Clip2Impl: Deprecated interface!");
-    if (!value) {
-        ViewAbstract::SetClipEdge(frameNode, false);
-        return;
-    }
-    auto clipTypeOpt = Converter::OptConvert<ClipType>(*value);
-    if (clipTypeOpt) {
-        if (auto arkBool = std::get_if<Ark_Boolean>(&clipTypeOpt.value()); arkBool) {
-            ViewAbstract::SetClipEdge(frameNode, Converter::Convert<bool>(*arkBool));
-            return;
-        } else if (auto arkCircle = std::get_if<Ark_CircleAttribute>(&clipTypeOpt.value()); arkCircle) {
-            LOGE("ARKOALA CommonMethod::Clip2Impl: Ark_CircleAttribute is not supported yet!");
-        } else if (auto arkEllipse = std::get_if<Ark_EllipseAttribute>(&clipTypeOpt.value()); arkEllipse) {
-            LOGE("ARKOALA CommonMethod::Clip2Impl: Ark_EllipseAttribute is not supported yet!");
-        } else if (auto arkPath = std::get_if<Ark_PathAttribute>(&clipTypeOpt.value()); arkPath) {
-            LOGE("ARKOALA CommonMethod::Clip2Impl: Ark_PathAttribute is not supported yet!");
-        } else if (auto arkRect = std::get_if<Ark_RectAttribute>(&clipTypeOpt.value()); arkRect) {
-            LOGE("ARKOALA CommonMethod::Clip2Impl: Ark_RectAttribute is not supported yet!");
-        }
-    }
-    ViewAbstract::SetClipEdge(frameNode, false);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetClip1(frameNode, convValue);
 }
 void ClipShape0Impl(Ark_NativePointer node,
                     const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -3867,12 +3841,14 @@ void ClipShape1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetClipShape1(frameNode, convValue);
 }
 void Mask0Impl(Ark_NativePointer node,
-               const Ark_ProgressMask* value)
+               const Opt_ProgressMask* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value && value->ptr);
-    const auto& progressMask = reinterpret_cast<ProgressMaskPeer*>(value->ptr)->GetProperty();
+    CHECK_NULL_VOID(value);
+    auto mask = Converter::OptConvert<Ark_ProgressMask>(*value);
+    if (!mask) return;
+    const auto& progressMask = mask.value()->GetProperty();
     ViewAbstract::SetProgressMask(frameNode, progressMask);
 }
 void Mask1Impl(Ark_NativePointer node,
@@ -3884,20 +3860,12 @@ void Mask1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetMask1(frameNode, convValue);
 }
 void Mask2Impl(Ark_NativePointer node,
-               const Ark_Type_CommonMethod_mask_value* value)
+               const Opt_ProgressMask* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    Converter::VisitUnion(*value,
-        [node](const Ark_ProgressMask& value) {
-            Mask0Impl(node, &value);
-        },
-        [node](const auto& value) {
-            LOGE("CommonMethodModifier::Mask2Impl is not implemented yet");
-        },
-        []() {}
-    );
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetMask1(frameNode, convValue);
 }
 void MaskShape0Impl(Ark_NativePointer node,
                     const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -4225,12 +4193,12 @@ void RenderFit1Impl(Ark_NativePointer node,
     ViewAbstract::SetRenderFit(frameNode, convValue);
 }
 void GestureModifierImpl(Ark_NativePointer node,
-                         const Ark_GestureModifier* value)
+                         Ark_GestureModifier value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //CommonMethodModelNG::SetGestureModifier(frameNode, convValue);
 }
 void BackgroundBrightness0Impl(Ark_NativePointer node,
@@ -4304,9 +4272,9 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
             Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
         if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
-            accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(arkValCurrent.ptr));
+            accessor->destroyPeer(arkValCurrent);
             holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
-                accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(item.ptr));
+                accessor->destroyPeer(item);
             });
         }
         return resultOpt.value_or(defVal);
@@ -4332,9 +4300,9 @@ void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
         auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
             Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
         if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
-            accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(arkValCurrent.ptr));
+            accessor->destroyPeer(arkValCurrent);
             holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
-                accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(item.ptr));
+                accessor->destroyPeer(item);
             });
         }
         return resultOpt.value_or(nullptr);

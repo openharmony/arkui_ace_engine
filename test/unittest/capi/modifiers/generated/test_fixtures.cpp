@@ -801,8 +801,8 @@ std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthA
     { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct), "-80.00%" },
 };
 
-// Fixture 'LengthMetricsNonNeg' for type 'Ark_LengthMetrics'
-std::vector<std::tuple<std::string, Ark_LengthMetrics, std::string>> testFixtureLengthMetricsNonNegValidValues = {
+// Fixture 'LengthMetricsNonNeg_' for type 'Ark_LengthMetrics'
+std::vector<std::tuple<std::string, Ark_LengthMetrics, std::string>> testFixtureLengthMetricsNonNeg_ValidValues = {
     { "123.0_vp", Converter::ArkValue<Ark_LengthMetrics>(123.0_vp), "123.00vp" },
     { "0.0_vp", Converter::ArkValue<Ark_LengthMetrics>(0.0_vp), "0.00vp" },
     { "1.23_vp", Converter::ArkValue<Ark_LengthMetrics>(1.23_vp), "1.23vp" },
@@ -816,7 +816,7 @@ std::vector<std::tuple<std::string, Ark_LengthMetrics, std::string>> testFixture
     { "0.0_pct", Converter::ArkValue<Ark_LengthMetrics>(0.0_pct), "0.00%" },
 };
 
-std::vector<std::tuple<std::string, Ark_LengthMetrics>> testFixtureLengthMetricsNonNegInvalidValues = {
+std::vector<std::tuple<std::string, Ark_LengthMetrics>> testFixtureLengthMetricsNonNeg_InvalidValues = {
     { "-2.3_vp", Converter::ArkValue<Ark_LengthMetrics>(-2.3_vp) },
     { "-4.5_fp", Converter::ArkValue<Ark_LengthMetrics>(-4.5_fp) },
     { "-5.6_px", Converter::ArkValue<Ark_LengthMetrics>(-5.6_px) },

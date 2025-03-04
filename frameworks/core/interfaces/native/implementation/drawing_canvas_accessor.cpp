@@ -20,24 +20,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawingCanvasAccessor {
-void DestroyPeerImpl(DrawingCanvasPeer* peer)
+void DestroyPeerImpl(Ark_DrawingCanvas peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Ark_PixelMap* pixelmap)
+Ark_DrawingCanvas CtorImpl(Ark_PixelMap pixelmap)
 {
-    auto info = Converter::OptConvert<ImageSourceInfo>(*pixelmap);
-    RefPtr<PixelMap> bitmap;
-    if (info) {
-        bitmap = info->GetPixmap();
-    }
-    return new DrawingCanvasPeer(bitmap);
+    return new DrawingCanvasPeer(pixelmap->pixelMap);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DrawRectImpl(DrawingCanvasPeer* peer,
+void DrawRectImpl(Ark_DrawingCanvas peer,
                   const Ark_Number* left,
                   const Ark_Number* top,
                   const Ark_Number* right,

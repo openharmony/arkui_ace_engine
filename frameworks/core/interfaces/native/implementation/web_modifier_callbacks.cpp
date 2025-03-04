@@ -126,7 +126,7 @@ void OnGeolocationShow(const Callback_OnGeolocationShowEvent_Void* value,
     parameter.origin = Converter::ArkValue<Ark_String>(eventInfo->GetOrigin());
     auto peer = new JsGeolocationPeer();
     peer->webGeolocation = eventInfo->GetWebGeolocation();
-    parameter.geolocation.ptr = peer;
+    parameter.geolocation = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
@@ -157,7 +157,7 @@ bool OnAlert(const Callback_OnAlertEvent_Boolean* value,
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
-    parameter.result.ptr = peer;
+    parameter.result = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -179,7 +179,7 @@ bool OnBeforeUnload(const Callback_OnBeforeUnloadEvent_Boolean* value,
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
-    parameter.result.ptr = peer;
+    parameter.result = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -201,7 +201,7 @@ bool OnConfirm(const Callback_OnConfirmEvent_Boolean* value,
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
-    parameter.result.ptr = peer;
+    parameter.result = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -223,7 +223,7 @@ bool OnPrompt(const Callback_OnPromptEvent_Boolean* value,
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
-    parameter.result.ptr = peer;
+    parameter.result = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -242,7 +242,7 @@ bool OnConsole(const Callback_OnConsoleEvent_Boolean* value,
     Ark_OnConsoleEvent parameter;
     auto peer = new ConsoleMessagePeer();
     peer->webConsoleLog = eventInfo->GetMessage();
-    parameter.message.ptr = peer;
+    parameter.message = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -260,10 +260,10 @@ void OnErrorReceive(const Callback_OnErrorReceiveEvent_Void* value,
     Ark_OnErrorReceiveEvent parameter;
     auto errorPeer = new WebResourceErrorPeer();
     errorPeer->handler = eventInfo->GetError();
-    parameter.error.ptr = errorPeer;
+    parameter.error = errorPeer;
     auto requestPeer = new WebResourceRequestPeer();
     requestPeer->webRequest = eventInfo->GetRequest();
-    parameter.request.ptr = requestPeer;
+    parameter.request = requestPeer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
@@ -280,10 +280,10 @@ void OnHttpErrorReceive(const Callback_OnHttpErrorReceiveEvent_Void* value,
     Ark_OnHttpErrorReceiveEvent parameter;
     auto requestPeer = new WebResourceRequestPeer();
     requestPeer->webRequest = eventInfo->GetRequest();
-    parameter.request.ptr = requestPeer;
+    parameter.request = requestPeer;
     auto responsePeer = new WebResourceResponsePeer();
     responsePeer->handler = eventInfo->GetResponse();
-    parameter.response.ptr = responsePeer;
+    parameter.response = responsePeer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
@@ -373,10 +373,10 @@ bool OnShowFileSelector(const Callback_OnShowFileSelectorEvent_Boolean* value,
     Ark_OnShowFileSelectorEvent parameter;
     auto paramPeer = new FileSelectorParamPeer();
     paramPeer->handler = eventInfo->GetParam();
-    parameter.fileSelector.ptr = paramPeer;
+    parameter.fileSelector = paramPeer;
     auto resultPeer = new FileSelectorResultPeer();
     resultPeer->handler = eventInfo->GetFileSelectorResult();
-    parameter.result.ptr = resultPeer;
+    parameter.result = resultPeer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -422,7 +422,7 @@ void OnFullScreenEnter(const OnFullScreenEnterCallback* value,
     parameter.videoHeight = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalHeight());
     auto peer = new FullScreenExitHandlerPeer();
     peer->handler = eventInfo->GetHandler();
-    parameter.handler.ptr = peer;
+    parameter.handler = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
@@ -459,7 +459,7 @@ bool OnHttpAuthRequest(const Callback_OnHttpAuthRequestEvent_Boolean* value,
     parameter.realm = Converter::ArkValue<Ark_String>(eventInfo->GetRealm());
     auto peer = new HttpAuthHandlerPeer();
     peer->handler = eventInfo->GetResult();
-    parameter.handler.ptr = peer;
+    parameter.handler = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -479,12 +479,12 @@ RefPtr<WebResponse> OnInterceptRequest(const Callback_OnInterceptRequestEvent_We
     Ark_OnInterceptRequestEvent parameter;
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
-    parameter.request.ptr = peer;
+    parameter.request = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebResourceResponse,
         Callback_WebResourceResponse_Void>(parameter);
-    CHECK_NULL_RETURN(arkResult.ptr, nullptr);
-    return reinterpret_cast<WebResourceResponsePeer*>(arkResult.ptr)->handler;
+    CHECK_NULL_RETURN(arkResult, nullptr);
+    return arkResult->handler;
 }
 
 void OnPermissionRequest(const Callback_OnPermissionRequestEvent_Void* value,
@@ -499,7 +499,7 @@ void OnPermissionRequest(const Callback_OnPermissionRequestEvent_Void* value,
     Ark_OnPermissionRequestEvent parameter;
     auto peer = new PermissionRequestPeer();
     peer->handler = eventInfo->GetWebPermissionRequest();
-    parameter.request.ptr = peer;
+    parameter.request = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
@@ -516,7 +516,7 @@ void OnScreenCaptureRequest(const Callback_OnScreenCaptureRequestEvent_Void* val
     Ark_OnScreenCaptureRequestEvent parameter;
     auto peer = new ScreenCaptureHandlerPeer();
     peer->handler = eventInfo->GetWebScreenCaptureRequest();
-    parameter.handler.ptr = peer;
+    parameter.handler = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
@@ -535,10 +535,10 @@ bool OnContextMenuShow(const Callback_OnContextMenuShowEvent_Boolean* value,
     Ark_OnContextMenuShowEvent parameter;
     auto paramPeer = new WebContextMenuParamPeer();
     paramPeer->handler = eventInfo->GetParam();
-    parameter.param.ptr = paramPeer;
+    parameter.param = paramPeer;
     auto resultPeer = new WebContextMenuResultPeer();
     resultPeer->handler = eventInfo->GetContextMenuResult();
-    parameter.result.ptr = resultPeer;
+    parameter.result = resultPeer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -603,7 +603,7 @@ bool OnSslErrorEventReceive(const Callback_OnSslErrorEventReceiveEvent_Void* val
     parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(vecHolder.ArkValue());
     auto peer = new SslErrorHandlerPeer();
     peer->handler = eventInfo->GetResult();
-    parameter.handler.ptr = peer;
+    parameter.handler = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return true;
@@ -630,7 +630,7 @@ bool OnSslError(const OnSslErrorEventCallback* value,
     parameter.url = Converter::ArkValue<Ark_String>(url);
     auto peer = new SslErrorHandlerPeer();
     peer->handler = eventInfo->GetResult();
-    parameter.handler.ptr = peer;
+    parameter.handler = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return true;
@@ -656,7 +656,7 @@ bool OnClientAuthentication(const Callback_OnClientAuthenticationEvent_Void* val
     parameter.issuers = vecIssuers.ArkValue();
         auto peer = new ClientAuthenticationHandlerPeer();
     peer->handler = eventInfo->GetResult();
-    parameter.handler.ptr = peer;
+    parameter.handler = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return false;
@@ -677,7 +677,7 @@ void OnWindowNew(const Callback_OnWindowNewEvent_Void* value,
     parameter.targetUrl = Converter::ArkValue<Ark_String>(eventInfo->GetTargetUrl());
     auto peer = new ControllerHandlerPeer();
     peer->handler = eventInfo->GetWebWindowNewHandler();
-    parameter.handler.ptr = peer;
+    parameter.handler = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
@@ -782,7 +782,7 @@ void OnDataResubmitted(const Callback_OnDataResubmittedEvent_Void* value,
         Ark_OnDataResubmittedEvent parameter;
         auto peer = new DataResubmissionHandlerPeer();
         peer->handler = eventInfo->GetHandler();
-        parameter.handler.ptr = peer;
+        parameter.handler = peer;
         arkCallback.Invoke(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
@@ -896,7 +896,7 @@ bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
     Ark_OnLoadInterceptEvent parameter;
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
-    parameter.data.ptr = peer;
+    parameter.data = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -1066,7 +1066,7 @@ void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
     peer->handler = eventInfo->GetResult();
-    arkEventResult.ptr = peer;
+    arkEventResult = peer;
     parameter.result = Converter::ArkValue<Opt_EventResult>(arkEventResult);
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
@@ -1086,7 +1086,7 @@ bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,
     Ark_WebResourceRequest parameter;
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
-    parameter.ptr = peer;
+    parameter = peer;
     auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
@@ -1151,7 +1151,7 @@ WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
     Ark_WebKeyboardCallbackInfo parameter;
     auto peer = new WebKeyboardControllerPeer();
     peer->handler = eventInfo->GetCustomKeyboardHandler();
-    parameter.controller.ptr = peer;
+    parameter.controller = peer;
 
     Map_String_String attributes;
     auto attributesMap = eventInfo->GetAttributesMap();

@@ -60,7 +60,7 @@ namespace ScrollableCommonMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 void ScrollBarImpl(Ark_NativePointer node,
                    Ark_BarState value)
@@ -165,11 +165,12 @@ void OnWillScrollImpl(Ark_NativePointer node,
 }
 
 void OnDidScrollImpl(Ark_NativePointer node,
-                     const Opt_ScrollOnScrollCallback* value)
+                     const ScrollOnScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollableCommonMethodModelNG::SetOnDidScroll(frameNode, convValue);
     LOGE("ScrollableCommonMethodModifier::OnDidScrollImpl is not implemented");
 }

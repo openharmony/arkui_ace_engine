@@ -378,13 +378,13 @@ HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
     auto checkCallback = [](
         const Ark_Int32 resourceId, const Ark_ClickEvent event,
         const Ark_LocationButtonOnClickResult result) {
-            auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+            auto peer = event;
             ASSERT_NE(peer, nullptr);
             auto accessor = GeneratedModifier::GetClickEventAccessor();
             checkEvent = {
                 .nodeId = resourceId,
-                .offsetX = accessor->getWindowX(peer),
-                .offsetY = accessor->getWindowY(peer),
+                .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+                .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
                 .result = result
             };
             accessor->destroyPeer(peer);

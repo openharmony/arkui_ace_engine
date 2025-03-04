@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorResultAccessor {
-void DestroyPeerImpl(FileSelectorResultPeer* peer)
+void DestroyPeerImpl(Ark_FileSelectorResult peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_FileSelectorResult CtorImpl()
 {
     return new FileSelectorResultPeer();
 }
@@ -32,7 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void HandleFileListImpl(FileSelectorResultPeer* peer,
+void HandleFileListImpl(Ark_FileSelectorResult peer,
                         const Array_String* fileList)
 {
     CHECK_NULL_VOID(peer && peer->handler);

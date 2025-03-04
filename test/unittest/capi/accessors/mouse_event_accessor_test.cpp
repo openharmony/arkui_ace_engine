@@ -99,8 +99,8 @@ HWTEST_F(MouseEventAccessorTest, GetDisplayXTest, TestSize.Level1)
         Offset screenLocation;
         screenLocation.SetX(value);
         info->SetScreenLocation(screenLocation);
-        Ark_Int32 arkRes = accessor_->getDisplayX(peer_);
-        EXPECT_EQ(arkRes, expected) <<
+        auto arkRes = Converter::Convert<float>(accessor_->getDisplayX(peer_));
+        EXPECT_FLOAT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: getDisplayX";
     }
 }
@@ -140,8 +140,8 @@ HWTEST_F(MouseEventAccessorTest, GetDisplayYTest, TestSize.Level1)
         Offset screenLocation;
         screenLocation.SetY(value);
         info->SetScreenLocation(screenLocation);
-        Ark_Int32 arkRes = accessor_->getDisplayY(peer_);
-        EXPECT_EQ(arkRes, expected) <<
+        auto arkRes = Converter::Convert<float>(accessor_->getDisplayY(peer_));
+        EXPECT_FLOAT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: getDisplayY";
     }
 }
@@ -181,8 +181,8 @@ HWTEST_F(MouseEventAccessorTest, GetWindowXTest, TestSize.Level1)
         Offset globalLocation;
         globalLocation.SetX(value);
         info->SetGlobalLocation(globalLocation);
-        Ark_Int32 arkRes = accessor_->getWindowX(peer_);
-        EXPECT_EQ(arkRes, expected) <<
+        auto arkRes = Converter::Convert<float>(accessor_->getWindowX(peer_));
+        EXPECT_FLOAT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetWindowX";
     }
 }
@@ -222,8 +222,8 @@ HWTEST_F(MouseEventAccessorTest, GetWindowYTest, TestSize.Level1)
         Offset globalLocation;
         globalLocation.SetY(value);
         info->SetGlobalLocation(globalLocation);
-        Ark_Int32 arkRes = accessor_->getWindowY(peer_);
-        EXPECT_EQ(arkRes, expected) <<
+        auto arkRes = Converter::Convert<float>(accessor_->getWindowY(peer_));
+        EXPECT_FLOAT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetWindowY";
     }
 }
@@ -263,8 +263,8 @@ HWTEST_F(MouseEventAccessorTest, GetScreenXTest, TestSize.Level1)
         Offset globalLocation;
         globalLocation.SetX(value);
         info->SetGlobalLocation(globalLocation);
-        Ark_Int32 arkRes = accessor_->getScreenX(peer_);
-        EXPECT_EQ(arkRes, expected) <<
+        auto arkRes = Converter::Convert<float>(accessor_->getScreenX(peer_));
+        EXPECT_FLOAT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetScreenX";
     }
 }
@@ -304,8 +304,8 @@ HWTEST_F(MouseEventAccessorTest, GetScreenYTest, TestSize.Level1)
         Offset globalLocation;
         globalLocation.SetY(value);
         info->SetGlobalLocation(globalLocation);
-        Ark_Int32 arkRes = accessor_->getScreenY(peer_);
-        EXPECT_EQ(arkRes, expected) <<
+        auto arkRes = Converter::Convert<float>(accessor_->getScreenY(peer_));
+        EXPECT_FLOAT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetScreenY";
     }
 }
@@ -345,8 +345,8 @@ HWTEST_F(MouseEventAccessorTest, GetXTest, TestSize.Level1)
         Offset localLocation;
         localLocation.SetX(value);
         info->SetLocalLocation(localLocation);
-        Ark_Int32 arkRes = accessor_->getX(peer_);
-        EXPECT_EQ(arkRes, expected) <<
+        auto arkRes = Converter::Convert<float>(accessor_->getX(peer_));
+        EXPECT_FLOAT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetX";
     }
 }
@@ -386,8 +386,8 @@ HWTEST_F(MouseEventAccessorTest, GetYTest, TestSize.Level1)
         Offset localLocation;
         localLocation.SetY(value);
         info->SetLocalLocation(localLocation);
-        Ark_Int32 arkRes = accessor_->getY(peer_);
-        EXPECT_EQ(arkRes, expected) <<
+        auto arkRes = Converter::Convert<float>(accessor_->getY(peer_));
+        EXPECT_FLOAT_EQ(arkRes, expected) <<
             "Input value is: " << input << ", method: GetY";
     }
 }

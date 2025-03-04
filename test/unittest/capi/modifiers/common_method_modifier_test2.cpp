@@ -254,13 +254,13 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick0Test, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
-        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .resourceId = resourceId,
-            .offsetX = accessor->getWindowX(peer),
-            .offsetY = accessor->getWindowY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
         };
         accessor->destroyPeer(peer);
     };
@@ -301,13 +301,13 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
-        auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+        auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .resourceId = resourceId,
-            .offsetX = accessor->getWindowX(peer),
-            .offsetY = accessor->getWindowY(peer),
+            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
         };
         accessor->destroyPeer(peer);
     };
@@ -350,7 +350,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
-        auto peer = reinterpret_cast<KeyEventPeer*>(parameter.ptr);
+        auto peer = parameter;
         ASSERT_NE(peer, nullptr);
         auto info = peer->GetEventInfo();
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
@@ -399,7 +399,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
     static const int32_t expectedResId = 123;
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
-        auto peer = reinterpret_cast<KeyEventPeer*>(event.ptr);
+        auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
         auto info = peer->GetEventInfo();
@@ -447,7 +447,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent1Test, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
-        auto peer = reinterpret_cast<KeyEventPeer*>(parameter.ptr);
+        auto peer = parameter;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
         auto info = peer->GetEventInfo();

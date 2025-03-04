@@ -23,11 +23,11 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace TextControllerAccessor {
-void DestroyPeerImpl(TextControllerPeer* peer)
+void DestroyPeerImpl(Ark_TextController peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextController CtorImpl()
 {
     return new TextControllerPeer();
 }
@@ -35,25 +35,24 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CloseSelectionMenuImpl(TextControllerPeer* peer)
+void CloseSelectionMenuImpl(Ark_TextController peer)
 {
     CHECK_NULL_VOID(peer && peer->controller);
     peer->controller->CloseSelectionMenu();
 }
-void SetStyledStringImpl(TextControllerPeer* peer,
-                         const Ark_StyledString* value)
+void SetStyledStringImpl(Ark_TextController peer,
+                         Ark_StyledString value)
 {
     CHECK_NULL_VOID(peer && peer->controller);
-    CHECK_NULL_VOID(value && value->ptr);
-    auto styledStringPeer = reinterpret_cast<StyledStringPeer*>(value->ptr);
-    peer->controller->SetStyledString(styledStringPeer->spanString);
+    CHECK_NULL_VOID(value);
+    peer->controller->SetStyledString(value->spanString);
 }
-Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
 {
     CHECK_NULL_RETURN(peer && peer->controller, nullptr);
     auto layoutManagerAccessor = GetLayoutManagerAccessor();
     CHECK_NULL_RETURN(layoutManagerAccessor, nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(layoutManagerAccessor->ctor());
+    auto layoutManagerPeer = layoutManagerAccessor->ctor();
     CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
     layoutManagerPeer->handler = peer->controller->GetLayoutInfoInterface();
     return layoutManagerPeer;

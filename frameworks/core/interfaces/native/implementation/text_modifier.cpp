@@ -132,8 +132,7 @@ template<>
 TextOptions Convert(const Ark_TextOptions& src)
 {
     TextOptions options;
-    auto nativePtr = Converter::Convert<Ark_NativePointer>(src.controller);
-    options.peer = reinterpret_cast<TextControllerPeer*>(nativePtr);
+    options.peer = src.controller;
     return options;
 }
 
@@ -369,12 +368,12 @@ void FontWeight1Impl(Ark_NativePointer node,
     TextModelNG::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
 }
 void LineSpacingImpl(Ark_NativePointer node,
-                     const Ark_LengthMetrics* value)
+                     Ark_LengthMetrics value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto lineSpacing = Converter::OptConvert<Dimension>(*value);
+    auto lineSpacing = Converter::OptConvert<Dimension>(value);
     Validator::ValidateNonNegative(lineSpacing);
     TextModelNG::SetLineSpacing(frameNode, lineSpacing);
 }
@@ -639,12 +638,12 @@ void TextSelectableImpl(Ark_NativePointer node,
     TextModelNG::SetTextSelectableMode(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGW("TextAttributeModifier::EditMenuOptionsImpl not implemented");
 }

@@ -76,6 +76,7 @@ class WebModifierTest : public ModifierTestBase<GENERATED_ArkUIWebModifier,
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_UNION
 HWTEST_F(WebModifierTest, setOptionsWebControllerTestValidValues, TestSize.Level1)
 {
     Ark_WebOptions options;
@@ -94,10 +95,8 @@ HWTEST_F(WebModifierTest, setOptionsWebControllerTestValidValues, TestSize.Level
     auto pattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(pattern, nullptr);
 
-    Ark_WebController arkController;
-    arkController.ptr = controllerPtr;
     options.controller =
-        Converter::ArkUnion<Ark_Union_WebController_WebviewController, Ark_WebController>(arkController);
+        Converter::ArkUnion<Ark_Union_WebController_WebviewController, Ark_WebController>(controllerPtr);
 
     RefPtr<WebController> controller = pattern->GetWebController();
     EXPECT_EQ(controller, nullptr);
@@ -114,6 +113,7 @@ HWTEST_F(WebModifierTest, setOptionsWebControllerTestValidValues, TestSize.Level
     EXPECT_NE(finalyzer, nullptr);
     finalyzer(reinterpret_cast<WebControllerPeer *>(controllerPtr));
 }
+#endif
 
 /*
  * @tc.name: onPageEndTest
@@ -315,7 +315,7 @@ HWTEST_F(WebModifierTest, onGeolocationShowTest, TestSize.Level1)
         checkEvent = {
             .resourceId = resourceId,
             .origin = Converter::Convert<std::string>(parameter.origin),
-            .peer = reinterpret_cast<JsGeolocationPeer*>(parameter.geolocation.ptr)
+            .peer = parameter.geolocation,
         };
     };
 
@@ -396,7 +396,7 @@ HWTEST_F(WebModifierTest, onAlertTest, TestSize.Level1)
             .resourceId = resourceId,
             .url = Converter::Convert<std::string>(parameter.url),
             .message = Converter::Convert<std::string>(parameter.message),
-            .peer = reinterpret_cast<JsResultPeer*>(parameter.result.ptr)
+            .peer = parameter.result,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -451,7 +451,7 @@ HWTEST_F(WebModifierTest, onBeforeUnloadTest, TestSize.Level1)
             .resourceId = resourceId,
             .url = Converter::Convert<std::string>(parameter.url),
             .message = Converter::Convert<std::string>(parameter.message),
-            .peer = reinterpret_cast<JsResultPeer*>(parameter.result.ptr)
+            .peer = parameter.result,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -506,7 +506,7 @@ HWTEST_F(WebModifierTest, onConfirmTest, TestSize.Level1)
             .resourceId = resourceId,
             .url = Converter::Convert<std::string>(parameter.url),
             .message = Converter::Convert<std::string>(parameter.message),
-            .peer = reinterpret_cast<JsResultPeer*>(parameter.result.ptr)
+            .peer = parameter.result,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -561,7 +561,7 @@ HWTEST_F(WebModifierTest, onPromptTest, TestSize.Level1)
             .resourceId = resourceId,
             .url = Converter::Convert<std::string>(parameter.url),
             .message = Converter::Convert<std::string>(parameter.message),
-            .peer = reinterpret_cast<JsResultPeer*>(parameter.result.ptr)
+            .peer = parameter.result,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -613,7 +613,7 @@ HWTEST_F(WebModifierTest, onConsoleTest, TestSize.Level1)
         const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<ConsoleMessagePeer*>(parameter.message.ptr)
+            .peer = parameter.message,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -666,8 +666,8 @@ HWTEST_F(WebModifierTest, onErrorReceiveTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnErrorReceiveEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .errorPeer = reinterpret_cast<WebResourceErrorPeer*>(parameter.error.ptr),
-            .requestPeer = reinterpret_cast<WebResourceRequestPeer*>(parameter.request.ptr)
+            .errorPeer = parameter.error,
+            .requestPeer = parameter.request,
         };
     };
 
@@ -714,8 +714,8 @@ HWTEST_F(WebModifierTest, onHttpErrorReceiveTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnHttpErrorReceiveEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .responsePeer = reinterpret_cast<WebResourceResponsePeer*>(parameter.response.ptr),
-            .requestPeer = reinterpret_cast<WebResourceRequestPeer*>(parameter.request.ptr)
+            .responsePeer = parameter.response,
+            .requestPeer = parameter.request,
         };
     };
 
@@ -940,8 +940,8 @@ HWTEST_F(WebModifierTest, onShowFileSelectorTest, TestSize.Level1)
         const Ark_OnShowFileSelectorEvent parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .resultPeer = reinterpret_cast<FileSelectorResultPeer*>(parameter.result.ptr),
-            .paramPeer = reinterpret_cast<FileSelectorParamPeer*>(parameter.fileSelector.ptr)
+            .resultPeer = parameter.result,
+            .paramPeer = parameter.fileSelector,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -1059,7 +1059,7 @@ HWTEST_F(WebModifierTest, onFullScreenEnterTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_FullScreenEnterEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<FullScreenExitHandlerPeer*>(parameter.handler.ptr),
+            .peer = parameter.handler,
             .width = Converter::OptConvert<int>(parameter.videoWidth).value_or(0),
             .height = Converter::OptConvert<int>(parameter.videoHeight).value_or(0)
         };
@@ -1146,7 +1146,7 @@ HWTEST_F(WebModifierTest, onHttpAuthRequestTest, TestSize.Level1)
         const Ark_OnHttpAuthRequestEvent parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<HttpAuthHandlerPeer*>(parameter.handler.ptr),
+            .peer = parameter.handler,
             .host = Converter::Convert<std::string>(parameter.host),
             .realm = Converter::Convert<std::string>(parameter.realm)
         };
@@ -1200,11 +1200,9 @@ HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
         const Ark_OnInterceptRequestEvent parameter, const Callback_WebResourceResponse_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.request.ptr)
+            .peer = parameter.request,
         };
-        CallbackHelper(continuation).Invoke(Ark_WebResourceResponse {
-            .ptr = reinterpret_cast<Ark_NativePointer>(callResult)
-        });
+        CallbackHelper(continuation).Invoke(callResult);
     };
 
     Callback_OnInterceptRequestEvent_WebResourceResponse arkCallback =
@@ -1253,7 +1251,7 @@ HWTEST_F(WebModifierTest, onPermissionRequestTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnPermissionRequestEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<PermissionRequestPeer*>(parameter.request.ptr)
+            .peer = parameter.request,
         };
     };
 
@@ -1290,7 +1288,7 @@ HWTEST_F(WebModifierTest, onScreenCaptureRequestTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnScreenCaptureRequestEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<ScreenCaptureHandlerPeer*>(parameter.handler.ptr)
+            .peer = parameter.handler,
         };
     };
 
@@ -1331,8 +1329,8 @@ HWTEST_F(WebModifierTest, onContextMenuShowTest, TestSize.Level1)
         const Ark_OnContextMenuShowEvent parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .paramPeer = reinterpret_cast<WebContextMenuParamPeer*>(parameter.param.ptr),
-            .resultPeer = reinterpret_cast<WebContextMenuResultPeer*>(parameter.result.ptr)
+            .paramPeer = parameter.param,
+            .resultPeer = parameter.result,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
@@ -1501,7 +1499,7 @@ HWTEST_F(WebModifierTest, onSslErrorEventReceiveTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnSslErrorEventReceiveEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<SslErrorHandlerPeer*>(parameter.handler.ptr),
+            .peer = parameter.handler,
             .error = Converter::OptConvert<SslError>(parameter.error).value_or(SslError::INVALID),
             .certChainData = Converter::OptConvert<std::vector<std::string>>(parameter.certChainData)
         };
@@ -1557,7 +1555,7 @@ HWTEST_F(WebModifierTest, onSslErrorEventTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_SslErrorEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<SslErrorHandlerPeer*>(parameter.handler.ptr),
+            .peer = parameter.handler,
             .error = Converter::OptConvert<SslError>(parameter.error).value_or(SslError::INVALID),
             .url = Converter::Convert<std::string>(parameter.url),
             .originalUrl = Converter::Convert<std::string>(parameter.originalUrl),
@@ -1614,7 +1612,7 @@ HWTEST_F(WebModifierTest, onClientAuthenticationRequestTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnClientAuthenticationEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<ClientAuthenticationHandlerPeer*>(parameter.handler.ptr),
+            .peer = parameter.handler,
             .host = Converter::Convert<std::string>(parameter.host),
             .port = Converter::Convert<int32_t>(parameter.port),
             .keyTypes = Converter::Convert<std::vector<std::string>>(parameter.keyTypes),
@@ -1666,7 +1664,7 @@ HWTEST_F(WebModifierTest, onWindowNewTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnWindowNewEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<ControllerHandlerPeer*>(parameter.handler.ptr),
+            .peer = parameter.handler,
             .targetUrl = Converter::Convert<std::string>(parameter.targetUrl),
             .isAlert = Converter::Convert<bool>(parameter.isAlert),
             .isUserTrigger = Converter::Convert<bool>(parameter.isUserTrigger)
@@ -1819,7 +1817,7 @@ HWTEST_F(WebModifierTest, onDataResubmittedTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnDataResubmittedEvent parameter) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<DataResubmissionHandlerPeer*>(parameter.handler.ptr)
+            .peer = parameter.handler,
         };
     };
 
@@ -2039,7 +2037,7 @@ HWTEST_F(WebModifierTest, onLoadInterceptTest, TestSize.Level1)
         const Ark_OnLoadInterceptEvent parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
-            .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.data.ptr)
+            .peer = parameter.data,
         };
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };

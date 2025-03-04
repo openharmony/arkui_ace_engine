@@ -28,14 +28,14 @@ inline void AssignCast(std::optional<Ark_Function>& dst, const Ark_Function& src
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperControllerAccessor {
-void DestroyPeerImpl(SwiperControllerPeer* peer)
+void DestroyPeerImpl(Ark_SwiperController peer)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_SwiperController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<SwiperControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -45,19 +45,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ShowNextImpl(SwiperControllerPeer* peer)
+void ShowNextImpl(Ark_SwiperController peer)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerShowNext();
 }
-void ShowPreviousImpl(SwiperControllerPeer* peer)
+void ShowPreviousImpl(Ark_SwiperController peer)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerShowPrevious();
 }
-void ChangeIndexImpl(SwiperControllerPeer* peer,
+void ChangeIndexImpl(Ark_SwiperController peer,
                      const Ark_Number* index,
                      const Opt_Boolean* useAnimation)
 {
@@ -68,7 +68,7 @@ void ChangeIndexImpl(SwiperControllerPeer* peer,
     auto aceUseAnim = useAnimation ? Converter::OptConvert<bool>(*useAnimation) : std::nullopt;
     peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
 }
-void FinishAnimationImpl(SwiperControllerPeer* peer,
+void FinishAnimationImpl(Ark_SwiperController peer,
                          const Opt_VoidCallback* callback_)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
@@ -82,7 +82,9 @@ void FinishAnimationImpl(SwiperControllerPeer* peer,
     }
     peerImpl->TriggerFinishAnimation();
 }
-void PreloadItemsImpl(SwiperControllerPeer* peer,
+void PreloadItemsImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_SwiperController peer,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {

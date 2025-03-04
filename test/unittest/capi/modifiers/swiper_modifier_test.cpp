@@ -1651,11 +1651,13 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
     ASSERT_NE(accessor->getIndex, nullptr);
 
     static std::optional<std::pair<int32_t, int32_t>> checkInvoke;
-    void (*fakeDeveloperCallbackFunc)(const Ark_Int32 resourceId, const Ark_Materialized parameter) =
-        [](const Ark_Int32 resourceId, const Ark_Materialized parameter) {
-            auto peer = reinterpret_cast<SwiperContentTransitionProxyPeer*>(parameter.ptr);
+    void (*fakeDeveloperCallbackFunc)(const Ark_Int32 resourceId, const Ark_SwiperContentTransitionProxy parameter) =
+        [](const Ark_Int32 resourceId, const Ark_SwiperContentTransitionProxy peer) {
             // get to further test: incoming resource, data from incoming peer via accessor
-            checkInvoke = { resourceId, accessor->getIndex(peer) };
+            checkInvoke = {
+                resourceId,
+                Converter::Convert<int32_t>(accessor->getIndex(peer))
+            };
 
             auto destroy = reinterpret_cast<void (*)(SwiperContentTransitionProxyPeer *)>(accessor->getFinalizer());
             if (destroy) {
@@ -1800,7 +1802,7 @@ HWTEST_F(SwiperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
 
     Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_index(node_, &arkCallback);
+    modifier_->set_onChangeEvent_index(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(0, 1, false);

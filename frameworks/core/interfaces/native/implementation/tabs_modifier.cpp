@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 struct TabsOptions {
     std::optional<BarPosition> barPosOpt;
     std::optional<int32_t> indexOpt;
-    std::optional<GeneratedModifier::TabsControllerPeerImpl *> controllerOpt;
+    std::optional<Ark_TabsController> controllerOpt;
 };
 }
 
@@ -103,7 +103,7 @@ TabsOptions Convert(const Ark_TabsOptions& src)
     return {
         .barPosOpt = OptConvert<BarPosition>(src.barPosition),
         .indexOpt = OptConvert<int32_t>(src.index),
-        .controllerOpt = OptConvert<GeneratedModifier::TabsControllerPeerImpl *>(src.controller),
+        .controllerOpt = OptConvert<Ark_TabsController>(src.controller),
     };
 }
 
@@ -479,8 +479,8 @@ void BarModeScrollableImpl(Ark_NativePointer node,
         BarMode1Impl(node, ARK_BAR_MODE_SCROLLABLE, nullptr);
     }
 }
-void __onChangeEvent_indexImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_indexImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -527,7 +527,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::PageFlipModeImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
         TabsAttributeModifier::BarModeScrollableImpl,
-        TabsAttributeModifier::__onChangeEvent_indexImpl,
+        TabsAttributeModifier::_onChangeEvent_indexImpl,
     };
     return &ArkUITabsModifierImpl;
 }

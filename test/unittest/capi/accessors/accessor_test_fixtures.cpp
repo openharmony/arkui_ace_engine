@@ -101,7 +101,7 @@ const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureNumber
     { "0", 0, ArkValue<Ark_Number>(0) },
     { "-100", -100, ArkValue<Ark_Number>(-100) },
     { "12.34", 12.34, ArkValue<Ark_Number>(12.34) },
-    { "-56.73", -56.34, ArkValue<Ark_Number>(-56.73) },
+    { "-56.73", -56.73, ArkValue<Ark_Number>(-56.73) },
 };
 
 const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureVelocityValues = {

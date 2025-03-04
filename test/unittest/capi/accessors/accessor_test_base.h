@@ -26,6 +26,25 @@ namespace OHOS::Ace::NG {
 
 extern "C" const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
 
+#ifdef CAPI_BACKTRACE
+void ReportTheme(ThemeType type);
+void ResetThemes();
+#endif
+
+inline RefPtr<Theme> CatchEmptyTheme(ThemeType type)
+{
+#ifdef CAPI_BACKTRACE
+    ReportTheme(type);
+#endif
+    return nullptr;
+}
+
+template<typename T, typename = void>
+struct HasFinalizer : std::false_type {};
+
+template<typename T>
+struct HasFinalizer<T, std::void_t<decltype(T().getFinalizer)>> : std::true_type {};
+
 template <typename AccessorType, auto GetAccessorFunc, typename PeerType>
 class AccessorTestBaseParent : public testing::Test {
 public:
@@ -39,10 +58,11 @@ public:
         MockPipelineContext::SetUp();
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
         ASSERT_NE(accessor_, nullptr);
-        ASSERT_NE(accessor_->ctor, nullptr);
-        ASSERT_NE(accessor_->getFinalizer, nullptr);
-        finalyzer_ = reinterpret_cast<void (*)(PeerType *)>(accessor_->getFinalizer());
-        ASSERT_NE(finalyzer_, nullptr);
+        if constexpr (HasFinalizer<AccessorType>::value) {
+            ASSERT_NE(accessor_->getFinalizer, nullptr);
+            finalyzer_ = reinterpret_cast<void (*)(PeerType *)>(accessor_->getFinalizer());
+            ASSERT_NE(finalyzer_, nullptr);
+        }
 
         MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
@@ -89,8 +109,10 @@ public:
 
     virtual void TearDown(void)
     {
-        ASSERT_NE(finalyzer_, nullptr);
-        finalyzer_(peer_);
+        if constexpr (HasFinalizer<AccessorType>::value) {
+            ASSERT_NE(finalyzer_, nullptr);
+            finalyzer_(peer_);
+        }
         peer_ = nullptr;
     }
 
@@ -121,13 +143,17 @@ class AccessorTestCtorBase : public AccessorTestBaseParent<AccessorType, GetAcce
 public:
     virtual void SetUp(void)
     {
-        ASSERT_NE(this->accessor_->ctor, nullptr);
-        this->peer_ = static_cast<PeerType *>(CreatePeerInstance());
+        this->peer_ = CreatePeer();
         ASSERT_NE(this->peer_, nullptr);
         AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
     }
 
     virtual void *CreatePeerInstance() = 0;
+
+    PeerType *CreatePeer()
+    {
+        return static_cast<PeerType *>(CreatePeerInstance());
+    }
 };
 
 } // namespace OHOS::Ace::NG

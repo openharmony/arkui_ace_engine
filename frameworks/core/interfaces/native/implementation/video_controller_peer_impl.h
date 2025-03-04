@@ -55,4 +55,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(VideoControllerPeerImpl);
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct VideoControllerPeer : public OHOS::Ace::NG::GeneratedModifier::VideoControllerPeerImpl {};
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_VIDEO_CONTROLLER_PEER_IMPL_H

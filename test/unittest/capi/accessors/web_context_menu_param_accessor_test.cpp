@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
@@ -59,7 +60,7 @@ HWTEST_F(WebContextMenuParamAccessorTest, xTest, TestSize.Level1)
     int32_t value = 5;
 
     EXPECT_CALL(*mockHandler_, GetXCoord()).Times(1).WillOnce(Return(value));
-    EXPECT_EQ(value, accessor_->x(peer_));
+    EXPECT_EQ(value, Converter::Convert<int32_t>(accessor_->x(peer_)));
 }
 
 /**
@@ -74,7 +75,7 @@ HWTEST_F(WebContextMenuParamAccessorTest, yTest, TestSize.Level1)
     int32_t value = 6;
 
     EXPECT_CALL(*mockHandler_, GetYCoord()).Times(1).WillOnce(Return(value));
-    EXPECT_EQ(value, accessor_->y(peer_));
+    EXPECT_EQ(value, Converter::Convert<int32_t>(accessor_->y(peer_)));
 }
 
 /**
@@ -239,7 +240,7 @@ HWTEST_F(WebContextMenuParamAccessorTest, getEditStateFlagsTest, TestSize.Level1
     int32_t value = 10;
 
     EXPECT_CALL(*mockHandler_, GetEditStateFlags()).Times(1).WillOnce(Return(value));
-    EXPECT_EQ(value, accessor_->getEditStateFlags(peer_));
+    EXPECT_EQ(value, Converter::Convert<int32_t>(accessor_->getEditStateFlags(peer_)));
 }
 
 /**
@@ -254,7 +255,7 @@ HWTEST_F(WebContextMenuParamAccessorTest, getPreviewWidthTest, TestSize.Level1)
     int32_t value = 11;
 
     mockHandler_->mockPreviewWidth = value;
-    auto result = accessor_->getPreviewWidth(peer_);
+    auto result = Converter::Convert<int32_t>(accessor_->getPreviewWidth(peer_));
     EXPECT_EQ(value, result);
 }
 
@@ -270,7 +271,7 @@ HWTEST_F(WebContextMenuParamAccessorTest, getPreviewHeightTest, TestSize.Level1)
     int32_t value = 12;
 
     mockHandler_->mockPreviewHeight = value;
-    auto result = accessor_->getPreviewHeight(peer_);
+    auto result = Converter::Convert<int32_t>(accessor_->getPreviewHeight(peer_));
     EXPECT_EQ(value, result);
 }
 } // namespace OHOS::Ace::NG

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearIndicatorControllerAccessor {
-void DestroyPeerImpl(LinearIndicatorControllerPeer* peer)
+void DestroyPeerImpl(Ark_LinearIndicatorController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_LinearIndicatorController CtorImpl()
 {
     return nullptr;
 }
@@ -30,19 +30,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetProgressImpl(LinearIndicatorControllerPeer* peer,
+void SetProgressImpl(Ark_LinearIndicatorController peer,
                      const Ark_Number* index,
                      const Ark_Number* progress)
 {
 }
-void StartImpl(LinearIndicatorControllerPeer* peer,
+void StartImpl(Ark_LinearIndicatorController peer,
                const Opt_LinearIndicatorStartOptions* options)
 {
 }
-void PauseImpl(LinearIndicatorControllerPeer* peer)
+void PauseImpl(Ark_LinearIndicatorController peer)
 {
 }
-void StopImpl(LinearIndicatorControllerPeer* peer)
+void StopImpl(Ark_LinearIndicatorController peer)
 {
 }
 } // LinearIndicatorControllerAccessor

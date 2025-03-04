@@ -65,8 +65,7 @@ HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
     value.perspective = Converter::ArkValue<Opt_Number>(6);
     value.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(45);
 
-    auto ptr = accessor_->rotate(&value);
-    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    auto peer = accessor_->rotate(&value);
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedRotateEffect>(peer->handler);
@@ -81,8 +80,7 @@ HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
     ASSERT_EQ(effect->GetEffect().angle, 45);
     GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 
-    ptr = accessor_->rotate(nullptr);
-    peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    peer = accessor_->rotate(nullptr);
     ASSERT_EQ(peer, nullptr);
 }
 
@@ -98,8 +96,7 @@ HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
     value.x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(2);
     value.y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
     value.z = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(4);
-    auto ptr = accessor_->translate(&value);
-    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    auto peer = accessor_->translate(&value);
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedTranslateEffect>(peer->handler);
@@ -109,8 +106,7 @@ HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
     ASSERT_EQ(effect->GetEffect().z.ToString(), "4.00vp");
     GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 
-    ptr = accessor_->translate(nullptr);
-    peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    peer = accessor_->translate(nullptr);
     ASSERT_EQ(peer, nullptr);
 }
 
@@ -128,8 +124,7 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
     value.z = Converter::ArkValue<Opt_Number>(4);
     value.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
     value.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
-    auto ptr = accessor_->scale(&value);
-    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    auto peer = accessor_->scale(&value);
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedScaleEffect>(peer->handler);
@@ -141,8 +136,7 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
     ASSERT_EQ(effect->GetEffect().centerY.ToString(), "3.00vp");
     GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 
-    ptr = accessor_->scale(nullptr);
-    peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    peer = accessor_->scale(nullptr);
     ASSERT_EQ(peer, nullptr);
 }
 
@@ -157,8 +151,7 @@ HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
     ASSERT_NE(accessor_->opacity, nullptr);
     Ark_Number value = Converter::ArkValue<Ark_Number>(testValue);
 
-    auto ptr = accessor_->opacity(&value);
-    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    auto peer = accessor_->opacity(&value);
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedOpacityEffect>(peer->handler);
@@ -166,8 +159,7 @@ HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
     ASSERT_EQ(effect->GetEffect(), testValue);
     GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
 
-    ptr = accessor_->opacity(nullptr);
-    peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    peer = accessor_->opacity(nullptr);
     ASSERT_EQ(peer, nullptr);
 }
 
@@ -181,8 +173,7 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
     ASSERT_NE(accessor_->move, nullptr);
     Ark_TransitionEdge value = Converter::ArkValue<Ark_TransitionEdge>(NG::TransitionEdge::END);
 
-    auto ptr = accessor_->move(value);
-    auto peer = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    auto peer = accessor_->move(value);
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedMoveEffect>(peer->handler);
@@ -199,18 +190,10 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
 HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->asymmetric, nullptr);
-    auto app = new(Ark_TransitionEffect);
-    auto appPeer = new(TransitionEffectPeer);
-    app->ptr = appPeer;
-    auto disapp = new(Ark_TransitionEffect);
-    auto disappPeer = new(TransitionEffectPeer);
-    disapp->ptr = disappPeer;
-    auto peer = accessor_->asymmetric(app, disapp);
+    TransitionEffectPeer app;
+    TransitionEffectPeer disapp;
+    auto peer = accessor_->asymmetric(&app, &disapp);
     ASSERT_NE(peer, nullptr);
-    delete disappPeer;
-    delete disapp;
-    delete appPeer;
-    delete app;
 }
 
 /**
@@ -228,8 +211,7 @@ HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
     TransitionEffectPeer peer;
     peer.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(33);
 
-    auto ptr = accessor_->animation(reinterpret_cast<TransitionEffectPeer*>(&peer), &animParam);
-    auto peer2 = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    auto peer2 = accessor_->animation(reinterpret_cast<TransitionEffectPeer*>(&peer), &animParam);
     ASSERT_NE(peer2, nullptr);
     ASSERT_EQ(peer2->handler->GetAnimationOption()->GetDuration(), testValue);
 }
@@ -251,10 +233,7 @@ HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
     TransitionEffectPeer peer2;
     peer2.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity2);
 
-    const Ark_TransitionEffect effect { .ptr = &peer2 };
-
-    auto ptr = accessor_->combine(reinterpret_cast<TransitionEffectPeer*>(&peer1), &effect);
-    auto ret_peer1 = reinterpret_cast<TransitionEffectPeer*>(ptr);
+    auto ret_peer1 = accessor_->combine(reinterpret_cast<TransitionEffectPeer*>(&peer1), &peer2);
     ASSERT_NE(ret_peer1, nullptr);
     auto effect1 = AceType::DynamicCast<ChainedOpacityEffect>(ret_peer1->handler);
     ASSERT_NE(effect1, nullptr);

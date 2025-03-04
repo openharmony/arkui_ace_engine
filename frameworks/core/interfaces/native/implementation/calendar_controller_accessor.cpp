@@ -20,13 +20,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarControllerAccessor {
-void DestroyPeerImpl(CalendarControllerPeer* peer)
+void DestroyPeerImpl(Ark_CalendarController peer)
 {
     CHECK_NULL_VOID(peer);
     peer->controller = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_CalendarController CtorImpl()
 {
     return new CalendarControllerPeer {
         .controller = Referenced::MakeRefPtr<CalendarControllerNg>()
@@ -36,12 +36,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void BackToTodayImpl(CalendarControllerPeer* peer)
+void BackToTodayImpl(Ark_CalendarController peer)
 {
     CHECK_NULL_VOID(peer && peer->controller);
     peer->controller->BackToToday();
 }
-void GoToImpl(CalendarControllerPeer* peer,
+void GoToImpl(Ark_CalendarController peer,
               const Ark_Literal_Number_day_month_year* value)
 {
     CHECK_NULL_VOID(peer && peer->controller);

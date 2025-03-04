@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,20 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_ACCESSORS_CANVAS_RENDERING_CONTEXT2D_ACCESSOR_TEST_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_ACCESSORS_CANVAS_RENDERING_CONTEXT2D_ACCESSOR_TEST_H
-
-#include <string>
+#pragma once
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::Converter {
-
-inline void AssignArkValue(Ark_RenderingContextSettings& dst, const Opt_Boolean& src)
-{
-    dst.antialias = src;
+namespace OHOS::Ace::NG::GeneratedModifier {
+void AnimateToInner(const Ark_AnimateParam* value, const Callback_Void* event, bool immediately);
 }
-
-} // namespace OHOS::Ace::NG::Converter
-
-#endif

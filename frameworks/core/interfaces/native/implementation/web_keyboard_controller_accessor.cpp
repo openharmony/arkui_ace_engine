@@ -21,11 +21,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebKeyboardControllerAccessor {
-void DestroyPeerImpl(WebKeyboardControllerPeer* peer)
+void DestroyPeerImpl(Ark_WebKeyboardController peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_WebKeyboardController CtorImpl()
 {
     return new WebKeyboardControllerPeer();
 }
@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void InsertTextImpl(WebKeyboardControllerPeer* peer,
+void InsertTextImpl(Ark_WebKeyboardController peer,
                     const Ark_String* text)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -42,7 +42,7 @@ void InsertTextImpl(WebKeyboardControllerPeer* peer,
         Converter::Convert<std::string>(*text)
     );
 }
-void DeleteForwardImpl(WebKeyboardControllerPeer* peer,
+void DeleteForwardImpl(Ark_WebKeyboardController peer,
                        const Ark_Number* length)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -53,7 +53,7 @@ void DeleteForwardImpl(WebKeyboardControllerPeer* peer,
         peer->handler->DeleteForward(lengthOpt.value());
     }
 }
-void DeleteBackwardImpl(WebKeyboardControllerPeer* peer,
+void DeleteBackwardImpl(Ark_WebKeyboardController peer,
                         const Ark_Number* length)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -64,7 +64,7 @@ void DeleteBackwardImpl(WebKeyboardControllerPeer* peer,
         peer->handler->DeleteBackward(lengthOpt.value());
     }
 }
-void SendFunctionKeyImpl(WebKeyboardControllerPeer* peer,
+void SendFunctionKeyImpl(Ark_WebKeyboardController peer,
                          const Ark_Number* key)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -73,7 +73,7 @@ void SendFunctionKeyImpl(WebKeyboardControllerPeer* peer,
         Converter::Convert<int32_t>(*key)
     );
 }
-void CloseImpl(WebKeyboardControllerPeer* peer)
+void CloseImpl(Ark_WebKeyboardController peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Close();

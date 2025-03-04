@@ -39,6 +39,7 @@ public:
     }
 
     std::unique_ptr<KeyEventInfo> eventInfo_;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /**
@@ -63,7 +64,7 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateValidTest, TestSize.Level1)
         Converter::ArkArrayHolder<Array_String> stringHolder(param);
         const auto stringArrayValues = stringHolder.ArkValue();
         eventInfo_->SetPressedKeyCodes(value);
-        const auto result = accessor_->getModifierKeyState(peer_, &stringArrayValues);
+        const auto result = accessor_->getModifierKeyState(vmContext_, peer_, &stringArrayValues);
         EXPECT_EQ(Converter::Convert<bool>(result), expected);
     }
 }
@@ -87,7 +88,7 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateInvalidTest, TestSize.Level1)
         { peer_, &stringArrayValues },
     };
     for (auto& [peer, str] : TEST_PLAN) {
-        auto result = accessor_->getModifierKeyState(peer, str);
+        auto result = accessor_->getModifierKeyState(vmContext_, peer, str);
         EXPECT_FALSE(Converter::Convert<bool>(result));
     }
 }
@@ -170,7 +171,7 @@ HWTEST_F(KeyEventAccessorTest, getKeyCodeValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, getKeyCodeInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeyCode, nullptr);
-    EXPECT_EQ(accessor_->getKeyCode(nullptr), Converter::Convert<Ark_Int32>(0));
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getKeyCode(nullptr)), 0);
 }
 
 /**
@@ -311,7 +312,7 @@ HWTEST_F(KeyEventAccessorTest, getDeviceIdValidTest, TestSize.Level1)
     ASSERT_NE(accessor_->getDeviceId, nullptr);
     for (auto& [input, expected, value] : testFixtureInt32WithNegativeValues) {
         eventInfo_->SetDeviceId(value);
-        auto deviceId = accessor_->getDeviceId(peer_);
+        auto deviceId = Converter::Convert<int32_t>(accessor_->getDeviceId(peer_));
         EXPECT_EQ(deviceId, expected) <<
             "Input value is: " << input;
     }
@@ -325,7 +326,7 @@ HWTEST_F(KeyEventAccessorTest, getDeviceIdValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, getDeviceIdInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getDeviceId, nullptr);
-    EXPECT_EQ(accessor_->getDeviceId(nullptr), Converter::ArkValue<Ark_Int32>(0));
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getDeviceId(nullptr)), 0);
 }
 
 /**
@@ -375,7 +376,7 @@ HWTEST_F(KeyEventAccessorTest, getMetaKeyValidTest, TestSize.Level1)
     ASSERT_NE(accessor_->getMetaKey, nullptr);
     for (auto& [input, expected, value] : testFixtureInt32WithNegativeValues) {
         eventInfo_->SetMetaKey(value);
-        auto key = accessor_->getMetaKey(peer_);
+        auto key = Converter::Convert<int32_t>(accessor_->getMetaKey(peer_));
         EXPECT_EQ(key, expected) <<
             "Input value is: " << input;
     }
@@ -389,7 +390,7 @@ HWTEST_F(KeyEventAccessorTest, getMetaKeyValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, getMetaKeyInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getMetaKey, nullptr);
-    EXPECT_EQ(accessor_->getMetaKey(nullptr), Converter::ArkValue<Ark_Int32>(0));
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getMetaKey(nullptr)), 0);
 }
 
 /**
@@ -460,7 +461,7 @@ HWTEST_F(KeyEventAccessorTest, getTimestampValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, getTimestampInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTimestamp, nullptr);
-    EXPECT_EQ(accessor_->getTimestamp(nullptr), Converter::ArkValue<Ark_Int32>(0));
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getTimestamp(nullptr)), 0);
 }
 
 /**
@@ -586,7 +587,7 @@ HWTEST_F(KeyEventAccessorTest, getUnicodeValidTest, TestSize.Level1)
         KeyEvent keyEvent;
         keyEvent.unicode = static_cast<decltype(keyEvent.unicode)>(value);
         *eventInfo_ = KeyEventInfo(keyEvent);
-        auto unicode = accessor_->getUnicode(peer_);
+        auto unicode = Converter::Convert<int32_t>(accessor_->getUnicode(peer_));
         EXPECT_EQ(unicode, expected) <<
             "Input value is: " << input;
     }
@@ -600,7 +601,7 @@ HWTEST_F(KeyEventAccessorTest, getUnicodeValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, getUnicodeInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getUnicode, nullptr);
-    EXPECT_EQ(accessor_->getUnicode(nullptr), Converter::ArkValue<Ark_Int32>(0));
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getUnicode(nullptr)), Converter::ArkValue<Ark_Int32>(0));
 }
 
 /**

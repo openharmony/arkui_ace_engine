@@ -324,7 +324,7 @@ namespace Converter {
     template<>
     inline void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_PixelMap& value)
     {
-        auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(value.ptr);
+        auto pixelMapPeer = value;
         if (pixelMapPeer) {
             dst = ImageSourceInfo(pixelMapPeer->pixelMap);
         } else {
@@ -455,6 +455,7 @@ namespace Converter {
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
+    template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradient_common& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> Header Convert(const Ark_Header& src);
@@ -532,7 +533,6 @@ namespace Converter {
     template<> Dimension Convert(const Ark_CustomObject& src);
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> FontMetaData Convert(const Ark_Font& src);
-    template<> Ark_NativePointer Convert(const Ark_Materialized& src);
     template<> ShadowColorStrategy Convert(const Ark_Color& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);

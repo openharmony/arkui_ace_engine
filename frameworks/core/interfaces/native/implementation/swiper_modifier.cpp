@@ -250,7 +250,7 @@ void SetSwiperOptionsImpl(Ark_NativePointer node,
     auto internalSwiperController = SwiperModelNG::GetSwiperController(frameNode);
 
     // obtain the external SwiperController peer
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*controller);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_SwiperController>(*controller);
     CHECK_NULL_VOID(abstPeerPtrOpt);
     auto peerImplPtr = reinterpret_cast<GeneratedModifier::SwiperControllerPeerImpl *>(*abstPeerPtrOpt);
     CHECK_NULL_VOID(peerImplPtr);
@@ -524,8 +524,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
         auto peer = new SwiperContentTransitionProxyPeer();
         CHECK_NULL_VOID(peer);
         peer->SetHandler(proxy);
-
-        arkCallback.Invoke(Ark_SwiperContentTransitionProxy{ .ptr = peer });
+        arkCallback.Invoke(peer);
     };
     SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
 }
@@ -652,8 +651,8 @@ void NextMarginImpl(Ark_NativePointer node,
     auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
     SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
 }
-void __onChangeEvent_indexImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_indexImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -702,7 +701,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::DisplayCountImpl,
         SwiperAttributeModifier::PrevMarginImpl,
         SwiperAttributeModifier::NextMarginImpl,
-        SwiperAttributeModifier::__onChangeEvent_indexImpl,
+        SwiperAttributeModifier::_onChangeEvent_indexImpl,
     };
     return &ArkUISwiperModifierImpl;
 }

@@ -22,11 +22,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
-void DestroyPeerImpl(TextMenuItemIdPeer* peer)
+void DestroyPeerImpl(Ark_TextMenuItemId peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextMenuItemId CtorImpl()
 {
     return new TextMenuItemIdPeer();
 }
@@ -34,19 +34,46 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer OfImpl(const Ark_ResourceStr* id)
+Ark_TextMenuItemId OfImpl(const Ark_ResourceStr* id)
 {
-    auto peer = static_cast<TextMenuItemIdPeer *>(CtorImpl());
+    auto peer = CtorImpl();
     peer->id = Converter::OptConvert<std::string>(*id);
-    return reinterpret_cast<Ark_NativePointer>(peer);
+    return peer;
 }
-Ark_Boolean EqualsImpl(TextMenuItemIdPeer* peer,
-                       const Ark_TextMenuItemId* id)
+Ark_Boolean EqualsImpl(Ark_TextMenuItemId peer,
+                       Ark_TextMenuItemId id)
 {
-    CHECK_NULL_RETURN(peer && id && id->ptr, false);
-    auto peer2 = static_cast<TextMenuItemIdPeer*>(id->ptr);
-    CHECK_NULL_RETURN(peer->id && peer2->id, false);
-    return Converter::ArkValue<Ark_Boolean>(peer->id.value() == peer2->id.value());
+    CHECK_NULL_RETURN(peer && id, false);
+    CHECK_NULL_RETURN(peer->id && id->id, false);
+    return Converter::ArkValue<Ark_Boolean>(peer->id == id->id);
+}
+Ark_TextMenuItemId GetCUTImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCOPYImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetPASTEImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetSELECT_ALLImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCOLLABORATION_SERVICEImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCAMERA_INPUTImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetAI_WRITERImpl()
+{
+    return {};
 }
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
@@ -57,6 +84,13 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
         TextMenuItemIdAccessor::GetFinalizerImpl,
         TextMenuItemIdAccessor::OfImpl,
         TextMenuItemIdAccessor::EqualsImpl,
+        TextMenuItemIdAccessor::GetCUTImpl,
+        TextMenuItemIdAccessor::GetCOPYImpl,
+        TextMenuItemIdAccessor::GetPASTEImpl,
+        TextMenuItemIdAccessor::GetSELECT_ALLImpl,
+        TextMenuItemIdAccessor::GetCOLLABORATION_SERVICEImpl,
+        TextMenuItemIdAccessor::GetCAMERA_INPUTImpl,
+        TextMenuItemIdAccessor::GetAI_WRITERImpl,
     };
     return &TextMenuItemIdAccessorImpl;
 }

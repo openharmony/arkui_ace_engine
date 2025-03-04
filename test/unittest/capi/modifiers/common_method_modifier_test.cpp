@@ -132,11 +132,11 @@ static const std::vector<ScaleTranslateTestStep> SCALE_TRANSLATE_TEST_PLAN = {
 
 using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
 static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = {
-    { {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(1)}, "1.00px" },
-    { {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(0)}, "0.00px" },
-    { {.unit = ARK_LENGTH_UNIT_VP, .value = Converter::ArkValue<Ark_Number>(2.45f)}, "2.45vp" },
-    { {.unit = ARK_LENGTH_UNIT_VP, .value = Converter::ArkValue<Ark_Number>(-7.f)}, "-7.00vp" },
-    { {.unit = ARK_LENGTH_UNIT_FP, .value = Converter::ArkValue<Ark_Number>(-65.5f)}, "-65.50fp" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 1.f), "1.00px" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 0.f), "0.00px" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
 };
 } // namespace
 
@@ -1943,22 +1943,15 @@ HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_CLIP_DEFAULT_VALUE);
 
-    modifier_->setClip0(node_, true);
+    auto inputVal = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setClip0(node_, &inputVal);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, "true");
 
-    modifier_->setClip0(node_, false);
+    inputVal = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setClip0(node_, &inputVal);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, "false");
-
-    Ark_Type_CommonMethod_clip_value arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(true));
-    modifier_->setClip2(node_, &arg);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
-    EXPECT_EQ(strResult, "true");
-
-    arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(false));
-    modifier_->setClip2(node_, &arg);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
 }
 
 /*

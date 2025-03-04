@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "accessor_test_base.h"
-#include "node_api.h"
+#include "core/interfaces/native/implementation/matrix2d_peer.h"
 #include "core/interfaces/native/implementation/path2d_accessor_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
 
@@ -49,9 +50,7 @@ public:
         mockPath_ = new MockCanvasPath();
         mockPathKeeper_ = AceType::Claim(mockPath_);
         ASSERT_NE(mockPathKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<GeneratedModifier::Path2DPeerImpl*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->path = mockPathKeeper_;
+        peer_->path = mockPathKeeper_;
         ASSERT_NE(mockPath_, nullptr);
     }
 
@@ -73,14 +72,11 @@ public:
 HWTEST_F(Path2DAccessorTest, addPathTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addPath, nullptr);
-    Ark_Path2D arkPath;
-    auto peerPathImpl = Referenced::MakeRefPtr<GeneratedModifier::Path2DPeerImpl>();
-    arkPath.ptr = reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerPathImpl));
+    auto peerPathImpl = Referenced::MakeRefPtr<Path2DPeer>();
+    auto arkPath = Referenced::RawPtr(peerPathImpl);
     peerPathImpl->path = AceType::MakeRefPtr<MockCanvasPath>();
-    Ark_Matrix2D arkMatrix;
     auto peerMatrix = new Matrix2DPeer();
-    arkMatrix.ptr = peerMatrix;
-    auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
+    auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peerMatrix);
     peerMatrix->transform.scaleX = NUMBER_TEST_PLAN[0];
     peerMatrix->transform.scaleY = NUMBER_TEST_PLAN[1];
     peerMatrix->transform.skewX = NUMBER_TEST_PLAN[2];
@@ -91,8 +87,8 @@ HWTEST_F(Path2DAccessorTest, addPathTest, TestSize.Level1)
     EXPECT_CALL(*mockPath_, AddPath(peerPathImpl->path)).Times(3);
     EXPECT_CALL(*mockPath_, SetTransform(tr.scaleX, tr.skewX, tr.skewY, tr.scaleY, tr.translateX, tr.translateY))
         .Times(3);
-    accessor_->addPath(peer_, &arkPath, &optMatrix);
-    accessor_->addPath(peer_, &arkPath, &optMatrix);
-    accessor_->addPath(peer_, &arkPath, &optMatrix);
+    accessor_->addPath(peer_, arkPath, &optMatrix);
+    accessor_->addPath(peer_, arkPath, &optMatrix);
+    accessor_->addPath(peer_, arkPath, &optMatrix);
 }
 } // namespace OHOS::Ace::NG

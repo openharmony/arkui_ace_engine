@@ -830,7 +830,7 @@ HWTEST_F(ToggleModifierTest, setOnChangeEventIsOnImpl, TestSize.Level1)
 
     Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_isOn(node_, &arkCallback);
+    modifier_->set_onChangeEvent_isOn(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->UpdateChangeEvent(true);

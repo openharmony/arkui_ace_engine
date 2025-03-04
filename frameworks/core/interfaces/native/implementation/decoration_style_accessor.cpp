@@ -18,32 +18,37 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace DynamicNodeAccessor {
-void DestroyPeerImpl(DynamicNodePeer* peer)
+namespace DecorationStyleAccessor {
+void DestroyPeerImpl(Ark_DecorationStyle peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void OnMoveImpl(DynamicNodePeer* peer,
-                const Opt_OnMoveHandler* handler)
+Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
 {
+    return {};
 }
-} // DynamicNodeAccessor
-const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor()
+Ark_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {
-    static const GENERATED_ArkUIDynamicNodeAccessor DynamicNodeAccessorImpl {
-        DynamicNodeAccessor::DestroyPeerImpl,
-        DynamicNodeAccessor::CtorImpl,
-        DynamicNodeAccessor::GetFinalizerImpl,
-        DynamicNodeAccessor::OnMoveImpl,
+    return {};
+}
+} // DecorationStyleAccessor
+const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()
+{
+    static const GENERATED_ArkUIDecorationStyleAccessor DecorationStyleAccessorImpl {
+        DecorationStyleAccessor::DestroyPeerImpl,
+        DecorationStyleAccessor::CtorImpl,
+        DecorationStyleAccessor::GetFinalizerImpl,
+        DecorationStyleAccessor::GetTypeImpl,
+        DecorationStyleAccessor::GetStyleImpl,
     };
-    return &DynamicNodeAccessorImpl;
+    return &DecorationStyleAccessorImpl;
 }
 
 }

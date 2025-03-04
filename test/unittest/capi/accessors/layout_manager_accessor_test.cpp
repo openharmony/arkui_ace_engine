@@ -17,6 +17,7 @@
 
 #include "accessor_test_base.h"
 #include "node_api.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/interfaces/native/implementation/layout_manager_peer_impl.h"
@@ -51,9 +52,9 @@ HWTEST_F(LayoutManagerAccessorTest, getLineCountTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_, nullptr);
     ASSERT_NE(peer_, nullptr);
-    auto value = accessor_->getLineCount(peer_);
+    auto value = Converter::Convert<int32_t>(accessor_->getLineCount(peer_));
     ASSERT_EQ(value, 0);
-    value = accessor_->getLineCount(nullptr);
+    value = Converter::Convert<int32_t>(accessor_->getLineCount(nullptr));
     ASSERT_EQ(value, 0);
 }
 
@@ -66,7 +67,7 @@ HWTEST_F(LayoutManagerAccessorTest, DISABLED_GetGlyphPositionAtCoordinate, TestS
 {
     Ark_Number valueX = Converter::ArkValue<Ark_Number>(33);
     Ark_Number valueY = Converter::ArkValue<Ark_Number>(55);
-    ASSERT_NE(accessor_->getGlyphPositionAtCoordinate(peer_, &valueX, &valueY), nullptr);
+    accessor_->getGlyphPositionAtCoordinate(peer_, &valueX, &valueY);
 }
 
 /**
@@ -77,7 +78,7 @@ HWTEST_F(LayoutManagerAccessorTest, DISABLED_GetGlyphPositionAtCoordinate, TestS
 HWTEST_F(LayoutManagerAccessorTest, DISABLED_GetLineMetrics, TestSize.Level1)
 {
     Ark_Number lineNumber = Converter::ArkValue<Ark_Number>(55);
-    ASSERT_NE(accessor_->getLineMetrics(peer_, &lineNumber), nullptr);
+    accessor_->getLineMetrics(peer_, &lineNumber);
 }
 
 /**

@@ -644,8 +644,8 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Union_Number_Array_Number_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Union_Number_Array_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -666,8 +666,8 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     };
     TextPickerModelNG::SetOnSelectedChangeEvent(frameNode, std::move(onEvent));
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_Union_String_Array_String_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_Union_String_Array_String_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -720,8 +720,8 @@ const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
         TextPickerAttributeModifier::GradientHeight1Impl,
         TextPickerAttributeModifier::EnableHapticFeedbackImpl,
         TextPickerAttributeModifier::DigitalCrownSensitivityImpl,
-        TextPickerAttributeModifier::__onChangeEvent_selectedImpl,
-        TextPickerAttributeModifier::__onChangeEvent_valueImpl,
+        TextPickerAttributeModifier::_onChangeEvent_selectedImpl,
+        TextPickerAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUITextPickerModifierImpl;
 }

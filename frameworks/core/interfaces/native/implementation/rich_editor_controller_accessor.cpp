@@ -14,11 +14,11 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
-#include "rich_editor_controller_peer_impl.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "rich_editor_controller_peer_impl.h"
+#include "styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 
@@ -302,14 +302,14 @@ RangeOptions Convert(const Ark_RichEditorRange& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorControllerAccessor {
-void DestroyPeerImpl(RichEditorControllerPeer* peer)
+void DestroyPeerImpl(Ark_RichEditorController peer)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<RichEditorControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -319,12 +319,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 AddTextSpanImpl(RichEditorControllerPeer* peer,
-                          const Ark_String* value,
-                          const Opt_RichEditorTextSpanOptions* options)
+Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
+                           const Ark_String* value,
+                           const Opt_RichEditorTextSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     int32_t result = 0;
     std::optional<TextSpanOptions> locOptions;
     if (options) {
@@ -336,14 +336,14 @@ Ark_Int32 AddTextSpanImpl(RichEditorControllerPeer* peer,
     if (locOptions) {
         result = peerImpl->AddTextSpanImpl(locOptions.value());
     }
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
-Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
-                           const Ark_Union_PixelMap_ResourceStr* value,
-                           const Opt_RichEditorImageSpanOptions* options)
+Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
+                            const Ark_Union_PixelMap_ResourceStr* value,
+                            const Opt_RichEditorImageSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     int32_t result = 0;
     std::optional<ImageSpanOptions> locOptions;
     if (options) {
@@ -363,14 +363,14 @@ Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
     if (locOptions) {
         result = peerImpl->AddImageSpanImpl(locOptions.value());
     }
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
-Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
-                             const CustomNodeBuilder* value,
-                             const Opt_RichEditorBuilderSpanOptions* options)
+Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
+                              const CustomNodeBuilder* value,
+                              const Opt_RichEditorBuilderSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     int32_t result = 0;
     std::optional<SpanOptionBase> locOptions = options ? Converter::OptConvert<SpanOptionBase>(*options) : std::nullopt;
     if (locOptions.has_value()) {
@@ -386,14 +386,14 @@ Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
             }
         }
     }
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
-Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer,
-                            const Ark_Resource* value,
-                            const Opt_RichEditorSymbolSpanOptions* options)
+Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
+                             const Ark_Resource* value,
+                             const Opt_RichEditorSymbolSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     int32_t result = 0;
     std::optional<SymbolSpanOptions> locOptions;
     if (options && value) {
@@ -406,9 +406,9 @@ Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer,
     if (locOptions) {
         result = peerImpl->AddSymbolSpanImpl(locOptions.value());
     }
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Ark_Number>(result);
 }
-void UpdateSpanStyleImpl(RichEditorControllerPeer* peer,
+void UpdateSpanStyleImpl(Ark_RichEditorController peer,
                          const Ark_Type_RichEditorController_updateSpanStyle_value* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
@@ -419,7 +419,7 @@ void UpdateSpanStyleImpl(RichEditorControllerPeer* peer,
         peerImpl->UpdateSpanStyleImpl(options.value());
     }
 }
-void UpdateParagraphStyleImpl(RichEditorControllerPeer* peer,
+void UpdateParagraphStyleImpl(Ark_RichEditorController peer,
                               const Ark_RichEditorParagraphStyleOptions* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
@@ -430,7 +430,7 @@ void UpdateParagraphStyleImpl(RichEditorControllerPeer* peer,
         peerImpl->UpdateParagraphStyleImpl(options.value());
     }
 }
-void DeleteSpansImpl(RichEditorControllerPeer* peer,
+void DeleteSpansImpl(Ark_RichEditorController peer,
                      const Opt_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
@@ -441,60 +441,63 @@ void DeleteSpansImpl(RichEditorControllerPeer* peer,
         peerImpl->DeleteSpansImpl(options.value());
     }
 }
-void GetSpansImpl(RichEditorControllerPeer* peer,
-                  const Opt_RichEditorRange* value)
+Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult GetSpansImpl(Ark_RichEditorController peer,
+                                                                            const Opt_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(value);
+    CHECK_NULL_RETURN(peerImpl, {});
+    CHECK_NULL_RETURN(value, {});
     auto options = Converter::OptConvert<RangeOptions>(*value);
     if (options) {
         peerImpl->GetSpansImpl(options.value());
     }
+    return {};
 }
-void GetParagraphsImpl(RichEditorControllerPeer* peer,
-                       const Opt_RichEditorRange* value)
+Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
+                                                  const Opt_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(value);
+    CHECK_NULL_RETURN(peerImpl, {});
+    CHECK_NULL_RETURN(value, {});
     auto options = Converter::OptConvert<RangeOptions>(*value);
     if (options) {
         peerImpl->GetParagraphsImpl(options.value());
     }
     LOGW("GENERATED_ArkUIRichEditorControllerAccessor::getParagraphs should return a value");
     //And this GetParagraphsImpl should return a value
+    return {};
 }
-Ark_NativePointer GetSelectionImpl(RichEditorControllerPeer* peer)
+Ark_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    return peerImpl->GetSelectionImpl();
+    CHECK_NULL_RETURN(peerImpl, {});
+    peerImpl->GetSelectionImpl();
+    return {};
 }
-void FromStyledStringImpl(RichEditorControllerPeer* peer,
-                          const Ark_StyledString* value)
+Array_RichEditorSpan FromStyledStringImpl(Ark_VMContext vmContext,
+                                          Ark_RichEditorController peer,
+                                          Ark_StyledString value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(value->ptr);
+    CHECK_NULL_RETURN(peerImpl, {});
+    CHECK_NULL_RETURN(value, {});
 
-    auto* rawSpanStringBasePtr = reinterpret_cast<SpanStringBase*>(value->ptr);
-    RefPtr<SpanStringBase> updateSpanStyle;
-    updateSpanStyle = rawSpanStringBasePtr;
+    RefPtr<SpanStringBase> updateSpanStyle = value->spanString;
     if (updateSpanStyle) {
         peerImpl->FromStyledStringImpl(updateSpanStyle);
     }
+    return {};
 }
-Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer,
-                                     const Ark_RichEditorRange* value)
+Ark_StyledString ToStyledStringImpl(Ark_VMContext vmContext,
+                                    Ark_RichEditorController peer,
+                                    const Ark_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(value, nullptr);
+    CHECK_NULL_RETURN(peerImpl, {});
+    CHECK_NULL_RETURN(value, {});
     auto options = Converter::Convert<RangeOptions>(*value);
     RefPtr<SpanStringBase> ret = peerImpl->ToStyledStringImpl(options);
-    return reinterpret_cast<Ark_NativePointer>(Referenced::RawPtr(ret));
+    return StyledStringPeer::Create(ret);
 }
 } // RichEditorControllerAccessor
 const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor()

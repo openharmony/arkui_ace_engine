@@ -50,14 +50,14 @@ void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyze
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnalyzerControllerAccessor {
-void DestroyPeerImpl(ImageAnalyzerControllerPeer* peer)
+void DestroyPeerImpl(Ark_ImageAnalyzerController peer)
 {
     auto peerImpl = reinterpret_cast<ImageAnalyzerControllerPeer*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_ImageAnalyzerController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<ImageAnalyzerControllerPeer>();
     peerImpl->IncRefCount();
@@ -67,20 +67,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
+Array_ImageAnalyzerType GetImageAnalyzerSupportTypesImpl(Ark_ImageAnalyzerController peer)
 {
-    CHECK_NULL_VOID(peer);
+    CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<ImageAnalyzerControllerPeer*>(peer);
-    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_RETURN(peerImpl, {});
 
     std::vector<ImageAnalyzerType> src = peerImpl->TriggerGetImageAnalyzerSupportTypes();
     Array_ImageAnalyzerType dst = Converter::ArkValue<Array_ImageAnalyzerType>(src);
 
-    if (dst.length == 0) {
-        return;
-    }
-
     LOGE("ARKOALA ImageAnalyzerControllerPeer::GetImageAnalyzerSupportTypesImpl return type not implemented.");
+    return {};
 }
 } // ImageAnalyzerControllerAccessor
 const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()

@@ -225,8 +225,8 @@ void OnSelectImpl(Ark_NativePointer node,
     };
     ListItemModelNG::SetSelectCallback(frameNode, onSelect);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -251,7 +251,7 @@ const GENERATED_ArkUIListItemModifier* GetListItemModifier()
         ListItemAttributeModifier::SelectedImpl,
         ListItemAttributeModifier::SwipeActionImpl,
         ListItemAttributeModifier::OnSelectImpl,
-        ListItemAttributeModifier::__onChangeEvent_selectedImpl,
+        ListItemAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIListItemModifierImpl;
 }

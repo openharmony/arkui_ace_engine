@@ -19,11 +19,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
-void DestroyPeerImpl(SearchControllerPeer* peer)
+void DestroyPeerImpl(Ark_SearchController peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_SearchController CtorImpl()
 {
     return new SearchControllerPeer();
 }
@@ -31,18 +31,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CaretPositionImpl(SearchControllerPeer* peer,
+void CaretPositionImpl(Ark_SearchController peer,
                        const Ark_Number* value)
 {
     CHECK_NULL_VOID(peer && value && peer->controller_);
     peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
 }
-void StopEditingImpl(SearchControllerPeer* peer)
+void StopEditingImpl(Ark_SearchController peer)
 {
     CHECK_NULL_VOID(peer && peer->controller_);
     peer->controller_->StopEditing();
 }
-void SetTextSelectionImpl(SearchControllerPeer* peer,
+void SetTextSelectionImpl(Ark_SearchController peer,
                           const Ark_Number* selectionStart,
                           const Ark_Number* selectionEnd,
                           const Opt_SelectionOptions* options)

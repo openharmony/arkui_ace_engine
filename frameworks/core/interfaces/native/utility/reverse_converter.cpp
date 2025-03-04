@@ -14,9 +14,12 @@
  */
 
 #include "reverse_converter.h"
+
 #include "base/utils/string_utils.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "converter.h"
 #include "validators.h"
 
 namespace OHOS::Ace {
@@ -74,15 +77,14 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::
     const auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(
         GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
     peer->SetEventInfo(src);
-    dst.ptr = peer;
+    dst = peer;
 }
 
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
-    const auto peer = reinterpret_cast<DragEventPeer*>(
-        GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor());
+    const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
     peer->dragInfo = info;
-    dragEvent.ptr = peer;
+    dragEvent = peer;
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
@@ -100,17 +102,7 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
-    AssignArkValue(dst.value, src.Value());
-    switch (src.Unit()) {
-        case DimensionUnit::PX: dst.unit = ARK_LENGTH_UNIT_PX; break;
-        case DimensionUnit::VP: dst.unit = ARK_LENGTH_UNIT_VP; break;
-        case DimensionUnit::FP: dst.unit = ARK_LENGTH_UNIT_FP; break;
-        case DimensionUnit::PERCENT: dst.unit = ARK_LENGTH_UNIT_PERCENT; break;
-        case DimensionUnit::LPX: dst.unit = ARK_LENGTH_UNIT_LPX; break;
-        default:
-            AssignArkValue(dst.value, 0.0);
-            dst.unit = ARK_LENGTH_UNIT_VP;
-    }
+    dst = LengthMetricsPeer::Create(src);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -137,16 +129,6 @@ void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
 {
     dst.alwaysEnabled = src;
-}
-
-void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
-{
-    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<StyledStringPeer&>(src));
-}
-
-void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src)
-{
-    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<TextAreaControllerPeer&>(src));
 }
 
 void AssignArkValue(Ark_Length& dst, const double& src)
@@ -305,5 +287,12 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
 void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx)
 {
     dst.supportAvoidance = Converter::ArkValue<Opt_Boolean>(src.supportAvoidance);
+}
+
+template<>
+Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
+{
+    DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
+    return LengthMetricsPeer::Create(Dimension(value, du));
 }
 } // namespace OHOS::Ace::NG::Converter

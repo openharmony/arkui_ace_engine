@@ -1402,7 +1402,7 @@ HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
     Callback_Union_Number_Resource_Void arkCallback =
         Converter::ArkValue<Callback_Union_Number_Resource_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+    modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     auto changeEvent = eventHub->GetSelectChangeEvent();
@@ -1446,7 +1446,7 @@ HWTEST_F(SelectModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
     Callback_ResourceStr_Void arkCallback =
         Converter::ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+    modifier_->set_onChangeEvent_value(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     auto changeEvent = eventHub->GetValueChangeEvent();

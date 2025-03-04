@@ -18,49 +18,6 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::Text;
 /*
- * @tc.name: setHalfLeadingTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, setHalfLeadingTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HALF_LEADING_DEFAULT_VALUE) << "Default value for attribute 'halfLeading'";
-}
-
-/*
- * @tc.name: setHalfLeadingTestHalfLeadingValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, setHalfLeadingTestHalfLeadingValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueHalfLeading;
-
-    // Initial setup
-    initValueHalfLeading = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueHalfLeading](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueHalfLeading = initValueHalfLeading;
-
-        inputValueHalfLeading = value;
-        modifier_->setHalfLeading(node_, inputValueHalfLeading);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
  * @tc.name: setEnableHapticFeedbackTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC

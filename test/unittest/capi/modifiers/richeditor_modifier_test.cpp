@@ -140,14 +140,13 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions0Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto internalController = RichEditorModelNG::GetRichEditorController(frameNode);
     ASSERT_NE(internalController, nullptr);
-    void* ptr = Referenced::RawPtr(internalController);
-    RichEditorController *rawPtr = reinterpret_cast<RichEditorController *>(ptr);
+    auto controller = AceType::DynamicCast<RichEditorController>(internalController);
     ImageSpanOptions imageOptions;
-    rawPtr->AddImageSpan(imageOptions);
+    controller->AddImageSpan(imageOptions);
 
-    GeneratedModifier::RichEditorControllerPeerImpl peer;
-    auto controller = Converter::ArkValue<Ark_RichEditorOptions>(&peer);
-    modifier_->setRichEditorOptions0(node_, &controller);
+    RichEditorControllerPeer peer;
+    auto options = Converter::ArkValue<Ark_RichEditorOptions>(&peer);
+    modifier_->setRichEditorOptions0(node_, &options);
 
     TextSpanOptions textSpanOptions;
     textSpanOptions.offset = TEST_OFFSET;
@@ -175,7 +174,7 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions1Test, TestSize.Level1)
     modifier_->setRichEditorOptions1(node_, nullptr);
 
     Ark_RichEditorStyledStringOptions controllerUndef;
-    controllerUndef.controller.ptr = nullptr;
+    controllerUndef.controller = nullptr;
     modifier_->setRichEditorOptions1(node_, &controllerUndef);
 
     // Check the internal controller
@@ -183,13 +182,13 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions1Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto internalController = RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
     ASSERT_NE(internalController, nullptr);
-    void* ptr = Referenced::RawPtr(internalController);
-    RichEditorStyledStringController *rawPtr = reinterpret_cast<RichEditorStyledStringController *>(ptr);
-    ASSERT_NE(rawPtr->GetStyledString(), nullptr);
+    auto controller = AceType::DynamicCast<RichEditorStyledStringController>(internalController);
+    ASSERT_NE(controller, nullptr);
+    ASSERT_NE(controller->GetStyledString(), nullptr);
 
     RichEditorStyledStringControllerPeer peer;
-    auto controller = Converter::ArkValue<Ark_RichEditorStyledStringOptions>(&peer);
-    modifier_->setRichEditorOptions1(node_, &controller);
+    auto options = Converter::ArkValue<Ark_RichEditorStyledStringOptions>(&peer);
+    modifier_->setRichEditorOptions1(node_, &options);
 
     auto string = peer.GetStyledString();
     ASSERT_NE(string, nullptr);

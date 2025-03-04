@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TouchEventAccessor {
-void DestroyPeerImpl(TouchEventPeer* peer)
+void DestroyPeerImpl(Ark_TouchEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TouchEvent CtorImpl()
 {
     return new TouchEventPeer();
 }
@@ -32,51 +32,68 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetHistoricalPointsImpl(TouchEventPeer* peer)
+Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
 {
-    CHECK_NULL_VOID(peer);
+    CHECK_NULL_RETURN(peer, {});
     auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
+    CHECK_NULL_RETURN(info, {});
     std::list<TouchLocationInfo> history;
     history = info->GetHistory();
     LOGE("TouchEventAccessor::GetHistoricalPointsImpl - wrong return");
+    return {};
 }
-Ark_NativePointer GetTypeImpl(TouchEventPeer* peer)
+Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, nullptr);
+    CHECK_NULL_RETURN(info, {});
     const std::list<TouchLocationInfo>& changeTouch = info->GetChangedTouches();
     auto type = Ark_TouchType::ARK_TOUCH_TYPE_CANCEL; // default value is not defined in documentation.
     if (changeTouch.size() > 0) {
         type = Converter::ArkValue<Ark_TouchType>(changeTouch.front().GetTouchType());
     }
     LOGE("TouchEventAccessor::GetTypeImpl - wrong return");
-    return nullptr;
+    return {};
 }
-void SetTypeImpl(TouchEventPeer* peer,
+void SetTypeImpl(Ark_TouchEvent peer,
                  Ark_TouchType type)
 {
     LOGE("TouchEventAccessor::SetTypeImpl we can only GET event type");
 }
-void SetTouchesImpl(TouchEventPeer* peer,
+Array_TouchObject GetTouchesImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetTouchesImpl(Ark_TouchEvent peer,
                     const Array_TouchObject* touches)
 {
     LOGE("TouchEventAccessor::SetTouchesImpl we can only add new touches. "
         "We can not set touches array");
 }
-void SetChangedTouchesImpl(TouchEventPeer* peer,
+Array_TouchObject GetChangedTouchesImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetChangedTouchesImpl(Ark_TouchEvent peer,
                            const Array_TouchObject* changedTouches)
 {
     LOGE("TouchEventAccessor::SetChangedTouchesImpl we can only add new changedTouches. "
         "We can not set changedTouches array");
 }
-void SetStopPropagationImpl(TouchEventPeer* peer,
+Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetStopPropagationImpl(Ark_TouchEvent peer,
                             const Callback_Void* stopPropagation)
 {
     LOGE("TouchEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
 }
-void SetPreventDefaultImpl(TouchEventPeer* peer,
+Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetPreventDefaultImpl(Ark_TouchEvent peer,
                            const Callback_Void* preventDefault)
 {
     LOGE("TouchEventAccessor::SetPreventDefaultImpl wen can only GET preventDefault callback");
@@ -91,9 +108,13 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
         TouchEventAccessor::GetHistoricalPointsImpl,
         TouchEventAccessor::GetTypeImpl,
         TouchEventAccessor::SetTypeImpl,
+        TouchEventAccessor::GetTouchesImpl,
         TouchEventAccessor::SetTouchesImpl,
+        TouchEventAccessor::GetChangedTouchesImpl,
         TouchEventAccessor::SetChangedTouchesImpl,
+        TouchEventAccessor::GetStopPropagationImpl,
         TouchEventAccessor::SetStopPropagationImpl,
+        TouchEventAccessor::GetPreventDefaultImpl,
         TouchEventAccessor::SetPreventDefaultImpl,
     };
     return &TouchEventAccessorImpl;

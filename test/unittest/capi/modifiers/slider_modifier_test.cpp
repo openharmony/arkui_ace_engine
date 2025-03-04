@@ -2026,8 +2026,7 @@ HWTEST_F(SliderModifierTest, setBlockStyleTestValidValues, TestSize.Level1)
     initValueBlockStyle.type = Converter::ArkValue<Ark_SliderBlockType>(
         std::get<1>(Fixtures::testFixtureEnumSliderBlockTypeValidValuesSlider[0]));
     initValueBlockStyle.image = Converter::ArkValue<Opt_ResourceStr>();
-    initValueBlockStyle.shape =
-        Converter::ArkValue<Opt_Type_SliderBlockStyle_shape>();
+    initValueBlockStyle.shape = Converter::ArkValue<Opt_String>();
 
     auto checkValue = [this, &initValueBlockStyle](const std::string& input, const Ark_SliderBlockType& value,
         const std::string& expectedStr) {
@@ -2484,7 +2483,7 @@ HWTEST_F(SliderModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
         }
     };
 
-    modifier_->set__onChangeEvent_value(node_, &arkCallback);
+    modifier_->set_onChangeEvent_value(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(55.4f, 0);

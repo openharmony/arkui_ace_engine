@@ -38,16 +38,6 @@ namespace  {
 
     const Ark_Int32 FAKE_RES_ID(1234);
     const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUICounterEventsReceiver counterEventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getCounterEventsReceiver = [] () -> const GENERATED_ArkUICounterEventsReceiver* {
-                return &counterEventsReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class CounterModifierTest : public ModifierTestBase<GENERATED_ArkUICounterModifier,
@@ -59,8 +49,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<CounterTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

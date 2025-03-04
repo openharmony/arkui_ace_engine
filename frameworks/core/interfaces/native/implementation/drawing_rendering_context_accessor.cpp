@@ -30,14 +30,14 @@ void AssignCast(std::optional<CanvasUnit>& dst, const Ark_LengthMetricsUnit& src
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawingRenderingContextAccessor {
-void DestroyPeerImpl(DrawingRenderingContextPeer* peer)
+void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
 {
     auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl(const Opt_LengthMetricsUnit* unit)
+Ark_DrawingRenderingContext CtorImpl(const Opt_LengthMetricsUnit* unit)
 {
     auto peerImpl = Referenced::MakeRefPtr<DrawingRenderingContextPeerImpl>();
     peerImpl->IncRefCount();
@@ -54,11 +54,15 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void InvalidateImpl(DrawingRenderingContextPeer* peer)
+void InvalidateImpl(Ark_DrawingRenderingContext peer)
 {
     auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerInvalidate();
+}
+Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
+{
+    return {};
 }
 } // DrawingRenderingContextAccessor
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
@@ -68,6 +72,7 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
         DrawingRenderingContextAccessor::CtorImpl,
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,
+        DrawingRenderingContextAccessor::GetCanvasImpl,
     };
     return &DrawingRenderingContextAccessorImpl;
 }

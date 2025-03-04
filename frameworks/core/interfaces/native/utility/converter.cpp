@@ -21,6 +21,7 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
+#include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -772,12 +773,6 @@ FontMetaData Convert(const Ark_Font& src)
 }
 
 template<>
-Ark_NativePointer Convert(const Ark_Materialized& src)
-{
-    return src.ptr;
-}
-
-template<>
 ShadowColorStrategy Convert(const Ark_Color& src)
 {
     return ShadowColorStrategy::NONE;
@@ -826,6 +821,14 @@ Font Convert(const Ark_Font& src)
 }
 
 template<>
+Gradient Convert(const Ark_LinearGradient& value)
+{
+    Gradient gradient;
+    LOGE("Conversion for Ark_LinearGradient to Gradient is not yet implemented!");
+    return gradient;
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient_common& value)
 {
     NG::Gradient gradient;
@@ -864,7 +867,6 @@ Gradient Convert(const Ark_LinearGradient_common& value)
             gradient.AddColor(gradientColor);
         }
     }
-
     return gradient;
 }
 
@@ -1180,8 +1182,7 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
 template<>
 RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
 {
-    OHOS::Ace::RefPtr<ChainedTransitionEffect> effect;
-    auto effectPeer = reinterpret_cast<TransitionEffectPeer*>(src.ptr);
+    auto effectPeer = src;
     if (effectPeer) {
         return effectPeer->handler;
     } else {
@@ -1204,8 +1205,7 @@ RefPtr<Curve> Convert(const Ark_Curve& src)
 template<>
 RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
-    auto peer = reinterpret_cast<ICurvePeer*>(src.ptr);
-    return peer ? peer->handler : nullptr;
+    return src ? src->handler : nullptr;
 }
 
 template<>
@@ -1268,8 +1268,7 @@ RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
 template<>
 RefPtr<PixelMap> Convert(const Ark_PixelMap& src)
 {
-    auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(src.ptr);
-    return pixelMapPeer ? pixelMapPeer->pixelMap : nullptr;
+    return src ? src->pixelMap : nullptr;
 }
 
 template<>
@@ -1311,9 +1310,8 @@ Dimension Convert(const Ark_Length& src)
 template<>
 Dimension Convert(const Ark_LengthMetrics& src)
 {
-    auto unit = OptConvert<DimensionUnit>(src.unit).value_or(DimensionUnit::VP);
-    auto value = Convert<float>(src.value);
-    return Dimension(value, unit);
+    CHECK_NULL_RETURN(src, {});
+    return src->value;
 }
 
 template<>

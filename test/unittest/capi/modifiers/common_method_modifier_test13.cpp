@@ -2013,7 +2013,7 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsTransitionTest, TestSi
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect> transitionHandler =
         AceType::Claim(new ChainedOpacityEffect(1.0f));
     peer.handler = transitionHandler;
-    auto arkEffect = Converter::ArkValue<Opt_TransitionEffect>(Ark_Materialized{.ptr=&peer});
+    auto arkEffect = Converter::ArkValue<Opt_TransitionEffect>(&peer);
 
     Ark_PopupOptions arkOptions = {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimationExtenderAccessor {
-void DestroyPeerImpl(AnimationExtenderPeer* peer)
+void DestroyPeerImpl(Ark_AnimationExtender peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_AnimationExtender CtorImpl()
 {
     return nullptr;
 }
@@ -31,10 +31,10 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetClipRectImpl(Ark_NativePointer peer,
-                     const Ark_Number* left,
-                     const Ark_Number* top,
-                     const Ark_Number* right,
-                     const Ark_Number* bottom)
+                     const Ark_Float32 left,
+                     const Ark_Float32 top,
+                     const Ark_Float32 right,
+                     const Ark_Float32 bottom)
 {
 }
 void OpenImplicitAnimationImpl(Ark_NativePointer peer,
@@ -44,8 +44,18 @@ void OpenImplicitAnimationImpl(Ark_NativePointer peer,
 void CloseImplicitAnimationImpl(Ark_NativePointer node)
 {
 }
-void StartDoubleAnimationImpl(Ark_NativePointer peer,
+void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
+{
+}
+void CloseImplicitAnimationImpl()
+{
+}
+void StartDoubleAnimationImpl(Ark_NativePointer node,
                               const Ark_DoubleAnimationParam* param)
+{
+}
+void AnimationTranslateImpl(Ark_NativePointer node,
+                            const Ark_TranslateOptions* options)
 {
 }
 } // AnimationExtenderAccessor
@@ -59,6 +69,7 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,
         AnimationExtenderAccessor::StartDoubleAnimationImpl,
+        AnimationExtenderAccessor::AnimationTranslateImpl,
     };
     return &AnimationExtenderAccessorImpl;
 }

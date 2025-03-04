@@ -36,7 +36,7 @@ namespace OHOS::Ace::NG::Converter {
     struct ListOptions {
         std::optional<int> initialIndex;
         std::optional<Dimension> space;
-        std::optional<Ark_NativePointer> scroller;
+        std::optional<Ark_Scroller> scroller;
     };
 
     struct NestedScrollModeOptions {
@@ -123,7 +123,7 @@ namespace OHOS::Ace::NG::Converter {
         return {
             .initialIndex = OptConvert<int>(src.initialIndex),
             .space = OptConvert<Dimension>(src.space),
-            .scroller = OptConvert<Ark_NativePointer>(src.scroller)
+            .scroller = OptConvert<Ark_Scroller>(src.scroller)
         };
     }
 }
@@ -160,7 +160,7 @@ void SetListOptionsImpl(Ark_NativePointer node,
     RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
     auto abstPeerPtrOpt = optionsOpt.value().scroller;
     CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = reinterpret_cast<ListScrollerPeer *>(*abstPeerPtrOpt);
+    auto peerImplPtr = *abstPeerPtrOpt;
     CHECK_NULL_VOID(peerImplPtr);
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);
@@ -303,13 +303,12 @@ void FrictionImpl(Ark_NativePointer node,
     ListModelNG::SetListFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
-                          const Ark_ChildrenMainSize* value)
+                          Ark_ChildrenMainSize value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto peer = reinterpret_cast<ChildrenMainSizePeer *>(value->ptr);
-    CHECK_NULL_VOID(peer);
+    auto peer = value;
     RefPtr<ListChildrenMainSize> handler = ListModelNG::GetOrCreateListChildrenMainSize(frameNode);
     peer->SetHandler(handler);
 }

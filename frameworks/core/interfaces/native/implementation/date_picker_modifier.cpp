@@ -252,8 +252,8 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, sensitivity);
 #endif
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Date_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Date_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -288,7 +288,7 @@ const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
         DatePickerAttributeModifier::OnDateChange0Impl,
         DatePickerAttributeModifier::OnDateChange1Impl,
         DatePickerAttributeModifier::DigitalCrownSensitivityImpl,
-        DatePickerAttributeModifier::__onChangeEvent_selectedImpl,
+        DatePickerAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIDatePickerModifierImpl;
 }

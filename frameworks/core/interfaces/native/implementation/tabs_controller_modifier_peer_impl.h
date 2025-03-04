@@ -71,4 +71,6 @@ private:
     Ace::WeakPtr<TabsControllerNG> controllerWeakPtr_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct TabsControllerPeer : public OHOS::Ace::NG::GeneratedModifier::TabsControllerPeerImpl {};
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TABS_CONTROLLER_PEER_IMPL_H

@@ -77,7 +77,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
     TextClockControllerPeer peer;
     Opt_TextClockOptions realInputValue = Converter::ArkValue<Opt_TextClockOptions>(Ark_TextClockOptions{
         .timeZoneOffset = Converter::ArkValue<Opt_Number>(0),
-        .controller = Converter::ArkValue<Opt_TextClockController>(Ark_TextClockController{&peer}),
+        .controller = Converter::ArkValue<Opt_TextClockController>(&peer),
     });
     modifier_->setTextClockOptions(node_, &realInputValue);
 

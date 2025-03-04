@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavExtenderAccessor {
-void DestroyPeerImpl(NavExtenderPeer* peer)
+void DestroyPeerImpl(Ark_NavExtender peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_NavExtender CtorImpl()
 {
     return nullptr;
 }
@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetUpdateStackCallbackImpl(const Ark_NavPathStack* peer,
+void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                 const NavExtender_OnUpdateStack* callback)
 {
 }

@@ -24,8 +24,18 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class GlobalScopeCommonAccessorTest : public AccessorTestBase<GENERATED_ArkUIGlobalScope_commonAccessor,
-    &GENERATED_ArkUIAccessors::getGlobalScope_commonAccessor, GlobalScope_commonPeer> {
+class GlobalScopeCommonAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIGlobalScopeAccessor,
+    &GENERATED_ArkUIAccessors::getGlobalScopeAccessor, void> {
+    void SetUp(void) override
+    {
+        // Skip AccessorTestCtorBase's setup, since we don't have peer_
+        AccessorTestBaseParent::SetUp();
+    }
+
+    void *CreatePeerInstance() override
+    {
+        return nullptr;
+    }
 };
 
 /**
@@ -48,9 +58,9 @@ HWTEST_F(GlobalScopeCommonAccessorTest, vp2pxTest, TestSize.Level1)
     Ark_Number arkVpValue1 = Converter::ArkValue<Ark_Number>(vpValue1);
     Ark_Number arkVpValue2 = Converter::ArkValue<Ark_Number>(vpValue2);
 
-    EXPECT_EQ(pxValue1, accessor_->vp2px(&arkVpValue1));
-    EXPECT_EQ(pxValue2, accessor_->vp2px(&arkVpValue2));
-    EXPECT_EQ(0, accessor_->vp2px(nullptr));
+    EXPECT_EQ(pxValue1, Converter::Convert<int32_t>(accessor_->vp2px(&arkVpValue1)));
+    EXPECT_EQ(pxValue2, Converter::Convert<int32_t>(accessor_->vp2px(&arkVpValue2)));
+    EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->vp2px(nullptr)));
 }
 
 /**
@@ -74,9 +84,9 @@ HWTEST_F(GlobalScopeCommonAccessorTest, px2vpTest, TestSize.Level1)
     Ark_Number arkPxValue1 = Converter::ArkValue<Ark_Number>(pxValue1);
     Ark_Number arkPxValue2 = Converter::ArkValue<Ark_Number>(pxValue2);
 
-    EXPECT_EQ(vpValue1, accessor_->px2vp(&arkPxValue1));
-    EXPECT_EQ(vpValue2, accessor_->px2vp(&arkPxValue2));
-    EXPECT_EQ(0, accessor_->px2vp(nullptr));
+    EXPECT_EQ(vpValue1, Converter::Convert<int32_t>(accessor_->px2vp(&arkPxValue1)));
+    EXPECT_EQ(vpValue2, Converter::Convert<int32_t>(accessor_->px2vp(&arkPxValue2)));
+    EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->px2vp(nullptr)));
 }
 
 /**
@@ -106,9 +116,9 @@ HWTEST_F(GlobalScopeCommonAccessorTest, fp2pxTest, TestSize.Level1)
     Ark_Number arkFpValue1 = Converter::ArkValue<Ark_Number>(fpValue1);
     Ark_Number arkFpValue2 = Converter::ArkValue<Ark_Number>(fpValue2);
 
-    EXPECT_EQ(pxValue1, accessor_->fp2px(&arkFpValue1));
-    EXPECT_EQ(pxValue2, accessor_->fp2px(&arkFpValue2));
-    EXPECT_EQ(0, accessor_->fp2px(nullptr));
+    EXPECT_EQ(pxValue1, Converter::Convert<int32_t>(accessor_->fp2px(&arkFpValue1)));
+    EXPECT_EQ(pxValue2, Converter::Convert<int32_t>(accessor_->fp2px(&arkFpValue2)));
+    EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->fp2px(nullptr)));
 }
 
 /**
@@ -142,9 +152,9 @@ HWTEST_F(GlobalScopeCommonAccessorTest, px2fpTest, TestSize.Level1)
     Ark_Number arkPxValue1 = Converter::ArkValue<Ark_Number>(pxValue1);
     Ark_Number arkPxValue2 = Converter::ArkValue<Ark_Number>(pxValue2);
 
-    EXPECT_EQ(fpValue1, accessor_->px2fp(&arkPxValue1));
-    EXPECT_EQ(fpValue2, accessor_->px2fp(&arkPxValue2));
-    EXPECT_EQ(0, accessor_->px2fp(nullptr));
+    EXPECT_EQ(fpValue1, Converter::Convert<int32_t>(accessor_->px2fp(&arkPxValue1)));
+    EXPECT_EQ(fpValue2, Converter::Convert<int32_t>(accessor_->px2fp(&arkPxValue2)));
+    EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->px2fp(nullptr)));
 }
 
 /**
@@ -176,9 +186,9 @@ HWTEST_F(GlobalScopeCommonAccessorTest, lpx2pxTest, TestSize.Level1)
     Ark_Number arkLpxValue1 = Converter::ArkValue<Ark_Number>(lpxValue1);
     Ark_Number arkLpxValue2 = Converter::ArkValue<Ark_Number>(lpxValue2);
 
-    EXPECT_EQ(pxValue1, accessor_->lpx2px(&arkLpxValue1));
-    EXPECT_EQ(pxValue2, accessor_->lpx2px(&arkLpxValue2));
-    EXPECT_EQ(0, accessor_->lpx2px(nullptr));
+    EXPECT_EQ(pxValue1, Converter::Convert<int32_t>(accessor_->lpx2px(&arkLpxValue1)));
+    EXPECT_EQ(pxValue2, Converter::Convert<int32_t>(accessor_->lpx2px(&arkLpxValue2)));
+    EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->lpx2px(nullptr)));
 }
 
 /**
@@ -210,47 +220,9 @@ HWTEST_F(GlobalScopeCommonAccessorTest, px2lpxTest, TestSize.Level1)
     Ark_Number arkPxValue1 = Converter::ArkValue<Ark_Number>(pxValue1);
     Ark_Number arkPxValue2 = Converter::ArkValue<Ark_Number>(pxValue2);
 
-    EXPECT_EQ(lpxValue1, accessor_->px2lpx(&arkPxValue1));
-    EXPECT_EQ(lpxValue2, accessor_->px2lpx(&arkPxValue2));
-    EXPECT_EQ(0, accessor_->px2lpx(nullptr));
-}
-
-/**
- * @tc.name: requestFocusTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GlobalScopeCommonAccessorTest, requestFocusTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->requestFocus, nullptr);
-
-    std::string inspectorKey = "inspectorKey";
-    Ark_String arkInspectorKey = Converter::ArkValue<Ark_String>(inspectorKey);
-
-    EXPECT_EQ(false, accessor_->requestFocus(&arkInspectorKey));
-    EXPECT_EQ(false, accessor_->requestFocus(nullptr));
-}
-
-/**
- * @tc.name: setCursorTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GlobalScopeCommonAccessorTest, setCursorTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setCursor, nullptr);
-    accessor_->setCursor(ARK_POINTER_STYLE_LOADING);
-}
-
-/**
- * @tc.name: restoreDefaultTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GlobalScopeCommonAccessorTest, restoreDefaultTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->restoreDefault, nullptr);
-    accessor_->restoreDefault();
+    EXPECT_EQ(lpxValue1, Converter::Convert<int32_t>(accessor_->px2lpx(&arkPxValue1)));
+    EXPECT_EQ(lpxValue2, Converter::Convert<int32_t>(accessor_->px2lpx(&arkPxValue2)));
+    EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->px2lpx(nullptr)));
 }
 
 /**

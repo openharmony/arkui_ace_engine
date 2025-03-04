@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuResultAccessor {
-void DestroyPeerImpl(WebContextMenuResultPeer* peer)
+void DestroyPeerImpl(Ark_WebContextMenuResult peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_WebContextMenuResult CtorImpl()
 {
     return new WebContextMenuResultPeer();
 }
@@ -32,32 +32,32 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CloseContextMenuImpl(WebContextMenuResultPeer* peer)
+void CloseContextMenuImpl(Ark_WebContextMenuResult peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Cancel();
 }
-void CopyImageImpl(WebContextMenuResultPeer* peer)
+void CopyImageImpl(Ark_WebContextMenuResult peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->CopyImage();
 }
-void CopyImpl(WebContextMenuResultPeer* peer)
+void CopyImpl(Ark_WebContextMenuResult peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Copy();
 }
-void PasteImpl(WebContextMenuResultPeer* peer)
+void PasteImpl(Ark_WebContextMenuResult peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Paste();
 }
-void CutImpl(WebContextMenuResultPeer* peer)
+void CutImpl(Ark_WebContextMenuResult peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Cut();
 }
-void SelectAllImpl(WebContextMenuResultPeer* peer)
+void SelectAllImpl(Ark_WebContextMenuResult peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->SelectAll();

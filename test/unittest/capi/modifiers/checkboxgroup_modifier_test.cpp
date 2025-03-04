@@ -210,7 +210,7 @@ HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Leve
 
     Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_selectAll(node_, &arkCallback);
+    modifier_->set_onChangeEvent_selectAll(node_, &arkCallback);
 
     std::vector<std::string> vec;
     CheckboxGroupResult groupResultAll(vec, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));

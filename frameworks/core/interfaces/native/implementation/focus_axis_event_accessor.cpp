@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FocusAxisEventAccessor {
-void DestroyPeerImpl(FocusAxisEventPeer* peer)
+void DestroyPeerImpl(Ark_FocusAxisEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_FocusAxisEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,14 +30,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetAxisMapImpl(FocusAxisEventPeer* peer,
+void SetAxisMapImpl(Ark_FocusAxisEvent peer,
                     const Map_AxisModel_Number* axisMap)
 {
 }
-void SetStopPropagationImpl(FocusAxisEventPeer* peer,
+Callback_Void GetStopPropagationImpl(Ark_FocusAxisEvent peer)
+{
+    return {};
+}
+void SetStopPropagationImpl(Ark_FocusAxisEvent peer,
                             const Callback_Void* stopPropagation)
 {
-    LOGE("FocusAxisEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
 }
 } // FocusAxisEventAccessor
 const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
@@ -47,6 +50,7 @@ const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
         FocusAxisEventAccessor::CtorImpl,
         FocusAxisEventAccessor::GetFinalizerImpl,
         FocusAxisEventAccessor::SetAxisMapImpl,
+        FocusAxisEventAccessor::GetStopPropagationImpl,
         FocusAxisEventAccessor::SetStopPropagationImpl,
     };
     return &FocusAxisEventAccessorImpl;
