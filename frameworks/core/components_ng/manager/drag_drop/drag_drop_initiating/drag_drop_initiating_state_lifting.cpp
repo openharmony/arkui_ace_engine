@@ -211,7 +211,8 @@ bool DragDropInitiatingStateLifting::CheckDoShowPreview(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(frameNode, false);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview()) {
+    bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
+    if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() || isMenuShow) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because of bind context menu");
         return false;
     }
