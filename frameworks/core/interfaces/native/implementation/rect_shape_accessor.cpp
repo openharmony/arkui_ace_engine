@@ -121,8 +121,7 @@ Ark_RectShape CtorImpl(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* o
             SetWidth(shape, width);
             auto height = Converter::OptConvert<Dimension>(rectShapeOptions.height);
             SetHeight(shape, height);
-            auto radius = Converter::GetOpt<Ark_Union_Number_String_Array_Union_Number_String>(
-                rectShapeOptions.radius);
+            auto radius = Converter::GetOpt(rectShapeOptions.radius);
             if (radius) {
                 ApplyRadius(radius.value(), shape);
             }

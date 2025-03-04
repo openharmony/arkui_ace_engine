@@ -28,10 +28,6 @@ namespace OHOS::Ace::NG {
 class ConvertorTest : public testing::Test {
 };
 
-namespace {
-const double EPSILON = 0.001;
-}
-
 /**
  * @tc.name:
  * @tc.desc:
@@ -126,11 +122,11 @@ HWTEST_F(ConvertorTest, GetOptTestValue, TestSize.Level1)
 {
     auto unionValue = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(5.2f);
     auto value = Converter::ArkValue<Opt_Union_Number_String>(unionValue);
-    std::optional<Ark_Union_Number_String> result = Converter::GetOpt<Ark_Union_Number_String>(value);
+    std::optional<Ark_Union_Number_String> result = Converter::GetOpt(value);
     ASSERT_TRUE(result);
     auto convValue = Converter::OptConvert<Dimension>(result.value());
     ASSERT_TRUE(convValue);
-    EXPECT_NEAR(convValue.value().Value(), 5.2f, EPSILON);
+    EXPECT_FLOAT_EQ(convValue.value().Value(), 5.2);
 }
 
 /**
@@ -141,7 +137,7 @@ HWTEST_F(ConvertorTest, GetOptTestValue, TestSize.Level1)
 HWTEST_F(ConvertorTest, GetOptTestEmpty, TestSize.Level1)
 {
     auto value = Converter::ArkValue<Opt_Union_Number_String>();
-    std::optional<Ark_Union_Number_String> result = Converter::GetOpt<Ark_Union_Number_String>(value);
+    std::optional<Ark_Union_Number_String> result = Converter::GetOpt(value);
     ASSERT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG
