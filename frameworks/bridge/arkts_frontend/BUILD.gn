@@ -23,5 +23,8 @@ ohos_source_set("arkts_frontend") {
   ]
 
   sources = [ "arkts_frontend.cpp" ]
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "hilog:libhilog",
+    "runtime_core:ani",
+  ]
 }

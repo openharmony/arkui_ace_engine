@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_KOALA_FRONTEND_KOALA_FRONTEND_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_KOALA_FRONTEND_KOALA_FRONTEND_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKTS_FRONTEND_H
+#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKTS_FRONTEND_H
 
 #include <unordered_map>
 
@@ -25,6 +25,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
+typedef struct __ani_env ani_env;
+
 namespace OHOS::Ace {
 /**
  * @brief Proxy class to interact with Koala frontend and static ArkTS runtime.
@@ -34,7 +36,7 @@ class ACE_EXPORT ArktsFrontend : public Frontend {
     DECLARE_ACE_TYPE(ArktsFrontend, Frontend);
 
 public:
-    explicit ArktsFrontend(void* runtime) : env_(reinterpret_cast<ets_env*>(runtime)) {}
+    explicit ArktsFrontend(void* runtime) : env_(reinterpret_cast<ani_env*>(runtime)) {}
     ~ArktsFrontend() override = default;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
@@ -195,7 +197,7 @@ public:
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
-    ets_env* env_; // ani_env
+    ani_env* env_; // ani_env
     bool foregroundFrontend_ = false;
 
     std::unordered_map<int32_t, void*> storageMap_;
@@ -205,4 +207,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_KOALA_FRONTEND_KOALA_FRONTEND_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKTS_FRONTEND_H
