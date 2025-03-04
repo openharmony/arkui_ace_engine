@@ -1781,4 +1781,24 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest007, TestSize.Level1)
     EXPECT_EQ(svgDom->root_->GetBaseAttributes().strokeState.GetHref(), "grad1");
     EXPECT_EQ(svgDom->root_->GetBaseAttributes().fillState.GetHref(), "grad1");
 }
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseStyleTest001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call ParseCssStyle
+     * @tc.expected: Execute function return value false
+     */
+    std::string str;
+    PushAttr callback = [&str](const std::string& key, const std::pair<std::string, std::string>& value) { str = key; };
+    SvgStyle::ParseCssStyle("", callback);
+    EXPECT_TRUE(str.empty());
+
+    SvgStyle::ParseCssStyle("body {font-style: oblique;}.normal {font-style: normal;}", callback);
+    EXPECT_FALSE(str.empty());
+}
 } // namespace OHOS::Ace::NG
