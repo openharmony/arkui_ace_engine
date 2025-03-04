@@ -2160,17 +2160,17 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     hostNode->SetIsOnAnimation(false);
-    if (preTopNavDestination) {
-        preTopNavDestination->SetIsOnAnimation(false);
-    }
-    if (newTopNavDestination) {
-        newTopNavDestination->SetIsOnAnimation(false);
-    }
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     do {
         if (replaceValue != 0) {
+            if (preTopNavDestination) {
+                preTopNavDestination->SetIsOnAnimation(false);
+            }
+            if (newTopNavDestination) {
+                newTopNavDestination->SetIsOnAnimation(false);
+            }
             hostNode->DealNavigationExit(preTopNavDestination, preTopNavDestination == nullptr);
             navigationStack_->UpdateReplaceValue(0);
             break;
@@ -2181,6 +2181,10 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             if (preNodeTransitionType != PageTransitionType::EXIT_POP) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");
                 return;
+            }
+            preTopNavDestination->SetIsOnAnimation(false);
+            if (newTopNavDestination && newTopNavDestination->GetTransitionType() == PageTransitionType::ENTER_POP) {
+                newTopNavDestination->SetIsOnAnimation(false);
             }
             auto preDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
             CHECK_NULL_VOID(preDestinationPattern);
@@ -2210,9 +2214,15 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
                 node = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
                 CHECK_NULL_VOID(node);
             }
+            if (newTopNavDestination && newTopNavDestination->GetTransitionType() == PageTransitionType::ENTER_PUSH) {
+                newTopNavDestination->SetIsOnAnimation(false);
+            }
             if (preNodeTransitionType != PageTransitionType::EXIT_PUSH) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");
                 return;
+            }
+            if (preTopNavDestination) {
+                preTopNavDestination->SetIsOnAnimation(false);
             }
             // recover event hub
             auto eventHub = node->GetEventHub<EventHub>();
