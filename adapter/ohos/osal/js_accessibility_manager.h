@@ -255,6 +255,7 @@ public:
         std::vector<std::string>& info) override;
 
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
+    bool IsScreenReaderEnabled() override;
 
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
         const RefPtr<PipelineBase>& context) override;

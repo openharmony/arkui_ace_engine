@@ -168,6 +168,8 @@ enum class AceAction : uint32_t {
     ACTION_CLEAR_SELECTION,
     ACTION_SET_CURSOR_POSITION,
     ACTION_EXEC_SUB_COMPONENT,
+    ACTION_NEXT_HTML_ITEM,
+    ACTION_PREVIOUS_HTML_ITEM,
 };
 
 struct AccessibilityValue {

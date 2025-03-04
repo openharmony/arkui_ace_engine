@@ -63,6 +63,8 @@ class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
+class WebAccessibilityChildTreeCallback;
+
 namespace {
 
 struct MouseClickInfo {
@@ -632,7 +634,7 @@ public:
         int32_t direction);
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
-    void SetAccessibilityState(bool state);
+    void SetAccessibilityState(bool state, bool isDelayed = false);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
@@ -1187,7 +1189,7 @@ private:
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     TextBlurCallback textBlurCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
-    std::unordered_map<int32_t, std::shared_ptr<AccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
+    std::unordered_map<int32_t, std::shared_ptr<WebAccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;

@@ -109,6 +109,7 @@ constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
 constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
+constexpr uint32_t ACCESSIBILITY_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
@@ -785,7 +786,7 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
 
 WebDelegate::~WebDelegate()
 {
-    SetAccessibilityState(false);
+    SetAccessibilityState(false, false);
     OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
@@ -4906,26 +4907,35 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     CHECK_NULL_VOID(webPattern);
     auto accessibilityManager = context->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
-        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
-    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED ||
-               eventType == AccessibilityEventType::CLICK) {
-        webPattern->ClearFocusedAccessibilityId();
-    } else if (eventType == AccessibilityEventType::PAGE_CHANGE || eventType == AccessibilityEventType::SCROLL_END) {
-        webPattern->UpdateFocusedAccessibilityId();
+    if (accessibilityId != 0) {
+        if (accessibilityManager->IsScreenReaderEnabled()) {
+            if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
+                webPattern->UpdateFocusedAccessibilityId(accessibilityId);
+            } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
+                webPattern->ClearFocusedAccessibilityId();
+            } else if (eventType == AccessibilityEventType::CHANGE) {
+                webPattern->UpdateFocusedAccessibilityId();
+            }
+        }
+        if (eventType == AccessibilityEventType::FOCUS) {
+            TextBlurReportByFocusEvent(accessibilityId);
+        }
+        if (eventType == AccessibilityEventType::CLICK) {
+            WebComponentClickReport(accessibilityId);
+        }
+        if (eventType == AccessibilityEventType::BLUR) {
+            TextBlurReportByBlurEvent(accessibilityId);
+        }
+        event.nodeId = accessibilityId;
+        event.type = eventType;
+        accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
+    } else {
+        auto webNode = webPattern->GetHost();
+        CHECK_NULL_VOID(webNode);
+        event.nodeId = webNode->GetAccessibilityId();
+        event.type = eventType;
+        accessibilityManager->SendAccessibilityAsyncEvent(event);
     }
-    if (eventType == AccessibilityEventType::CLICK) {
-        WebComponentClickReport(accessibilityId);
-    }
-    if (eventType == AccessibilityEventType::FOCUS) {
-        TextBlurReportByFocusEvent(accessibilityId);
-    }
-    if (eventType == AccessibilityEventType::BLUR) {
-        TextBlurReportByBlurEvent(accessibilityId);
-    }
-    event.nodeId = accessibilityId;
-    event.type = eventType;
-    accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
 }
 
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
@@ -6798,21 +6808,22 @@ bool WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
     if (!accessibilityState_) {
         return false;
     }
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, false);
     uint32_t nwebAction = static_cast<uint32_t>(action);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityId, nwebAction, actionArguments]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
-    return true;
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->PerformActionV2(accessibilityId, nwebAction, actionArguments);
 }
 
-void WebDelegate::SetAccessibilityState(bool state)
+bool WebDelegate::GetAccessibilityNodeRectById(
+    int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY)
+{
+    if (!accessibilityState_) {
+        return false;
+    }
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->GetAccessibilityNodeRectById(accessibilityId, width, height, offsetX, offsetY);
+}
+
+void WebDelegate::SetAccessibilityState(bool state, bool isDelayed)
 {
     if (state == accessibilityState_) {
         return;
@@ -6821,19 +6832,18 @@ void WebDelegate::SetAccessibilityState(bool state)
     if (state) {
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
+        uint32_t delayedTime = 0;
+        if (isDelayed) {
+            delayedTime = ACCESSIBILITY_DELAY_MILLISECONDS;
+        }
+        context->GetTaskExecutor()->PostDelayedTask(
             [weak = WeakClaim(this), state]() {
                 auto delegate = weak.Upgrade();
                 CHECK_NULL_VOID(delegate);
                 CHECK_NULL_VOID(delegate->nweb_);
                 delegate->nweb_->SetAccessibilityState(state);
-                auto accessibilityEventListenerImpl =
-                    std::make_shared<AccessibilityEventListenerImpl>();
-                CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+            TaskExecutor::TaskType::PLATFORM, delayedTime, "ArkUIWebSetAccessibilityState");
     } else {
         CHECK_NULL_VOID(nweb_);
         nweb_->SetAccessibilityState(state);

@@ -338,7 +338,8 @@ public:
         if (!pattern->OnAccessibilityChildTreeRegister()) {
             return false;
         }
-        pattern->SetAccessibilityState(true);
+        pattern->SetAccessibilityState(true, isDelayed_);
+        isDelayed_ = false;
         isReg_ = true;
         return true;
     }
@@ -384,8 +385,14 @@ public:
         isReg_ = false;
     }
 
+    void SetIsDelayed(bool isDelayed)
+    {
+        isDelayed_ = isDelayed;
+    }
+
 private:
     bool isReg_ = false;
+    bool isDelayed_ = false;
     WeakPtr<WebPattern> weakPattern_;
 };
 
@@ -6369,23 +6376,22 @@ bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
     return delegate_->ExecuteAction(accessibilityId, action, actionArguments);
 }
 
-void WebPattern::SetAccessibilityState(bool state)
+void WebPattern::SetAccessibilityState(bool state, bool isDelayed)
 {
     CHECK_NULL_VOID(delegate_);
     focusedAccessibilityId_ = -1;
     if (!state) {
-        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
-            || inspectorAccessibilityEnable_ || textBlurAccessibilityEnable_) {
-                return;
+        if (!accessibilityState_ || inspectorAccessibilityEnable_ || textBlurAccessibilityEnable_) {
+            return;
         }
         accessibilityState_ = state;
-        delegate_->SetAccessibilityState(state);
+        delegate_->SetAccessibilityState(state, isDelayed);
         return;
     }
 
     if (accessibilityState_ != state) {
         accessibilityState_ = state;
-        delegate_->SetAccessibilityState(state);
+        delegate_->SetAccessibilityState(state, isDelayed);
     }
 }
 
@@ -6576,14 +6582,24 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         focusedAccessibilityId_ = accessibilityId;
     }
     RectT<int32_t> rect;
-    if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+    if (focusedAccessibilityId_ <= 0) {
+        focusedAccessibilityId_ = -1;
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
     }
-
-    renderContext->UpdateAccessibilityFocusRect(rect);
-    renderContext->UpdateAccessibilityFocus(true);
+    if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+        if (rect.Width() <= 1 || rect.Height() <= 1) {
+            renderContext->ResetAccessibilityFocusRect();
+            renderContext->UpdateAccessibilityFocus(false);
+        } else {
+            renderContext->UpdateAccessibilityFocusRect(rect);
+            renderContext->UpdateAccessibilityFocus(true);
+        }
+    } else {
+        renderContext->ResetAccessibilityFocusRect();
+        renderContext->UpdateAccessibilityFocus(false);
+    }
 }
 
 void WebPattern::ClearFocusedAccessibilityId()
@@ -6615,13 +6631,16 @@ bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t ac
         return false;
     }
     CHECK_NULL_RETURN(delegate_, false);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
-        delegate_->GetAccessibilityNodeInfoById(accessibilityId);
-    if (!info) {
+    int32_t rectWidth = 0;
+    int32_t rectHeight = 0;
+    int32_t rectX = 0;
+    int32_t rectY = 0;
+    bool result = delegate_->GetAccessibilityNodeRectById(accessibilityId, &rectWidth, &rectHeight, &rectX, &rectY);
+    if (!result) {
         return false;
     }
 
-    paintRect.SetRect(info->GetRectX(), info->GetRectY(), info->GetRectWidth(), info->GetRectHeight());
+    paintRect.SetRect(rectX, rectY, rectWidth, rectHeight);
     return true;
 }
 
@@ -7012,6 +7031,7 @@ void WebPattern::InitializeAccessibility()
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId,
         accessibilityChildTreeCallback_[instanceId_]);
     if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_[instanceId_]->SetIsDelayed(true);
         accessibilityChildTreeCallback_[instanceId_]->OnRegister(pipeline->GetWindowId(),
             accessibilityManager->GetTreeId());
     }
