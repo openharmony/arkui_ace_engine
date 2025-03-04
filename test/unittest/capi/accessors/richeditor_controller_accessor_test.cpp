@@ -154,26 +154,6 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
     dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(decoration, ctx);
 }
 
-void AssignArkValue(Ark_TextAlign& dst, const OHOS::Ace::TextAlign& src)
-{
-    switch (src) {
-        case TextAlign::START: dst = ARK_TEXT_ALIGN_START; break;
-        case TextAlign::CENTER: dst = ARK_TEXT_ALIGN_CENTER; break;
-        case TextAlign::END: dst = ARK_TEXT_ALIGN_END; break;
-        default: LOGE("Unexpected enum value in TextAlign: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src)
-{
-    switch (src) {
-        case WordBreak::NORMAL: dst = ARK_WORD_BREAK_NORMAL; break;
-        case WordBreak::BREAK_ALL: dst = ARK_WORD_BREAK_BREAK_ALL; break;
-        case WordBreak::BREAK_WORD: dst = ARK_WORD_BREAK_BREAK_WORD; break;
-        default: LOGE("Unexpected enum value in WordBreak: %{public}d", src);
-    }
-}
-
 void AssignArkValue(Ark_LineBreakStrategy& dst, const OHOS::Ace::LineBreakStrategy& src)
 {
     switch (src) {

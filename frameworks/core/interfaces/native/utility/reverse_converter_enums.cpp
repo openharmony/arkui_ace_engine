@@ -595,6 +595,29 @@ void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src)
     }
 }
 
+void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src)
+{
+    switch (src) {
+        case TextAlign::LEFT: dst = ARK_TEXT_ALIGN_START; break;
+        case TextAlign::RIGHT: dst = ARK_TEXT_ALIGN_END; break;
+        case TextAlign::CENTER: dst = ARK_TEXT_ALIGN_CENTER; break;
+        case TextAlign::JUSTIFY: dst = ARK_TEXT_ALIGN_JUSTIFY; break;
+        case TextAlign::START: dst = ARK_TEXT_ALIGN_START; break;
+        case TextAlign::END: dst = ARK_TEXT_ALIGN_END; break;
+        default: LOGE("Unexpected enum value in TextAlign: %{public}d", src);
+    }
+}
+void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src)
+{
+    switch (src) {
+        case TextOverflow::NONE: dst = ARK_TEXT_OVERFLOW_NONE; break;
+        case TextOverflow::CLIP: dst = ARK_TEXT_OVERFLOW_CLIP; break;
+        case TextOverflow::ELLIPSIS: dst = ARK_TEXT_OVERFLOW_ELLIPSIS; break;
+        case TextOverflow::MARQUEE: dst = ARK_TEXT_OVERFLOW_MARQUEE; break;
+        case TextOverflow::DEFAULT: dst = ARK_TEXT_OVERFLOW_NONE; break;
+        default: LOGE("Unexpected enum value in TextOverflow: %{public}d", src);
+    }
+}
 void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
 {
     switch (src) {
@@ -821,6 +844,15 @@ void AssignArkValue(Ark_EffectDirection& dst, const OHOS::Ace::CommonSubType& sr
         case OHOS::Ace::CommonSubType::DOWN: dst = ARK_EFFECT_DIRECTION_DOWN; break;
         case OHOS::Ace::CommonSubType::UP: dst = ARK_EFFECT_DIRECTION_UP; break;
         default: dst = static_cast<Ark_EffectDirection>(-1);
+    }
+}
+void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src)
+{
+    switch (src) {
+        case WordBreak::NORMAL: dst = ARK_WORD_BREAK_NORMAL; break;
+        case WordBreak::BREAK_ALL: dst = ARK_WORD_BREAK_BREAK_ALL; break;
+        case WordBreak::BREAK_WORD: dst = ARK_WORD_BREAK_BREAK_WORD; break;
+        default: LOGE("Unexpected enum value in WordBreak: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
