@@ -3390,8 +3390,8 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     NG::PaddingProperty paddings;
-    padding.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
-    padding.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
+    paddings.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
+    paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
     menuParam.layoutRegionMargin = paddings;
     menuParam.enableMenuHideEffect = true;
     menuParam.isShow = true;
