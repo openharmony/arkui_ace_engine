@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import SelectBootcampTest from './ButtonsAndSelections/SelectBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  SelectBootcampTest();
 }
