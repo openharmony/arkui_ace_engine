@@ -23,6 +23,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
+#include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
@@ -38,14 +39,16 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components/common/properties/effect_option.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/outline_style.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/theme_utils.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
+
+class PipelineContext;
 
 constexpr double CENTER_OFFSET = 50.0;
 constexpr double BOX_BEGIN_SIZE = 0.0;
@@ -579,57 +582,7 @@ public:
     }
 
     void SetGradient(const Gradient& gradient, const WeakPtr<PipelineContext>& context = nullptr,
-        const RenderNodeAnimationCallback& callback = nullptr)
-    {
-        gradient_ = gradient;
-        if (callback) {
-            switch (gradient_.GetType()) {
-                case GradientType::LINEAR:
-                    if (gradient_.GetLinearGradient().angle) {
-                        gradient_.GetLinearGradient().angle->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    break;
-                case GradientType::SWEEP:
-                    if (gradient_.GetSweepGradient().centerX) {
-                        gradient_.GetSweepGradient().centerX->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    if (gradient_.GetSweepGradient().centerY) {
-                        gradient_.GetSweepGradient().centerY->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    if (gradient_.GetSweepGradient().startAngle) {
-                        gradient_.GetSweepGradient().startAngle->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    if (gradient_.GetSweepGradient().endAngle) {
-                        gradient_.GetSweepGradient().endAngle->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    if (gradient_.GetSweepGradient().rotation) {
-                        gradient_.GetSweepGradient().rotation->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    break;
-                case GradientType::RADIAL:
-                    if (gradient_.GetRadialGradient().radialHorizontalSize) {
-                        gradient_.GetRadialGradient().radialHorizontalSize->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    if (gradient_.GetRadialGradient().radialVerticalSize) {
-                        gradient_.GetRadialGradient().radialVerticalSize->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    if (gradient_.GetRadialGradient().radialCenterX) {
-                        gradient_.GetRadialGradient().radialCenterX->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    if (gradient_.GetRadialGradient().radialCenterY) {
-                        gradient_.GetRadialGradient().radialCenterY->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+        const RenderNodeAnimationCallback& callback = nullptr);
 
     void SetBorderImageGradient(const Gradient& gradient)
     {

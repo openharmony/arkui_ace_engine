@@ -65,6 +65,12 @@ const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
+ScrollablePattern::ScrollablePattern() = default;
+
+ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+    : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+{}
+
 ScrollablePattern::~ScrollablePattern()
 {
     if (AnimateRunning()) {
@@ -4133,5 +4139,21 @@ void ScrollablePattern::SetOnHiddenChangeForParent()
         };
         navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
     }
+}
+
+bool ScrollablePattern::IsRestrictBoundary()
+{
+    return !scrollEffect_ || scrollEffect_->IsRestrictBoundary();
+}
+
+bool ScrollablePattern::IsScrollableSpringEffect() const
+{
+    CHECK_NULL_RETURN(scrollEffect_, false);
+    return scrollEffect_->IsSpringEffect();
+}
+
+const RefPtr<ScrollEdgeEffect>& ScrollablePattern::GetScrollEdgeEffect() const
+{
+    return scrollEffect_;
 }
 } // namespace OHOS::Ace::NG

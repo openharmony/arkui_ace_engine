@@ -29,6 +29,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/common/display_info.h"
 
 namespace OHOS::Ace {
 constexpr int32_t INSTANCE_ID_BIT = 24;

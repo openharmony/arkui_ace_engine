@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
+#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 constexpr int32_t DUMP_START_NUMBER = 4;

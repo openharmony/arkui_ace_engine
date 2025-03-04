@@ -19,6 +19,10 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 
+namespace OHOS::Ace {
+class Window;
+}
+
 namespace OHOS::Ace::NG {
 class TransparentNodeDetector {
 public:

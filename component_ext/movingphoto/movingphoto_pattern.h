@@ -25,7 +25,6 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/touch_event.h"

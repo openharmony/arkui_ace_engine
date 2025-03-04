@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/syntax/content_slot_node.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATOR_NAVIGATOR_TYPE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATOR_NAVIGATOR_TYPE_H
 
-#include "core/pipeline/base/element_register.h"
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
 
-RefPtr<ContentSlotNode> ContentSlotNode::GetOrCreateContentSlot(int32_t nodeId)
-{
-    auto node = ElementRegister::GetInstance()->GetSpecificItemById<ContentSlotNode>(nodeId);
-    if (node) {
-        return node;
-    }
-    node = MakeRefPtr<ContentSlotNode>(nodeId);
-    ElementRegister::GetInstance()->AddUINode(node);
-    return node;
-}
+enum class NavigatorType {
+    DEFAULT = 0,
+    PUSH,
+    REPLACE,
+    BACK
+};
 
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATOR_NAVIGATOR_TYPE_H

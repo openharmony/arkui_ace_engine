@@ -74,6 +74,10 @@ const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
 } // namespace
 
+TabBarPattern::TabBarPattern() = default;
+
+TabBarPattern::~TabBarPattern() = default;
+
 void TabBarPattern::SetController(const RefPtr<SwiperController>& controller)
 {
     swiperController_ = controller;

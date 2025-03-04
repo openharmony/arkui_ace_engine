@@ -31,6 +31,7 @@
 #include "core/components/image/image_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 struct ACE_FORCE_EXPORT ImageInfoConfig {

@@ -83,6 +83,11 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/event/key_event.h"
 
+namespace OHOS::Ace::NG {
+constexpr uint32_t DEFAULT_GRID_SPAN = 1;
+constexpr int32_t DEFAULT_GRID_OFFSET = 0;
+}
+
 namespace OHOS::Ace {
 namespace {
 const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";

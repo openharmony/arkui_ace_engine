@@ -35,10 +35,12 @@
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 struct DragNotifyMsg;
+struct KeyEvent;
 class UnifiedData;
 class Subwindow;
 }
@@ -132,6 +134,7 @@ constexpr float DEFALUT_DRAG_PPIXELMAP_SCALE = 1.05f;
 constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
 
 class EventHub;
+class PipelineContext;
 
 // The gesture event hub is mainly used to handle common gesture events.
 class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
