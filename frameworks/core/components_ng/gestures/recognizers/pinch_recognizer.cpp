@@ -124,7 +124,7 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     }
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch axis start, state: %{public}d", event.touchEventId,
         refereeState_);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (refereeState_ == RefereeState::READY &&
             (NearEqual(event.pinchAxisScale, 1.0) ||
                 (IsCtrlBeingPressed(event) && event.sourceTool != SourceTool::TOUCHPAD))) {
