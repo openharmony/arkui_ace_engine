@@ -555,7 +555,7 @@ typedef enum {
 /**
  * @brief Enumerates the modes of the date picker.
  *
- * @since 16
+ * @since 18
  */
 typedef enum {
     /** A mode that displays the date in months, days of month, and years. */

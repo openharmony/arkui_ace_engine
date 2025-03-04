@@ -3515,7 +3515,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].f32: minimum font scale, in fp.
     *
-    * @since 16
+    * @since 18
     */
     NODE_BUTTON_MIN_FONT_SCALE,
 
@@ -3528,7 +3528,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].f32: maximum font scale, in fp.
     *
-    * @since 16
+    * @since 18
     */
     NODE_BUTTON_MAX_FONT_SCALE,
 
@@ -3894,7 +3894,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: the mode. The value is and enum of {@link ArkUI_DatePickerMode}.\n.
      *
-     * @since 16
+     * @since 18
      */
     NODE_DATE_PICKER_MODE = 13007,
     /**
@@ -3908,7 +3908,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: whether to feedback.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_DATE_PICKER_ENABLE_HAPTIC_FEEDBACK = 13008,
     /**
@@ -4018,7 +4018,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: time. The default value is <b>"00:00:00"</b>.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_START = 14005,
     /**
@@ -4031,7 +4031,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: time. The default value is <b>"23:59:59"</b>.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_END = 14006,
 
@@ -4045,7 +4045,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: whether to enable cascade.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_ENABLE_CASCADE = 14007,
 
@@ -4219,7 +4219,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: whether to feedback.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TEXT_PICKER_ENABLE_HAPTIC_FEEDBACK = 15010,
     /**
@@ -4301,7 +4301,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: date. \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_CALENDAR_PICKER_START = 16004,
     /**
@@ -4314,7 +4314,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: date. \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_CALENDAR_PICKER_END = 16005,
     /**
@@ -6121,7 +6121,7 @@ typedef enum {
     * ...\n
     * value[n].f32: percentage of total width.\n
     *
-    * @since 16
+    * @since 18
     */
     NODE_TEXT_PICKER_COLUMN_WIDTHS = 15009,
     /**
