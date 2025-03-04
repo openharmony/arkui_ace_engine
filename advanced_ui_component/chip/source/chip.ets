@@ -988,7 +988,7 @@ export struct ChipComponent {
     this.lgListener.off("change")
     if (this.callbackId) {
       this.getUIContext()
-        .getHostContext()
+      ?.getHostContext()
       ?.getApplicationContext()
       ?.off('environment', this.callbackId);
       this.callbackId = void (0)
