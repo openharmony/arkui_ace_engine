@@ -57,6 +57,8 @@ const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
 const int32_t PARAM_ZERO = 0;
 const int32_t PARAM_ONE = 1;
 const int32_t PARAM_TWO = 2;
+constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
+constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 
 void EraseSpace(std::string& data)
 {
@@ -3387,6 +3389,11 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     }
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
+    NG::PaddingProperty paddings;
+    padding.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
+    padding.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
+    menuParam.layoutRegionMargin = paddings;
+    menuParam.enableEndDragEffect = true;
     menuParam.isShow = true;
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
