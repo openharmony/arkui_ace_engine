@@ -47,6 +47,7 @@ struct AccessibilityHoverForThirdState {
     std::vector<int64_t> nodesHovering;
     TimeStamp time;
     bool idle = true;
+    bool thirdOperationIdle = true;
 };
 
 struct AccessibilityHoverForThirdConfig {
@@ -55,7 +56,6 @@ struct AccessibilityHoverForThirdConfig {
     SourceType sourceType = SourceType::NONE;
     NG::AccessibilityHoverEventType eventType = NG::AccessibilityHoverEventType::ENTER;
     TimeStamp time = std::chrono::high_resolution_clock::now();
-    RefPtr<NG::FrameNode> hostNode;
     RefPtr<NG::PipelineContext> context;
 };
 
@@ -96,6 +96,8 @@ public:
     bool ClearThirdAccessibilityFocus(const RefPtr<NG::FrameNode>& hostNode);
 
 private:
+    void HandleAccessibilityHoverForThirdInner(
+        const AccessibilityHoverForThirdConfig& config);
     void ResetHoverForThirdState();
     AccessibilityHoverTestPathForThird HoverPathForThird(
         const int64_t hostElementId,

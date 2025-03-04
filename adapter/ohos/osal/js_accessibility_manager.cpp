@@ -7388,7 +7388,6 @@ void JsAccessibilityManager::TransferThirdProviderHoverEvent(
     config.sourceType = source;
     config.eventType = eventType;
     config.time = time;
-    config.hostNode = frameNode;
     config.context = ngPipeline;
     HandleAccessibilityHoverForThird(config);
 }
