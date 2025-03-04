@@ -180,9 +180,6 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 void JSButton::SetType(const JSCallbackInfo& info)
 {
     int32_t value = static_cast<int32_t>(ButtonType::CAPSULE);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        value = static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE);
-    }
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     }

@@ -406,13 +406,8 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
     if (type.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, type.value());
     } else {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            // undefined use ROUNDED_RECTANGLE type.
-            ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
-        } else {
-            // undefined use capsule type.
-            ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
-        }
+        // undefined use capsule type.
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
     }
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -601,15 +596,7 @@ void ButtonModelNG::ResetBorderRadius()
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
 {
     ButtonType value = ButtonType::CAPSULE;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        value = ButtonType::ROUNDED_RECTANGLE;
-        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
-                                                        frameNode, ButtonType::ROUNDED_RECTANGLE);
-    } else {
-        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
-                                                        frameNode, ButtonType::CAPSULE);
-    }
-
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value, frameNode, ButtonType::CAPSULE);
     return value;
 }
 
