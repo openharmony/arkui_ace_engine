@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HttpAuthHandlerAccessor {
-void DestroyPeerImpl(HttpAuthHandlerPeer* peer)
+void DestroyPeerImpl(Ark_HttpAuthHandler peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_HttpAuthHandler CtorImpl()
 {
     return nullptr;
 }
@@ -30,18 +30,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer,
+Ark_Boolean ConfirmImpl(Ark_HttpAuthHandler peer,
                         const Ark_String* userName,
                         const Ark_String* password)
 {
-    return 0;
+    return {};
 }
-void CancelImpl(HttpAuthHandlerPeer* peer)
+void CancelImpl(Ark_HttpAuthHandler peer)
 {
 }
-Ark_Boolean IsHttpAuthInfoSavedImpl(HttpAuthHandlerPeer* peer)
+Ark_Boolean IsHttpAuthInfoSavedImpl(Ark_HttpAuthHandler peer)
 {
-    return 0;
+    return {};
 }
 } // HttpAuthHandlerAccessor
 const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor()

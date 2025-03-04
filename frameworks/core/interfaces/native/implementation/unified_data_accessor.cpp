@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UnifiedDataAccessor {
-void DestroyPeerImpl(UnifiedDataPeer* peer)
+void DestroyPeerImpl(Ark_UnifiedData peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_UnifiedData CtorImpl()
 {
     return nullptr;
 }
@@ -30,13 +30,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean HasTypeImpl(UnifiedDataPeer* peer,
+Ark_Boolean HasTypeImpl(Ark_UnifiedData peer,
                         const Ark_String* UnifiedData_type)
 {
-    return 0;
+    return {};
 }
-void GetTypesImpl(UnifiedDataPeer* peer)
+Array_String GetTypesImpl(Ark_UnifiedData peer)
 {
+    return {};
 }
 } // UnifiedDataAccessor
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor()

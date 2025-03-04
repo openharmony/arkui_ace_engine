@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MouseEventAccessor {
-void DestroyPeerImpl(MouseEventPeer* peer)
+void DestroyPeerImpl(Ark_MouseEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_MouseEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,87 +30,91 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetButtonImpl(MouseEventPeer* peer)
+Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetButtonImpl(MouseEventPeer* peer,
+void SetButtonImpl(Ark_MouseEvent peer,
                    Ark_MouseButton button)
 {
 }
-Ark_NativePointer GetActionImpl(MouseEventPeer* peer)
+Ark_MouseAction GetActionImpl(Ark_MouseEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetActionImpl(MouseEventPeer* peer,
+void SetActionImpl(Ark_MouseEvent peer,
                    Ark_MouseAction action)
 {
 }
-Ark_Int32 GetDisplayXImpl(MouseEventPeer* peer)
+Ark_Number GetDisplayXImpl(Ark_MouseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetDisplayXImpl(MouseEventPeer* peer,
+void SetDisplayXImpl(Ark_MouseEvent peer,
                      const Ark_Number* displayX)
 {
 }
-Ark_Int32 GetDisplayYImpl(MouseEventPeer* peer)
+Ark_Number GetDisplayYImpl(Ark_MouseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetDisplayYImpl(MouseEventPeer* peer,
+void SetDisplayYImpl(Ark_MouseEvent peer,
                      const Ark_Number* displayY)
 {
 }
-Ark_Int32 GetWindowXImpl(MouseEventPeer* peer)
+Ark_Number GetWindowXImpl(Ark_MouseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetWindowXImpl(MouseEventPeer* peer,
+void SetWindowXImpl(Ark_MouseEvent peer,
                     const Ark_Number* windowX)
 {
 }
-Ark_Int32 GetWindowYImpl(MouseEventPeer* peer)
+Ark_Number GetWindowYImpl(Ark_MouseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetWindowYImpl(MouseEventPeer* peer,
+void SetWindowYImpl(Ark_MouseEvent peer,
                     const Ark_Number* windowY)
 {
 }
-Ark_Int32 GetScreenXImpl(MouseEventPeer* peer)
+Ark_Number GetScreenXImpl(Ark_MouseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetScreenXImpl(MouseEventPeer* peer,
+void SetScreenXImpl(Ark_MouseEvent peer,
                     const Ark_Number* screenX)
 {
 }
-Ark_Int32 GetScreenYImpl(MouseEventPeer* peer)
+Ark_Number GetScreenYImpl(Ark_MouseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetScreenYImpl(MouseEventPeer* peer,
+void SetScreenYImpl(Ark_MouseEvent peer,
                     const Ark_Number* screenY)
 {
 }
-Ark_Int32 GetXImpl(MouseEventPeer* peer)
+Ark_Number GetXImpl(Ark_MouseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetXImpl(MouseEventPeer* peer,
+void SetXImpl(Ark_MouseEvent peer,
               const Ark_Number* x)
 {
 }
-Ark_Int32 GetYImpl(MouseEventPeer* peer)
+Ark_Number GetYImpl(Ark_MouseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetYImpl(MouseEventPeer* peer,
+void SetYImpl(Ark_MouseEvent peer,
               const Ark_Number* y)
 {
 }
-void SetStopPropagationImpl(MouseEventPeer* peer,
+Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
+{
+    return {};
+}
+void SetStopPropagationImpl(Ark_MouseEvent peer,
                             const Callback_Void* stopPropagation)
 {
 }
@@ -141,6 +145,7 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetXImpl,
         MouseEventAccessor::GetYImpl,
         MouseEventAccessor::SetYImpl,
+        MouseEventAccessor::GetStopPropagationImpl,
         MouseEventAccessor::SetStopPropagationImpl,
     };
     return &MouseEventAccessorImpl;

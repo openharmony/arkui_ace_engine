@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentTransitionProxyAccessor {
-void DestroyPeerImpl(TabContentTransitionProxyPeer* peer)
+void DestroyPeerImpl(Ark_TabContentTransitionProxy peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TabContentTransitionProxy CtorImpl()
 {
     return nullptr;
 }
@@ -30,22 +30,22 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void FinishTransitionImpl(TabContentTransitionProxyPeer* peer)
+void FinishTransitionImpl(Ark_TabContentTransitionProxy peer)
 {
 }
-Ark_Int32 GetFromImpl(TabContentTransitionProxyPeer* peer)
+Ark_Number GetFromImpl(Ark_TabContentTransitionProxy peer)
 {
-    return 0;
+    return {};
 }
-void SetFromImpl(TabContentTransitionProxyPeer* peer,
+void SetFromImpl(Ark_TabContentTransitionProxy peer,
                  const Ark_Number* from)
 {
 }
-Ark_Int32 GetToImpl(TabContentTransitionProxyPeer* peer)
+Ark_Number GetToImpl(Ark_TabContentTransitionProxy peer)
 {
-    return 0;
+    return {};
 }
-void SetToImpl(TabContentTransitionProxyPeer* peer,
+void SetToImpl(Ark_TabContentTransitionProxy peer,
                const Ark_Number* to)
 {
 }

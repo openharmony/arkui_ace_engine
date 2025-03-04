@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
-void DestroyPeerImpl(TextContentControllerBasePeer* peer)
+void DestroyPeerImpl(Ark_TextContentControllerBase peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TextContentControllerBase CtorImpl()
 {
     return nullptr;
 }
@@ -30,17 +30,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
+Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
+Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
+Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {
-    return 0;
+    return {};
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()

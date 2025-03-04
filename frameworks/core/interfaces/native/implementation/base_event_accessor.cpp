@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseEventAccessor {
-void DestroyPeerImpl(BaseEventPeer* peer)
+void DestroyPeerImpl(Ark_BaseEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_BaseEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,84 +30,85 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetModifierKeyStateImpl(BaseEventPeer* peer,
+Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
+                                    Ark_BaseEvent peer,
                                     const Array_String* keys)
 {
-    return 0;
+    return {};
 }
-void SetTargetImpl(BaseEventPeer* peer,
+void SetTargetImpl(Ark_BaseEvent peer,
                    const Ark_EventTarget* target)
 {
 }
-Ark_Int32 GetTimestampImpl(BaseEventPeer* peer)
+Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetTimestampImpl(BaseEventPeer* peer,
+void SetTimestampImpl(Ark_BaseEvent peer,
                       const Ark_Number* timestamp)
 {
 }
-Ark_NativePointer GetSourceImpl(BaseEventPeer* peer)
+Ark_SourceType GetSourceImpl(Ark_BaseEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetSourceImpl(BaseEventPeer* peer,
+void SetSourceImpl(Ark_BaseEvent peer,
                    Ark_SourceType source)
 {
 }
-Ark_Int32 GetAxisHorizontalImpl(BaseEventPeer* peer)
+Ark_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetAxisHorizontalImpl(BaseEventPeer* peer,
+void SetAxisHorizontalImpl(Ark_BaseEvent peer,
                            const Ark_Number* axisHorizontal)
 {
 }
-Ark_Int32 GetAxisVerticalImpl(BaseEventPeer* peer)
+Ark_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetAxisVerticalImpl(BaseEventPeer* peer,
+void SetAxisVerticalImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisVertical)
 {
 }
-Ark_Int32 GetPressureImpl(BaseEventPeer* peer)
+Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetPressureImpl(BaseEventPeer* peer,
+void SetPressureImpl(Ark_BaseEvent peer,
                      const Ark_Number* pressure)
 {
 }
-Ark_Int32 GetTiltXImpl(BaseEventPeer* peer)
+Ark_Number GetTiltXImpl(Ark_BaseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetTiltXImpl(BaseEventPeer* peer,
+void SetTiltXImpl(Ark_BaseEvent peer,
                   const Ark_Number* tiltX)
 {
 }
-Ark_Int32 GetTiltYImpl(BaseEventPeer* peer)
+Ark_Number GetTiltYImpl(Ark_BaseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetTiltYImpl(BaseEventPeer* peer,
+void SetTiltYImpl(Ark_BaseEvent peer,
                   const Ark_Number* tiltY)
 {
 }
-Ark_NativePointer GetSourceToolImpl(BaseEventPeer* peer)
+Ark_SourceTool GetSourceToolImpl(Ark_BaseEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetSourceToolImpl(BaseEventPeer* peer,
+void SetSourceToolImpl(Ark_BaseEvent peer,
                        Ark_SourceTool sourceTool)
 {
 }
-Ark_Int32 GetDeviceIdImpl(BaseEventPeer* peer)
+Ark_Number GetDeviceIdImpl(Ark_BaseEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetDeviceIdImpl(BaseEventPeer* peer,
+void SetDeviceIdImpl(Ark_BaseEvent peer,
                      const Ark_Number* deviceId)
 {
 }

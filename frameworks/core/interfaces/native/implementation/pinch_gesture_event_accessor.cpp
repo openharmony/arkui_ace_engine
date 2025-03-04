@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PinchGestureEventAccessor {
-void DestroyPeerImpl(PinchGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_PinchGestureEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_PinchGestureEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,27 +30,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetScaleImpl(PinchGestureEventPeer* peer)
+Ark_Number GetScaleImpl(Ark_PinchGestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetScaleImpl(PinchGestureEventPeer* peer,
+void SetScaleImpl(Ark_PinchGestureEvent peer,
                   const Ark_Number* scale)
 {
 }
-Ark_Int32 GetPinchCenterXImpl(PinchGestureEventPeer* peer)
+Ark_Number GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetPinchCenterXImpl(PinchGestureEventPeer* peer,
+void SetPinchCenterXImpl(Ark_PinchGestureEvent peer,
                          const Ark_Number* pinchCenterX)
 {
 }
-Ark_Int32 GetPinchCenterYImpl(PinchGestureEventPeer* peer)
+Ark_Number GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetPinchCenterYImpl(PinchGestureEventPeer* peer,
+void SetPinchCenterYImpl(Ark_PinchGestureEvent peer,
                          const Ark_Number* pinchCenterY)
 {
 }

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ActionSheetAccessor {
-void DestroyPeerImpl(ActionSheetPeer* peer)
+void DestroyPeerImpl(Ark_ActionSheet peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_ActionSheet CtorImpl()
 {
     return nullptr;
 }

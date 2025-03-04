@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlertDialogAccessor {
-void DestroyPeerImpl(AlertDialogPeer* peer)
+void DestroyPeerImpl(Ark_AlertDialog peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_AlertDialog CtorImpl()
 {
     return nullptr;
 }

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PermissionRequestAccessor {
-void DestroyPeerImpl(PermissionRequestPeer* peer)
+void DestroyPeerImpl(Ark_PermissionRequest peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_PermissionRequest CtorImpl()
 {
     return nullptr;
 }
@@ -30,16 +30,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DenyImpl(PermissionRequestPeer* peer)
+void DenyImpl(Ark_PermissionRequest peer)
 {
 }
-void GetOriginImpl(PermissionRequestPeer* peer)
+Ark_String GetOriginImpl(Ark_PermissionRequest peer)
 {
+    return {};
 }
-void GetAccessibleResourceImpl(PermissionRequestPeer* peer)
+Array_String GetAccessibleResourceImpl(Ark_PermissionRequest peer)
 {
+    return {};
 }
-void GrantImpl(PermissionRequestPeer* peer,
+void GrantImpl(Ark_PermissionRequest peer,
                const Array_String* resources)
 {
 }

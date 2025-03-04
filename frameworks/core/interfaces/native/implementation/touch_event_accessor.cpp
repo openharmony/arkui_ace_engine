@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TouchEventAccessor {
-void DestroyPeerImpl(TouchEventPeer* peer)
+void DestroyPeerImpl(Ark_TouchEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TouchEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,30 +30,47 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetHistoricalPointsImpl(TouchEventPeer* peer)
+Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
 {
+    return {};
 }
-Ark_NativePointer GetTypeImpl(TouchEventPeer* peer)
+Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetTypeImpl(TouchEventPeer* peer,
+void SetTypeImpl(Ark_TouchEvent peer,
                  Ark_TouchType type)
 {
 }
-void SetTouchesImpl(TouchEventPeer* peer,
+Array_TouchObject GetTouchesImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetTouchesImpl(Ark_TouchEvent peer,
                     const Array_TouchObject* touches)
 {
 }
-void SetChangedTouchesImpl(TouchEventPeer* peer,
+Array_TouchObject GetChangedTouchesImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetChangedTouchesImpl(Ark_TouchEvent peer,
                            const Array_TouchObject* changedTouches)
 {
 }
-void SetStopPropagationImpl(TouchEventPeer* peer,
+Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetStopPropagationImpl(Ark_TouchEvent peer,
                             const Callback_Void* stopPropagation)
 {
 }
-void SetPreventDefaultImpl(TouchEventPeer* peer,
+Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
+{
+    return {};
+}
+void SetPreventDefaultImpl(Ark_TouchEvent peer,
                            const Callback_Void* preventDefault)
 {
 }
@@ -67,9 +84,13 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
         TouchEventAccessor::GetHistoricalPointsImpl,
         TouchEventAccessor::GetTypeImpl,
         TouchEventAccessor::SetTypeImpl,
+        TouchEventAccessor::GetTouchesImpl,
         TouchEventAccessor::SetTouchesImpl,
+        TouchEventAccessor::GetChangedTouchesImpl,
         TouchEventAccessor::SetChangedTouchesImpl,
+        TouchEventAccessor::GetStopPropagationImpl,
         TouchEventAccessor::SetStopPropagationImpl,
+        TouchEventAccessor::GetPreventDefaultImpl,
         TouchEventAccessor::SetPreventDefaultImpl,
     };
     return &TouchEventAccessorImpl;

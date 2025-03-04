@@ -22,7 +22,7 @@ namespace CommonMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
@@ -445,25 +445,6 @@ void ForegroundColor1Impl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetForegroundColor1(frameNode, convValue);
 }
-void OnClick0Impl(Ark_NativePointer node,
-                  const Callback_ClickEvent_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnClick0(frameNode, convValue);
-}
-void OnClick1Impl(Ark_NativePointer node,
-                  const Callback_ClickEvent_Void* event,
-                  const Ark_Number* distanceThreshold)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(event);
-    //auto convValue = Converter::OptConvert<type>(event); // for enums
-    //CommonMethodModelNG::SetOnClick1(frameNode, convValue);
-}
 void OnHoverImpl(Ark_NativePointer node,
                  const Callback_Boolean_HoverEvent_Void* value)
 {
@@ -657,7 +638,7 @@ void Transition0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetTransition0(frameNode, convValue);
 }
 void Transition1Impl(Ark_NativePointer node,
-                     const Ark_TransitionEffect* effect,
+                     Ark_TransitionEffect effect,
                      const Opt_TransitionFinishCallback* onFinish)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1360,11 +1341,11 @@ void Shadow1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetShadow1(frameNode, convValue);
 }
 void Clip0Impl(Ark_NativePointer node,
-               Ark_Boolean value)
+               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetClip0(frameNode, convValue);
 }
 void Clip1Impl(Ark_NativePointer node,
@@ -1376,12 +1357,11 @@ void Clip1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetClip1(frameNode, convValue);
 }
 void Clip2Impl(Ark_NativePointer node,
-               const Ark_Type_CommonMethod_clip_value* value)
+               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetClip2(frameNode, convValue);
 }
 void ClipShape0Impl(Ark_NativePointer node,
@@ -1402,12 +1382,11 @@ void ClipShape1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetClipShape1(frameNode, convValue);
 }
 void Mask0Impl(Ark_NativePointer node,
-               const Ark_ProgressMask* value)
+               const Opt_ProgressMask* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetMask0(frameNode, convValue);
 }
 void Mask1Impl(Ark_NativePointer node,
@@ -1419,12 +1398,11 @@ void Mask1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetMask1(frameNode, convValue);
 }
 void Mask2Impl(Ark_NativePointer node,
-               const Ark_Type_CommonMethod_mask_value* value)
+               const Opt_ProgressMask* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetMask2(frameNode, convValue);
 }
 void MaskShape0Impl(Ark_NativePointer node,
@@ -1710,12 +1688,12 @@ void RenderFit1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetRenderFit1(frameNode, convValue);
 }
 void GestureModifierImpl(Ark_NativePointer node,
-                         const Ark_GestureModifier* value)
+                         Ark_GestureModifier value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //CommonMethodModelNG::SetGestureModifier(frameNode, convValue);
 }
 void BackgroundBrightness0Impl(Ark_NativePointer node,

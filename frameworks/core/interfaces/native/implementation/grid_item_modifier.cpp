@@ -22,7 +22,7 @@ namespace GridItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // GridItemModifier
 namespace GridItemInterfaceModifier {
@@ -105,14 +105,14 @@ void OnSelectImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //GridItemModelNG::SetOnSelect(frameNode, convValue);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //GridItemModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+    //GridItemModelNG::Set_onChangeEvent_selected(frameNode, convValue);
 }
 } // GridItemAttributeModifier
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
@@ -128,7 +128,7 @@ const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
         GridItemAttributeModifier::SelectableImpl,
         GridItemAttributeModifier::SelectedImpl,
         GridItemAttributeModifier::OnSelectImpl,
-        GridItemAttributeModifier::__onChangeEvent_selectedImpl,
+        GridItemAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIGridItemModifierImpl;
 }

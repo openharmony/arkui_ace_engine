@@ -22,7 +22,7 @@ namespace TextClockModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // TextClockModifier
 namespace TextClockInterfaceModifier {

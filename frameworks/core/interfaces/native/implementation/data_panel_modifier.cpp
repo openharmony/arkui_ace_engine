@@ -22,7 +22,7 @@ namespace DataPanelModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // DataPanelModifier
 namespace DataPanelInterfaceModifier {
@@ -46,7 +46,7 @@ void CloseEffectImpl(Ark_NativePointer node,
     //DataPanelModelNG::SetCloseEffect(frameNode, convValue);
 }
 void ValueColorsImpl(Ark_NativePointer node,
-                     const Array_Union_ResourceColor_LinearGradient_data_panel* value)
+                     const Array_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

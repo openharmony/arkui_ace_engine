@@ -22,7 +22,7 @@ namespace VideoModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // VideoModifier
 namespace VideoInterfaceModifier {
@@ -186,12 +186,12 @@ void AnalyzerConfigImpl(Ark_NativePointer node,
     //VideoModelNG::SetAnalyzerConfig(frameNode, convValue);
 }
 void SurfaceBackgroundColorImpl(Ark_NativePointer node,
-                                const Ark_ColorMetrics* value)
+                                Ark_ColorMetrics value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //VideoModelNG::SetSurfaceBackgroundColor(frameNode, convValue);
 }
 void EnableShortcutKeyImpl(Ark_NativePointer node,

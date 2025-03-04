@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubmitEventAccessor {
-void DestroyPeerImpl(SubmitEventPeer* peer)
+void DestroyPeerImpl(Ark_SubmitEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_SubmitEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,13 +30,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void KeepEditableStateImpl(SubmitEventPeer* peer)
+void KeepEditableStateImpl(Ark_SubmitEvent peer)
 {
 }
-void GetTextImpl(SubmitEventPeer* peer)
+Ark_String GetTextImpl(Ark_SubmitEvent peer)
 {
+    return {};
 }
-void SetTextImpl(SubmitEventPeer* peer,
+void SetTextImpl(Ark_SubmitEvent peer,
                  const Ark_String* text)
 {
 }

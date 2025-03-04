@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventTargetInfoAccessor {
-void DestroyPeerImpl(EventTargetInfoPeer* peer)
+void DestroyPeerImpl(Ark_EventTargetInfo peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_EventTargetInfo CtorImpl()
 {
     return nullptr;
 }
@@ -30,8 +30,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetIdImpl(EventTargetInfoPeer* peer)
+Ark_String GetIdImpl(Ark_EventTargetInfo peer)
 {
+    return {};
 }
 } // EventTargetInfoAccessor
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()

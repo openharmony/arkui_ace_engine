@@ -19,32 +19,32 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureOptionsAccessor {
-void DestroyPeerImpl(PanGestureOptionsPeer* peer)
+void DestroyPeerImpl(Ark_PanGestureOptions peer)
 {
 }
-Ark_NativePointer CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
+Ark_PanGestureOptions CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
 {
-    return new PanGestureOptionsPeer(value);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetDirectionImpl(PanGestureOptionsPeer* peer,
+void SetDirectionImpl(Ark_PanGestureOptions peer,
                       Ark_PanDirection value)
 {
 }
-void SetDistanceImpl(PanGestureOptionsPeer* peer,
+void SetDistanceImpl(Ark_PanGestureOptions peer,
                      const Ark_Number* value)
 {
 }
-void SetFingersImpl(PanGestureOptionsPeer* peer,
+void SetFingersImpl(Ark_PanGestureOptions peer,
                     const Ark_Number* value)
 {
 }
-Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer)
+Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
 {
-    return nullptr;
+    return {};
 }
 } // PanGestureOptionsAccessor
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()

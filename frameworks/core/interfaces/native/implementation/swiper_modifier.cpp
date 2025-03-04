@@ -22,7 +22,7 @@ namespace SwiperModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // SwiperModifier
 namespace SwiperInterfaceModifier {
@@ -296,14 +296,14 @@ void NextMarginImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SwiperModelNG::SetNextMargin(frameNode, convValue);
 }
-void __onChangeEvent_indexImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_indexImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //SwiperModelNG::Set__onChangeEvent_index(frameNode, convValue);
+    //SwiperModelNG::Set_onChangeEvent_index(frameNode, convValue);
 }
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
@@ -340,7 +340,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::DisplayCountImpl,
         SwiperAttributeModifier::PrevMarginImpl,
         SwiperAttributeModifier::NextMarginImpl,
-        SwiperAttributeModifier::__onChangeEvent_indexImpl,
+        SwiperAttributeModifier::_onChangeEvent_indexImpl,
     };
     return &ArkUISwiperModifierImpl;
 }

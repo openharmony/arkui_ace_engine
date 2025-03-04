@@ -22,7 +22,7 @@ namespace CheckboxModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // CheckboxModifier
 namespace CheckboxInterfaceModifier {
@@ -154,14 +154,14 @@ void ContentModifier1Impl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CheckboxModelNG::SetContentModifier1(frameNode, convValue);
 }
-void __onChangeEvent_selectImpl(Ark_NativePointer node,
-                                const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectImpl(Ark_NativePointer node,
+                               const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //CheckboxModelNG::Set__onChangeEvent_select(frameNode, convValue);
+    //CheckboxModelNG::Set_onChangeEvent_select(frameNode, convValue);
 }
 } // CheckboxAttributeModifier
 const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
@@ -183,7 +183,7 @@ const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
         CheckboxAttributeModifier::OnChange1Impl,
         CheckboxAttributeModifier::ContentModifier0Impl,
         CheckboxAttributeModifier::ContentModifier1Impl,
-        CheckboxAttributeModifier::__onChangeEvent_selectImpl,
+        CheckboxAttributeModifier::_onChangeEvent_selectImpl,
     };
     return &ArkUICheckboxModifierImpl;
 }

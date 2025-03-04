@@ -22,7 +22,7 @@ namespace TextInputModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // TextInputModifier
 namespace TextInputInterfaceModifier {
@@ -574,12 +574,12 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     //TextInputModelNG::SetOnDidDelete(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextInputModelNG::SetEditMenuOptions(frameNode, convValue);
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
@@ -652,14 +652,14 @@ void ShowCounterImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextInputModelNG::SetShowCounter(frameNode, convValue);
 }
-void __onChangeEvent_textImpl(Ark_NativePointer node,
-                              const Callback_ResourceStr_Void* callback)
+void _onChangeEvent_textImpl(Ark_NativePointer node,
+                             const Callback_ResourceStr_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //TextInputModelNG::Set__onChangeEvent_text(frameNode, convValue);
+    //TextInputModelNG::Set_onChangeEvent_text(frameNode, convValue);
 }
 } // TextInputAttributeModifier
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
@@ -737,7 +737,7 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::InputFilterImpl,
         TextInputAttributeModifier::CustomKeyboardImpl,
         TextInputAttributeModifier::ShowCounterImpl,
-        TextInputAttributeModifier::__onChangeEvent_textImpl,
+        TextInputAttributeModifier::_onChangeEvent_textImpl,
     };
     return &ArkUITextInputModifierImpl;
 }

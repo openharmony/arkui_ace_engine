@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceErrorAccessor {
-void DestroyPeerImpl(WebResourceErrorPeer* peer)
+void DestroyPeerImpl(Ark_WebResourceError peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_WebResourceError CtorImpl()
 {
     return nullptr;
 }
@@ -30,12 +30,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetErrorInfoImpl(WebResourceErrorPeer* peer)
+Ark_String GetErrorInfoImpl(Ark_WebResourceError peer)
 {
+    return {};
 }
-Ark_Int32 GetErrorCodeImpl(WebResourceErrorPeer* peer)
+Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
 {
-    return 0;
+    return {};
 }
 } // WebResourceErrorAccessor
 const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()

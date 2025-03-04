@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
-void DestroyPeerImpl(ClickEventPeer* peer)
+void DestroyPeerImpl(Ark_ClickEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_ClickEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,71 +30,75 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetDisplayXImpl(ClickEventPeer* peer)
+Ark_Number GetDisplayXImpl(Ark_ClickEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetDisplayXImpl(ClickEventPeer* peer,
+void SetDisplayXImpl(Ark_ClickEvent peer,
                      const Ark_Number* displayX)
 {
 }
-Ark_Int32 GetDisplayYImpl(ClickEventPeer* peer)
+Ark_Number GetDisplayYImpl(Ark_ClickEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetDisplayYImpl(ClickEventPeer* peer,
+void SetDisplayYImpl(Ark_ClickEvent peer,
                      const Ark_Number* displayY)
 {
 }
-Ark_Int32 GetWindowXImpl(ClickEventPeer* peer)
+Ark_Number GetWindowXImpl(Ark_ClickEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetWindowXImpl(ClickEventPeer* peer,
+void SetWindowXImpl(Ark_ClickEvent peer,
                     const Ark_Number* windowX)
 {
 }
-Ark_Int32 GetWindowYImpl(ClickEventPeer* peer)
+Ark_Number GetWindowYImpl(Ark_ClickEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetWindowYImpl(ClickEventPeer* peer,
+void SetWindowYImpl(Ark_ClickEvent peer,
                     const Ark_Number* windowY)
 {
 }
-Ark_Int32 GetScreenXImpl(ClickEventPeer* peer)
+Ark_Number GetScreenXImpl(Ark_ClickEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetScreenXImpl(ClickEventPeer* peer,
+void SetScreenXImpl(Ark_ClickEvent peer,
                     const Ark_Number* screenX)
 {
 }
-Ark_Int32 GetScreenYImpl(ClickEventPeer* peer)
+Ark_Number GetScreenYImpl(Ark_ClickEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetScreenYImpl(ClickEventPeer* peer,
+void SetScreenYImpl(Ark_ClickEvent peer,
                     const Ark_Number* screenY)
 {
 }
-Ark_Int32 GetXImpl(ClickEventPeer* peer)
+Ark_Number GetXImpl(Ark_ClickEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetXImpl(ClickEventPeer* peer,
+void SetXImpl(Ark_ClickEvent peer,
               const Ark_Number* x)
 {
 }
-Ark_Int32 GetYImpl(ClickEventPeer* peer)
+Ark_Number GetYImpl(Ark_ClickEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetYImpl(ClickEventPeer* peer,
+void SetYImpl(Ark_ClickEvent peer,
               const Ark_Number* y)
 {
 }
-void SetPreventDefaultImpl(ClickEventPeer* peer,
+Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
+{
+    return {};
+}
+void SetPreventDefaultImpl(Ark_ClickEvent peer,
                            const Callback_Void* preventDefault)
 {
 }
@@ -121,6 +125,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetXImpl,
         ClickEventAccessor::GetYImpl,
         ClickEventAccessor::SetYImpl,
+        ClickEventAccessor::GetPreventDefaultImpl,
         ClickEventAccessor::SetPreventDefaultImpl,
     };
     return &ClickEventAccessorImpl;

@@ -22,17 +22,17 @@ namespace ShapeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // ShapeModifier
 namespace ShapeInterfaceModifier {
 void SetShapeOptions0Impl(Ark_NativePointer node,
-                          const Ark_PixelMap* value)
+                          Ark_PixelMap value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ShapeModelNG::SetSetShapeOptions0(frameNode, convValue);
 }
 void SetShapeOptions1Impl(Ark_NativePointer node)

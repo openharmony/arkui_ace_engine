@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix2DAccessor {
-void DestroyPeerImpl(Matrix2DPeer* peer)
+void DestroyPeerImpl(Ark_Matrix2D peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_Matrix2D CtorImpl()
 {
     return nullptr;
 }
@@ -30,89 +30,89 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer IdentityImpl(Matrix2DPeer* peer)
+Ark_Matrix2D IdentityImpl(Ark_Matrix2D peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer InvertImpl(Matrix2DPeer* peer)
+Ark_Matrix2D InvertImpl(Ark_Matrix2D peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer,
-                               const Opt_Matrix2D* other)
+Ark_Matrix2D MultiplyImpl(Ark_Matrix2D peer,
+                          const Opt_Matrix2D* other)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer,
-                              const Opt_Number* rx,
-                              const Opt_Number* ry)
+Ark_Matrix2D Rotate0Impl(Ark_Matrix2D peer,
+                         const Opt_Number* rx,
+                         const Opt_Number* ry)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
-                              const Ark_Number* degree,
-                              const Opt_Number* rx,
-                              const Opt_Number* ry)
+Ark_Matrix2D Rotate1Impl(Ark_Matrix2D peer,
+                         const Ark_Number* degree,
+                         const Opt_Number* rx,
+                         const Opt_Number* ry)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
-                                const Opt_Number* tx,
-                                const Opt_Number* ty)
+Ark_Matrix2D TranslateImpl(Ark_Matrix2D peer,
+                           const Opt_Number* tx,
+                           const Opt_Number* ty)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer ScaleImpl(Matrix2DPeer* peer,
-                            const Opt_Number* sx,
-                            const Opt_Number* sy)
+Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
+                       const Opt_Number* sx,
+                       const Opt_Number* sy)
 {
-    return nullptr;
+    return {};
 }
-Ark_Int32 GetScaleXImpl(Matrix2DPeer* peer)
+Ark_Number GetScaleXImpl(Ark_Matrix2D peer)
 {
-    return 0;
+    return {};
 }
-void SetScaleXImpl(Matrix2DPeer* peer,
+void SetScaleXImpl(Ark_Matrix2D peer,
                    const Ark_Number* scaleX)
 {
 }
-Ark_Int32 GetRotateYImpl(Matrix2DPeer* peer)
+Ark_Number GetRotateYImpl(Ark_Matrix2D peer)
 {
-    return 0;
+    return {};
 }
-void SetRotateYImpl(Matrix2DPeer* peer,
+void SetRotateYImpl(Ark_Matrix2D peer,
                     const Ark_Number* rotateY)
 {
 }
-Ark_Int32 GetRotateXImpl(Matrix2DPeer* peer)
+Ark_Number GetRotateXImpl(Ark_Matrix2D peer)
 {
-    return 0;
+    return {};
 }
-void SetRotateXImpl(Matrix2DPeer* peer,
+void SetRotateXImpl(Ark_Matrix2D peer,
                     const Ark_Number* rotateX)
 {
 }
-Ark_Int32 GetScaleYImpl(Matrix2DPeer* peer)
+Ark_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
-    return 0;
+    return {};
 }
-void SetScaleYImpl(Matrix2DPeer* peer,
+void SetScaleYImpl(Ark_Matrix2D peer,
                    const Ark_Number* scaleY)
 {
 }
-Ark_Int32 GetTranslateXImpl(Matrix2DPeer* peer)
+Ark_Number GetTranslateXImpl(Ark_Matrix2D peer)
 {
-    return 0;
+    return {};
 }
-void SetTranslateXImpl(Matrix2DPeer* peer,
+void SetTranslateXImpl(Ark_Matrix2D peer,
                        const Ark_Number* translateX)
 {
 }
-Ark_Int32 GetTranslateYImpl(Matrix2DPeer* peer)
+Ark_Number GetTranslateYImpl(Ark_Matrix2D peer)
 {
-    return 0;
+    return {};
 }
-void SetTranslateYImpl(Matrix2DPeer* peer,
+void SetTranslateYImpl(Ark_Matrix2D peer,
                        const Ark_Number* translateY)
 {
 }

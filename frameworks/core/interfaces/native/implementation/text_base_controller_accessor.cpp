@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextBaseControllerAccessor {
-void DestroyPeerImpl(TextBaseControllerPeer* peer)
+void DestroyPeerImpl(Ark_TextBaseController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TextBaseController CtorImpl()
 {
     return nullptr;
 }
@@ -30,18 +30,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetSelectionImpl(TextBaseControllerPeer* peer,
+void SetSelectionImpl(Ark_TextBaseController peer,
                       const Ark_Number* selectionStart,
                       const Ark_Number* selectionEnd,
                       const Opt_SelectionOptions* options)
 {
 }
-void CloseSelectionMenuImpl(TextBaseControllerPeer* peer)
+void CloseSelectionMenuImpl(Ark_TextBaseController peer)
 {
 }
-Ark_NativePointer GetLayoutManagerImpl(TextBaseControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
 {
-    return nullptr;
+    return {};
 }
 } // TextBaseControllerAccessor
 const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()

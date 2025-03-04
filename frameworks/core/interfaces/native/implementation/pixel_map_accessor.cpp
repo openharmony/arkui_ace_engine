@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapAccessor {
-void DestroyPeerImpl(PixelMapPeer* peer)
+void DestroyPeerImpl(Ark_PixelMap peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_PixelMap CtorImpl()
 {
     return nullptr;
 }
@@ -30,29 +30,21 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ReadPixelsToBufferSyncImpl(PixelMapPeer* peer,
+void ReadPixelsToBufferSyncImpl(Ark_PixelMap peer,
                                 const Ark_Buffer* dst)
 {
 }
-void WriteBufferToPixelsImpl(PixelMapPeer* peer,
+void WriteBufferToPixelsImpl(Ark_PixelMap peer,
                              const Ark_Buffer* src)
 {
 }
-Ark_Int32 GetIsEditableImpl(PixelMapPeer* peer)
+Ark_Boolean GetIsEditableImpl(Ark_PixelMap peer)
 {
-    return 0;
+    return {};
 }
-void SetIsEditableImpl(PixelMapPeer* peer,
-                       Ark_Int32 isEditable)
+Ark_Boolean GetIsStrideAlignmentImpl(Ark_PixelMap peer)
 {
-}
-Ark_Int32 GetIsStrideAlignmentImpl(PixelMapPeer* peer)
-{
-    return 0;
-}
-void SetIsStrideAlignmentImpl(PixelMapPeer* peer,
-                              Ark_Int32 isStrideAlignment)
-{
+    return {};
 }
 } // PixelMapAccessor
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
@@ -64,9 +56,7 @@ const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
         PixelMapAccessor::ReadPixelsToBufferSyncImpl,
         PixelMapAccessor::WriteBufferToPixelsImpl,
         PixelMapAccessor::GetIsEditableImpl,
-        PixelMapAccessor::SetIsEditableImpl,
         PixelMapAccessor::GetIsStrideAlignmentImpl,
-        PixelMapAccessor::SetIsStrideAlignmentImpl,
     };
     return &PixelMapAccessorImpl;
 }

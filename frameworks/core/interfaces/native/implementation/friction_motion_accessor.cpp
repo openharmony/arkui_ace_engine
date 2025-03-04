@@ -18,11 +18,13 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace DynamicNodeAccessor {
-void DestroyPeerImpl(DynamicNodePeer* peer)
+namespace FrictionMotionAccessor {
+void DestroyPeerImpl(Ark_FrictionMotion peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_FrictionMotion CtorImpl(const Ark_Number* friction,
+                            const Ark_Number* position,
+                            const Ark_Number* velocity)
 {
     return nullptr;
 }
@@ -30,20 +32,15 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void OnMoveImpl(DynamicNodePeer* peer,
-                const Opt_OnMoveHandler* handler)
+} // FrictionMotionAccessor
+const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor()
 {
-}
-} // DynamicNodeAccessor
-const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor()
-{
-    static const GENERATED_ArkUIDynamicNodeAccessor DynamicNodeAccessorImpl {
-        DynamicNodeAccessor::DestroyPeerImpl,
-        DynamicNodeAccessor::CtorImpl,
-        DynamicNodeAccessor::GetFinalizerImpl,
-        DynamicNodeAccessor::OnMoveImpl,
+    static const GENERATED_ArkUIFrictionMotionAccessor FrictionMotionAccessorImpl {
+        FrictionMotionAccessor::DestroyPeerImpl,
+        FrictionMotionAccessor::CtorImpl,
+        FrictionMotionAccessor::GetFinalizerImpl,
     };
-    return &DynamicNodeAccessorImpl;
+    return &FrictionMotionAccessorImpl;
 }
 
 }

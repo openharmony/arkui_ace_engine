@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorBaseControllerAccessor {
-void DestroyPeerImpl(RichEditorBaseControllerPeer* peer)
+void DestroyPeerImpl(Ark_RichEditorBaseController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorBaseController CtorImpl()
 {
     return nullptr;
 }
@@ -30,50 +30,50 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetCaretOffsetImpl(RichEditorBaseControllerPeer* peer)
+Ark_Number GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer,
+Ark_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
                                const Ark_Number* offset)
 {
-    return 0;
+    return {};
 }
-void CloseSelectionMenuImpl(RichEditorBaseControllerPeer* peer)
+void CloseSelectionMenuImpl(Ark_RichEditorBaseController peer)
 {
 }
-Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer)
+Ark_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
 {
-    return nullptr;
+    return {};
 }
-void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer,
+void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
                         const Ark_RichEditorTextStyle* value)
 {
 }
-void SetSelectionImpl(RichEditorBaseControllerPeer* peer,
+void SetSelectionImpl(Ark_RichEditorBaseController peer,
                       const Ark_Number* selectionStart,
                       const Ark_Number* selectionEnd,
                       const Opt_SelectionOptions* options)
 {
 }
-Ark_Boolean IsEditingImpl(RichEditorBaseControllerPeer* peer)
+Ark_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
 {
-    return 0;
+    return {};
 }
-void StopEditingImpl(RichEditorBaseControllerPeer* peer)
+void StopEditingImpl(Ark_RichEditorBaseController peer)
 {
 }
-Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
+Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
+Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetCaretRectImpl(RichEditorBaseControllerPeer* peer)
+Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
 {
-    return 0;
+    return {};
 }
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()

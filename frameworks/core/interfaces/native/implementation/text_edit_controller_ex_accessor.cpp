@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
-void DestroyPeerImpl(TextEditControllerExPeer* peer)
+void DestroyPeerImpl(Ark_TextEditControllerEx peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TextEditControllerEx CtorImpl()
 {
     return nullptr;
 }
@@ -30,25 +30,25 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean IsEditingImpl(TextEditControllerExPeer* peer)
+Ark_Boolean IsEditingImpl(Ark_TextEditControllerEx peer)
 {
-    return 0;
+    return {};
 }
-void StopEditingImpl(TextEditControllerExPeer* peer)
+void StopEditingImpl(Ark_TextEditControllerEx peer)
 {
 }
-Ark_Boolean SetCaretOffsetImpl(TextEditControllerExPeer* peer,
+Ark_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
                                const Ark_Number* offset)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetCaretOffsetImpl(TextEditControllerExPeer* peer)
+Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
+Ark_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
 {
-    return nullptr;
+    return {};
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnalyzerControllerAccessor {
-void DestroyPeerImpl(ImageAnalyzerControllerPeer* peer)
+void DestroyPeerImpl(Ark_ImageAnalyzerController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_ImageAnalyzerController CtorImpl()
 {
     return nullptr;
 }
@@ -30,8 +30,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
+Array_ImageAnalyzerType GetImageAnalyzerSupportTypesImpl(Ark_ImageAnalyzerController peer)
 {
+    return {};
 }
 } // ImageAnalyzerControllerAccessor
 const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()

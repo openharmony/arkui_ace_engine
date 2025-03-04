@@ -22,7 +22,7 @@ namespace CommonShapeMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 void StrokeImpl(Ark_NativePointer node,
                 const Ark_ResourceColor* value)

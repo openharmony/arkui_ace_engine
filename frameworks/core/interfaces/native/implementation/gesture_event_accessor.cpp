@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureEventAccessor {
-void DestroyPeerImpl(GestureEventPeer* peer)
+void DestroyPeerImpl(Ark_GestureEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_GestureEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,95 +30,99 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetRepeatImpl(GestureEventPeer* peer)
+Ark_Boolean GetRepeatImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetRepeatImpl(GestureEventPeer* peer,
+void SetRepeatImpl(Ark_GestureEvent peer,
                    Ark_Boolean repeat)
 {
 }
-void SetFingerListImpl(GestureEventPeer* peer,
+Array_FingerInfo GetFingerListImpl(Ark_GestureEvent peer)
+{
+    return {};
+}
+void SetFingerListImpl(Ark_GestureEvent peer,
                        const Array_FingerInfo* fingerList)
 {
 }
-Ark_Int32 GetOffsetXImpl(GestureEventPeer* peer)
+Ark_Number GetOffsetXImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetOffsetXImpl(GestureEventPeer* peer,
+void SetOffsetXImpl(Ark_GestureEvent peer,
                     const Ark_Number* offsetX)
 {
 }
-Ark_Int32 GetOffsetYImpl(GestureEventPeer* peer)
+Ark_Number GetOffsetYImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetOffsetYImpl(GestureEventPeer* peer,
+void SetOffsetYImpl(Ark_GestureEvent peer,
                     const Ark_Number* offsetY)
 {
 }
-Ark_Int32 GetAngleImpl(GestureEventPeer* peer)
+Ark_Number GetAngleImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetAngleImpl(GestureEventPeer* peer,
+void SetAngleImpl(Ark_GestureEvent peer,
                   const Ark_Number* angle)
 {
 }
-Ark_Int32 GetSpeedImpl(GestureEventPeer* peer)
+Ark_Number GetSpeedImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetSpeedImpl(GestureEventPeer* peer,
+void SetSpeedImpl(Ark_GestureEvent peer,
                   const Ark_Number* speed)
 {
 }
-Ark_Int32 GetScaleImpl(GestureEventPeer* peer)
+Ark_Number GetScaleImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetScaleImpl(GestureEventPeer* peer,
+void SetScaleImpl(Ark_GestureEvent peer,
                   const Ark_Number* scale)
 {
 }
-Ark_Int32 GetPinchCenterXImpl(GestureEventPeer* peer)
+Ark_Number GetPinchCenterXImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetPinchCenterXImpl(GestureEventPeer* peer,
+void SetPinchCenterXImpl(Ark_GestureEvent peer,
                          const Ark_Number* pinchCenterX)
 {
 }
-Ark_Int32 GetPinchCenterYImpl(GestureEventPeer* peer)
+Ark_Number GetPinchCenterYImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetPinchCenterYImpl(GestureEventPeer* peer,
+void SetPinchCenterYImpl(Ark_GestureEvent peer,
                          const Ark_Number* pinchCenterY)
 {
 }
-Ark_Int32 GetVelocityXImpl(GestureEventPeer* peer)
+Ark_Number GetVelocityXImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetVelocityXImpl(GestureEventPeer* peer,
+void SetVelocityXImpl(Ark_GestureEvent peer,
                       const Ark_Number* velocityX)
 {
 }
-Ark_Int32 GetVelocityYImpl(GestureEventPeer* peer)
+Ark_Number GetVelocityYImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetVelocityYImpl(GestureEventPeer* peer,
+void SetVelocityYImpl(Ark_GestureEvent peer,
                       const Ark_Number* velocityY)
 {
 }
-Ark_Int32 GetVelocityImpl(GestureEventPeer* peer)
+Ark_Number GetVelocityImpl(Ark_GestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetVelocityImpl(GestureEventPeer* peer,
+void SetVelocityImpl(Ark_GestureEvent peer,
                      const Ark_Number* velocity)
 {
 }
@@ -131,6 +135,7 @@ const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
         GestureEventAccessor::GetFinalizerImpl,
         GestureEventAccessor::GetRepeatImpl,
         GestureEventAccessor::SetRepeatImpl,
+        GestureEventAccessor::GetFingerListImpl,
         GestureEventAccessor::SetFingerListImpl,
         GestureEventAccessor::GetOffsetXImpl,
         GestureEventAccessor::SetOffsetXImpl,

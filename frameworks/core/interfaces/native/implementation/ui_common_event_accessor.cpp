@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UICommonEventAccessor {
-void DestroyPeerImpl(UICommonEventPeer* peer)
+void DestroyPeerImpl(Ark_UICommonEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_UICommonEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,47 +30,47 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetOnClickImpl(UICommonEventPeer* peer,
+void SetOnClickImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_ClickEvent_Void* callback_)
 {
 }
-void SetOnTouchImpl(UICommonEventPeer* peer,
+void SetOnTouchImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_TouchEvent_Void* callback_)
 {
 }
-void SetOnAppearImpl(UICommonEventPeer* peer,
+void SetOnAppearImpl(Ark_UICommonEvent peer,
                      const Opt_Callback_Void* callback_)
 {
 }
-void SetOnDisappearImpl(UICommonEventPeer* peer,
+void SetOnDisappearImpl(Ark_UICommonEvent peer,
                         const Opt_Callback_Void* callback_)
 {
 }
-void SetOnKeyEventImpl(UICommonEventPeer* peer,
+void SetOnKeyEventImpl(Ark_UICommonEvent peer,
                        const Opt_Callback_KeyEvent_Void* callback_)
 {
 }
-void SetOnFocusImpl(UICommonEventPeer* peer,
+void SetOnFocusImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_Void* callback_)
 {
 }
-void SetOnBlurImpl(UICommonEventPeer* peer,
+void SetOnBlurImpl(Ark_UICommonEvent peer,
                    const Opt_Callback_Void* callback_)
 {
 }
-void SetOnHoverImpl(UICommonEventPeer* peer,
+void SetOnHoverImpl(Ark_UICommonEvent peer,
                     const Opt_HoverCallback* callback_)
 {
 }
-void SetOnMouseImpl(UICommonEventPeer* peer,
+void SetOnMouseImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_MouseEvent_Void* callback_)
 {
 }
-void SetOnSizeChangeImpl(UICommonEventPeer* peer,
+void SetOnSizeChangeImpl(Ark_UICommonEvent peer,
                          const Opt_SizeChangeCallback* callback_)
 {
 }
-void SetOnVisibleAreaApproximateChangeImpl(UICommonEventPeer* peer,
+void SetOnVisibleAreaApproximateChangeImpl(Ark_UICommonEvent peer,
                                            const Ark_VisibleAreaEventOptions* options,
                                            const Opt_VisibleAreaChangeCallback* event)
 {

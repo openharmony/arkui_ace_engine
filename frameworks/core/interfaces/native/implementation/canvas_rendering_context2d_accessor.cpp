@@ -19,53 +19,64 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRenderingContext2DAccessor {
-void DestroyPeerImpl(CanvasRenderingContext2DPeer* peer)
+void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
 {
 }
-Ark_NativePointer CtorImpl(const Opt_RenderingContextSettings* settings)
+Ark_CanvasRenderingContext2D CtorImpl(const Opt_RenderingContextSettings* settings)
 {
-    return new CanvasRenderingContext2DPeer(settings);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
-                   const Opt_String* type,
-                   const Opt_Number* quality)
+Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
+                         const Opt_String* type,
+                         const Opt_Float32* quality)
 {
+    return {};
 }
-void StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
+void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_CanvasRenderingContext2D peer,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
-void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)
+void StopImageAnalyzerImpl(Ark_CanvasRenderingContext2D peer)
 {
 }
-void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
+void OnOnAttachImpl(Ark_VMContext vmContext,
+                    Ark_CanvasRenderingContext2D peer,
                     const Callback_Void* callback_)
 {
 }
-void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
+void OffOnAttachImpl(Ark_VMContext vmContext,
+                     Ark_CanvasRenderingContext2D peer,
                      const Opt_Callback_Void* callback_)
 {
 }
-void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
+void OnOnDetachImpl(Ark_VMContext vmContext,
+                    Ark_CanvasRenderingContext2D peer,
                     const Callback_Void* callback_)
 {
 }
-void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
+void OffOnDetachImpl(Ark_VMContext vmContext,
+                     Ark_CanvasRenderingContext2D peer,
                      const Opt_Callback_Void* callback_)
 {
 }
-Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer)
+Ark_Number GetHeightImpl(Ark_CanvasRenderingContext2D peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetWidthImpl(CanvasRenderingContext2DPeer* peer)
+Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 {
-    return 0;
+    return {};
+}
+Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
+{
+    return {};
 }
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()
@@ -83,6 +94,7 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
         CanvasRenderingContext2DAccessor::OffOnDetachImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,
+        CanvasRenderingContext2DAccessor::GetCanvasImpl,
     };
     return &CanvasRenderingContext2DAccessorImpl;
 }

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceRequestAccessor {
-void DestroyPeerImpl(WebResourceRequestPeer* peer)
+void DestroyPeerImpl(Ark_WebResourceRequest peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_WebResourceRequest CtorImpl()
 {
     return nullptr;
 }
@@ -30,26 +30,29 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetRequestHeaderImpl(WebResourceRequestPeer* peer)
+Array_Header GetRequestHeaderImpl(Ark_WebResourceRequest peer)
 {
+    return {};
 }
-void GetRequestUrlImpl(WebResourceRequestPeer* peer)
+Ark_String GetRequestUrlImpl(Ark_WebResourceRequest peer)
 {
+    return {};
 }
-Ark_Boolean IsRequestGestureImpl(WebResourceRequestPeer* peer)
+Ark_Boolean IsRequestGestureImpl(Ark_WebResourceRequest peer)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean IsMainFrameImpl(WebResourceRequestPeer* peer)
+Ark_Boolean IsMainFrameImpl(Ark_WebResourceRequest peer)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean IsRedirectImpl(WebResourceRequestPeer* peer)
+Ark_Boolean IsRedirectImpl(Ark_WebResourceRequest peer)
 {
-    return 0;
+    return {};
 }
-void GetRequestMethodImpl(WebResourceRequestPeer* peer)
+Ark_String GetRequestMethodImpl(Ark_WebResourceRequest peer)
 {
+    return {};
 }
 } // WebResourceRequestAccessor
 const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor()

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebKeyboardControllerAccessor {
-void DestroyPeerImpl(WebKeyboardControllerPeer* peer)
+void DestroyPeerImpl(Ark_WebKeyboardController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_WebKeyboardController CtorImpl()
 {
     return nullptr;
 }
@@ -30,23 +30,23 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void InsertTextImpl(WebKeyboardControllerPeer* peer,
+void InsertTextImpl(Ark_WebKeyboardController peer,
                     const Ark_String* text)
 {
 }
-void DeleteForwardImpl(WebKeyboardControllerPeer* peer,
+void DeleteForwardImpl(Ark_WebKeyboardController peer,
                        const Ark_Number* length)
 {
 }
-void DeleteBackwardImpl(WebKeyboardControllerPeer* peer,
+void DeleteBackwardImpl(Ark_WebKeyboardController peer,
                         const Ark_Number* length)
 {
 }
-void SendFunctionKeyImpl(WebKeyboardControllerPeer* peer,
+void SendFunctionKeyImpl(Ark_WebKeyboardController peer,
                          const Ark_Number* key)
 {
 }
-void CloseImpl(WebKeyboardControllerPeer* peer)
+void CloseImpl(Ark_WebKeyboardController peer)
 {
 }
 } // WebKeyboardControllerAccessor

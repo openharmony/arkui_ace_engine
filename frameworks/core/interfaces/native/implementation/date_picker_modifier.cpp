@@ -22,7 +22,7 @@ namespace DatePickerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // DatePickerModifier
 namespace DatePickerInterfaceModifier {
@@ -137,14 +137,14 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Date_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Date_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //DatePickerModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+    //DatePickerModelNG::Set_onChangeEvent_selected(frameNode, convValue);
 }
 } // DatePickerAttributeModifier
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
@@ -164,7 +164,7 @@ const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
         DatePickerAttributeModifier::OnDateChange0Impl,
         DatePickerAttributeModifier::OnDateChange1Impl,
         DatePickerAttributeModifier::DigitalCrownSensitivityImpl,
-        DatePickerAttributeModifier::__onChangeEvent_selectedImpl,
+        DatePickerAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIDatePickerModifierImpl;
 }

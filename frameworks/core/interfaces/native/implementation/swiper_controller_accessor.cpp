@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperControllerAccessor {
-void DestroyPeerImpl(SwiperControllerPeer* peer)
+void DestroyPeerImpl(Ark_SwiperController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_SwiperController CtorImpl()
 {
     return nullptr;
 }
@@ -30,22 +30,24 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ShowNextImpl(SwiperControllerPeer* peer)
+void ShowNextImpl(Ark_SwiperController peer)
 {
 }
-void ShowPreviousImpl(SwiperControllerPeer* peer)
+void ShowPreviousImpl(Ark_SwiperController peer)
 {
 }
-void ChangeIndexImpl(SwiperControllerPeer* peer,
+void ChangeIndexImpl(Ark_SwiperController peer,
                      const Ark_Number* index,
                      const Opt_Boolean* useAnimation)
 {
 }
-void FinishAnimationImpl(SwiperControllerPeer* peer,
+void FinishAnimationImpl(Ark_SwiperController peer,
                          const Opt_VoidCallback* callback_)
 {
 }
-void PreloadItemsImpl(SwiperControllerPeer* peer,
+void PreloadItemsImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_SwiperController peer,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {

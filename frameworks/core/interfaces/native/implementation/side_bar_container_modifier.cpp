@@ -22,7 +22,7 @@ namespace SideBarContainerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // SideBarContainerModifier
 namespace SideBarContainerInterfaceModifier {
@@ -158,14 +158,14 @@ void MinContentWidthImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SideBarContainerModelNG::SetMinContentWidth(frameNode, convValue);
 }
-void __onChangeEvent_showSideBarImpl(Ark_NativePointer node,
-                                     const Callback_Boolean_Void* callback)
+void _onChangeEvent_showSideBarImpl(Ark_NativePointer node,
+                                    const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //SideBarContainerModelNG::Set__onChangeEvent_showSideBar(frameNode, convValue);
+    //SideBarContainerModelNG::Set_onChangeEvent_showSideBar(frameNode, convValue);
 }
 } // SideBarContainerAttributeModifier
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
@@ -187,7 +187,7 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         SideBarContainerAttributeModifier::SideBarPositionImpl,
         SideBarContainerAttributeModifier::DividerImpl,
         SideBarContainerAttributeModifier::MinContentWidthImpl,
-        SideBarContainerAttributeModifier::__onChangeEvent_showSideBarImpl,
+        SideBarContainerAttributeModifier::_onChangeEvent_showSideBarImpl,
     };
     return &ArkUISideBarContainerModifierImpl;
 }

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationTransitionProxyAccessor {
-void DestroyPeerImpl(NavigationTransitionProxyPeer* peer)
+void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_NavigationTransitionProxy CtorImpl()
 {
     return nullptr;
 }
@@ -30,29 +30,29 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void FinishTransitionImpl(NavigationTransitionProxyPeer* peer)
+void FinishTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
 }
-void CancelTransitionImpl(NavigationTransitionProxyPeer* peer)
+void CancelTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
 }
-void UpdateTransitionImpl(NavigationTransitionProxyPeer* peer,
+void UpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
                           const Ark_Number* progress)
 {
 }
-void SetFromImpl(NavigationTransitionProxyPeer* peer,
+void SetFromImpl(Ark_NavigationTransitionProxy peer,
                  const Ark_NavContentInfo* from)
 {
 }
-void SetToImpl(NavigationTransitionProxyPeer* peer,
+void SetToImpl(Ark_NavigationTransitionProxy peer,
                const Ark_NavContentInfo* to)
 {
 }
-Ark_Boolean GetIsInteractiveImpl(NavigationTransitionProxyPeer* peer)
+Ark_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
 {
-    return 0;
+    return {};
 }
-void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer,
+void SetIsInteractiveImpl(Ark_NavigationTransitionProxy peer,
                           Ark_Boolean isInteractive)
 {
 }

@@ -22,7 +22,7 @@ namespace PanelModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // PanelModifier
 namespace PanelInterfaceModifier {
@@ -141,14 +141,14 @@ void OnHeightChangeImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //PanelModelNG::SetOnHeightChange(frameNode, convValue);
 }
-void __onChangeEvent_modeImpl(Ark_NativePointer node,
-                              const Callback_PanelMode_Void* callback)
+void _onChangeEvent_modeImpl(Ark_NativePointer node,
+                             const Callback_PanelMode_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //PanelModelNG::Set__onChangeEvent_mode(frameNode, convValue);
+    //PanelModelNG::Set_onChangeEvent_mode(frameNode, convValue);
 }
 } // PanelAttributeModifier
 const GENERATED_ArkUIPanelModifier* GetPanelModifier()
@@ -168,7 +168,7 @@ const GENERATED_ArkUIPanelModifier* GetPanelModifier()
         PanelAttributeModifier::ShowCloseIconImpl,
         PanelAttributeModifier::OnChangeImpl,
         PanelAttributeModifier::OnHeightChangeImpl,
-        PanelAttributeModifier::__onChangeEvent_modeImpl,
+        PanelAttributeModifier::_onChangeEvent_modeImpl,
     };
     return &ArkUIPanelModifierImpl;
 }

@@ -22,7 +22,7 @@ namespace ScrollModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // ScrollModifier
 namespace ScrollInterfaceModifier {
@@ -63,11 +63,12 @@ void OnWillScrollImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
 }
 void OnDidScrollImpl(Ark_NativePointer node,
-                     const Opt_ScrollOnScrollCallback* value)
+                     const ScrollOnScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,

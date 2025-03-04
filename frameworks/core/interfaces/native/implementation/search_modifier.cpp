@@ -22,7 +22,7 @@ namespace SearchModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // SearchModifier
 namespace SearchInterfaceModifier {
@@ -364,12 +364,12 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     //SearchModelNG::SetOnDidDelete(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SearchModelNG::SetEditMenuOptions(frameNode, convValue);
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
@@ -434,14 +434,14 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SearchModelNG::SetCustomKeyboard(frameNode, convValue);
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_String_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_String_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //SearchModelNG::Set__onChangeEvent_value(frameNode, convValue);
+    //SearchModelNG::Set_onChangeEvent_value(frameNode, convValue);
 }
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()
@@ -494,7 +494,7 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::InputFilterImpl,
         SearchAttributeModifier::CustomKeyboardImpl,
-        SearchAttributeModifier::__onChangeEvent_valueImpl,
+        SearchAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISearchModifierImpl;
 }

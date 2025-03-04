@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapGestureEventAccessor {
-void DestroyPeerImpl(TapGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_TapGestureEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TapGestureEvent CtorImpl()
 {
     return nullptr;
 }

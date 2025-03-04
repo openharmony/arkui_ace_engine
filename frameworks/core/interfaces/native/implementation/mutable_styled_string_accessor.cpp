@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MutableStyledStringAccessor {
-void DestroyPeerImpl(MutableStyledStringPeer* peer)
+void DestroyPeerImpl(Ark_MutableStyledString peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_MutableStyledString CtorImpl()
 {
     return nullptr;
 }
@@ -30,57 +30,66 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ReplaceStringImpl(MutableStyledStringPeer* peer,
+void ReplaceStringImpl(Ark_VMContext vmContext,
+                       Ark_MutableStyledString peer,
                        const Ark_Number* start,
                        const Ark_Number* length,
                        const Ark_String* other)
 {
 }
-void InsertStringImpl(MutableStyledStringPeer* peer,
+void InsertStringImpl(Ark_VMContext vmContext,
+                      Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_String* other)
 {
 }
-void RemoveStringImpl(MutableStyledStringPeer* peer,
+void RemoveStringImpl(Ark_VMContext vmContext,
+                      Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_Number* length)
 {
 }
-void ReplaceStyleImpl(MutableStyledStringPeer* peer,
+void ReplaceStyleImpl(Ark_VMContext vmContext,
+                      Ark_MutableStyledString peer,
                       const Ark_SpanStyle* spanStyle)
 {
 }
-void SetStyleImpl(MutableStyledStringPeer* peer,
+void SetStyleImpl(Ark_VMContext vmContext,
+                  Ark_MutableStyledString peer,
                   const Ark_SpanStyle* spanStyle)
 {
 }
-void RemoveStyleImpl(MutableStyledStringPeer* peer,
+void RemoveStyleImpl(Ark_VMContext vmContext,
+                     Ark_MutableStyledString peer,
                      const Ark_Number* start,
                      const Ark_Number* length,
                      Ark_StyledStringKey styledKey)
 {
 }
-void RemoveStylesImpl(MutableStyledStringPeer* peer,
+void RemoveStylesImpl(Ark_VMContext vmContext,
+                      Ark_MutableStyledString peer,
                       const Ark_Number* start,
                       const Ark_Number* length)
 {
 }
-void ClearStylesImpl(MutableStyledStringPeer* peer)
+void ClearStylesImpl(Ark_MutableStyledString peer)
 {
 }
-void ReplaceStyledStringImpl(MutableStyledStringPeer* peer,
+void ReplaceStyledStringImpl(Ark_VMContext vmContext,
+                             Ark_MutableStyledString peer,
                              const Ark_Number* start,
                              const Ark_Number* length,
-                             const Ark_StyledString* other)
+                             Ark_StyledString other)
 {
 }
-void InsertStyledStringImpl(MutableStyledStringPeer* peer,
+void InsertStyledStringImpl(Ark_VMContext vmContext,
+                            Ark_MutableStyledString peer,
                             const Ark_Number* start,
-                            const Ark_StyledString* other)
+                            Ark_StyledString other)
 {
 }
-void AppendStyledStringImpl(MutableStyledStringPeer* peer,
-                            const Ark_StyledString* other)
+void AppendStyledStringImpl(Ark_MutableStyledString peer,
+                            Ark_StyledString other)
 {
 }
 } // MutableStyledStringAccessor

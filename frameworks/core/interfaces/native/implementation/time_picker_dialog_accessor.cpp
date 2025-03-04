@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
-void DestroyPeerImpl(TimePickerDialogPeer* peer)
+void DestroyPeerImpl(Ark_TimePickerDialog peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TimePickerDialog CtorImpl()
 {
     return nullptr;
 }

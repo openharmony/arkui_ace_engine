@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowSectionsAccessor {
-void DestroyPeerImpl(WaterFlowSectionsPeer* peer)
+void DestroyPeerImpl(Ark_WaterFlowSections peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_WaterFlowSections CtorImpl()
 {
     return nullptr;
 }
@@ -30,30 +30,31 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer,
+Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
                        const Ark_Number* start,
                        const Opt_Number* deleteCount,
                        const Opt_Array_SectionOptions* sections)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer,
+Ark_Boolean PushImpl(Ark_WaterFlowSections peer,
                      const Ark_SectionOptions* section)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer,
+Ark_Boolean UpdateImpl(Ark_WaterFlowSections peer,
                        const Ark_Number* sectionIndex,
                        const Ark_SectionOptions* section)
 {
-    return 0;
+    return {};
 }
-void ValuesImpl(WaterFlowSectionsPeer* peer)
+Array_SectionOptions ValuesImpl(Ark_WaterFlowSections peer)
 {
+    return {};
 }
-Ark_Int32 LengthImpl(WaterFlowSectionsPeer* peer)
+Ark_Number LengthImpl(Ark_WaterFlowSections peer)
 {
-    return 0;
+    return {};
 }
 } // WaterFlowSectionsAccessor
 const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor()

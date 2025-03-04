@@ -22,7 +22,7 @@ namespace SelectModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // SelectModifier
 namespace SelectInterfaceModifier {
@@ -404,23 +404,23 @@ void MenuAlign1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(alignType); // for enums
     //SelectModelNG::SetMenuAlign1(frameNode, convValue);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Union_Number_Resource_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Union_Number_Resource_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //SelectModelNG::Set__onChangeEvent_selected(frameNode, convValue);
+    //SelectModelNG::Set_onChangeEvent_selected(frameNode, convValue);
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_ResourceStr_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_ResourceStr_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //SelectModelNG::Set__onChangeEvent_value(frameNode, convValue);
+    //SelectModelNG::Set_onChangeEvent_value(frameNode, convValue);
 }
 } // SelectAttributeModifier
 const GENERATED_ArkUISelectModifier* GetSelectModifier()
@@ -471,8 +471,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::ArrowModifierImpl,
         SelectAttributeModifier::MenuAlign0Impl,
         SelectAttributeModifier::MenuAlign1Impl,
-        SelectAttributeModifier::__onChangeEvent_selectedImpl,
-        SelectAttributeModifier::__onChangeEvent_valueImpl,
+        SelectAttributeModifier::_onChangeEvent_selectedImpl,
+        SelectAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISelectModifierImpl;
 }

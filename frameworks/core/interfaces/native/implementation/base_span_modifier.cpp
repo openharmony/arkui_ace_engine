@@ -22,7 +22,7 @@ namespace BaseSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 void TextBackgroundStyleImpl(Ark_NativePointer node,
                              const Ark_TextBackgroundStyle* value)
@@ -34,12 +34,12 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
     //BaseSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
-                        const Ark_LengthMetrics* value)
+                        Ark_LengthMetrics value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //BaseSpanModelNG::SetBaselineOffset(frameNode, convValue);
 }
 } // BaseSpanModifier

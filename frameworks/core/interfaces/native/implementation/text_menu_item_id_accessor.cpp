@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
-void DestroyPeerImpl(TextMenuItemIdPeer* peer)
+void DestroyPeerImpl(Ark_TextMenuItemId peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TextMenuItemId CtorImpl()
 {
     return nullptr;
 }
@@ -30,14 +30,46 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer OfImpl(const Ark_ResourceStr* id)
+Ark_TextMenuItemId OfImpl(const Ark_ResourceStr* id)
 {
-    return nullptr;
+    return {};
 }
-Ark_Boolean EqualsImpl(TextMenuItemIdPeer* peer,
-                       const Ark_TextMenuItemId* id)
+Ark_Boolean EqualsImpl(Ark_TextMenuItemId peer,
+                       Ark_TextMenuItemId id)
 {
-    return 0;
+    return {};
+}
+Ark_TextMenuItemId GetCUTImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCOPYImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetPASTEImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetSELECT_ALLImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCOLLABORATION_SERVICEImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetCAMERA_INPUTImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetAI_WRITERImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetSEARCHImpl()
+{
+    return {};
 }
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
@@ -48,6 +80,14 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
         TextMenuItemIdAccessor::GetFinalizerImpl,
         TextMenuItemIdAccessor::OfImpl,
         TextMenuItemIdAccessor::EqualsImpl,
+        TextMenuItemIdAccessor::GetCUTImpl,
+        TextMenuItemIdAccessor::GetCOPYImpl,
+        TextMenuItemIdAccessor::GetPASTEImpl,
+        TextMenuItemIdAccessor::GetSELECT_ALLImpl,
+        TextMenuItemIdAccessor::GetCOLLABORATION_SERVICEImpl,
+        TextMenuItemIdAccessor::GetCAMERA_INPUTImpl,
+        TextMenuItemIdAccessor::GetAI_WRITERImpl,
+        TextMenuItemIdAccessor::GetSEARCHImpl,
     };
     return &TextMenuItemIdAccessorImpl;
 }

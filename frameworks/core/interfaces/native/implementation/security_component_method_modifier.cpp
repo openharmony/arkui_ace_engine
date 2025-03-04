@@ -22,7 +22,7 @@ namespace SecurityComponentMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 void IconSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)

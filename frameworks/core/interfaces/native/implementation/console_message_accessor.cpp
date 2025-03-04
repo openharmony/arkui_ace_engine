@@ -19,33 +19,35 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ConsoleMessageAccessor {
-void DestroyPeerImpl(ConsoleMessagePeer* peer)
+void DestroyPeerImpl(Ark_ConsoleMessage peer)
 {
 }
-Ark_NativePointer CtorImpl(const Ark_String* message,
-                           const Ark_String* sourceId,
-                           const Ark_Number* lineNumber,
-                           Ark_MessageLevel messageLevel)
+Ark_ConsoleMessage CtorImpl(const Ark_String* message,
+                            const Ark_String* sourceId,
+                            const Ark_Number* lineNumber,
+                            Ark_MessageLevel messageLevel)
 {
-    return new ConsoleMessagePeer(message, sourceId, lineNumber, messageLevel);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetMessageImpl(ConsoleMessagePeer* peer)
+Ark_String GetMessageImpl(Ark_ConsoleMessage peer)
 {
+    return {};
 }
-void GetSourceIdImpl(ConsoleMessagePeer* peer)
+Ark_String GetSourceIdImpl(Ark_ConsoleMessage peer)
 {
+    return {};
 }
-Ark_Int32 GetLineNumberImpl(ConsoleMessagePeer* peer)
+Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
+Ark_MessageLevel GetMessageLevelImpl(Ark_ConsoleMessage peer)
 {
-    return nullptr;
+    return {};
 }
 } // ConsoleMessageAccessor
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()

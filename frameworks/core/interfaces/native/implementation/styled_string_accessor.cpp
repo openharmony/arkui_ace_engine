@@ -19,55 +19,66 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringAccessor {
-void DestroyPeerImpl(StyledStringPeer* peer)
+void DestroyPeerImpl(Ark_StyledString peer)
 {
 }
-Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
-                           const Opt_Array_StyleOptions* styles)
+Ark_StyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                          const Opt_Array_StyleOptions* styles)
 {
-    return new StyledStringPeer(value, styles);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetStringImpl(StyledStringPeer* peer)
+Ark_String GetStringImpl(Ark_StyledString peer)
 {
+    return {};
 }
-void GetStylesImpl(StyledStringPeer* peer,
-                   const Ark_Number* start,
-                   const Ark_Number* length,
-                   const Opt_StyledStringKey* styledKey)
+Array_SpanStyle GetStylesImpl(Ark_VMContext vmContext,
+                              Ark_StyledString peer,
+                              const Ark_Number* start,
+                              const Ark_Number* length,
+                              const Opt_StyledStringKey* styledKey)
 {
+    return {};
 }
-Ark_Boolean EqualsImpl(StyledStringPeer* peer,
-                       const Ark_StyledString* other)
+Ark_Boolean EqualsImpl(Ark_StyledString peer,
+                       Ark_StyledString other)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
-                                      const Ark_Number* start,
-                                      const Opt_Number* length)
+Ark_StyledString SubStyledStringImpl(Ark_VMContext vmContext,
+                                     Ark_StyledString peer,
+                                     const Ark_Number* start,
+                                     const Opt_Number* length)
 {
-    return nullptr;
+    return {};
 }
-void FromHtmlImpl(const Ark_String* html,
+void FromHtmlImpl(Ark_VMContext vmContext,
+                  Ark_AsyncWorkerPtr asyncWorker,
+                  const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
-void ToHtmlImpl(const Ark_StyledString* styledString)
+Ark_String ToHtmlImpl(Ark_VMContext vmContext,
+                      Ark_StyledString styledString)
 {
+    return {};
 }
-void MarshallingImpl(const Ark_StyledString* styledString)
+Ark_Buffer MarshallingImpl(Ark_StyledString styledString)
 {
+    return {};
 }
-void UnmarshallingImpl(const Ark_Buffer* buffer,
+void UnmarshallingImpl(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       const Ark_Buffer* buffer,
                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
-Ark_Int32 GetLengthImpl(StyledStringPeer* peer)
+Ark_Number GetLengthImpl(Ark_StyledString peer)
 {
-    return 0;
+    return {};
 }
 } // StyledStringAccessor
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()

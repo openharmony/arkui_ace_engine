@@ -19,64 +19,72 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrameNodeAccessor {
-void DestroyPeerImpl(FrameNodePeer* peer)
+void DestroyPeerImpl(Ark_FrameNode peer)
 {
 }
-Ark_NativePointer CtorImpl(const Ark_UIContext* uiContext)
+Ark_FrameNode CtorImpl(const Ark_UIContext* uiContext)
 {
-    return new FrameNodePeer(uiContext);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean IsModifiableImpl(FrameNodePeer* peer)
+Ark_Boolean IsModifiableImpl(Ark_FrameNode peer)
 {
-    return 0;
+    return {};
 }
-void AppendChildImpl(FrameNodePeer* peer,
-                     const Ark_FrameNode* node)
-{
-}
-void InsertChildAfterImpl(FrameNodePeer* peer,
-                          const Ark_FrameNode* child,
-                          const Ark_FrameNode* sibling)
+void AppendChildImpl(Ark_FrameNode peer,
+                     Ark_FrameNode node)
 {
 }
-void RemoveChildImpl(FrameNodePeer* peer,
-                     const Ark_FrameNode* node)
+void InsertChildAfterImpl(Ark_FrameNode peer,
+                          Ark_FrameNode child,
+                          Ark_FrameNode sibling)
 {
 }
-void ClearChildrenImpl(FrameNodePeer* peer)
+void RemoveChildImpl(Ark_FrameNode peer,
+                     Ark_FrameNode node)
 {
 }
-Ark_NativePointer GetChildImpl(FrameNodePeer* peer,
-                               const Ark_Number* index)
+void ClearChildrenImpl(Ark_FrameNode peer)
 {
-    return nullptr;
 }
-Ark_NativePointer GetFirstChildImpl(FrameNodePeer* peer)
+Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
+                           const Ark_Number* index)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetNextSiblingImpl(FrameNodePeer* peer)
+Ark_FrameNode GetFirstChildImpl(Ark_FrameNode peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetPreviousSiblingImpl(FrameNodePeer* peer)
+Ark_FrameNode GetNextSiblingImpl(Ark_FrameNode peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetParentImpl(FrameNodePeer* peer)
+Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNode peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_Int32 GetChildrenCountImpl(FrameNodePeer* peer)
+Ark_FrameNode GetParentImpl(Ark_FrameNode peer)
 {
-    return 0;
+    return {};
 }
-void DisposeImpl(FrameNodePeer* peer)
+Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
 {
+    return {};
+}
+void DisposeImpl(Ark_FrameNode peer)
+{
+}
+Ark_Number GetOpacityImpl(Ark_FrameNode peer)
+{
+    return {};
+}
+Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
+{
+    return {};
 }
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
@@ -97,6 +105,8 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetParentImpl,
         FrameNodeAccessor::GetChildrenCountImpl,
         FrameNodeAccessor::DisposeImpl,
+        FrameNodeAccessor::GetOpacityImpl,
+        FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
     };
     return &FrameNodeAccessorImpl;
 }

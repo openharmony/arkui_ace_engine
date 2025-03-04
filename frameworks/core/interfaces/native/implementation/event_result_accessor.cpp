@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventResultAccessor {
-void DestroyPeerImpl(EventResultPeer* peer)
+void DestroyPeerImpl(Ark_EventResult peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_EventResult CtorImpl()
 {
     return nullptr;
 }
@@ -30,11 +30,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetGestureEventResult0Impl(EventResultPeer* peer,
+void SetGestureEventResult0Impl(Ark_EventResult peer,
                                 Ark_Boolean result)
 {
 }
-void SetGestureEventResult1Impl(EventResultPeer* peer,
+void SetGestureEventResult1Impl(Ark_EventResult peer,
                                 Ark_Boolean result,
                                 Ark_Boolean stopPropagation)
 {

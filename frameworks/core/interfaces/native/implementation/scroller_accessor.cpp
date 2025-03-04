@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
-void DestroyPeerImpl(ScrollerPeer* peer)
+void DestroyPeerImpl(Ark_Scroller peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_Scroller CtorImpl()
 {
     return nullptr;
 }
@@ -30,57 +30,60 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ScrollToImpl(ScrollerPeer* peer,
+void ScrollToImpl(Ark_Scroller peer,
                   const Ark_ScrollOptions* options)
 {
 }
-void ScrollEdgeImpl(ScrollerPeer* peer,
+void ScrollEdgeImpl(Ark_Scroller peer,
                     Ark_Edge value,
                     const Opt_ScrollEdgeOptions* options)
 {
 }
-void FlingImpl(ScrollerPeer* peer,
+void FlingImpl(Ark_VMContext vmContext,
+               Ark_Scroller peer,
                const Ark_Number* velocity)
 {
 }
-void ScrollPage0Impl(ScrollerPeer* peer,
+void ScrollPage0Impl(Ark_Scroller peer,
                      const Ark_ScrollPageOptions* value)
 {
 }
-void ScrollPage1Impl(ScrollerPeer* peer,
+void ScrollPage1Impl(Ark_Scroller peer,
                      const Ark_Literal_Boolean_next_Axis_direction* value)
 {
 }
-Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
+Ark_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
 {
-    return nullptr;
+    return {};
 }
-void ScrollToIndexImpl(ScrollerPeer* peer,
+void ScrollToIndexImpl(Ark_Scroller peer,
                        const Ark_Number* value,
                        const Opt_Boolean* smooth,
                        const Opt_ScrollAlign* align,
                        const Opt_ScrollToIndexOptions* options)
 {
 }
-void ScrollByImpl(ScrollerPeer* peer,
+void ScrollByImpl(Ark_Scroller peer,
                   const Ark_Length* dx,
                   const Ark_Length* dy)
 {
 }
-Ark_Boolean IsAtEndImpl(ScrollerPeer* peer)
+Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer,
-                                  const Ark_Number* index)
+Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
+                               Ark_Scroller peer,
+                               const Ark_Number* index)
 {
-    return nullptr;
+    return {};
 }
-Ark_Int32 GetItemIndexImpl(ScrollerPeer* peer,
-                           const Ark_Number* x,
-                           const Ark_Number* y)
+Ark_Number GetItemIndexImpl(Ark_VMContext vmContext,
+                            Ark_Scroller peer,
+                            const Ark_Number* x,
+                            const Ark_Number* y)
 {
-    return 0;
+    return {};
 }
 } // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()

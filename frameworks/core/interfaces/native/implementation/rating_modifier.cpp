@@ -22,7 +22,7 @@ namespace RatingModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // RatingModifier
 namespace RatingInterfaceModifier {
@@ -121,14 +121,14 @@ void ContentModifier1Impl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //RatingModelNG::SetContentModifier1(frameNode, convValue);
 }
-void __onChangeEvent_ratingImpl(Ark_NativePointer node,
-                                const Callback_Number_Void* callback)
+void _onChangeEvent_ratingImpl(Ark_NativePointer node,
+                               const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //RatingModelNG::Set__onChangeEvent_rating(frameNode, convValue);
+    //RatingModelNG::Set_onChangeEvent_rating(frameNode, convValue);
 }
 } // RatingAttributeModifier
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()
@@ -146,7 +146,7 @@ const GENERATED_ArkUIRatingModifier* GetRatingModifier()
         RatingAttributeModifier::OnChange1Impl,
         RatingAttributeModifier::ContentModifier0Impl,
         RatingAttributeModifier::ContentModifier1Impl,
-        RatingAttributeModifier::__onChangeEvent_ratingImpl,
+        RatingAttributeModifier::_onChangeEvent_ratingImpl,
     };
     return &ArkUIRatingModifierImpl;
 }

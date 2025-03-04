@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuResultAccessor {
-void DestroyPeerImpl(WebContextMenuResultPeer* peer)
+void DestroyPeerImpl(Ark_WebContextMenuResult peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_WebContextMenuResult CtorImpl()
 {
     return nullptr;
 }
@@ -30,22 +30,22 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CloseContextMenuImpl(WebContextMenuResultPeer* peer)
+void CloseContextMenuImpl(Ark_WebContextMenuResult peer)
 {
 }
-void CopyImageImpl(WebContextMenuResultPeer* peer)
+void CopyImageImpl(Ark_WebContextMenuResult peer)
 {
 }
-void CopyImpl(WebContextMenuResultPeer* peer)
+void CopyImpl(Ark_WebContextMenuResult peer)
 {
 }
-void PasteImpl(WebContextMenuResultPeer* peer)
+void PasteImpl(Ark_WebContextMenuResult peer)
 {
 }
-void CutImpl(WebContextMenuResultPeer* peer)
+void CutImpl(Ark_WebContextMenuResult peer)
 {
 }
-void SelectAllImpl(WebContextMenuResultPeer* peer)
+void SelectAllImpl(Ark_WebContextMenuResult peer)
 {
 }
 } // WebContextMenuResultAccessor

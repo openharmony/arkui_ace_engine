@@ -22,7 +22,7 @@ namespace ProgressModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // ProgressModifier
 namespace ProgressInterfaceModifier {
@@ -47,7 +47,7 @@ void ValueImpl(Ark_NativePointer node,
     //ProgressModelNG::SetValue(frameNode, convValue);
 }
 void ColorImpl(Ark_NativePointer node,
-               const Ark_Union_ResourceColor_LinearGradient_common* value)
+               const Ark_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

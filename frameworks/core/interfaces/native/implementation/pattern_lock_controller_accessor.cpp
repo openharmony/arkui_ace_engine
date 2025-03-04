@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PatternLockControllerAccessor {
-void DestroyPeerImpl(PatternLockControllerPeer* peer)
+void DestroyPeerImpl(Ark_PatternLockController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_PatternLockController CtorImpl()
 {
     return nullptr;
 }
@@ -30,10 +30,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ResetImpl(PatternLockControllerPeer* peer)
+void ResetImpl(Ark_PatternLockController peer)
 {
 }
-void SetChallengeResultImpl(PatternLockControllerPeer* peer,
+void SetChallengeResultImpl(Ark_PatternLockController peer,
                             Ark_PatternLockChallengeResult result)
 {
 }

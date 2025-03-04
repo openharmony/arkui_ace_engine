@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace VideoControllerAccessor {
-void DestroyPeerImpl(VideoControllerPeer* peer)
+void DestroyPeerImpl(Ark_VideoController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_VideoController CtorImpl()
 {
     return nullptr;
 }
@@ -30,32 +30,32 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void StartImpl(VideoControllerPeer* peer)
+void StartImpl(Ark_VideoController peer)
 {
 }
-void PauseImpl(VideoControllerPeer* peer)
+void PauseImpl(Ark_VideoController peer)
 {
 }
-void StopImpl(VideoControllerPeer* peer)
+void StopImpl(Ark_VideoController peer)
 {
 }
-void SetCurrentTime0Impl(VideoControllerPeer* peer,
+void SetCurrentTime0Impl(Ark_VideoController peer,
                          const Ark_Number* value)
 {
 }
-void RequestFullscreenImpl(VideoControllerPeer* peer,
+void RequestFullscreenImpl(Ark_VideoController peer,
                            Ark_Boolean value)
 {
 }
-void ExitFullscreenImpl(VideoControllerPeer* peer)
+void ExitFullscreenImpl(Ark_VideoController peer)
 {
 }
-void SetCurrentTime1Impl(VideoControllerPeer* peer,
+void SetCurrentTime1Impl(Ark_VideoController peer,
                          const Ark_Number* value,
                          Ark_SeekMode seekMode)
 {
 }
-void ResetImpl(VideoControllerPeer* peer)
+void ResetImpl(Ark_VideoController peer)
 {
 }
 } // VideoControllerAccessor

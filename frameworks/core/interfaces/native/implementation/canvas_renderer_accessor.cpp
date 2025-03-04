@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRendererAccessor {
-void DestroyPeerImpl(CanvasRendererPeer* peer)
+void DestroyPeerImpl(Ark_CanvasRenderer peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_CanvasRenderer CtorImpl()
 {
     return nullptr;
 }
@@ -30,13 +30,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DrawImage0Impl(CanvasRendererPeer* peer,
+void DrawImage0Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
                     const Ark_Number* dx,
                     const Ark_Number* dy)
 {
 }
-void DrawImage1Impl(CanvasRendererPeer* peer,
+void DrawImage1Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
                     const Ark_Number* dx,
                     const Ark_Number* dy,
@@ -44,7 +44,7 @@ void DrawImage1Impl(CanvasRendererPeer* peer,
                     const Ark_Number* dh)
 {
 }
-void DrawImage2Impl(CanvasRendererPeer* peer,
+void DrawImage2Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
                     const Ark_Number* sx,
                     const Ark_Number* sy,
@@ -56,100 +56,100 @@ void DrawImage2Impl(CanvasRendererPeer* peer,
                     const Ark_Number* dh)
 {
 }
-void BeginPathImpl(CanvasRendererPeer* peer)
+void BeginPathImpl(Ark_CanvasRenderer peer)
 {
 }
-void Clip0Impl(CanvasRendererPeer* peer,
+void Clip0Impl(Ark_CanvasRenderer peer,
                const Opt_String* fillRule)
 {
 }
-void Clip1Impl(CanvasRendererPeer* peer,
-               const Ark_Path2D* path,
+void Clip1Impl(Ark_CanvasRenderer peer,
+               Ark_Path2D path,
                const Opt_String* fillRule)
 {
 }
-void Fill0Impl(CanvasRendererPeer* peer,
+void Fill0Impl(Ark_CanvasRenderer peer,
                const Opt_String* fillRule)
 {
 }
-void Fill1Impl(CanvasRendererPeer* peer,
-               const Ark_Path2D* path,
+void Fill1Impl(Ark_CanvasRenderer peer,
+               Ark_Path2D path,
                const Opt_String* fillRule)
 {
 }
-void Stroke0Impl(CanvasRendererPeer* peer)
+void Stroke0Impl(Ark_CanvasRenderer peer)
 {
 }
-void Stroke1Impl(CanvasRendererPeer* peer,
-                 const Ark_Path2D* path)
+void Stroke1Impl(Ark_CanvasRenderer peer,
+                 Ark_Path2D path)
 {
 }
-Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
-                                           const Ark_Number* x0,
-                                           const Ark_Number* y0,
-                                           const Ark_Number* x1,
-                                           const Ark_Number* y1)
+Ark_CanvasGradient CreateLinearGradientImpl(Ark_CanvasRenderer peer,
+                                            const Ark_Number* x0,
+                                            const Ark_Number* y0,
+                                            const Ark_Number* x1,
+                                            const Ark_Number* y1)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
-                                    const Ark_ImageBitmap* image,
+Opt_CanvasPattern CreatePatternImpl(Ark_CanvasRenderer peer,
+                                    Ark_ImageBitmap image,
                                     const Opt_String* repetition)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
-                                           const Ark_Number* x0,
-                                           const Ark_Number* y0,
-                                           const Ark_Number* r0,
-                                           const Ark_Number* x1,
-                                           const Ark_Number* y1,
-                                           const Ark_Number* r1)
+Ark_CanvasGradient CreateRadialGradientImpl(Ark_CanvasRenderer peer,
+                                            const Ark_Number* x0,
+                                            const Ark_Number* y0,
+                                            const Ark_Number* r0,
+                                            const Ark_Number* x1,
+                                            const Ark_Number* y1,
+                                            const Ark_Number* r1)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer CreateConicGradientImpl(CanvasRendererPeer* peer,
-                                          const Ark_Number* startAngle,
-                                          const Ark_Number* x,
-                                          const Ark_Number* y)
+Ark_CanvasGradient CreateConicGradientImpl(Ark_CanvasRenderer peer,
+                                           const Ark_Number* startAngle,
+                                           const Ark_Number* x,
+                                           const Ark_Number* y)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
-                                       const Ark_Number* sw,
-                                       const Ark_Number* sh)
-{
-    return nullptr;
-}
-Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
-                                       const Ark_ImageData* imagedata)
-{
-    return nullptr;
-}
-Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
-                                   const Ark_Number* sx,
-                                   const Ark_Number* sy,
+Ark_ImageData CreateImageData0Impl(Ark_CanvasRenderer peer,
                                    const Ark_Number* sw,
                                    const Ark_Number* sh)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
-                                  const Ark_Number* sx,
-                                  const Ark_Number* sy,
-                                  const Ark_Number* sw,
-                                  const Ark_Number* sh)
+Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
+                                   Ark_ImageData imagedata)
 {
-    return nullptr;
+    return {};
 }
-void PutImageData0Impl(CanvasRendererPeer* peer,
-                       const Ark_ImageData* imagedata,
+Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
+                               const Ark_Number* sx,
+                               const Ark_Number* sy,
+                               const Ark_Number* sw,
+                               const Ark_Number* sh)
+{
+    return {};
+}
+Ark_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
+                             const Ark_Number* sx,
+                             const Ark_Number* sy,
+                             const Ark_Number* sw,
+                             const Ark_Number* sh)
+{
+    return {};
+}
+void PutImageData0Impl(Ark_CanvasRenderer peer,
+                       Ark_ImageData imagedata,
                        const Ark_Union_Number_String* dx,
                        const Ark_Union_Number_String* dy)
 {
 }
-void PutImageData1Impl(CanvasRendererPeer* peer,
-                       const Ark_ImageData* imagedata,
+void PutImageData1Impl(Ark_CanvasRenderer peer,
+                       Ark_ImageData imagedata,
                        const Ark_Union_Number_String* dx,
                        const Ark_Union_Number_String* dy,
                        const Ark_Union_Number_String* dirtyX,
@@ -158,76 +158,77 @@ void PutImageData1Impl(CanvasRendererPeer* peer,
                        const Ark_Union_Number_String* dirtyHeight)
 {
 }
-void GetLineDashImpl(CanvasRendererPeer* peer)
+Array_Number GetLineDashImpl(Ark_CanvasRenderer peer)
 {
+    return {};
 }
-void SetLineDashImpl(CanvasRendererPeer* peer,
+void SetLineDashImpl(Ark_CanvasRenderer peer,
                      const Array_Number* segments)
 {
 }
-void ClearRectImpl(CanvasRendererPeer* peer,
+void ClearRectImpl(Ark_CanvasRenderer peer,
                    const Ark_Number* x,
                    const Ark_Number* y,
                    const Ark_Number* w,
                    const Ark_Number* h)
 {
 }
-void FillRectImpl(CanvasRendererPeer* peer,
+void FillRectImpl(Ark_CanvasRenderer peer,
                   const Ark_Number* x,
                   const Ark_Number* y,
                   const Ark_Number* w,
                   const Ark_Number* h)
 {
 }
-void StrokeRectImpl(CanvasRendererPeer* peer,
+void StrokeRectImpl(Ark_CanvasRenderer peer,
                     const Ark_Number* x,
                     const Ark_Number* y,
                     const Ark_Number* w,
                     const Ark_Number* h)
 {
 }
-void RestoreImpl(CanvasRendererPeer* peer)
+void RestoreImpl(Ark_CanvasRenderer peer)
 {
 }
-void SaveImpl(CanvasRendererPeer* peer)
+void SaveImpl(Ark_CanvasRenderer peer)
 {
 }
-void FillTextImpl(CanvasRendererPeer* peer,
+void FillTextImpl(Ark_CanvasRenderer peer,
                   const Ark_String* text,
                   const Ark_Number* x,
                   const Ark_Number* y,
                   const Opt_Number* maxWidth)
 {
 }
-Ark_NativePointer MeasureTextImpl(CanvasRendererPeer* peer,
-                                  const Ark_String* text)
+Ark_TextMetrics MeasureTextImpl(Ark_CanvasRenderer peer,
+                                const Ark_String* text)
 {
-    return nullptr;
+    return {};
 }
-void StrokeTextImpl(CanvasRendererPeer* peer,
+void StrokeTextImpl(Ark_CanvasRenderer peer,
                     const Ark_String* text,
                     const Ark_Number* x,
                     const Ark_Number* y,
                     const Opt_Number* maxWidth)
 {
 }
-Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer)
+Ark_Matrix2D GetTransformImpl(Ark_CanvasRenderer peer)
 {
-    return nullptr;
+    return {};
 }
-void ResetTransformImpl(CanvasRendererPeer* peer)
+void ResetTransformImpl(Ark_CanvasRenderer peer)
 {
 }
-void RotateImpl(CanvasRendererPeer* peer,
+void RotateImpl(Ark_CanvasRenderer peer,
                 const Ark_Number* angle)
 {
 }
-void ScaleImpl(CanvasRendererPeer* peer,
+void ScaleImpl(Ark_CanvasRenderer peer,
                const Ark_Number* x,
                const Ark_Number* y)
 {
 }
-void SetTransform0Impl(CanvasRendererPeer* peer,
+void SetTransform0Impl(Ark_CanvasRenderer peer,
                        const Ark_Number* a,
                        const Ark_Number* b,
                        const Ark_Number* c,
@@ -236,11 +237,11 @@ void SetTransform0Impl(CanvasRendererPeer* peer,
                        const Ark_Number* f)
 {
 }
-void SetTransform1Impl(CanvasRendererPeer* peer,
+void SetTransform1Impl(Ark_CanvasRenderer peer,
                        const Opt_Matrix2D* transform)
 {
 }
-void TransformImpl(CanvasRendererPeer* peer,
+void TransformImpl(Ark_CanvasRenderer peer,
                    const Ark_Number* a,
                    const Ark_Number* b,
                    const Ark_Number* c,
@@ -249,177 +250,181 @@ void TransformImpl(CanvasRendererPeer* peer,
                    const Ark_Number* f)
 {
 }
-void TranslateImpl(CanvasRendererPeer* peer,
+void TranslateImpl(Ark_CanvasRenderer peer,
                    const Ark_Number* x,
                    const Ark_Number* y)
 {
 }
-void SetPixelMapImpl(CanvasRendererPeer* peer,
+void SetPixelMapImpl(Ark_CanvasRenderer peer,
                      const Opt_PixelMap* value)
 {
 }
-void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
-                                 const Ark_ImageBitmap* bitmap)
+void TransferFromImageBitmapImpl(Ark_CanvasRenderer peer,
+                                 Ark_ImageBitmap bitmap)
 {
 }
-void SaveLayerImpl(CanvasRendererPeer* peer)
+void SaveLayerImpl(Ark_CanvasRenderer peer)
 {
 }
-void RestoreLayerImpl(CanvasRendererPeer* peer)
+void RestoreLayerImpl(Ark_CanvasRenderer peer)
 {
 }
-void ResetImpl(CanvasRendererPeer* peer)
+void ResetImpl(Ark_CanvasRenderer peer)
 {
 }
-void SetLetterSpacingImpl(CanvasRendererPeer* peer,
+void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
                           const Ark_Union_LengthMetrics_String* letterSpacing)
 {
 }
-Ark_Int32 GetGlobalAlphaImpl(CanvasRendererPeer* peer)
+Ark_Number GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
 {
-    return 0;
+    return {};
 }
-void SetGlobalAlphaImpl(CanvasRendererPeer* peer,
+void SetGlobalAlphaImpl(Ark_CanvasRenderer peer,
                         const Ark_Number* globalAlpha)
 {
 }
-void GetGlobalCompositeOperationImpl(CanvasRendererPeer* peer)
+Ark_String GetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer)
 {
+    return {};
 }
-void SetGlobalCompositeOperationImpl(CanvasRendererPeer* peer,
+void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
                                      const Ark_String* globalCompositeOperation)
 {
 }
-void SetFillStyleImpl(CanvasRendererPeer* peer,
+void SetFillStyleImpl(Ark_CanvasRenderer peer,
                       const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
 {
 }
-void SetStrokeStyleImpl(CanvasRendererPeer* peer,
+void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
 {
 }
-void GetFilterImpl(CanvasRendererPeer* peer)
+Ark_String GetFilterImpl(Ark_CanvasRenderer peer)
 {
+    return {};
 }
-void SetFilterImpl(CanvasRendererPeer* peer,
+void SetFilterImpl(Ark_CanvasRenderer peer,
                    const Ark_String* filter)
 {
 }
-Ark_Boolean GetImageSmoothingEnabledImpl(CanvasRendererPeer* peer)
+Ark_Boolean GetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer)
 {
-    return 0;
+    return {};
 }
-void SetImageSmoothingEnabledImpl(CanvasRendererPeer* peer,
+void SetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer,
                                   Ark_Boolean imageSmoothingEnabled)
 {
 }
-Ark_NativePointer GetImageSmoothingQualityImpl(CanvasRendererPeer* peer)
+Ark_String GetImageSmoothingQualityImpl(Ark_CanvasRenderer peer)
 {
-    return nullptr;
+    return {};
 }
-void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
+void SetImageSmoothingQualityImpl(Ark_CanvasRenderer peer,
                                   const Ark_String* imageSmoothingQuality)
 {
 }
-Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
+Ark_String GetLineCapImpl(Ark_CanvasRenderer peer)
 {
-    return nullptr;
+    return {};
 }
-void SetLineCapImpl(CanvasRendererPeer* peer,
+void SetLineCapImpl(Ark_CanvasRenderer peer,
                     const Ark_String* lineCap)
 {
 }
-Ark_Int32 GetLineDashOffsetImpl(CanvasRendererPeer* peer)
+Ark_Number GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
 {
-    return 0;
+    return {};
 }
-void SetLineDashOffsetImpl(CanvasRendererPeer* peer,
+void SetLineDashOffsetImpl(Ark_CanvasRenderer peer,
                            const Ark_Number* lineDashOffset)
 {
 }
-Ark_NativePointer GetLineJoinImpl(CanvasRendererPeer* peer)
+Ark_String GetLineJoinImpl(Ark_CanvasRenderer peer)
 {
-    return nullptr;
+    return {};
 }
-void SetLineJoinImpl(CanvasRendererPeer* peer,
+void SetLineJoinImpl(Ark_CanvasRenderer peer,
                      const Ark_String* lineJoin)
 {
 }
-Ark_Int32 GetLineWidthImpl(CanvasRendererPeer* peer)
+Ark_Number GetLineWidthImpl(Ark_CanvasRenderer peer)
 {
-    return 0;
+    return {};
 }
-void SetLineWidthImpl(CanvasRendererPeer* peer,
+void SetLineWidthImpl(Ark_CanvasRenderer peer,
                       const Ark_Number* lineWidth)
 {
 }
-Ark_Int32 GetMiterLimitImpl(CanvasRendererPeer* peer)
+Ark_Number GetMiterLimitImpl(Ark_CanvasRenderer peer)
 {
-    return 0;
+    return {};
 }
-void SetMiterLimitImpl(CanvasRendererPeer* peer,
+void SetMiterLimitImpl(Ark_CanvasRenderer peer,
                        const Ark_Number* miterLimit)
 {
 }
-Ark_Int32 GetShadowBlurImpl(CanvasRendererPeer* peer)
+Ark_Number GetShadowBlurImpl(Ark_CanvasRenderer peer)
 {
-    return 0;
+    return {};
 }
-void SetShadowBlurImpl(CanvasRendererPeer* peer,
+void SetShadowBlurImpl(Ark_CanvasRenderer peer,
                        const Ark_Number* shadowBlur)
 {
 }
-void GetShadowColorImpl(CanvasRendererPeer* peer)
+Ark_String GetShadowColorImpl(Ark_CanvasRenderer peer)
 {
+    return {};
 }
-void SetShadowColorImpl(CanvasRendererPeer* peer,
+void SetShadowColorImpl(Ark_CanvasRenderer peer,
                         const Ark_String* shadowColor)
 {
 }
-Ark_Int32 GetShadowOffsetXImpl(CanvasRendererPeer* peer)
+Ark_Number GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
 {
-    return 0;
+    return {};
 }
-void SetShadowOffsetXImpl(CanvasRendererPeer* peer,
+void SetShadowOffsetXImpl(Ark_CanvasRenderer peer,
                           const Ark_Number* shadowOffsetX)
 {
 }
-Ark_Int32 GetShadowOffsetYImpl(CanvasRendererPeer* peer)
+Ark_Number GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
 {
-    return 0;
+    return {};
 }
-void SetShadowOffsetYImpl(CanvasRendererPeer* peer,
+void SetShadowOffsetYImpl(Ark_CanvasRenderer peer,
                           const Ark_Number* shadowOffsetY)
 {
 }
-Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
+Ark_String GetDirectionImpl(Ark_CanvasRenderer peer)
 {
-    return nullptr;
+    return {};
 }
-void SetDirectionImpl(CanvasRendererPeer* peer,
+void SetDirectionImpl(Ark_CanvasRenderer peer,
                       const Ark_String* direction)
 {
 }
-void GetFontImpl(CanvasRendererPeer* peer)
+Ark_String GetFontImpl(Ark_CanvasRenderer peer)
 {
+    return {};
 }
-void SetFontImpl(CanvasRendererPeer* peer,
+void SetFontImpl(Ark_CanvasRenderer peer,
                  const Ark_String* font)
 {
 }
-Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
+Ark_String GetTextAlignImpl(Ark_CanvasRenderer peer)
 {
-    return nullptr;
+    return {};
 }
-void SetTextAlignImpl(CanvasRendererPeer* peer,
+void SetTextAlignImpl(Ark_CanvasRenderer peer,
                       const Ark_String* textAlign)
 {
 }
-Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
+Ark_String GetTextBaselineImpl(Ark_CanvasRenderer peer)
 {
-    return nullptr;
+    return {};
 }
-void SetTextBaselineImpl(CanvasRendererPeer* peer,
+void SetTextBaselineImpl(Ark_CanvasRenderer peer,
                          const Ark_String* textBaseline)
 {
 }

@@ -19,28 +19,28 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ProgressMaskAccessor {
-void DestroyPeerImpl(ProgressMaskPeer* peer)
+void DestroyPeerImpl(Ark_ProgressMask peer)
 {
 }
-Ark_NativePointer CtorImpl(const Ark_Number* value,
-                           const Ark_Number* total,
-                           const Ark_ResourceColor* color)
+Ark_ProgressMask CtorImpl(const Ark_Number* value,
+                          const Ark_Number* total,
+                          const Ark_ResourceColor* color)
 {
-    return new ProgressMaskPeer(value, total, color);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void UpdateProgressImpl(ProgressMaskPeer* peer,
+void UpdateProgressImpl(Ark_ProgressMask peer,
                         const Ark_Number* value)
 {
 }
-void UpdateColorImpl(ProgressMaskPeer* peer,
+void UpdateColorImpl(Ark_ProgressMask peer,
                      const Ark_ResourceColor* value)
 {
 }
-void EnableBreathingAnimationImpl(ProgressMaskPeer* peer,
+void EnableBreathingAnimationImpl(Ark_ProgressMask peer,
                                   Ark_Boolean value)
 {
 }

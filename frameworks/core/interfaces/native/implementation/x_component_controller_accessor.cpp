@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentControllerAccessor {
-void DestroyPeerImpl(XComponentControllerPeer* peer)
+void DestroyPeerImpl(Ark_XComponentController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_XComponentController CtorImpl()
 {
     return nullptr;
 }
@@ -30,52 +30,55 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetXComponentSurfaceIdImpl(XComponentControllerPeer* peer)
+Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
 {
+    return {};
 }
-Ark_NativePointer GetXComponentContextImpl(XComponentControllerPeer* peer)
+Ark_CustomObject GetXComponentContextImpl(Ark_XComponentController peer)
 {
-    return nullptr;
+    return {};
 }
-void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer,
+void SetXComponentSurfaceSizeImpl(Ark_XComponentController peer,
                                   const Ark_Literal_Number_surfaceHeight_surfaceWidth* value)
 {
 }
-void SetXComponentSurfaceRectImpl(XComponentControllerPeer* peer,
+void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
                                   const Ark_SurfaceRect* rect)
 {
 }
-Ark_NativePointer GetXComponentSurfaceRectImpl(XComponentControllerPeer* peer)
+Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentController peer)
 {
-    return nullptr;
+    return {};
 }
-void SetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer,
+void SetXComponentSurfaceRotationImpl(Ark_XComponentController peer,
                                       const Ark_SurfaceRotationOptions* rotationOptions)
 {
 }
-Ark_NativePointer GetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer)
+Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentController peer)
 {
-    return nullptr;
+    return {};
 }
-void OnSurfaceCreatedImpl(XComponentControllerPeer* peer,
+void OnSurfaceCreatedImpl(Ark_XComponentController peer,
                           const Ark_String* surfaceId)
 {
 }
-void OnSurfaceChangedImpl(XComponentControllerPeer* peer,
+void OnSurfaceChangedImpl(Ark_XComponentController peer,
                           const Ark_String* surfaceId,
                           const Ark_SurfaceRect* rect)
 {
 }
-void OnSurfaceDestroyedImpl(XComponentControllerPeer* peer,
+void OnSurfaceDestroyedImpl(Ark_XComponentController peer,
                             const Ark_String* surfaceId)
 {
 }
-void StartImageAnalyzerImpl(XComponentControllerPeer* peer,
+void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_XComponentController peer,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
-void StopImageAnalyzerImpl(XComponentControllerPeer* peer)
+void StopImageAnalyzerImpl(Ark_XComponentController peer)
 {
 }
 } // XComponentControllerAccessor

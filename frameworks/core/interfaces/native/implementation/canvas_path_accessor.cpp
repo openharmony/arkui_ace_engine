@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPathAccessor {
-void DestroyPeerImpl(CanvasPathPeer* peer)
+void DestroyPeerImpl(Ark_CanvasPath peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_CanvasPath CtorImpl()
 {
     return nullptr;
 }
@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ArcImpl(CanvasPathPeer* peer,
+void ArcImpl(Ark_CanvasPath peer,
              const Ark_Number* x,
              const Ark_Number* y,
              const Ark_Number* radius,
@@ -39,7 +39,7 @@ void ArcImpl(CanvasPathPeer* peer,
              const Opt_Boolean* counterclockwise)
 {
 }
-void ArcToImpl(CanvasPathPeer* peer,
+void ArcToImpl(Ark_CanvasPath peer,
                const Ark_Number* x1,
                const Ark_Number* y1,
                const Ark_Number* x2,
@@ -47,7 +47,7 @@ void ArcToImpl(CanvasPathPeer* peer,
                const Ark_Number* radius)
 {
 }
-void BezierCurveToImpl(CanvasPathPeer* peer,
+void BezierCurveToImpl(Ark_CanvasPath peer,
                        const Ark_Number* cp1x,
                        const Ark_Number* cp1y,
                        const Ark_Number* cp2x,
@@ -56,10 +56,10 @@ void BezierCurveToImpl(CanvasPathPeer* peer,
                        const Ark_Number* y)
 {
 }
-void ClosePathImpl(CanvasPathPeer* peer)
+void ClosePathImpl(Ark_CanvasPath peer)
 {
 }
-void EllipseImpl(CanvasPathPeer* peer,
+void EllipseImpl(Ark_CanvasPath peer,
                  const Ark_Number* x,
                  const Ark_Number* y,
                  const Ark_Number* radiusX,
@@ -70,24 +70,24 @@ void EllipseImpl(CanvasPathPeer* peer,
                  const Opt_Boolean* counterclockwise)
 {
 }
-void LineToImpl(CanvasPathPeer* peer,
+void LineToImpl(Ark_CanvasPath peer,
                 const Ark_Number* x,
                 const Ark_Number* y)
 {
 }
-void MoveToImpl(CanvasPathPeer* peer,
+void MoveToImpl(Ark_CanvasPath peer,
                 const Ark_Number* x,
                 const Ark_Number* y)
 {
 }
-void QuadraticCurveToImpl(CanvasPathPeer* peer,
+void QuadraticCurveToImpl(Ark_CanvasPath peer,
                           const Ark_Number* cpx,
                           const Ark_Number* cpy,
                           const Ark_Number* x,
                           const Ark_Number* y)
 {
 }
-void RectImpl(CanvasPathPeer* peer,
+void RectImpl(Ark_CanvasPath peer,
               const Ark_Number* x,
               const Ark_Number* y,
               const Ark_Number* w,

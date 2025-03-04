@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ICurveAccessor {
-void DestroyPeerImpl(ICurvePeer* peer)
+void DestroyPeerImpl(Ark_ICurve peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_ICurve CtorImpl()
 {
     return nullptr;
 }
@@ -30,10 +30,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 InterpolateImpl(ICurvePeer* peer,
-                          const Ark_Number* fraction)
+Ark_Number InterpolateImpl(Ark_ICurve peer,
+                           const Ark_Number* fraction)
 {
-    return 0;
+    return {};
 }
 } // ICurveAccessor
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()

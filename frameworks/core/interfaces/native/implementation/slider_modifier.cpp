@@ -22,7 +22,7 @@ namespace SliderModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // SliderModifier
 namespace SliderInterfaceModifier {
@@ -46,7 +46,7 @@ void BlockColorImpl(Ark_NativePointer node,
     //SliderModelNG::SetBlockColor(frameNode, convValue);
 }
 void TrackColorImpl(Ark_NativePointer node,
-                    const Ark_Union_ResourceColor_LinearGradient_common* value)
+                    const Ark_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -225,14 +225,14 @@ void ShowTipsImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SliderModelNG::SetShowTips(frameNode, convValue);
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //SliderModelNG::Set__onChangeEvent_value(frameNode, convValue);
+    //SliderModelNG::Set_onChangeEvent_value(frameNode, convValue);
 }
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()
@@ -261,7 +261,7 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::ContentModifierImpl,
         SliderAttributeModifier::SlideRangeImpl,
         SliderAttributeModifier::ShowTipsImpl,
-        SliderAttributeModifier::__onChangeEvent_valueImpl,
+        SliderAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISliderModifierImpl;
 }

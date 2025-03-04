@@ -19,27 +19,27 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageBitmapAccessor {
-void DestroyPeerImpl(ImageBitmapPeer* peer)
+void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
 }
-Ark_NativePointer CtorImpl(const Ark_String* src)
+Ark_ImageBitmap CtorImpl(const Ark_String* src)
 {
-    return new ImageBitmapPeer(src);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CloseImpl(ImageBitmapPeer* peer)
+void CloseImpl(Ark_ImageBitmap peer)
 {
 }
-Ark_Int32 GetHeightImpl(ImageBitmapPeer* peer)
+Ark_Number GetHeightImpl(Ark_ImageBitmap peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetWidthImpl(ImageBitmapPeer* peer)
+Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
 {
-    return 0;
+    return {};
 }
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()

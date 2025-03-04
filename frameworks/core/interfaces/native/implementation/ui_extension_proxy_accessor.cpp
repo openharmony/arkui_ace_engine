@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionProxyAccessor {
-void DestroyPeerImpl(UIExtensionProxyPeer* peer)
+void DestroyPeerImpl(Ark_UIExtensionProxy peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_UIExtensionProxy CtorImpl()
 {
     return nullptr;
 }
@@ -30,28 +30,29 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SendImpl(UIExtensionProxyPeer* peer,
+void SendImpl(Ark_UIExtensionProxy peer,
               const Map_String_CustomObject* data)
 {
 }
-Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
-                               const Map_String_CustomObject* data)
+Map_String_CustomObject SendSyncImpl(Ark_VMContext vmContext,
+                                     Ark_UIExtensionProxy peer,
+                                     const Map_String_CustomObject* data)
 {
-    return 0;
+    return {};
 }
-void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+void OnAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
                                  const Callback_UIExtensionProxy_Void* callback_)
 {
 }
-void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+void OnSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
                                 const Callback_UIExtensionProxy_Void* callback_)
 {
 }
-void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+void OffAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
                                   const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 }
-void OffSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+void OffSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
                                  const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 }

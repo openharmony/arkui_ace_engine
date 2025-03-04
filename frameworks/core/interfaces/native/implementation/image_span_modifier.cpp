@@ -22,7 +22,7 @@ namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // ImageSpanModifier
 namespace ImageSpanInterfaceModifier {
@@ -83,12 +83,12 @@ void OnErrorImpl(Ark_NativePointer node,
     //ImageSpanModelNG::SetOnError(frameNode, convValue);
 }
 void AltImpl(Ark_NativePointer node,
-             const Ark_PixelMap* value)
+             Ark_PixelMap value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ImageSpanModelNG::SetAlt(frameNode, convValue);
 }
 } // ImageSpanAttributeModifier

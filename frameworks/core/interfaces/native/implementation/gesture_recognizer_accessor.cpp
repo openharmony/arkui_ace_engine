@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureRecognizerAccessor {
-void DestroyPeerImpl(GestureRecognizerPeer* peer)
+void DestroyPeerImpl(Ark_GestureRecognizer peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_GestureRecognizer CtorImpl()
 {
     return nullptr;
 }
@@ -30,36 +30,37 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetTagImpl(GestureRecognizerPeer* peer)
+Ark_String GetTagImpl(Ark_GestureRecognizer peer)
 {
+    return {};
 }
-Ark_NativePointer GetTypeImpl(GestureRecognizerPeer* peer)
+Ark_GestureControl_GestureType GetTypeImpl(Ark_GestureRecognizer peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_Boolean IsBuiltInImpl(GestureRecognizerPeer* peer)
+Ark_Boolean IsBuiltInImpl(Ark_GestureRecognizer peer)
 {
-    return 0;
+    return {};
 }
-void SetEnabledImpl(GestureRecognizerPeer* peer,
+void SetEnabledImpl(Ark_GestureRecognizer peer,
                     Ark_Boolean isEnabled)
 {
 }
-Ark_Boolean IsEnabledImpl(GestureRecognizerPeer* peer)
+Ark_Boolean IsEnabledImpl(Ark_GestureRecognizer peer)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer GetStateImpl(GestureRecognizerPeer* peer)
+Ark_GestureRecognizerState GetStateImpl(Ark_GestureRecognizer peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
+Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
+Ark_Boolean IsValidImpl(Ark_GestureRecognizer peer)
 {
-    return 0;
+    return {};
 }
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()

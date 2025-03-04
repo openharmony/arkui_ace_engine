@@ -22,7 +22,7 @@ namespace RadioModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // RadioModifier
 namespace RadioInterfaceModifier {
@@ -95,14 +95,14 @@ void ContentModifier1Impl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //RadioModelNG::SetContentModifier1(frameNode, convValue);
 }
-void __onChangeEvent_checkedImpl(Ark_NativePointer node,
-                                 const Callback_Boolean_Void* callback)
+void _onChangeEvent_checkedImpl(Ark_NativePointer node,
+                                const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //RadioModelNG::Set__onChangeEvent_checked(frameNode, convValue);
+    //RadioModelNG::Set_onChangeEvent_checked(frameNode, convValue);
 }
 } // RadioAttributeModifier
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()
@@ -117,7 +117,7 @@ const GENERATED_ArkUIRadioModifier* GetRadioModifier()
         RadioAttributeModifier::RadioStyleImpl,
         RadioAttributeModifier::ContentModifier0Impl,
         RadioAttributeModifier::ContentModifier1Impl,
-        RadioAttributeModifier::__onChangeEvent_checkedImpl,
+        RadioAttributeModifier::_onChangeEvent_checkedImpl,
     };
     return &ArkUIRadioModifierImpl;
 }

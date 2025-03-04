@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableTargetInfoAccessor {
-void DestroyPeerImpl(ScrollableTargetInfoPeer* peer)
+void DestroyPeerImpl(Ark_ScrollableTargetInfo peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_ScrollableTargetInfo CtorImpl()
 {
     return nullptr;
 }
@@ -30,13 +30,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean IsBeginImpl(ScrollableTargetInfoPeer* peer)
+Ark_Boolean IsBeginImpl(Ark_ScrollableTargetInfo peer)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean IsEndImpl(ScrollableTargetInfoPeer* peer)
+Ark_Boolean IsEndImpl(Ark_ScrollableTargetInfo peer)
 {
-    return 0;
+    return {};
 }
 } // ScrollableTargetInfoAccessor
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor()

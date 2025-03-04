@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
-void DestroyPeerImpl(DatePickerDialogPeer* peer)
+void DestroyPeerImpl(Ark_DatePickerDialog peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_DatePickerDialog CtorImpl()
 {
     return nullptr;
 }

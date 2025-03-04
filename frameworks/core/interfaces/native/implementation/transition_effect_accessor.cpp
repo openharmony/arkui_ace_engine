@@ -19,52 +19,68 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TransitionEffectAccessor {
-void DestroyPeerImpl(TransitionEffectPeer* peer)
+void DestroyPeerImpl(Ark_TransitionEffect peer)
 {
 }
-Ark_NativePointer CtorImpl(const Ark_String* type,
-                           const Ark_TransitionEffects* effect)
+Ark_TransitionEffect CtorImpl(const Ark_String* type,
+                              const Ark_TransitionEffects* effect)
 {
-    return new TransitionEffectPeer(type, effect);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
+Ark_TransitionEffect TranslateImpl(const Ark_TranslateOptions* options)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
+Ark_TransitionEffect RotateImpl(const Ark_RotateOptions* options)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
+Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
+Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
+Ark_TransitionEffect MoveImpl(Ark_TransitionEdge edge)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
-                                 const Ark_TransitionEffect* disappear)
+Ark_TransitionEffect AsymmetricImpl(Ark_TransitionEffect appear,
+                                    Ark_TransitionEffect disappear)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
-                                const Ark_AnimateParam* value)
+Ark_TransitionEffect AnimationImpl(Ark_TransitionEffect peer,
+                                   const Ark_AnimateParam* value)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
-                              const Ark_TransitionEffect* transitionEffect)
+Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
+                                 Ark_TransitionEffect transitionEffect)
 {
-    return nullptr;
+    return {};
+}
+Ark_TransitionEffect GetIDENTITYImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetOPACITYImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetSLIDEImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetSLIDE_SWITCHImpl()
+{
+    return {};
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
@@ -81,6 +97,10 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
         TransitionEffectAccessor::AsymmetricImpl,
         TransitionEffectAccessor::AnimationImpl,
         TransitionEffectAccessor::CombineImpl,
+        TransitionEffectAccessor::GetIDENTITYImpl,
+        TransitionEffectAccessor::GetOPACITYImpl,
+        TransitionEffectAccessor::GetSLIDEImpl,
+        TransitionEffectAccessor::GetSLIDE_SWITCHImpl,
     };
     return &TransitionEffectAccessorImpl;
 }

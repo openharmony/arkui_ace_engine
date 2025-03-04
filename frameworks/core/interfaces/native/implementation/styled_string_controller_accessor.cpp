@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringControllerAccessor {
-void DestroyPeerImpl(StyledStringControllerPeer* peer)
+void DestroyPeerImpl(Ark_StyledStringController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_StyledStringController CtorImpl()
 {
     return nullptr;
 }
@@ -30,13 +30,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetStyledStringImpl(StyledStringControllerPeer* peer,
-                         const Ark_StyledString* styledString)
+void SetStyledStringImpl(Ark_StyledStringController peer,
+                         Ark_StyledString styledString)
 {
 }
-Ark_NativePointer GetStyledStringImpl(StyledStringControllerPeer* peer)
+Ark_MutableStyledString GetStyledStringImpl(Ark_StyledStringController peer)
 {
-    return nullptr;
+    return {};
 }
 } // StyledStringControllerAccessor
 const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor()

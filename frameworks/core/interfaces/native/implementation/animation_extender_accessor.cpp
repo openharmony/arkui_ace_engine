@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimationExtenderAccessor {
-void DestroyPeerImpl(AnimationExtenderPeer* peer)
+void DestroyPeerImpl(Ark_AnimationExtender peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_AnimationExtender CtorImpl()
 {
     return nullptr;
 }
@@ -30,43 +30,41 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetClipRectImpl(Ark_NativePointer peer,
-                     const Ark_Number* left,
-                     const Ark_Number* top,
-                     const Ark_Number* right,
-                     const Ark_Number* bottom)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(peer);
-    //auto convValue = Converter::OptConvert<type>(peer); // for enums
-    //undefinedModelNG::SetSetClipRect(frameNode, convValue);
-}
-void OpenImplicitAnimationImpl(Ark_NativePointer peer,
-                               const Ark_AnimateParam* param)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(peer);
-    //auto convValue = Converter::OptConvert<type>(peer); // for enums
-    //undefinedModelNG::SetOpenicitAnimationImpl(frameNode, convValue);
-}
-void CloseImplicitAnimationImpl(Ark_NativePointer node)
+void SetClipRectImpl(Ark_NativePointer node,
+                     Ark_Float32 x,
+                     Ark_Float32 y,
+                     Ark_Float32 width,
+                     Ark_Float32 height)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(node);
     //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetCloseicitAnimationImpl(frameNode, convValue);
+    //undefinedModelNG::SetSetClipRect(frameNode, convValue);
 }
-void StartDoubleAnimationImpl(Ark_NativePointer peer,
+void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
+{
+}
+void CloseImplicitAnimationImpl()
+{
+}
+void StartDoubleAnimationImpl(Ark_NativePointer node,
                               const Ark_DoubleAnimationParam* param)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(peer);
-    //auto convValue = Converter::OptConvert<type>(peer); // for enums
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
     //undefinedModelNG::SetStartDoubleAnimation(frameNode, convValue);
+}
+void AnimationTranslateImpl(Ark_NativePointer node,
+                            const Ark_TranslateOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetAnimationTranslate(frameNode, convValue);
 }
 } // AnimationExtenderAccessor
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
@@ -79,6 +77,7 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,
         AnimationExtenderAccessor::StartDoubleAnimationImpl,
+        AnimationExtenderAccessor::AnimationTranslateImpl,
     };
     return &AnimationExtenderAccessorImpl;
 }

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeGestureEventAccessor {
-void DestroyPeerImpl(SwipeGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_SwipeGestureEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_SwipeGestureEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,19 +30,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetAngleImpl(SwipeGestureEventPeer* peer)
+Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetAngleImpl(SwipeGestureEventPeer* peer,
+void SetAngleImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* angle)
 {
 }
-Ark_Int32 GetSpeedImpl(SwipeGestureEventPeer* peer)
+Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetSpeedImpl(SwipeGestureEventPeer* peer,
+void SetSpeedImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* speed)
 {
 }

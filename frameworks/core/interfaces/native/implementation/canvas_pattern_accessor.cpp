@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
-void DestroyPeerImpl(CanvasPatternPeer* peer)
+void DestroyPeerImpl(Ark_CanvasPattern peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_CanvasPattern CtorImpl()
 {
     return nullptr;
 }
@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetTransformImpl(CanvasPatternPeer* peer,
+void SetTransformImpl(Ark_CanvasPattern peer,
                       const Opt_Matrix2D* transform)
 {
 }

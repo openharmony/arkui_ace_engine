@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorStyledStringControllerAccessor {
-void DestroyPeerImpl(RichEditorStyledStringControllerPeer* peer)
+void DestroyPeerImpl(Ark_RichEditorStyledStringController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorStyledStringController CtorImpl()
 {
     return nullptr;
 }
@@ -30,19 +30,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
-                         const Ark_StyledString* styledString)
+void SetStyledStringImpl(Ark_RichEditorStyledStringController peer,
+                         Ark_StyledString styledString)
 {
 }
-Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
+Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
+Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
 {
-    return nullptr;
+    return {};
 }
-void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
+void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
                           const Ark_StyledStringChangedListener* listener)
 {
 }

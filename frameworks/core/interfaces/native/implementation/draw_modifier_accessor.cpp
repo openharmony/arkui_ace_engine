@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawModifierAccessor {
-void DestroyPeerImpl(DrawModifierPeer* peer)
+void DestroyPeerImpl(Ark_DrawModifier peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_DrawModifier CtorImpl()
 {
     return nullptr;
 }
@@ -30,19 +30,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DrawBehindImpl(DrawModifierPeer* peer,
+void DrawBehindImpl(Ark_DrawModifier peer,
                     const Ark_DrawContext* drawContext)
 {
 }
-void DrawContentImpl(DrawModifierPeer* peer,
+void DrawContentImpl(Ark_DrawModifier peer,
                      const Ark_DrawContext* drawContext)
 {
 }
-void DrawFrontImpl(DrawModifierPeer* peer,
+void DrawFrontImpl(Ark_DrawModifier peer,
                    const Ark_DrawContext* drawContext)
 {
 }
-void InvalidateImpl(DrawModifierPeer* peer)
+void InvalidateImpl(Ark_DrawModifier peer)
 {
 }
 } // DrawModifierAccessor

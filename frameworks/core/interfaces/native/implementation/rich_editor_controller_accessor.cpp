@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorControllerAccessor {
-void DestroyPeerImpl(RichEditorControllerPeer* peer)
+void DestroyPeerImpl(Ark_RichEditorController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorController CtorImpl()
 {
     return nullptr;
 }
@@ -30,62 +30,67 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 AddTextSpanImpl(RichEditorControllerPeer* peer,
-                          const Ark_String* value,
-                          const Opt_RichEditorTextSpanOptions* options)
+Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
+                           const Ark_String* value,
+                           const Opt_RichEditorTextSpanOptions* options)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
-                           const Ark_Union_PixelMap_ResourceStr* value,
-                           const Opt_RichEditorImageSpanOptions* options)
+Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
+                            const Ark_Union_PixelMap_ResourceStr* value,
+                            const Opt_RichEditorImageSpanOptions* options)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
-                             const CustomNodeBuilder* value,
-                             const Opt_RichEditorBuilderSpanOptions* options)
+Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
+                              const CustomNodeBuilder* value,
+                              const Opt_RichEditorBuilderSpanOptions* options)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer,
-                            const Ark_Resource* value,
-                            const Opt_RichEditorSymbolSpanOptions* options)
+Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
+                             const Ark_Resource* value,
+                             const Opt_RichEditorSymbolSpanOptions* options)
 {
-    return 0;
+    return {};
 }
-void UpdateSpanStyleImpl(RichEditorControllerPeer* peer,
+void UpdateSpanStyleImpl(Ark_RichEditorController peer,
                          const Ark_Type_RichEditorController_updateSpanStyle_value* value)
 {
 }
-void UpdateParagraphStyleImpl(RichEditorControllerPeer* peer,
+void UpdateParagraphStyleImpl(Ark_RichEditorController peer,
                               const Ark_RichEditorParagraphStyleOptions* value)
 {
 }
-void DeleteSpansImpl(RichEditorControllerPeer* peer,
+void DeleteSpansImpl(Ark_RichEditorController peer,
                      const Opt_RichEditorRange* value)
 {
 }
-void GetSpansImpl(RichEditorControllerPeer* peer,
-                  const Opt_RichEditorRange* value)
+Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult GetSpansImpl(Ark_RichEditorController peer,
+                                                                            const Opt_RichEditorRange* value)
 {
+    return {};
 }
-void GetParagraphsImpl(RichEditorControllerPeer* peer,
-                       const Opt_RichEditorRange* value)
+Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
+                                                  const Opt_RichEditorRange* value)
 {
+    return {};
 }
-Ark_NativePointer GetSelectionImpl(RichEditorControllerPeer* peer)
+Ark_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
 {
-    return nullptr;
+    return {};
 }
-void FromStyledStringImpl(RichEditorControllerPeer* peer,
-                          const Ark_StyledString* value)
+Array_RichEditorSpan FromStyledStringImpl(Ark_VMContext vmContext,
+                                          Ark_RichEditorController peer,
+                                          Ark_StyledString value)
 {
+    return {};
 }
-Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer,
-                                     const Ark_RichEditorRange* value)
+Ark_StyledString ToStyledStringImpl(Ark_VMContext vmContext,
+                                    Ark_RichEditorController peer,
+                                    const Ark_RichEditorRange* value)
 {
-    return nullptr;
+    return {};
 }
 } // RichEditorControllerAccessor
 const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor()

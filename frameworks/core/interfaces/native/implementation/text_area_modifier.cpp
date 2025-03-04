@@ -22,7 +22,7 @@ namespace TextAreaModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // TextAreaModifier
 namespace TextAreaInterfaceModifier {
@@ -384,12 +384,12 @@ void LetterSpacingImpl(Ark_NativePointer node,
     //TextAreaModelNG::SetLetterSpacing(frameNode, convValue);
 }
 void LineSpacingImpl(Ark_NativePointer node,
-                     const Ark_LengthMetrics* value)
+                     Ark_LengthMetrics value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextAreaModelNG::SetLineSpacing(frameNode, convValue);
 }
 void LineHeightImpl(Ark_NativePointer node,
@@ -473,12 +473,12 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     //TextAreaModelNG::SetOnDidDelete(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextAreaModelNG::SetEditMenuOptions(frameNode, convValue);
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
@@ -551,14 +551,14 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextAreaModelNG::SetCustomKeyboard(frameNode, convValue);
 }
-void __onChangeEvent_textImpl(Ark_NativePointer node,
-                              const Callback_ResourceStr_Void* callback)
+void _onChangeEvent_textImpl(Ark_NativePointer node,
+                             const Callback_ResourceStr_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
     //auto convValue = Converter::OptConvert<type_name>(*callback);
-    //TextAreaModelNG::Set__onChangeEvent_text(frameNode, convValue);
+    //TextAreaModelNG::Set_onChangeEvent_text(frameNode, convValue);
 }
 } // TextAreaAttributeModifier
 const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
@@ -624,7 +624,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::InputFilterImpl,
         TextAreaAttributeModifier::ShowCounterImpl,
         TextAreaAttributeModifier::CustomKeyboardImpl,
-        TextAreaAttributeModifier::__onChangeEvent_textImpl,
+        TextAreaAttributeModifier::_onChangeEvent_textImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

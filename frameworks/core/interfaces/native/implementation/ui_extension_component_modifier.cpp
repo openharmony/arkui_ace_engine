@@ -22,7 +22,7 @@ namespace UIExtensionComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {
@@ -75,7 +75,7 @@ void OnReleaseImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnRelease(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_CustomObject* value)
+                 const ErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

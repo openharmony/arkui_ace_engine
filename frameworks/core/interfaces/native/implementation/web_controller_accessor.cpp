@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebControllerAccessor {
-void DestroyPeerImpl(WebControllerPeer* peer)
+void DestroyPeerImpl(Ark_WebController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_WebController CtorImpl()
 {
     return nullptr;
 }
@@ -30,74 +30,74 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void OnInactiveImpl(WebControllerPeer* peer)
+void OnInactiveImpl(Ark_WebController peer)
 {
 }
-void OnActiveImpl(WebControllerPeer* peer)
+void OnActiveImpl(Ark_WebController peer)
 {
 }
-void ZoomImpl(WebControllerPeer* peer,
+void ZoomImpl(Ark_WebController peer,
               const Ark_Number* factor)
 {
 }
-void ClearHistoryImpl(WebControllerPeer* peer)
+void ClearHistoryImpl(Ark_WebController peer)
 {
 }
-void RunJavaScriptImpl(WebControllerPeer* peer,
+void RunJavaScriptImpl(Ark_WebController peer,
                        const Ark_Literal_String_script_Callback_String_Void_callback_* options)
 {
 }
-void LoadDataImpl(WebControllerPeer* peer,
+void LoadDataImpl(Ark_WebController peer,
                   const Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType* options)
 {
 }
-void LoadUrlImpl(WebControllerPeer* peer,
+void LoadUrlImpl(Ark_WebController peer,
                  const Ark_Literal_Union_String_Resource_url_Array_Header_headers* options)
 {
 }
-void RefreshImpl(WebControllerPeer* peer)
+void RefreshImpl(Ark_WebController peer)
 {
 }
-void StopImpl(WebControllerPeer* peer)
+void StopImpl(Ark_WebController peer)
 {
 }
-void RegisterJavaScriptProxyImpl(WebControllerPeer* peer,
+void RegisterJavaScriptProxyImpl(Ark_WebController peer,
                                  const Ark_Literal_Object_object__String_name_Array_String_methodList* options)
 {
 }
-void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer,
+void DeleteJavaScriptRegisterImpl(Ark_WebController peer,
                                   const Ark_String* name)
 {
 }
-Ark_NativePointer GetHitTestImpl(WebControllerPeer* peer)
+Ark_HitTestType GetHitTestImpl(Ark_WebController peer)
 {
-    return nullptr;
+    return {};
 }
-void RequestFocusImpl(WebControllerPeer* peer)
+void RequestFocusImpl(Ark_WebController peer)
 {
 }
-Ark_Boolean AccessBackwardImpl(WebControllerPeer* peer)
+Ark_Boolean AccessBackwardImpl(Ark_WebController peer)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean AccessForwardImpl(WebControllerPeer* peer)
+Ark_Boolean AccessForwardImpl(Ark_WebController peer)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean AccessStepImpl(WebControllerPeer* peer,
+Ark_Boolean AccessStepImpl(Ark_WebController peer,
                            const Ark_Number* step)
 {
-    return 0;
+    return {};
 }
-void BackwardImpl(WebControllerPeer* peer)
+void BackwardImpl(Ark_WebController peer)
 {
 }
-void ForwardImpl(WebControllerPeer* peer)
+void ForwardImpl(Ark_WebController peer)
 {
 }
-Ark_NativePointer GetCookieManagerImpl(WebControllerPeer* peer)
+Ark_WebCookie GetCookieManagerImpl(Ark_WebController peer)
 {
-    return nullptr;
+    return {};
 }
 } // WebControllerAccessor
 const GENERATED_ArkUIWebControllerAccessor* GetWebControllerAccessor()

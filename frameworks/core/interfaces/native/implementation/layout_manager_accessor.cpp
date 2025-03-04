@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutManagerAccessor {
-void DestroyPeerImpl(LayoutManagerPeer* peer)
+void DestroyPeerImpl(Ark_LayoutManager peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_LayoutManager CtorImpl()
 {
     return nullptr;
 }
@@ -30,26 +30,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetLineCountImpl(LayoutManagerPeer* peer)
+Ark_Number GetLineCountImpl(Ark_LayoutManager peer)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer,
-                                                   const Ark_Number* x,
-                                                   const Ark_Number* y)
+Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
+                                                          const Ark_Number* x,
+                                                          const Ark_Number* y)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
-                                     const Ark_Number* lineNumber)
+Ark_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
+                                   const Ark_Number* lineNumber)
 {
-    return nullptr;
+    return {};
 }
-void GetRectsForRangeImpl(LayoutManagerPeer* peer,
-                          const Ark_TextRange* range,
-                          Ark_RectWidthStyle widthStyle,
-                          Ark_RectHeightStyle heightStyle)
+Array_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
+                                   const Ark_TextRange* range,
+                                   Ark_RectWidthStyle widthStyle,
+                                   Ark_RectHeightStyle heightStyle)
 {
+    return {};
 }
 } // LayoutManagerAccessor
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()

@@ -19,55 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
-void DestroyPeerImpl(LazyForEachOpsPeer* peer)
-{
-}
-Ark_NativePointer CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node,
-                                       Ark_NativePointer mark,
-                                       Ark_Int32 direction)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetNeedMoreElements(frameNode, convValue);
-    return nullptr;
-}
-void OnRangeUpdateImpl(Ark_NativePointer node,
-                       Ark_Int32 totalCount,
-                       const Callback_RangeUpdate* updater)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetOnRangeUpdate(frameNode, convValue);
-}
-void SetCurrentIndexImpl(Ark_NativePointer node,
-                         Ark_Int32 index)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetSetCurrentIndex(frameNode, convValue);
-}
-void PrepareImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetPrepare(frameNode, convValue);
-}
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
@@ -79,6 +30,7 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
         LazyForEachOpsAccessor::SetCurrentIndexImpl,
         LazyForEachOpsAccessor::PrepareImpl,
+        LazyForEachOpsAccessor::NotifyChangeImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }

@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace KeyEventAccessor {
-void DestroyPeerImpl(KeyEventPeer* peer)
+void DestroyPeerImpl(Ark_KeyEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_KeyEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,79 +30,85 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetModifierKeyStateImpl(KeyEventPeer* peer,
+Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
+                                    Ark_KeyEvent peer,
                                     const Array_String* keys)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer GetTypeImpl(KeyEventPeer* peer)
+Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetTypeImpl(KeyEventPeer* peer,
+void SetTypeImpl(Ark_KeyEvent peer,
                  Ark_KeyType type)
 {
 }
-Ark_Int32 GetKeyCodeImpl(KeyEventPeer* peer)
+Ark_Number GetKeyCodeImpl(Ark_KeyEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetKeyCodeImpl(KeyEventPeer* peer,
+void SetKeyCodeImpl(Ark_KeyEvent peer,
                     const Ark_Number* keyCode)
 {
 }
-void GetKeyTextImpl(KeyEventPeer* peer)
+Ark_String GetKeyTextImpl(Ark_KeyEvent peer)
 {
+    return {};
 }
-void SetKeyTextImpl(KeyEventPeer* peer,
+void SetKeyTextImpl(Ark_KeyEvent peer,
                     const Ark_String* keyText)
 {
 }
-Ark_NativePointer GetKeySourceImpl(KeyEventPeer* peer)
+Ark_KeySource GetKeySourceImpl(Ark_KeyEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetKeySourceImpl(KeyEventPeer* peer,
+void SetKeySourceImpl(Ark_KeyEvent peer,
                       Ark_KeySource keySource)
 {
 }
-Ark_Int32 GetDeviceIdImpl(KeyEventPeer* peer)
+Ark_Number GetDeviceIdImpl(Ark_KeyEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetDeviceIdImpl(KeyEventPeer* peer,
+void SetDeviceIdImpl(Ark_KeyEvent peer,
                      const Ark_Number* deviceId)
 {
 }
-Ark_Int32 GetMetaKeyImpl(KeyEventPeer* peer)
+Ark_Number GetMetaKeyImpl(Ark_KeyEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetMetaKeyImpl(KeyEventPeer* peer,
+void SetMetaKeyImpl(Ark_KeyEvent peer,
                     const Ark_Number* metaKey)
 {
 }
-Ark_Int32 GetTimestampImpl(KeyEventPeer* peer)
+Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetTimestampImpl(KeyEventPeer* peer,
+void SetTimestampImpl(Ark_KeyEvent peer,
                       const Ark_Number* timestamp)
 {
 }
-void SetStopPropagationImpl(KeyEventPeer* peer,
+Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
+{
+    return {};
+}
+void SetStopPropagationImpl(Ark_KeyEvent peer,
                             const Callback_Void* stopPropagation)
 {
 }
-void SetIntentionCodeImpl(KeyEventPeer* peer,
+void SetIntentionCodeImpl(Ark_KeyEvent peer,
                           const Ark_IntentionCode* intentionCode)
 {
 }
-Ark_Int32 GetUnicodeImpl(KeyEventPeer* peer)
+Ark_Number GetUnicodeImpl(Ark_KeyEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetUnicodeImpl(KeyEventPeer* peer,
+void SetUnicodeImpl(Ark_KeyEvent peer,
                     const Ark_Number* unicode)
 {
 }
@@ -128,6 +134,7 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::SetMetaKeyImpl,
         KeyEventAccessor::GetTimestampImpl,
         KeyEventAccessor::SetTimestampImpl,
+        KeyEventAccessor::GetStopPropagationImpl,
         KeyEventAccessor::SetStopPropagationImpl,
         KeyEventAccessor::SetIntentionCodeImpl,
         KeyEventAccessor::GetUnicodeImpl,

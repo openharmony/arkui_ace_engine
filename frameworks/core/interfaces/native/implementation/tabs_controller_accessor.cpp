@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsControllerAccessor {
-void DestroyPeerImpl(TabsControllerPeer* peer)
+void DestroyPeerImpl(Ark_TabsController peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_TabsController CtorImpl()
 {
     return nullptr;
 }
@@ -30,20 +30,22 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ChangeIndexImpl(TabsControllerPeer* peer,
+void ChangeIndexImpl(Ark_TabsController peer,
                      const Ark_Number* value)
 {
 }
-void PreloadItemsImpl(TabsControllerPeer* peer,
+void PreloadItemsImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_TabsController peer,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
-void SetTabBarTranslateImpl(TabsControllerPeer* peer,
+void SetTabBarTranslateImpl(Ark_TabsController peer,
                             const Ark_TranslateOptions* translate)
 {
 }
-void SetTabBarOpacityImpl(TabsControllerPeer* peer,
+void SetTabBarOpacityImpl(Ark_TabsController peer,
                           const Ark_Number* opacity)
 {
 }

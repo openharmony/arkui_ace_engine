@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListScrollerAccessor {
-void DestroyPeerImpl(ListScrollerPeer* peer)
+void DestroyPeerImpl(Ark_ListScroller peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_ListScroller CtorImpl()
 {
     return nullptr;
 }
@@ -30,28 +30,32 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer GetItemRectInGroupImpl(ListScrollerPeer* peer,
-                                         const Ark_Number* index,
-                                         const Ark_Number* indexInGroup)
+Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
+                                      Ark_ListScroller peer,
+                                      const Ark_Number* index,
+                                      const Ark_Number* indexInGroup)
 {
-    return nullptr;
+    return {};
 }
-void ScrollToItemInGroupImpl(ListScrollerPeer* peer,
+void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
+                             Ark_ListScroller peer,
                              const Ark_Number* index,
                              const Ark_Number* indexInGroup,
                              const Opt_Boolean* smooth,
                              const Opt_ScrollAlign* align)
 {
 }
-void CloseAllSwipeActionsImpl(ListScrollerPeer* peer,
+void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
+                              Ark_ListScroller peer,
                               const Opt_CloseSwipeActionOptions* options)
 {
 }
-Ark_NativePointer GetVisibleListContentInfoImpl(ListScrollerPeer* peer,
-                                                const Ark_Number* x,
-                                                const Ark_Number* y)
+Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext,
+                                                         Ark_ListScroller peer,
+                                                         const Ark_Number* x,
+                                                         const Ark_Number* y)
 {
-    return nullptr;
+    return {};
 }
 } // ListScrollerAccessor
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()

@@ -22,7 +22,7 @@ namespace ColumnModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // ColumnModifier
 namespace ColumnInterfaceModifier {

@@ -22,7 +22,7 @@ namespace ListModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 } // ListModifier
 namespace ListInterfaceModifier {
@@ -186,12 +186,12 @@ void FrictionImpl(Ark_NativePointer node,
     //ListModelNG::SetFriction(frameNode, convValue);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
-                          const Ark_ChildrenMainSize* value)
+                          Ark_ChildrenMainSize value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ListModelNG::SetChildrenMainSize(frameNode, convValue);
 }
 void MaintainVisibleContentPositionImpl(Ark_NativePointer node,

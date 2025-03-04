@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {
-void DestroyPeerImpl(DragEventPeer* peer)
+void DestroyPeerImpl(Ark_DragEvent peer)
 {
 }
-Ark_NativePointer CtorImpl()
+Ark_DragEvent CtorImpl()
 {
     return nullptr;
 }
@@ -30,84 +30,86 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetDisplayXImpl(DragEventPeer* peer)
+Ark_Number GetDisplayXImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetDisplayYImpl(DragEventPeer* peer)
+Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetWindowXImpl(DragEventPeer* peer)
+Ark_Number GetWindowXImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetWindowYImpl(DragEventPeer* peer)
+Ark_Number GetWindowYImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetXImpl(DragEventPeer* peer)
+Ark_Number GetXImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetYImpl(DragEventPeer* peer)
+Ark_Number GetYImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetDataImpl(DragEventPeer* peer,
-                 const Ark_UnifiedData* unifiedData)
+void SetDataImpl(Ark_DragEvent peer,
+                 Ark_UnifiedData unifiedData)
 {
 }
-Ark_NativePointer GetDataImpl(DragEventPeer* peer)
+Ark_UnifiedData GetDataImpl(Ark_VMContext vmContext,
+                            Ark_DragEvent peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetSummaryImpl(DragEventPeer* peer)
+Ark_Summary GetSummaryImpl(Ark_DragEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetResultImpl(DragEventPeer* peer,
+void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)
 {
 }
-Ark_NativePointer GetResultImpl(DragEventPeer* peer)
+Ark_DragResult GetResultImpl(Ark_DragEvent peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_NativePointer GetPreviewRectImpl(DragEventPeer* peer)
+Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
 {
-    return nullptr;
+    return {};
 }
-Ark_Int32 GetVelocityXImpl(DragEventPeer* peer)
+Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetVelocityYImpl(DragEventPeer* peer)
+Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-Ark_Int32 GetVelocityImpl(DragEventPeer* peer)
+Ark_Number GetVelocityImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-Ark_Boolean GetModifierKeyStateImpl(DragEventPeer* peer,
+Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
+                                    Ark_DragEvent peer,
                                     const Array_String* keys)
 {
-    return 0;
+    return {};
 }
-Ark_NativePointer GetDragBehaviorImpl(DragEventPeer* peer)
+Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {
-    return nullptr;
+    return {};
 }
-void SetDragBehaviorImpl(DragEventPeer* peer,
+void SetDragBehaviorImpl(Ark_DragEvent peer,
                          Ark_DragBehavior dragBehavior)
 {
 }
-Ark_Boolean GetUseCustomDropAnimationImpl(DragEventPeer* peer)
+Ark_Boolean GetUseCustomDropAnimationImpl(Ark_DragEvent peer)
 {
-    return 0;
+    return {};
 }
-void SetUseCustomDropAnimationImpl(DragEventPeer* peer,
+void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
                                    Ark_Boolean useCustomDropAnimation)
 {
 }
