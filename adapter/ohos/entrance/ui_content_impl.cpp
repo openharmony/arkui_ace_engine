@@ -2261,7 +2261,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
     auto pipeline = container->GetPipelineContext();
     bool isSystemWindow = GetIsSystemWindow(container) &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         if (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow() || isSystemWindow) {
             avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
