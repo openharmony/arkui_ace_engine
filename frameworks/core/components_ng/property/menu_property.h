@@ -84,7 +84,7 @@ struct MenuParam {
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
     HapticFeedbackMode hapticFeedbackMode = HapticFeedbackMode::DISABLED;
-    bool enableEndDragEffect = false;
+    bool enableMenuHideEffect = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -280,7 +280,7 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     float previewScale = 1.0f;
     if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE ||
         (menuWrapperPattern->GetMenuParam().isPreviewContainScale &&
-            menuWrapperPattern->GetMenuParam().enableEndDragEffect)) {
+            menuWrapperPattern->GetMenuParam().enableMenuHideEffect)) {
         auto previewGeometryNode = previewChild->GetGeometryNode();
         CHECK_NULL_VOID(previewGeometryNode);
         auto previewSize = previewGeometryNode->GetFrameSize();

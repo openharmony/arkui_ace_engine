@@ -3393,7 +3393,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     padding.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
     padding.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
     menuParam.layoutRegionMargin = paddings;
-    menuParam.enableEndDragEffect = true;
+    menuParam.enableMenuHideEffect = true;
     menuParam.isShow = true;
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
