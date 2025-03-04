@@ -442,9 +442,9 @@ void Scrollable::SetAxis(Axis axis)
 #endif
 }
 
-void Scrollable::HandleTouchDown()
+void Scrollable::HandleTouchDown(bool fromcrown)
 {
-    if (!isCrownDragging_) {
+    if (!fromcrown) {
         isTouching_ = true;
     }
     // If animation still runs, first stop it.
@@ -563,7 +563,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         isCrownEventDragging_ = false;
     }
     if (isCrownEventDragging_) {
-        HandleTouchDown();
+        HandleTouchDown(true);
     }
 #endif
     currentVelocity_ = info.GetMainVelocity();
@@ -807,7 +807,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     if (dragEndCallback_) {
         dragEndCallback_();
     }
-    if (!isCrownDragging_) {
+    if (info.GetSourceDevice() != SourceType::CROWN) {
         isTouching_ = false;
     }
     SetDragStartPosition(0.0);
