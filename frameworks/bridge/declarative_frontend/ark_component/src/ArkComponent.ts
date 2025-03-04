@@ -150,7 +150,7 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  if (Utils.isApiVersionEQAbove(16)) {
+  if (Utils.isApiVersionEQAbove(18)) {
     return false;
   }
   return (stageValue.bundleName === value.bundleName) &&
