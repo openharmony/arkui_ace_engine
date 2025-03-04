@@ -7684,6 +7684,11 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     auto parent = node->GetParent();
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(node);
+    auto pipelineContext = rootNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->GetInstallationFree()) {
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& parentNode, const std::string& key)
