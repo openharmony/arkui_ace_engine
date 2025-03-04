@@ -149,7 +149,9 @@ interface __RepeatConfig<T> {
 };
 
 // should be empty string, don't change it
-const RepeatEachFuncTtype : string = '';
+const RepeatEachFuncTtype: string = '';
+// API Version 18
+const VERSION_EIGHTEEN: number = 18;
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
@@ -249,7 +251,7 @@ class __Repeat<T> implements RepeatAPI<T> {
             this.impl.render(this.config, isInitialRender);
             return;
         }
-        if (!Utils.isApiVersionEQAbove(18)) {
+        if (!Utils.isApiVersionEQAbove(VERSION_EIGHTEEN)) {
             // RepeatVirtualScroll
             this.impl ??= new __RepeatVirtualScrollImpl<T>();
             this.impl.render(this.config, isInitialRender);
