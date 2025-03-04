@@ -70,10 +70,10 @@ constexpr double ANGULAR_VELOCITY_FACTOR  = 0.001f;
 constexpr float ANGULAR_VELOCITY_SLOW = 0.07f;
 constexpr float ANGULAR_VELOCITY_MEDIUM = 0.2f;
 constexpr float ANGULAR_VELOCITY_FAST = 0.54f;
-constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 0.85f;
-constexpr float DISPLAY_CONTROL_RATIO_SLOW = 1.85f;
-constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 2.15f;
-constexpr float DISPLAY_CONTROL_RATIO_FAST = 1.35f;
+constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 1.19f;
+constexpr float DISPLAY_CONTROL_RATIO_SLOW = 1.87f;
+constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 1.67f;
+constexpr float DISPLAY_CONTROL_RATIO_FAST = 1.59f;
 constexpr float CROWN_SENSITIVITY_LOW = 0.8f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
@@ -82,6 +82,7 @@ constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.00025f;
 constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
 constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
+constexpr float CROWN_START_FRICTION_VELOCITY_THRESHOLD = 6.0f;
 #else
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 #endif
@@ -873,7 +874,11 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
         }
         return;
     }
-    if (NearZero(correctVelocity, START_FRICTION_VELOCITY_THRESHOLD)) {
+    float threshold = START_FRICTION_VELOCITY_THRESHOLD;
+#ifdef SUPPORT_DIGITAL_CROWN
+    threshold = isCrownEventDragging_ ? CROWN_START_FRICTION_VELOCITY_THRESHOLD : threshold;
+#endif
+    if (NearZero(correctVelocity, threshold)) {
         HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM

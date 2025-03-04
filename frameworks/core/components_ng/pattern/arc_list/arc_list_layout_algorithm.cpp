@@ -372,7 +372,7 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
     }
 }
 
-float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos)
+float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(int32_t index, float prevPredictEndPos)
 {
     float predictSnapEndPos = prevPredictEndPos;
     float predictPos = prevPredictEndPos + contentMainSize_ / FLOAT_TWO - totalOffset_;

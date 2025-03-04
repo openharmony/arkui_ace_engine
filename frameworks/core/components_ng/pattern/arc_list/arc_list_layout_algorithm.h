@@ -77,7 +77,7 @@ private:
     void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty) override;
     void FixPredictSnapOffsetAlignCenter();
 
-    float CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos);
+    float CalculatePredictSnapEndPositionByIndex(int32_t index, float prevPredictEndPos);
 
     static float GetNearScale(float pos);
     float InitItemOffset(LayoutWrapper* layoutWrapper);
