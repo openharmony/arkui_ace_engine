@@ -79,7 +79,7 @@ class UIExtensionPattern : public Pattern {
 
 public:
     explicit UIExtensionPattern(bool isTransferringCaller = false, bool isModal = false,
-        bool isAsyncModalBinding = false, SessionType sessionType = SessionType::UI_EXTENSION_ABILITY);
+            bool isAsyncModalBinding = false, SessionType sessionType = SessionType::UI_EXTENSION_ABILITY);
     ~UIExtensionPattern() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -148,7 +148,6 @@ public:
     int32_t GetUiExtensionId() override;
     bool IsModalUec();
     bool IsForeground();
-    void OnExtensionDetachToDisplay();
     RefPtr<SessionWrapper> GetSessionWrapper()
     {
         return sessionWrapper_;
@@ -156,6 +155,7 @@ public:
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     void HandleVisibleAreaChange(bool visible, double ratio);
+    void OnExtensionDetachToDisplay();
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
     bool IsShowPlaceholder()

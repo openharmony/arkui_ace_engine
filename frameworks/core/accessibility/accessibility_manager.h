@@ -93,6 +93,10 @@ struct AccessibilityWindowInfo {
     float_t scaleY = 1.0f;
 };
 
+struct AccessibilityWorkMode {
+    bool isTouchExplorationEnabled = true;
+};
+
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
     ON_SHOW = 1,
@@ -164,6 +168,10 @@ public:
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
     virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) {}
+    virtual bool IsScreenReaderEnabled()
+    {
+        return false;
+    }
     virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
@@ -304,6 +312,12 @@ public:
     }
 
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
+
+    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
+    {
+        return AccessibilityWorkMode();
+    }
+
 protected:
     int32_t treeId_ = 0;
 

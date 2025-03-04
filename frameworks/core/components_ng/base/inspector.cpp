@@ -29,10 +29,6 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/memory/type_info_base.h"
 #include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
 
 namespace OHOS::Ace::NG {
