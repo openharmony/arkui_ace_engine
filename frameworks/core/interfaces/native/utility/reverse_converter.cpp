@@ -287,6 +287,12 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
     return LengthMetricsPeer::Create(Dimension(value, du));
 }
 
+void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)
+{
+    dst.headerKey = Converter::ArkValue<Ark_String>(src.headerKey, ctx);
+    dst.headerValue = Converter::ArkValue<Ark_String>(src.headerValue, ctx);
+}
+
 void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx)
 {
     dst.id = ArkValue<Ark_Number>(-1);
