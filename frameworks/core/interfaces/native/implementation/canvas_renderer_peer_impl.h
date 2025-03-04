@@ -100,6 +100,32 @@ public:
     void TriggerSetStrokeStyleImpl(const Color& color);
     void TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
     void TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
+    void TriggerArcImpl(double x,
+                        double y,
+                        double radius,
+                        double startAngle,
+                        double endAngle,
+                        bool counterclockwise) override;
+    void TriggerArcToImpl(double x1, double y1, double x2, double y2, double radius) override;
+    void TriggerBezierCurveToImpl(double cp1x,
+                                  double cp1y,
+                                  double cp2x,
+                                  double cp2y,
+                                  double x,
+                                  double y) override;
+    void TriggerClosePathImpl() override;
+    void TriggerEllipseImpl(double x,
+                            double y,
+                            double radiusX,
+                            double radiusY,
+                            double rotation,
+                            double startAngle,
+                            double endAngle,
+                            bool counterclockwise) override;
+    void TriggerLineToImpl(double x, double y) override;
+    void TriggerMoveToImpl(double x, double y) override;
+    void TriggerQuadraticCurveToImpl(double cpx, double cpy, double x, double y) override;
+    void TriggerRectImpl(double x, double y, double w, double h) override;
     void SetFont(std::string fontStr);
     std::shared_ptr<OHOS::Ace::Gradient> CreateLinearGradient(
         const double x0, const double y0, const double x1, const double y1);

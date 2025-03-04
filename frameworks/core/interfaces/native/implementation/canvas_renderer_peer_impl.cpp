@@ -222,7 +222,11 @@ void CanvasRendererPeerImpl::TriggerFillTextImpl(
              "not bound to component.");
         return;
     }
-    pattern_->FillText(text, x, y, maxWidth);
+    double density = GetDensity();
+    if (maxWidth.has_value()) {
+        maxWidth = maxWidth.value() * density;
+    }
+    pattern_->FillText(text, x * density, y * density, maxWidth);
 }
 void CanvasRendererPeerImpl::TriggerStrokeTextImpl(
     const std::string& text, double x, double y, std::optional<double> maxWidth)
@@ -436,6 +440,104 @@ void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::
         return;
     }
     pattern_->UpdateStrokePattern(pattern);
+}
+void CanvasRendererPeerImpl::TriggerArcImpl(double x,
+                                            double y,
+                                            double radius,
+                                            double startAngle,
+                                            double endAngle,
+                                            bool counterclockwise)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerArcImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->Arc({x, y, radius, startAngle, endAngle, counterclockwise});
+}
+void CanvasRendererPeerImpl::TriggerArcToImpl(double x1, double y1, double x2, double y2, double radius)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerArcToImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->ArcTo({x1, y1, x2, y2, radius});
+}
+void CanvasRendererPeerImpl::TriggerBezierCurveToImpl(double cp1x,
+                                                      double cp1y,
+                                                      double cp2x,
+                                                      double cp2y,
+                                                      double x,
+                                                      double y)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerBezierCurveToImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->BezierCurveTo({cp1x, cp1y, cp2x, cp2y, x, y});
+}
+void CanvasRendererPeerImpl::TriggerClosePathImpl()
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerClosePathImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->ClosePath();
+}
+void CanvasRendererPeerImpl::TriggerEllipseImpl(double x,
+                                                double y,
+                                                double radiusX,
+                                                double radiusY,
+                                                double rotation,
+                                                double startAngle,
+                                                double endAngle,
+                                                bool counterclockwise)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerEllipseImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->Ellipse({x, y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise});
+}
+void CanvasRendererPeerImpl::TriggerLineToImpl(double x, double y)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerLineToImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->LineTo(x, y);
+}
+void CanvasRendererPeerImpl::TriggerMoveToImpl(double x, double y)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerMoveToImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->MoveTo(x, y);
+}
+void CanvasRendererPeerImpl::TriggerQuadraticCurveToImpl(double cpx, double cpy, double x, double y)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerQuadraticCurveToImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->QuadraticCurveTo({cpx, cpy, x, y});
+}
+void CanvasRendererPeerImpl::TriggerRectImpl(double x, double y, double w, double h)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerRectImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->AddRect({x, y, w, h});
 }
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 {
