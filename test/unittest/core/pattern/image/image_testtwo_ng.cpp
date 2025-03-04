@@ -563,6 +563,17 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0001, TestSize.Level1)
     EXPECT_EQ(imagePattern->durationTotal_, 0);
     EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
     EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
+
+    /**
+    * @tc.steps: step4. set SrcUndefined and call OnAnimatedModifyDone.
+    * @tc.expected: isSrcUndefined_ is true.
+    */
+    imagePattern->imageType_ = ImageType::UNDEFINED;
+    imagePattern->status_ = Animator::Status::PAUSED;
+    imagePattern->SetSrcUndefined(true);
+    imagePattern->OnModifyDone();
+    imagePattern->OnAnimatedModifyDone();
+    EXPECT_TRUE(imagePattern->isSrcUndefined_);
 }
 
 /**
