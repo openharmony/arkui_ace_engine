@@ -323,11 +323,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg010, TestSize.Lev
                 EXPECT_EQ(retTextDecoration, RSTextDecoration::OVERLINE);
                 break;
             case TextDecoration::LINE_THROUGH:
-#ifndef USE_GRAPHIC_TEXT_GINE
-                EXPECT_EQ(retTextDecoration, RSTextDecoration::LINETHROUGH);
-#else
                 EXPECT_EQ(retTextDecoration, RSTextDecoration::LINE_THROUGH);
-#endif
                 break;
             case TextDecoration::UNDERLINE:
                 EXPECT_EQ(retTextDecoration, RSTextDecoration::UNDERLINE);
@@ -357,11 +353,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
      * @tc.expected: retTextStyle.ellipsis_ is default value.
      */
     RSTextStyle retTextStyle = ToRSTextStyle(context, textStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_NE(retTextStyle.ellipsis_, StringUtils::Str8ToStr16(StringUtils::ELLIPSIS));
-#else
     EXPECT_NE(retTextStyle.ellipsis, StringUtils::Str8ToStr16(StringUtils::ELLIPSIS));
-#endif
     /**
      * @tc.steps3: call ToRSTextStyle and set input textStyle.textOverflow_ is TextOverflow::ELLIPSIS.
      * @tc.expected: the return retTextStyle is expected.
@@ -369,27 +361,11 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
     textStyle.textOverflow_ = TextOverflow::ELLIPSIS;
     textStyle.wordSpacing_ = WORD_SPACING_PX;
     retTextStyle = ToRSTextStyle(context, textStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(retTextStyle.ellipsis_, StringUtils::Str8ToStr16(StringUtils::ELLIPSIS));
-    EXPECT_EQ(retTextStyle.fontSize_, FONT_SIZE);
-    EXPECT_EQ(retTextStyle.wordSpacing_, WORD_SPACING_PX.value_);
-    EXPECT_FALSE(retTextStyle.hasHeightOverride_);
-#else
     EXPECT_EQ(retTextStyle.ellipsis, StringUtils::Str8ToStr16(StringUtils::ELLIPSIS));
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE);
     EXPECT_EQ(retTextStyle.wordSpacing, WORD_SPACING_PX.value_);
     EXPECT_FALSE(retTextStyle.heightOnly);
-#endif
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    /**
-     * @tc.steps4: call ToRSTextStyle and set input textStyle.lineHeight_ is not equal to textStyle.fontSize_.
-     * @tc.expected: retTextStyle.height_ is expected value.
-     */
-    textStyle.lineHeight_ = LINE_HIGHT_PX;
-    retTextStyle = ToRSTextStyle(context, textStyle);
-    EXPECT_EQ(retTextStyle.height_, LINE_HIGHT_PX.value_ / FONT_SIZE);
-#else
     /**
      * @tc.steps4: call ToRSTextStyle and set input textStyle.lineHeight_ is not equal to textStyle.fontSize_.
      * @tc.expected: retTextStyle.heightScale is expected value.
@@ -397,20 +373,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
     textStyle.lineHeight_ = LINE_HIGHT_PX;
     retTextStyle = ToRSTextStyle(context, textStyle);
     EXPECT_EQ(retTextStyle.heightScale, LINE_HIGHT_PX.value_ / FONT_SIZE);
-#endif
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    /**
-     * @tc.steps5: call ToRSTextStyle and set input textStyle.wordSpacing_ is WORD_SPACING_PERCENT.
-     * @tc.expected: retTextStyle.height_ is equal to LINE_HIGHT_PERCENT.value_.
-     */
-    textStyle.wordSpacing_ = WORD_SPACING_PERCENT;
-    textStyle.lineHeight_ = LINE_HIGHT_PERCENT;
-    retTextStyle = ToRSTextStyle(context, textStyle);
-    EXPECT_EQ(retTextStyle.wordSpacing_, WORD_SPACING_PERCENT.value_ * FONT_SIZE);
-    EXPECT_EQ(retTextStyle.height_, LINE_HIGHT_PERCENT.value_);
-    EXPECT_TRUE(retTextStyle.hasHeightOverride_);
-#else
     /**
      * @tc.steps5: call ToRSTextStyle and set input textStyle.wordSpacing_ is WORD_SPACING_PERCENT.
      * @tc.expected: retTextStyle.heightScale is equal to LINE_HIGHT_PERCENT.value_.
@@ -421,7 +384,6 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
     EXPECT_EQ(retTextStyle.wordSpacing, WORD_SPACING_PERCENT.value_ * FONT_SIZE);
     EXPECT_EQ(retTextStyle.heightScale, LINE_HIGHT_PERCENT.value_);
     EXPECT_TRUE(retTextStyle.heightOnly);
-#endif
 }
 
 /**
@@ -445,27 +407,11 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg012, TestSize.Lev
     textStyle.wordSpacing_ = WORD_SPACING_PX;
     textStyle.lineHeight_ = LINE_HIGHT_PX;
     RSTextStyle retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(retTextStyle.fontSize_, FONT_SIZE * pipelineContext->fontScale_);
-    EXPECT_EQ(retTextStyle.letterSpacing_, LETTER_SPACING.value_);
-    EXPECT_EQ(retTextStyle.wordSpacing_, WORD_SPACING_PX.value_);
-    EXPECT_EQ(retTextStyle.height_, LINE_HIGHT_PX.value_ / FONT_SIZE);
-#else
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE * pipelineContext->fontScale_);
     EXPECT_EQ(retTextStyle.letterSpacing, LETTER_SPACING.value_);
     EXPECT_EQ(retTextStyle.wordSpacing, WORD_SPACING_PX.value_);
     EXPECT_EQ(retTextStyle.heightScale, LINE_HIGHT_PX.value_ / FONT_SIZE);
-#endif
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    /**
-     * @tc.steps3: call ToRSTextStyle and set textStyle.allowScale_ is false.
-     * @tc.expected: retTextStyle.fontSize_ is equal to FONT_SIZE.
-     */
-    textStyle.allowScale_ = false;
-    retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
-    EXPECT_EQ(retTextStyle.fontSize_, FONT_SIZE);
-#else
     /**
      * @tc.steps3: call ToRSTextStyle and set textStyle.allowScale_ is false.
      * @tc.expected: retTextStyle.fontSize is equal to FONT_SIZE.
@@ -473,17 +419,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg012, TestSize.Lev
     textStyle.allowScale_ = false;
     retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE);
-#endif
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    /**
-     * @tc.steps4: call ToRSTextStyle and set textStyle.fontSize_ is FONT_SIZE_FP.
-     * @tc.expected: retTextStyle.fontSize_ is equal to FONT_SIZE.
-     */
-    textStyle.fontSize_ = FONT_SIZE_FP;
-    retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
-    EXPECT_EQ(retTextStyle.fontSize_, FONT_SIZE_FP.value_);
-#else
     /**
      * @tc.steps4: call ToRSTextStyle and set textStyle.fontSize_ is FONT_SIZE_FP.
      * @tc.expected: retTextStyle.fontSize is equal to FONT_SIZE.
@@ -491,7 +427,6 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg012, TestSize.Lev
     textStyle.fontSize_ = FONT_SIZE_FP;
     retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE_FP.value_);
-#endif
 }
 
 /**
@@ -513,11 +448,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg013, TestSize.Lev
      */
     textStyle.lineHeight_ = LINE_HIGHT_PX;
     RSTextStyle retTextStyle = ToRSTextStyle(context, textStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(retTextStyle.height_, 1.0);
-#else
     EXPECT_EQ(retTextStyle.heightScale, 1.0);
-#endif
 
     /**
      * @tc.steps3: call ToRSTextStyle and set input textStyle.fontSize_ is FONT_SIZE_PX_0.
@@ -525,11 +456,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg013, TestSize.Lev
      */
     textStyle.fontSize_ = FONT_SIZE_PX_0;
     retTextStyle = ToRSTextStyle(context, textStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(retTextStyle.height_, 1.0);
-#else
     EXPECT_EQ(retTextStyle.heightScale, 1.0);
-#endif
 }
 
 /**
@@ -551,11 +478,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg014, TestSize.Lev
      */
     pipelineContext->minPlatformVersion_ = 6;
     RSTextStyle retTextStyle = ToRSTextStyle(pipelineContext, testTextStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_FALSE(retTextStyle.hasHeightOverride_);
-#else
     EXPECT_FALSE(retTextStyle.heightOnly);
-#endif
 
     /**
      * @tc.steps3: call ToRSTextStyle and set testTextStyle.fontSize_ is FONT_SIZE_PX_5.
@@ -564,11 +487,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg014, TestSize.Lev
     testTextStyle.fontSize_ = FONT_SIZE_PX_5;
     testTextStyle.lineHeight_ = LINE_HIGHT_PX;
     retTextStyle = ToRSTextStyle(pipelineContext, testTextStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_FALSE(retTextStyle.hasHeightOverride_);
-#else
     EXPECT_FALSE(retTextStyle.heightOnly);
-#endif
 }
 
 /**
@@ -608,15 +527,15 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg016, TestSize.Lev
      */
     TextStyle textStyle;
     textStyle.SetTextDecorationStyle(TextDecorationStyle::DASHED);
-    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::DASHED);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle, RSTextDecorationStyle::DASHED);
     textStyle.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
-    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::DOTTED);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle, RSTextDecorationStyle::DOTTED);
     textStyle.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
-    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::DOUBLE);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle, RSTextDecorationStyle::DOUBLE);
     textStyle.SetTextDecorationStyle(TextDecorationStyle::WAVY);
-    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::WAVY);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle, RSTextDecorationStyle::WAVY);
     textStyle.SetTextDecorationStyle(TextDecorationStyle::INHERIT);
-    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle_, RSTextDecorationStyle::SOLID);
+    EXPECT_EQ(ToRSTextStyle(nullptr, textStyle).decorationStyle, RSTextDecorationStyle::SOLID);
 }
 
 /**
