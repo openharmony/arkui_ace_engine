@@ -47,6 +47,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT = 8;
+constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT = 12;
+
 RefPtr<AppBarTheme> GetAppBarTheme()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -358,7 +362,7 @@ void AppBarView::InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode)
 
 std::optional<RectF> AppBarView::GetAppBarRect()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!pipeline || !pipeline->GetInstallationFree()) {
         return std::nullopt;
     }
@@ -370,7 +374,7 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto menuBar = pattern->GetMenuBar();
     CHECK_NULL_RETURN(menuBar, std::nullopt);
-    auto size = menuBar->GetGeometryNode()->GetMarginFrameSize();
+    auto size = menuBar->GetGeometryNode()->GetFrameSize();
     auto offset = menuBar->GetGeometryNode()->GetMarginFrameOffset();
     auto parent = menuBar->GetParent();
     while (parent) {
@@ -384,6 +388,19 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(manager, std::nullopt);
     offset.AddY(manager->GetSystemSafeArea().top_.Length());
+
+    auto leftMarginUX = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT, DimensionUnit::VP).ConvertToPx();
+    auto rightMarginUX = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT, DimensionUnit::VP).ConvertToPx();
+    size.AddWidth((leftMarginUX + rightMarginUX));
+    auto safeArea = pipeline->GetSafeArea();
+    auto safeAreaLeft = Dimension(pipeline->Px2VpWithCurrentDensity(safeArea.left_.Length()), DimensionUnit::VP)
+        .ConvertToPx();
+    auto safeAreaRight = Dimension(pipeline->Px2VpWithCurrentDensity(safeArea.right_.Length()), DimensionUnit::VP)
+        .ConvertToPx();
+    auto atomRect = atom->GetGeometryNode()->GetFrameRect();
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    // offset.GetX() includes left margin
+    offset.SetX(isRtl ? (safeAreaLeft) : (atomRect.Width() - size.Width() - safeAreaRight));
     return RectF(offset, size);
 }
 
