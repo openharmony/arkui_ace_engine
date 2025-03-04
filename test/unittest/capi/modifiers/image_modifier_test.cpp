@@ -14,7 +14,10 @@
  */
 
 #include <gtest/gtest.h>
+#include <sstream>
+#include <vector>
 
+#include "image_common_methods_test.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
@@ -59,16 +62,18 @@ LoadImageSuccessEvent Convert(const Ark_Type_ImageAttribute_onComplete_callback_
 } // OHOS::Ace::NG::Converter
 
 namespace  {
-    
-    const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor";
-    const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
-    const auto OPACITY_COLOR = "#FF000000";
-    const auto ATTRIBUTE_AUTO_RESIZE_NAME = "autoResize";
-    const auto ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE = "false";
-    const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
-    const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "false";
-    const auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
-    const auto ATTRIBUTE_SOURCE_SIZE_DEFAULT_VALUE = "[0.00 x 0.00]";
+    constexpr auto PRECISION = 6;
+
+    constexpr auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor";
+    constexpr auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
+    constexpr auto OPACITY_COLOR = "#FF000000";
+    constexpr auto ATTRIBUTE_AUTO_RESIZE_NAME = "autoResize";
+    constexpr auto ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE = "false";
+    constexpr auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
+    constexpr auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "false";
+    constexpr auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
+    constexpr auto ATTRIBUTE_SOURCE_SIZE_DEFAULT_VALUE = "[0.00 x 0.00]";
+
 
     // Valid values for boolean values
     const std::vector<std::tuple<std::string, Ark_Boolean, std::string>> validBoolean = {
@@ -1184,6 +1189,35 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedValidValues, T
 
     for (auto& [input, value, expected] : testFixtureEnumIlluminatedTypeValidValues) {
         checkValue(input, expected, ArkValue<Opt_IlluminatedType>(value));
+    }
+}
+
+/*
+ * @tc.name: setColorFilterTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setColorFilterTest, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setColorFilter);
+    auto accessor = GeneratedModifier::GetColorFilterAccessor();
+    ASSERT_TRUE(accessor);
+    auto jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<std::string>(jsonValue, ColorFilter::ATTRIBUTE_COLOR_FILTER_NAME);
+    EXPECT_EQ(result, ColorFilter::ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE);
+    for (auto& [name, value, expected] : ColorFilter::floatMatrixTest) {
+        std::stringstream expectedStream;
+        expectedStream << std::fixed << std::setprecision(PRECISION);
+        auto peer = accessor->ctor(&value);
+        ASSERT_TRUE(peer);
+        auto unionValue = Converter::ArkUnion<Ark_Union_ColorFilter_DrawingColorFilter, Ark_ColorFilter>(peer);
+        modifier_->setColorFilter(node_, &unionValue);
+        jsonValue = GetJsonValue(node_);
+        for (const auto& elem : expected) {
+            expectedStream << std::fixed << elem << " ";
+        }
+        result = GetAttrValue<std::string>(jsonValue, ColorFilter::ATTRIBUTE_COLOR_FILTER_NAME);
+        EXPECT_EQ(result, expectedStream.str());
     }
 }
 

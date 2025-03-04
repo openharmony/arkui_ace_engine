@@ -2410,6 +2410,8 @@
                 "setImageSpanOptionsTestDefaultValues",
                 "setImageSpanOptionsTestValueInvalidValues",
                 "setImageSpanOptionsTestValueValidValues",
+            ],
+            "remove": [
                 "setColorFilterTestDefaultValues",
                 "setColorFilterTestValidValues",
             ],
@@ -3681,6 +3683,7 @@
                 }
             ],
             "remove": [
+                "setColorFilterTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setDraggableTestDefaultValues",
                 "setDraggableTestDraggableValidValues",
                 "setSourceSizeTestDefaultValues",
@@ -3713,7 +3716,6 @@
                 "setDynamicRangeModeTestDefaultValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeInvalidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
-                "setColorFilterTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setCopyOptionTestCopyOptionValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setAnalyzerConfigTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setResizableTestDefaultValues", // No values in the JSON

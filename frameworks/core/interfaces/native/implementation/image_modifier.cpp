@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/native/utility/converter.h"
-
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
-#include "frameworks/core/components/common/layout/constants.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/image/image_component.h"
+#include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -200,10 +197,7 @@ void SyncLoadImpl(Ark_NativePointer node,
 void ColorFilterImpl(Ark_NativePointer node,
                      const Ark_Union_ColorFilter_DrawingColorFilter* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    LOGE("Arkoala: Image.ColorFilterImpl - method not implemented");
+    ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)
