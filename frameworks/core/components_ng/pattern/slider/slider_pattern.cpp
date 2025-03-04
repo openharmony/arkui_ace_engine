@@ -133,7 +133,7 @@ void SliderPattern::PlayHapticFeedback(bool isShowSteps, float step, float oldVa
 
 void SliderPattern::InitHapticController()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     auto host = GetHost();
