@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,17 @@ public:
         TAG_LOGI(AceLogTag::ACE_MENU, "dynamic create expended menu");
         createDeviceMenu(menuWrapper, info);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+#endif
+    }
+
+    bool HasCollaborationMenu()
+    {
+#ifndef WINDOWS_PLATFORM
+        CHECK_NULL_RETURN(LoadPlugin(), false);
+        CHECK_NULL_RETURN(createDeviceMenu, false);
+        return true;
+#else
+        return false;
 #endif
     }
 
