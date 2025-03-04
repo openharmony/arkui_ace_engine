@@ -124,8 +124,6 @@ CustomPaintPaintMethod::CustomPaintPaintMethod()
     apiVersion_ = Container::GetCurrentApiTargetVersion();
     // The default value of the font size in canvas is 14px.
     SetMeasureFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetMeasureTextAlign(TextAlign::START);
 }
 
 bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)
@@ -1564,7 +1562,7 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1594,7 +1592,7 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1625,7 +1623,7 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1670,7 +1668,7 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1699,7 +1697,7 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1726,7 +1724,7 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
     matrix[18] = percentNum;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1750,7 +1748,7 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1775,7 +1773,7 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
     matrix[18] = 1;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -2000,8 +1998,6 @@ void CustomPaintPaintMethod::ResetMeasureTextState()
     measureTextState_ = PaintState();
     // The default value of the font size in canvas is 14px.
     SetMeasureFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetMeasureTextAlign(TextAlign::START);
 }
 
 void CustomPaintPaintMethod::RotateMatrix(double angle)
@@ -2062,8 +2058,6 @@ void CustomPaintPaintMethod::ResetStates()
     state_.globalState = GlobalPaintState();
     // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetDefaultTextAlign();
     state_.shadow = Shadow();
     imageBrush_ = RSBrush();
     rsPath_.Reset();
