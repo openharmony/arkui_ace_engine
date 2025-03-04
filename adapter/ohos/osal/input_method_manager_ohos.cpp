@@ -41,7 +41,7 @@ InputMethodManager* InputMethodManager::GetInstance()
     return instance_.get();
 }
 
-void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode)
+void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode, FocusReason focusReason)
 {
     auto container = Container::Current();
     if (container && container->IsKeyboard()) {
@@ -63,6 +63,10 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
     }
 
     curFocusNode_ = curFocusNode;
+    auto pattern = curFocusNode->GetPattern();
+    if (pattern) {
+        pattern->OnFocusNodeChange(focusReason);
+    }
 #ifdef WINDOW_SCENE_SUPPORTED
     auto isWindowScene = NG::WindowSceneHelper::IsWindowScene(curFocusNode);
     if (isWindowScene) {
