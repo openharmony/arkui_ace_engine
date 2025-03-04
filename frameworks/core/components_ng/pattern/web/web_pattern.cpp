@@ -1069,6 +1069,11 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
         return;
     }
 
+    if (LessOrEqual(curScale, 0.0) || LessOrEqual(preScale_, 0.0)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "HandleScaleGestureChange invalid scale");
+        return;
+    }
+
     if (!CheckZoomStatus(curScale)) {
         return;
     }
@@ -1076,11 +1081,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 
     pinchIndex_++;
 
-    double scale = 0.0;
-    if (!ZoomOutAndIn(curScale, scale)) {
-        return;
-    }
-    double newScale = GetNewScale(scale);
+    double newScale = curScale / preScale_;
     double newOriginScale = GetNewOriginScale(event.GetScale());
 
     double centerX = event.GetPinchCenter().GetX();
@@ -1089,17 +1090,15 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     CHECK_NULL_VOID(frameNode);
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
-        " newOriginScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
-         " offset Y: %{public}f",
-        curScale, scale, newScale, event.GetScale(), centerX, centerY, offset.GetX(), offset.GetY());
+        "HandleScaleGestureChangeV2 curScale:%{public}f newScale: %{public}f"
+        " centerX: %{public}f centerY: %{public}f",
+        curScale, newScale, centerX, centerY);
 
     // Plan two
     delegate_->ScaleGestureChangeV2(
         PINCH_UPDATE_TYPE, newScale, newOriginScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
-    pageScale_ = scale;
 }
 
 double WebPattern::GetNewScale(double& scale) const
