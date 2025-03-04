@@ -14,7 +14,10 @@
  */
 
 import abilityTest from './Ability.test';
+import DividerBootcampTest from './BlankAndDivider/DividerBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
+  DividerBootcampTest();
 }
