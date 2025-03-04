@@ -1959,6 +1959,163 @@ export default function GaugeBootcampTest() {
       done();
 
     })
+    it('ArkUI_Gauge_Comp_0050', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundColor');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Gauge',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundColor', JsonType.value),
+        ],
+        assertEqual: '#FFFFFFFF'
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件backgroundImage.src
+     */
+    it('ArkUI_Gauge_Comp_0051', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImage.src');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImage.src')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await driver.delayMs(1000)
+      done();
+    })
+    it('ArkUI_Gauge_Comp_0052', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImage.src');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImage.src')))
+      if (await toggle.isChecked() === true) {
+        await toggle.click();
+      }
+      await driver.delayMs(1000)
+      done();
+    })
+    /**
+     * 测试组件backgroundImage.repeat
+     */
+    it('ArkUI_Gauge_Comp_0053', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImage.repeat');
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Gauge',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImage', JsonType.value),
+        ],
+        assertEqual: ', ImageRepeat.NoRepeat'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Gauge_Comp_0054', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImage.repeat');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImage.repeat')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 1,
+        id: 'Gauge',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImage', JsonType.value),
+        ],
+        assertEqual: ', ImageRepeat.X'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Gauge_Comp_0055', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImage.repeat');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImage.repeat')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 2,
+        id: 'Gauge',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImage', JsonType.value),
+        ],
+        assertEqual: ', ImageRepeat.Y'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Gauge_Comp_0056', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImage.repeat');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImage.repeat')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 3,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Gauge',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImage', JsonType.value),
+        ],
+        assertEqual: ', ImageRepeat.XY'
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件backgroundImageSize
+     */
+    it('ArkUI_Gauge_Comp_0057', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImageSize');
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Gauge',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageSize', JsonType.value),
+        ],
+        assertEqual: 'ImageSize.Auto'
+      })
+
+      done();
+
+    })
 
   })
 }
