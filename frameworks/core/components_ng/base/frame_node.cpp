@@ -4716,9 +4716,8 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 
     UpdateAccessibilityNodeRect();
     ProcessAccessibilityVirtualNode();
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    pipeline->SendUpdateVirtualNodeFocusEvent();
+    CHECK_NULL_RETURN(context, false);
+    context->SendUpdateVirtualNodeFocusEvent();
     return true;
 }
 
