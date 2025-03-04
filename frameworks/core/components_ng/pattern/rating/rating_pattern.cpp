@@ -177,11 +177,7 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
 void RatingPattern::OnImageDataReady(int32_t imageFlag)
 {
     imageReadyStateCode_ |= static_cast<uint32_t>(imageFlag);
-
-    // 3 images are ready, invoke to update layout to calculate single star size.
-    if (IsRatingImageReady(imageReadyStateCode_)) {
-        MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    }
+    MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void RatingPattern::UpdatePaintConfig()
