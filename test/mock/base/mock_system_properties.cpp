@@ -247,6 +247,11 @@ double SystemProperties::GetScrollableDistance()
     return 0.0;
 }
 
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return true;
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;

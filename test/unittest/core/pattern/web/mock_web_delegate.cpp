@@ -1038,6 +1038,7 @@ bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
     return false;
 }
+void WebDelegate::MaximizeResize() {}
 void WebDelegate::DragResize(
     const double& width, const double& height, const double& pre_height, const double& pre_width)
 {}

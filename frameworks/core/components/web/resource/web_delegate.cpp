@@ -7802,4 +7802,19 @@ std::string WebDelegate::GetCurrentLanguage()
     }
     return "";
 }
+
+void WebDelegate::MaximizeResize()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->MaximizeResize();
+    }
+}
+
+void WebDelegate::RestoreRenderFit()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->RestoreRenderFit();
+}
 } // namespace OHOS::Ace

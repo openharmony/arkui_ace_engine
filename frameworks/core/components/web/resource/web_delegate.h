@@ -1057,6 +1057,7 @@ public:
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
+    void RestoreRenderFit();
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1174,6 +1175,8 @@ public:
     bool GetAccessibilityVisible(int64_t accessibilityId);
 
     void SetTransformHint(uint32_t rotation);
+
+    void MaximizeResize();
 
     void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
 
