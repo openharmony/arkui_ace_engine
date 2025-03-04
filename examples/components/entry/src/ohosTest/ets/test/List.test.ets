@@ -14,7 +14,10 @@
  */
 
 import abilityTest from './Ability.test';
+import BlankBootcampTest from './BlankAndDivider/BlankBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
+  BlankBootcampTest();
 }
