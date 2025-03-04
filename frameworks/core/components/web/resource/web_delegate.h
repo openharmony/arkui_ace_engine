@@ -605,6 +605,16 @@ private:
     WeakPtr<PipelineBase> context_;
 };
 
+class WebWindowFocusChangedListener : public Rosen::IWindowLifeCycle {
+public:
+    explicit WebWindowFocusChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    ~WebWindowFocusChangedListener() = default;
+
+    void AfterFocused() override;;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END = 1,
@@ -1082,6 +1092,12 @@ public:
 
     bool GetAccessibilityVisible(int64_t accessibilityId);
 
+    void RegisterWebWindowFocusChangedListener();
+
+    void UnRegisterWebWindowFocusChangedListener();
+
+    void OnDragAttach();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1293,6 +1309,7 @@ private:
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
+    sptr<WebWindowFocusChangedListener> webWindowFocusChangedListener_ = nullptr;
     int32_t instanceId_;
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;

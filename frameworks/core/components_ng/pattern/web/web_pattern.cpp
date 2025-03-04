@@ -1874,12 +1874,17 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
     }
 }
 
-void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
+void WebPattern::ResetDragStateValue()
 {
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     isDragStartFromWeb_ = false;
+}
+
+void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
+{
+    ResetDragStateValue();
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1931,6 +1936,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     }
 
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_DROP);
+    delegate_->RegisterWebWindowFocusChangedListener();
 }
 
 void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
