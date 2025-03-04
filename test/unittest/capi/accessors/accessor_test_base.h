@@ -192,6 +192,15 @@ MATCHER_P2(CompareArkLength, first, second, "Ark_Length compare")
         first->resource == second->resource;
 }
 
+MATCHER_P2(CompareArkNumber, first, second, "Ark_Number compare")
+{
+    if (first.tag == second.tag) {
+        if (first.tag == 0 && first.f32 == second.f32) return true;
+        if (first.tag == 1 && first.i32 == second.i32) return true;
+    }
+    return false;
+}
+
 MATCHER_P2(CompareOptLength, first, second, "Opt_Length compare")
 {
     auto firstLength = Converter::OptConvert<Ark_Length>(first);

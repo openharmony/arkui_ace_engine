@@ -25,6 +25,8 @@ const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBoolean
     { "false", ArkValue<Ark_Boolean>(false), false },
 };
 
+const std::vector<float> testFixtureFloatValues = { 1.24f, 0.f, 100.f, -20.65f };
+
 const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues = {
     { "0", ArkValue<Ark_Int32>(0), 0 },
     { "INT32_MIN", ArkValue<Ark_Int32>(INT32_MIN), INT32_MIN },
