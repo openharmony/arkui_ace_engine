@@ -26,7 +26,7 @@ namespace OHOS::Ace {
 
 using WindowCallback = std::function<void(void)>;
 using WindowModeCallback = std::function<WindowMode(void)>;
-using WindowMidScene = std::function<WindowMode(void)>;
+using WindowMidSceneCallback = std::function<int32_t(bool&)>;
 using WindowTypeCallback = std::function<WindowType(void)>;
 using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
 using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
@@ -100,6 +100,11 @@ public:
     void SetWindowGetModeCallBack(WindowModeCallback&& callback)
     {
         windowGetModeCallback_ = std::move(callback);
+    }
+
+    void SetWindowGetIsMidSceneCallBack(WindowMidSceneCallback&& callback)
+    {
+        windowGetIsMidSceneCallback_ = std::move(callback);
     }
 
     void SetWindowGetTypeCallBack(WindowTypeCallback&& callback)
@@ -220,6 +225,14 @@ public:
         return WindowMode::WINDOW_MODE_UNDEFINED;
     }
 
+    int32_t GetIsMidScene(bool& isMidScene) const
+    {
+        if (windowGetIsMidSceneCallback_) {
+            return windowGetIsMidSceneCallback_(isMidScene);
+        }
+        return -1;
+    }
+
     WindowType GetWindowType() const
     {
         if (windowGetTypeCallback_) {
@@ -293,6 +306,7 @@ private:
     WindowSetMaximizeModeCallback windowSetMaximizeModeCallback_;
     WindowGetMaximizeModeCallback windowGetMaximizeModeCallback_;
     WindowModeCallback windowGetModeCallback_;
+    WindowMidSceneCallback windowGetIsMidSceneCallback_;
     WindowTypeCallback windowGetTypeCallback_;
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
