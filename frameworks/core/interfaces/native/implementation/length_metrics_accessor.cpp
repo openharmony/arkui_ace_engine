@@ -20,6 +20,16 @@
 
 #include "length_metrics_peer.h"
 
+namespace OHOS::Ace::NG {
+namespace {
+inline Ark_LengthMetrics CreatePeer(const Ark_Number* value, DimensionUnit unit)
+{
+    double convValue = value ? Converter::Convert<float>(*value) : 0.;
+    return LengthMetricsPeer::Create(Dimension(convValue, unit));
+}
+} // namespace
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LengthMetricsAccessor {
 using namespace Converter;
@@ -37,27 +47,28 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_LengthMetrics PxImpl(const Ark_Number* value)
 {
-    return LengthMetricsPeer::Create(Dimension(Convert<float>(*value)));
+    return CreatePeer(value, DimensionUnit::PX);
 }
 Ark_LengthMetrics VpImpl(const Ark_Number* value)
 {
-    return {};
+    return CreatePeer(value, DimensionUnit::VP);
 }
 Ark_LengthMetrics FpImpl(const Ark_Number* value)
 {
-    return {};
+    return CreatePeer(value, DimensionUnit::FP);
 }
 Ark_LengthMetrics PercentImpl(const Ark_Number* value)
 {
-    return {};
+    return CreatePeer(value, DimensionUnit::PERCENT);
 }
 Ark_LengthMetrics LpxImpl(const Ark_Number* value)
 {
-    return {};
+    return CreatePeer(value, DimensionUnit::LPX);
 }
 Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
 {
-    return LengthMetricsPeer::Create(Converter::OptConvert<Dimension>(*value).value_or(Dimension()));
+    std::optional<Dimension> convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    return LengthMetricsPeer::Create(convValue.value_or(Dimension()));
 }
 Ark_LengthUnit GetUnitImpl(Ark_LengthMetrics peer)
 {
@@ -74,10 +85,9 @@ void SetUnitImpl(Ark_LengthMetrics peer,
 }
 Ark_Number GetValueImpl(Ark_LengthMetrics peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
-    auto value = static_cast<int32_t>(peer->value.Value());
-    LOGE("LengthMetricsAccessor::GetValueImpl wrong return type");
-    return Converter::ArkValue<Ark_Int32>(value);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
+    auto value = peer->value.Value();
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetValueImpl(Ark_LengthMetrics peer,
                   const Ark_Number* value)

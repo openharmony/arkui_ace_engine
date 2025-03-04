@@ -79,6 +79,74 @@ HWTEST_F(LengthMetricsAccessorTest, PxTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: VpTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LengthMetricsAccessorTest, VpTest, TestSize.Level1)
+{
+    for (float number : testFixtureFloatValues) {
+        Ark_Number value = Converter::ArkValue<Ark_Number>(number);
+        auto pointer = reinterpret_cast<LengthMetricsPeer*>(accessor_->vp(&value));
+        ASSERT_TRUE(pointer);
+        EXPECT_NEAR(pointer->value.Value(), number, EPSILON);
+        EXPECT_EQ(pointer->value.Unit(), DimensionUnit::VP);
+        accessor_->destroyPeer(pointer);
+    }
+}
+
+/**
+ * @tc.name: FpTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LengthMetricsAccessorTest, FpTest, TestSize.Level1)
+{
+    for (float number : testFixtureFloatValues) {
+        Ark_Number value = Converter::ArkValue<Ark_Number>(number);
+        auto pointer = reinterpret_cast<LengthMetricsPeer*>(accessor_->fp(&value));
+        ASSERT_TRUE(pointer);
+        EXPECT_NEAR(pointer->value.Value(), number, EPSILON);
+        EXPECT_EQ(pointer->value.Unit(), DimensionUnit::FP);
+        accessor_->destroyPeer(pointer);
+    }
+}
+
+/**
+ * @tc.name: PercentTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LengthMetricsAccessorTest, PercentTest, TestSize.Level1)
+{
+    for (float number : testFixtureFloatValues) {
+        Ark_Number value = Converter::ArkValue<Ark_Number>(number);
+        auto pointer = reinterpret_cast<LengthMetricsPeer*>(accessor_->percent(&value));
+        ASSERT_TRUE(pointer);
+        EXPECT_NEAR(pointer->value.Value(), number, EPSILON);
+        EXPECT_EQ(pointer->value.Unit(), DimensionUnit::PERCENT);
+        accessor_->destroyPeer(pointer);
+    }
+}
+
+/**
+ * @tc.name: LpxTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LengthMetricsAccessorTest, LpxTest, TestSize.Level1)
+{
+    for (float number : testFixtureFloatValues) {
+        Ark_Number value = Converter::ArkValue<Ark_Number>(number);
+        auto pointer = reinterpret_cast<LengthMetricsPeer*>(accessor_->lpx(&value));
+        ASSERT_TRUE(pointer);
+        EXPECT_NEAR(pointer->value.Value(), number, EPSILON);
+        EXPECT_EQ(pointer->value.Unit(), DimensionUnit::LPX);
+        accessor_->destroyPeer(pointer);
+    }
+}
+
+/**
  * @tc.name: ResourceTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -132,6 +200,20 @@ HWTEST_F(LengthMetricsAccessorTest, SetUnitTest, TestSize.Level1)
         accessor_->setUnit(peer_, value);
         DimensionUnit result = peer_->value.Unit();
         ASSERT_EQ(result, expected);
+    }
+}
+
+/**
+ * @tc.name: GetValueTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LengthMetricsAccessorTest, GetValueTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
+        peer_->value.SetValue(value);
+        Ark_Number result = accessor_->getValue(peer_);
+        CompareArkNumber(result, expected);
     }
 }
 
