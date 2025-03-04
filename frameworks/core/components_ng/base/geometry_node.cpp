@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/geometry_node.h"
 
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 
 void GeometryNode::Reset()
@@ -134,5 +135,197 @@ RectF GeometryNode::GetSelfAdjust() const
 void GeometryNode::SetSelfAdjust(RectF selfAdjust)
 {
     selfAdjust_ = selfAdjust;
+}
+
+SizeF GeometryNode::GetMarginFrameSize(bool withSafeArea) const
+{
+    auto size = frame_.rect_.GetSize();
+    if (withSafeArea) {
+        size += selfAdjust_.GetSize();
+    }
+    if (margin_) {
+        AddPaddingToSize(*margin_, size);
+    }
+    return size;
+}
+
+OffsetF GeometryNode::GetMarginFrameOffset(bool withSafeArea) const
+{
+    auto offset = frame_.rect_.GetOffset();
+    if (withSafeArea) {
+        offset += selfAdjust_.GetOffset();
+    }
+    if (margin_) {
+        offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
+    }
+    return offset;
+}
+
+RectF GeometryNode::GetMarginFrameRect(bool withSafeArea) const
+{
+    auto offset = frame_.rect_.GetOffset();
+    auto size = frame_.rect_.GetSize();
+    if (withSafeArea) {
+        offset += selfAdjust_.GetOffset();
+        size += selfAdjust_.GetSize();
+    }
+    if (margin_) {
+        offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
+        AddPaddingToSize(*margin_, size);
+    }
+    return RectF(offset, size);
+}
+
+void GeometryNode::SetMarginFrameOffset(const OffsetF& translate)
+{
+    OffsetF offset;
+    if (margin_) {
+        offset += OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
+    }
+    frame_.rect_.SetOffset(translate + offset);
+}
+
+RectF GeometryNode::GetFrameRect(bool withSafeArea) const
+{
+    auto result = frame_.rect_;
+    if (withSafeArea) {
+        result += selfAdjust_;
+    }
+    return result;
+}
+
+SizeF GeometryNode::GetFrameSize(bool withSafeArea) const
+{
+    auto result = frame_.rect_.GetSize();
+    if (withSafeArea) {
+        result += selfAdjust_.GetSize();
+    }
+    return result;
+}
+
+OffsetF GeometryNode::GetFrameOffset(bool withSafeArea) const
+{
+    auto result = frame_.rect_.GetOffset();
+    if (withSafeArea) {
+        result += selfAdjust_.GetOffset();
+    }
+    return result;
+}
+
+void GeometryNode::SetMarginFrameOffsetX(int32_t offsetX)
+{
+    float offset = offsetX;
+    if (margin_) {
+        offset += margin_->left.value_or(0);
+    }
+    frame_.rect_.SetLeft(offset);
+}
+
+void GeometryNode::SetMarginFrameOffsetY(int32_t offsetY)
+{
+    float offset = offsetY;
+    if (margin_) {
+        offset += margin_->top.value_or(0);
+    }
+    frame_.rect_.SetTop(offset);
+}
+
+SizeF GeometryNode::GetPaddingSize(bool withSafeArea) const
+{
+    auto size = frame_.rect_.GetSize();
+    if (withSafeArea) {
+        size += selfAdjust_.GetSize();
+    }
+    if (padding_) {
+        MinusPaddingToSize(*padding_, size);
+    }
+    return size;
+}
+
+OffsetF GeometryNode::GetPaddingOffset(bool withSafeArea) const
+{
+    auto offset = frame_.rect_.GetOffset();
+    if (withSafeArea) {
+        offset += selfAdjust_.GetOffset();
+    }
+    if (padding_) {
+        offset += OffsetF(padding_->left.value_or(0), padding_->top.value_or(0));
+    }
+    return offset;
+}
+
+RectF GeometryNode::GetPaddingRect(bool withSafeArea) const
+{
+    auto rect = frame_.rect_;
+    if (withSafeArea) {
+        rect += selfAdjust_;
+    }
+    if (padding_) {
+        auto size = rect.GetSize();
+        MinusPaddingToSize(*padding_, size);
+        rect.SetSize(size);
+        auto offset = rect.GetOffset();
+        offset += OffsetF(padding_->left.value_or(0), padding_->top.value_or(0));
+        rect.SetOffset(offset);
+    }
+    return rect;
+}
+
+void GeometryNode::SetContentSize(const SizeF& size)
+{
+    if (!content_) {
+        content_ = std::make_unique<GeometryProperty>();
+    }
+    content_->rect_.SetSize(size);
+}
+
+void GeometryNode::SetContentOffset(const OffsetF& translate)
+{
+    if (!content_) {
+        content_ = std::make_unique<GeometryProperty>();
+    }
+    content_->rect_.SetOffset(translate);
+}
+
+void GeometryNode::UpdateMargin(const MarginPropertyF& margin)
+{
+    if (!margin_) {
+        margin_ = std::make_unique<MarginPropertyF>(margin);
+        return;
+    }
+    margin_->Reset();
+    if (margin.left) {
+        margin_->left = margin.left;
+    }
+    if (margin.right) {
+        margin_->right = margin.right;
+    }
+    if (margin.top) {
+        margin_->top = margin.top;
+    }
+    if (margin.bottom) {
+        margin_->bottom = margin.bottom;
+    }
+}
+
+void GeometryNode::UpdatePaddingWithBorder(const PaddingPropertyF& padding)
+{
+    if (!padding_) {
+        padding_ = std::make_unique<PaddingPropertyF>(padding);
+        return;
+    }
+    padding_->Reset();
+    if (padding.left) {
+        padding_->left = padding.left;
+    }
+    if (padding.right) {
+        padding_->right = padding.right;
+    }
+    if (padding.top) {
+        padding_->top = padding.top;
+    }
+    if (padding.bottom) {
+        padding_->bottom = padding.bottom;
+    }
 }
 } // namespace OHOS::Ace::NG

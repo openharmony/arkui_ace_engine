@@ -17,6 +17,7 @@
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

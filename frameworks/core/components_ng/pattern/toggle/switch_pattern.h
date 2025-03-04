@@ -61,44 +61,14 @@ public:
         return MakeRefPtr<SwitchPaintProperty>();
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        if (!paintMethod_) {
-            paintMethod_ = MakeRefPtr<SwitchPaintMethod>();
-        }
-        paintMethod_->SetUseContentModifier(UseContentModifier());
-        paintMethod_->SetDirection(direction_);
-        paintMethod_->SetIsSelect(isOn_.value_or(false));
-        paintMethod_->SetDragOffsetX(dragOffsetX_);
-        paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
-        paintMethod_->SetIsDragEvent(isDragEvent_);
-        paintMethod_->SetShowHoverEffect(showHoverEffect_);
-        paintMethod_->SetUseContentModifier(UseContentModifier());
-        return paintMethod_;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<SwitchAccessibilityProperty>();
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        FocusPaintParam focusPaintParams;
-
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>(GetThemeScopeId());
-        CHECK_NULL_RETURN(switchTheme, FocusPattern());
-
-        auto focusPaintcolor = switchTheme->GetActiveColor();
-        focusPaintParams.SetPaintColor(focusPaintcolor);
-        focusPaintParams.SetFocusPadding(switchTheme->GetSwitchFocuPadding());
-
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     bool IsChecked()
     {

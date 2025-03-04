@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr Dimension ITEM_BOTTOM_TOP_PADDING = 8.0_vp;
