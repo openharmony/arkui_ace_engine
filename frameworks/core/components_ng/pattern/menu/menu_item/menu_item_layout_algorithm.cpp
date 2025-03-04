@@ -304,7 +304,6 @@ float MenuItemLayoutAlgorithm::GetBordersHeight(LayoutWrapper* layoutWrapper)
 {
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(props, 0.0f);
-    
     const auto& border = props->GetBorderWidthProperty();
     CHECK_NULL_RETURN(border, 0.0f);
     return border->topDimen.value_or(Dimension(0.0)).ConvertToPx() +
