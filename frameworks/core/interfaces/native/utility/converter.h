@@ -727,6 +727,16 @@ namespace Converter {
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
     template<>
     void AssignCast(std::optional<OHOS::Ace::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src);
+
+    template<typename T, typename From>
+    std::optional<T> GetOpt(const From& src)
+    {
+        static_assert(std::is_same_v<T, decltype(From().value)>, "Opt_AAA type should be same as AAA");
+        if (src.tag != INTEROP_TAG_UNDEFINED) {
+            return src.value;
+        }
+        return std::nullopt;
+    }
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 
