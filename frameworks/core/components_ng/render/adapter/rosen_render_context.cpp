@@ -3950,6 +3950,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
     CHECK_NULL_VOID(node);
     std::list<RefPtr<FrameNode>> childrenList;
     auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
     node->GenerateOneDepthVisibleFrameWithTransition(childrenList);
     for (auto& child : childrenList) {
         auto rsChild = GetRsNodeByFrame(child);
