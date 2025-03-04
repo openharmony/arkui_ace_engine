@@ -774,7 +774,6 @@ export class SubHeaderV2 extends ViewV2 {
             SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
             SymbolGlyph.fontColor([this.subHeaderV2Theme.iconArrowColor]);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.focusable(true);
             SymbolGlyph.width(ARROW_ICON_WIDTH);
             SymbolGlyph.height(OPERATE_ITEM_LENGTH);
         }, SymbolGlyph);
