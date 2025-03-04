@@ -240,6 +240,8 @@ ActionType ConvertAceAction(AceAction aceAction)
         { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
         { AceAction::ACTION_SET_CURSOR_POSITION, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION },
         { AceAction::ACTION_EXEC_SUB_COMPONENT, ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK },
+        { AceAction::ACTION_NEXT_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM },
+        { AceAction::ACTION_PREVIOUS_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM },
     };
     for (const auto& item : actionTable) {
         if (aceAction == item.aceAction) {
@@ -1489,17 +1491,15 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     nodeInfo.SetGridItem(gridItemInfo);
 
     SetAccessibilityFocusAction(nodeInfo, "web");
-    if (nodeInfo.IsEnabled()) {
-        nodeInfo.SetCheckable(node->GetIsCheckable());
-        nodeInfo.SetScrollable(node->GetIsScrollable());
-        nodeInfo.SetEditable(node->GetIsEditable());
-        nodeInfo.SetDeletable(node->GetIsDeletable());
-        nodeInfo.SetClickable(node->GetIsClickable());
-        auto supportAceActions = node->GetActions();
-        for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
-            AccessibleAction action(ConvertAceAction(static_cast<AceAction>(*it)), "web");
-            nodeInfo.AddAction(action);
-        }
+    nodeInfo.SetCheckable(node->GetIsCheckable());
+    nodeInfo.SetScrollable(node->GetIsScrollable());
+    nodeInfo.SetEditable(node->GetIsEditable());
+    nodeInfo.SetDeletable(node->GetIsDeletable());
+    nodeInfo.SetClickable(node->GetIsClickable());
+    auto supportAceActions = node->GetActions();
+    for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
+        AccessibleAction action(ConvertAceAction(static_cast<AceAction>(*it)), "web");
+        nodeInfo.AddAction(action);
     }
     nodeInfo.SetAccessibilityGroup(node->GetIsAccessibilityGroup());
 }
@@ -2171,6 +2171,8 @@ static std::string ConvertActionTypeToString(ActionType action)
         { ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT, "ACCESSIBILITY_ACTION_PREVIOUS_TEXT" },
         { ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION, "ACCESSIBILITY_ACTION_SET_CURSOR_POSITION" },
         { ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK, "ACCESSIBILITY_ACTION_SPAN_CLICK" },
+        { ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM, "ACCESSIBILITY_ACTION_NEXT_HTML_ITEM" },
+        { ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM, "ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM" },
     };
     for (const auto& item : actionStrTable) {
         if (action == item.action) {
@@ -2202,6 +2204,8 @@ static AceAction ConvertAccessibilityAction(ActionType accessibilityAction)
         { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
         { AceAction::ACTION_SET_CURSOR_POSITION, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION },
         { AceAction::ACTION_EXEC_SUB_COMPONENT, ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK },
+        { AceAction::ACTION_NEXT_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM },
+        { AceAction::ACTION_PREVIOUS_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM },
     };
     for (const auto& item : actionTable) {
         if (accessibilityAction == item.action) {
@@ -5013,14 +5017,17 @@ void JsAccessibilityManager::WebFocusMoveSearchNG(int64_t elementId, int32_t dir
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
 
-    auto node = webPattern->GetAccessibilityNodeByFocusMove(elementId, direction);
-    if (!node) {
-        info.SetValidElement(false);
-        return;
-    }
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
+    CHECK_NULL_VOID(webPattern);
+    auto node = webPattern->GetAccessibilityNodeByFocusMove(elementId, direction);
+    if (node) {
+        UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
+    } else {
+        auto webNode = webPattern->GetHost();
+        CHECK_NULL_VOID(webNode);
+        UpdateAccessibilityElementInfo(webNode, commonProperty, info, ngPipeline);
+    }
 }
 
 bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType action,
@@ -5487,7 +5494,16 @@ void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
         splitElementId, treeId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
-    jsAccessibilityManager->NotifySetChildTreeIdAndWinId(splitElementId, treeId, childWindowId);
+    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = GetHandler(), splitElementId, treeId, childWindowId] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            ACE_SCOPED_TRACE("SetChildTreeIdAndWinId");
+            jsAccessibilityManager->NotifySetChildTreeIdAndWinId(splitElementId, treeId, childWindowId);
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetChildTreeIdAndWinId");
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32_t treeId)
@@ -6393,5 +6409,10 @@ void JsAccessibilityManager::FireAccessibilityEventCallback(uint32_t eventId, in
         default:
             break;
     }
+}
+
+bool JsAccessibilityManager::IsScreenReaderEnabled()
+{
+    return true;
 }
 } // namespace OHOS::Ace::Framework

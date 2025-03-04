@@ -1014,12 +1014,14 @@ public:
     bool ShouldVirtualKeyboardOverlay();
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments);
+    bool GetAccessibilityNodeRectById(
+        int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoByFocusMove(
         int64_t accessibilityId, int32_t direction);
-    void SetAccessibilityState(bool state);
+    void SetAccessibilityState(bool state, bool isDelayed);
     void UpdateAccessibilityState(bool state);
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
     void OnIntelligentTrackingPreventionResult(
