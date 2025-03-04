@@ -278,6 +278,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.
     EXPECT_EQ(leftRow->GetChildren().size(), 1u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
+    
 
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
