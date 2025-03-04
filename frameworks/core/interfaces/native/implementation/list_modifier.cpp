@@ -319,6 +319,14 @@ void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListMaintainVisibleContentPosition(frameNode, Converter::Convert<bool>(value));
 }
+void StackFromEndImpl(Ark_NativePointer node,
+                      Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //ListModelNG::SetStackFromEnd(frameNode, convValue);
+}
 void OnScrollImpl(Ark_NativePointer node,
                   const Callback_Number_Number_Void* value)
 {
@@ -595,6 +603,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::FrictionImpl,
         ListAttributeModifier::ChildrenMainSizeImpl,
         ListAttributeModifier::MaintainVisibleContentPositionImpl,
+        ListAttributeModifier::StackFromEndImpl,
         ListAttributeModifier::OnScrollImpl,
         ListAttributeModifier::OnScrollIndexImpl,
         ListAttributeModifier::OnScrollVisibleContentChangeImpl,

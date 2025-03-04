@@ -837,9 +837,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshallingTest, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1Test, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->unmarshalling, nullptr);
+    ASSERT_NE(accessor_->unmarshalling1, nullptr);
 
     std::vector<uint8_t> tlvData;
     auto encodeResult = peer_->spanString->EncodeTlv(tlvData);
@@ -874,7 +874,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshallingTest, Tes
     auto akrBuffer = Converter::ArkValue<Ark_Buffer>(testBuffer, nullptr);
 
     EXPECT_FALSE(checkEvent.has_value());
-    accessor_->unmarshalling(vmContext_, asyncWorker_, &akrBuffer, &arkCallback);
+    accessor_->unmarshalling1(vmContext_, asyncWorker_, &akrBuffer, &arkCallback);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
     EXPECT_EQ(peer_->spanString->GetString(), checkEvent->value);

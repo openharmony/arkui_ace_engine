@@ -2016,12 +2016,12 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBiasVerticalInval
 }
 
 /*
- * @tc.name: setDragPreviewTestDragPreviewDragItemInfoExtraInfoValidValues
+ * @tc.name: setDragPreview0TestDragPreviewDragItemInfoExtraInfoValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_P(
-    CommonMethodModifierTest, DISABLED_setDragPreviewTestDragPreviewDragItemInfoExtraInfoValidValues, TestSize.Level1)
+    CommonMethodModifierTest, DISABLED_setDragPreview0TestDragPreviewDragItemInfoExtraInfoValidValues, TestSize.Level1)
 {
     Ark_Union_CustomBuilder_DragItemInfo_String initValueDragPreview;
 
@@ -2034,12 +2034,12 @@ HWTEST_P(
         Ark_Union_CustomBuilder_DragItemInfo_String inputValueDragPreview = initValueDragPreview;
 
         WriteToUnion<Ark_DragItemInfo>(inputValueDragPreview).extraInfo = value;
-        modifier_->setDragPreview(node_, &inputValueDragPreview);
+        modifier_->setDragPreview0(node_, &inputValueDragPreview);
         auto jsonValue = GetJsonValue(node_);
         auto resultDragPreview = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DRAG_PREVIEW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDragPreview, ATTRIBUTE_DRAG_PREVIEW_I_EXTRA_INFO_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setDragPreview, attribute: dragPreview.DragItemInfo.extraInfo";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setDragPreview0, attribute: dragPreview.DragItemInfo.extraInfo";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
@@ -2048,12 +2048,12 @@ HWTEST_P(
 }
 
 /*
- * @tc.name: setDragPreviewTestDragPreviewDragItemInfoExtraInfoInvalidValues
+ * @tc.name: setDragPreview0TestDragPreviewDragItemInfoExtraInfoInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(
-    CommonMethodModifierTest, DISABLED_setDragPreviewTestDragPreviewDragItemInfoExtraInfoInvalidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, DISABLED_setDragPreview0TestDragPreviewDragItemInfoExtraInfoInvalidValues,
+    TestSize.Level1)
 {
     Ark_Union_CustomBuilder_DragItemInfo_String initValueDragPreview;
 
@@ -2064,14 +2064,15 @@ HWTEST_P(
     auto checkValue = [this, &initValueDragPreview](const std::string& input, const Opt_String& value) {
         Ark_Union_CustomBuilder_DragItemInfo_String inputValueDragPreview = initValueDragPreview;
 
-        modifier_->setDragPreview(node_, &inputValueDragPreview);
+        modifier_->setDragPreview0(node_, &inputValueDragPreview);
         WriteToUnion<Ark_DragItemInfo>(inputValueDragPreview).extraInfo = value;
-        modifier_->setDragPreview(node_, &inputValueDragPreview);
+        modifier_->setDragPreview0(node_, &inputValueDragPreview);
         auto jsonValue = GetJsonValue(node_);
         auto resultDragPreview = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DRAG_PREVIEW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDragPreview, ATTRIBUTE_DRAG_PREVIEW_I_EXTRA_INFO_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_DRAG_PREVIEW_I_EXTRA_INFO_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setDragPreview, attribute: dragPreview.DragItemInfo.extraInfo";
+            "Input value is: " << input
+            << ", method: setDragPreview0, attribute: dragPreview.DragItemInfo.extraInfo";
     };
 
     // Check empty optional

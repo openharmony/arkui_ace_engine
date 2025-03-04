@@ -54,6 +54,8 @@ const auto ATTRIBUTE_CLIP_CONTENT_NAME = "clipContent";
 const auto ATTRIBUTE_CLIP_CONTENT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
 const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_BACK_TO_TOP_NAME = "backToTop";
+const auto ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME = "edgeEffect";
 const auto ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_NAME = "alwaysEnabled";
@@ -840,6 +842,49 @@ HWTEST_P(ScrollableCommonMethodModifierTest,
 
     for (auto& [input, value] : Fixtures::testFixtureEnumCrownSensitivityInvalidValues) {
         checkValue(input, ArkValue<Opt_CrownSensitivity>(value));
+    }
+}
+
+/*
+ * @tc.name: setBackToTopTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACK_TO_TOP_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE) << "Default value for attribute 'backToTop'";
+}
+
+/*
+ * @tc.name: setBackToTopTestBackToTopValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestBackToTopValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueBackToTop;
+
+    // Initial setup
+    initValueBackToTop = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueBackToTop](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueBackToTop = initValueBackToTop;
+
+        inputValueBackToTop = value;
+        modifier_->setBackToTop(node_, inputValueBackToTop);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACK_TO_TOP_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setBackToTop, attribute: backToTop";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
     }
 }
 

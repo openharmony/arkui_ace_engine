@@ -223,8 +223,9 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onChange = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& info) {
         Converter::ConvContext ctx;
+        auto options = Converter::ArkValue<Opt_TextChangeOptions>();
         arkCallback.Invoke(Converter::ArkValue<Ark_String>(info.value, &ctx),
-            Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx));
+            Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx), options);
     };
     TextFieldModelNG::SetOnChange(frameNode, onChange);
 }
@@ -803,6 +804,23 @@ void StopBackPressImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetStopBackPress(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
+void OnWillChangeImpl(Ark_NativePointer node,
+                      const Callback_EditableTextChangeValue_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnWillChange(frameNode, convValue);
+}
+void KeyboardAppearanceImpl(Ark_NativePointer node,
+                            const Opt_KeyboardAppearance* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetKeyboardAppearance(frameNode, convValue);
+}
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,
                      const Opt_Callback_String_Void* error)
@@ -942,6 +960,8 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::HalfLeadingImpl,
         TextInputAttributeModifier::EllipsisModeImpl,
         TextInputAttributeModifier::StopBackPressImpl,
+        TextInputAttributeModifier::OnWillChangeImpl,
+        TextInputAttributeModifier::KeyboardAppearanceImpl,
         TextInputAttributeModifier::InputFilterImpl,
         TextInputAttributeModifier::CustomKeyboardImpl,
         TextInputAttributeModifier::ShowCounterImpl,

@@ -202,6 +202,14 @@ void SetDeviceIdImpl(Ark_BaseEvent peer,
     CHECK_NULL_VOID(deviceId);
     peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(*deviceId));
 }
+Ark_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
+{
+    return {};
+}
+void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
+                            const Ark_Number* targetDisplayId)
+{
+}
 } // BaseEventAccessor
 
 const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
@@ -230,6 +238,8 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetSourceToolImpl,
         BaseEventAccessor::GetDeviceIdImpl,
         BaseEventAccessor::SetDeviceIdImpl,
+        BaseEventAccessor::GetTargetDisplayIdImpl,
+        BaseEventAccessor::SetTargetDisplayIdImpl,
     };
     return &BaseEventAccessorImpl;
 }

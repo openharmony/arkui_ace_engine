@@ -61,6 +61,9 @@ namespace Converter {
             case ARK_PRE_DRAG_STATUS_ACTION_CANCELED_BEFORE_DRAG:
                 dst = PreDragStatus::ACTION_CANCELED_BEFORE_DRAG;
                 break;
+            case ARK_PRE_DRAG_STATUS_PREPARING_FOR_DRAG_DETECTION:
+                dst = PreDragStatus::PREPARING_FOR_DRAG_DETECTION;
+                break;
             default:
                 break;
         }
@@ -161,6 +164,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnPreDragTest, TestSize.Level1)
     test(PreDragStatus::PREVIEW_LANDING_STARTED);
     test(PreDragStatus::PREVIEW_LANDING_FINISHED);
     test(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+    test(PreDragStatus::PREPARING_FOR_DRAG_DETECTION);
 }
 
 /*
@@ -300,7 +304,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragLeaveTest, TestSize.Level1)
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, SetOnDropTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnDrop0Test, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -327,7 +331,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDropTest, TestSize.Level1)
     auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
 
     checkEvent = std::nullopt;
-    modifier_->setOnDrop(node_, &callBackValue);
+    modifier_->setOnDrop0(node_, &callBackValue);
     EXPECT_FALSE(checkEvent.has_value());
 
     RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();

@@ -162,6 +162,7 @@ TextSpanType Convert(const Ark_TextSpanType& src)
         case ARK_TEXT_SPAN_TYPE_TEXT: textSpanType = TextSpanType::TEXT; break;
         case ARK_TEXT_SPAN_TYPE_IMAGE: textSpanType = TextSpanType::IMAGE; break;
         case ARK_TEXT_SPAN_TYPE_MIXED: textSpanType = TextSpanType::MIXED; break;
+        case ARK_TEXT_SPAN_TYPE_DEFAULT: textSpanType = TextSpanType::NONE; break;
         default: LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src); break;
     }
     return textSpanType;
@@ -175,6 +176,7 @@ TextResponseType Convert(const Ark_TextResponseType& src)
         case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: responseType = TextResponseType::RIGHT_CLICK; break;
         case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: responseType = TextResponseType::LONG_PRESS; break;
         case ARK_TEXT_RESPONSE_TYPE_SELECT: responseType = TextResponseType::SELECTED_BY_MOUSE; break;
+        case ARK_TEXT_RESPONSE_TYPE_DEFAULT: responseType = TextResponseType::NONE; break;
         default: LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src); break;
     }
     return responseType;

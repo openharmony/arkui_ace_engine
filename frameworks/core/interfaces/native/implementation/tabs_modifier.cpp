@@ -271,6 +271,15 @@ void OnChangeImpl(Ark_NativePointer node,
     };
     TabsModelNG::SetOnChange(frameNode, std::move(onChange));
 }
+void OnSelectedImpl(Ark_NativePointer node,
+                    const Callback_Number_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TabsModelNG::SetOnSelected(frameNode, convValue);
+}
 void OnTabBarClickImpl(Ark_NativePointer node,
                        const Callback_Number_Void* value)
 {
@@ -287,6 +296,15 @@ void OnTabBarClickImpl(Ark_NativePointer node,
         arkCallback.Invoke(index);
     };
     TabsModelNG::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
+}
+void OnUnselectedImpl(Ark_NativePointer node,
+                      const Callback_Number_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TabsModelNG::SetOnUnselected(frameNode, convValue);
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
                           const OnTabsAnimationStartCallback* value)
@@ -479,6 +497,16 @@ void BarModeScrollableImpl(Ark_NativePointer node,
         BarMode1Impl(node, ARK_BAR_MODE_SCROLLABLE, nullptr);
     }
 }
+void CachedMaxCountImpl(Ark_NativePointer node,
+                        const Ark_Number* count,
+                        Ark_TabsCacheMode mode)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(count);
+    //auto convValue = Converter::OptConvert<type>(count); // for enums
+    //TabsModelNG::SetCachedMaxCount(frameNode, convValue);
+}
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Number_Void* callback)
 {
@@ -511,7 +539,9 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::AnimationModeImpl,
         TabsAttributeModifier::EdgeEffectImpl,
         TabsAttributeModifier::OnChangeImpl,
+        TabsAttributeModifier::OnSelectedImpl,
         TabsAttributeModifier::OnTabBarClickImpl,
+        TabsAttributeModifier::OnUnselectedImpl,
         TabsAttributeModifier::OnAnimationStartImpl,
         TabsAttributeModifier::OnAnimationEndImpl,
         TabsAttributeModifier::OnGestureSwipeImpl,
@@ -527,6 +557,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::PageFlipModeImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
         TabsAttributeModifier::BarModeScrollableImpl,
+        TabsAttributeModifier::CachedMaxCountImpl,
         TabsAttributeModifier::_onChangeEvent_indexImpl,
     };
     return &ArkUITabsModifierImpl;

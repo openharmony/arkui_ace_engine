@@ -247,7 +247,7 @@ HWTEST_F(CounterModifierTest, setWidthTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setWidthTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, setWidth0TestValidValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -264,7 +264,7 @@ HWTEST_F(CounterModifierTest, setWidthTestValidValues, TestSize.Level1)
 
     for (const auto &[arkLength, expected]: testPlan) {
         Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        commonModifier_->setWidth(node_, &inputValue);
+        commonModifier_->setWidth0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
         EXPECT_EQ(strResult, expected);
     }
@@ -275,7 +275,7 @@ HWTEST_F(CounterModifierTest, setWidthTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setWidthTestInvalidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, setWidth0TestInvalidValues, TestSize.Level1)
 {
     static const std::vector<Ark_Length> testPlan = {
         Converter::ArkValue<Ark_Length>(-2.45f),
@@ -289,12 +289,12 @@ HWTEST_F(CounterModifierTest, setWidthTestInvalidValues, TestSize.Level1)
 
     for (const auto &arkLength : testPlan) {
         Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        commonModifier_->setWidth(node_, &inputValue);
+        commonModifier_->setWidth0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
         EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
     }
 
-    commonModifier_->setWidth(node_, nullptr);
+    commonModifier_->setWidth0(node_, nullptr);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
 }
@@ -315,7 +315,7 @@ HWTEST_F(CounterModifierTest, setHeightTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setHeightTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, setHeight0TestValidValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -332,7 +332,7 @@ HWTEST_F(CounterModifierTest, setHeightTestValidValues, TestSize.Level1)
 
     for (const auto &[arkLength, expected]: testPlan) {
         Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        commonModifier_->setHeight(node_, &inputValue);
+        commonModifier_->setHeight0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
         EXPECT_EQ(strResult, expected);
     }
@@ -343,7 +343,7 @@ HWTEST_F(CounterModifierTest, setHeightTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setHeightTestInvalidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, setHeight0TestInvalidValues, TestSize.Level1)
 {
     static const std::vector<Ark_Length> testPlan = {
         Converter::ArkValue<Ark_Length>(-2.45f),
@@ -357,12 +357,12 @@ HWTEST_F(CounterModifierTest, setHeightTestInvalidValues, TestSize.Level1)
 
     for (const auto &arkLength : testPlan) {
         Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        commonModifier_->setHeight(node_, &inputValue);
+        commonModifier_->setHeight0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
         EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
     }
 
-    commonModifier_->setHeight(node_, nullptr);
+    commonModifier_->setHeight0(node_, nullptr);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
 }

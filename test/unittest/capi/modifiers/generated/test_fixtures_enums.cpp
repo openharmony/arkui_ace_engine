@@ -231,6 +231,20 @@ std::vector<std::tuple<std::string, Ark_AccessibilityRoleType>> testFixtureEnumA
     { "INT_MAX", static_cast<Ark_AccessibilityRoleType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_AccessibilitySamePageMode, std::string>>
+    testFixtureEnumAccessibilitySamePageModeValidValues = {
+        { "ARK_ACCESSIBILITY_SAME_PAGE_MODE_SEMI_SILENT", ARK_ACCESSIBILITY_SAME_PAGE_MODE_SEMI_SILENT,
+            "AccessibilitySamePageMode.SEMI_SILENT" },
+        { "ARK_ACCESSIBILITY_SAME_PAGE_MODE_FULL_SILENT", ARK_ACCESSIBILITY_SAME_PAGE_MODE_FULL_SILENT,
+            "AccessibilitySamePageMode.FULL_SILENT" },
+    };
+
+std::vector<std::tuple<std::string, Ark_AccessibilitySamePageMode>>
+    testFixtureEnumAccessibilitySamePageModeInvalidValues = {
+        { "-1", static_cast<Ark_AccessibilitySamePageMode>(-1) },
+        { "INT_MAX", static_cast<Ark_AccessibilitySamePageMode>(INT_MAX) },
+    };
+
 std::vector<std::tuple<std::string, Ark_AdaptiveColor, std::string>> testFixtureEnumAdaptiveColorValidValues = {
     { "ARK_ADAPTIVE_COLOR_DEFAULT", ARK_ADAPTIVE_COLOR_DEFAULT, "AdaptiveColor.DEFAULT" },
     { "ARK_ADAPTIVE_COLOR_AVERAGE", ARK_ADAPTIVE_COLOR_AVERAGE, "AdaptiveColor.AVERAGE" },
@@ -459,10 +473,14 @@ std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeIn
 };
 
 std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues = {
-    { "ARK_CACHE_MODE_DEFAULT", ARK_CACHE_MODE_DEFAULT, "CacheMode.Default" },
+    { "ARK_CACHE_MODE_LEGACY_DEFAULT", ARK_CACHE_MODE_LEGACY_DEFAULT, "CacheMode.Default" },
+    { "ARK_CACHE_MODE_DEFAULT", ARK_CACHE_MODE_DEFAULT, "CacheMode.DEFAULT" },
     { "ARK_CACHE_MODE_NONE", ARK_CACHE_MODE_NONE, "CacheMode.None" },
+    { "ARK_CACHE_MODE_CACHE_ELSE_NETWORK", ARK_CACHE_MODE_CACHE_ELSE_NETWORK, "CacheMode.CACHE_ELSE_NETWORK" },
     { "ARK_CACHE_MODE_ONLINE", ARK_CACHE_MODE_ONLINE, "CacheMode.Online" },
+    { "ARK_CACHE_MODE_NO_CACHE", ARK_CACHE_MODE_NO_CACHE, "CacheMode.NO_CACHE" },
     { "ARK_CACHE_MODE_ONLY", ARK_CACHE_MODE_ONLY, "CacheMode.Only" },
+    { "ARK_CACHE_MODE_CACHE_ONLY", ARK_CACHE_MODE_CACHE_ONLY, "CacheMode.CACHE_ONLY" },
 };
 
 std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues = {
@@ -587,6 +605,8 @@ std::vector<std::tuple<std::string, Ark_DragPreviewMode, std::string>> testFixtu
         "DragPreviewMode.ENABLE_DEFAULT_RADIUS" },
     { "ARK_DRAG_PREVIEW_MODE_ENABLE_DRAG_ITEM_GRAY_EFFECT", ARK_DRAG_PREVIEW_MODE_ENABLE_DRAG_ITEM_GRAY_EFFECT,
         "DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT" },
+    { "ARK_DRAG_PREVIEW_MODE_ENABLE_MULTI_TILE_EFFECT", ARK_DRAG_PREVIEW_MODE_ENABLE_MULTI_TILE_EFFECT,
+        "DragPreviewMode.ENABLE_MULTI_TILE_EFFECT" },
 };
 
 std::vector<std::tuple<std::string, Ark_DragPreviewMode>> testFixtureEnumDragPreviewModeInvalidValues = {
@@ -685,6 +705,16 @@ std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixture
 std::vector<std::tuple<std::string, Ark_FlexDirection>> testFixtureEnumFlexDirectionInvalidValues = {
     { "-1", static_cast<Ark_FlexDirection>(-1) },
     { "INT_MAX", static_cast<Ark_FlexDirection>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_FocusDrawLevel, std::string>> testFixtureEnumFocusDrawLevelValidValues = {
+    { "ARK_FOCUS_DRAW_LEVEL_SELF", ARK_FOCUS_DRAW_LEVEL_SELF, "FocusDrawLevel.SELF" },
+    { "ARK_FOCUS_DRAW_LEVEL_TOP", ARK_FOCUS_DRAW_LEVEL_TOP, "FocusDrawLevel.TOP" },
+};
+
+std::vector<std::tuple<std::string, Ark_FocusDrawLevel>> testFixtureEnumFocusDrawLevelInvalidValues = {
+    { "-1", static_cast<Ark_FocusDrawLevel>(-1) },
+    { "INT_MAX", static_cast<Ark_FocusDrawLevel>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_FocusPriority, std::string>> testFixtureEnumFocusPriorityValidValues = {
@@ -934,6 +964,32 @@ std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixtureEnum
 std::vector<std::tuple<std::string, Ark_ItemAlign>> testFixtureEnumItemAlignInvalidValues = {
     { "-1", static_cast<Ark_ItemAlign>(-1) },
     { "INT_MAX", static_cast<Ark_ItemAlign>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_KeyboardAppearance, std::string>>
+    testFixtureEnumKeyboardAppearanceValidValues = {
+        { "ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE", ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE,
+            "KeyboardAppearance.NONE_IMMERSIVE" },
+        { "ARK_KEYBOARD_APPEARANCE_IMMERSIVE", ARK_KEYBOARD_APPEARANCE_IMMERSIVE, "KeyboardAppearance.IMMERSIVE" },
+        { "ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE", ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE,
+            "KeyboardAppearance.LIGHT_IMMERSIVE" },
+        { "ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE", ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE,
+            "KeyboardAppearance.DARK_IMMERSIVE" },
+    };
+
+std::vector<std::tuple<std::string, Ark_KeyboardAppearance>> testFixtureEnumKeyboardAppearanceInvalidValues = {
+    { "-1", static_cast<Ark_KeyboardAppearance>(-1) },
+    { "INT_MAX", static_cast<Ark_KeyboardAppearance>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_KeyboardAvoidMode, std::string>> testFixtureEnumKeyboardAvoidModeValidValues = {
+    { "ARK_KEYBOARD_AVOID_MODE_DEFAULT", ARK_KEYBOARD_AVOID_MODE_DEFAULT, "KeyboardAvoidMode.DEFAULT" },
+    { "ARK_KEYBOARD_AVOID_MODE_NONE", ARK_KEYBOARD_AVOID_MODE_NONE, "KeyboardAvoidMode.NONE" },
+};
+
+std::vector<std::tuple<std::string, Ark_KeyboardAvoidMode>> testFixtureEnumKeyboardAvoidModeInvalidValues = {
+    { "-1", static_cast<Ark_KeyboardAvoidMode>(-1) },
+    { "INT_MAX", static_cast<Ark_KeyboardAvoidMode>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_MarqueeStartPolicy, std::string>>

@@ -377,7 +377,7 @@ HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](
         const Ark_Int32 resourceId, const Ark_ClickEvent event,
-        const Ark_LocationButtonOnClickResult result) {
+        const Ark_LocationButtonOnClickResult result, Opt_BusinessError error) {
             auto peer = event;
             ASSERT_NE(peer, nullptr);
             auto accessor = GeneratedModifier::GetClickEventAccessor();
@@ -390,7 +390,7 @@ HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
             accessor->destroyPeer(peer);
         };
     const int32_t contextId = 123;
-    auto func = Converter::ArkValue<Callback_ClickEvent_LocationButtonOnClickResult_Void>(checkCallback, contextId);
+    auto func = Converter::ArkValue<LocationButtonCallback>(checkCallback, contextId);
 
     modifier_->setOnClick(node_, &func);
 

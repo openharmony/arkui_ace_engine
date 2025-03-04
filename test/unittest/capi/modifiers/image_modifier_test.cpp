@@ -114,10 +114,10 @@ HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
  * @tc.desc: Check functionality of ImageModifier.setFillColor
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setFillColor0TestValidValues, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
-        modifier_->setFillColor(node_, &value);
+        modifier_->setFillColor0(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;

@@ -105,6 +105,14 @@ Ark_Boolean IsValidImpl(Ark_GestureRecognizer peer)
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
     return Converter::ArkValue<Ark_Boolean>(peer->GetRecognizer()->IsInResponseLinkRecognizers());
 }
+Ark_Number GetFingerCountImpl(Ark_GestureRecognizer peer)
+{
+    return {};
+}
+Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
+{
+    return {};
+}
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
 {
@@ -120,6 +128,8 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
         GestureRecognizerAccessor::GetStateImpl,
         GestureRecognizerAccessor::GetEventTargetInfoImpl,
         GestureRecognizerAccessor::IsValidImpl,
+        GestureRecognizerAccessor::GetFingerCountImpl,
+        GestureRecognizerAccessor::IsFingerCountLimitImpl,
     };
     return &GestureRecognizerAccessorImpl;
 }

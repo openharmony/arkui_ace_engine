@@ -1069,7 +1069,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueSelectedColor;
 
@@ -1082,11 +1082,11 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
         Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
 
         inputValueSelectedColor = value;
-        modifier_->setSelectedColor(node_, &inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSelectedColor, attribute: selectedColor";
+            << "Input value is: " << input << ", method: setSelectedColor0, attribute: selectedColor";
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
@@ -1108,11 +1108,11 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
 }
 
 /*
- * @tc.name: setSelectedColorTestSelectedColorInvalidValues
+ * @tc.name: setSelectedColor0TestSelectedColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueSelectedColor;
 
@@ -1123,13 +1123,13 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, Tes
     auto checkValue = [this, &initValueSelectedColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
 
-        modifier_->setSelectedColor(node_, &inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
         inputValueSelectedColor = value;
-        modifier_->setSelectedColor(node_, &inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setSelectedColor, attribute: selectedColor";
+            << "Input value is: " << input << ", method: setSelectedColor0, attribute: selectedColor";
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {

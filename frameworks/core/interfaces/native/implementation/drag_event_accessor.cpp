@@ -198,6 +198,16 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
     return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
+void ExecuteDropAnimationImpl(Ark_DragEvent peer,
+                              const Callback_Void* customDropAnimation)
+{
+}
+Ark_String StartDataLoadingImpl(Ark_VMContext vmContext,
+                                Ark_DragEvent peer,
+                                const Ark_DataSyncOptions* options)
+{
+    return {};
+}
 Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
@@ -254,6 +264,8 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
         DragEventAccessor::GetModifierKeyStateImpl,
+        DragEventAccessor::ExecuteDropAnimationImpl,
+        DragEventAccessor::StartDataLoadingImpl,
         DragEventAccessor::GetDragBehaviorImpl,
         DragEventAccessor::SetDragBehaviorImpl,
         DragEventAccessor::GetUseCustomDropAnimationImpl,

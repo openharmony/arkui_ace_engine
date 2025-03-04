@@ -154,14 +154,23 @@ void TrackColorImpl(Ark_NativePointer node,
     LOGE("SliderModifier::TrackColorImpl is not implemented, incorrect LinearGradient passed!");
     // LinearGradient issue https://gitee.com/nikolay-igotti/idlize/issues/IAW4DU
 }
-void SelectedColorImpl(Ark_NativePointer node,
-                       const Ark_ResourceColor* value)
+void SelectedColor0Impl(Ark_NativePointer node,
+                        const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
     SliderModelNG::SetSelectColor(frameNode, convValue);
+}
+void SelectedColor1Impl(Ark_NativePointer node,
+                        const Ark_Union_ResourceColor_LinearGradient* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SliderModelNG::SetSelectedColor1(frameNode, convValue);
 }
 void MinLabelImpl(Ark_NativePointer node,
                   const Ark_String* value)
@@ -335,6 +344,22 @@ void SlideRangeImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<Converter::SliderRange>(*value);
     SliderModelNG::SetValidSlideRange(frameNode, convValue.from, convValue.to);
 }
+void DigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                 const Opt_CrownSensitivity* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+}
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //SliderModelNG::SetEnableHapticFeedback(frameNode, convValue);
+}
 void ShowTipsImpl(Ark_NativePointer node,
                   Ark_Boolean value,
                   const Opt_ResourceStr* content)
@@ -366,7 +391,8 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderInterfaceModifier::SetSliderOptionsImpl,
         SliderAttributeModifier::BlockColorImpl,
         SliderAttributeModifier::TrackColorImpl,
-        SliderAttributeModifier::SelectedColorImpl,
+        SliderAttributeModifier::SelectedColor0Impl,
+        SliderAttributeModifier::SelectedColor1Impl,
         SliderAttributeModifier::MinLabelImpl,
         SliderAttributeModifier::MaxLabelImpl,
         SliderAttributeModifier::ShowStepsImpl,
@@ -384,6 +410,8 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::MinResponsiveDistanceImpl,
         SliderAttributeModifier::ContentModifierImpl,
         SliderAttributeModifier::SlideRangeImpl,
+        SliderAttributeModifier::DigitalCrownSensitivityImpl,
+        SliderAttributeModifier::EnableHapticFeedbackImpl,
         SliderAttributeModifier::ShowTipsImpl,
         SliderAttributeModifier::_onChangeEvent_valueImpl,
     };

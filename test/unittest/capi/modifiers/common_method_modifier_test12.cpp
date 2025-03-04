@@ -70,9 +70,9 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreviewTestDefaultValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest12, setDragPreview_CustomBuilderTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest12, setDragPreview0TestCustomBuilderTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    ASSERT_NE(modifier_->setDragPreview0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
@@ -82,7 +82,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_CustomBuilderTest, TestSize.
 
     auto unionValue = Converter::ArkUnion<Ark_Union_CustomBuilder_DragItemInfo_String,
         CustomNodeBuilder>(builder);
-    modifier_->setDragPreview(node_, &unionValue);
+    modifier_->setDragPreview0(node_, &unionValue);
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
     EXPECT_EQ(builderHelper.GetCustomNode(), Referenced::RawPtr(resultDragPreview.customNode));
@@ -94,9 +94,9 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_CustomBuilderTest, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest12, setDragPreview_DragItemInfoTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest12, setDragPreview0TestDragItemInfoTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    ASSERT_NE(modifier_->setDragPreview0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     // CustomNodeBuilder
@@ -118,7 +118,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_DragItemInfoTest, TestSize.L
 
     auto unionValue = Converter::ArkUnion<Ark_Union_CustomBuilder_DragItemInfo_String,
         Ark_DragItemInfo>(dragItemInfo);
-    modifier_->setDragPreview(node_, &unionValue);
+    modifier_->setDragPreview0(node_, &unionValue);
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
     EXPECT_EQ(builderHelper.GetCustomNode(), Referenced::RawPtr(resultDragPreview.customNode));
@@ -132,9 +132,9 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_DragItemInfoTest, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest12, setDragPreview_String, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest12, setDragPreview0TestString, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    ASSERT_NE(modifier_->setDragPreview0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
@@ -142,7 +142,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_String, TestSize.Level1)
     auto arkExpectedString = Converter::ArkValue<Ark_String>(expectedString);
 
     auto unionValue = Converter::ArkUnion<Ark_Union_CustomBuilder_DragItemInfo_String, Ark_String>(arkExpectedString);
-    modifier_->setDragPreview(node_, &unionValue);
+    modifier_->setDragPreview0(node_, &unionValue);
 
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
@@ -157,7 +157,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview_String, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest12, AccessibilityVirtualNodeTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityVirtualNode, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
@@ -209,7 +209,7 @@ HWTEST_F(CommonMethodModifierTest12, OverlayTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest12, OverlayTest_Union_String_CustomNodeBuilder_Values, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    ASSERT_NE(modifier_->setOverlay, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 

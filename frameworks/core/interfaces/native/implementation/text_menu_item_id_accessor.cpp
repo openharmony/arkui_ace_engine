@@ -75,6 +75,18 @@ Ark_TextMenuItemId GetAI_WRITERImpl()
 {
     return {};
 }
+Ark_TextMenuItemId GetTRANSLATEImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetSEARCHImpl()
+{
+    return {};
+}
+Ark_TextMenuItemId GetSHAREImpl()
+{
+    return {};
+}
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
 {
@@ -91,6 +103,9 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
         TextMenuItemIdAccessor::GetCOLLABORATION_SERVICEImpl,
         TextMenuItemIdAccessor::GetCAMERA_INPUTImpl,
         TextMenuItemIdAccessor::GetAI_WRITERImpl,
+        TextMenuItemIdAccessor::GetTRANSLATEImpl,
+        TextMenuItemIdAccessor::GetSEARCHImpl,
+        TextMenuItemIdAccessor::GetSHAREImpl,
     };
     return &TextMenuItemIdAccessorImpl;
 }

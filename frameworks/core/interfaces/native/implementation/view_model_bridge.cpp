@@ -67,6 +67,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createImageNode(Ark_Int32 nodeId);
     Ark_NodeHandle createImageAnimatorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createImageSpanNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createIndicatorComponentNode(Ark_Int32 nodeId);
     Ark_NodeHandle createLineNode(Ark_Int32 nodeId);
     Ark_NodeHandle createLinearIndicatorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createListNode(Ark_Int32 nodeId);
@@ -196,6 +197,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_IMAGE: return GeneratedViewModel::createImageNode(id);
             case GENERATED_ARKUI_IMAGE_ANIMATOR: return GeneratedViewModel::createImageAnimatorNode(id);
             case GENERATED_ARKUI_IMAGE_SPAN: return GeneratedViewModel::createImageSpanNode(id);
+            case GENERATED_ARKUI_INDICATOR_COMPONENT: return GeneratedViewModel::createIndicatorComponentNode(id);
             case GENERATED_ARKUI_LINE: return GeneratedViewModel::createLineNode(id);
             case GENERATED_ARKUI_LINEAR_INDICATOR: return GeneratedViewModel::createLinearIndicatorNode(id);
             case GENERATED_ARKUI_LIST: return GeneratedViewModel::createListNode(id);

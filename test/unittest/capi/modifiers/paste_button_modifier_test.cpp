@@ -376,7 +376,7 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
-        Ark_PasteButtonOnClickResult result) {
+        Ark_PasteButtonOnClickResult result, Opt_BusinessError error) {
         auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
@@ -389,8 +389,7 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
         accessor->destroyPeer(peer);
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_ClickEvent_PasteButtonOnClickResult_Void>(nullptr, onClick,
-        frameNode->GetId());
+    auto arkCallback = Converter::ArkValue<PasteButtonCallback>(nullptr, onClick, frameNode->GetId());
     modifier_->setOnClick(node_, &arkCallback);
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);

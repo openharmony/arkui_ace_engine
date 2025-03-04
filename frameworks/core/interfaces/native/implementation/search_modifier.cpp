@@ -321,7 +321,8 @@ void OnChangeImpl(Ark_NativePointer node,
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(info.value, &ctx);
         auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx);
-        arkCallback.Invoke(textArkString, textArkPrevText);
+        auto options = Converter::ArkValue<Opt_TextChangeOptions>();
+        arkCallback.Invoke(textArkString, textArkPrevText, options);
     };
     SearchModelNG::SetOnChange(frameNode, std::move(onChange));
 }
@@ -639,6 +640,23 @@ void StopBackPressImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetStopBackPress(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
+void OnWillChangeImpl(Ark_NativePointer node,
+                      const Callback_EditableTextChangeValue_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SearchModelNG::SetOnWillChange(frameNode, convValue);
+}
+void KeyboardAppearanceImpl(Ark_NativePointer node,
+                            const Opt_KeyboardAppearance* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SearchModelNG::SetKeyboardAppearance(frameNode, convValue);
+}
 void SearchButtonImpl(Ark_NativePointer node,
                       const Ark_String* value,
                       const Opt_SearchButtonOptions* option)
@@ -750,6 +768,8 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::EnableHapticFeedbackImpl,
         SearchAttributeModifier::HalfLeadingImpl,
         SearchAttributeModifier::StopBackPressImpl,
+        SearchAttributeModifier::OnWillChangeImpl,
+        SearchAttributeModifier::KeyboardAppearanceImpl,
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::InputFilterImpl,
         SearchAttributeModifier::CustomKeyboardImpl,

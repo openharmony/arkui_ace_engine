@@ -475,7 +475,8 @@ HWTEST_F(SearchModifierCallbackTest, setOnChangeTest, TestSize.Level1)
     static int32_t eventTestOffset = 0;
     EditableTextOnChangeCallback onChangeCallback = {
         .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+        .call = [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText,
+            Opt_TextChangeOptions options) {
             auto convValue = Converter::Convert<std::u16string>(value);
             auto convPreviewText = Converter::OptConvert<PreviewText>(previewText).value_or(PREVIEW_TEXT);
             eventTestOffset = convPreviewText.offset;

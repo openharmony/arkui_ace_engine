@@ -667,7 +667,7 @@ HWTEST_F(TextAreaModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     EXPECT_EQ(g_EventTestOffset, 0);
     auto onChange =
-        [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+        [](Ark_Int32 nodeId, Ark_String value, Opt_PreviewText previewText, Opt_TextChangeOptions options) {
             g_EventTestOffset = PREVIEW_TEXT.offset;
             g_EventTestString.append(CHECK_TEXT).append(PREVIEW_TEXT.value);
         };

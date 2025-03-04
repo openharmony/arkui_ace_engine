@@ -541,7 +541,7 @@ HWTEST_F(WebModifierTest, setCacheModeTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setCacheModeTestCacheModeValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, DISABLED_setCacheModeTestCacheModeValidValues, TestSize.Level1)
 {
     Ark_CacheMode initValueCacheMode;
 

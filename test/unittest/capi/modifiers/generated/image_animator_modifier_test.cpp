@@ -42,6 +42,8 @@ const auto ATTRIBUTE_FILL_MODE_NAME = "fillMode";
 const auto ATTRIBUTE_FILL_MODE_DEFAULT_VALUE = "FillMode.Forwards";
 const auto ATTRIBUTE_ITERATIONS_NAME = "iterations";
 const auto ATTRIBUTE_ITERATIONS_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME = "monitorInvisibleArea";
+const auto ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE = "!NOT-DEFINED!";
 } // namespace
 
 class ImageAnimatorModifierTest
@@ -422,6 +424,51 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setIterationsTestIterationsValidVal
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setMonitorInvisibleAreaTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE) <<
+        "Default value for attribute 'monitorInvisibleArea'";
+}
+
+/*
+ * @tc.name: setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueMonitorInvisibleArea;
+
+    // Initial setup
+    initValueMonitorInvisibleArea = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueMonitorInvisibleArea](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueMonitorInvisibleArea = initValueMonitorInvisibleArea;
+
+        inputValueMonitorInvisibleArea = value;
+        modifier_->setMonitorInvisibleArea(node_, inputValueMonitorInvisibleArea);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMonitorInvisibleArea, attribute: monitorInvisibleArea";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, expected, value);
     }
 }

@@ -1289,6 +1289,82 @@ HWTEST_F(TextAreaModifierTest, setStopBackPressTestStopBackPressInvalidValues, T
 }
 
 /*
+ * @tc.name: setKeyboardAppearanceTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setKeyboardAppearanceTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE) <<
+        "Default value for attribute 'keyboardAppearance'";
+}
+
+/*
+ * @tc.name: setKeyboardAppearanceTestKeyboardAppearanceValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppearanceValidValues, TestSize.Level1)
+{
+    Opt_KeyboardAppearance initValueKeyboardAppearance;
+
+    // Initial setup
+    initValueKeyboardAppearance =
+        ArkValue<Opt_KeyboardAppearance>(std::get<1>(Fixtures::testFixtureEnumKeyboardAppearanceValidValues[0]));
+
+    auto checkValue = [this, &initValueKeyboardAppearance](const std::string& input, const std::string& expectedStr,
+                          const Opt_KeyboardAppearance& value) {
+        Opt_KeyboardAppearance inputValueKeyboardAppearance = initValueKeyboardAppearance;
+
+        inputValueKeyboardAppearance = value;
+        modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumKeyboardAppearanceValidValues) {
+        checkValue(input, expected, ArkValue<Opt_KeyboardAppearance>(value));
+    }
+}
+
+/*
+ * @tc.name: setKeyboardAppearanceTestKeyboardAppearanceInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppearanceInvalidValues, TestSize.Level1)
+{
+    Opt_KeyboardAppearance initValueKeyboardAppearance;
+
+    // Initial setup
+    initValueKeyboardAppearance =
+        ArkValue<Opt_KeyboardAppearance>(std::get<1>(Fixtures::testFixtureEnumKeyboardAppearanceValidValues[0]));
+
+    auto checkValue = [this, &initValueKeyboardAppearance](
+                          const std::string& input, const Opt_KeyboardAppearance& value) {
+        Opt_KeyboardAppearance inputValueKeyboardAppearance = initValueKeyboardAppearance;
+
+        modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
+        inputValueKeyboardAppearance = value;
+        modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumKeyboardAppearanceInvalidValues) {
+        checkValue(input, ArkValue<Opt_KeyboardAppearance>(value));
+    }
+}
+
+/*
  * @tc.name: setShowCounterTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC

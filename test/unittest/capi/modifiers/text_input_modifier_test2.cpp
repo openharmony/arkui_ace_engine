@@ -73,7 +73,8 @@ HWTEST_F(TextInputModifierTest2, setOnChangeTest, TestSize.Level1)
     static std::u16string resultPreviewText = u"";
     static int32_t resultOffset = 0;
 
-    auto arkCallback = [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+    auto arkCallback = [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText,
+        Opt_TextChangeOptions options) {
         auto convPreviewText = Converter::OptConvert<PreviewText>(previewText).value_or(PreviewText{});
         resultOffset = convPreviewText.offset;
         resultPreviewText.append(convPreviewText.value);
