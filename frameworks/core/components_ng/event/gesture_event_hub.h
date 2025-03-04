@@ -353,6 +353,8 @@ public:
     void SetExcludedAxisForPanEvent(bool isExcludedAxis);
 
     void DumpVelocityInfoFroPanEvent(int32_t fingerId);
+
+    bool IsDragNewFwk() const;
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -459,6 +461,7 @@ private:
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;
     float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
+    bool isDragNewFwk_ = false;
 };
 
 } // namespace OHOS::Ace::NG
