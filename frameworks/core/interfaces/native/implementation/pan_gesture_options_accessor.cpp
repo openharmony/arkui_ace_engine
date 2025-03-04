@@ -46,6 +46,10 @@ Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
 {
     return {};
 }
+Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
+{
+    return {};
+}
 } // PanGestureOptionsAccessor
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
 {
@@ -57,6 +61,7 @@ const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
         PanGestureOptionsAccessor::SetDistanceImpl,
         PanGestureOptionsAccessor::SetFingersImpl,
         PanGestureOptionsAccessor::GetDirectionImpl,
+        PanGestureOptionsAccessor::GetDistanceImpl,
     };
     return &PanGestureOptionsAccessorImpl;
 }

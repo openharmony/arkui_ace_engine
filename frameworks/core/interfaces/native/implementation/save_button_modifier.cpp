@@ -46,7 +46,7 @@ void SetSaveButtonOptions1Impl(Ark_NativePointer node,
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 const Callback_ClickEvent_SaveButtonOnClickResult_Void* value)
+                 const SaveButtonCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

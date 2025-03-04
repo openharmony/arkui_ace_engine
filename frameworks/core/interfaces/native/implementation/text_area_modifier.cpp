@@ -521,6 +521,23 @@ void StopBackPressImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //TextAreaModelNG::SetStopBackPress(frameNode, convValue);
 }
+void OnWillChangeImpl(Ark_NativePointer node,
+                      const Callback_EditableTextChangeValue_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextAreaModelNG::SetOnWillChange(frameNode, convValue);
+}
+void KeyboardAppearanceImpl(Ark_NativePointer node,
+                            const Opt_KeyboardAppearance* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextAreaModelNG::SetKeyboardAppearance(frameNode, convValue);
+}
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,
                      const Opt_Callback_String_Void* error)
@@ -621,6 +638,8 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::HalfLeadingImpl,
         TextAreaAttributeModifier::EllipsisModeImpl,
         TextAreaAttributeModifier::StopBackPressImpl,
+        TextAreaAttributeModifier::OnWillChangeImpl,
+        TextAreaAttributeModifier::KeyboardAppearanceImpl,
         TextAreaAttributeModifier::InputFilterImpl,
         TextAreaAttributeModifier::ShowCounterImpl,
         TextAreaAttributeModifier::CustomKeyboardImpl,

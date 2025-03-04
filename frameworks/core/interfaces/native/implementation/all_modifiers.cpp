@@ -179,6 +179,7 @@ const GENERATED_ArkUIStackModifier* GetStackModifier();
 const GENERATED_ArkUIStepperModifier* GetStepperModifier();
 const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier();
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier();
+const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier();
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier();
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier();
 const GENERATED_ArkUITabsModifier* GetTabsModifier();
@@ -252,6 +253,7 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor();
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
 const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
 const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
+const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
 const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
@@ -279,6 +281,11 @@ const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor();
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
+const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor();
+const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor();
+const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor();
+const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
+const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor();
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
 const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor();
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor();
@@ -288,6 +295,7 @@ const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor();
 const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor();
 const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor();
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor();
+const GENERATED_ArkUIVirtualScrollOptionsAccessor* GetVirtualScrollOptionsAccessor();
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor();
 const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor();
 const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor();
@@ -295,6 +303,7 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor();
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor();
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor();
 const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor();
+const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor();
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor();
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
@@ -454,6 +463,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetStepperModifier,
         GetStepperItemModifier,
         GetSwiperModifier,
+        GetIndicatorComponentModifier,
         GetSymbolGlyphModifier,
         GetSymbolSpanModifier,
         GetTabsModifier,
@@ -533,6 +543,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetMouseEventAccessor,
         GetAccessibilityHoverEventAccessor,
         GetTouchEventAccessor,
+        GetAxisEventAccessor,
         GetPixelMapMockAccessor,
         GetDragEventAccessor,
         GetKeyEventAccessor,
@@ -560,6 +571,11 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetScrollableTargetInfoAccessor,
         GetEventTargetInfoAccessor,
         GetGestureRecognizerAccessor,
+        GetTapRecognizerAccessor,
+        GetLongPressRecognizerAccessor,
+        GetSwipeRecognizerAccessor,
+        GetPinchRecognizerAccessor,
+        GetRotationRecognizerAccessor,
         GetPanRecognizerAccessor,
         GetImageAnalyzerControllerAccessor,
         GetListScrollerAccessor,
@@ -569,6 +585,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetNavPathStackAccessor,
         GetNavigationTransitionProxyAccessor,
         GetPatternLockControllerAccessor,
+        GetVirtualScrollOptionsAccessor,
         GetRichEditorBaseControllerAccessor,
         GetRichEditorControllerAccessor,
         GetRichEditorStyledStringControllerAccessor,
@@ -576,6 +593,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetSearchControllerAccessor,
         GetSwiperControllerAccessor,
         GetSwiperContentTransitionProxyAccessor,
+        GetIndicatorComponentControllerAccessor,
         GetHierarchicalSymbolEffectAccessor,
         GetAppearSymbolEffectAccessor,
         GetDisappearSymbolEffectAccessor,

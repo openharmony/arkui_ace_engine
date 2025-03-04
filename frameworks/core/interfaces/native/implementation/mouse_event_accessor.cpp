@@ -118,6 +118,30 @@ void SetStopPropagationImpl(Ark_MouseEvent peer,
                             const Callback_Void* stopPropagation)
 {
 }
+Ark_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
+{
+    return {};
+}
+void SetRawDeltaXImpl(Ark_MouseEvent peer,
+                      const Ark_Number* rawDeltaX)
+{
+}
+Ark_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
+{
+    return {};
+}
+void SetRawDeltaYImpl(Ark_MouseEvent peer,
+                      const Ark_Number* rawDeltaY)
+{
+}
+Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
+{
+    return {};
+}
+void SetPressedButtonsImpl(Ark_MouseEvent peer,
+                           const Array_MouseButton* pressedButtons)
+{
+}
 } // MouseEventAccessor
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
 {
@@ -147,6 +171,12 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetYImpl,
         MouseEventAccessor::GetStopPropagationImpl,
         MouseEventAccessor::SetStopPropagationImpl,
+        MouseEventAccessor::GetRawDeltaXImpl,
+        MouseEventAccessor::SetRawDeltaXImpl,
+        MouseEventAccessor::GetRawDeltaYImpl,
+        MouseEventAccessor::SetRawDeltaYImpl,
+        MouseEventAccessor::GetPressedButtonsImpl,
+        MouseEventAccessor::SetPressedButtonsImpl,
     };
     return &MouseEventAccessorImpl;
 }

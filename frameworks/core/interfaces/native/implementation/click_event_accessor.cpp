@@ -94,6 +94,14 @@ void SetYImpl(Ark_ClickEvent peer,
               const Ark_Number* y)
 {
 }
+Ark_InteractionHand GetHandImpl(Ark_ClickEvent peer)
+{
+    return {};
+}
+void SetHandImpl(Ark_ClickEvent peer,
+                 Ark_InteractionHand hand)
+{
+}
 Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
 {
     return {};
@@ -125,6 +133,8 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetXImpl,
         ClickEventAccessor::GetYImpl,
         ClickEventAccessor::SetYImpl,
+        ClickEventAccessor::GetHandImpl,
+        ClickEventAccessor::SetHandImpl,
         ClickEventAccessor::GetPreventDefaultImpl,
         ClickEventAccessor::SetPreventDefaultImpl,
     };

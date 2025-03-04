@@ -24,23 +24,41 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
     return {};
 }
-void WidthImpl(Ark_NativePointer node,
-               const Ark_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetWidth(frameNode, convValue);
-}
-void HeightImpl(Ark_NativePointer node,
+void Width0Impl(Ark_NativePointer node,
                 const Ark_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetHeight(frameNode, convValue);
+    //CommonMethodModelNG::SetWidth0(frameNode, convValue);
+}
+void Width1Impl(Ark_NativePointer node,
+                const Ark_Union_Length_LayoutPolicy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetWidth1(frameNode, convValue);
+}
+void Height0Impl(Ark_NativePointer node,
+                 const Ark_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetHeight0(frameNode, convValue);
+}
+void Height1Impl(Ark_NativePointer node,
+                 const Ark_Union_Length_LayoutPolicy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetHeight1(frameNode, convValue);
 }
 void DrawModifierImpl(Ark_NativePointer node,
                       const Opt_DrawModifier* value)
@@ -454,6 +472,15 @@ void OnHoverImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnHover(frameNode, convValue);
 }
+void OnHoverMoveImpl(Ark_NativePointer node,
+                     const Callback_HoverEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetOnHoverMove(frameNode, convValue);
+}
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const AccessibilityCallback* value)
 {
@@ -543,6 +570,15 @@ void OnFocusAxisEventImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnFocusAxisEvent(frameNode, convValue);
 }
+void OnAxisEventImpl(Ark_NativePointer node,
+                     const Callback_AxisEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetOnAxisEvent(frameNode, convValue);
+}
 void FocusableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
@@ -550,6 +586,14 @@ void FocusableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
     //CommonMethodModelNG::SetFocusable(frameNode, convValue);
+}
+void NextFocusImpl(Ark_NativePointer node,
+                   const Opt_FocusMovement* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetNextFocus(frameNode, convValue);
 }
 void TabStopImpl(Ark_NativePointer node,
                  Ark_Boolean value)
@@ -1211,14 +1255,24 @@ void OnDragLeaveImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnDragLeave(frameNode, convValue);
 }
-void OnDropImpl(Ark_NativePointer node,
-                const Callback_DragEvent_String_Void* value)
+void OnDrop0Impl(Ark_NativePointer node,
+                 const Callback_DragEvent_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnDrop(frameNode, convValue);
+    //CommonMethodModelNG::SetOnDrop0(frameNode, convValue);
+}
+void OnDrop1Impl(Ark_NativePointer node,
+                 const OnDragEventCallback* eventCallback,
+                 const Opt_DropOptions* dropOptions)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(eventCallback);
+    //auto convValue = Converter::OptConvert<type>(eventCallback); // for enums
+    //CommonMethodModelNG::SetOnDrop1(frameNode, convValue);
 }
 void OnDragEndImpl(Ark_NativePointer node,
                    const Callback_DragEvent_String_Void* value)
@@ -1245,14 +1299,24 @@ void DraggableImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //CommonMethodModelNG::SetDraggable(frameNode, convValue);
 }
-void DragPreviewImpl(Ark_NativePointer node,
-                     const Ark_Union_CustomBuilder_DragItemInfo_String* value)
+void DragPreview0Impl(Ark_NativePointer node,
+                      const Ark_Union_CustomBuilder_DragItemInfo_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetDragPreview(frameNode, convValue);
+    //CommonMethodModelNG::SetDragPreview0(frameNode, convValue);
+}
+void DragPreview1Impl(Ark_NativePointer node,
+                      const Ark_Union_CustomBuilder_DragItemInfo_String* preview,
+                      const Opt_PreviewConfiguration* config)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(preview);
+    //auto convValue = Converter::OptConvert<type>(preview); // for enums
+    //CommonMethodModelNG::SetDragPreview1(frameNode, convValue);
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Callback_PreDragStatus_Void* value)
@@ -1564,6 +1628,40 @@ void AccessibilityText1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetAccessibilityText1(frameNode, convValue);
 }
+void AccessibilityNextFocusIdImpl(Ark_NativePointer node,
+                                  const Ark_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<std::string>(*value);
+    //CommonMethodModelNG::SetAccessibilityNextFocusId(frameNode, convValue);
+}
+void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
+                                   Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //CommonMethodModelNG::SetAccessibilityDefaultFocus(frameNode, convValue);
+}
+void AccessibilityUseSamePageImpl(Ark_NativePointer node,
+                                  Ark_AccessibilitySamePageMode value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //CommonMethodModelNG::SetAccessibilityUseSamePage(frameNode, convValue);
+}
+void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
+                                        Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //CommonMethodModelNG::SetAccessibilityScrollTriggerable(frameNode, convValue);
+}
 void AccessibilityRoleImpl(Ark_NativePointer node,
                            Ark_AccessibilityRoleType value)
 {
@@ -1776,6 +1874,15 @@ void OnSizeChangeImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnSizeChange(frameNode, convValue);
 }
+void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
+                                     Ark_FocusDrawLevel value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //CommonMethodModelNG::SetAccessibilityFocusDrawLevel(frameNode, convValue);
+}
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Ark_String* name,
                         const Opt_CustomObject* value)
@@ -1806,15 +1913,25 @@ void BackgroundImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(builder); // for enums
     //CommonMethodModelNG::SetBackground(frameNode, convValue);
 }
-void BackgroundImageImpl(Ark_NativePointer node,
-                         const Ark_Union_ResourceStr_PixelMap* src,
-                         const Opt_ImageRepeat* repeat)
+void BackgroundImage0Impl(Ark_NativePointer node,
+                          const Ark_Union_ResourceStr_PixelMap* src,
+                          const Opt_ImageRepeat* repeat)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(src);
     //auto convValue = Converter::OptConvert<type>(src); // for enums
-    //CommonMethodModelNG::SetBackgroundImage(frameNode, convValue);
+    //CommonMethodModelNG::SetBackgroundImage0(frameNode, convValue);
+}
+void BackgroundImage1Impl(Ark_NativePointer node,
+                          const Ark_Union_ResourceStr_PixelMap* src,
+                          const Opt_BackgroundImageOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(src);
+    //auto convValue = Converter::OptConvert<type>(src); // for enums
+    //CommonMethodModelNG::SetBackgroundImage1(frameNode, convValue);
 }
 void BackgroundBlurStyle0Impl(Ark_NativePointer node,
                               Ark_BlurStyle value,
@@ -2151,6 +2268,16 @@ void OnVisibleAreaChangeImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(ratios); // for enums
     //CommonMethodModelNG::SetOnVisibleAreaChange(frameNode, convValue);
 }
+void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
+                                        const Ark_VisibleAreaEventOptions* options,
+                                        const Opt_VisibleAreaChangeCallback* event)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(options);
+    //auto convValue = Converter::OptConvert<type>(options); // for enums
+    //CommonMethodModelNG::SetOnVisibleAreaApproximateChange(frameNode, convValue);
+}
 void KeyboardShortcutImpl(Ark_NativePointer node,
                           const Ark_Union_String_FunctionKey* value,
                           const Array_ModifierKey* keys,
@@ -2167,8 +2294,10 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
 {
     static const GENERATED_ArkUICommonMethodModifier ArkUICommonMethodModifierImpl {
         CommonMethodModifier::ConstructImpl,
-        CommonMethodModifier::WidthImpl,
-        CommonMethodModifier::HeightImpl,
+        CommonMethodModifier::Width0Impl,
+        CommonMethodModifier::Width1Impl,
+        CommonMethodModifier::Height0Impl,
+        CommonMethodModifier::Height1Impl,
         CommonMethodModifier::DrawModifierImpl,
         CommonMethodModifier::ResponseRegionImpl,
         CommonMethodModifier::MouseResponseRegionImpl,
@@ -2218,6 +2347,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OnClick0Impl,
         CommonMethodModifier::OnClick1Impl,
         CommonMethodModifier::OnHoverImpl,
+        CommonMethodModifier::OnHoverMoveImpl,
         CommonMethodModifier::OnAccessibilityHoverImpl,
         CommonMethodModifier::HoverEffectImpl,
         CommonMethodModifier::OnMouseImpl,
@@ -2228,7 +2358,9 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OnKeyPreImeImpl,
         CommonMethodModifier::OnKeyEventDispatchImpl,
         CommonMethodModifier::OnFocusAxisEventImpl,
+        CommonMethodModifier::OnAxisEventImpl,
         CommonMethodModifier::FocusableImpl,
+        CommonMethodModifier::NextFocusImpl,
         CommonMethodModifier::TabStopImpl,
         CommonMethodModifier::OnFocusImpl,
         CommonMethodModifier::OnBlurImpl,
@@ -2305,11 +2437,13 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OnDragEnterImpl,
         CommonMethodModifier::OnDragMoveImpl,
         CommonMethodModifier::OnDragLeaveImpl,
-        CommonMethodModifier::OnDropImpl,
+        CommonMethodModifier::OnDrop0Impl,
+        CommonMethodModifier::OnDrop1Impl,
         CommonMethodModifier::OnDragEndImpl,
         CommonMethodModifier::AllowDropImpl,
         CommonMethodModifier::DraggableImpl,
-        CommonMethodModifier::DragPreviewImpl,
+        CommonMethodModifier::DragPreview0Impl,
+        CommonMethodModifier::DragPreview1Impl,
         CommonMethodModifier::OnPreDragImpl,
         CommonMethodModifier::LinearGradient0Impl,
         CommonMethodModifier::LinearGradient1Impl,
@@ -2346,6 +2480,10 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::AccessibilityGroup1Impl,
         CommonMethodModifier::AccessibilityText0Impl,
         CommonMethodModifier::AccessibilityText1Impl,
+        CommonMethodModifier::AccessibilityNextFocusIdImpl,
+        CommonMethodModifier::AccessibilityDefaultFocusImpl,
+        CommonMethodModifier::AccessibilityUseSamePageImpl,
+        CommonMethodModifier::AccessibilityScrollTriggerableImpl,
         CommonMethodModifier::AccessibilityRoleImpl,
         CommonMethodModifier::OnAccessibilityFocusImpl,
         CommonMethodModifier::AccessibilityTextHintImpl,
@@ -2370,10 +2508,12 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::MonopolizeEventsImpl,
         CommonMethodModifier::OnTouchInterceptImpl,
         CommonMethodModifier::OnSizeChangeImpl,
+        CommonMethodModifier::AccessibilityFocusDrawLevelImpl,
         CommonMethodModifier::CustomPropertyImpl,
         CommonMethodModifier::ExpandSafeAreaImpl,
         CommonMethodModifier::BackgroundImpl,
-        CommonMethodModifier::BackgroundImageImpl,
+        CommonMethodModifier::BackgroundImage0Impl,
+        CommonMethodModifier::BackgroundImage1Impl,
         CommonMethodModifier::BackgroundBlurStyle0Impl,
         CommonMethodModifier::BackgroundBlurStyle1Impl,
         CommonMethodModifier::ForegroundBlurStyle0Impl,
@@ -2407,6 +2547,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::BindContentCover1Impl,
         CommonMethodModifier::BindSheetImpl,
         CommonMethodModifier::OnVisibleAreaChangeImpl,
+        CommonMethodModifier::OnVisibleAreaApproximateChangeImpl,
         CommonMethodModifier::KeyboardShortcutImpl,
     };
     return &ArkUICommonMethodModifierImpl;

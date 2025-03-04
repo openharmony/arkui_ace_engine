@@ -404,6 +404,23 @@ void StopBackPressImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SearchModelNG::SetStopBackPress(frameNode, convValue);
 }
+void OnWillChangeImpl(Ark_NativePointer node,
+                      const Callback_EditableTextChangeValue_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SearchModelNG::SetOnWillChange(frameNode, convValue);
+}
+void KeyboardAppearanceImpl(Ark_NativePointer node,
+                            const Opt_KeyboardAppearance* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SearchModelNG::SetKeyboardAppearance(frameNode, convValue);
+}
 void SearchButtonImpl(Ark_NativePointer node,
                       const Ark_String* value,
                       const Opt_SearchButtonOptions* option)
@@ -491,6 +508,8 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::EnableHapticFeedbackImpl,
         SearchAttributeModifier::HalfLeadingImpl,
         SearchAttributeModifier::StopBackPressImpl,
+        SearchAttributeModifier::OnWillChangeImpl,
+        SearchAttributeModifier::KeyboardAppearanceImpl,
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::InputFilterImpl,
         SearchAttributeModifier::CustomKeyboardImpl,

@@ -384,6 +384,22 @@ void ArrowModifierImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SelectModelNG::SetArrowModifier(frameNode, convValue);
 }
+void OptionTextModifierImpl(Ark_NativePointer node,
+                            const Opt_TextModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetOptionTextModifier(frameNode, convValue);
+}
+void SelectedOptionTextModifierImpl(Ark_NativePointer node,
+                                    const Opt_TextModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetSelectedOptionTextModifier(frameNode, convValue);
+}
 void MenuAlign0Impl(Ark_NativePointer node,
                     Ark_MenuAlignType alignType,
                     const Opt_Offset* offset)
@@ -469,6 +485,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::DividerImpl,
         SelectAttributeModifier::TextModifierImpl,
         SelectAttributeModifier::ArrowModifierImpl,
+        SelectAttributeModifier::OptionTextModifierImpl,
+        SelectAttributeModifier::SelectedOptionTextModifierImpl,
         SelectAttributeModifier::MenuAlign0Impl,
         SelectAttributeModifier::MenuAlign1Impl,
         SelectAttributeModifier::_onChangeEvent_selectedImpl,

@@ -72,14 +72,23 @@ void IntervalImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SwiperModelNG::SetInterval(frameNode, convValue);
 }
-void IndicatorImpl(Ark_NativePointer node,
-                   const Ark_Union_DotIndicator_DigitIndicator_Boolean* value)
+void Indicator0Impl(Ark_NativePointer node,
+                    const Ark_Union_DotIndicator_DigitIndicator_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SwiperModelNG::SetIndicator(frameNode, convValue);
+    //SwiperModelNG::SetIndicator0(frameNode, convValue);
+}
+void Indicator1Impl(Ark_NativePointer node,
+                    const Ark_Type_SwiperAttribute_indicator_indicator* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetIndicator1(frameNode, convValue);
 }
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)
@@ -178,6 +187,15 @@ void OnChangeImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SwiperModelNG::SetOnChange(frameNode, convValue);
 }
+void OnSelectedImpl(Ark_NativePointer node,
+                    const Callback_Number_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetOnSelected(frameNode, convValue);
+}
 void IndicatorStyleImpl(Ark_NativePointer node,
                         const Opt_IndicatorStyle* value)
 {
@@ -185,6 +203,15 @@ void IndicatorStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SwiperModelNG::SetIndicatorStyle(frameNode, convValue);
+}
+void OnUnselectedImpl(Ark_NativePointer node,
+                      const Callback_Number_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetOnUnselected(frameNode, convValue);
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
                           const OnSwiperAnimationStartCallback* value)
@@ -256,6 +283,15 @@ void PageFlipModeImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SwiperModelNG::SetPageFlipMode(frameNode, convValue);
 }
+void OnContentWillScrollImpl(Ark_NativePointer node,
+                             const ContentWillScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SwiperModelNG::SetOnContentWillScroll(frameNode, convValue);
+}
 void DisplayArrowImpl(Ark_NativePointer node,
                       const Ark_Union_ArrowStyle_Boolean* value,
                       const Opt_Boolean* isHoverShow)
@@ -315,7 +351,8 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::AutoPlay0Impl,
         SwiperAttributeModifier::AutoPlay1Impl,
         SwiperAttributeModifier::IntervalImpl,
-        SwiperAttributeModifier::IndicatorImpl,
+        SwiperAttributeModifier::Indicator0Impl,
+        SwiperAttributeModifier::Indicator1Impl,
         SwiperAttributeModifier::LoopImpl,
         SwiperAttributeModifier::DurationImpl,
         SwiperAttributeModifier::VerticalImpl,
@@ -327,7 +364,9 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::DisableSwipeImpl,
         SwiperAttributeModifier::CurveImpl,
         SwiperAttributeModifier::OnChangeImpl,
+        SwiperAttributeModifier::OnSelectedImpl,
         SwiperAttributeModifier::IndicatorStyleImpl,
+        SwiperAttributeModifier::OnUnselectedImpl,
         SwiperAttributeModifier::OnAnimationStartImpl,
         SwiperAttributeModifier::OnAnimationEndImpl,
         SwiperAttributeModifier::OnGestureSwipeImpl,
@@ -336,6 +375,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::OnContentDidScrollImpl,
         SwiperAttributeModifier::IndicatorInteractiveImpl,
         SwiperAttributeModifier::PageFlipModeImpl,
+        SwiperAttributeModifier::OnContentWillScrollImpl,
         SwiperAttributeModifier::DisplayArrowImpl,
         SwiperAttributeModifier::DisplayCountImpl,
         SwiperAttributeModifier::PrevMarginImpl,

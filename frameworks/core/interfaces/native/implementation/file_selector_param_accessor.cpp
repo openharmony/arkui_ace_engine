@@ -46,6 +46,10 @@ Ark_Boolean IsCaptureImpl(Ark_FileSelectorParam peer)
 {
     return {};
 }
+Array_String GetMimeTypesImpl(Ark_FileSelectorParam peer)
+{
+    return {};
+}
 } // FileSelectorParamAccessor
 const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
 {
@@ -57,6 +61,7 @@ const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
         FileSelectorParamAccessor::GetModeImpl,
         FileSelectorParamAccessor::GetAcceptTypeImpl,
         FileSelectorParamAccessor::IsCaptureImpl,
+        FileSelectorParamAccessor::GetMimeTypesImpl,
     };
     return &FileSelectorParamAccessorImpl;
 }

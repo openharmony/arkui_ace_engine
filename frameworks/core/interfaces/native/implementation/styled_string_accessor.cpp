@@ -66,14 +66,26 @@ Ark_String ToHtmlImpl(Ark_VMContext vmContext,
 {
     return {};
 }
-Ark_Buffer MarshallingImpl(Ark_StyledString styledString)
+Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
+                            const StyledStringMarshallCallback* callback_)
 {
     return {};
 }
-void UnmarshallingImpl(Ark_VMContext vmContext,
-                       Ark_AsyncWorkerPtr asyncWorker,
-                       const Ark_Buffer* buffer,
-                       const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
+void Unmarshalling0Impl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        const Ark_Buffer* buffer,
+                        const StyledStringUnmarshallCallback* callback_,
+                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+}
+Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
+{
+    return {};
+}
+void Unmarshalling1Impl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        const Ark_Buffer* buffer,
+                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
 Ark_Number GetLengthImpl(Ark_StyledString peer)
@@ -93,8 +105,10 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::SubStyledStringImpl,
         StyledStringAccessor::FromHtmlImpl,
         StyledStringAccessor::ToHtmlImpl,
-        StyledStringAccessor::MarshallingImpl,
-        StyledStringAccessor::UnmarshallingImpl,
+        StyledStringAccessor::Marshalling0Impl,
+        StyledStringAccessor::Unmarshalling0Impl,
+        StyledStringAccessor::Marshalling1Impl,
+        StyledStringAccessor::Unmarshalling1Impl,
         StyledStringAccessor::GetLengthImpl,
     };
     return &StyledStringAccessorImpl;

@@ -1003,14 +1003,6 @@ void EnableNativeMediaPlayerImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //WebModelNG::SetEnableNativeMediaPlayer(frameNode, convValue);
 }
-void EnableSmoothDragResizeImpl(Ark_NativePointer node,
-                                Ark_Boolean value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetEnableSmoothDragResize(frameNode, convValue);
-}
 void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
                                       const OnRenderProcessNotRespondingCallback* value)
 {
@@ -1106,6 +1098,41 @@ void EnableWebAVSessionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
     //WebModelNG::SetEnableWebAVSession(frameNode, convValue);
+}
+void OptimizeParserBudgetImpl(Ark_NativePointer node,
+                              Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //WebModelNG::SetOptimizeParserBudget(frameNode, convValue);
+}
+void RunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
+                                      const Array_ScriptItem* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WebModelNG::SetRunJavaScriptOnDocumentStart(frameNode, convValue);
+}
+void RunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
+                                    const Array_ScriptItem* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WebModelNG::SetRunJavaScriptOnDocumentEnd(frameNode, convValue);
+}
+void RunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
+                                const Array_ScriptItem* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WebModelNG::SetRunJavaScriptOnHeadEnd(frameNode, convValue);
 }
 void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                  const Ark_String* tag,
@@ -1245,7 +1272,6 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::OnOverrideUrlLoadingImpl,
         WebAttributeModifier::TextAutosizingImpl,
         WebAttributeModifier::EnableNativeMediaPlayerImpl,
-        WebAttributeModifier::EnableSmoothDragResizeImpl,
         WebAttributeModifier::OnRenderProcessNotRespondingImpl,
         WebAttributeModifier::OnRenderProcessRespondingImpl,
         WebAttributeModifier::SelectionMenuOptionsImpl,
@@ -1257,6 +1283,10 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::EnableHapticFeedbackImpl,
         WebAttributeModifier::EnableFollowSystemFontWeightImpl,
         WebAttributeModifier::EnableWebAVSessionImpl,
+        WebAttributeModifier::OptimizeParserBudgetImpl,
+        WebAttributeModifier::RunJavaScriptOnDocumentStartImpl,
+        WebAttributeModifier::RunJavaScriptOnDocumentEndImpl,
+        WebAttributeModifier::RunJavaScriptOnHeadEndImpl,
         WebAttributeModifier::RegisterNativeEmbedRuleImpl,
         WebAttributeModifier::BindSelectionMenuImpl,
     };

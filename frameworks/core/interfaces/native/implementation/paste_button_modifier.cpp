@@ -46,7 +46,7 @@ void SetPasteButtonOptions1Impl(Ark_NativePointer node,
 } // PasteButtonInterfaceModifier
 namespace PasteButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 const Callback_ClickEvent_PasteButtonOnClickResult_Void* value)
+                 const PasteButtonCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

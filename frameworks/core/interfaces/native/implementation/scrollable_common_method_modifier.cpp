@@ -165,6 +165,14 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //ScrollableCommonMethodModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
+void BackToTopImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //ScrollableCommonMethodModelNG::SetBackToTop(frameNode, convValue);
+}
 void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_EdgeEffect edgeEffect,
                     const Opt_EdgeEffectOptions* options)
@@ -206,6 +214,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::FlingSpeedLimitImpl,
         ScrollableCommonMethodModifier::ClipContentImpl,
         ScrollableCommonMethodModifier::DigitalCrownSensitivityImpl,
+        ScrollableCommonMethodModifier::BackToTopImpl,
         ScrollableCommonMethodModifier::EdgeEffectImpl,
         ScrollableCommonMethodModifier::FadingEdgeImpl,
     };

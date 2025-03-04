@@ -36,9 +36,14 @@ void ShowNextImpl(Ark_SwiperController peer)
 void ShowPreviousImpl(Ark_SwiperController peer)
 {
 }
-void ChangeIndexImpl(Ark_SwiperController peer,
-                     const Ark_Number* index,
-                     const Opt_Boolean* useAnimation)
+void ChangeIndex0Impl(Ark_SwiperController peer,
+                      const Ark_Number* index,
+                      const Opt_Boolean* useAnimation)
+{
+}
+void ChangeIndex1Impl(Ark_SwiperController peer,
+                      const Ark_Number* index,
+                      const Ark_Union_SwiperAnimationMode_Boolean* animationMode)
 {
 }
 void FinishAnimationImpl(Ark_SwiperController peer,
@@ -61,7 +66,8 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
         SwiperControllerAccessor::GetFinalizerImpl,
         SwiperControllerAccessor::ShowNextImpl,
         SwiperControllerAccessor::ShowPreviousImpl,
-        SwiperControllerAccessor::ChangeIndexImpl,
+        SwiperControllerAccessor::ChangeIndex0Impl,
+        SwiperControllerAccessor::ChangeIndex1Impl,
         SwiperControllerAccessor::FinishAnimationImpl,
         SwiperControllerAccessor::PreloadItemsImpl,
     };

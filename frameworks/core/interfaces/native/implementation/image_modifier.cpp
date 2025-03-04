@@ -81,14 +81,23 @@ void FitOriginalSizeImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //ImageModelNG::SetFitOriginalSize(frameNode, convValue);
 }
-void FillColorImpl(Ark_NativePointer node,
-                   const Ark_ResourceColor* value)
+void FillColor0Impl(Ark_NativePointer node,
+                    const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageModelNG::SetFillColor(frameNode, convValue);
+    //ImageModelNG::SetFillColor0(frameNode, convValue);
+}
+void FillColor1Impl(Ark_NativePointer node,
+                    const Ark_Union_ResourceColor_ColorContent* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageModelNG::SetFillColor1(frameNode, convValue);
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    Ark_ImageFit value)
@@ -303,7 +312,8 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::AltImpl,
         ImageAttributeModifier::MatchTextDirectionImpl,
         ImageAttributeModifier::FitOriginalSizeImpl,
-        ImageAttributeModifier::FillColorImpl,
+        ImageAttributeModifier::FillColor0Impl,
+        ImageAttributeModifier::FillColor1Impl,
         ImageAttributeModifier::ObjectFitImpl,
         ImageAttributeModifier::ImageMatrixImpl,
         ImageAttributeModifier::ObjectRepeatImpl,

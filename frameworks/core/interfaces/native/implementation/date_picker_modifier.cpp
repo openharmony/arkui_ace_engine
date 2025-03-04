@@ -137,6 +137,14 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DatePickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
+}
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Date_Void* callback)
 {
@@ -164,6 +172,7 @@ const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
         DatePickerAttributeModifier::OnDateChange0Impl,
         DatePickerAttributeModifier::OnDateChange1Impl,
         DatePickerAttributeModifier::DigitalCrownSensitivityImpl,
+        DatePickerAttributeModifier::EnableHapticFeedbackImpl,
         DatePickerAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIDatePickerModifierImpl;

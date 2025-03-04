@@ -70,6 +70,14 @@ void OnChange1Impl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CalendarPickerModelNG::SetOnChange1(frameNode, convValue);
 }
+void MarkTodayImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //CalendarPickerModelNG::SetMarkToday(frameNode, convValue);
+}
 void EdgeAlign0Impl(Ark_NativePointer node,
                     Ark_CalendarAlign alignType,
                     const Opt_Offset* offset)
@@ -100,6 +108,7 @@ const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
         CalendarPickerAttributeModifier::TextStyle1Impl,
         CalendarPickerAttributeModifier::OnChange0Impl,
         CalendarPickerAttributeModifier::OnChange1Impl,
+        CalendarPickerAttributeModifier::MarkTodayImpl,
         CalendarPickerAttributeModifier::EdgeAlign0Impl,
         CalendarPickerAttributeModifier::EdgeAlign1Impl,
     };

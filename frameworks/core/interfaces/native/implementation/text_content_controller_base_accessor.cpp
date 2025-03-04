@@ -42,6 +42,20 @@ Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {
     return {};
 }
+Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
+                       const Ark_String* text,
+                       const Opt_TextContentControllerOptions* textOperationOptions)
+{
+    return {};
+}
+void DeleteTextImpl(Ark_TextContentControllerBase peer,
+                    const Opt_TextRange* range)
+{
+}
+Ark_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
+{
+    return {};
+}
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
 {
@@ -52,6 +66,9 @@ const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentController
         TextContentControllerBaseAccessor::GetCaretOffsetImpl,
         TextContentControllerBaseAccessor::GetTextContentRectImpl,
         TextContentControllerBaseAccessor::GetTextContentLineCountImpl,
+        TextContentControllerBaseAccessor::AddTextImpl,
+        TextContentControllerBaseAccessor::DeleteTextImpl,
+        TextContentControllerBaseAccessor::GetSelectionImpl,
     };
     return &TextContentControllerBaseAccessorImpl;
 }

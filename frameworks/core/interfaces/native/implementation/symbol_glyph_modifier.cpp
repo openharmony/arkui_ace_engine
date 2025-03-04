@@ -81,6 +81,22 @@ void RenderingStrategyImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SymbolGlyphModelNG::SetRenderingStrategy(frameNode, convValue);
 }
+void MinFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SymbolGlyphModelNG::SetMinFontScale(frameNode, convValue);
+}
+void MaxFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SymbolGlyphModelNG::SetMaxFontScale(frameNode, convValue);
+}
 void SymbolEffect0Impl(Ark_NativePointer node,
                        const Ark_SymbolEffect* symbolEffect,
                        const Opt_Boolean* isActive)
@@ -112,6 +128,8 @@ const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         SymbolGlyphAttributeModifier::FontWeightImpl,
         SymbolGlyphAttributeModifier::EffectStrategyImpl,
         SymbolGlyphAttributeModifier::RenderingStrategyImpl,
+        SymbolGlyphAttributeModifier::MinFontScaleImpl,
+        SymbolGlyphAttributeModifier::MaxFontScaleImpl,
         SymbolGlyphAttributeModifier::SymbolEffect0Impl,
         SymbolGlyphAttributeModifier::SymbolEffect1Impl,
     };
