@@ -4827,21 +4827,25 @@ bool RichEditorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 void RichEditorPattern::OnCommonColorChange()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto theme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_VOID(theme);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(host && theme && textLayoutProperty);
+
     auto displayColorMode = GetDisplayColorMode();
     COLOR_MODE_LOCK(displayColorMode);
+
     const auto& themeTextStyle = theme->GetTextStyle();
     auto themeTextColor = themeTextStyle.GetTextColor();
-    auto themeTextDecorationColor = themeTextStyle.GetTextDecorationColor();
+    auto themeTextDecColor = themeTextStyle.GetTextDecorationColor();
     textLayoutProperty->UpdateTextColor(themeTextColor);
-    textLayoutProperty->UpdateTextDecorationColor(themeTextDecorationColor);
+    textLayoutProperty->UpdateTextDecorationColor(themeTextDecColor);
     auto themeUrlSpanColor = GetUrlSpanColor();
+    textLayoutProperty->UpdateUrlDefualtColor(themeUrlSpanColor);
+    textLayoutProperty->UpdateUrlHoverColor(GetUrlHoverColor());
+    textLayoutProperty->UpdateUrlPressedColor(GetUrlPressColor());
+
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, ColorMode=%{public}d, TextColor=%{public}s, DecorationColor=%{public}s",
-        displayColorMode, themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
+        displayColorMode, themeTextColor.ToString().c_str(), themeTextDecColor.ToString().c_str());
 
     const auto& spans = host->GetChildren();
     for (const auto& uiNode : spans) {
@@ -4857,8 +4861,7 @@ void RichEditorPattern::OnCommonColorChange()
         CHECK_NULL_CONTINUE(spanItem);
         auto& textColor = spanItem->urlOnRelease ? themeUrlSpanColor : themeTextColor;
         IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColorWithoutCheck(textColor));
-        IF_TRUE(spanItem->useThemeDecorationColor, 
-            spanNode->UpdateTextDecorationColorWithoutCheck(themeTextDecorationColor));
+        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColorWithoutCheck(themeTextDecColor));
         spanNode->UpdateColorByResourceId();
     }
     paragraphCache_.Clear();
