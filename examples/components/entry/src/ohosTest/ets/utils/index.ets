@@ -107,7 +107,6 @@ export async function radioClick(radioOperate: radioOperateType, blockStr?: stri
   listText?: string) {
   await getToggle(ToggleClick.Open, radioOperate.toggleClick?.toggleClickObj)
   if (radioOperate.radioClickObj != undefined) {
-    console.log('---222' + typeof radioOperate.radioClickObj)
     if (typeof radioOperate.radioClickObj === 'string') {
       await searchRadio(radioOperate.radioClickObj)
     } else {
@@ -121,7 +120,6 @@ export async function radioClick(radioOperate: radioOperateType, blockStr?: stri
     let idValue = getInspectorByKey(radioOperate.id)
     console.log(idValue)
     let result = getJson(radioOperate.arr, idValue)
-    console.log('jj', JSON.stringify(result))
     expect(JSON.stringify(result)).assertEqual(JSON.stringify(radioOperate.assertEqual));
     console.log(TAG, result, 'expect', radioOperate.assertEqual)
   }
@@ -254,7 +252,6 @@ export async function Search(category: string, compText: string, listText?: stri
         await scrolls.scrollToTop();
       }
       let title: Component = await scrolls.scrollSearch(ON.text(compText))
-      console.log('---1' + title)
       if (title) {
         titleRect = await title.getBounds();
         scroll(titleRect.top - 678)
@@ -280,7 +277,6 @@ export async function getToggle(isClose: ToggleClick = ToggleClick.Open, lastCom
     await driver.delayMs(1500)
   }
 }
-
 export async function titleSearch(category: string, compText: string, listText?: string) {
   let title = await driver.findComponent(ON.text(compText))
   await driver.delayMs(1500)
@@ -302,7 +298,6 @@ export async function searchRadio(radioName: string) {
       let texts: Component[] = await driver.findComponents(ON.type('Text').within(ON.type('Scroll')))
       for (let i = 0; i < texts.length; i++) {
         if (await texts[i].getText() === radioName) {
-          console.log('---radio' + i)
           await radios[i].click()
           await driver.delayMs(1500)
           break
@@ -336,7 +331,6 @@ export async function searchToggle(toggleName: string, currentText: string, list
   let textSearch: Component = await driver.findComponent(ON.text(titles ? '参数列表' : '基础属性'))
   await textSearch.click()
   if (selection != listText) {
-    console.log('---1')
     let scrolls: Component = await driver.findComponent(ON.id('scroll'));
     let title: Component = await scrolls.scrollSearch(ON.text(listText)
       .isBefore(ON.type('Image'))
@@ -348,10 +342,9 @@ export async function searchToggle(toggleName: string, currentText: string, list
   let scrolls: Component = await driver.findComponent(ON.id('scroll'));
   let title: Component = await scrolls.scrollSearch(ON.text(currentText))
   if (!title) {
-    console.log('---2' + title)
+
     let titles: Component = await scrolls.scrollSearch(ON.text(toggleName))
     if (titles) {
-      console.log('---3' + titles)
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(toggleName)))
       await toggle.click();
