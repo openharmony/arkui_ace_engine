@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright (c) 2024 Huawei Device Co., Ltd.
+=======
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+>>>>>>> 3189dbc59de (MouseEventAccessor - update implementation and ut)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +18,13 @@
  */
 #include "accessor_test_base.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
+<<<<<<< HEAD
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+=======
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+>>>>>>> 3189dbc59de (MouseEventAccessor - update implementation and ut)
 #include "test/unittest/capi/accessors/accessor_test_fixtures.h"
 
 namespace OHOS::Ace::NG {
@@ -27,12 +36,15 @@ class MouseEventAccessorTest
     : public AccessorTestBase<GENERATED_ArkUIMouseEventAccessor,
         &GENERATED_ArkUIAccessors::getMouseEventAccessor, MouseEventPeer> {
 public:
-    OHOS::Ace::MouseInfo info;
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        peer_->SetEventInfo(&info);
+        eventInfo_ = std::make_unique<MouseInfo>();
+        peer_->SetEventInfo(eventInfo_.get());
     }
+
+private:
+    std::unique_ptr<MouseInfo> eventInfo_;
 };
 
 namespace {
@@ -44,12 +56,53 @@ namespace {
         { "100", Converter::ArkValue<Ark_Number>(100), 100 },
         { "-20.65", Converter::ArkValue<Ark_Number>(-20.65), -20.65 },
     };
-    const std::vector<std::tuple<std::string, double, Ark_Int32>> testFixtureDoubleArkInt32Values = {
-        { "1.24", 1.24,  Converter::ArkValue<Ark_Int32>(1) },
-        { "0", 0,  Converter::ArkValue<Ark_Int32>(0) },
-        { "100", 100,  Converter::ArkValue<Ark_Int32>(100) },
-        { "-20.65", -20.65,  Converter::ArkValue<Ark_Int32>(-20) },
+
+    const std::vector<std::pair<MouseAction, Ark_MouseAction>> getMouseActionTestPlan = {
+        { MouseAction::NONE, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::PRESS, Ark_MouseAction::ARK_MOUSE_ACTION_PRESS },
+        { MouseAction::RELEASE, Ark_MouseAction::ARK_MOUSE_ACTION_RELEASE },
+        { MouseAction::MOVE, Ark_MouseAction::ARK_MOUSE_ACTION_MOVE },
+        { MouseAction::WINDOW_ENTER, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::WINDOW_LEAVE, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::HOVER, Ark_MouseAction::ARK_MOUSE_ACTION_HOVER },
+        { MouseAction::HOVER_ENTER, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::HOVER_MOVE, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::HOVER_EXIT, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::PULL_DOWN, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::PULL_MOVE, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::PULL_UP, static_cast<Ark_MouseAction>(-1) },
+        { MouseAction::CANCEL, static_cast<Ark_MouseAction>(-1) },
     };
+    
+    const std::vector<std::pair<MouseButton, Ark_MouseButton>> getMouseButtonTestPlan = {
+        { MouseButton::NONE_BUTTON, Ark_MouseButton::ARK_MOUSE_BUTTON_NONE },
+        { MouseButton::LEFT_BUTTON, Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT },
+        { MouseButton::RIGHT_BUTTON, Ark_MouseButton::ARK_MOUSE_BUTTON_RIGHT },
+        { MouseButton::MIDDLE_BUTTON, Ark_MouseButton::ARK_MOUSE_BUTTON_MIDDLE },
+        { MouseButton::BACK_BUTTON, Ark_MouseButton::ARK_MOUSE_BUTTON_BACK },
+        { MouseButton::FORWARD_BUTTON, Ark_MouseButton::ARK_MOUSE_BUTTON_FORWARD },
+        { MouseButton::SIDE_BUTTON, static_cast<Ark_MouseButton>(-1) },
+        { MouseButton::EXTRA_BUTTON, static_cast<Ark_MouseButton>(-1) },
+        { MouseButton::TASK_BUTTON, static_cast<Ark_MouseButton>(-1) },
+    };
+}
+
+/**
+ * @tc.name: GetStopPropagationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, GetStopPropagationTest, TestSize.Level1)
+{
+    MouseInfo* eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    Callback_Void callback = accessor_->getStopPropagation(peer_);
+    auto callbackHelper = CallbackHelper(callback);
+    eventInfo->SetStopPropagation(false);
+    EXPECT_FALSE(eventInfo->IsStopPropagation());
+    callbackHelper.Invoke();
+    EXPECT_TRUE(eventInfo->IsStopPropagation());
+    CallbackKeeper::ReleaseReverseCallback<Callback_Void>(callback);
 }
 
 /**
@@ -70,6 +123,22 @@ HWTEST_F(MouseEventAccessorTest, SetButtonTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetButtonTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, GetButtonTest, TestSize.Level1)
+{
+    for (auto& [value, expected]: getMouseButtonTestPlan) {
+        auto eventInfo = peer_->GetEventInfo();
+        ASSERT_NE(eventInfo, nullptr);
+        eventInfo->SetButton(value);
+        auto result = accessor_->getButton(peer_);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/**
  * @tc.name: SetActionTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -87,20 +156,36 @@ HWTEST_F(MouseEventAccessorTest, SetActionTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetActionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, GetActionTest, TestSize.Level1)
+{
+    for (auto& [value, expected]: getMouseActionTestPlan) {
+        auto eventInfo = peer_->GetEventInfo();
+        ASSERT_NE(eventInfo, nullptr);
+        eventInfo->SetAction(value);
+        auto result = accessor_->getAction(peer_);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/**
  * @tc.name: GetDisplayXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(MouseEventAccessorTest, GetDisplayXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureDoubleArkInt32Values) {
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         Offset screenLocation;
         screenLocation.SetX(value);
         info->SetScreenLocation(screenLocation);
-        auto arkRes = Converter::Convert<float>(accessor_->getDisplayX(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getDisplayX(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: getDisplayX";
     }
 }
@@ -134,14 +219,14 @@ HWTEST_F(MouseEventAccessorTest, SetDisplayXTest, TestSize.Level1)
  */
 HWTEST_F(MouseEventAccessorTest, GetDisplayYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureDoubleArkInt32Values) {
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         Offset screenLocation;
         screenLocation.SetY(value);
         info->SetScreenLocation(screenLocation);
-        auto arkRes = Converter::Convert<float>(accessor_->getDisplayY(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getDisplayY(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: getDisplayY";
     }
 }
@@ -175,14 +260,14 @@ HWTEST_F(MouseEventAccessorTest, SetDisplayYTest, TestSize.Level1)
  */
 HWTEST_F(MouseEventAccessorTest, GetWindowXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureDoubleArkInt32Values) {
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         Offset globalLocation;
         globalLocation.SetX(value);
         info->SetGlobalLocation(globalLocation);
-        auto arkRes = Converter::Convert<float>(accessor_->getWindowX(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getWindowX(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetWindowX";
     }
 }
@@ -216,14 +301,14 @@ HWTEST_F(MouseEventAccessorTest, SetWindowXTest, TestSize.Level1)
  */
 HWTEST_F(MouseEventAccessorTest, GetWindowYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureDoubleArkInt32Values) {
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         Offset globalLocation;
         globalLocation.SetY(value);
         info->SetGlobalLocation(globalLocation);
-        auto arkRes = Converter::Convert<float>(accessor_->getWindowY(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getWindowY(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetWindowY";
     }
 }
@@ -257,14 +342,14 @@ HWTEST_F(MouseEventAccessorTest, SetWindowYTest, TestSize.Level1)
  */
 HWTEST_F(MouseEventAccessorTest, GetScreenXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureDoubleArkInt32Values) {
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         Offset globalLocation;
         globalLocation.SetX(value);
         info->SetGlobalLocation(globalLocation);
-        auto arkRes = Converter::Convert<float>(accessor_->getScreenX(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getScreenX(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetScreenX";
     }
 }
@@ -298,14 +383,14 @@ HWTEST_F(MouseEventAccessorTest, SetScreenXTest, TestSize.Level1)
  */
 HWTEST_F(MouseEventAccessorTest, GetScreenYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureDoubleArkInt32Values) {
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         Offset globalLocation;
         globalLocation.SetY(value);
         info->SetGlobalLocation(globalLocation);
-        auto arkRes = Converter::Convert<float>(accessor_->getScreenY(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getScreenY(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetScreenY";
     }
 }
@@ -339,14 +424,14 @@ HWTEST_F(MouseEventAccessorTest, SetScreenYTest, TestSize.Level1)
  */
 HWTEST_F(MouseEventAccessorTest, GetXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureDoubleArkInt32Values) {
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         Offset localLocation;
         localLocation.SetX(value);
         info->SetLocalLocation(localLocation);
-        auto arkRes = Converter::Convert<float>(accessor_->getX(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getX(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetX";
     }
 }
@@ -380,14 +465,14 @@ HWTEST_F(MouseEventAccessorTest, SetXTest, TestSize.Level1)
  */
 HWTEST_F(MouseEventAccessorTest, GetYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureDoubleArkInt32Values) {
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         Offset localLocation;
         localLocation.SetY(value);
         info->SetLocalLocation(localLocation);
-        auto arkRes = Converter::Convert<float>(accessor_->getY(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getY(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetY";
     }
 }
@@ -413,4 +498,5 @@ HWTEST_F(MouseEventAccessorTest, SetYTest, TestSize.Level1)
             "Input value is: " << input << ", method: SetYTest";
     }
 }
+
 }

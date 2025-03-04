@@ -64,12 +64,12 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    const auto errValue = Converter::ArkValue<Ark_MouseButton>(MouseButton::NONE_BUTTON);
+    CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, {});
-    LOGE("Arkoala method MouseEventAccessor.GetButtonImpl return nullptr value but should return enum MouseButton");
-    LOGE("return info->GetButton();");
-    return {};
+    CHECK_NULL_RETURN(info, errValue);
+    auto mouseBtn = info->GetButton();
+    return Converter::ArkValue<Ark_MouseButton>(mouseBtn);
 }
 void SetButtonImpl(Ark_MouseEvent peer,
                    Ark_MouseButton button)
@@ -84,12 +84,12 @@ void SetButtonImpl(Ark_MouseEvent peer,
 }
 Ark_MouseAction GetActionImpl(Ark_MouseEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    const auto errValue = Converter::ArkValue<Ark_MouseAction>(MouseAction::NONE);
+    CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, {});
-    LOGE("Arkoala method MouseEventAccessor.GetButtonImpl return nullptr value but should return enum MouseAction");
-    LOGE("return info->GetAction();");
-    return {};
+    CHECK_NULL_RETURN(info, errValue);
+    auto mouseAct = info->GetAction();
+    return Converter::ArkValue<Ark_MouseAction>(mouseAct);
 }
 void SetActionImpl(Ark_MouseEvent peer,
                    Ark_MouseAction action)
@@ -109,9 +109,8 @@ Ark_Number GetDisplayXImpl(Ark_MouseEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& screenLocation = info->GetScreenLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetDisplayXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetDisplayXImpl(Ark_MouseEvent peer,
                      const Ark_Number* displayX)
@@ -134,9 +133,8 @@ Ark_Number GetDisplayYImpl(Ark_MouseEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& screenLocation = info->GetScreenLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetDisplayYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetDisplayYImpl(Ark_MouseEvent peer,
                      const Ark_Number* displayY)
@@ -159,9 +157,8 @@ Ark_Number GetWindowXImpl(Ark_MouseEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& globalLocation = info->GetGlobalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetWindowXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetWindowXImpl(Ark_MouseEvent peer,
                     const Ark_Number* windowX)
@@ -184,9 +181,8 @@ Ark_Number GetWindowYImpl(Ark_MouseEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& globalLocation = info->GetGlobalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetWindowYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetWindowYImpl(Ark_MouseEvent peer,
                     const Ark_Number* windowY)
@@ -209,9 +205,8 @@ Ark_Number GetScreenXImpl(Ark_MouseEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& globalLocation = info->GetGlobalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetScreenXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetScreenXImpl(Ark_MouseEvent peer,
                     const Ark_Number* screenX)
@@ -234,9 +229,8 @@ Ark_Number GetScreenYImpl(Ark_MouseEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& globalLocation = info->GetGlobalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetScreenYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetScreenYImpl(Ark_MouseEvent peer,
                     const Ark_Number* screenY)
@@ -259,9 +253,8 @@ Ark_Number GetXImpl(Ark_MouseEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& localLocation = info->GetLocalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetXImpl(Ark_MouseEvent peer,
               const Ark_Number* x)
@@ -284,9 +277,8 @@ Ark_Number GetYImpl(Ark_MouseEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& localLocation = info->GetLocalLocation();
-    LOGE("Arkoala method MouseEventAccessor.GetYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetYImpl(Ark_MouseEvent peer,
               const Ark_Number* y)

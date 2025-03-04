@@ -86,7 +86,7 @@ Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
 void SetStopPropagationImpl(Ark_HoverEvent peer,
                             const Callback_Void* stopPropagation)
 {
-    LOGE("HoverEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
+    LOGE("HoverEventAccessor::SetStopPropagationImpl we can only GET stopPropagation callback");
 }
 } // HoverEventAccessor
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
