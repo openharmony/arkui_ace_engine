@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
+import { ListItemBootcamp } from 'feature/src/main/ets/pages/ScrollAndSwipe/ListItemBootcamp';
 import abilityTest from './Ability.test';
 
 export default function testsuite() {
   abilityTest();
+  ListItemBootcamp()
 }
