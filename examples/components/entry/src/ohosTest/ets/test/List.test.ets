@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import PopupBootcampTest from './InformationDisplay/PopupBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  PopupBootcampTest();
 }
