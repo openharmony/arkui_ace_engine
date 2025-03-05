@@ -2066,6 +2066,17 @@ EventTarget Convert(const Ark_EventTarget& src)
 }
 
 template<>
+ImageResizableSlice Convert(const Ark_EdgeWidths& src)
+{
+    ImageResizableSlice dst;
+    dst.left = OptConvert<Dimension>(src.left).value_or(dst.left);
+    dst.right = OptConvert<Dimension>(src.right).value_or(dst.right);
+    dst.top = OptConvert<Dimension>(src.top).value_or(dst.top);
+    dst.bottom = OptConvert<Dimension>(src.bottom).value_or(dst.bottom);
+    return dst;
+}
+
+template<>
 SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
 {
     SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
