@@ -47,5 +47,6 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_selection_test_ng.cpp",
     "rich_editor_span_test.cpp",
     "rich_editor_styled_string_test_ng.cpp",
+    "rich_editor_url_style_test.cpp",
   ]
 }

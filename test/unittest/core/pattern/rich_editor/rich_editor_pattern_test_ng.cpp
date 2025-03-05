@@ -923,7 +923,8 @@ HWTEST_F(RichEditorPatternTestNg, GetChangeSpanStyle002, TestSize.Level1)
      * @tc.steps: step2. change parameter and call function.
      */
     lastInfo.SetSpanIndex(richEditorPattern->spans_.size() - 2);
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
+    std::optional<std::u16string> urlAddress;
+    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
 }
 

@@ -6708,6 +6708,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     }
     spanResult.SetOffsetInSpan(currentPosition - contentStartPosition);
     spanResult.SetEraseLength(eraseLength);
+    spanResult.SetUrlAddress(spanItem->urlAddress);
     if (!spanItem->GetTextStyle().has_value()) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SpanItem text style is empty.");
         return eraseLength;
@@ -6723,7 +6724,6 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     spanResult.SetTextDecoration(spanItem->GetTextStyle()->GetTextDecoration());
     spanResult.SetTextDecorationStyle(spanItem->GetTextStyle()->GetTextDecorationStyle());
     spanResult.SetFontFeature(spanItem->GetTextStyle()->GetFontFeatures());
-    spanResult.SetUrlAddress(spanItem->urlAddress);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, eraseLength);
     auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
@@ -10125,7 +10125,8 @@ TextInputAction RichEditorPattern::GetDefaultTextInputAction() const
 }
 
 void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
-    std::optional<struct UpdateParagraphStyle>& spanParaStyle, const RefPtr<SpanNode>& spanNode, int32_t spanIndex)
+    std::optional<struct UpdateParagraphStyle>& spanParaStyle, std::optional<std::u16string>& urlAddress,
+    const RefPtr<SpanNode>& spanNode, int32_t spanIndex)
 {
     auto originalSpans = changeValue.GetRichEditorOriginalSpans();
     if (spanIndex == 0 && originalSpans.size()) {
@@ -10136,6 +10137,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
         if (firstInfo.GetEraseLength() == firstLength && lastInfo.GetEraseLength() == lastLength) {
             if (spans_.size() == originalSpans.size() ||
                 static_cast<int32_t>(spans_.size()) == (lastInfo.GetSpanIndex() + 1)) {
+                urlAddress.reset();
                 return; // all spanNode be deleted, set default style
             }
             spanIndex = lastInfo.GetSpanIndex() + 1;
@@ -10212,7 +10214,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     } else {
         std::optional<TextStyle> spanTextStyle = textStyle ? textStyle : typingTextStyle_;
         std::optional<struct UpdateParagraphStyle> spanParaStyle = paraStyle;
-        GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
+        GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
         CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, offsetInSpan + insertValue.length(),
             textTemp, spanTextStyle, spanParaStyle, urlAddress);
         innerPosition += static_cast<int32_t>(insertValue.length());
