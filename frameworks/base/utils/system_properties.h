@@ -582,6 +582,8 @@ public:
     
     static bool IsBigFoldProduct();
 
+    static bool GetWebDebugMaximizeResizeOptimize();
+
     static bool IsNeedResampleTouchPoints();
 
 private:

@@ -1073,6 +1073,14 @@ void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visib
     delegate->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
 }
 
+void WebClientImpl::RestoreRenderFit()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->RestoreRenderFit();
+}
+
 bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     auto delegate = webDelegate_.Upgrade();

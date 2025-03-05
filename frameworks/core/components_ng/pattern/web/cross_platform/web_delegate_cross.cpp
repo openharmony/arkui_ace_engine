@@ -1727,4 +1727,9 @@ void WebDelegateCross::UpdateOptimizeParserBudgetEnabled(const bool enable)
 {
     // cross platform is not support now;
 }
+
+void WebDelegateCross::MaximizeResize()
+{
+    // cross platform is not support now;
+}
 }

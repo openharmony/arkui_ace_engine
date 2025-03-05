@@ -982,6 +982,7 @@ public:
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
+    void RestoreRenderFit();
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -1099,6 +1100,8 @@ public:
     void UnRegisterWebWindowFocusChangedListener();
 
     void OnDragAttach();
+
+    void MaximizeResize();
 
 private:
     void InitWebEvent();

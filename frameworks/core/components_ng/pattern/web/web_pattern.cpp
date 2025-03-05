@@ -4989,6 +4989,14 @@ void WebPattern::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleW
     visibleHeight = visibleInnerRect.Height();
 }
 
+void WebPattern::RestoreRenderFit()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreRenderFit, webId: %{public}d", GetWebId());
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
+    }
+}
+
 void WebPattern::AttachCustomKeyboard()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard enter");
@@ -5539,7 +5547,39 @@ void WebPattern::OnWindowHide()
     isWindowShow_ = false;
 }
 
-void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (type == WindowSizeChangeReason::MAXIMIZE) {
+        WindowMaximize();
+        return;
+    }
+}
+
+void WebPattern::WindowMaximize()
+{
+    if (!SystemProperties::GetWebDebugMaximizeResizeOptimize()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize not enabled");
+        return;
+    }
+    WebInfoType webInfoType = GetWebInfoType();
+    if (webInfoType != WebInfoType::TYPE_2IN1) {
+        return;
+    }
+    if (layoutMode_ != WebLayoutMode::NONE || renderMode_ != RenderMode::ASYNC_RENDER) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize not support");
+        return;
+    }
+    if (!isAttachedToMainTree_ || !isVisible_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize, webId: %{public}d", GetWebId());
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(RenderFit::RESIZE_FILL);
+    }
+    if (delegate_) {
+        delegate_->MaximizeResize();
+    }
+}
 
 void WebPattern::OnCompleteSwapWithNewSize()
 {

@@ -639,6 +639,8 @@ public:
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
+    void RestoreRenderFit();
+    void WindowMaximize();
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);

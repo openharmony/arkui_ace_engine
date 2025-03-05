@@ -407,6 +407,7 @@ public:
 
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset) override;
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
+    void MaximizeResize();
 private:
     void ReleasePlatformResource();
     void CreatePluginResource(const Size& size, const Offset& position, const WeakPtr<NG::PipelineContext>& context);

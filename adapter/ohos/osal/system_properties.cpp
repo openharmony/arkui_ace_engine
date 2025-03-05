@@ -854,6 +854,11 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
     }
 }
 
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;

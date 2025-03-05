@@ -202,6 +202,11 @@ bool SystemProperties::IsBigFoldProduct()
     return false;
 }
 
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return true;
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
