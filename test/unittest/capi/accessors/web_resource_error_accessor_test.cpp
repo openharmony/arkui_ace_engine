@@ -53,14 +53,17 @@ HWTEST_F(WebResourceErrorAccessorTest, getErrorCodeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_getErrorInfoTest
+ * @tc.name: getErrorInfoTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceErrorAccessorTest, DISABLED_getErrorInfoTest, TestSize.Level1)
+HWTEST_F(WebResourceErrorAccessorTest, getErrorInfoTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getErrorInfo, nullptr);
-    accessor_->getErrorInfo(peer_);
+    Ark_String info = accessor_->getErrorInfo(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(info), g_info);
+    info = accessor_->getErrorInfo(nullptr);
+    EXPECT_EQ(Converter::Convert<std::string>(info), "");
 }
 
 } // namespace OHOS::Ace::NG
