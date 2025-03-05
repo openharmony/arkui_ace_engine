@@ -821,4 +821,66 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0033, TestSize.Level1)
     animatedDrawable->SetDuration(0);
     EXPECT_EQ(animatedDrawable->duration_, 0);
 }
+
+/**
+ * @tc.name: DrawableDescTest0034
+ * @tc.desc: Test PreGetDrawableItem function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0034, TestSize.Level1)
+{
+    auto descriptor = Napi::LayeredDrawableDescriptor();
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    
+    // Case 1: Input string does not contain ':'
+    {
+        const char* testStr = "InvalidString";
+        Napi::DrawableItem resItem = descriptor.PreGetDrawableItem(resourceMgr, testStr);
+        EXPECT_EQ(resItem.len_, 0);
+    }
+
+    // Case 2: Input string contains ':' but the part after ':' is not a number
+    {
+        const char* testStr = "drawable:abc";
+        auto resItem = descriptor.PreGetDrawableItem(resourceMgr, testStr);
+        EXPECT_EQ(resItem.len_, 0);
+    }
+
+    // Case 3: Input string is correctly formatted
+    {
+        const char* testStr = "drawable:123";
+        auto resItem = descriptor.PreGetDrawableItem(resourceMgr, testStr);
+        EXPECT_EQ(resItem.len_, 0);
+    }
+}
+
+/**
+ * @tc.name: DrawableDescTest0035
+ * @tc.desc: test OptionalPixelMap;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. pixelMap param not exist in pixelMapDrawable 
+     */
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    /**
+     * @tc.steps: step2. init resource name and data
+     */
+    layeredDrawable.InitialMask(resMgr);
+    /**
+     * @tc.steps: step3. update foreground is nullptr into layeredDrawable
+     */
+    layeredDrawable.foreground_ = std::make_optional(nullptr);
+    auto foregroundRes1 = layeredDrawable.GetForeground();
+    EXPECT_EQ(foregroundRes1, nullptr);
+    /**
+     * @tc.steps: step3. update foreground into layeredDrawable
+     */
+    layeredDrawable.foreground_ = std::make_shared<Media::PixelMap>();
+    auto foregroundRes2 = layeredDrawable.GetForeground();
+    EXPECT_NE(foregroundRes2, nullptr);
+}
 } // namespace OHOS::Ace
