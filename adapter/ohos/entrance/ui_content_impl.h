@@ -44,6 +44,11 @@ namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 }
 
+enum KeyFrameActionResult {
+    KEYFRAME_BREAK,
+    KEYFRAME_RETURN
+};
+
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
@@ -401,6 +406,18 @@ public:
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
     void EnableContainerModalCustomGesture(bool enable) override;
 
+    void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback) override;
+    void AddKeyFrameCanvasNodeCallback(
+        const std::function<void(std::shared_ptr<Rosen::RSCanvasNode> canvasNode)>& callback) override;
+    void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode) override;
+    void CacheAnimateInfo(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
+    void ExecKeyFrameCachedAnimateAction();
+    KeyFrameActionResult KeyFrameActionPolicy(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -485,6 +502,13 @@ private:
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
     OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
+    std::function<void(std::shared_ptr<Rosen::RSCanvasNode>)> addNodeCallback_ = nullptr;
+    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ = nullptr;
+    std::atomic<bool> cachedAnimateFlag_ = false;
+    ViewportConfig cachedConfig_;
+    OHOS::Rosen::WindowSizeChangeReason cachedReason_;
+    std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_;
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> cachedAvoidAreas_;
 };
 
 } // namespace OHOS::Ace

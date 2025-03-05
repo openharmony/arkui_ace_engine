@@ -2846,10 +2846,119 @@ void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::Ap
         instanceId_, bundleName_.c_str(), moduleName_.c_str(), config->GetName().c_str());
 }
 
+void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (context) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
+        context->AddKeyFrameAnimateEndCallback(callback);
+    }
+}
+
+void UIContentImpl::AddKeyFrameCanvasNodeCallback(
+    const std::function<void(std::shared_ptr<Rosen::RSCanvasNode> canvasNode)>& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameCanvasNodeCallback");
+    addNodeCallback_ = callback;
+}
+
+void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (context) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
+        context->LinkCanvasNodeToRootNode(canvasNode);
+    }
+}
+
+void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "CacheAnimateInfo.");
+    cachedAnimateFlag_.store(true);
+    cachedConfig_ = config;
+    cachedReason_ = reason;
+    cachedRsTransaction_ = rsTransaction;
+    cahcedAvoidAreas_ = avoidAreas;
+}
+
+void UIContentImpl::ExecKeyFrameCachedAnimateAction()
+{
+    if (cachedAnimateFlag_.load()) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "ExecKeyFrameCachedAnimateAction.");
+        UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cahcedAvoidAreas_);
+        cachedAnimateFlag_.store(false);
+    }
+}
+
+KeyFrameActionResult KeyFrameActionPolicy(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    if (!config.GetKeyFrameConfig().enableKeyFrame_) {
+        return KEYFRAME_BREAK;
+    }
+
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        return KEYFRAME_RETURN;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (!context) {
+        return KEYFRAME_RETURN;
+    }
+
+    bool animateRes = true;
+    std::function<void()> callbackCachedAnimation =  nullptr;
+    switch (reason) {
+        case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
+            if (canvasNode_) {
+                return KEYFRAME_RETURN;
+            }
+            canvasNode_ = context->GetCanvasNode();
+            if (addNodeCallback_ && canvasNode_) {
+                addNodeCallback_(canvasNode_);
+            }
+            callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
+            if (callbackCachedAnimation) {
+                context->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
+            }
+            return KEYFRAME_RETURN;
+        case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
+            canvasNode_ = nullptr;
+        case OHOS::Rosen::WindowSizeChangeReason::DRAG:
+            animateRes = context->SetCanvasNodeOpacityAnimation(config.GetKeyFrameConfig().animationDuration,
+            config.GetKeyFrameConfig().animationDelay, reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
+            if (!animateRes) {
+                CacheAnimateInfo(config, reason, rsTransaction, avoidAreas);
+                return KEYFRAME_RETURN;
+            }
+            return KEYFRAME_BREAK;
+        default:
+            return KEYFRAME_RETURN;
+    }
+    return KEYFRAME_BREAK;
+}
+
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
+    if (KeyFrameActionPolicy(config, reason, rsTransaction, avoidAreas) == KEYFRAME_RETURN) {
+        return;
+    }
+
     if (SystemProperties::GetWindowRectResizeEnabled()) {
         PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
             bundleName_);

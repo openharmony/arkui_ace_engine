@@ -67,6 +67,10 @@ class UIContext;
 class UIContextImpl;
 }
 
+namespace OHOS::Rosen {
+class RSCanvasNode;
+}
+
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
@@ -1166,6 +1170,22 @@ public:
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
     }
 
+    void FreezeCanvasNode(bool freezeFlag = false);
+    void RemoveCanvasNode();
+    bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
+    void LinkCanvasNodeToRootNode(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode);
+    std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode();
+
+    void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
+    {
+        callbackAnimateEnd_ =  callback;
+    }
+
+    void AddKeyFrameCachedAnimateActionCallback(const std::function<void()>& callback)
+    {
+        callbackCachedAnimateAction_ = callback;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1329,6 +1349,9 @@ private:
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
     RefPtr<FrameNode> rootNode_;
+    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_;
+    std::function<void()> callbackAnimateEnd_ = nullptr;
+    std::function<void()> callbackCachedAnimateAction_ = nullptr;
 
     int32_t curFocusNodeId_ = -1;
 

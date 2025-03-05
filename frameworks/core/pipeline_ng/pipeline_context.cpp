@@ -66,6 +66,10 @@
 #include "component_test/pipeline_status.h"
 #endif // COMPONENT_TEST_ENABLED
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_canvas_node.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -215,6 +219,96 @@ void PipelineContext::GetCurrentPageNameCallback()
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(pageNameCallback);
 #endif
+}
+
+void PipelineContext::FreezeCanvasNode(bool freezeFlag)
+{
+    if (canvasNode_) {
+        TAG_LOGD(AceLogTga::ACE_WINDOW, "FreezeCanvasNode. %{public}d", freezeFlag);
+        canvasNode_->SetFreeze(freezeFlag);
+    }
+}
+
+void PipelineContext::RemoveCanvasNode()
+{
+    if (canvasNode_) {
+        TAG_LOGD(AceLogTga::ACE_WINDOW, "RemoveCanvasNode.");
+        canvasNode_->RemoveFromeTree();
+        canvasNode_ = nullptr;
+    }
+}
+
+bool PipelineContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false)
+{
+    static bool animationFlag = false;
+    if (animationFlag) {
+        TAG_LOGD(AceLogTga::ACE_WINDOW, "animationFlag is true.");
+        return false;
+    }
+    if (!canvasNode_) {
+        return true;
+    }
+    const int32_t maxTime = 2000;
+    const int32_t defaultTime = 100;
+    if (duration <= 0 || duration > maxTime) {
+        duration = defaultTime;
+    }
+    if (delay <= 0 || delay > maxTime) {
+        delay = defaultTime;
+    }
+
+    FreezeCanvasNode(true);
+    window_->FlushTasks();
+    
+    AnimationOption option;
+    option.SetDuration(duration);
+    option.SetDelay(delay);
+    option.SetCurve(Curves::EASE_OUT);
+    AnimationUtils::Animate(option,
+        [this]() {
+            if (canvasNode_) {
+                animationFlag = true;
+                canvasNode_->SetAlpha(0.0f);
+            }
+        },
+        [this, isDragEnd]() {
+            if (canvasNode_) {
+                canvasNode_->SetAlpha(1.0f);
+            }
+            FreezeCanvasNode(false);
+            if (isDragEnd) {
+                RemoveCanvasNode();
+            }
+            if (callbackAnimateEnd_) {
+                callbackAnimateEnd_();
+            }
+            window_->FlushTasks();
+            animationFlag = false;
+            if (callbackCachedAnimateAction_) {
+                callbackCachedAnimateAction_();
+            }
+        });
+        return true;
+}
+
+void PipelineContext::LinkCanvasNodeToRootNode(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode)
+{
+    canvasNode_ = canvasNode;
+    if (canvasNode_ && rootNode_) {
+        TAG_LOGD(AceLogTga::ACE_WINDOW, "SetLinkedRootNodeId");
+        canvasNode_->SetLinkedRootNodeId(rootNode_->GetRenderContext()->GetNodeId());
+        window_->FlushTasks();
+    }
+}
+
+std::shared_ptr<Rosen::RSCanvasNode> PipelineContext::GetCanvasNode()
+{
+    if (!canvasNode_) {
+        TAG_LOGD(AceLogTga::ACE_WINDOW, "Create RSCanvasNode.");
+        canvasNode_ = Rosen::RSCanvasNode::Create();
+        window_->FlushTasks();
+    }
+    return canvasNode_;
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
