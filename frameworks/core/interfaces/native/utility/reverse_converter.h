@@ -188,6 +188,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_MarqueeState& dst, int32_t src);
     void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
+    void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src);
     void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src);
     void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src);
     void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src);

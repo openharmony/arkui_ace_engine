@@ -45,42 +45,42 @@ public:
 };
 
 /**
- * @tc.name: DISABLED_getMessageTest
+ * @tc.name: getMessageTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConsoleMessageAccessorTest, DISABLED_getMessageTest, TestSize.Level1)
+HWTEST_F(ConsoleMessageAccessorTest, getMessageTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getMessage, nullptr);
-
-    // should return value
-    accessor_->getMessage(peer_);
+    Ark_String message = accessor_->getMessage(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(message), g_message);
+    message = accessor_->getMessage(nullptr);
+    EXPECT_EQ(Converter::Convert<std::string>(message), "");
 }
 
 /**
- * @tc.name: DISABLED_getSourceIdTest
+ * @tc.name: getSourceIdTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConsoleMessageAccessorTest, DISABLED_getSourceIdTest, TestSize.Level1)
+HWTEST_F(ConsoleMessageAccessorTest, getSourceIdTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSourceId, nullptr);
-
-    // should return value
-    accessor_->getSourceId(peer_);
+    Ark_String sourceId = accessor_->getSourceId(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(sourceId), g_sourceId);
+    sourceId = accessor_->getSourceId(nullptr);
+    EXPECT_EQ(Converter::Convert<std::string>(sourceId), "");
 }
 
 /**
- * @tc.name: DISABLED_getMessageLevelTest
+ * @tc.name: getMessageLevelTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConsoleMessageAccessorTest, DISABLED_getMessageLevelTest, TestSize.Level1)
+HWTEST_F(ConsoleMessageAccessorTest, getMessageLevelTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getMessageLevel, nullptr);
-
-    // should return value
-    accessor_->getMessageLevel(peer_);
+    EXPECT_EQ(accessor_->getMessageLevel(peer_), ARK_MESSAGE_LEVEL_INFO);
 }
 
 /**
