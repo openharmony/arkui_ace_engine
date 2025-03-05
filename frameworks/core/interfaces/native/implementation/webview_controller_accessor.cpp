@@ -13,10 +13,15 @@
  * limitations under the License.
  */
 
-#ifdef WEBVIEW_SUPPORTED
+#ifdef WEB_SUPPORTED
+#ifdef ARKUI_CAPI_UNITTEST
+#include "test/unittest/capi/stubs/mock_application_context.h"
+#include "test/unittest/capi/stubs/mock_nweb_helper.h"
+#else
 #include "application_context.h"
 #include "nweb_helper.h"
-#endif
+#endif // ARKUI_CAPI_UNITTEST
+#endif // WEB_SUPPORTED
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -38,7 +43,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void InitializeWebEngineImpl()
 {
-#ifdef WEBVIEW_SUPPORTED
+#ifdef WEB_SUPPORTED
     auto applicationContext = AbilityRuntime::ApplicationContext::GetApplicationContext();
     const std::string& bundlePath = applicationContext->GetBundleCodeDir();
     NWeb::NWebHelper::Instance().SetBundlePath(bundlePath);
@@ -51,7 +56,7 @@ void LoadUrlImpl(Ark_WebviewController peer,
                  const Ark_Union_String_Resource* url,
                  const Opt_Array_WebHeader* headers)
 {
-#ifdef WEBVIEW_SUPPORTED
+#ifdef WEB_SUPPORTED
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(url);
     CHECK_NULL_VOID(headers);

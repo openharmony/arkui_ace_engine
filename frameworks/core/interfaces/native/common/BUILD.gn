@@ -55,10 +55,7 @@ template("ace_core_interfaces_native") {
     sources += rebased_common_sources
     if (defined(config.web_components_support) &&
         config.web_components_support && !is_arkui_x) {
-      defines += [
-        "WEB_SUPPORTED",
-        "WEBVIEW_SUPPORTED",
-      ]
+      defines += [ "WEB_SUPPORTED" ]
       external_deps += [
         "ability_runtime:app_context",
         "webview:libnweb",
