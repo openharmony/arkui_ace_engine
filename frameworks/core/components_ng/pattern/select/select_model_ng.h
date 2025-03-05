@@ -71,6 +71,7 @@ public:
     void SetSpace(const Dimension& value) override;
     void SetArrowPosition(const ArrowPosition value) override;
     void SetMenuAlign(const MenuAlign& menuAlign) override;
+    void SetAvoidance(const Avoidance& avoidance) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
     void SetOptionWidth(const Dimension& value) override;
@@ -101,6 +102,7 @@ public:
     static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
     static void SetSpace(FrameNode* frameNode, const Dimension& value);
     static void SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlign);
+    static void SetAvoidance(FrameNode* frameNode, const Avoidance& avoidance);
     static void SetValue(FrameNode* frameNode, const std::string& value);
     static void SetSelected(FrameNode* frameNode, int32_t idx);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
