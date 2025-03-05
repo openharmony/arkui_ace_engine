@@ -1509,7 +1509,7 @@ struct AutoTransitionEffectPeer {
             value.x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(translateX);
             value.y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(translateY);
             value.z = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(translateZ);
-            peer_ = reinterpret_cast<TransitionEffectPeer*>(accessor_->translate(&value));
+            peer_ = accessor_->translate(&value);
         }
         if (type == ChainedTransitionEffectType::ROTATE) {
             Ark_RotateOptions value;
@@ -1521,15 +1521,13 @@ struct AutoTransitionEffectPeer {
             value.centerZ = Converter::ArkValue<Opt_Number>(translateZ);
             value.perspective = Converter::ArkValue<Opt_Number>(perspective);
             value.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(angle);
-            peer_ = reinterpret_cast<TransitionEffectPeer*>(accessor_->rotate(&value));
+            peer_ = accessor_->rotate(&value);
         }
     }
     ~AutoTransitionEffectPeer() { accessor_->destroyPeer(peer_); }
     Ark_TransitionEffect GetArkValue() const
     {
-        return {
-            .ptr = reinterpret_cast<Ark_NativePointer>(peer_)
-        };
+        return peer_;
     }
     ACE_DISALLOW_COPY_AND_MOVE(AutoTransitionEffectPeer);
 };
@@ -1601,7 +1599,7 @@ HWTEST_F(CommonMethodModifierTest4, Transition1TransitionEffectCbTest, TestSize.
     ::TransitionFinishCallback callBackValue =
         Converter::ArkValue<::TransitionFinishCallback>(callback, contextId);
     auto optCb = Converter::ArkValue<Opt_TransitionFinishCallback>(callBackValue);
-    modifier_->setTransition1(node_, &materialized, &optCb);
+    modifier_->setTransition1(node_, materialized, &optCb);
     auto rcEffect = rContext->chainedTransitionEffect_;
     ASSERT_NE(rcEffect, nullptr);
     EXPECT_EQ(rcEffect->GetType(), ChainedTransitionEffectType::TRANSLATE);
