@@ -3326,8 +3326,16 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     }
     auto menuType = menuOptions->GetProperty("menuType");
     bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::DISABLED;
     if (isPreviewMenu) {
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
+        if (previewMenuOptions->IsObject()) {
+            auto hapticFeedbackMode = JSRef<JSObject>::Cast(previewMenuOptions)->GetProperty("hapticFeedbackMode");
+            if (hapticFeedbackMode->IsNumber()) {
+                menuParam.hapticFeedbackMode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
+            }
+        }
         RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
