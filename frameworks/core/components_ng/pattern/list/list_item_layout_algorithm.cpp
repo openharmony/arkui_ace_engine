@@ -86,30 +86,6 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-void ListItemLayoutAlgorithm::MeasureStartNode(RefPtr<LayoutWrapper> layoutWrapper)
-{
-    auto mainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
-    auto startLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    startLayoutConstraint.maxSize.SetMainSize(mainSize, axis_);
-    startLayoutConstraint.percentReference.SetMainSize(mainSize, axis_);
-    auto startNode = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
-    CHECK_NULL_VOID(startNode);
-    startNode->Measure(startLayoutConstraint);
-    startNodeSize_ = startNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
-}
-
-void ListItemLayoutAlgorithm::MeasureEndNode(RefPtr<LayoutWrapper> layoutWrapper)
-{
-    auto mainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
-    auto endLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    endLayoutConstraint.maxSize.SetMainSize(mainSize, axis_);
-    endLayoutConstraint.percentReference.SetMainSize(mainSize, axis_);
-    auto endNode = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
-    CHECK_NULL_VOID(endNode);
-    endNode->Measure(endLayoutConstraint);
-    endNodeSize_ = endNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
-}
-
 void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     // update child position.

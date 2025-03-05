@@ -129,6 +129,10 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     if (axis_ != GetAxis()) {
         ChangeAxis(GetAxis());
     }
+    if (pendingSwipeFunc_) {
+        pendingSwipeFunc_();
+        pendingSwipeFunc_ = nullptr;
+    }
     return false;
 }
 
@@ -731,11 +735,9 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
     }
     if (swipeActionState_ != oldState) {
         if (swipeActionState_ == SwipeActionState::COLLAPSED) {
-            SetSwipeState(SwipeState::COLLAPSED);
             host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
         if (swipeActionState_ == SwipeActionState::EXPANDED) {
-            SetSwipeState(SwipeState::EXPANDED);
             host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
     }
@@ -918,80 +920,49 @@ void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
 
 void ListItemPattern::SwipeForward()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(host->GetLayoutAlgorithm(false));
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    auto layoutAlgorithm = DynamicCast<ListItemLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(layoutAlgorithm);
-    layoutAlgorithm->MeasureEndNode(host);
-    endNodeSize_ = layoutAlgorithm->GetEndNodeSize();
-
-    MarkDirtyNode();
-    float end = 0.0f;
-    auto itemPosition = GetItemPosition();
-    if (itemPosition == ListItemPosition::HEAD) {
+    auto itemPosition = GetSwiperIndex();
+    if (itemPosition == ListItemSwipeIndex::SWIPER_END) {
         return;
     }
 
-    if (itemPosition == ListItemPosition::MIDDLE) {
-        FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_END);
-        end = -endNodeSize_;
-        StartSpringMotion(curOffset_, end, 0.0f, true);
+    if (GetSwipeActionState() == SwipeActionState::COLLAPSED) {
+        curOffset_ = -1.0f;
+        MarkDirtyNode();
+        pendingSwipeFunc_ = [this]() {
+            FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_END);
+            StartSpringMotion(curOffset_, -endNodeSize_, 0.0f, true);
+        };
     }
-    if (itemPosition == ListItemPosition::TAIL) {
+    if (itemPosition == ListItemSwipeIndex::SWIPER_START) {
         FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
-        end = 0.0f;
-        StartSpringMotion(curOffset_, end, 0.0f, true);
+        StartSpringMotion(curOffset_, 0.0f, 0.0f, true);
     }
-    SetItemPosition(end);
 }
 
 void ListItemPattern::SwipeBackward()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(host->GetLayoutAlgorithm(false));
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    auto layoutAlgorithm = DynamicCast<ListItemLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(layoutAlgorithm);
-    layoutAlgorithm->MeasureStartNode(host);
-    startNodeSize_ = layoutAlgorithm->GetStartNodeSize();
-
-    MarkDirtyNode();
-    float end = 0.0f;
-    auto itemPosition = GetItemPosition();
-    if (itemPosition == ListItemPosition::TAIL) {
+    auto itemPosition = GetSwiperIndex();
+    if (itemPosition == ListItemSwipeIndex::SWIPER_START) {
         return;
     }
 
-    if (itemPosition == ListItemPosition::MIDDLE) {
-        FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_START);
-        end = startNodeSize_;
-        StartSpringMotion(curOffset_, end, 0.0f, true);
+    if (GetSwipeActionState() == SwipeActionState::COLLAPSED) {
+        curOffset_ = 1.0f;
+        MarkDirtyNode();
+        pendingSwipeFunc_ = [this]() {
+            FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_START);
+            StartSpringMotion(curOffset_, startNodeSize_, 0.0f, true);
+        };
     }
-    if (itemPosition == ListItemPosition::HEAD) {
+    if (itemPosition == ListItemSwipeIndex::SWIPER_END) {
         FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
-        end = 0.0f;
-        StartSpringMotion(curOffset_, end, 0.0f, true);
-    }
-    SetItemPosition(end);
-}
-
-void ListItemPattern::SetItemPosition(float curOffset)
-{
-    if (curOffset > 0) {
-        itemPosition_ = ListItemPosition::TAIL;
-    } else if (curOffset < 0) {
-        itemPosition_ = ListItemPosition::HEAD;
-    } else if (curOffset == 0) {
-        itemPosition_ = ListItemPosition::MIDDLE;
+        StartSpringMotion(curOffset_, 0.0f, 0.0f, true);
     }
 }
 
-ListItemPosition ListItemPattern::GetItemPosition()
+SwipeActionState ListItemPattern::GetSwipeActionState()
 {
-    return itemPosition_;
+    return swipeActionState_;
 }
 
 void ListItemPattern::SetAccessibilityAction()

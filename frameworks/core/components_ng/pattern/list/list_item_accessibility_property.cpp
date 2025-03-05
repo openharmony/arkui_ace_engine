@@ -38,25 +38,21 @@ void ListItemAccessibilityProperty::SetSpecificSupportAction()
     auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(listItemPattern);
 
-    if (!listItemPattern->HasStartNode() && !listItemPattern->HasEndNode()) {
-        listItemPattern->SetSwipeState(SwipeState::DISABLED);
-    } else {
-        auto swipeState = listItemPattern->GetSwipeState();
-        auto itemPosition = listItemPattern->GetItemPosition();
+    auto swiperIndex = listItemPattern->GetSwiperIndex();
+    auto swipeActionState = listItemPattern->GetSwipeActionState();
 
-        if (listItemPattern->HasStartNode()) {
-            if (swipeState == SwipeState::EXPANDED && itemPosition == ListItemPosition::TAIL) {
-                AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
-            } else if (swipeState == SwipeState::COLLAPSED) {
-                AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
-            }
+    if (listItemPattern->HasStartNode()) {
+        if (swipeActionState == SwipeActionState::EXPANDED && swiperIndex == ListItemSwipeIndex::SWIPER_START) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        } else if (swipeActionState == SwipeActionState::COLLAPSED) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
         }
-        if (listItemPattern->HasEndNode()) {
-            if (swipeState == SwipeState::EXPANDED && itemPosition == ListItemPosition::HEAD) {
-                AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
-            } else if (swipeState == SwipeState::COLLAPSED) {
-                AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
-            }
+    }
+    if (listItemPattern->HasEndNode()) {
+        if (swipeActionState == SwipeActionState::EXPANDED && swiperIndex == ListItemSwipeIndex::SWIPER_END) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        } else if (swipeActionState == SwipeActionState::COLLAPSED) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
         }
     }
     AddSupportAction(AceAction::ACTION_SELECT);
@@ -72,17 +68,21 @@ void ListItemAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElem
     CHECK_NULL_VOID(listItemPattern);
     extraElementInfo.SetExtraElementInfo("ListItemIndex", listItemPattern->GetIndexInList());
     std::string stateStr;
-    switch (listItemPattern->GetSwipeState()) {
-        case SwipeState::DISABLED:
-            stateStr = "disabled";
-            break;
-        case SwipeState::EXPANDED:
-            stateStr = "expanded";
-            break;
-        case SwipeState::COLLAPSED:
+    switch (listItemPattern->GetSwipeActionState()) {
+        case SwipeActionState::COLLAPSED:
             stateStr = "collapsed";
             break;
+        case SwipeActionState::EXPANDED:
+            stateStr = "expanded";
+            break;
+        case SwipeActionState::ACTIONING:
+            break;
     }
+
+    if (!listItemPattern->HasStartNode() && !listItemPattern->HasEndNode()) {
+        stateStr = "disabled";
+    }
+
     std::string axisStr;
     switch (listItemPattern->GetAxis()) {
         case Axis::VERTICAL:
