@@ -543,7 +543,8 @@ int32_t OH_ArkUI_XComponent_Finalize(ArkUI_NodeHandle node)
 int32_t OH_ArkUI_XComponent_IsInitialized(ArkUI_NodeHandle node, bool* isInitialized)
 {
     if (!OHOS::Ace::NodeModel::IsValidArkUINode(node) ||
-        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
+        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE) ||
+        !isInitialized) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -552,9 +553,9 @@ int32_t OH_ArkUI_XComponent_IsInitialized(ArkUI_NodeHandle node, bool* isInitial
     CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     auto xComponentModifier = nodeModifiers->getXComponentModifier();
     CHECK_NULL_RETURN(xComponentModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    ArkUI_Bool* value = 0;
-    auto res = xComponentModifier->isInitialized(node->uiNodeHandle, value);
-    (*isInitialized) = reinterpret_cast<bool*>(value);
+    ArkUI_Bool value = 0;
+    auto res = xComponentModifier->isInitialized(node->uiNodeHandle, &value);
+    *isInitialized = value;
     return res;
 }
 
