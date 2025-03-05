@@ -2503,7 +2503,8 @@ void SwiperPattern::InitIndicator()
             RemoveIndicatorNode();
             return;
         }
-        if (indicatorType == SwiperIndicatorType::DIGIT && lastSwiperIndicatorType_ == SwiperIndicatorType::DOT) {
+        if ((indicatorType == SwiperIndicatorType::DIGIT && lastSwiperIndicatorType_ == SwiperIndicatorType::DOT) ||
+            (indicatorType == SwiperIndicatorType::DOT && lastSwiperIndicatorType_ == SwiperIndicatorType::DIGIT)) {
             RemoveIndicatorNode();
             indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
