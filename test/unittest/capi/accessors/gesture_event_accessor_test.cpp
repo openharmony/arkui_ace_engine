@@ -85,12 +85,12 @@ HWTEST_F(GestureEventAccessorTest, SetRepeatTest, TestSize.Level1)
 HWTEST_F(GestureEventAccessorTest, GetOffsetXTest, TestSize.Level1)
 {
     PipelineBase::GetCurrentDensity();
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureFloatFloat_half_Values) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetOffsetX(value);
-        auto arkRes = Converter::Convert<float>(accessor_->getOffsetX(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        Ark_Number arkRes = accessor_->getOffsetX(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), expected) <<
             "Input value is: " << input << ", method: GetOffsetX";
     }
 }
@@ -118,12 +118,12 @@ HWTEST_F(GestureEventAccessorTest, SetOffsetXTest, TestSize.Level1)
  */
 HWTEST_F(GestureEventAccessorTest, GetOffsetYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureFloatFloat_half_Values) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetOffsetY(value);
-        auto arkRes = Converter::Convert<float>(accessor_->getOffsetY(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getOffsetY(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), expected) <<
             "Input value is: " << input << ", method: GetOffsetY";
     }
 }
@@ -151,13 +151,13 @@ HWTEST_F(GestureEventAccessorTest, SetOffsetYTest, TestSize.Level1)
  */
 HWTEST_F(GestureEventAccessorTest, GetAngleTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32Values) {
+    for (auto value : AccessorTestFixtures::testFixtureFloatValues) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetAngle(value);
-        auto arkRes = Converter::Convert<float>(accessor_->getAngle(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
-            "Input value is: " << input << ", method: GetAngle";
+        auto arkRes = accessor_->getAngle(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), value) <<
+            "Input value is: " << value << ", method: GetAngle";
     }
 }
 
@@ -184,13 +184,13 @@ HWTEST_F(GestureEventAccessorTest, SetAngleTest, TestSize.Level1)
  */
 HWTEST_F(GestureEventAccessorTest, GetSpeedTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32Values) {
+    for (auto value : AccessorTestFixtures::testFixtureFloatValues) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetSpeed(value);
-        auto arkRes = Converter::Convert<float>(accessor_->getSpeed(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
-            "Input value is: " << input << ", method: GetSpeed";
+        auto arkRes = accessor_->getSpeed(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), value) <<
+            "Input value is: " << value << ", method: GetSpeed";
     }
 }
 
@@ -217,13 +217,13 @@ HWTEST_F(GestureEventAccessorTest, SetSpeedTest, TestSize.Level1)
  */
 HWTEST_F(GestureEventAccessorTest, GetScaleTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32Values) {
+    for (auto value : AccessorTestFixtures::testFixtureFloatValues) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetScale(value);
-        auto arkRes = Converter::Convert<float>(accessor_->getScale(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
-            "Input value is: " << input << ", method: GetScale";
+        auto arkRes = accessor_->getScale(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), value) <<
+            "Input value is: " << value << ", method: GetScale";
     }
 }
 
@@ -250,12 +250,12 @@ HWTEST_F(GestureEventAccessorTest, SetScaleTest, TestSize.Level1)
  */
 HWTEST_F(GestureEventAccessorTest, GetPinchCenterXTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureFloatFloat_half_Values) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetPinchCenter(Offset(value, 0.));
-        auto arkRes = Converter::Convert<float>(accessor_->getPinchCenterX(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getPinchCenterX(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), expected) <<
             "Input value is: " << input << ", method: GetPinchCenterX";
     }
 }
@@ -283,12 +283,12 @@ HWTEST_F(GestureEventAccessorTest, SetPinchCenterXTest, TestSize.Level1)
  */
 HWTEST_F(GestureEventAccessorTest, GetPinchCenterYTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureFloatFloat_half_Values) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetPinchCenter(Offset(0., value));
-        auto arkRes = Converter::Convert<float>(accessor_->getPinchCenterY(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getPinchCenterY(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), expected) <<
             "Input value is: " << input << ", method: GetPinchCenterY";
     }
 }
@@ -317,13 +317,13 @@ HWTEST_F(GestureEventAccessorTest, SetPinchCenterYTest, TestSize.Level1)
 HWTEST_F(GestureEventAccessorTest, GetVelocityXTest, TestSize.Level1)
 {
     const double velocityY = 2.3;
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureFloatFloat_half_Values) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(value, velocityY);
         event->SetVelocity(Velocity(offsetPerSec));
-        auto arkRes = Converter::Convert<float>(accessor_->getVelocityX(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getVelocityX(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), expected) <<
             "Input value is: " << input << ", method: GetVelocityX";
     }
 }
@@ -352,13 +352,13 @@ HWTEST_F(GestureEventAccessorTest, SetVelocityXTest, TestSize.Level1)
 HWTEST_F(GestureEventAccessorTest, GetVelocityYTest, TestSize.Level1)
 {
     const double velocityX = 2.3;
-    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureFloatFloat_half_Values) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(velocityX, value);
         event->SetVelocity(Velocity(offsetPerSec));
-        auto arkRes = Converter::Convert<float>(accessor_->getVelocityY(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getVelocityY(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), expected) <<
             "Input value is: " << input << ", method: GetVelocityY";
     }
 }
@@ -386,13 +386,14 @@ HWTEST_F(GestureEventAccessorTest, SetVelocityYTest, TestSize.Level1)
  */
 HWTEST_F(GestureEventAccessorTest, GetVelocityTest, TestSize.Level1)
 {
-    for (auto& [input, velocityX, velocityY, expected] : AccessorTestFixtures::testFixtureVelocity_half_Values) {
+    for (auto& [input, velocityX, velocityY, expected] :
+        AccessorTestFixtures::testFixtureVelocityFloat_half_Values) {
         GestureEvent* event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(velocityX, velocityY);
         event->SetVelocity(Velocity(offsetPerSec));
-        auto arkRes = Converter::Convert<float>(accessor_->getVelocity(peer_));
-        EXPECT_FLOAT_EQ(arkRes, expected) <<
+        auto arkRes = accessor_->getVelocity(peer_);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(arkRes), expected) <<
             "Input value is: " << input << ", method: GetVelocity";
     }
 }

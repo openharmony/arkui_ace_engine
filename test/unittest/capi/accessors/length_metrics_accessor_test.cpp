@@ -210,10 +210,10 @@ HWTEST_F(LengthMetricsAccessorTest, SetUnitTest, TestSize.Level1)
  */
 HWTEST_F(LengthMetricsAccessorTest, GetValueTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
+    for (auto value : testFixtureFloatValues) {
         peer_->value.SetValue(value);
         Ark_Number result = accessor_->getValue(peer_);
-        CompareArkNumber(result, expected);
+        EXPECT_FLOAT_EQ(Converter::Convert<float>(result), value);
     }
 }
 
