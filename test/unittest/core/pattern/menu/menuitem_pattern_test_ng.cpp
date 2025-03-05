@@ -279,10 +279,17 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else if (type == MenuTheme::TypeId()) {
+            return AceType::MakeRefPtr<MenuTheme>();
+        } else {
+            return nullptr;
+        }
+    });
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
