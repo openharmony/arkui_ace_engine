@@ -94,6 +94,12 @@ constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
 constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
 constexpr char EVENT_KEY_FORM_NAME[] = "FORM_NAME";
 constexpr char EVENT_KEY_DIMENSION[] = "DIMENSION";
+constexpr char EVENT_KEY_SCENE[] = "SCENE";
+constexpr char EVENT_KEY_PACNAME[] = "PACNAME";
+constexpr char EVENT_KEY_DURATION_60[] = "DURATION_60";
+constexpr char EVENT_KEY_DURATION_72[] = "DURATION_72";
+constexpr char EVENT_KEY_DURATION_90[] = "DURATION_90";
+constexpr char EVENT_KEY_DURATION_120[] = "DURATION_120";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -159,6 +165,28 @@ void EventReport::SendJsCardRenderTimeEvent(
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
         EVENT_KEY_SESSIONID, sessionID,
         STATISTIC_DURATION, timeDelay);
+}
+
+void EventReport::SendDiffFrameRatesDuring(const std::string &scene, int32_t frameRateDuring_60,
+    int32_t frameRateDuring_72, int32_t frameRateDuring_90, int32_t frameRateDuring_120)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    std::string eventName = "FRC_SCENE_INFO";
+    if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
+        StrTrim(packageName);
+    }
+    auto frameRateDuring_60_ms = frameRateDuring_60 / NS_TO_MS;
+    auto frameRateDuring_72_ms = frameRateDuring_72 / NS_TO_MS;
+    auto frameRateDuring_90_ms = frameRateDuring_90 / NS_TO_MS;
+    auto frameRateDuring_120_ms = frameRateDuring_120 / NS_TO_MS;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_SCENE, scene,
+        EVENT_KEY_PACNAME, packageName,
+        EVENT_KEY_DURATION_120, frameRateDuring_120_ms,
+        EVENT_KEY_DURATION_90, frameRateDuring_90_ms,
+        EVENT_KEY_DURATION_72, frameRateDuring_72_ms,
+        EVENT_KEY_DURATION_60, frameRateDuring_60_ms);
 }
 
 void EventReport::SendAppStartException(AppStartExcepType type)
