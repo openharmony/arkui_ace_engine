@@ -202,6 +202,7 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
     params.triggeredSourceType = touchEvent.sourceType;
     params.idleFingerId = touchEvent.id;
     params.isNeedGather = DragDropFuncWrapper::CheckIsNeedGather(frameNode);
+    params.touchOffset = Offset(touchEvent.x, touchEvent.y);
     RegisterDragListener();
     if (touchEvent.sourceType != SourceType::MOUSE) {
         if (DragDropFuncWrapper::IsTextCategoryComponent(frameNode->GetTag())) {
