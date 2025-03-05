@@ -62,7 +62,7 @@ void SheetWrapperTestNg::TearDownTestCase()
 
 /**
  * @tc.name: DecreaseArrowHeightWhenArrowIsShown001
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_SIXTEEN)) = true
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_EIGHTEEN)) = true
  * @tc.type: FUNC
  */
 HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown001, TestSize.Level1)
@@ -74,6 +74,7 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown001, TestSize.Le
         AceType::MakeRefPtr<SheetPresentationPattern>(ElementRegister::GetInstance()->MakeUniqueId(),
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
     container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
@@ -88,7 +89,7 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown001, TestSize.Le
 
 /**
  * @tc.name: DecreaseArrowHeightWhenArrowIsShown002
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_SIXTEEN)) = false
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_EIGHTEEN)) = false
  *           Branch: if (!prePopupInfo.showArrow) = true
  * @tc.type: FUNC
  */
@@ -101,9 +102,10 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown002, TestSize.Le
         AceType::MakeRefPtr<SheetPresentationPattern>(ElementRegister::GetInstance()->MakeUniqueId(),
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->sheetPopupInfo_.showArrow = false;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 1000.0f;
@@ -117,7 +119,7 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown002, TestSize.Le
 
 /**
  * @tc.name: DecreaseArrowHeightWhenArrowIsShown003
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_SIXTEEN)) = false
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_EIGHTEEN)) = false
  *           Branch: if (!prePopupInfo.showArrow) = false
  *           Branch: case Placement::BOTTOM_LEFT = true
  *           Branch: case Placement::BOTTOM_RIGHT = true
@@ -136,9 +138,10 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown003, TestSize.Le
         AceType::MakeRefPtr<SheetPresentationPattern>(ElementRegister::GetInstance()->MakeUniqueId(),
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->sheetPopupInfo_.showArrow = true;
     sheetPattern->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_LEFT;
@@ -176,7 +179,7 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown003, TestSize.Le
 
 /**
  * @tc.name: DecreaseArrowHeightWhenArrowIsShown004
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_SIXTEEN)) = false
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_EIGHTEEN)) = false
  *           Branch: if (!prePopupInfo.showArrow) = false
  *           Branch: case Placement::RIGHT_TOP = true
  *           Branch: case Placement::RIGHT_BOTTOM = true
@@ -195,9 +198,10 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown004, TestSize.Le
         AceType::MakeRefPtr<SheetPresentationPattern>(ElementRegister::GetInstance()->MakeUniqueId(),
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->sheetPopupInfo_.showArrow = true;
     sheetPattern->sheetPopupInfo_.finalPlacement = Placement::RIGHT_TOP;
@@ -235,7 +239,7 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown004, TestSize.Le
 
 /**
  * @tc.name: DecreaseArrowHeightWhenArrowIsShown005
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_SIXTEEN)) = false
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_EIGHTEEN)) = false
  *           Branch: if (!prePopupInfo.showArrow) = false
  *           Branch: default = true
  * @tc.type: FUNC
@@ -249,9 +253,10 @@ HWTEST_F(SheetWrapperTestNg, DecreaseArrowHeightWhenArrowIsShown005, TestSize.Le
         AceType::MakeRefPtr<SheetPresentationPattern>(ElementRegister::GetInstance()->MakeUniqueId(),
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
-    auto pipelineContext = sheetNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->sheetPopupInfo_.showArrow = true;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 1000.0f;
@@ -278,6 +283,7 @@ HWTEST_F(SheetWrapperTestNg, GetLeftSpaceWithPlacement001, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.width_ = 1000.0f;
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.height_ = 800.0f;
     sheetWrapperLayoutAlgorithm->windowEdgeWidth_ = 0.0f;
@@ -318,6 +324,7 @@ HWTEST_F(SheetWrapperTestNg, GetLeftSpaceWithPlacement002, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.width_ = 1000.0f;
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.height_ = 800.0f;
     sheetWrapperLayoutAlgorithm->windowEdgeWidth_ = 0.0f;
@@ -358,6 +365,7 @@ HWTEST_F(SheetWrapperTestNg, GetLeftSpaceWithPlacement003, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.width_ = 1000.0f;
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.height_ = 800.0f;
     sheetWrapperLayoutAlgorithm->windowEdgeWidth_ = 0.0f;
@@ -398,6 +406,7 @@ HWTEST_F(SheetWrapperTestNg, GetLeftSpaceWithPlacement004, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.width_ = 1000.0f;
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.height_ = 800.0f;
     sheetWrapperLayoutAlgorithm->windowEdgeWidth_ = 0.0f;
@@ -432,6 +441,7 @@ HWTEST_F(SheetWrapperTestNg, GetLeftSpaceWithPlacement005, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
 
     SizeF sheetWrapperLeftSpace = sheetWrapperLayoutAlgorithm->GetLeftSpaceWithPlacement(
         Placement::NONE, SizeF(), OffsetF());
@@ -452,6 +462,7 @@ HWTEST_F(SheetWrapperTestNg, RecheckBestPlacementWithInsufficientSpace001, TestS
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.width_ = 1000.0f;
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.height_ = 800.0f;
     sheetWrapperLayoutAlgorithm->placement_ = Placement::BOTTOM_LEFT;
@@ -476,6 +487,7 @@ HWTEST_F(SheetWrapperTestNg, RecheckBestPlacementWithInsufficientSpace002, TestS
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.width_ = 1000.0f;
     sheetWrapperLayoutAlgorithm->windowGlobalRect_.height_ = 800.0f;
     sheetWrapperLayoutAlgorithm->placement_ = Placement::BOTTOM_LEFT;
@@ -498,10 +510,8 @@ HWTEST_F(SheetWrapperTestNg, RecheckBestPlacementWithInsufficientSpace002, TestS
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTop001, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = false;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 800.0f;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 600.0f;
@@ -526,10 +536,8 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTop001, TestSize.Level1)
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTop002, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 800.0f;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 600.0f;
@@ -555,12 +563,10 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTop002, TestSize.Level1)
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTop003, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_LEFT;
-    sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition = SheetArrowPosition::NONE;
+    sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition = SheetArrowPosition::BOTTOM_RIGHT;
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 800.0f;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 600.0f;
@@ -572,7 +578,7 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTop003, TestSize.Level1)
     auto offset = sheetWrapperLayoutAlgorithm->GetOffsetWithTop(targetSize, targetOffset);
     EXPECT_EQ(offset.GetX(), 0.0f);
     EXPECT_EQ(offset.GetY(), 6.0f);
-    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition, SheetArrowPosition::BOTTOM_RIGHT);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition, SheetArrowPosition::NONE);
     SheetWrapperTestNg::TearDownTestCase();
 }
 
@@ -584,10 +590,8 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTop003, TestSize.Level1)
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopLeft001, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = false;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 800.0f;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 600.0f;
@@ -612,10 +616,8 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopLeft001, TestSize.Level1)
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopLeft002, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 800.0f;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 600.0f;
@@ -641,10 +643,8 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopLeft002, TestSize.Level1)
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopLeft003, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_LEFT;
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition = SheetArrowPosition::BOTTOM_RIGHT;
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
@@ -670,10 +670,8 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopLeft003, TestSize.Level1)
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopRight001, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = false;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 800.0f;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 600.0f;
@@ -698,10 +696,8 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopRight001, TestSize.Level1)
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopRight002, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 800.0f;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 600.0f;
@@ -727,12 +723,10 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopRight002, TestSize.Level1)
 HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopRight003, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_LEFT;
-    sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition = SheetArrowPosition::NONE;
+    sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition = SheetArrowPosition::BOTTOM_RIGHT;
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 800.0f;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 600.0f;
@@ -744,7 +738,7 @@ HWTEST_F(SheetWrapperTestNg, GetOffsetWithTopRight003, TestSize.Level1)
     auto offset = sheetWrapperLayoutAlgorithm->GetOffsetWithTopRight(targetSize, targetOffset);
     EXPECT_EQ(offset.GetX(), 0.0f);
     EXPECT_EQ(offset.GetY(), 6.0f);
-    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition, SheetArrowPosition::BOTTOM_RIGHT);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowPosition, SheetArrowPosition::NONE);
     SheetWrapperTestNg::TearDownTestCase();
 }
 
@@ -767,6 +761,7 @@ HWTEST_F(SheetWrapperTestNg, CheckIsArrowOverlapSheetRadius001, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_LEFT;
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowOffsetX = 100.0f;
     sheetWrapperLayoutAlgorithm->sheetRadius_.radiusTopLeft = 150.0_vp;
@@ -813,6 +808,7 @@ HWTEST_F(SheetWrapperTestNg, CheckIsArrowOverlapSheetRadius002, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::TOP_LEFT;
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowOffsetX = 100.0f;
     sheetWrapperLayoutAlgorithm->sheetRadius_.radiusBottomLeft = 150.0_vp;
@@ -859,6 +855,7 @@ HWTEST_F(SheetWrapperTestNg, CheckIsArrowOverlapSheetRadius003, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::RIGHT_TOP;
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowOffsetY = 100.0f;
     sheetWrapperLayoutAlgorithm->sheetRadius_.radiusTopLeft = 150.0_vp;
@@ -905,6 +902,7 @@ HWTEST_F(SheetWrapperTestNg, CheckIsArrowOverlapSheetRadius004, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::LEFT_TOP;
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.arrowOffsetY = 100.0f;
     sheetWrapperLayoutAlgorithm->sheetRadius_.radiusTopRight = 150.0_vp;
@@ -941,6 +939,7 @@ HWTEST_F(SheetWrapperTestNg, CheckIsArrowOverlapSheetRadius005, TestSize.Level1)
 {
     SheetWrapperTestNg::SetUpTestCase();
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
     sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::NONE;
 
     sheetWrapperLayoutAlgorithm->CheckIsArrowOverlapSheetRadius();
