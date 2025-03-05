@@ -71,6 +71,7 @@ template("ace_osal_ohos_source_set") {
       "layout_inspector.cpp",
       "log_wrapper.cpp",
       "modal_ui_extension_impl.cpp",
+      "perf_interfaces.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
       "stylus_detector_callback.cpp",
@@ -94,6 +95,7 @@ template("ace_osal_ohos_source_set") {
 
     external_deps += [
       "ability_runtime:app_manager",
+      "hicollie:libhicollie",
       "i18n:intl_util",
       "init:libbegetutil",
     ]

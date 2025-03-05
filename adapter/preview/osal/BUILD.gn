@@ -83,6 +83,7 @@ ohos_source_set("preview_osal_source") {
       "modal_ui_extension_impl.cpp",
       "mouse_style_ohos.cpp",
       "package_event_proxy_preview.cpp",
+      "perf_interfaces.cpp",
       "pixel_map_preview.cpp",
       "response_data.cpp",
       "ressched_report.cpp",
