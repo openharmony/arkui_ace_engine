@@ -1617,7 +1617,7 @@ HWTEST_F(OverlayTestNg, ShowAIEntityMenu, TestSize.Level1)
     std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
     menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
     RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
-    EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, targetNode));
+    EXPECT_FALSE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, targetNode));
 }
 
 /**

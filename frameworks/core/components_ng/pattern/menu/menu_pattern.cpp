@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -294,7 +295,7 @@ void MenuPattern::OnModifyDone()
     }
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
-    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(selecTheme);
     if (selecTheme->GetMenuNeedFocus()) {
         UpdateMenuBorderAndBackgroundBlur();
@@ -478,7 +479,7 @@ void InnerMenuPattern::OnModifyDone()
     SetAccessibilityAction();
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
-    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(selecTheme);
     if (selecTheme->GetMenuNeedFocus()) {
         InitDefaultBorder(host);
@@ -1109,7 +1110,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(renderContext);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     expandDisplay_ = expandDisplay;
@@ -1146,7 +1147,7 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     }
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     // apply default padding from theme on inner menu
     PaddingProperty padding;
@@ -1879,25 +1880,32 @@ void InnerMenuPattern::ApplyMultiMenuTheme()
 
 void MenuPattern::OnColorConfigurationUpdate()
 {
+    OnThemeScopeUpdate(GetThemeScopeId());
+}
+
+bool MenuPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-
-    auto menuTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(menuTheme);
-
-    auto menuPattern = host->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-
+    CHECK_NULL_RETURN(host, result);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>(themeScopeId);
+    CHECK_NULL_RETURN(menuTheme, result);
     auto renderContext = host->GetRenderContext();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
-        || menuTheme->GetMenuBlendBgColor()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled() ||
+        menuTheme->GetMenuBlendBgColor()) {
         renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
     } else {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     }
-
+    auto menuProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuProperty, result);
+    if (!activeSetting_ && menuProperty->HasFontColor()) {
+        menuProperty->UpdateFontColor(menuTheme->GetFontColor());
+    }
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, result);
     auto optionNode = menuPattern->GetOptions();
     for (const auto& child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
@@ -1906,7 +1914,8 @@ void MenuPattern::OnColorConfigurationUpdate()
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    host->SetNeedCallChildrenUpdate(false);
+
+    return result;
 }
 
 void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)

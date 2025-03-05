@@ -72,6 +72,19 @@ const std::string MENU_TAG = "menu";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == TextTheme::TypeId()) {
+        return AceType::MakeRefPtr<TextTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else {
+        return AceType::MakeRefPtr<MenuTheme>();
+    }
+}
 } // namespace
 class CustomMenuItemPatternTestNg : public testing::Test {
 public:
@@ -102,6 +115,7 @@ void CustomMenuItemPatternTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MockContainer::SetUp();
 }
 
@@ -110,16 +124,10 @@ void CustomMenuItemPatternTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == TextTheme::TypeId()) {
-            return AceType::MakeRefPtr<TextTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else {
-            return AceType::MakeRefPtr<MenuTheme>();
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 void CustomMenuItemPatternTestNg::TearDown()

@@ -142,7 +142,10 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
-
+    auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+    if (targetNode) {
+        menuNode->SetThemeScopeId(targetNode->GetThemeScopeId());
+    }
     auto renderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
@@ -150,7 +153,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         if (!pipeLineContext) {
             return { wrapperNode, menuNode };
         }
-        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        auto selectTheme = targetNode ? pipeLineContext->GetTheme<SelectTheme>(targetNode->GetThemeScopeId())
+                                      : pipeLineContext->GetTheme<SelectTheme>();
         if (!selectTheme) {
             return { wrapperNode, menuNode };
         }
@@ -179,7 +183,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
 
     auto pipeline = textNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(column->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto padding = static_cast<float>(theme->GetMenuItemHorIntervalPadding().ConvertToPx());
     PaddingProperty textPadding;
@@ -1145,12 +1149,16 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+    if (targetNode) {
+        column->UpdateThemeScopeId(targetNode->GetThemeScopeId());
+    }
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
-    MountOptionToColumn(params, menuNode, menuParam, column);
+    MountOptionToColumn(params, menuNode, menuParam, column, targetNode);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
@@ -1464,6 +1472,17 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
     }
 }
 
+void UpdateStyleOptionColorMode(const PipelineContext* pipeLineContext, BlurStyleOption& styleOption)
+{
+    CHECK_NULL_VOID(pipeLineContext);
+    if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    }
+    if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    }
+}
+
 void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     auto menuNodeRenderContext = menuNode->GetRenderContext();
@@ -1476,11 +1495,9 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         BlurStyleOption styleOption;
         if (menuParam.blurStyleOption.has_value()) {
             styleOption = menuParam.blurStyleOption.value();
-            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
-            } else {
-                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
-            }
+            styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE
+                ? pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId())
+                : pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
         }
         Color color;
         if (selectTheme->GetMenuBlendBgColor()) {
@@ -1497,6 +1514,7 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         if (menuParam.blurStyleOption.has_value() && menuNodeRenderContext->GetBackgroundEffect().has_value()) {
             menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
         }
+        UpdateStyleOptionColorMode(pipeLineContext, styleOption);
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);
         if (menuParam.effectOption.has_value()) {
@@ -1631,7 +1649,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
 }
 
 void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
-    const MenuParam& menuParam, RefPtr<FrameNode> column)
+    const MenuParam& menuParam, RefPtr<FrameNode> column, const RefPtr<FrameNode>& targetNode)
 {
     bool optionsHasIcon = GetHasIcon(params);
     bool optionsHasSymbol = GetHasSymbol(params);
@@ -1672,17 +1690,24 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
         if (optionsHasIcon) {
             props->UpdateHasIcon(true);
         }
+        if (targetNode) {
+            optionNode->UpdateThemeScopeId(targetNode->GetThemeScopeId());
+        }
         optionNode->MountToParent(column);
         optionNode->MarkModifyDone();
+    }
+    if (targetNode) {
+        menuNode->UpdateThemeScopeId(targetNode->GetThemeScopeId());
     }
 }
 
 void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
     const std::function<void()>& onClickFunc, const std::string& icon)
 {
+    CHECK_NULL_VOID(option);
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(option->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto overlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(overlayTheme);

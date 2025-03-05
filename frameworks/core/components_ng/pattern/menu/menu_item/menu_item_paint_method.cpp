@@ -50,7 +50,7 @@ CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* pai
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(selectTheme);
         if (!selectTheme->GetDefaultShowDivider() && (press || hover)) {
             return;
