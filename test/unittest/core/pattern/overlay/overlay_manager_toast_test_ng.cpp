@@ -547,6 +547,27 @@ HWTEST_F(OverlayManagerToastTestNg, ToastDumpInfoTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToastThemeGetTopTest001
+ * @tc.desc: Test ToastTheme::GetTop function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastThemeGetTopTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ToastTheme and set top value.
+     */
+    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
+    Dimension topValue = 10.0_vp;
+    toastTheme->top_ = topValue;
+    /**
+     * @tc.steps: step2. call GetTop function and check the returned value.
+     * @tc.expected: the returned value should be equal to the set top value.
+     */
+    const Dimension& result = toastTheme->GetTop();
+    EXPECT_EQ(result, topValue);
+}
+
+/**
  * @tc.name: FoldStatusChangedAnimation
  * @tc.desc: Test FoldStatusChangedAnimation
  * @tc.type: FUNC
