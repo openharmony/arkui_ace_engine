@@ -3399,8 +3399,9 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
-    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder);
+
     std::function<void()> previewBuilder = nullptr;
+    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder);
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
         elementType, responseType, menuBuilder, previewBuilder, menuParam);
