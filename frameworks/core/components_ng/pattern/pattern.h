@@ -657,7 +657,7 @@ public:
     {
         return true;
     }
-
+    virtual void OnFocusNodeChange(FocusReason focusReason) {}
     virtual bool ReusedNodeSkipMeasure()
     {
         return false;
