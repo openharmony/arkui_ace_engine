@@ -2698,7 +2698,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         HandleTripleClickEvent(info);
     } else if (multipleClickRecognizer_->IsDoubleClick()) {
         HandleDoubleClickEvent(info);
-    } else if (multipleClickRecognizer_->IsSingleClick()) {
+    } else {
         HandleSingleClickEvent(info, firstGetFocus);
     }
     if (ResetObscureTickCountDown()) {
