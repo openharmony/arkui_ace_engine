@@ -19,13 +19,15 @@
 #include <utility>
 #include "gtest/gtest.h"
 #include "arkoala_api_generated.h"
-#include "test/unittest/capi/modifiers/modifier_test_base.h"
-#include "test/unittest/capi/accessors/accessor_test_base.h"
-#include "test/unittest/capi/accessors/accessor_test_utils.h"
 #include "core/interfaces/native/common/extension_companion_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
+#include "test/unittest/capi/modifiers/modifier_test_base.h"
+#endif
+
 
 namespace OHOS::Ace::NG {
 class ICustomNodeBuilderTestHelper {
@@ -138,20 +140,14 @@ public:
         builder.call =  [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
                 auto testHelper = TestHelperManager::GetInstance().GetHelperById(resourceId);
-                if (testHelper) {
-                    testHelper->TestFunction(resourceId, parentNode, continuation);
-                } else {
-                    ASSERT_EQ(testHelper, nullptr);
-                }
+                ASSERT_NE(testHelper, nullptr);
+                testHelper->TestFunction(resourceId, parentNode, continuation);
             };
         builder.callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
                 auto testHelper = TestHelperManager::GetInstance().GetHelperById(resourceId);
-                if (testHelper) {
-                    testHelper->TestFunctionSync(context, resourceId, parentNode, continuation);
-                } else {
-                    ASSERT_EQ(testHelper, nullptr);
-                }
+                ASSERT_NE(testHelper, nullptr);
+                testHelper->TestFunctionSync(context, resourceId, parentNode, continuation);
             };
         return builder;
     }
