@@ -2316,7 +2316,7 @@ HWTEST_F(SearchTestTwoNg, searchAnimateTouchAndHoverTest, TestSize.Level1)
     frameNode->MarkModifyDone();
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);;
+    ASSERT_NE(pattern, nullptr);
 
     /**
     * @tc.steps: case
@@ -2328,5 +2328,214 @@ HWTEST_F(SearchTestTwoNg, searchAnimateTouchAndHoverTest, TestSize.Level1)
     auto renderContext = buttonFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION);
+}
+
+/**
+ * @tc.name: searchHoverEventTest
+ * @tc.desc: Test search hover event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchHoverEventTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->InitHoverEvent();
+    pattern->InitHoverEvent(); // second for testing searchHoverListener_ = true;
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputEventHub = frameNode->GetOrCreateInputEventHub();
+    ASSERT_NE(inputEventHub, nullptr);
+    inputEventHub->SetHoverEffect(HoverEffectType::NONE);
+    pattern->HandleHoverEvent(true);
+}
+
+/**
+ * @tc.name: searchTouchEventTest
+ * @tc.desc: Test search touch event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchTouchEventTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->InitTouchEvent();
+    pattern->InitTouchEvent(); // second for testing searchTouchListener_ = true;
+    pattern->OnTouchDownOrUp(true);
+    pattern->OnTouchDownOrUp(false);
+
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    auto events = gesture->touchEventActuator_->touchEvents_;
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::UP);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    for (auto event : events) {
+        if (event->callback_) {
+            event->callback_(info);
+        }
+    }
+    EXPECT_NE(events.size(), 0);
+
+    TouchEventInfo info2("onTouch");
+    TouchLocationInfo touchInfo2(1);
+    touchInfo2.SetTouchType(TouchType::MOVE);
+    info2.AddTouchLocationInfo(std::move(touchInfo2));
+    for (auto event : events) {
+        if (event->callback_) {
+            event->callback_(info2);
+        }
+    }
+    EXPECT_NE(events.size(), 0);
+}
+
+/**
+ * @tc.name: searchToJsonTest
+ * @tc.desc: Test search to json
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchToJsonTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    InspectorFilter filter;
+    filter.AddFilterAttr("content");
+    auto jsonValue = JsonUtil::Create(true);
+    pattern->ToJsonValueForTextField(jsonValue, filter);
+    pattern->ToJsonValueForSearchIcon(jsonValue, filter);
+    pattern->ToJsonValueForCancelButton(jsonValue, filter);
+    pattern->ToJsonValueForCursor(jsonValue, filter);
+    pattern->ToJsonValueForSearchButtonOption(jsonValue, filter);
+    EXPECT_EQ(filter.FilterEmpty(), false);
+    EXPECT_EQ(filter.IsFastFilter(), true);
+
+    InspectorFilter filter2;
+    pattern->CreateOrUpdateSymbol(IMAGE_INDEX, false, false);
+    searchModelInstance.SetSearchIconColor(Color::BLACK);
+    pattern->ToJsonValueForSearchIcon(jsonValue, filter2);
+    searchModelInstance.ResetSearchIconColor();
+    pattern->ToJsonValueForSearchIcon(jsonValue, filter2);
+    auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(searchIconFrameNode, nullptr);
+    EXPECT_EQ(searchIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
+
+    pattern->CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, false, false);
+    searchModelInstance.SetCancelIconColor(Color::BLACK);
+    pattern->ToJsonValueForCancelButton(jsonValue, filter2);
+    searchModelInstance.ResetCancelIconColor();
+    pattern->ToJsonValueForCancelButton(jsonValue, filter2);
+    auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    ASSERT_NE(cancelImageFrameNode, nullptr);
+    EXPECT_EQ(cancelImageFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
+}
+
+/**
+ * @tc.name: searchSymbolIconColorTest
+ * @tc.desc: Test search symbol icon color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchSymbolIconColorTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->CreateOrUpdateSymbol(IMAGE_INDEX, false, false);
+    searchModelInstance.SetSearchIconColor(Color::BLACK);
+    pattern->isFocusIconColorSet_ = true;
+    pattern->UpdateSearchSymbolIconColor();
+
+    auto color = pattern->GetDefaultIconColor(IMAGE_INDEX);
+    auto searchTheme = pattern->GetTheme();
+    ASSERT_NE(searchTheme, nullptr);
+    auto normalIconColor = searchTheme->GetSymbolIconColor();
+    EXPECT_EQ(color, normalIconColor);
+}
+
+/**
+ * @tc.name: searchMinMaxFontScaleTest
+ * @tc.desc: Test search min and max font scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchMinMaxFontScaleTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    auto max = pattern->GetMaxFontScale();
+    EXPECT_EQ(max, 2);
+    auto min = pattern->GetMinFontScale();
+    EXPECT_EQ(max, 2);
+
+    searchModelInstance.SetMaxFontScale(1.0f);
+    max = pattern->GetMaxFontScale();
+    EXPECT_EQ(max, 1.0f);
+
+    searchModelInstance.SetMinFontScale(1.0f);
+    min = pattern->GetMinFontScale();
+    EXPECT_EQ(min, 1.0f);
 }
 } // namespace OHOS::Ace::NG
