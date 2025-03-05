@@ -388,19 +388,13 @@ bool Container::GreatOrEqualAPIVersion(PlatformVersion version)
 
 bool Container::LessThanAPIVersionWithCheck(PlatformVersion version)
 {
-    return static_cast<int32_t>(version) < 14
-               ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                     PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
-                         static_cast<int32_t>(version)
-               : LessThanAPITargetVersion(version);
+    return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+           PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() < static_cast<int32_t>(version);
 }
 
 bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
 {
-    return static_cast<int32_t>(version) < 14
-               ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                     PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
-                         static_cast<int32_t>(version)
-               : GreatOrEqualAPITargetVersion(version);
+    return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+           PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
 }
 } // namespace OHOS::Ace
