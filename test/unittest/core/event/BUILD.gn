@@ -85,6 +85,7 @@ ace_unittest("gesture_event_hub_test_ng") {
     "gesture_event_hub_test_ng.cpp",
     "gesture_event_hub_test_ng_coverage.cpp",
     "gesture_event_hub_test_ng_property_config.cpp",
+    "gesture_event_hub_test_three_ng.cpp",
     "gesture_event_hub_test_two_ng.cpp",
   ]
 }
