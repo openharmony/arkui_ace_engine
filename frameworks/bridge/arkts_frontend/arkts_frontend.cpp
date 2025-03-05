@@ -104,36 +104,35 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     }
 
     // Find app class
-    ani_class clsArray = nullptr;
-    if (env_->FindClass("Lfixarray/GetPathArray;", &clsArray) != ANI_OK) {
-        LOGE("FindClass failed");
+    ani_class stringCls = nullptr;
+    if (env_->FindClass("Lstd/core/String;", &stringCls) != ANI_OK) {
+        LOGE("FindClass Lstd/core/String Failed");
         return UIContentErrorCode::INVALID_URL;
-    };
-    ani_static_method methodArray;
-    if (env_->Class_FindStaticMethod(clsArray, "getPathArray", "Lstd/core/String;:[Lstd/core/String;", &methodArray) !=
-        ANI_OK) {
-        LOGE("Class_FindStaticMethod failed");
-        return UIContentErrorCode::INVALID_URL;
-    };
+    }
     const std::string moduleName = "entry";
     std::string modulePath = BUNDLE_INSTALL_PATH + moduleName + MERGE_ABC_PATH;
-    ani_string abcPath;
-    if (env_->String_NewUTF8(modulePath.c_str(), modulePath.length(), &abcPath) != ANI_OK) {
-        LOGE("abilityPath String_NewUTF8 failed");
-    };
-    ani_ref refArray = nullptr;
-    if (env_->Class_CallStaticMethod_Ref(clsArray, methodArray, &refArray, abcPath) != ANI_OK) {
-        LOGE("Class_CallStaticMethod_Ref failed");
-        return UIContentErrorCode::INVALID_URL;
-    };
-    ani_class cls = nullptr;
-    if (env_->FindClass("Lstd/core/AbcRuntimeLinker;", &cls) != ANI_OK) {
-        LOGE("FindClass AbcRuntimeLinker failed");
+    ani_string ani_str;
+    if (env_->String_NewUTF8(modulePath.c_str(), modulePath.size(), &ani_str) != ANI_OK) {
+        LOGE("String_NewUTF8 modulePath Failed");
         return UIContentErrorCode::INVALID_URL;
     }
     ani_ref undefined_ref;
     if (env_->GetUndefined(&undefined_ref) != ANI_OK) {
         LOGE("GetUndefined failed");
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_array_ref refArray;
+    if (env_->Array_New_Ref(stringCls, 1, undefined_ref, &refArray) != ANI_OK) {
+        LOGE("Array_New_Ref Failed");
+        return UIContentErrorCode::INVALID_URL;
+    }
+    if (env_->Array_Set_Ref(refArray, 0, ani_str) != ANI_OK) {
+        LOGE("Array_Set_Ref Failed");
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_class cls = nullptr;
+    if (env_->FindClass("Lstd/core/AbcRuntimeLinker;", &cls) != ANI_OK) {
+        LOGE("FindClass AbcRuntimeLinker failed");
         return UIContentErrorCode::INVALID_URL;
     }
     ani_method method = nullptr;
@@ -147,7 +146,7 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
         return UIContentErrorCode::INVALID_URL;
     }
     ani_method loadClassMethod = nullptr;
-    if (env_->Class_FindMethod(cls, "loadClass", "Lstd/core/String;Z:Lstd/core/Class;", &loadClassMethod) != ANI_OK) {
+    if (env_->Class_FindMethod(cls, "loadClass", nullptr, &loadClassMethod) != ANI_OK) {
         LOGE("Class_FindMethod loadClass failed");
         return UIContentErrorCode::INVALID_URL;
     }
@@ -158,7 +157,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 
     ani_class entryClass = nullptr;
     ani_ref entryClassRef = nullptr;
-    if (env_->Object_CallMethod_Ref(object, loadClassMethod, &entryClassRef, entryClassStr) != ANI_OK) {
+    ani_boolean isInit = false;
+    if (env_->Object_CallMethod_Ref(object, loadClassMethod, &entryClassRef, entryClassStr, isInit) != ANI_OK) {
         LOGE("Object_CallMethod_Ref loadClassMethod failed");
         return UIContentErrorCode::INVALID_URL;
     } else {
