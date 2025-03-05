@@ -280,7 +280,7 @@ struct custombutton {
     this.buttonSize = parseInt(param);
   }
 
-  //最后一个按键离右侧的距离
+  // 最后一个按键离右侧的距离
   setButtonRightOffset(param: string) {
     this.buttonRightOffset = parseInt(param);
   }
@@ -300,7 +300,7 @@ struct custombutton {
     this.closeFillColor = this.getResourceColor(buttonNormalIconFillColor)
   }
 
-  //适配三键相关的颜色资源锁定深色模式
+  // 适配三键相关的颜色资源锁定深色模式
   getResourceColor(resource: Resource): Resource | string {
     if (this.colorConfigurationLocked && colorMap.has(resource)) {
       const colorGroup = colorMap.get(resource);
