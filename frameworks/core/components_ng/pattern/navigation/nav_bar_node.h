@@ -46,6 +46,7 @@ public:
     void StartSystemTransitionPush();
     void StartSystemTransitionPop();
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
+    RefPtr<UINode> GetNavigationNode() override;
 };
 
 } // namespace OHOS::Ace::NG

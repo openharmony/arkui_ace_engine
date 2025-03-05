@@ -1010,4 +1010,11 @@ void NavDestinationGroupNode::ResetCustomTransitionAnimationProperties()
     renderContext->SetOpacity(userSetOpacity_);
     renderContext->SetActualForegroundColor(Color::TRANSPARENT);
 }
+
+RefPtr<UINode> NavDestinationGroupNode::GetNavigationNode()
+{
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, nullptr);
+    return navDestinationPattern->GetNavigationNode();
+}
 } // namespace OHOS::Ace::NG
