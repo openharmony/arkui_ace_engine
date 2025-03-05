@@ -166,7 +166,7 @@ void ArcIndexerPattern::InitAccessibilityClickEvent()
     if (collapsedNode_.Upgrade() != nullptr) {
         auto collapsedNode = collapsedNode_.Upgrade();
         CHECK_NULL_VOID(collapsedNode);
-        auto textAccessibilityProperty = collapsedNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        auto textAccessibilityProperty = collapsedNode->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(textAccessibilityProperty);
         textAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
         textAccessibilityProperty->SetAccessibilityText(indexerTheme->GetAccessibilityCollapse());
@@ -184,7 +184,7 @@ void ArcIndexerPattern::InitAccessibilityClickEvent()
     if (expandedNode_.Upgrade() != nullptr) {
         auto expandedNode = expandedNode_.Upgrade();
         CHECK_NULL_VOID(expandedNode);
-        auto textAccessibilityProperty = expandedNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        auto textAccessibilityProperty = expandedNode->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(textAccessibilityProperty);
         textAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
         textAccessibilityProperty->SetAccessibilityText(indexerTheme->GetAccessibilityExpand());
@@ -941,20 +941,20 @@ void ArcIndexerPattern::UpdateChildNodeStyle(int32_t index)
 void ArcIndexerPattern::SetChildNodeAccessibility(const RefPtr<FrameNode>& childNode, const std::string &nodeStr)
 {
     CHECK_NULL_VOID(childNode);
-    auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-    if (textAccessibilityProperty) {
-        textAccessibilityProperty->SetSelected(false);
-        if (StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED) == nodeStr) {
-            expandedNode_ = childNode;
-            if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || isScreenReaderOn_) {
-                InitAccessibilityClickEvent();
-            }
+    if (StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED) == nodeStr) {
+        expandedNode_ = childNode;
+        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || isScreenReaderOn_) {
+            InitAccessibilityClickEvent();
         }
-        if (StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED) == nodeStr) {
-            collapsedNode_ = childNode;
-            if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || isScreenReaderOn_) {
-                InitAccessibilityClickEvent();
-            }
+    } else if (StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED) == nodeStr) {
+        collapsedNode_ = childNode;
+        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || isScreenReaderOn_) {
+            InitAccessibilityClickEvent();
+        }
+    } else {
+        auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        if (textAccessibilityProperty) {
+            textAccessibilityProperty->SetSelected(false);
         }
     }
 }
@@ -1541,9 +1541,6 @@ float ArcIndexerPattern::GetPositionAngle(const Offset& position)
 
 bool ArcIndexerPattern::AtArcHotArea(const Offset& position)
 {
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || isScreenReaderOn_) {
-        return true;
-    }
     float indexAngle = GetPositionAngle(position);
     if (GreatNotEqual(indexAngle, sweepAngle_ + startAngle_ + stepAngle_ * HALF) ||
         LessNotEqual(indexAngle, startAngle_ - stepAngle_ * HALF)) {
