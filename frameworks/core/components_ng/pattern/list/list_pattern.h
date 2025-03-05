@@ -421,7 +421,8 @@ protected:
     virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) {}
     virtual float GetStartOverScrollOffset(float offset, float startMainPos) const;
     virtual float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
-
+    void SetLayoutAlgorithmParams(
+        const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
