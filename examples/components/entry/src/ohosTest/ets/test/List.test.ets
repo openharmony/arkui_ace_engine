@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import FlexBootcampTest from './RowsColumnsAndStacking/FlexBootcamp.test'
 
 export default function testsuite() {
   abilityTest();
+  FlexBootcampTest();
 }
