@@ -3343,6 +3343,29 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     }
 }
 
+NG::MenuParam GetSelectionMenuParam(
+    const JSCallbackInfo& info, ResponseType responseType, std::function<void()> previewBuilder)
+{
+    NG::MenuParam menuParam;
+    if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
+        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
+    }
+
+    if (responseType != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    NG::PaddingProperty paddings;
+    paddings.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
+    paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
+    menuParam.layoutRegionMargin = paddings;
+    menuParam.disappearScaleToTarget = true;
+    menuParam.isShow = true;
+    return menuParam;
+}
+
 void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
 {
     if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX || !info[0]->IsNumber() || !info[1]->IsObject() ||
@@ -3376,33 +3399,12 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
-    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType);
+    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder);
     std::function<void()> previewBuilder = nullptr;
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
         elementType, responseType, menuBuilder, previewBuilder, menuParam);
     WebModel::GetInstance()->SetPreviewSelectionMenu(previewSelectionMenuParam);
-}
-
-NG::MenuParam GetSelectionMenuParam(const JSCallbackInfo& info, ResponseType responseType) {
-    NG::MenuParam menuParam;
-    if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
-        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
-    }
-
-    if (responseType != ResponseType::LONG_PRESS) {
-        menuParam.previewMode = MenuPreviewMode::NONE;
-        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
-    }
-    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
-    menuParam.type = NG::MenuType::CONTEXT_MENU;
-    NG::PaddingProperty paddings;
-    paddings.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
-    paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
-    menuParam.layoutRegionMargin = paddings;
-    menuParam.disappearScaleToTarget = true;
-    menuParam.isShow = true;
-    return menuParam;
 }
 
 void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
