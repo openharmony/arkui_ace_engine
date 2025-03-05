@@ -4289,19 +4289,19 @@ void FrameNode::AddFrameRateDuration(int32_t frameRate, int32_t duration)
 {
     switch (frameRate) {
         case FRAME_NODE_120: {
-            curFRCSceneFpsInfo_.duration_120 +=  duration;
+            curFRCSceneFpsInfo_.duration_120 += duration;
             break;
         }
         case FRAME_NODE_90: {
-            curFRCSceneFpsInfo_.duration_90  += duration;
+            curFRCSceneFpsInfo_.duration_90 += duration;
             break;
         }
         case FRAME_NODE_72: {
-            curFRCSceneFpsInfo_.duration_72 +=  duration;
+            curFRCSceneFpsInfo_.duration_72 += duration;
             break;
         }
         case FRAME_NODE_60: {
-            curFRCSceneFpsInfo_.duration_60  += duration;
+            curFRCSceneFpsInfo_.duration_60 += duration;
             break;
         }
         default:
@@ -4313,7 +4313,7 @@ void FrameNode::TryPrintDebugLog(const std::string& scene, float speed, SceneSta
 {
     if (SystemProperties::GetDebugEnabled()) {
         const std::string sceneStatusStrs[] = { "START", "RUNNING", "END" };
-        LOGD("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
+        LOGI("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
             scene.c_str(), std::abs(speed), sceneStatusStrs[static_cast<int32_t>(status)].c_str());
     }
 }
@@ -4332,6 +4332,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     auto expectedRate = renderContext->CalcExpectedFrameRate(scene, std::abs(speed));
     auto nodeId = GetId();
     auto iter = sceneRateMap_.find(scene);
+    FrameRateDurationsStatistics(status, expectedRate, scene);
     switch (status) {
         case SceneStatus::START: {
             if (iter == sceneRateMap_.end()) {
