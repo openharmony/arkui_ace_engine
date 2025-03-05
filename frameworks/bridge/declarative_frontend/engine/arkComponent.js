@@ -3538,6 +3538,7 @@ class ArkComponent {
     if (typeof value === 'object') {
       arkDragPreviewOptions.mode = value.mode;
       arkDragPreviewOptions.numberBadge = value.numberBadge;
+      arkDragPreviewOptions.sizeChangeEffect = value.sizeChangeEffect;
     }
     if (typeof options === 'object') {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
@@ -17952,6 +17953,7 @@ class ArkDragPreviewOptions {
   constructor() {
     this.mode = undefined;
     this.numberBadge = undefined;
+    this.sizeChangeEffect = undefined;
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
@@ -17963,6 +17965,7 @@ class ArkDragPreviewOptions {
     return (
       this.mode === another.mode &&
       this.numberBadge === another.numberBadge &&
+      this.sizeChangeEffect === another.sizeChangeEffect &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting &&
       this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&

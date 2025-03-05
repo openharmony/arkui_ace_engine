@@ -317,6 +317,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
             previewOption.isMultiTiled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
+            break;
         default:
             break;
     }
@@ -5600,6 +5603,11 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
                 break;
             }
         }
+    }
+
+    auto sizeChangeEffect = obj->GetProperty("sizeChangeEffect");
+    if (sizeChangeEffect->IsNumber()) {
+        previewOption.sizeChangeEffect = static_cast<NG::DraggingSizeChangeEffect>(sizeChangeEffect->ToNumber<int>());
     }
 
     JSViewAbstract::SetDragNumberBadge(info, previewOption);

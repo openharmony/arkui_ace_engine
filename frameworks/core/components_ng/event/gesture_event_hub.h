@@ -91,6 +91,13 @@ struct PreparedInfoForDrag {
     OffsetF dragMovePosition = { 0.0f, 0.0f };
     RefPtr<PixelMap> pixelMap;
     RefPtr<FrameNode> imageNode;
+    RefPtr<FrameNode> relativeContainerNode { nullptr };
+    RefPtr<FrameNode> menuPreviewNode { nullptr };
+    RefPtr<FrameNode> textNode { nullptr };
+    RefPtr<FrameNode> gatherNode { nullptr };
+    RectF menuPreviewRect;
+    RectF dragPreviewRect;
+    BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
 };
 
 struct PreparedAsyncCtxForAnimate {
@@ -370,6 +377,8 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void PrepareDragStartInfo(
+        const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data);
     void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale,
         const PreparedInfoForDrag& dragInfoData);
@@ -391,6 +400,9 @@ private:
         const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
         RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
         int32_t& exclusiveIndex);
+
+    void UpdateNodePositionBeforeStartAnimation(const RefPtr<FrameNode>& frameNode,
+        PreparedInfoForDrag& data, const OffsetF& subWindowOffset);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

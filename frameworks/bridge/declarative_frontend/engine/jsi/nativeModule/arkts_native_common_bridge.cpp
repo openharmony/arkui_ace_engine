@@ -5416,6 +5416,12 @@ void ParseDragPreViewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValu
         preViewOptions.modeArray = modeIntArray;
         preViewOptions.modeArrayLength = static_cast<ArkUI_Int32>(arrLength);
     }
+
+    auto sizeChangeEffect = obj->Get(vm, "sizeChangeEffect");
+    if (sizeChangeEffect->IsNumber()) {
+        preViewOptions.sizeChangeEffect = sizeChangeEffect->Int32Value(vm);
+    }
+
     auto numberBadge = obj->Get(vm, "numberBadge");
     if (numberBadge->IsBoolean()) {
         preViewOptions.isBadgeNumber = false;
@@ -5466,7 +5472,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
 
     Local<JSValueRef> valueObj = runtimeCallInfo->GetCallArgRef(NUM_1);
-    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, nullptr, false, true, false};
+    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, 0, nullptr, false, true, false };
     struct ArkUIDragInteractionOptions interactionOptions = { false, false, true, false, false };
     int32_t* modeIntArray = nullptr;
     ParseDragPreViewOptions(runtimeCallInfo, valueObj, preViewOptions, modeIntArray);

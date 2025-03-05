@@ -7325,10 +7325,33 @@ void OverlayManager::UpdatePixelMapPosition(bool isSubwindowOverlay)
 
 RefPtr<FrameNode> OverlayManager::GetDragPixelMapContentNode() const
 {
+    RefPtr<FrameNode> imageNode = nullptr;
     auto column = dragPixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(column, nullptr);
-    auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
-    return imageNode;
+    auto frameNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        return frameNode;
+    }
+    auto framNodeFirstChild = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_RETURN(framNodeFirstChild, nullptr);
+    if (framNodeFirstChild->GetTag() == V2::STACK_ETS_TAG) {
+        imageNode = AceType::DynamicCast<FrameNode>(framNodeFirstChild->GetFirstChild());
+        return imageNode;
+    }
+    return framNodeFirstChild;
+}
+
+RefPtr<FrameNode> OverlayManager::GetRelativeContainerNode() const
+{
+    auto column = dragPixmapColumnNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(column, nullptr);
+    auto relativeContainerNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+    CHECK_NULL_RETURN(relativeContainerNode, nullptr);
+    if (relativeContainerNode->GetTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
+        return nullptr;
+    }
+    return relativeContainerNode;
 }
 
 RefPtr<FrameNode> OverlayManager::GetPixelMapBadgeNode() const
@@ -7344,7 +7367,14 @@ RefPtr<FrameNode> OverlayManager::GetDragPixelMapBadgeNode() const
 {
     auto column = dragPixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(column, nullptr);
-    auto textNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
+    auto frameNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        return frameNode;
+    }
+    auto textRowNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_RETURN(textRowNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(textRowNode->GetLastChild());
     CHECK_NULL_RETURN(textNode, nullptr);
     return textNode;
 }
