@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -33,11 +34,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    const auto& angle = info->GetAngle();
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(angle));
 }
 void SetAngleImpl(Ark_RotationGestureEvent peer,
                   const Ark_Number* angle)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(angle);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetAngle(Converter::Convert<float>(*angle));
 }
 } // RotationGestureEventAccessor
 const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccessor()

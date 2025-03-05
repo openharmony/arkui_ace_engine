@@ -39,7 +39,6 @@ Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& angle = info->GetAngle();
-    LOGE("Arkoala method SwipeGestureEventAccessor.GetAngleImpl return int32_t value");
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(angle));
 }
 void SetAngleImpl(Ark_SwipeGestureEvent peer,
@@ -57,9 +56,7 @@ Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
     CHECK_NULL_RETURN(peer, errValue);
     auto event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
-
     double value = event->GetSpeed();
-    LOGE("Arkoala method SwipeGestureEventAccessor.GetSpeedImpl return int32_t value");
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetSpeedImpl(Ark_SwipeGestureEvent peer,
@@ -69,7 +66,6 @@ void SetSpeedImpl(Ark_SwipeGestureEvent peer,
     auto event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(speed);
-
     auto convValue = Converter::Convert<float>(*speed);
     event->SetSpeed(convValue);
 }
