@@ -8382,7 +8382,10 @@ void TextFieldPattern::CheckPasswordAreaState()
     }
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
     CHECK_NULL_VOID(passwordArea);
-    passwordArea->SetObscured(!showPasswordState.value());
+    if (!showPasswordState_.has_value() || showPasswordState_.value() != showPasswordState.value()) {
+        passwordArea->SetObscured(!showPasswordState.value());
+        showPasswordState_ = showPasswordState.value();
+    }
 }
 
 void TextFieldPattern::AfterLayoutProcessCleanResponse(

@@ -604,11 +604,12 @@ void PasswordResponseArea::UpdateSymbolSource()
     auto currentSymbolId = isObscured_ ? textFieldTheme->GetHideSymbolId() : textFieldTheme->GetShowSymbolId();
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(currentSymbolId));
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
+    symbolColor_ = textFieldTheme->GetSymbolColor();
+    symbolProperty->UpdateSymbolColorList({ symbolColor_ });
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         symbolProperty->UpdateFontSize(textFieldTheme->GetPasswordIconSize());
     }
-    UpdateSymbolColor();
 
     symbolNode->MarkModifyDone();
     symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
