@@ -158,6 +158,8 @@ public:
         isRootNode_ = isRoot;
     }
     Offset CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin, const Rect& baseRect);
+    float GetRegionLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
+    float GetRegionPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     Rect GetSvgContainerRect() const;
@@ -205,6 +207,8 @@ protected:
     template<typename T>
     void UpdateAttr(const std::string& name, const T& val);
     void UpdateAttrHelper(const std::string& name, const std::string& val);
+    SvgLengthScaleRule TransformForCurrentOBB(RSCanvas& canvas, const SvgCoordinateSystemContext& context,
+        SvgLengthScaleUnit contentUnits, float offsetX, float offsetY);
 
     // defs gradient animation
     void InitNoneFlag()

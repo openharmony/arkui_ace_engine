@@ -56,11 +56,10 @@ void SvgPattern::OnPatternEffect(RSCanvas& canvas, RSBrush& brush,
 {
     canvas.Save();
     auto patternRule = svgCoordinateSystemContext.BuildScaleRule(patternAttr_.patternUnits);
-    auto measureX = GetMeasuredPosition(patternAttr_.x, patternRule, SvgLengthType::HORIZONTAL);
-    auto measureY = GetMeasuredPosition(patternAttr_.y, patternRule, SvgLengthType::VERTICAL);
-    auto measuredWidth = GetMeasuredLength(patternAttr_.width, patternRule, SvgLengthType::HORIZONTAL);
-    auto measuredHeight = GetMeasuredLength(patternAttr_.height, patternRule, SvgLengthType::VERTICAL);
-
+    auto measureX = GetRegionPosition(patternAttr_.x, patternRule, SvgLengthType::HORIZONTAL);
+    auto measureY = GetRegionPosition(patternAttr_.y, patternRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetRegionLength(patternAttr_.width, patternRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetRegionLength(patternAttr_.height, patternRule, SvgLengthType::VERTICAL);
     auto surface = RSSurface::MakeRasterN32Premul(measuredWidth, measuredHeight);
     if (surface == nullptr) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgPattern::OnPatternEffect surface is null");
@@ -72,10 +71,12 @@ void SvgPattern::OnPatternEffect(RSCanvas& canvas, RSBrush& brush,
         return;
     }
     // Create New coordinate system
-    Rect patternContentRect(0, 0, svgCoordinateSystemContext.GetBoundingBoxRect().Width(),
-        svgCoordinateSystemContext.GetBoundingBoxRect().Height());
-    SvgCoordinateSystemContext patternContentCoordinateSystemContext(patternContentRect, GetSvgContainerRect());
-    auto patternContentRule = patternContentCoordinateSystemContext.BuildScaleRule(patternAttr_.patternContentUnits);
+    Rect patternContentRect(0, 0, svgCoordinateSystemContext.GetContainerRect().Width(),
+        svgCoordinateSystemContext.GetContainerRect().Height());
+    SvgCoordinateSystemContext patternContentCoordinateSystemContext(patternContentRect,
+        svgCoordinateSystemContext.GetViewPort());
+    auto patternContentRule = TransformForCurrentOBB(*patternCanvas, svgCoordinateSystemContext,
+        patternAttr_.patternContentUnits, 0.0f, 0.0f);
     TAG_LOGD(AceLogTag::ACE_IMAGE, "OnPatternEffect l:%{public}lf, t:%{public}lf, r:%{public}lf, b:%{public}lf ",
         patternContentRect.Left(), patternContentRect.Top(), patternContentRect.Right(), patternContentRect.Bottom());
     for (auto& child : children_) {

@@ -74,7 +74,7 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     }
     auto bounds = path.GetBounds();
     Rect boundingRect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
-    SvgCoordinateSystemContext svgCoordinateSystemContext(boundingRect, GetSvgContainerRect());
+    SvgCoordinateSystemContext svgCoordinateSystemContext(boundingRect, lengthRule.GetViewPort());
     auto fillType = GetFillType();
     if (fillType != PaintType::NONE) {
         OnGraphicFill(canvas, svgCoordinateSystemContext, path, fillType);
@@ -376,7 +376,7 @@ RSMatrix SvgGraphic::GetLocalMatrix(SvgLengthScaleUnit gradientUnits,
     const SvgCoordinateSystemContext& svgCoordinateSystemContext)
 {
     if (gradientUnits == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
-        auto bounds = svgCoordinateSystemContext.GetBoundingBoxRect();
+        auto bounds = svgCoordinateSystemContext.GetContainerRect();
         RSMatrix m;
         RSMatrix t;
         m.SetScale(bounds.Width(), bounds.Height());
