@@ -31,6 +31,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
+#include "base/log/event_report.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -85,6 +86,10 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 constexpr int32_t DEFAULT_PRECISION = 2;
+constexpr int32_t FRAME_NODE_60 = 60;
+constexpr int32_t FRAME_NODE_72 = 72;
+constexpr int32_t FRAME_NODE_90 = 90;
+constexpr int32_t FRAME_NODE_120 = 120;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -4239,13 +4244,83 @@ int32_t FrameNode::GetNodeExpectedRate()
     return iter->second;
 }
 
-void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
+void FrameNode::FrameRateDurationsStatistics(SceneStatus status, int32_t expectedRate, const std::string &scene)
+{
+    switch (status) {
+        case SceneStatus::START: {
+            curFRCSceneFpsInfo_= FRCSceneFpsInfo();
+            calTime_= 0;
+            calFrameRate_ = 0;
+            curFRCSceneFpsInfo_.scene = scene;
+            return;
+        }
+        case SceneStatus::RUNNING: {
+            if (calTime_ == 0) {
+                calTime_ = GetSysTimestamp();
+                calFrameRate_ = expectedRate;
+            }
+            if (expectedRate != calFrameRate_) {
+                int32_t endTime = GetSysTimestamp();
+                int32_t duration = endTime - calTime_;
+                calTime_ = endTime;
+            AddFrameRateDuration(calFrameRate_, duration);
+            }
+            calFrameRate_ = expectedRate;
+            return;
+        }
+        case SceneStatus::END: {
+            int32_t endTime = GetSysTimestamp();
+            int32_t duration = endTime - calTime_;
+            calTime_ = endTime;
+        AddFrameRateDuration(calFrameRate_, duration);
+        EventReport::SendDiffFrameRatesDuring(scene,
+            curFRCSceneFpsInfo_.duration_60,
+            curFRCSceneFpsInfo_.duration_72,
+            curFRCSceneFpsInfo_.duration_90,
+            curFRCSceneFpsInfo_.duration_120);
+            return;
+        }
+        default:
+            return;
+    }
+}
+
+void FrameNode::AddFrameRateDuration(int32_t frameRate, int32_t duration)
+{
+    switch (frameRate) {
+        case FRAME_NODE_120: {
+            curFRCSceneFpsInfo_.duration_120 +=  duration;
+            break;
+        }
+        case FRAME_NODE_90: {
+            curFRCSceneFpsInfo_.duration_90  += duration;
+            break;
+        }
+        case FRAME_NODE_72: {
+            curFRCSceneFpsInfo_.duration_72 +=  duration;
+            break;
+        }
+        case FRAME_NODE_60: {
+            curFRCSceneFpsInfo_.duration_60  += duration;
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void FrameNode::TryPrintDebugLog(const std::string& scene, float speed, SceneStatus status)
 {
     if (SystemProperties::GetDebugEnabled()) {
         const std::string sceneStatusStrs[] = { "START", "RUNNING", "END" };
         LOGD("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
             scene.c_str(), std::abs(speed), sceneStatusStrs[static_cast<int32_t>(status)].c_str());
     }
+}
+
+void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
+{
+    TryPrintDebugLog(scene, speed, status);
 
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
