@@ -74,7 +74,7 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "image", []() -> RefPtr<SvgNode> { return SvgImage::Create(); } },
     { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
     { "linearGradient", []() -> RefPtr<SvgNode> {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
              return SvgGradient::CreateLinearGradient();
         } else {
             return SvgLinearGradient::Create();
@@ -86,7 +86,7 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "polygon", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolygon(); } },
     { "polyline", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolyline(); } },
     { "radialGradient", []() -> RefPtr<SvgNode> {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             return SvgGradient::CreateRadialGradient();
         } else {
             return SvgRadialGradient::Create();
@@ -220,7 +220,7 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
         std::string newValue;
         std::stringstream stream;
         auto fillColor = fillColor_.value();
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             stream << std::hex << fillColor.GetValue();
             newValue = stream.str();
         } else {
@@ -356,7 +356,7 @@ void SvgDom::DrawImage(
         root_->SetSmoothEdge(smoothEdge_);
     }
     root_->SetColorFilter(colorFilter_);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
     } else {
         Size viewPort = svgContext_->GetRootViewBox().GetSize();

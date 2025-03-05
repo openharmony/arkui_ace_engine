@@ -122,6 +122,7 @@ void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     // Create New coordinate system
     SvgCoordinateSystemContext useContext(lengthRule.GetContainerRect(), lengthRule.GetViewPort());
     auto useRule = useContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    useRule.SetUseFillColor(lengthRule.UseFillColor());
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_VOID(refSvgNode);
     auto useX = GetRegionPosition(useAttr_.x, useRule, SvgLengthType::HORIZONTAL);

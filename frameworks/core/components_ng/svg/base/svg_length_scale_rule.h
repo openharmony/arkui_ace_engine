@@ -66,11 +66,22 @@ public:
     {
         return pathTransform_;
     }
+    
+    bool UseFillColor() const
+    {
+        return useFillColor_;
+    }
+
+    void SetUseFillColor(bool useFillColor)
+    {
+        useFillColor_ = useFillColor;
+    }
 private:
     Rect containerRect_;
     Size viewPort_;
     SvgLengthScaleUnit lengthScaleUnit_;
     bool pathTransform_ = false;
+    bool useFillColor_ = true;
 };
 }
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_BASE_LENGTH_SCALE_RULE_H

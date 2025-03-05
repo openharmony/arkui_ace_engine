@@ -272,7 +272,7 @@ bool SvgAttributesParser::ParseColor(std::string value, Color& color)
         return true;
     }
     value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)
         && ParseRGBAMagicColor(value, color)) {
         return true;
     }
@@ -326,7 +326,7 @@ void SvgAttributesParser::StringToDimensionWithUnitSvg(const std::string& value,
 
 void SvgAttributesParser::ParseDimension(const std::string& value, Dimension& dimension, bool useVp)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         dimension = StringUtils::StringToDimension(value, useVp);
         return;
     }

@@ -50,6 +50,8 @@ void SvgMask::OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& s
     RosenSvgPainter::SetMask(&canvas);
     auto maskContentRule = TransformForCurrentOBB(canvas, svgCoordinateSystemContext, maskAttr_.maskContentUnits,
         svgCoordinateSystemContext.GetContainerRect().Left(), svgCoordinateSystemContext.GetContainerRect().Top());
+    // subgraph does not use image components parameter fillColor
+    maskContentRule.SetUseFillColor(false);
     DrawChildren(canvas, maskContentRule);
     canvas.RestoreToCount(canvasLayerCount);
     // create content layer and render content
@@ -141,7 +143,7 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             } },
         { SVG_MASK_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                     attr.maskUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
                         SvgLengthScaleUnit::USER_SPACE_ON_USE;
                     return;
