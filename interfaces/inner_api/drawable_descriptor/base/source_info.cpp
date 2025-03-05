@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,23 @@
  * limitations under the License.
  */
 
-#include "drawable/js_drawable_descriptor.h"
+#include "base/source_info.h"
 
-namespace OHOS::Ace::Napi {
-static napi_module drawable_module = {
-    .nm_version = 1,
-    .nm_flags = 0,
-    .nm_filename = nullptr,
-    .nm_register_func = JsDrawableDescriptor::Export,
-    .nm_modname = JsDrawableDescriptor::MODULE_NAME,
-    .nm_priv = ((void*)0),
-    .reserved = { 0 },
-};
-
-extern "C" __attribute__((constructor)) void DrawableRegister()
+namespace OHOS {
+namespace Ace {
+namespace Drawable {
+SrcType SourceInfo::ResolveSrcType(const std::string& src)
 {
-    napi_module_register(&drawable_module);
+    return SrcType::RESOURCE;
 }
-} // namespace OHOS::Ace::Napi
+
+std::string SourceInfo::ToString() const
+{
+    if (srcType_ == SrcType::RESOURCE) {
+        return resource_.ToString();
+    }
+    return src_;
+}
+} // namespace Drawable
+} // namespace Ace
+} // namespace OHOS
