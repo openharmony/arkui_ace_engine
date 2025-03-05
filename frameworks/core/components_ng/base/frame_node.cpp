@@ -4248,8 +4248,8 @@ void FrameNode::FrameRateDurationsStatistics(SceneStatus status, int32_t expecte
 {
     switch (status) {
         case SceneStatus::START: {
-            curFRCSceneFpsInfo_= FRCSceneFpsInfo();
-            calTime_= 0;
+            curFRCSceneFpsInfo_ = FRCSceneFpsInfo();
+            calTime_ = 0;
             calFrameRate_ = 0;
             curFRCSceneFpsInfo_.scene = scene;
             return;
