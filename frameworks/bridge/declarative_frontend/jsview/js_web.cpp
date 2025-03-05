@@ -3376,8 +3376,15 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
-
+    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType);
     std::function<void()> previewBuilder = nullptr;
+    WebModel::GetInstance()->SetNewDragStyle(true);
+    auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
+        elementType, responseType, menuBuilder, previewBuilder, menuParam);
+    WebModel::GetInstance()->SetPreviewSelectionMenu(previewSelectionMenuParam);
+}
+
+NG::MenuParam GetSelectionMenuParam(const JSCallbackInfo& info, ResponseType responseType) {
     NG::MenuParam menuParam;
     if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
         ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
@@ -3393,12 +3400,9 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     paddings.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
     paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
     menuParam.layoutRegionMargin = paddings;
-    menuParam.enableMenuHideEffect = true;
+    menuParam.disappearScaleToTarget = true;
     menuParam.isShow = true;
-    WebModel::GetInstance()->SetNewDragStyle(true);
-    auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
-        elementType, responseType, menuBuilder, previewBuilder, menuParam);
-    WebModel::GetInstance()->SetPreviewSelectionMenu(previewSelectionMenuParam);
+    return menuParam;
 }
 
 void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
