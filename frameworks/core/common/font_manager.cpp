@@ -352,15 +352,13 @@ void FontManager::NotifyVariationNodes()
 bool FontManager::RegisterCallbackNG(
     const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
-    bool hasFontLoader = false;
     CHECK_NULL_RETURN(callback, false);
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoadedNG(node, callback);
-            hasFontLoader = true;
         }
     }
-    return hasFontLoader;
+    return false;
 }
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
