@@ -845,6 +845,7 @@ void SearchPattern::OnClickButtonAndImage()
         textFieldPattern->StopEditing();
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
 }
 
 void SearchPattern::OnClickCancelButton()
