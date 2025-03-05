@@ -112,4 +112,32 @@ HWTEST_F(ConvertorTest, ListOptionalConversion, TestSize.Level1)
         iter++;
     }
 }
+
+/**
+ * @tc.name:
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConvertorTest, GetOptTestValue, TestSize.Level1)
+{
+    auto unionValue = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(5.2f);
+    auto value = Converter::ArkValue<Opt_Union_Number_String>(unionValue);
+    std::optional<Ark_Union_Number_String> result = Converter::GetOpt(value);
+    ASSERT_TRUE(result);
+    auto convValue = Converter::OptConvert<Dimension>(result.value());
+    ASSERT_TRUE(convValue);
+    EXPECT_FLOAT_EQ(convValue.value().Value(), 5.2);
+}
+
+/**
+ * @tc.name:
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConvertorTest, GetOptTestEmpty, TestSize.Level1)
+{
+    auto value = Converter::ArkValue<Opt_Union_Number_String>();
+    std::optional<Ark_Union_Number_String> result = Converter::GetOpt(value);
+    ASSERT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
