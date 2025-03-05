@@ -14,7 +14,8 @@
  */
 
 import abilityTest from './Ability.test';
-
+import CheckboxBootcampTest from './ButtonsAndSelections/CheckboxBootcamp.test';
 export default function testsuite() {
   abilityTest();
+  CheckboxBootcampTest()
 }
