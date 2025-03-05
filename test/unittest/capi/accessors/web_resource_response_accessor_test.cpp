@@ -86,69 +86,146 @@ private:
 };
 
 /**
- * @tc.name: DISABLED_getResponseDataTest
+ * @tc.name: getResponseDataTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, DISABLED_getResponseDataTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getResponseDataTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getResponseData, nullptr);
-    accessor_->getResponseData(peer_);
+    EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getResponseData(peer_)));
+
+    std::string responseData = "responseData";
+    auto data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_String>(responseData);
+    accessor_->setResponseData(peer_, &data);
+
+    EXPECT_EQ(responseData, Converter::Convert<std::string>(accessor_->getResponseData(peer_)));
+    EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getResponseData(nullptr)));
 }
 
 /**
- * @tc.name: DISABLED_getResponseDataExTest
+ * @tc.name: getResponseDataExTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, DISABLED_getResponseDataExTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getResponseDataExTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getResponseDataEx, nullptr);
-    accessor_->getResponseDataEx(peer_);
+
+    auto dataString = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_String>("text");
+    auto dataNumber = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Number>(5);
+
+    accessor_->setResponseData(peer_, &dataString);
+    auto data = accessor_->getResponseDataEx(peer_);
+    std::string strResult = "";
+    Converter::VisitUnion(data,
+        [&strResult](const Ark_String& responseData) {
+            strResult = Converter::Convert<std::string>(responseData);
+        },
+        [](const auto& value) {},
+        []() {}
+    );
+    EXPECT_EQ(strResult, "text");
+
+    accessor_->setResponseData(peer_, &dataNumber);
+    data = accessor_->getResponseDataEx(peer_);
+    int32_t intResult = 0;
+    Converter::VisitUnion(data,
+        [&intResult](const Ark_Number& responseData) {
+            intResult = Converter::Convert<int32_t>(responseData);
+        },
+        [](const auto& value) {},
+        []() {}
+    );
+    EXPECT_EQ(intResult, 5);
 }
 
 /**
- * @tc.name: DISABLED_getResponseEncodingTest
+ * @tc.name: getResponseEncodingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, DISABLED_getResponseEncodingTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getResponseEncodingTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getResponseEncoding, nullptr);
-    accessor_->getResponseEncoding(peer_);
+    EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getResponseEncoding(peer_)));
+
+    std::string encodingData = "encodingData";
+    Ark_String data = Converter::ArkValue<Ark_String>(encodingData);
+    accessor_->setResponseEncoding(peer_, &data);
+
+    EXPECT_EQ(encodingData, Converter::Convert<std::string>(accessor_->getResponseEncoding(peer_)));
+    EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getResponseEncoding(nullptr)));
 }
 
 /**
- * @tc.name: DISABLED_getResponseMimeTypeTest
+ * @tc.name: getResponseMimeTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, DISABLED_getResponseMimeTypeTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getResponseMimeTypeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getResponseMimeType, nullptr);
-    accessor_->getResponseMimeType(peer_);
+    EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getResponseMimeType(peer_)));
+
+    std::string mimeType = "mimeType";
+    Ark_String data = Converter::ArkValue<Ark_String>(mimeType);
+    accessor_->setResponseMimeType(peer_, &data);
+
+    EXPECT_EQ(mimeType, Converter::Convert<std::string>(accessor_->getResponseMimeType(peer_)));
+    EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getResponseMimeType(nullptr)));
 }
 
 /**
- * @tc.name: DISABLED_getReasonMessageTest
+ * @tc.name: getReasonMessageTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, DISABLED_getReasonMessageTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getReasonMessageTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getReasonMessage, nullptr);
-    accessor_->getReasonMessage(peer_);
+    std::vector<Converter::Header> empty;
+    EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getReasonMessage(peer_)));
+
+    std::string reason = "reason";
+    Ark_String data = Converter::ArkValue<Ark_String>(reason);
+    accessor_->setReasonMessage(peer_, &data);
+
+    EXPECT_EQ(reason, Converter::Convert<std::string>(accessor_->getReasonMessage(peer_)));
+    EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getReasonMessage(nullptr)));
 }
 
 /**
- * @tc.name: DISABLED_getResponseHeaderTest
+ * @tc.name: getResponseHeaderTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, DISABLED_getResponseHeaderTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getResponseHeaderTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getResponseHeader, nullptr);
-    accessor_->getResponseHeader(peer_);
+    auto headers = accessor_->getResponseHeader(nullptr);
+    std::vector<Converter::Header> headerVect = Converter::Convert<std::vector<Converter::Header>>(headers);
+    std::vector<Converter::Header> empty;
+    EXPECT_EQ(headerVect, empty);
+
+    std::string headerKey = "headerKey";
+    std::string headerValue = "headerValue";
+    std::map<std::string, std::string> httpHeaders;
+    httpHeaders[headerKey] = headerValue;
+
+    Ark_Header header;
+    header.headerKey = Converter::ArkValue<Ark_String>(headerKey);
+    header.headerValue = Converter::ArkValue<Ark_String>(headerValue);
+    std::vector<Ark_Header> vec { header };
+    Converter::ArkArrayHolder<Array_Header> vecHolder(vec);
+    Array_Header arrayHeader = vecHolder.ArkValue();
+    accessor_->setResponseHeader(peer_, &arrayHeader);
+
+    headers = accessor_->getResponseHeader(peer_);
+    headerVect = Converter::Convert<std::vector<Converter::Header>>(headers);
+    std::vector<Converter::Header> expected = Converter::Convert<std::vector<Converter::Header>>(arrayHeader);
+
+    EXPECT_EQ(headerVect, expected);
 }
 
 /**
