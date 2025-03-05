@@ -2667,7 +2667,8 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(selectOverlay_);
     CHECK_NULL_VOID(multipleClickRecognizer_);
-    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) || !focusHub->IsFocusable()) {
+    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsValidClick(info)) ||
+        !focusHub->IsFocusable()) {
         return;
     }
     focusIndex_ = FocuseIndex::TEXT;
@@ -2691,13 +2692,13 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
     lastClickTimeStamp_ = info.GetTimeStamp();
-    multipleClickRecognizer_->Start(info);
+    multipleClickRecognizer_->StartCounting(info);
     // register click event
     if (multipleClickRecognizer_->IsTripleClick()) {
         HandleTripleClickEvent(info);
     } else if (multipleClickRecognizer_->IsDoubleClick()) {
         HandleDoubleClickEvent(info);
-    } else {
+    } else if (multipleClickRecognizer_->IsSingleClick()) {
         HandleSingleClickEvent(info, firstGetFocus);
     }
     if (ResetObscureTickCountDown()) {
