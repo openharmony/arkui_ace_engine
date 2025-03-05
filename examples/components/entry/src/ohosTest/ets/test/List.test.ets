@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import BindSheetBootcampTest from './BindSheetBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  BindSheetBootcampTest();
 }
