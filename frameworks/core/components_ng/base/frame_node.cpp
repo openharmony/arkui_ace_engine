@@ -4272,12 +4272,12 @@ void FrameNode::FrameRateDurationsStatistics(SceneStatus status, int32_t expecte
             int32_t endTime = GetSysTimestamp();
             int32_t duration = endTime - calTime_;
             calTime_ = endTime;
-        AddFrameRateDuration(calFrameRate_, duration);
-        EventReport::SendDiffFrameRatesDuring(scene,
-            curFRCSceneFpsInfo_.duration_60,
-            curFRCSceneFpsInfo_.duration_72,
-            curFRCSceneFpsInfo_.duration_90,
-            curFRCSceneFpsInfo_.duration_120);
+            AddFrameRateDuration(calFrameRate_, duration);
+            EventReport::SendDiffFrameRatesDuring(scene,
+                curFRCSceneFpsInfo_.duration_60,
+                curFRCSceneFpsInfo_.duration_72,
+                curFRCSceneFpsInfo_.duration_90,
+                curFRCSceneFpsInfo_.duration_120);
             return;
         }
         default:
