@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import TextClockBootcampTest from './InformationDisplay/TextClockBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  TextClockBootcampTest();
 }
