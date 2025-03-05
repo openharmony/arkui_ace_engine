@@ -472,6 +472,7 @@ namespace Converter {
     template<> Header Convert(const Ark_WebHeader& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> LightSource Convert(const Ark_LightSource& src);
+    template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
     template<> OptionParam Convert(const Ark_MenuElement& src);
@@ -556,6 +557,7 @@ namespace Converter {
     template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> PathShapeOptions Convert(const Ark_PathShapeOptions& value);
+    template<> Rect Convert(const Ark_RectResult& src);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);

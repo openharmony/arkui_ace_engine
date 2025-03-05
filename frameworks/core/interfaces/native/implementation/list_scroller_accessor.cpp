@@ -50,19 +50,19 @@ Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
                                       const Ark_Number* index,
                                       const Ark_Number* indexInGroup)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(index, {});
-    CHECK_NULL_RETURN(indexInGroup, {});
+    auto errValue = Converter::ArkValue<Ark_RectResult>(Rect{});
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(index, errValue);
+    CHECK_NULL_RETURN(indexInGroup, errValue);
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerAccessor::GetItemRectInGroupImpl. Controller isn't bound to a component.");
-        return {};
+        return errValue;
     }
 
     int32_t convIndex = Converter::Convert<int32_t>(*index);
     int32_t convIndexInGroup = Converter::Convert<int32_t>(*indexInGroup);
-    // get a result of GetItemRectInGroup to return it
     auto rect = scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
     return Converter::ArkValue<Ark_RectResult>(rect);
 }
@@ -112,23 +112,21 @@ Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext
                                                          const Ark_Number* x,
                                                          const Ark_Number* y)
 {
-    LOGE("ListScrollerAccessor::GetVisibleListContentInfoImpl is not implemented.");
-    // wait for Ark_NativePointer change to another type which is acceptable to "ListItemGroupIndex" data
-    CHECK_NULL_RETURN(peer, {}); // need to fix a return value
-    CHECK_NULL_RETURN(x, {}); // need to fix a return value
-    CHECK_NULL_RETURN(y, {}); // need to fix a return value
+    auto errValue = Converter::ArkValue<Ark_VisibleListContentInfo>(ListItemGroupIndex{});
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(x, errValue);
+    CHECK_NULL_RETURN(y, errValue);
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerPeerAccessor::GetVisibleListContentInfoImpl. Controller isn't bound to a component.");
-        return {}; // need to fix a return value
+        return errValue;
     }
 
     auto convX = Converter::Convert<float>(*x);
     auto convY = Converter::Convert<float>(*y);
-    // get a result of GetItemIndexInGroup to return it
-    scrollController->GetItemIndexInGroup(convX, convY);
-    return {}; // need to fix a return value
+    auto retVal = scrollController->GetItemIndexInGroup(convX, convY);
+    return Converter::ArkValue<Ark_VisibleListContentInfo>(retVal);
 }
 } // ListScrollerAccessor
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()
