@@ -16,8 +16,10 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_WEB_RESOURCE_RESPONSE_PEER_IMPL_H
 
 #include "core/components/web/web_event.h"
+#include "arkoala_api_generated.h"
 
 struct WebResourceResponsePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::WebResponse> handler;
+    std::optional<Ark_Union_String_Number_Resource_Buffer> responseDataEx;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_WEB_RESOURCE_RESPONSE_PEER_IMPL_H

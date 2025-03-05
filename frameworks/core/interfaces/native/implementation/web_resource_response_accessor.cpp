@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -41,49 +42,70 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetResponseDataImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetData();
-    // value need to be returned
-    LOGE("WebResourceResponseAccessor::GetResponseDataImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result  = peer->handler->GetData();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
 {
-    // value need to be returned
-    LOGE("WebResourceResponseAccessor::GetResponseDataExImpl - return value need to be supported");
-    return {};
+    Opt_Union_String_Number_Buffer_Resource result {};
+    CHECK_NULL_RETURN(peer, result);
+    if (peer->responseDataEx) {
+        Converter::VisitUnion(peer->responseDataEx.value(),
+            [&result](const Ark_String& responseData) {
+                result = Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_String>(
+                    responseData, Converter::FC);
+            },
+            [&result](const Ark_Number& responseData) {
+                result = Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Number>(responseData);
+            },
+            [&result](const Ark_Resource& responseData) {
+                result = Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Resource>(responseData);
+            },
+            [&result](const Ark_Buffer& responseData) {
+                result = Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Buffer>(
+                    responseData, Converter::FC);
+            },
+            []() {}
+        );
+    }
+    return result;
 }
 Ark_String GetResponseEncodingImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetEncoding();
-    // value need to be returned
-    LOGE("WebResourceResponseAccessor::GetResponseEncodingImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetEncoding();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetResponseMimeTypeImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetMimeType();
-    // value need to be returned
-    LOGE("WebResourceResponseAccessor::GetResponseMimeTypeImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetMimeType();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetReasonMessageImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetReason();
-    // value need to be returned
-    LOGE("WebResourceResponseAccessor::GetReasonMessageImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetReason();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Array_Header GetResponseHeaderImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetHeaders();
-    // value need to be returned
-    LOGE("WebResourceResponseAccessor::GetResponseHeaderImpl - return value need to be supported");
-    return {};
+    std::vector<Converter::Header> result;
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Array_Header>(result, Converter::FC));
+    auto headers = peer->handler->GetHeaders();
+    for (const auto& pair : headers) {
+        Converter::Header header {
+            .headerKey = pair.first,
+            .headerValue = pair.second
+        };
+        result.push_back(header);
+    }
+    return Converter::ArkValue<Array_Header>(result, Converter::FC);
 }
 Ark_Number GetResponseCodeImpl(Ark_WebResourceResponse peer)
 {
@@ -95,6 +117,7 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(data);
+    peer->responseDataEx = *data;
     Converter::VisitUnion(*data,
         [peer](const Ark_String& responseData) {
             std::string str = Converter::Convert<std::string>(responseData);
