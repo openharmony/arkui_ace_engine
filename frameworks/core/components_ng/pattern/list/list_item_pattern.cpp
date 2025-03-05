@@ -819,7 +819,6 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         float width = startNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachLeftSpeed) {
             StartSpringMotion(curOffset_, 0, velocity * friction);
-            SetItemPosition(0);
             FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
             return;
         }
@@ -844,7 +843,6 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         float width = endNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachRightSpeed) {
             StartSpringMotion(curOffset_, 0, velocity * friction);
-            SetItemPosition(0);
             FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
             return;
         }
@@ -867,7 +865,6 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         end = width * static_cast<int32_t>(swiperIndex_);
     }
     StartSpringMotion(curOffset_, end, velocity * friction);
-    SetItemPosition(end);
 }
 
 void ListItemPattern::ResetSwipeStatus(bool calledByUser)
@@ -886,7 +883,6 @@ void ListItemPattern::ResetSwipeStatus(bool calledByUser)
         springController_->Stop();
     }
     StartSpringMotion(curOffset_, 0.0f, velocity, calledByUser);
-    SetItemPosition(0.0f);
 }
 
 void ListItemPattern::MarkIsSelected(bool isSelected)

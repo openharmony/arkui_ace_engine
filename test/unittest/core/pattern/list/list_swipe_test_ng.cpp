@@ -1763,10 +1763,9 @@ HWTEST_F(ListSwipeTestNg, SwipeForward001, TestSize.Level1)
     auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    auto curOffset = 1.0f;
-    itemPattern_->SetItemPosition(curOffset);
+    itemPattern_->swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
     itemPattern_->SwipeForward();
-    EXPECT_EQ(itemPattern_->GetSwipeState(), SwipeState::COLLAPSED);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
 }
 
 /**
@@ -1780,10 +1779,9 @@ HWTEST_F(ListSwipeTestNg, SwipeForward002, TestSize.Level1)
     auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    auto curOffset = 0.0f;
-    itemPattern_->SetItemPosition(curOffset);
+    itemPattern_->swipeActionState_ = SwipeActionState::COLLAPSED;
     itemPattern_->SwipeForward();
-    EXPECT_EQ(itemPattern_->GetSwipeState(), SwipeState::EXPANDED);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
 }
 
 /**
@@ -1797,10 +1795,9 @@ HWTEST_F(ListSwipeTestNg, SwipeForward003, TestSize.Level1)
     auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    auto curOffset = -1.0f;
-    itemPattern_->SetItemPosition(curOffset);
+    itemPattern_->swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
     itemPattern_->SwipeForward();
-    EXPECT_EQ(itemPattern_->GetSwipeState(), SwipeState::COLLAPSED);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
 }
 
 /**
@@ -1814,10 +1811,9 @@ HWTEST_F(ListSwipeTestNg, SwipeBackward001, TestSize.Level1)
     auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    auto curOffset = -1.0f;
-    itemPattern_->SetItemPosition(curOffset);
+    itemPattern_->swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
     itemPattern_->SwipeBackward();
-    EXPECT_EQ(itemPattern_->GetSwipeState(), SwipeState::COLLAPSED);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
 }
 
 /**
@@ -1831,10 +1827,9 @@ HWTEST_F(ListSwipeTestNg, SwipeBackward002, TestSize.Level1)
     auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    auto curOffset = 1.0f;
-    itemPattern_->SetItemPosition(curOffset);
+    itemPattern_->swipeActionState_ = SwipeActionState::COLLAPSED;
     itemPattern_->SwipeBackward();
-    EXPECT_EQ(itemPattern_->GetSwipeState(), SwipeState::COLLAPSED);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
 }
 
 /**
@@ -1848,10 +1843,9 @@ HWTEST_F(ListSwipeTestNg, SwipeBackward003, TestSize.Level1)
     auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    auto curOffset = 0.0f;
-    itemPattern_->SetItemPosition(curOffset);
+    itemPattern_->swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
     itemPattern_->SwipeBackward();
-    EXPECT_EQ(itemPattern_->GetSwipeState(), SwipeState::EXPANDED);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(),  SwipeActionState::COLLAPSED);
 }
 
 /**
@@ -1865,10 +1859,9 @@ HWTEST_F(ListSwipeTestNg, FireSwipeActionStateChange001, TestSize.Level1)
     auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    itemPattern_->SetSwipeState(SwipeState::EXPANDED);
     ListItemSwipeIndex newSwiperIndex = ListItemSwipeIndex::SWIPER_END;
     itemPattern_->FireSwipeActionStateChange(newSwiperIndex);
-    EXPECT_EQ(itemPattern_->GetSwipeState(), SwipeState::EXPANDED);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(),  SwipeActionState::EXPANDED);
 }
 
 /**
@@ -1882,57 +1875,8 @@ HWTEST_F(ListSwipeTestNg, FireSwipeActionStateChange002, TestSize.Level1)
     auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
     CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
-    itemPattern_->SetSwipeState(SwipeState::EXPANDED);
     ListItemSwipeIndex newSwiperIndex = ListItemSwipeIndex::SWIPER_START;
     itemPattern_->FireSwipeActionStateChange(newSwiperIndex);
-    EXPECT_EQ(itemPattern_->GetSwipeState(), SwipeState::EXPANDED);
-}
-
-/**
- * @tc.name: SetItemPosition001
- * @tc.desc: Test SetItemPosition
- * @tc.type: FUNC
- */
-HWTEST_F(ListSwipeTestNg, SetItemPosition001, TestSize.Level1)
-{
-    CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
-    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
-    CreateSwipeDone();
-    auto curOffset = 0.0f;
-    itemPattern_->SetItemPosition(curOffset);
-    EXPECT_EQ(itemPattern_->GetItemPosition(), ListItemPosition::MIDDLE);
-}
-
-/**
- * @tc.name: SetItemPosition002
- * @tc.desc: Test SetItemPosition
- * @tc.type: FUNC
- */
-HWTEST_F(ListSwipeTestNg, SetItemPosition002, TestSize.Level1)
-{
-    CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
-    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
-    CreateSwipeDone();
-    auto curOffset = 1.0f;
-    itemPattern_->SetItemPosition(curOffset);
-    EXPECT_EQ(itemPattern_->GetItemPosition(), ListItemPosition::TAIL);
-}
-
-/**
- * @tc.name: SetItemPosition003
- * @tc.desc: Test SetItemPosition
- * @tc.type: FUNC
- */
-HWTEST_F(ListSwipeTestNg, SetItemPosition003, TestSize.Level1)
-{
-    CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
-    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
-    CreateSwipeDone();
-    auto curOffset = -1.0f;
-    itemPattern_->SetItemPosition(curOffset);
-    EXPECT_EQ(itemPattern_->GetItemPosition(), ListItemPosition::HEAD);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::EXPANDED);
 }
 } // namespace OHOS::Ace::NG
