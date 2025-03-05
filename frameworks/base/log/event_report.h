@@ -244,7 +244,9 @@ public:
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
     static void ReportReusedNodeSkipMeasureApp();
-
+    static void SendDiffFrameRatesDuring(const std::string &scene, int32_t frameRateDuring_60,
+    int32_t frameRateDuring_72, int32_t frameRateDuring_90, int32_t frameRateDuring_120);
+    
 private:
     static void SendEventInner(const EventInfo& eventInfo);
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
