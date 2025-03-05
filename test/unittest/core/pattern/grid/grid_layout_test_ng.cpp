@@ -583,4 +583,41 @@ HWTEST_F(GridLayoutTestNg, LargeDelta001, TestSize.Level1)
     UpdateCurrentOffset(-35000.0f);
     EXPECT_EQ(info.startIndex_, EstimateIndex(45050.0f));
 }
+
+/**
+ * @tc.name: EstimateHeight001
+ * @tc.desc: Test EstimateHeight when have bigItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, EstimateHeight001, TestSize.Level1)
+{
+    /*
+     * 0 0
+     * 0 0
+     * 1 2
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    CreateBigItem(0, 1, 0, 1, 240.0f, 150.0f);
+    CreateFixedItems(10);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.lineHeightMap_[0], 72.5f);
+    EXPECT_EQ(pattern_->info_.lineHeightMap_[1], 72.5f);
+    EXPECT_EQ(pattern_->info_.lineHeightMap_[2], ITEM_MAIN_SIZE);
+
+    UpdateCurrentOffset(-100.0f);
+    ;
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -22.5);
+
+    pattern_->isSmoothScrolling_ = true;
+    pattern_->isConfigScrollable_ = true;
+    auto tempGridLayoutInfo = pattern_->info_;
+    pattern_->infoCopy_ = std::make_unique<GridLayoutInfo>(pattern_->info_);
+    pattern_->info_ = tempGridLayoutInfo;
+    EXPECT_EQ(pattern_->EstimateHeight(), 100.0f);
+}
 } // namespace OHOS::Ace::NG
