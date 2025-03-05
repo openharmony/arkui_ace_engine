@@ -19,18 +19,24 @@
 #include <utility>
 #include "gtest/gtest.h"
 #include "arkoala_api_generated.h"
-#include "test/unittest/capi/modifiers/modifier_test_base.h"
 #include "core/interfaces/native/common/extension_companion_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
+#include "test/unittest/capi/modifiers/modifier_test_base.h"
+#endif
+
+
 namespace OHOS::Ace::NG {
 class ICustomNodeBuilderTestHelper {
 public:
     virtual ~ICustomNodeBuilderTestHelper() = default;
-    virtual void TestFunction(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+    virtual void TestFunction(const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                               const Callback_Pointer_Void continuation) = 0;
+    virtual void TestFunctionSync(Ark_VMContext context, const Ark_Int32 resourceId,
+                                  const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) = 0;
 };
 
 class TestHelperManager {
@@ -91,11 +97,11 @@ private:
 
 template<typename T>
 class CustomNodeBuilderTestHelper : public ICustomNodeBuilderTestHelper {
-public:
-    CustomNodeBuilderTestHelper(T* testClassObject, FrameNode* parentNode)
+    public:
+    CustomNodeBuilderTestHelper(T* testClassObject, FrameNode* parentNode, Ark_NodeHandle customNode = nullptr)
         : testClassObject_(testClassObject),
         expectedParentNode_(parentNode),
-        expectedCustomNode_(testClassObject->CreateNode()),
+        expectedCustomNode_(call_CreateNode(testClassObject, customNode)),
         uniqueId_(TestHelperManager::Register(this))
         {}
 
@@ -103,9 +109,10 @@ public:
     {
         TestHelperManager::Unregister(uniqueId_);
         if (testClassObject_ && expectedCustomNode_) {
-            testClassObject_->DisposeNode(expectedCustomNode_);
+            call_DisposeNode(testClassObject_, expectedCustomNode_);
         }
         expectedParentNode_ = nullptr;
+        expectedCustomNode_ = nullptr;
         testClassObject_ = nullptr;
         syncCallbackCounter_ = 0;
         asyncCallbackCounter_ = 0;
@@ -116,20 +123,38 @@ public:
         return syncCallbackCounter_;
     }
 
+    int GetCallsCountAsync() const
+    {
+        return asyncCallbackCounter_;
+    }
+
+    int GetCallsCountAll() const
+    {
+        return syncCallbackCounter_ + asyncCallbackCounter_;
+    }
+
     CustomNodeBuilder GetBuilder() const
     {
-        CustomNodeBuilder builder = {
-            .resource = {.resourceId = uniqueId_, .hold = nullptr, .release = nullptr},
-            .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        CustomNodeBuilder builder;
+        builder.resource = {.resourceId = uniqueId_, .hold = [](InteropInt32){}, .release = [](InteropInt32){}};
+        builder.call =  [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
                 auto testHelper = TestHelperManager::GetInstance().GetHelperById(resourceId);
                 if (testHelper) {
-                    testHelper->TestFunction(context, resourceId, parentNode, continuation);
+                    testHelper->TestFunction(resourceId, parentNode, continuation);
                 } else {
                     ASSERT_EQ(testHelper, nullptr);
                 }
-            }
-        };
+            };
+        builder.callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+                const Callback_Pointer_Void continuation) {
+                auto testHelper = TestHelperManager::GetInstance().GetHelperById(resourceId);
+                if (testHelper) {
+                    testHelper->TestFunctionSync(context, resourceId, parentNode, continuation);
+                } else {
+                    ASSERT_EQ(testHelper, nullptr);
+                }
+            };
         return builder;
     }
 
@@ -143,7 +168,15 @@ public:
         return reinterpret_cast<FrameNode*>(expectedCustomNode_);
     }
 
-    void TestFunction(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+    void TestFunction(const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+                    const Callback_Pointer_Void continuation)
+    {
+        asyncCallbackCounter_++;
+        EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
+        CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
+    }
+
+    void TestFunctionSync(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                     const Callback_Pointer_Void continuation)
     {
         syncCallbackCounter_++;
@@ -158,8 +191,51 @@ private:
     int syncCallbackCounter_ = 0;
     int asyncCallbackCounter_ = 0;
     const int32_t uniqueId_;
-};
 
+    // Helper trait for checking the presence of the CreateNode method
+    template <typename U, typename = void>
+    struct has_CreateNode : std::false_type {};
+
+    template <typename U>
+    struct has_CreateNode<U, decltype(std::declval<U>().CreateNode(), void())> : std::true_type {};
+
+    // Helper trait for checking the presence of the DisposeNode method
+    template <typename U, typename = void>
+    struct has_DisposeNode : std::false_type {};
+
+    template <typename U>
+    struct has_DisposeNode<U, decltype(std::declval<U>().DisposeNode(std::declval<Ark_NodeHandle&>()), void())> :
+        std::true_type {};
+
+    // Overloading functions to select CreateNode and DisposeNode methods
+    template <class U>
+    static std::enable_if_t<has_CreateNode<U>::value, Ark_NodeHandle> call_CreateNode(U* testClassObject,
+                                                                                      Ark_NodeHandle)
+    {
+        Ark_NodeHandle customNode = testClassObject->CreateNode();
+        return customNode;
+    }
+
+    template <class U>
+    static std::enable_if_t<!has_CreateNode<U>::value, Ark_NodeHandle> call_CreateNode(U*, Ark_NodeHandle customNode)
+    {
+        return customNode;
+    }
+
+    template <class U>
+    static std::enable_if_t<has_DisposeNode<U>::value, void> call_DisposeNode(U* testClassObject, Ark_NodeHandle& node)
+    {
+        if (node) {
+            testClassObject->DisposeNode(node);
+        }
+    }
+
+    template <class U>
+    static std::enable_if_t<!has_DisposeNode<U>::value, void> call_DisposeNode(U* testClassObject, Ark_NodeHandle& node)
+    {
+        // No default action if there is no DisposeNode method
+    }
+};
 } // OHOS::Ace::NG
 
 #endif // CUSTOM_NODE_BUILDER_TEST_HELPER_H
