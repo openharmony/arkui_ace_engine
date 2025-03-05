@@ -19,6 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1207,15 +1208,9 @@ HWTEST_F(CommonMethodModifierTest4, setOnSizeChangeTest, TestSize.Level1)
         sizeH = arkLen.has_value() ? arkLen.value().value : 0.0f;
         checkEvent->newSize = SizeF(sizeW, sizeH);
     };
-
-    SizeChangeCallback callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = callback
-    };
+    static constexpr int32_t contextId = 123;
+    SizeChangeCallback callBackValue =
+        Converter::ArkValue<SizeChangeCallback>(callback, contextId);
     auto test = [this, &callBackValue, eventHub, frameNode](const sizeOneTestStep testSize) {
         checkEvent = std::nullopt;
         modifier_->setOnSizeChange(node_, &callBackValue);
@@ -1496,4 +1491,128 @@ HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateAngleValidValues, TestSi
     }
 }
 
+struct AutoTransitionEffectPeer {
+    const GENERATED_ArkUITransitionEffectAccessor* const accessor_;
+    TransitionEffectPeer* peer_;
+    static constexpr auto translateX = 123.4567f;
+    static constexpr auto translateY = 765.4321f;
+    static constexpr auto translateZ = 77.001f;
+    static constexpr auto angle = 10.f;
+    static constexpr auto perspective = 45.f;
+
+    explicit  AutoTransitionEffectPeer(const GENERATED_ArkUIFullNodeAPI* fullAPI,
+            ChainedTransitionEffectType type = ChainedTransitionEffectType::TRANSLATE)
+        :accessor_(fullAPI->getAccessors()->getTransitionEffectAccessor())
+    {
+        if (type == ChainedTransitionEffectType::TRANSLATE) {
+            Ark_TranslateOptions value;
+            value.x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(translateX);
+            value.y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(translateY);
+            value.z = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(translateZ);
+            peer_ = reinterpret_cast<TransitionEffectPeer*>(accessor_->translate(&value));
+        }
+        if (type == ChainedTransitionEffectType::ROTATE) {
+            Ark_RotateOptions value;
+            value.x = Converter::ArkValue<Opt_Number>(translateX);
+            value.y = Converter::ArkValue<Opt_Number>(translateY);
+            value.z = Converter::ArkValue<Opt_Number>(translateZ);
+            value.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(translateX);
+            value.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(translateY);
+            value.centerZ = Converter::ArkValue<Opt_Number>(translateZ);
+            value.perspective = Converter::ArkValue<Opt_Number>(perspective);
+            value.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(angle);
+            peer_ = reinterpret_cast<TransitionEffectPeer*>(accessor_->rotate(&value));
+        }
+    }
+    ~AutoTransitionEffectPeer() { accessor_->destroyPeer(peer_); }
+    Ark_TransitionEffect GetArkValue() const
+    {
+        return {
+            .ptr = reinterpret_cast<Ark_NativePointer>(peer_)
+        };
+    }
+    ACE_DISALLOW_COPY_AND_MOVE(AutoTransitionEffectPeer);
+};
+
+/*
+ * @tc.name: CommonMethod Transition0TransitionEffectTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, Transition0TransitionEffectTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    const auto& rContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+    ASSERT_NE(rContext, nullptr);
+    AutoTransitionEffectPeer peer(fullAPI_, ChainedTransitionEffectType::TRANSLATE);
+    const auto materialized = peer.GetArkValue();
+    auto effect = Converter::ArkUnion<Ark_Union_TransitionOptions_TransitionEffect,
+    Ark_TransitionEffect>(materialized);
+    modifier_->setTransition0(node_, &effect);
+    auto rcEffect = rContext->chainedTransitionEffect_;
+    ASSERT_NE(rcEffect, nullptr);
+    EXPECT_EQ(rcEffect->GetType(), ChainedTransitionEffectType::TRANSLATE);
+}
+
+/*
+ * @tc.name: CommonMethod Transition0TransitionEffect2Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, Transition0TransitionEffect2Test, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    const auto& rContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+    ASSERT_NE(rContext, nullptr);
+    AutoTransitionEffectPeer peer(fullAPI_, ChainedTransitionEffectType::ROTATE);
+    const auto materialized = peer.GetArkValue();
+    auto effect = Converter::ArkUnion<Ark_Union_TransitionOptions_TransitionEffect,
+    Ark_TransitionEffect>(materialized);
+    modifier_->setTransition0(node_, &effect);
+    auto rcEffect = rContext->chainedTransitionEffect_;
+    ASSERT_NE(rcEffect, nullptr);
+    EXPECT_EQ(rcEffect->GetType(), ChainedTransitionEffectType::ROTATE);
+}
+
+/*
+ * @tc.name: CommonMethod Transition1TransitionEffectCbTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, Transition1TransitionEffectCbTest, TestSize.Level1)
+{
+    struct CheckEvent {
+        int32_t nodeId;
+        bool isTransitionIn;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    const auto& rContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+    ASSERT_NE(rContext, nullptr);
+    AutoTransitionEffectPeer peer(fullAPI_);
+    const auto materialized = peer.GetArkValue();
+    auto callback = [](Ark_Int32 nodeId, const Ark_Boolean transitionIn) {
+        checkEvent = {.nodeId = nodeId, .isTransitionIn = transitionIn};
+    };
+    static constexpr int32_t contextId = 123;
+    ::TransitionFinishCallback callBackValue =
+        Converter::ArkValue<::TransitionFinishCallback>(callback, contextId);
+    auto optCb = Converter::ArkValue<Opt_TransitionFinishCallback>(callBackValue);
+    modifier_->setTransition1(node_, &materialized, &optCb);
+    auto rcEffect = rContext->chainedTransitionEffect_;
+    ASSERT_NE(rcEffect, nullptr);
+    EXPECT_EQ(rcEffect->GetType(), ChainedTransitionEffectType::TRANSLATE);
+    ASSERT_NE(rContext->transitionUserCallback_, nullptr);
+    rContext->transitionUserCallback_(true);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_TRUE(checkEvent->isTransitionIn);
+    rContext->transitionUserCallback_(false);
+    EXPECT_FALSE(checkEvent->isTransitionIn);
+    modifier_->setTransition1(node_, nullptr, &optCb);
+    rContext->transitionUserCallback_ = nullptr;
+    rContext->chainedTransitionEffect_ = nullptr;
+}
 }

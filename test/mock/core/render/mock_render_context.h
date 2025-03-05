@@ -97,6 +97,11 @@ public:
         return paintRect_;
     }
 
+    void SetTransitionUserCallback(TransitionFinishCallback&& callback) override
+    {
+        transitionUserCallback_ = std::move(callback);
+    }
+
 #ifdef ENHANCED_ANIMATION
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
@@ -200,6 +205,7 @@ public:
     std::function<void()> transitionOutCallback_;
     BlurOption backdropBlurOption;
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
+    TransitionFinishCallback transitionUserCallback_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
