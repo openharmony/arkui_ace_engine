@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
+import { AnimateParam, TranslateOptions } from "./ArkCommonInterfaces"
+import { DoubleAnimationParam } from "./ArkAnimationExtenderInterfaces"
+import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { unsafeCast, int32, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+export class AnimationExtenderInternal {
+    public static fromPtr(ptr: KPointer): AnimationExtender {
+        const obj : AnimationExtender = new AnimationExtender()
+        obj.peer = new Finalizable(ptr, AnimationExtender.getFinalizer())
+        return obj
+    }
+}
+export class AnimationExtender implements MaterializedBase {
+    peer?: Finalizable | undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    static ctor_animationextender(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._AnimationExtender_ctor()
+        return retval
+    }
+     constructor() {
+        // Constructor does not have parameters.
+        // It means that the static method call invokes ctor method as well
+        // when all arguments are undefined.
+        const ctorPtr : KPointer = AnimationExtender.ctor_animationextender()
+        this.peer = new Finalizable(ctorPtr, AnimationExtender.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._AnimationExtender_getFinalizer()
+    }
+    public static SetClipRect(node: KPointer, x: float32, y: float32, width: float32, height: float32): void {
+        const node_casted = node as (KPointer)
+        const x_casted = x as (float32)
+        const y_casted = y as (float32)
+        const width_casted = width as (float32)
+        const height_casted = height as (float32)
+        AnimationExtender.SetClipRect_serialize(node_casted, x_casted, y_casted, width_casted, height_casted)
+        return
+    }
+    public static OpenImplicitAnimation(param: AnimateParam): void {
+        const param_casted = param as (AnimateParam)
+        AnimationExtender.OpenImplicitAnimation_serialize(param_casted)
+        return
+    }
+    public static CloseImplicitAnimation(): void {
+        AnimationExtender.CloseImplicitAnimation_serialize()
+        return
+    }
+    public static StartDoubleAnimation(node: KPointer, param: DoubleAnimationParam): void {
+        const node_casted = node as (KPointer)
+        const param_casted = param as (DoubleAnimationParam)
+        AnimationExtender.StartDoubleAnimation_serialize(node_casted, param_casted)
+        return
+    }
+    public static AnimationTranslate(node: KPointer, options: TranslateOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (TranslateOptions)
+        AnimationExtender.AnimationTranslate_serialize(node_casted, options_casted)
+        return
+    }
+    private static SetClipRect_serialize(node: KPointer, x: float32, y: float32, width: float32, height: float32): void {
+        ArkUIGeneratedNativeModule._AnimationExtender_SetClipRect(node, x, y, width, height)
+    }
+    private static OpenImplicitAnimation_serialize(param: AnimateParam): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeAnimateParam(param)
+        ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimation(thisSerializer.asArray(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static CloseImplicitAnimation_serialize(): void {
+        ArkUIGeneratedNativeModule._AnimationExtender_CloseImplicitAnimation()
+    }
+    private static StartDoubleAnimation_serialize(node: KPointer, param: DoubleAnimationParam): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeDoubleAnimationParam(param)
+        ArkUIGeneratedNativeModule._AnimationExtender_StartDoubleAnimation(node, thisSerializer.asArray(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static AnimationTranslate_serialize(node: KPointer, options: TranslateOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeTranslateOptions(options)
+        ArkUIGeneratedNativeModule._AnimationExtender_AnimationTranslate(node, thisSerializer.asArray(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}

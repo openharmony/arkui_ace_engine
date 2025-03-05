@@ -1,0 +1,17 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/junk",
+        "rootDir" : ".",
+        "module": "CommonJS",
+        "plugins": [
+            {
+                "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js",
+                "trace": false,
+                "only_unmemoize": true,
+                "unmemoizeDir": "build/unmemoized",
+            }
+        ]
+    },
+    "include": ["./demo.ts", "./stub.ts"]
+}

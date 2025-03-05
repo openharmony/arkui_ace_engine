@@ -1,0 +1,22 @@
+{
+  "name": "concurrent-ui",
+  "description": "",
+  "main": "build/src/index.js",
+  "bin": "lib/js/index.js",
+  "dependencies": {
+    "node-loader": "^2.0.0",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "private": true,
+  "keywords": [],
+  "pkg": {
+    "scripts": "lib/js/app.js",
+    "outputPath": "dist"
+  },
+  "scripts": {
+    "compile": "WEBPACK_NO_MINIMIZE=true webpack --config webpack.config.node.js",
+    "run": "npm run compile && node lib/js/app.js",
+    "clean": "rimraf build"
+  }
+}

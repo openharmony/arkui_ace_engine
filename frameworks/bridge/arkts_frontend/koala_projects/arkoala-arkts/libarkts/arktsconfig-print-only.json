@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "outDir": "./abc",
+        "baseUrl": ".",
+	"comment": "This is a simplest config to run visitors on both stages",
+        "plugins": [
+            {
+                "transform": "./plugins/build/src/printer-plugin.js",
+                "stage": "parsed"
+            },
+	    {
+                "transform": "./plugins/build/src/parsed-stage-plugin.js",
+                "stage": "parsed"
+            },
+            {
+                "transform": "./plugins/build/src/checked-stage-plugin.js",
+                "stage": "checked"
+            }
+        ]
+    }
+}

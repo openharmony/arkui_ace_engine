@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/runtime",
+        "outDir": "build/unmemoized/abc",
+        "baseUrl": "./build/unmemoized/src",
+        "paths": {
+            "@koalaui/common": ["../../../../common/src"],
+            "@koalaui/compat": ["../../../../compat/src/arkts"]
+        }
+    },
+    "include": ["build/unmemoized/src/**/*.ts", "build/unmemoized/src/*.ts"],
+    "references": [
+        { "path": "../common" },
+        { "path": "../compat" }
+    ]
+}

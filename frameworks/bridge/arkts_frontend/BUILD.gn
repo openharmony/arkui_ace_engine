@@ -17,6 +17,10 @@ ohos_source_set("arkts_frontend") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   configs = [ "$ace_root:ace_config" ]
+  deps = [
+    "arkoala:arkoala_prebuild",
+    "arkoala:arkoala_prebuild_lib",
+  ]
 
   sources = [ "arkts_frontend.cpp" ]
   external_deps = [ "hilog:libhilog" ]

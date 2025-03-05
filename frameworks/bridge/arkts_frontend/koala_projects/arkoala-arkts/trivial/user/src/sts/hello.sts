@@ -1,0 +1,39 @@
+import { Text } from "@ohos.arkui"
+import { Column, ColumnOptions } from "@ohos.arkui"
+import { Button } from "@ohos.arkui"
+import { Component, State, Entry, memo } from "@ohos.arkui"
+import { Color } from "@ohos.arkui"
+
+@Entry
+@Component
+struct MyStateSample {
+    @State color: Color = Color.White
+    build() {
+        Column({ space: 20 } as ColumnOptions) {
+            Text("Hello World!")
+                .fontColor(this.color)
+            Button('change')
+                .onClick(() => {
+                    this.color = Color.Red
+                })
+
+        }
+            .width(100)
+            .height(300)
+
+    }
+}
+
+export class ArkUIEntry {
+    static run()  {
+        console.log("About to invoke the struct")
+        // The proper call fails because of a compiler frontend bug.
+        // MyStateSample({} as __Options_MyStateSample)
+        MyStateSample.instantiateImpl(
+            undefined,
+            (): MyStateSample => new MyStateSample(),
+            {} as __Options_MyStateSample,
+            undefined
+        )
+    }
+}

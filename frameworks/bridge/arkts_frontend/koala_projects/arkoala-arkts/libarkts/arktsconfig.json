@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "outDir": "./abc",
+        "baseUrl": ".",
+        "plugins": [
+            {
+                "transform": "./plugins/build/src/printer-plugin.js",
+                "stage": "parsed"
+            },
+            {
+                "transform": "./plugins/build/src/parsed-stage-plugin.js",
+                "stage": "parsed",
+                "arkui": "../../../arkui/src/sts"
+
+            },
+            {
+                "transform": "./plugins/build/src/checked-stage-plugin.js",
+                "stage": "checked"
+            }
+        ]
+    }
+}
