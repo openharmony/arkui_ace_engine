@@ -5834,8 +5834,10 @@ RefPtr<Kit::UIContext> PipelineContext::GetUIContext()
 
 void PipelineContext::GetAllPixelMap()
 {
+    CHECK_NULL_VOID(stageManager_);
     auto pageNode = stageManager_->GetLastPage();
     CHECK_NULL_VOID(pageNode);
+    CHECK_NULL_VOID(uiTranslateManager_);
     uiTranslateManager_->GetAllPixelMap(pageNode);
 }
 

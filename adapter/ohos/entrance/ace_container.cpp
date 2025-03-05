@@ -2266,7 +2266,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
         UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
-        pipeline->SaveTranslateManager(uiTranslateManager);
+        if (pipeline) {
+            pipeline->SaveTranslateManager(uiTranslateManager);
+        } else {
+            LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
+        }
     } else {
         LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
@@ -2279,7 +2283,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
-    pipeline->SaveTranslateManager(uiTranslateManager);
+    if (pipeline) {
+        pipeline->SaveTranslateManager(uiTranslateManager);
+    } else {
+        LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
+    }
 #endif
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
