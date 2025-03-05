@@ -23,6 +23,9 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+const size_t EMPTY_SIZE = 0;
+} // namespace
 class ImageAnalyzerControllerAccessorTest
     : public AccessorTestBase<GENERATED_ArkUIImageAnalyzerControllerAccessor,
     &GENERATED_ArkUIAccessors::getImageAnalyzerControllerAccessor, ImageAnalyzerControllerPeer> {
@@ -39,16 +42,17 @@ public:
 };
 
 /**
- * @tc.name: invalidateTest
+ * @tc.name: getImageAnalyzerSupportTypesTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnalyzerControllerAccessorTest, DISABLED_getImageAnalyzerSupportTypesTest, TestSize.Level1)
+HWTEST_F(ImageAnalyzerControllerAccessorTest, getImageAnalyzerSupportTypesTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getImageAnalyzerSupportTypes, nullptr);
-    accessor_->getImageAnalyzerSupportTypes(peer_);
-
-    LOGE("ARKOALA ImageAnalyzerControllerPeerImpl::GetImageAnalyzerSupportTypesImpl return type not implemented.");
+    auto result = accessor_->getImageAnalyzerSupportTypes(peer_);
+    auto types = Converter::Convert<std::vector<ImageAnalyzerType>>(result);
+    EXPECT_EQ(types.data(), nullptr);
+    EXPECT_EQ(types.size(), EMPTY_SIZE);
 }
 
 } // namespace OHOS::Ace::NG
