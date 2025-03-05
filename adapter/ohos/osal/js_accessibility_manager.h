@@ -651,7 +651,7 @@ private:
         const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize);
     void CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
         std::unique_ptr<JsonValue>& json, int32_t childSize);
-
+    bool IsEventIgnoredByWorkMode(const AccessibilityEvent& accessibilityEvent);
     void SendEventToAccessibilityWithNodeInner(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
     void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
