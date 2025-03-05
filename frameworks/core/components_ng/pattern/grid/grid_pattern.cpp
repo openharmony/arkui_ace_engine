@@ -776,9 +776,7 @@ float GridPattern::EstimateHeight() const
     if (isSmoothScrolling_) {
         const auto* infoPtr = UseIrregularLayout() ? &info_ : infoCopy_.get();
         CHECK_NULL_RETURN(infoPtr, 0.0f);
-        int32_t lineIndex = 0;
-        infoPtr->GetLineIndexByIndex(info_.startIndex_, lineIndex);
-        return infoPtr->GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) - info_.currentOffset_;
+        return infoPtr->GetTotalHeightFromZeroIndex(info_.startMainLineIndex_, GetMainGap()) - info_.currentOffset_;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
