@@ -284,15 +284,20 @@ class SubscribableHandler {
       }
     }
     // this is added for stability test: Reflect.get target is not object
+    let oldArrayLength : number = NaN;
     try {
       if (Reflect.get(target, property) === newValue) {
         return true;
+      }
+      if (this.enableV2Compatible_ && Array.isArray(target)) {
+        oldArrayLength = target.length;
       }
     } catch (error) {
       ArkTools.print('SubscribableHandler: set', target);
       stateMgmtConsole.error(`An error occurred in SubscribableHandler set, target type is: ${typeof target}, ${error.message}`);
       throw error;
     }
+
     Reflect.set(target, property, newValue);
     const propString = String(property);
     if (TrackedObject.isCompatibilityMode(target)) {
@@ -302,8 +307,7 @@ class SubscribableHandler {
       // mark view model object 'target' property 'propString' as changed
       // Notify affected elements and ensure its nested objects are V2-compatible
       if (this.enableV2Compatible_) {
-        ObserveV2.getObserve().fireChange(target, propString);
-        ObservedObject.enableV2CompatibleNoWarn(newValue);
+        this.setV2Compatible(target, property, newValue, oldArrayLength)
       }
     } else {
       if (this.isPropertyTracked(target, propString)) {
@@ -313,8 +317,7 @@ class SubscribableHandler {
         // mark view model object 'target' property 'propString' as changed
         // Notify affected elements and ensure its nested objects are V2-compatible
         if (this.enableV2Compatible_) {
-          ObserveV2.getObserve().fireChange(target, propString);
-          ObservedObject.enableV2CompatibleNoWarn(newValue);
+          this.setV2Compatible(target, propString, newValue, oldArrayLength)
         }
       } else {
         stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '${propString}' (object property tracking mode) is NOT @Tracked!`);
@@ -322,7 +325,24 @@ class SubscribableHandler {
     }
     return true;
   }
+
+  private setV2Compatible(target: Object, property: PropertyKey, newValue: any, oldArrayLength: number): void {
+    // for Array:
+    // fireChange OB_Length (only) if setting array item extends array length
+    // otherwise FireChange key.toString
+    // for non-array always FireChange
+    if (Array.isArray(target)) {
+      if (typeof property !== 'symbol') {
+        const arrayLenChanged = target.length !== oldArrayLength;
+        ObserveV2.getObserve().fireChange(target, arrayLenChanged ? ObserveV2.OB_LENGTH : property.toString());
+      }
+    } else {
+      ObserveV2.getObserve().fireChange(target, property.toString())
+    }
+    ObservedObject.enableV2CompatibleNoWarn(newValue);
+  }
 }
+
 
 class SubscribableMapSetHandler extends SubscribableHandler {
   constructor(owningProperty: IPropertySubscriber) {
@@ -756,19 +776,7 @@ class SubscribableArrayHandler extends SubscribableHandler {
         return result;
       };
     } else {
-      return ret.bind(target); 
-    }
-  }
-
-  set(target: Array<any>, key: string | symbol, value: any): boolean {
-    if (this.enableV2Compatible_) {
-      const originalLength = target.length;
-      const result = super.set(target, key, value);
-      const arrayLenChanged = target.length !== originalLength;
-      ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
-      return result;
-    } else {
-      return super.set(target, key, value);
+      return ret.bind(target);
     }
   }
 }
@@ -899,7 +907,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
       stateMgmtConsole.warn(`enableV2Compatibility cannot be applied for an object without V1 observation.`);
       return;
     }
-    if (ObserveV2.IsObservedObjectV2(obj) || ObserveV2.IsMakeObserved(obj) || ObserveV2.IsProxiedObservedV2(obj)) {
+    if (ObserveV2.IsObservedObjectV2(obj) || ObserveV2.IsMakeObserved(obj)) {
       stateMgmtConsole.warn(`enableV2Compatibility cannot be applied for an object with V2 observation already enabled.`);
       return;
     }
@@ -914,7 +922,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
       return;
     }
 
-    if (ObserveV2.IsObservedObjectV2(obj) || ObserveV2.IsMakeObserved(obj) || ObserveV2.IsProxiedObservedV2(obj)) {
+    if (ObserveV2.IsObservedObjectV2(obj) || ObserveV2.IsMakeObserved(obj)) {
       return;
     }
 
@@ -939,11 +947,6 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
       return;
     }
 
-    // Mark the object as visited to prevent circular references in future calls
-    visitedObjects.add(obj);
-
-    obj[SubscribableHandler.ENABLE_V2_COMPATIBLE] = true;
-
     // Get the unproxied/raw object
     const rawObj = ObservedObject.GetRawObject(obj);
 
@@ -951,6 +954,13 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     if (!rawObj || typeof rawObj !== 'object') {
       return;
     }
+
+    stateMgmtConsole.debug(`enableV2CompatibleInternal object of class '${obj?.constructor?.name}'`)
+
+    // Mark the object as visited to prevent circular references in future calls
+    visitedObjects.add(obj);
+
+    obj[SubscribableHandler.ENABLE_V2_COMPATIBLE] = true;
 
     // Recursively process Array elements
     if (Array.isArray(rawObj)) {
