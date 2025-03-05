@@ -8420,7 +8420,7 @@ class ImageSpanBorderRadiusModifier extends ModifierWithKey {
         getUINativeModule().imageSpan.setBorderRadius(node, this.value, this.value, this.value, this.value);
       } else {
         let keys = Object.keys(this.value);
-        if (Utils.isApiVersionEQAbove(16) &&
+        if (Utils.isApiVersionEQAbove(18) &&
           (keys.indexOf('topStart') >= 0 || keys.indexOf('topEnd') >= 0 ||
           keys.indexOf('bottomStart') >= 0 || keys.indexOf('bottomEnd') >= 0)) {
           let localizedBorderRadius = this.value;
