@@ -579,10 +579,7 @@ public:
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        if (!container) {
-            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-            return apiTargetVersion < static_cast<int32_t>(version);
-        }
+        CHECK_NULL_RETURN(container, false);
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }
