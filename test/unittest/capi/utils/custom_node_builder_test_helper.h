@@ -140,20 +140,14 @@ class CustomNodeBuilderTestHelper : public ICustomNodeBuilderTestHelper {
         builder.call =  [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
                 auto testHelper = TestHelperManager::GetInstance().GetHelperById(resourceId);
-                if (testHelper) {
-                    testHelper->TestFunction(resourceId, parentNode, continuation);
-                } else {
-                    ASSERT_EQ(testHelper, nullptr);
-                }
+                ASSERT_NE(testHelper, nullptr);
+                testHelper->TestFunction(resourceId, parentNode, continuation);
             };
         builder.callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
                 auto testHelper = TestHelperManager::GetInstance().GetHelperById(resourceId);
-                if (testHelper) {
-                    testHelper->TestFunctionSync(context, resourceId, parentNode, continuation);
-                } else {
-                    ASSERT_EQ(testHelper, nullptr);
-                }
+                ASSERT_NE(testHelper, nullptr);
+                testHelper->TestFunctionSync(context, resourceId, parentNode, continuation);
             };
         return builder;
     }
