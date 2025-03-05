@@ -88,6 +88,14 @@ struct CacheMatrixInfo {
     RectF paintRectWithTransform;
 };
 
+struct FRCSceneFpsInfo {
+    std::string scene;
+    int32_t duration_120;
+    int32_t duration_90;
+    int32_t duration_72;
+    int32_t duration_60;
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -789,6 +797,12 @@ public:
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
+
+    void FrameRateDurationsStatistics(SceneStatus status, int32_t expectedRate, const std::string& scene);
+ 
+    void AddFrameRateDuration(int32_t frameRate, int32_t duration);
+ 
+    void TryPrintDubugLog(const std::string& scene, float speed, SceneStatus status);
 
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
@@ -1566,6 +1580,9 @@ private:
     mutable std::shared_mutex colorModeCallbackMutex_;
 
     RefPtr<Kit::FrameNode> kitNode_;
+    FRCSceneFpsInfo curFRCSceneFpsInfo_;
+    int64_t calTime_;
+    int32_t calFrameRate_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG
