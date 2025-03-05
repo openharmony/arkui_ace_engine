@@ -1347,6 +1347,46 @@ bool JSNavigationStack::IsTopFromSingletonMoved()
     return isFromSingletonMoved->ToBoolean();
 }
 
+uint64_t JSNavigationStack::GetNavDestinationIdInt(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, -1);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return -1;
+    }
+    auto id = pathInfo->GetProperty("navDestinationId");
+    if (!id->IsString()) {
+        return -1;
+    }
+    auto navDestinationIdStr = id->ToString();
+    auto navDestinationId = std::atol(navDestinationIdStr.c_str());
+    return navDestinationId;
+}
+
+bool JSNavigationStack::GetIsForceSet(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto isForceSet = pathInfo->GetProperty("isForceSet");
+    if (!isForceSet->IsBoolean()) {
+        return false;
+    }
+    return isForceSet->ToBoolean();
+}
+
+void JSNavigationStack::ResetIsForceSetFlag(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetPropertyObject("isForceSet", JsiValue::Undefined());
+}
+
 void JSNavigationStack::ResetSingletonMoved()
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
