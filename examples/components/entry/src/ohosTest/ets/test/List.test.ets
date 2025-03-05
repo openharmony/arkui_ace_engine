@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import RowBootcampTest from './RowsColumnsAndStacking/RowBootcamp.test'
 
 export default function testsuite() {
   abilityTest();
+  RowBootcampTest();
 }
