@@ -52,6 +52,9 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
     AsyncDragEnd();
     ResetBorderRadiusAnimation();
     UnRegisterDragListener();
+    if (params.isNeedGather) {
+        DragDropFuncWrapper::ResetNode(frameNode);
+    }
     if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::READY)) {
         if (gestureHub->GetTextDraggable()) {
             params.preScaledPixelMap = nullptr;
