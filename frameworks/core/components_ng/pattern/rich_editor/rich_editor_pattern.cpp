@@ -1714,6 +1714,7 @@ void RichEditorPattern::CopyTextSpanLineStyle(
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextAlign);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, WordBreak);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LineBreakStrategy);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, ParagraphSpacing);
     needLeadingMargin |= previewTextRecord_.previewTextHasStarted;
     if (source->HasLeadingMargin()) {
         auto leadingMargin = source->GetLeadingMarginValue({});
@@ -1886,6 +1887,15 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
     CHECK_NULL_RETURN(overlayMod_, caretOffset);
     caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, richTextRect_.Right()));
     return caretOffset;
+}
+
+void RichEditorPattern::HandleCurrentPositionParagraphInfo(float& lastLineTop, float& paragraphSpacing)
+{
+    auto paragraphInfo = paragraphs_.GetParagrahInfo(caretPosition_);
+    paragraphSpacing = paragraphInfo.paragraphStyle.paragraphSpacing.ConvertToPx();
+    float lastLineHeight = 0.0f;
+    CHECK_EQUAL_VOID(paragraphInfo.end - 1 >= paragraphInfo.start, false);
+    lastLineTop = CalcCursorOffsetByPosition(paragraphInfo.end -1, lastLineHeight, true, true).GetY();
 }
 
 bool RichEditorPattern::IsCustomSpanInCaretPos(int32_t position, bool downStreamFirst)
@@ -2566,7 +2576,10 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
         if (it == std::prev(spanNodes.end()) || (*it)->GetSpanItem()->content.back() == u'\n') {
             ParagraphInfo info;
             auto lm = (*it)->GetLeadingMarginValue({});
-
+            std::optional<double> spacingOpt;
+            if (auto spacing = (*it)->GetParagraphSpacing(); spacing.has_value()) {
+                spacingOpt = spacing.value().ConvertToFp();
+            }
             res.emplace_back(ParagraphInfo {
                 .leadingMarginPixmap = lm.pixmap,
                 .leadingMarginSize = { lm.size.Width().ToString(),
@@ -2574,6 +2587,7 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
                 .textAlign = static_cast<int32_t>((*it)->GetTextAlignValue(TextAlign::START)),
                 .wordBreak = static_cast<int32_t>((*it)->GetWordBreakValue(WordBreak::BREAK_WORD)),
                 .lineBreakStrategy = static_cast<int32_t>((*it)->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY)),
+                .paragraphSpacing = spacingOpt,
                 .range = { paraStart, (*it)->GetSpanItem()->position },
             });
             paraStart = (*it)->GetSpanItem()->position;
@@ -2677,6 +2691,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     spanNode->UpdateTextAlign(style.textAlign.value_or(TextAlign::START));
     spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
     spanNode->UpdateLineBreakStrategy(style.lineBreakStrategy.value_or(LineBreakStrategy::GREEDY));
+    spanNode->UpdateParagraphSpacing(style.paragraphSpacing.value_or(Dimension()));
     if (style.leadingMargin.has_value()) {
         spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
         spanNode->UpdateLeadingMargin(*style.leadingMargin);
@@ -4107,6 +4122,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
             static_cast<int32_t>(spanItem->textLineStyle->GetWordBreak().value_or(WordBreak::BREAK_WORD));
         textStyle.lineBreakStrategy =
             static_cast<int32_t>(spanItem->textLineStyle->GetLineBreakStrategy().value_or(LineBreakStrategy::GREEDY));
+        textStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     }
     textStyle.textBackgroundStyle = spanItem->backgroundStyle;
     return textStyle;
@@ -4470,6 +4486,7 @@ TextSpanOptions RichEditorPattern::GetTextSpanOptions(const RefPtr<SpanItem>& sp
     paraStyle.leadingMargin = spanItem->textLineStyle->GetLeadingMargin();
     paraStyle.wordBreak = spanItem->textLineStyle->GetWordBreak();
     paraStyle.lineBreakStrategy = spanItem->textLineStyle->GetLineBreakStrategy();
+    paraStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     TextSpanOptions options;
     options.value = spanItem->content;
     options.offset = caretPosition_;
@@ -10153,6 +10170,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
         paraStyle.leadingMargin = (*it)->textLineStyle->GetLeadingMargin();
         paraStyle.wordBreak = (*it)->textLineStyle->GetWordBreak();
         paraStyle.lineBreakStrategy = (*it)->textLineStyle->GetLineBreakStrategy();
+        paraStyle.paragraphSpacing = (*it)->textLineStyle->GetParagraphSpacing();
         spanParaStyle = paraStyle;
     } else if (spanNode && spanNode->GetSpanItem()) {
         spanTextStyle = spanNode->GetSpanItem()->GetTextStyle();
@@ -10161,6 +10179,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
         paraStyle.leadingMargin = spanNode->GetLeadingMarginValue({});
         paraStyle.wordBreak = spanNode->GetWordBreak();
         paraStyle.lineBreakStrategy = spanNode->GetLineBreakStrategy();
+        paraStyle.paragraphSpacing = spanNode->GetParagraphSpacing();
         spanParaStyle = paraStyle;
     }
 }
@@ -10290,6 +10309,8 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
             textStyleResult.wordBreak = static_cast<int32_t>(paraStyle->wordBreak.value()));
         IF_TRUE(paraStyle->lineBreakStrategy.has_value(),
             textStyleResult.lineBreakStrategy = static_cast<int32_t>(paraStyle->lineBreakStrategy.value()));
+        IF_TRUE(paraStyle->paragraphSpacing.has_value(), textStyleResult.paragraphSpacing =
+            Dimension(paraStyle->paragraphSpacing.value().ConvertToFp(), DimensionUnit::FP));
         retInfo.SetTextStyle(textStyleResult);
     }
     changeValue.SetRichEditorReplacedSpans(retInfo);
@@ -10825,9 +10846,16 @@ int32_t RichEditorPattern::CalcMoveDownPos(float& leadingMarginOffset)
     auto lineHeightDis = rectLineInfo.Height();
     // midle or end, first line start position,end line end position
     textOffsetDownY = caretInfo.caretOffsetLine.GetY() + caretInfo.caretHeightLine - textOffsetY;
+    float lastLineTop = 0.0f;
+    float paragraphSpacing = 0.0f;
+    HandleCurrentPositionParagraphInfo(lastLineTop, paragraphSpacing);
     if (cursorNotAtLineStart || caretPosition_ == 0) {
+        IF_TRUE(NearEqual(std::floor(caretInfo.caretOffsetLine.GetY()), std::floor(lastLineTop)),
+            textOffsetDownY += paragraphSpacing);
         textOffset = Offset(caretInfo.caretOffsetLine.GetX() - textOffsetX, textOffsetDownY);
     } else {
+        IF_TRUE(NearEqual(std::floor(caretInfo.caretOffsetLine.GetY() + lineHeightDis), std::floor(lastLineTop)),
+            textOffsetDownY += paragraphSpacing);
         textOffsetDownY += lineHeightDis;
         textOffset = Offset(caretOffsetOverlay.GetX() - textOffsetX, textOffsetDownY);
     }
@@ -11127,32 +11155,35 @@ int32_t RichEditorPattern::HandleKbVerticalSelection(bool isUp)
         CHECK_NULL_RETURN(GreatNotEqual(textOffset.GetY(), 0), 0);
         newPos = paragraphs_.GetIndex(textOffset, true);
         OffsetF newCaretOffset = CalcCursorOffsetByPosition(newPos, newCaretHeight);
-        if (!textSelector_.SelectNothing() && textSelector_.GetTextEnd() == caretPosition_ &&
-            selectStartOffset.GetY() == newCaretOffset.GetY()) {
-            return textSelector_.GetTextStart();
-        }
+        CHECK_EQUAL_RETURN(!textSelector_.SelectNothing() && textSelector_.GetTextEnd() == caretPosition_ &&
+            selectStartOffset.GetY() == newCaretOffset.GetY(), true, textSelector_.GetTextStart());
     } else {
         float selectEndHeight = 0.0f;
         OffsetF selectEndOffset = CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectEndHeight);
         careOffsetY = caretOffset.GetY() - GetTextRect().GetY() + caretHeight + (minDet / 2.0);
+        float lastLineTop = 0.0f;
+        float paragraphSpacing = 0.0f;
+        HandleCurrentPositionParagraphInfo(lastLineTop, paragraphSpacing);
         if (positionType == PositionType::LINE_START) {
             auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
             CHECK_NULL_RETURN(overlayMod, 0);
             auto caretOffsetOverlay = overlayMod->GetCaretOffset();
             auto rectLineInfo = CalcLineInfoByPosition();
             careOffsetY += rectLineInfo.Height();
+            IF_TRUE(NearEqual(std::floor(caretOffset.GetY() + rectLineInfo.Height()), std::floor(lastLineTop)),
+                careOffsetY += paragraphSpacing);
             textOffset = Offset(caretOffsetOverlay.GetX() - GetTextRect().GetX(), careOffsetY);
         } else {
+            IF_TRUE(NearEqual(std::floor(caretOffset.GetY()), std::floor(lastLineTop)),
+                careOffsetY += paragraphSpacing);
             textOffset = Offset(caretOffset.GetX() - GetTextRect().GetX(), careOffsetY);
         }
         auto height = paragraphs_.GetHeight();
         CHECK_NULL_RETURN(LessNotEqual(textOffset.GetY(), height), GetTextContentLength());
         newPos = paragraphs_.GetIndex(textOffset, true);
         OffsetF newCaretOffset = CalcCursorOffsetByPosition(newPos, newCaretHeight);
-        if (!textSelector_.SelectNothing() && textSelector_.GetTextStart() == caretPosition_ &&
-            selectEndOffset.GetY() == newCaretOffset.GetY()) {
-            return textSelector_.GetTextEnd();
-        }
+        CHECK_EQUAL_RETURN(!textSelector_.SelectNothing() && textSelector_.GetTextStart() == caretPosition_ &&
+            selectEndOffset.GetY() == newCaretOffset.GetY(), true, textSelector_.GetTextEnd());
     }
     return newPos;
 }
@@ -11402,7 +11433,8 @@ void RichEditorPattern::PreferredParagraph()
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = textStyle.GetFontSize().ConvertToPx(),
-        .halfLeading = textStyle.GetHalfLeading() };
+        .halfLeading = textStyle.GetHalfLeading(),
+        .paragraphSpacing = textStyle.GetParagraphSpacing() };
     presetParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_VOID(presetParagraph_);
     presetParagraph_->PushStyle(textStyle);
