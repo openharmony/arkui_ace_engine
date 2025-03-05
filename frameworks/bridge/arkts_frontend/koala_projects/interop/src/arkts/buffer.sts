@@ -1,0 +1,29 @@
+// todo can be removed if passing ArrayBuffer type through interop is possible
+
+import { int8 } from "@koalaui/common"
+
+export class KBuffer {
+    private readonly _buffer: byte[]
+    public get buffer(): byte[] {
+        return this._buffer
+    }
+    public get length(): int {
+        return this._buffer.length
+    }
+
+    constructor(length: int) {
+        this._buffer = new byte[length]
+    }
+
+    constructor(buffer: byte[]) {
+        this._buffer = buffer
+    }
+
+    set(index: int, value: int8): void {
+        this._buffer[index] = value as byte
+    }
+
+    get(index: int): byte {
+        return this._buffer[index]
+    }
+}

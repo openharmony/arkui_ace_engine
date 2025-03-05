@@ -1,0 +1,24 @@
+{
+  "string": [
+    {
+      "name": "entry_desc",
+      "value": "Arkoala Loader"
+    },
+    {
+      "name": "MainAbility_label",
+      "value": "Arkoala Loader"
+    },
+    {
+      "name": "MainAbility_desc",
+      "value": "Arkoala Loader"
+    },
+    {
+      "name": "Video_src",
+      "value": "https://contentcenter-test-bj4-001.obs.cn-north-4.myhwclouds.com/test_media/hw264/twopass/10513129109511410900490_tp.mp4"
+    },
+    {
+      "name": "text_label_1",
+      "value": "My Simple Label"
+    }
+  ]
+}

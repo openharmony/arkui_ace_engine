@@ -1,0 +1,15 @@
+/** @memo */
+rek(__memo_context: __memo_context_type, __memo_id: __memo_id_type, msg: string) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + ("9___key_id_DIRNAME/module.test.ts" as __memo_id_type), 2);
+    const __memo_parameter_msg = __memo_scope.param(1, msg);
+    const __memo_parameter_this = __memo_scope.param(0, this);
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    log(`I'm rek the member. I have an ${__memo_parameter_msg.value}`);
+    {
+        __memo_scope.recache();
+        return;
+    }
+}

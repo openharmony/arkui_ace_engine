@@ -1,0 +1,17 @@
+install node modules (arkoala):
+  stage: install-deps
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (incremental)
+  before_script:
+    - !reference [.setup, script]
+  script:
+    - npm i --no-audit --no-fund --prefix arkoala
+  artifacts:
+    paths:
+      - arkoala/har/node_modules
+      - arkoala/framework/node_modules
+      - arkoala/rollup-plugin-ets/node_modules
+      - arkoala/node_modules
+    expire_in: 1 day

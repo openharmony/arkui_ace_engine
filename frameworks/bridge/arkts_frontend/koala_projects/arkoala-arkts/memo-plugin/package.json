@@ -1,0 +1,10 @@
+{
+    "name": "@koalaui/memo-plugin",
+    "main": "build/src/MemoTransformer.js",
+    "scripts": {
+        "compile": "tsc -b .",
+        "compile:libarkts": "npm run compile --prefix ../libarkts",
+        "demo:run": "npm run compile && npm run ts-like:compile --prefix demo && npm run arkts-like:compile:capi --prefix demo && npm run run --prefix demo",
+        "demo:disasm": "npm run disasm --prefix demo"
+    }
+}

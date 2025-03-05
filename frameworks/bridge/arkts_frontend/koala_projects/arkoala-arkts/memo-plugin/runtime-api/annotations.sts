@@ -1,0 +1,5 @@
+export @interface memo {}
+export @interface memo_intrinsic {}
+export @interface memo_entry {}
+export @interface memo_stable {}
+export @interface memo_skip {}

@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "package": "@ohos.example",
+        "outDir": "build/sts/abc",
+        "baseUrl": ".",
+        "paths": {
+            "@ohos.arkui": ["../../arkui/src/sts"]
+        },
+       "plugins": [
+            {
+                "transform": "@koalaui/libarkts/plugins/printer-plugin",
+                "stage": "parsed"
+            },
+            {
+                "transform": "@koalaui/libarkts/plugins/parsed-stage-plugin",
+                "stage": "parsed",
+                "arkui": "../../../../arkui/src/sts"
+            },
+            {
+                "transform": "@koalaui/libarkts/plugins/checked-stage-plugin",
+                "stage": "checked"
+            }
+        ]
+    },
+    "include": [
+        "./src/ets/hello.sts"
+    ]
+}

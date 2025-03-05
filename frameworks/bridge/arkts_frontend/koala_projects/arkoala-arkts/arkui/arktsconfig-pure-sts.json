@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "package": "@ohos.arkui",
+        "outDir": "build/sts/abc",
+        "baseUrl": "./src/sts"
+    },
+    "files": [
+        "./src/sts/arkui.sts"
+    ]
+}

@@ -36,7 +36,7 @@ ohos_prebuilt_etc("arkoala_prebuild_lib") {
   } else {
     install_enable = false
   }
-  
+
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
