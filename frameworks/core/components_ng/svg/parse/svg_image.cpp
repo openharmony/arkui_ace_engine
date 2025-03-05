@@ -196,7 +196,7 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
     auto scaleY = 0.0f;
     auto offsetX = 0.0f;
     auto offsetY = 0.0f;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         scaleX = std::min(viewBox.Width() / realSize.Width(), viewBox.Height() / realSize.Height());
         scaleY = scaleX;
         auto spaceX = viewBox.Width() - realSize.Width() * scaleX;

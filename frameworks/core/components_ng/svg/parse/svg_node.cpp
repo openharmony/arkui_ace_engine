@@ -736,7 +736,7 @@ double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPor
                 return value.Value() * height;
             }
             if (type == SvgLengthType::OTHER) {
-                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                     return value.Value() * sqrt(width * height);
                 }
                 return value.Value() * std::sqrt(width * width + height * height) / std::sqrt(2.0f);

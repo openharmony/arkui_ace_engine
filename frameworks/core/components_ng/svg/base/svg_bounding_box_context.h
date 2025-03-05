@@ -44,9 +44,21 @@ public:
         }
         return SvgLengthScaleRule(containerRect_, viewPort_, scaleUnit);
     }
+
+    bool UseFillColor() const
+    {
+        return useFillColor_;
+    }
+
+    void SetUseFillColor(bool useFillColor)
+    {
+        useFillColor_ = useFillColor;
+    }
+
 private:
     Rect containerRect_;
     Size viewPort_;
+    bool useFillColor_ = true;
 };
 }
 #endif
