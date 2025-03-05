@@ -245,7 +245,7 @@ bool SubwindowOhos::InitContainer()
         return false;
     }
     subSurface->SetShadowElevation(0.0f);
-    window_->NapiSetUIContent(url, nullptr, nullptr, Rosen::BackupAndRestoreType::NONE);
+    window_->NapiSetUIContent(url, (napi_env)nullptr, (napi_value)nullptr, Rosen::BackupAndRestoreType::NONE);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(window_->GetWindowId());
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Window child containerId : %{public}d", childContainerId_);
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
@@ -1220,7 +1220,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "init toast dialog view enter");
 #ifndef NG_BUILD
-    dialogWindow_->NapiSetUIContent("", nullptr, nullptr, Rosen::BackupAndRestoreType::NONE);
+    dialogWindow_->NapiSetUIContent("", (napi_env)nullptr, (napi_value)nullptr, Rosen::BackupAndRestoreType::NONE);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(dialogWindow_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
     ContainerScope scope(childContainerId_);
