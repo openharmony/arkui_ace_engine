@@ -14,7 +14,9 @@
  */
 #include "core/interfaces/native/node/select_modifier.h"
 
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -617,6 +619,30 @@ void ResetSelectDirection(ArkUINodeHandle node)
     SelectModelNG::SetLayoutDirection(frameNode, DEFAULT_SELECT_DIRECTION);
 }
 
+void SetSelectDividerStyle(ArkUINodeHandle node, ArkUIMenuDividerOptions* dividerInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    NG::SelectDivider divider;
+    divider.isDividerStyle = true;
+    divider.strokeWidth = Dimension(dividerInfo->strokeWidth.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->strokeWidth.units));
+    divider.color = Color(dividerInfo->color);
+    divider.startMargin = Dimension(dividerInfo->startMargin.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->startMargin.units));
+    divider.endMargin = Dimension(dividerInfo->endMargin.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->endMargin.units));
+    DividerMode mode = dividerInfo->mode == 1 ? DividerMode::EMBEDDED_IN_MENU: DividerMode::FLOATING_ABOVE_MENU;
+    SelectModelNG::SetDividerStyle(frameNode, divider, mode);
+}
+
+void ResetSelectDividerStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    SelectModelNG::ResetDividerStyle(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -672,6 +698,8 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetSelectDividerNull = ResetSelectDividerNull,
         .setSelectDirection = SetSelectDirection,
         .resetSelectDirection = ResetSelectDirection,
+        .setSelectDividerStyle = SetSelectDividerStyle,
+        .resetSelectDividerStyle = ResetSelectDividerStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

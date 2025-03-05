@@ -73,6 +73,7 @@ public:
 void TextClockPatternTestNG::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -127,19 +128,19 @@ void TextClockPatternTestNG::CreateWithItem(const std::function<void(TextClockMo
         callback(model);
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void TextClockPatternTestNG::Start()
 {
     controller_->Start();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void TextClockPatternTestNG::Stop()
 {
     controller_->Stop();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 /**

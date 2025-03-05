@@ -29,6 +29,7 @@ public:
     ~NGSvgTransform() = default;
 
     static Matrix4 CreateMatrix4(const std::vector<NG::TransformInfo>& transformVec, const Offset& globalPivot);
+    static bool CreateTranslate(const std::vector<std::string>& paramVec, RSMatrix& matrix);
 
 private:
     static bool UpdateSingleTransform(

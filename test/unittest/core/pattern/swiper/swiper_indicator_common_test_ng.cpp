@@ -92,7 +92,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern002, TestSize.Level1)
         (*callback)(info);
     }
     EXPECT_TRUE(indicatorPattern->isClicked_);
-    EXPECT_EQ(indicatorPattern->mouseClickIndex_, std::nullopt);
+    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
 }
 
 /**

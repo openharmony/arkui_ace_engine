@@ -17,9 +17,11 @@
 
 #include <optional>
 #include <string>
+#include <unordered_set>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/rect.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
@@ -182,6 +184,7 @@ private:
     OffsetF AdjustPosition(const OffsetF& position, float width, float height, float space);
     OffsetF AdjustPositionNew(const OffsetF& position, float width, float height);
     OffsetF GetBubblePosition(const OffsetF& position, float xMin, float xMax, float yMin, float yMax);
+    bool CheckIfNeedRemoveArrow(float& xMin, float& xMax, float& yMin, float& yMax);
     void CheckArrowPosition(OffsetF& position, float width, float height);
     bool IsUIExtensionWindow();
     void HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);

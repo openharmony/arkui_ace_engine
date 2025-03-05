@@ -43,6 +43,7 @@ struct DragDropInitiatingParams {
     OptionsAfterApplied optionsAfterApplied;
     WeakPtr<FrameNode> frameNode;
     SourceType triggeredSourceType;
+    Offset touchOffset { 0.0, 0.0 };
 
     RefPtr<FrameNode> GetFrameNode()
     {
@@ -62,6 +63,7 @@ struct DragDropInitiatingParams {
         notifyPreDragCallback.Cancel();
         showGatherCallback.Cancel();
         preDragStatusCallback.Cancel();
+        touchOffset.Reset();
     }
 };
 
@@ -109,6 +111,10 @@ protected:
     bool CheckStatusForPanActionBegin(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
     int32_t GetCurDuration(const TouchEvent& touchEvent, int32_t curDuration);
     void FireCustomerOnDragEnd();
+    void SetTextPixelMap();
+    void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
+    void HandleTextDragCallback();
+
 private:
     WeakPtr<DragDropInitiatingStateMachine> stateMachine_;
 };

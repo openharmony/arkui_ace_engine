@@ -116,7 +116,7 @@ bool UpdateColumnWidth(const RefPtr<FrameNode>& frameNode, const RefPtr<GridColu
     CHECK_NULL_RETURN(currentId >= MIN_SUBCONTAINER_ID, false);
     auto subwindowManager = SubwindowManager::GetInstance();
     CHECK_NULL_RETURN(subwindowManager, false);
-    auto subwindow = subwindowManager->GetSubwindow(pipeline->GetInstanceId());
+    auto subwindow = subwindowManager->GetSubwindowByType(pipeline->GetInstanceId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_RETURN(subwindow, false);
     auto width = subwindow->GetRect().Width();
     CHECK_NULL_RETURN(Positive(width), false);

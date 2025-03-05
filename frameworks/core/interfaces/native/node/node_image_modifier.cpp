@@ -14,13 +14,14 @@
  */
 #include "core/interfaces/native/node/node_image_modifier.h"
 
+#include "effect/color_filter.h"
+
 #include "core/common/card_scope.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-
-#include "effect/color_filter.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

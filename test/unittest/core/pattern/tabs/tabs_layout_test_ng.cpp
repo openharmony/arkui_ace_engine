@@ -390,6 +390,73 @@ HWTEST_F(TabsLayoutTestNg, BarGridAlign001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 1), RectF(377.5f, 0, 72.5f, TAB_BAR_SIZE)));
     EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 2), RectF(450.0f, 0, 72.5f, TAB_BAR_SIZE)));
     EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 3), RectF(522.5f, 0, 72.5f, TAB_BAR_SIZE)));
+
+    /**
+     * @tc.steps: steps4. TabsWidth is > lg
+     * @tc.expected: The margin between items would be 0
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(1500.0f));
+    FlushUITasks();
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 0), RectF(505.0f, 0, 122.5f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 1), RectF(627.5f, 0, 122.5f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 2), RectF(750.0f, 0, 122.5f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 3), RectF(872.5f, 0, 122.5f, TAB_BAR_SIZE)));
+}
+
+/**
+ * @tc.name: BarGridAlign002
+ * @tc.desc: Test Tabs BarGridAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsLayoutTestNg, BarGridAlign002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Set columnNum > maxNum
+     * @tc.expected: The margin between items would be 0
+     */
+    TabsModelNG model = CreateTabs();
+    BarGridColumnOptions options;
+    options.sm = 6;  // > SM_COLUMN_NUM
+    options.md = 10; // > MD_COLUMN_NUM
+    options.lg = 14; // > LG_COLUMN_NUM
+    options.gutter = Dimension(5);
+    options.margin = Dimension(10);
+    model.SetBarGridAlign(options);
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. TabsWidth is md
+     * @tc.expected: The margin between items would be 0
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(800.0f));
+    FlushUITasks();
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 0), RectF(0, 0, 200.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 1), RectF(200.0f, 0, 200.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 2), RectF(400.0f, 0, 200.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 3), RectF(600.0f, 0, 200.0f, TAB_BAR_SIZE)));
+
+    /**
+     * @tc.steps: steps3. TabsWidth is sm
+     * @tc.expected: The margin between items would be 0
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(400.0f));
+    FlushUITasks();
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 0), RectF(0, 0, 100.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 1), RectF(100.0f, 0, 100.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 2), RectF(200.0f, 0, 100.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 3), RectF(300.0f, 0, 100.0f, TAB_BAR_SIZE)));
+
+    /**
+     * @tc.steps: steps4. TabsWidth is lg
+     * @tc.expected: The margin between items would be 0
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(900.0f));
+    FlushUITasks();
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 0), RectF(0, 0, 225.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 1), RectF(225.0f, 0, 225.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 2), RectF(450.0f, 0, 225.0f, TAB_BAR_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildRect(tabBarNode_, 3), RectF(675.0f, 0, 225.0f, TAB_BAR_SIZE)));
 }
 
 /**

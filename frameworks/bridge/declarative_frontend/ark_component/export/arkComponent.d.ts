@@ -1896,6 +1896,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect): TabsAttribute;
     pageFlipMode(value: PageFlipMode): TabsAttribute;
+    cachedMaxCount(count: number, mode: CacheMode): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2037,6 +2038,8 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
+    minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
+    maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

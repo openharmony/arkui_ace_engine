@@ -71,6 +71,14 @@ void RepeatModelNG::CreateNewChildFinish(const std::string& key)
     stack->PopContainer();
 }
 
+void RepeatModelNG::AfterAddChild()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->AfterAddChild();
+}
+
 void RepeatModelNG::OnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
     auto* stack = ViewStackProcessor::GetInstance();

@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/state_style_manager.h"
@@ -517,11 +518,9 @@ public:
         return elementsStack_.empty();
     }
 
-    void SetIsPrebuildingAndDeadline(bool isPrebuilding, int64_t prebuildDeadline)
+    void SetIsPrebuilding(bool isPrebuilding)
     {
         isPrebuilding_ = isPrebuilding;
-        prebuildDeadline_ = prebuildDeadline;
-        isPrebuildTimeout_ = false;
     }
 
     bool CheckIsPrebuildTimeout()
@@ -534,7 +533,7 @@ public:
 
     bool IsPrebuilding() const
     {
-        return isPrebuilding_ && isPrebuildTimeout_;
+        return isPrebuilding_;
     }
 
     std::queue<PrebuildCompCmd>& GetPrebuildComponentCmds()

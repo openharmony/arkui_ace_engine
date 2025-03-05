@@ -56,6 +56,7 @@ public:
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
     void SetMaintainVisibleContentPosition(bool enabled) override;
+    void SetStackFromEnd(bool enabled) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -125,6 +126,8 @@ public:
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static void SetListStackFromEnd(FrameNode* frameNode, bool enabled);
+    static bool GetListStackFromEnd(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);

@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -291,7 +292,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     if (dialogProperties_.isShowInSubWindow) {
         auto pipeline = host->GetContextRefPtr();
         auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentId();
-        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId());
+        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId(), SubwindowType::TYPE_DIALOG);
         SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
     overlayManager->CloseDialog(host);
@@ -539,6 +540,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     auto dialog = GetHost();
     contentColumn->MountToParent(dialog);
+    AddExtraMaskNode(props);
     UpdateTextFontScale();
     if (isSuitableForElderly_ && NeedsButtonDirectionChange(props.buttons)) {
         //remove buttonContainer when Button text is too long
@@ -552,6 +554,28 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     UpdateTextFontScale();
 }
 
+void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
+{
+    auto dialog = GetHost();
+    CHECK_NULL_VOID(dialog);
+    auto pipeline = dialog->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    if (IsUIExtensionSubWindow() && props.isModal) {
+        auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        CHECK_NULL_VOID(extraMaskNode);
+        auto extraMaskNodeContext = extraMaskNode->GetRenderContext();
+        CHECK_NULL_VOID(extraMaskNodeContext);
+        auto maskLayoutProps = extraMaskNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(maskLayoutProps);
+        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+        extraMaskNodeContext->UpdateZIndex(-1);
+        extraMaskNode->MountToParent(dialog);
+    }
+}
+
 void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode)
 {
     auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -563,6 +587,7 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
     customNode->MountToParent(contentWrapper);
     auto dialog = GetHost();
     contentWrapper->MountToParent(dialog);
+    AddExtraMaskNode(props);
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -618,6 +643,9 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     title->MountToParent(titleRow);
     title->MarkModifyDone();
     contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
+    auto focusHub = titleRow->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, titleRow);
+    focusHub->SetFocusable(false);
     return titleRow;
 }
 
@@ -1224,11 +1252,11 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 Shadow GetDefaultShadow(ShadowStyle style)
 {
     Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, shadow);
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipeline->GetColorMode();
     shadow = shadowTheme->GetShadow(style, colorMode);
     return shadow;
 }
@@ -1768,16 +1796,76 @@ void DialogPattern::DumpObjectProperty()
         DumpLog::GetInstance().AddDesc("MaskRect: " + dialogProperties_.maskRect.value().ToString());
     }
 }
+
+bool DialogPattern::NeedUpdateHostWindowRect()
+{
+    CHECK_NULL_RETURN(isUIExtensionSubWindow_, false);
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto currentId = pipeline->GetInstanceId();
+    if (currentId < MIN_SUBCONTAINER_ID) {
+        return false;
+    }
+
+    auto container = AceEngine::Get().GetContainer(currentId);
+    CHECK_NULL_RETURN(container, false);
+    if (container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+        CHECK_NULL_RETURN(subwindow, false);
+        return subwindow->IsSameDisplayWithParentWindow();
+    }
+
+    return false;
+}
+
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (isFoldStatusChanged_ || type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
-        TAG_LOGI(AceLogTag::ACE_DIALOG, "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d",
-            type, isFoldStatusChanged_);
+    auto forceUpdate = NeedUpdateHostWindowRect();
+    auto isWindowChanged = type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE;
+
+    TAG_LOGI(AceLogTag::ACE_DIALOG,
+        "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d forceUpdate: %{public}d", type,
+        isFoldStatusChanged_, forceUpdate);
+
+    if (isFoldStatusChanged_ || isWindowChanged || forceUpdate) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         InitHostWindowRect();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         isFoldStatusChanged_ = false;
+    }
+}
+
+void DialogPattern::UpdateHostWindowRect()
+{
+    CHECK_NULL_VOID(isUIExtensionSubWindow_);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto currentId = pipeline->GetInstanceId();
+    if (currentId < MIN_SUBCONTAINER_ID) {
+        return;
+    }
+
+    auto needUpdate = true;
+    if (SystemProperties::IsSuperFoldDisplayDevice()) {
+        auto container = AceEngine::Get().GetContainer(currentId);
+        auto isHalfFold = container && container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow();
+    }
+
+    if (needUpdate) {
+        InitHostWindowRect();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -1800,7 +1888,7 @@ void DialogPattern::InitHostWindowRect()
 
     if (container->IsUIExtensionWindow()) {
         isUIExtensionSubWindow_ = true;
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subwindow);
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());

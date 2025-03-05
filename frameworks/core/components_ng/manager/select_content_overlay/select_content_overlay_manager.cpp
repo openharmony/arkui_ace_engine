@@ -545,7 +545,7 @@ void SelectContentOverlayManager::MountNodeToRoot(
     std::vector<std::string> nodeTags = {
         V2::KEYBOARD_ETS_TAG, // keep handle and menu node before keyboard node
         V2::SELECT_OVERLAY_ETS_TAG, // keep handle node before menu node
-        V2::TEXTINPUT_ETS_TAG, // keep handle and menu node before magnifier
+        V2::MAGNIFIER_TAG, // keep handle and menu node before magnifier
         V2::SHEET_WRAPPER_TAG // keep handle and menu node before SheetWrapper
     };
     for (auto it = slotIt; it != children.end(); ++it) {
@@ -1307,10 +1307,6 @@ bool SelectContentOverlayManager::IsEnableSubWindowMenu()
         TAG_LOGW(AceLogTag::ACE_SELECT_OVERLAY, "The callerNode does not support show menu in subwinodw.");
         return false;
     }
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    auto expandDisplay = theme->GetExpandDisplay();
-    CHECK_NULL_RETURN(expandDisplay, false);
     auto containerId = Container::CurrentIdSafelyWithCheck();
     auto callerFrameNode = shareOverlayInfo_->callerFrameNode.Upgrade();
     CHECK_NULL_RETURN(callerFrameNode, false);
@@ -1333,7 +1329,7 @@ bool SelectContentOverlayManager::IsRightClickSubWindowMenu()
 }
 
 // whether the menu is the text selection menu which root node is selectoverlay and is displayed in subwindow
-bool SelectContentOverlayManager::IsSeletctOverlaySubWindowMenu()
+bool SelectContentOverlayManager::IsSelectOverlaySubWindowMenu()
 {
     CHECK_NULL_RETURN(shareOverlayInfo_, false);
     if (shareOverlayInfo_->isUsingMouse && !shareOverlayInfo_->menuInfo.menuBuilder) {

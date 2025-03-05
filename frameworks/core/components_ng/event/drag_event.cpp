@@ -1460,9 +1460,11 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
         preDragStatus != PreDragStatus::ACTION_CANCELED_BEFORE_DRAG)
         || preDragStatus == PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION
         || preDragStatus == PreDragStatus::PREVIEW_LIFT_STARTED) {
-        auto nextPreDragStatus = static_cast<PreDragStatus>(static_cast<int32_t>(preDragStatus) + 1);
-        DragDropGlobalController::GetInstance().SetPreDragStatus(nextPreDragStatus);
-        onPreDragStatus = preDragStatus;
+        if (preDragStatus != PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+            auto nextPreDragStatus = static_cast<PreDragStatus>(static_cast<int32_t>(preDragStatus) + 1);
+            DragDropGlobalController::GetInstance().SetPreDragStatus(nextPreDragStatus);
+            onPreDragStatus = preDragStatus;
+        }
     }
     auto onPreDragFunc = eventHub->GetOnPreDrag();
     CHECK_NULL_VOID(onPreDragFunc);
@@ -1476,6 +1478,8 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 callback(onPreDragStatus);
             },
             TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
+    } else if (preDragStatus == PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+        onPreDragFunc(preDragStatus);
     } else {
         onPreDragFunc(onPreDragStatus);
     }
@@ -2191,7 +2195,7 @@ std::optional<Shadow> DragEventActuator::GetDefaultShadow()
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
     shadow.SetIsFilled(true);
     return shadow;

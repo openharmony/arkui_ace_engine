@@ -101,6 +101,7 @@ private:
     void BuildFullArrayValue();
     void CollapseArrayValue();
     void ApplyFourPlusOneMode();
+    void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);

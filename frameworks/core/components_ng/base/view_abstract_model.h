@@ -33,10 +33,10 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
@@ -423,9 +423,10 @@ public:
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
     virtual void ResetOnAccessibilityFocus() = 0;
-    virtual void SetAccessibilityDefaultFocus() = 0;
-    virtual void SetAccessibilityUseSamePage(bool isFullSilent) = 0;
+    virtual void SetAccessibilityDefaultFocus(bool isFocus) = 0;
+    virtual void SetAccessibilityUseSamePage(const std::string& pageMode) = 0;
     virtual void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) = 0;
+    virtual void SetAccessibilityFocusDrawLevel(int32_t drawLevel) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

@@ -136,6 +136,19 @@ void SwiperArrowPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto arrowGestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(arrowGestureHub);
+    auto arrowClickCallback = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ButtonClickEvent();
+    };
+    if (arrowClickListener_) {
+        arrowGestureHub->RemoveClickEvent(arrowClickListener_);
+    }
+    arrowClickListener_ = MakeRefPtr<ClickEvent>(std::move(arrowClickCallback));
+    arrowGestureHub->AddClickEvent(arrowClickListener_);
+
     auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
 
@@ -161,17 +174,6 @@ void SwiperArrowPattern::InitEvent()
     buttonOnHoverListener_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     buttonInputHub->AddOnHoverEvent(buttonOnHoverListener_);
-
-    auto clickCallback = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ButtonClickEvent();
-    };
-    if (buttonClickListener_) {
-        buttonGestureHub->RemoveClickEvent(buttonClickListener_);
-    }
-    buttonClickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    buttonGestureHub->AddClickEvent(buttonClickListener_);
 }
 
 void SwiperArrowPattern::ButtonClickEvent()
@@ -193,17 +195,12 @@ void SwiperArrowPattern::InitAccessibilityText()
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(buttonNode);
-    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(buttonAccessibilityProperty);
     auto preAccessibilityText = swiperIndicatorTheme->GetPreAccessibilityText();
     auto nextAccessibilityText = swiperIndicatorTheme->GetNextAccessibilityText();
     if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
@@ -213,7 +210,8 @@ void SwiperArrowPattern::InitAccessibilityText()
         } else {
             accessibilityLeftText = preAccessibilityText;
         }
-        buttonAccessibilityProperty->SetAccessibilityText(accessibilityLeftText);
+        accessibilityProperty->SetAccessibilityText(accessibilityLeftText);
+        accessibilityProperty->SetAccessibilityCustomRole("button");
     }
     if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
         std::string accessibilityRightText = "";
@@ -222,7 +220,8 @@ void SwiperArrowPattern::InitAccessibilityText()
         } else {
             accessibilityRightText = nextAccessibilityText;
         }
-        buttonAccessibilityProperty->SetAccessibilityText(accessibilityRightText);
+        accessibilityProperty->SetAccessibilityText(accessibilityRightText);
+        accessibilityProperty->SetAccessibilityCustomRole("button");
     }
 }
 
@@ -230,6 +229,9 @@ void SwiperArrowPattern::InitNavigationArrow()
 {
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(buttonAccessibilityProperty);
+    buttonAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     auto buttonNodeFocusHub = buttonNode->GetFocusHub();
     CHECK_NULL_VOID(buttonNodeFocusHub);
     buttonNodeFocusHub->SetParentFocusable(false);
@@ -371,7 +373,7 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && swiperPattern->IsSwipeByGroup()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displayCount);
         rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }
@@ -417,17 +419,19 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     }
     renderContext->SetVisible(visible);
     // Set hit test mode BLOCK to make sure button respond to the touch events when visible.
-    buttonNodeGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMTRANSPARENT);
-    arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMDEFAULT : HitTestMode::HTMTRANSPARENT);
-    if (buttonClickListener_) {
-        buttonNodeGestureHub->RemoveClickEvent(buttonClickListener_);
+    arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMTRANSPARENT);
+    if (arrowClickListener_) {
+        arrowGestureHub->RemoveClickEvent(arrowClickListener_);
         if (visible) {
-            buttonNodeGestureHub->AddClickEvent(buttonClickListener_);
+            arrowGestureHub->AddClickEvent(arrowClickListener_);
         }
     }
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    auto arrowAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     if (accessibilityProperty) {
         accessibilityProperty->SetAccessibilityLevel(
+            visible ? AccessibilityProperty::Level::AUTO : AccessibilityProperty::Level::NO_STR);
+        arrowAccessibilityProperty->SetAccessibilityLevel(
             visible ? AccessibilityProperty::Level::AUTO : AccessibilityProperty::Level::NO_STR);
     }
 }

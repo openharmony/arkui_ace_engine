@@ -461,6 +461,7 @@ ACE_EXPORT extern const char MENU_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char MENU_ITEM_GROUP_ETS_TAG[];
 ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
 ACE_EXPORT extern const char MENU_PREVIEW_ETS_TAG[];
+ACE_EXPORT extern const char MENU_DIVIDER_TAG[];
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];

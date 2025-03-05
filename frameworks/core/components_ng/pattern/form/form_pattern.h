@@ -236,7 +236,8 @@ private:
     void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
     void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
-    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId) const;
+    bool IsFormBundleExempt(int64_t formId) const;
+    bool IsFormBundleProtected(const std::string &bundleName, int64_t formId) const;
     void HandleLockEvent(bool isLock);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);

@@ -20,6 +20,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
+#include "core/common/resource/resource_manager.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
@@ -94,6 +95,7 @@ void PluginSubContainer::Initialize()
 void PluginSubContainer::Destroy()
 {
     ContainerScope scope(instanceId_);
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);
     if (frontend_) {
         frontend_->Destroy();
         frontend_.Reset();
@@ -315,6 +317,7 @@ void PluginSubContainer::SetPluginComponentTheme(
     RefPtr<ThemeManagerImpl> pluginThemeManager;
     if (SystemProperties::GetResourceDecoupling()) {
         auto resourceAdapter = ResourceAdapter::CreateV2();
+        ResourceManager::GetInstance().RegisterMainResourceAdapter("", "", instanceId_, resourceAdapter);
         pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     } else {
         pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();

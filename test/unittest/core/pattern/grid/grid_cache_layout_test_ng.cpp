@@ -17,6 +17,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -622,5 +623,64 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
     ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
+}
+
+/**
+ * @tc.name: LayoutCachedItem002
+ * @tc.desc: Change dataSource when overScroll at top.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem002, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(1);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetCachedCount(3, true);
+    CreateFixedItems(40);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(400.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 400);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 400);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 0);
+
+    // remove the last child.
+    frameNode_->RemoveChildAtIndex(39);
+    frameNode_->ChildrenUpdatedFrom(39);
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 463.02078);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 463.020782);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 0);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 2), 100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 4), 200);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
 }
 } // namespace OHOS::Ace::NG

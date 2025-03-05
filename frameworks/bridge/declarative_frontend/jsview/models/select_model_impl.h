@@ -67,9 +67,13 @@ public:
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetDivider(const NG::SelectDivider& divider) override {}
+    void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode) override {};
     void SetControlSize(const std::optional<ControlSize>& controlSize) override {}
     void SetLayoutDirection(TextDirection value) override;
     ControlSize GetControlSize() override { return ControlSize{}; }
+    void ResetFontColor() override {};
+    void BackgroundColor(const Color& color) override {};
+    void ResetBackgroundColor() override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

@@ -618,9 +618,14 @@ public:
     float GetSelectMenuWidthFromTheme() const;
 
     bool IsSelectOverlayDefaultModeRightClickMenu();
+    void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+        const RefPtr<MenuLayoutProperty>& property, int32_t& index);
+    void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
+    void UpdateMenuItemDivider();
+    void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
 
 protected:
-    void UpdateMenuItemChildren(RefPtr<UINode>& host);
+    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
@@ -648,6 +653,7 @@ private:
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
     void ResetScrollTheme(const RefPtr<FrameNode>& host);
+    void ResetThemeByInnerMenuCount();
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);

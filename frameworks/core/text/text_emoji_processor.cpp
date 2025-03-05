@@ -194,6 +194,9 @@ EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
         startIndex = index;
         return EmojiRelation::IN_EMOJI;
     } else if (emojiBackwardLengthU16 == 0 && emojiForwardLengthU16 > 1) {
+        if (index > 0 && u16Content[index - 1] == u'\u200D') {
+            return EmojiRelation::IN_EMOJI;
+        }
         return EmojiRelation::BEFORE_EMOJI;
     } else if (emojiBackwardLengthU16 > 1 && emojiBackwardLengthU16 == emojiForwardLengthU16) {
         // emoji exists before index
@@ -277,7 +280,7 @@ std::u16string TextEmojiProcessor::SubU16string(
     if (rangeLength == 0) {
         return u"";
     }
-    return content.substr(range.startIndex, rangeLength);
+    return content.substr(static_cast<uint32_t>(range.startIndex), static_cast<uint32_t>(rangeLength));
 }
 
 TextEmojiSubStringRange TextEmojiProcessor::CalSubU16stringRange(
@@ -340,7 +343,7 @@ int32_t TextEmojiProcessor::GetEmojiLengthBackward(std::u32string& u32Content,
         }
         ++startIndex;
     } while (1);
-    std::u16string temp = u16Content.substr(0, startIndex);
+    std::u16string temp = u16Content.substr(0, static_cast<uint32_t>(startIndex));
     u32Content = UtfUtils::Str16ToStr32(temp);
     return GetEmojiLengthAtEnd(u32Content, false);
 }

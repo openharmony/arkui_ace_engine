@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
 #include "base/i18n/localization.h"
+#include "base/thread/task_dependency_manager.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -290,10 +291,14 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     CleanPageOverlay();
     UpdateSrcPage();
     if (target.routerMode == RouterMode::SINGLE) {
-        auto PageInfoByUrl = FindPageInStackByRouteName(target.url);
-        if (PageInfoByUrl.second) {
+        auto pageInfoByUrl = FindPageInStackByRouteName(target.url);
+        if (pageInfoByUrl.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(PageInfoByUrl.first, PageInfoByUrl.second, target, true);
+            auto pagePattern = pageInfoByUrl.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(target.params);
+            }
+            MovePageToFront(pageInfoByUrl.first, pageInfoByUrl.second, target, true);
             return;
         }
         auto index = FindPageInRestoreStack(target.url);
@@ -1147,6 +1152,10 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
@@ -1220,6 +1229,10 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
@@ -1246,6 +1259,10 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(target.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             return;
         }
@@ -1434,6 +1451,9 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
     auto pageNode = CreatePage(pageId, target);
+
+    TaskDependencyManager::GetInstance()->Sync();
+
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
         return;
@@ -2108,6 +2128,11 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         }
         if (pageInfo.first == popIndex) {
             // replace top self in SINGLE mode, do nothing.
+            CHECK_NULL_VOID(pageInfo.second);
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             return;
         }
         if (pageInfo.second) {
@@ -2121,6 +2146,10 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #endif
             popIndex = popIndex - 1;
             findPage = true;
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
         } else {
             auto index = FindPageInRestoreStack(info.url);
             if (index != INVALID_PAGE_INDEX) {

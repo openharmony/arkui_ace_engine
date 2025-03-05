@@ -56,7 +56,7 @@ void UpdateSymbolBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto iconSize = barItemNode->IsHideText() ? theme->GetToolbarHideTextIconSize() : theme->GetToolbarIconSize();
+    auto iconSize = theme->GetToolbarIconSize();
     if (symbol != nullptr) {
         // symbol -> symbol
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
@@ -89,7 +89,7 @@ void UpdateImageBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<F
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto iconSize = barItemNode->IsHideText() ? theme->GetToolbarHideTextIconSize() : theme->GetToolbarIconSize();
+    auto iconSize = theme->GetToolbarIconSize();
     if (symbol != nullptr) {
         // image -> symbol
         barItemNode->RemoveChild(iconNode);
@@ -138,7 +138,7 @@ void BarItemPattern::UpdateBarItemTextAndIconStatusResource(const RefPtr<BarItem
 {
     CHECK_NULL_VOID(barItemNode);
     CHECK_NULL_VOID(iconNode);
-    auto theme = NavigationGetTheme();
+    auto theme = GetNavigationBarTheme();
     CHECK_NULL_VOID(theme);
     ImageSourceInfo info;
     ToolbarIconStatus barIconStatus;
@@ -217,4 +217,50 @@ void BarItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     CHECK_NULL_VOID(textLayoutProperty);
     json->PutExtAttr("label", (UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""))).c_str(), filter);
 }
+
+bool BarItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto theme = NavigationGetTheme(themeScopeId);
+    CHECK_NULL_RETURN(theme, false);
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(GetHost());
+    CHECK_NULL_RETURN(barItemNode, false);
+    auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
+    CHECK_NULL_RETURN(textNode, false);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
+    CHECK_NULL_RETURN(iconNode, false);
+
+    Color textColor;
+    Color iconColor;
+    auto iconStatus = GetCurrentIconStatus();
+    if (iconStatus == ToolbarIconStatus::ACTIVE) {
+        textColor = theme->GetToolBarItemActiveFontColor();
+        iconColor = theme->GetToolbarActiveIconColor();
+    }
+    if (iconStatus == ToolbarIconStatus::INITIAL) {
+        textColor = theme->GetToolBarItemFontColor();
+        iconColor = theme->GetToolbarIconColor();
+    }
+
+    if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(symbolProperty, false);
+        symbolProperty->UpdateSymbolColorList({ iconColor });
+        iconNode->MarkDirtyNode();
+    }
+
+    textLayoutProperty->UpdateTextColor(textColor);
+    textNode->MarkDirtyNode();
+
+    return false;
+}
+
+RefPtr<NavigationBarTheme> BarItemPattern::GetNavigationBarTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    return NavigationGetTheme(host->GetThemeScopeId());
+}
+
 } // namespace OHOS::Ace::NG

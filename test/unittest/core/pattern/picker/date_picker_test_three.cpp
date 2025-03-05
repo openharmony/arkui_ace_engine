@@ -22,6 +22,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #undef private
 #undef protected
@@ -698,8 +699,12 @@ HWTEST_F(DatePickerTestThree, DatePickerPatternTest005, TestSize.Level1)
     datePickerPattern->GetInnerFocusPaintRect(paintRect);
     auto rect = paintRect.GetRect();
     Dimension offset = 2.0_vp;
-    EXPECT_EQ(rect.GetX(), offset.ConvertToPx());
-    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2);
+    Dimension focusLineWidth = 1.5_vp;
+    EXPECT_EQ(rect.GetX(), offset.ConvertToPx() + focusLineWidth.ConvertToPx());
+
+    auto expectWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2 -
+        focusLineWidth.ConvertToPx() * 2;
+    EXPECT_EQ(rect.Width(), expectWidth);
 }
 
 /**

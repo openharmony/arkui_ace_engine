@@ -17,6 +17,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/pipeline/base/element.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
@@ -104,7 +105,11 @@ NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
         return nullptr;
     }
     auto iter = itemMap_.find(elementId);
-    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::FrameNode>(iter->second.GetRawPtr());
+    if (iter == itemMap_.end()) {
+        return nullptr;
+    }
+    auto node = AceType::DynamicCast<NG::FrameNode>(iter->second.Upgrade());
+    return AceType::RawPtr(node); // warning: returning an unsafe rawptr !!!
 }
 
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)

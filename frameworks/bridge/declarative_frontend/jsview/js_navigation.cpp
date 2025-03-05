@@ -81,6 +81,7 @@ constexpr int32_t PARAMETER_LENGTH_TWO  = 2;
 constexpr int32_t FIRST_INDEX  = 0;
 constexpr int32_t SECOND_INDEX  = 1;
 constexpr bool ENABLE_TOOLBAR_ADAPTATION_DEFULT = true;
+constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
@@ -501,6 +502,13 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
                 JSNavigationUtils::ParseToolbarItemsConfiguration(
                     targetNode, info, JSRef<JSArray>::Cast(info[0]), toolbarItems);
             }
+            NG::MoreButtonOptions toolbarMoreButtonOptions;
+            if (info.Length() > 1) {
+                auto optObj = JSRef<JSObject>::Cast(info[1]);
+                auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
+                JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
+            }
+            NavigationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
             NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
         } else {
             std::list<RefPtr<AceType>> items;
@@ -529,6 +537,12 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         return;
     }
 
+    NG::NavigationMenuOptions options;
+    if (info.Length() > 1) {
+        auto optObj = JSRef<JSObject>::Cast(info[1]);
+        auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
+        JSNavigationUtils::ParseMenuOptions(moreButtonProperty, options);
+    }
     if (info[0]->IsUndefined() || info[0]->IsArray()) {
         if (NavigationModel::GetInstance()->NeedSetItems()) {
             std::vector<NG::BarItem> menuItems;
@@ -539,6 +553,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
                 JSNavigationUtils::ParseBarItems(targetNode, info, JSRef<JSArray>::Cast(info[0]), menuItems);
             }
             NavigationModel::GetInstance()->SetMenuItems(std::move(menuItems));
+            NavigationModel::GetInstance()->SetMenuOptions(std::move(options));
             return;
         }
         std::list<RefPtr<AceType>> items;
@@ -553,6 +568,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavigationModel::GetInstance()->SetCustomMenu(customNode);
+            NavigationModel::GetInstance()->SetMenuOptions(std::move(options));
         }
     }
 }

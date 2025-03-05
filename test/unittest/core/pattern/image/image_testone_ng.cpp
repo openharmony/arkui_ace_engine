@@ -15,6 +15,8 @@
 
 #include "image_base.h"
 
+#include "base/image/image_defines.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -1688,7 +1690,7 @@ void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
 
     image.EnableAnalyzer(false);
     ImageModelNG::EnableAnalyzer(frameNode, true);
-    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATION);
     ImageModelNG::ResetImageSrc(frameNode);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_EQ(imageSourceInfo->GetSrc(), "");

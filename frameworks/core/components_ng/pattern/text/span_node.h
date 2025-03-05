@@ -72,6 +72,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
+        spanItem_->MarkDirty();                                              \
         RequestTextFlushDirty();                                             \
     }                                                                        \
     void Reset##name()                                                       \
@@ -123,6 +124,7 @@ public:                                                                         
             return;                                                              \
         }                                                                        \
         spanItem_->textLineStyle->Update##name(value);                           \
+        spanItem_->MarkDirty();                                                  \
         RequestTextFlushDirty();                                                 \
     }                                                                            \
     void Reset##name()                                                           \
@@ -216,7 +218,9 @@ public:
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1; // relative offset from span, [selectedStart, selectedEnd)
     int32_t selectedEnd = -1;
+    bool needReLayout = false;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
+    bool UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle);
     void UpdateSymbolSpanParagraph(
         const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder,
         bool isDragging = false);
@@ -240,6 +244,7 @@ public:
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+    std::u16string urlAddress;
     std::function<void()> urlOnRelease;
     void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
     {
@@ -333,6 +338,27 @@ public:
     
     virtual void SpanDumpInfo();
     void SpanDumpInfoAdvance();
+    void MarkDirty()
+    {
+        needReLayout = true;
+    }
+    void UpdateContent(const std::u16string& newContent)
+    {
+        content = newContent;
+        MarkDirty();
+    }
+
+    void UpdateTextColorWithoutCheck(Color color)
+    {
+        fontStyle->propTextColor = color;
+        MarkDirty();
+    }
+
+    void UpdateTextDecorationColorWithoutCheck(Color color)
+    {
+        fontStyle->propTextDecorationColor = color;
+        MarkDirty();
+    }
 
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
@@ -415,6 +441,7 @@ public:
             return;
         }
         spanItem_->unicode = unicode;
+        spanItem_->MarkDirty();
         RequestTextFlushDirty(true);
     }
 
@@ -424,6 +451,7 @@ public:
             return;
         }
         spanItem_->content = content;
+        spanItem_->MarkDirty();
         RequestTextFlushDirty(true);
     }
 
@@ -450,6 +478,16 @@ public:
         }
     }
 
+    void UpdateTextColorWithoutCheck(Color color)
+    {
+        spanItem_->UpdateTextColorWithoutCheck(color);
+    }
+
+    void UpdateTextDecorationColorWithoutCheck(Color color)
+    {
+        spanItem_->UpdateTextDecorationColorWithoutCheck(color);
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
@@ -470,6 +508,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
     DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolType, SymbolType);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -631,6 +670,18 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    void MarkModifyDone() override
+    {
+        FrameNode::MarkModifyDone();
+        placeholderSpanItem_->MarkDirty();
+    }
+
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override
+    {
+        FrameNode::MarkDirtyNode(extraFlag);
+        placeholderSpanItem_->MarkDirty();
     }
 
     void DumpInfo() override

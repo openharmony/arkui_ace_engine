@@ -50,6 +50,7 @@ constexpr float SAFE_AREA_KEYBOARD = 500.0f;
 void ExpandSafeAreaTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void ExpandSafeAreaTestNg::TearDownTestSuite()
@@ -97,7 +98,7 @@ void ExpandSafeAreaTestNg::Create(const std::function<void()>& callback, bool fl
     }
     GetInstance();
     if (flushLayout) {
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
 }
 

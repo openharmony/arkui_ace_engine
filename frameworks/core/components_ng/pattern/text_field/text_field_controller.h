@@ -52,6 +52,7 @@ public:
 
     int32_t AddText(std::u16string text, int32_t offset) override;
     void DeleteText(int32_t start, int32_t end) override;
+    void ClearPreviewText() override;
     SelectionInfo GetSelection() override;
 private:
     WeakPtr<Pattern> pattern_;

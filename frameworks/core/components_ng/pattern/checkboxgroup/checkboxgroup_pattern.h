@@ -173,6 +173,7 @@ public:
     void MarkIsSelected(bool isSelected);
     void OnAttachToMainTree() override;
     void UpdateCheckBoxStyle();
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnAttachToFrameNode() override;

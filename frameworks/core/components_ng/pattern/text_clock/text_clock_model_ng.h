@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@ public:
     void SetOnDateChange(std::function<void(const std::string)>&& onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -52,6 +53,7 @@ public:
     static void SetFormat(FrameNode* frameNode, const std::string& format);
     static void SetHoursWest(FrameNode* frameNode, float hoursWest);
     static void SetFontColor(FrameNode* frameNode, const Color& value);
+    static void ResetFontColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);

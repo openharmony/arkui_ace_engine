@@ -18,6 +18,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/button/button_theme.h"
@@ -103,6 +104,8 @@ void SwiperTestNg::CreateSwiperDone()
     if (pattern_->HasRightButtonNode()) {
         rightArrowNode_ = GetChildFrameNode(frameNode_, index);
     }
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, SWIPER_WIDTH, SWIPER_HEIGHT);
 }
 
 SwiperModelNG SwiperTestNg::CreateSwiper()
@@ -1239,7 +1242,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level
     layoutProperty_->UpdateLoop(false);
     pattern_->currentIndex_ = 0;
     dragVelocity = 500.0f;
-    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 0);
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
 
     pattern_->currentIndex_ = 3;
     dragVelocity = -500.0f;

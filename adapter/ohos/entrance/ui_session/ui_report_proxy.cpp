@@ -185,6 +185,24 @@ void UiReportProxy::SendCurrentLanguage(const std::string& data)
     }
 }
 
+void UiReportProxy::SendCurrentPageName(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCurrentPageName write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("SendCurrentPageName write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_CURRENT_PAGE_NAME, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendCurrentPageName send request failed");
+    }
+}
+
 void UiReportProxy::SendWebText(int32_t nodeId, std::string res)
 {
     MessageParcel messageData;

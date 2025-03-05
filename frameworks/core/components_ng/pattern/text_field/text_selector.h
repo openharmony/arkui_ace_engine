@@ -93,6 +93,9 @@ struct TextSelector {
         }
         bool isChanged = baseOffset != destinationOffset || base != destination;
         baseOffset = base;
+        if (baseOffset >= 0) {
+            lastValidStart = baseOffset;
+        }
         destinationOffset = destination;
         if (isChanged) {
             FireAccessibilityCallback();
@@ -109,6 +112,9 @@ struct TextSelector {
         }
         baseOffset = both;
         destinationOffset = both;
+        if (baseOffset >= 0) {
+            lastValidStart = baseOffset;
+        }
     }
 
     void ReverseTextSelector()
@@ -226,6 +232,7 @@ struct TextSelector {
     OffsetF firstHandleOffset_;
     OffsetF secondHandleOffset_;
     OnAccessibilityCallback onAccessibilityCallback_;
+    int32_t lastValidStart = 0;
 };
 
 enum class TextSpanType : int32_t {

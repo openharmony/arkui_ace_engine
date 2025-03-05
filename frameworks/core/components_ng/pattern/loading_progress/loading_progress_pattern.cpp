@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -191,7 +191,7 @@ void LoadingProgressPattern::InitThemeValues()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(progressTheme);
 
     defaultColor_ = progressTheme->GetLoadingColor();
@@ -290,5 +290,26 @@ void LoadingProgressPattern::RemoveIsFocusActiveUpdateEvent()
     auto pipline = host->GetContext();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+bool LoadingProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
+    CHECK_NULL_RETURN(progressTheme, result);
+    auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, result);
+
+    result = !paintProperty->HasColor();
+
+    if (themeScopeId && !colorLock_) {
+        paintProperty->UpdateColor(progressTheme->GetLoadingColor());
+        result = true;
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

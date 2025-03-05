@@ -15,15 +15,18 @@
 
 import curves from '@ohos.curves';
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
-import { ContainersDestination, containersRoute } from 'feature/src/main/ets/pages/containers';
-import { DisplaysDestination, displaysRoute } from 'feature/src/main/ets/pages/displays';
-import { OperatesDestination, operatesRoute } from 'feature/src/main/ets/pages/operates';
-import { PickersDestination, pickersRoute } from 'feature/src/main/ets/pages/pickers';
-import { InputsDestination, inputsRoute } from 'feature/src/main/ets/pages/inputs';
-import { NavigatesDestination, navigatesRoute } from 'feature/src/main/ets/pages/navigates';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
-import { BlankAndDividerDestination, blankAndDividerRoute } from 'feature/src/main/ets/pages/blankanddivider';
-
+import { blankAndDividerDestination, blankAndDividerRoute } from 'feature/src/main/ets/pages/BlankAndDivider';
+import { rowsColumnsAndStackingDestination, rowsColumnsAndStackingRoute } from 'feature/src/main/ets/pages/RowsColumnsAndStacking'
+import { gridAndColumnLayoutDestination, gridAndColumnLayoutRoute } from 'feature/src/main/ets/pages/GridAndColumnLayout'
+import { scrollAndSwipeDestination, scrollAndSwipeRoute } from 'feature/src/main/ets/pages/ScrollAndSwipe'
+import { navigationAndSwitchingDestination, navigationAndSwitchingRoute } from 'feature/src/main/ets/pages/NavigationAndSwitching'
+import { buttonsAndSelectionsDestination, buttonsAndSelectionsRoute } from 'feature/src/main/ets/pages/ButtonsAndSelections'
+import { textAndInputDestination, textAndInputRoute } from 'feature/src/main/ets/pages/TextAndInput'
+import { imagesAndVideosDestination, imagesAndVideosRoute } from 'feature/src/main/ets/pages/ImagesAndVideos'
+import { informationDisplayDestination, informationDisplayRoute } from 'feature/src/main/ets/pages/InformationDisplay'
+import { menusDestination, menusRoute } from 'feature/src/main/ets/pages/Menus'
+import { dialogBoxesDestination, dialogBoxesRoute } from 'feature/src/main/ets/pages/DialogBoxes'
 @Styles
 function CardPressedStyle() {
   .backgroundColor('rgba(0,0,0,0.1)')
@@ -48,20 +51,28 @@ function CardDisabledStyle() {
 
 @Builder
 function Destination(name: string, route: Route) {
-  if (name.startsWith('containers/')) {
-    ContainersDestination(name, route)
-  } else if (name.startsWith('displays/')) {
-    DisplaysDestination(name, route)
-  } else if (name.startsWith('operates/')) {
-    OperatesDestination(name, route)
-  } else if (name.startsWith('pickers/')) {
-    PickersDestination(name, route)
-  } else if (name.startsWith('inputs/')) {
-    InputsDestination(name, route)
-  } else if (name.startsWith('navigates/')) {
-    NavigatesDestination(name, route)
-  } else if (name.startsWith('blankanddivider/')) {
-    BlankAndDividerDestination(name, route)
+  if (name.startsWith('BlankAndDivider/')) {
+    blankAndDividerDestination(name, route)
+  } else if (name.startsWith('RowsColumnsAndStacking/')){
+    rowsColumnsAndStackingDestination(name, route)
+  } else if (name.startsWith('GridAndColumnLayout/')){
+    gridAndColumnLayoutDestination(name, route)
+  } else if (name.startsWith('ScrollAndSwipe/')){
+    scrollAndSwipeDestination(name, route)
+  } else if (name.startsWith('NavigationAndSwitching/')){
+    navigationAndSwitchingDestination(name, route)
+  } else if (name.startsWith('ButtonsAndSelections/')){
+    buttonsAndSelectionsDestination(name, route)
+  } else if (name.startsWith('TextAndInput/')){
+    textAndInputDestination(name, route)
+  } else if (name.startsWith('ImagesAndVideos/')){
+    imagesAndVideosDestination(name, route)
+  }else if (name.startsWith('InformationDisplay/')){
+    informationDisplayDestination(name, route)
+  }else if (name.startsWith('Menus/')){
+    menusDestination(name, route)
+  }else if (name.startsWith('DialogBoxes/')){
+    dialogBoxesDestination(name, route)
   }
 }
 
@@ -70,13 +81,17 @@ function Destination(name: string, route: Route) {
 struct Index {
   @Provide('router') router: NavPathStack = new NavPathStack();
   @State routes: RouteGroup[] = [
-    containersRoute,
-    displaysRoute,
-    operatesRoute,
-    pickersRoute,
-    inputsRoute,
-    navigatesRoute,
-    blankAndDividerRoute
+    blankAndDividerRoute,
+    rowsColumnsAndStackingRoute,
+    gridAndColumnLayoutRoute,
+    scrollAndSwipeRoute,
+    navigationAndSwitchingRoute,
+    buttonsAndSelectionsRoute,
+    textAndInputRoute,
+    imagesAndVideosRoute,
+    informationDisplayRoute,
+    menusRoute,
+    dialogBoxesRoute
   ];
   @State selection: string | null = null;
 
@@ -188,7 +203,7 @@ struct Index {
           .padding(4)
           .divider({ strokeWidth: 0.5 })
         })
-      }
+      }.padding({bottom: 70})
     }
     .title('Component')
     .backgroundColor($r('sys.color.ohos_id_color_sub_background'))

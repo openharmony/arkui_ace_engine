@@ -161,7 +161,7 @@ public:
 
     void UpdateMoveFromTo(int32_t from, int32_t to);
     void ResetMoveFromTo();
-    int32_t ConvertFormToIndex(int32_t index);
+    int32_t ConvertFromToIndex(int32_t index);
 
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
     {

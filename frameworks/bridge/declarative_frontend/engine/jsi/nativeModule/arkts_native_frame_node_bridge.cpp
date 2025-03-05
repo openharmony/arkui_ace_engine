@@ -43,6 +43,7 @@ constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t INDEX_OF_INTERVAL = 4;
 constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
+constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
 
 ArkUI_Bool GetIsExpanded(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
 {
@@ -169,6 +170,10 @@ ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* ru
     auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     node->SetExclusiveEventForChild(true);
     node->SetIsArkTsFrameNode(true);
+    auto renderContext = node->GetRenderContext();
+    if (renderContext) {
+        renderContext->SetNeedDebugBoundary(true);
+    }
     FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
     FrameNodeBridge::SetCustomFunc(node, runtimeCallInfo);
     const char* keys[] = { "nodeId", "nativeStrongRef" };
@@ -1434,7 +1439,7 @@ ArkUINativeModuleValue FrameNodeBridge::IsAttached(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool isAttached;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isAttached(nativeNode);
     } else {
         isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isVisible(nativeNode);
@@ -1760,6 +1765,9 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t intervalMs = static_cast<int32_t>(intervalArg->ToNumber(vm)->Value());
+    if (intervalMs < 0) {
+        intervalMs = DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
     NG::ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs);
     return panda::JSValueRef::Undefined(vm);

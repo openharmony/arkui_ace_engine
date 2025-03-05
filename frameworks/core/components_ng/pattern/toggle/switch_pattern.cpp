@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -77,7 +78,7 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    switchTheme_ = pipeline->GetTheme<SwitchTheme>();
+    switchTheme_ = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
     InitPanEvent(gestureHub);
     InitTouchEvent();
     InitMouseEvent();
@@ -427,11 +428,11 @@ void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
     Color onBgColor = switchTheme_->GetActiveColor();
     Color offBgColor = switchTheme_->GetInactiveColor();
     if (isOn) {
-        if (!switchPaintProperty->HasSelectedColor() || switchPaintProperty->GetSelectedColor() == onBgColor) {
+        if (switchPaintProperty->HasSelectedColor() && switchPaintProperty->GetSelectedColor() == onBgColor) {
             switchPaintProperty->UpdateSelectedColor(onBgColor);
         }
     } else {
-        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == offBgColor) {
+        if (switchPaintProperty->HasUnselectedColor() && switchPaintProperty->GetUnselectedColor() == offBgColor) {
             Color bgColor = isFocus_ ? switchTheme_->GetFocusedBGColorUnselected() : switchTheme_->GetInactiveColor();
             switchPaintProperty->UpdateUnselectedColor(bgColor);
         }
@@ -766,7 +767,7 @@ void SwitchPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(switchTheme);
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
@@ -774,8 +775,24 @@ void SwitchPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
-    switchModifier->InitializeParam();
+    switchModifier->InitializeParam(host->GetThemeScopeId());
     host->MarkDirtyNode();
+    host->SetNeedCallChildrenUpdate(false);
+}
+
+bool SwitchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+
+    if (!paintProperty->HasSelectedColor() || !paintProperty->HasSwitchPointColor()) {
+        result = true;
+    }
+
+    return result;
 }
 
 void SwitchPattern::SetSwitchIsOn(bool ison)

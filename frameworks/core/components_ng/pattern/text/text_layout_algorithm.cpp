@@ -27,6 +27,28 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
+uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
+{
+    double minTextSizeHeight = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    if (LessOrEqual(minTextSizeHeight, 0.0)) {
+        minTextSizeHeight = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
+    double lineHeight = minTextSizeHeight;
+    if (textStyle.HasHeightOverride()) {
+        lineHeight = textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT
+                            ? textStyle.GetLineHeight().ConvertToPxWithSize(contentConstraint.maxSize.Height())
+                            : textStyle.GetLineHeight().ConvertToPxDistribute(
+                                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
+    // plus extraLine to ensure maxlines -1 is the next maxline to try for layout
+    uint32_t maxLines = contentConstraint.maxSize.Height() / (lineHeight) + 1;
+    return std::max(maxLines, static_cast<uint32_t>(0));
+}
 }; // namespace
 
 TextLayoutAlgorithm::TextLayoutAlgorithm(
@@ -109,7 +131,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
-    ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d]", host->GetId());
     auto pattern = host->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -118,6 +139,11 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     bool needRemain = false;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
+    auto logTag = "MeasureContent";
+    pattern->DumpRecord(logTag);
+    pattern->LogForFormRender(logTag);
+    ACE_SCOPED_TRACE(
+        "TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d]", host->GetId(), needReCreateParagraph_);
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
         auto result = BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
@@ -127,7 +153,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (isSpanStringMode_ && spanStringHasMaxLines_) {
         textStyle.SetMaxLines(UINT32_MAX);
     }
-    if (isSpanStringMode_ && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (isSpanStringMode_ && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         textStyle_ = textStyle;
         BuildParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
@@ -303,6 +329,9 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    auto logTag = "CreateParagraph";
+    pattern->DumpRecord(logTag);
+    pattern->LogForFormRender(logTag);
     pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);
@@ -347,16 +376,30 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
     symbolTextStyle.SetEffectStrategy(
         symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
-    symbolTextStyle.SetFontFamilies({ "HM Symbol" });
+    auto symbolType = textStyle.GetSymbolType();
+    symbolTextStyle.SetSymbolType(symbolType);
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = textStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        if (fontFamilies.empty()) {
+            return false;
+        }
+        symbolTextStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        symbolTextStyle.SetFontFamilies(fontFamilies);
+    }
     paragraph->PushStyle(symbolTextStyle);
     if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
         auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
         symbolEffectOptions.Reset();
         layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-        if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
-            auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
-            symboloptiOns.Reset();
-        }
     }
     paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
     paragraph->PopStyle();
@@ -615,13 +658,8 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
 bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto pattern = host->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    pattern->DumpRecord("TextLayout BuildParagraph id:" + std::to_string(host->GetId()));
     if (!textStyle.GetAdaptTextSize() ||
-        (!spans_.empty() && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN))) {
+        (!spans_.empty() && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))) {
         if (!CreateParagraphAndLayout(textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint,
             layoutWrapper)) {
             TAG_LOGW(AceLogTag::ACE_TEXT, "BuildParagraph fail, contentConstraint:%{public}s",
@@ -657,6 +695,10 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
     }
 
     CHECK_NULL_RETURN(paragraphManager_, false);
+    if (textStyle.GetMaxLines() == UINT32_MAX) {
+        uint32_t maxLines = GetAdaptedMaxLines(textStyle, contentConstraint);
+        textStyle.SetMaxLines(maxLines);
+    }
     auto lineCount = static_cast<uint32_t>(paragraphManager_->GetLineCount());
     lineCount = std::max(std::min(textStyle.GetMaxLines(), lineCount), static_cast<uint32_t>(0));
     textStyle.SetMaxLines(lineCount);

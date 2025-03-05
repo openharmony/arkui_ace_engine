@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -559,7 +560,8 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         return;
     }
 
-    ACE_SCOPED_TRACE("StartDecoding imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
+    ACE_SCOPED_TRACE("StartDecoding imageInfo: [%d-%d-%s]", imageDfxConfig_.nodeId_,
+        static_cast<int32_t>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
 
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);
@@ -569,12 +571,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
-    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
-    bool isHdrDecoderNeed = false;
-    if (renderProp && renderProp->HasDynamicMode()) {
-        isHdrDecoderNeed = true;
-        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
-    }
+    bool isHdrDecoderNeed = renderProp && renderProp->HasDynamicMode();
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
@@ -1523,11 +1520,11 @@ void ImagePattern::DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutPr
     DumpLog::GetInstance().AddDesc(
         std::string("SrcType: ").append(std::to_string(static_cast<int32_t>(src.GetSrcType()))));
     DumpLog::GetInstance().AddDesc(
-        std::string("AbilityName: ").append(std::to_string(static_cast<int32_t>(SystemProperties::GetColorMode()))));
+        std::string("AbilityName: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
     DumpLog::GetInstance().AddDesc(std::string("BundleName: ").append(src.GetBundleName()));
     DumpLog::GetInstance().AddDesc(std::string("ModuleName: ").append(src.GetModuleName()));
     DumpLog::GetInstance().AddDesc(
-        std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(SystemProperties::GetColorMode()))));
+        std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
     DumpLog::GetInstance().AddDesc(
         std::string("LocalColorMode: ").append(std::to_string(static_cast<int32_t>(src.GetLocalColorMode()))));
 }
@@ -2263,7 +2260,11 @@ bool ImagePattern::IsFormRender()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->IsFormRender();
+
+    auto container = Container::Current();
+    bool isDynamicComponent = container && container->IsDynamicRender() &&
+                              container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    return pipeline->IsFormRender() && !isDynamicComponent;
 }
 
 void ImagePattern::UpdateFormDurationByRemainder()
@@ -2621,5 +2622,31 @@ void ImagePattern::AddPixelMapToUiManager()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddPixelMap(host->GetId(), pixmap);
+}
+
+FocusPattern ImagePattern::GetFocusPattern() const
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+    } else {
+        return { FocusType::NODE, false };
+    }
+}
+
+void ImagePattern::OnActive()
+{
+    if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (!animator_->HasScheduler()) {
+            auto context = host->GetContextRefPtr();
+            if (context) {
+                animator_->AttachScheduler(context);
+            } else {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+            }
+        }
+        animator_->Forward();
+    }
 }
 } // namespace OHOS::Ace::NG

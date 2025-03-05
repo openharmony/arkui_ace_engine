@@ -787,7 +787,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder01, TestSize.Level1)
 
 /**
  * @tc.name: LazyForEachBuilder02
- * @tc.desc: LazyForEachBuilder::ConvertFormToIndex
+ * @tc.desc: LazyForEachBuilder::ConvertFromToIndex
  * @tc.type: FUNC
  */
 HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder02, TestSize.Level1)
@@ -801,21 +801,21 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder02, TestSize.Level1)
     /**
      * @tc.steps: step1. !moveFromTo_;
      */
-    auto step1 = lazyForEachBuilder->ConvertFormToIndex(0);
+    auto step1 = lazyForEachBuilder->ConvertFromToIndex(0);
     EXPECT_EQ(step1, 0);
 
     /**
      * @tc.steps: step2. (1, 1);
      */
     lazyForEachBuilder->moveFromTo_.emplace(1, 1);
-    auto step2 = lazyForEachBuilder->ConvertFormToIndex(0);
+    auto step2 = lazyForEachBuilder->ConvertFromToIndex(0);
     EXPECT_EQ(step2, 0);
 
     /**
      * @tc.steps: step3. moveFromTo_.value().second == index;
      */
     lazyForEachBuilder->moveFromTo_.value().second = 0;
-    auto step3 = lazyForEachBuilder->ConvertFormToIndex(0);
+    auto step3 = lazyForEachBuilder->ConvertFromToIndex(0);
     EXPECT_EQ(step3, 1);
 
     /**
@@ -823,7 +823,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder02, TestSize.Level1)
      */
     lazyForEachBuilder->moveFromTo_.value().first = 0;
     lazyForEachBuilder->moveFromTo_.value().second = 0;
-    auto step4 = lazyForEachBuilder->ConvertFormToIndex(1);
+    auto step4 = lazyForEachBuilder->ConvertFromToIndex(1);
     EXPECT_EQ(step4, 1);
 
     /**
@@ -831,7 +831,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder02, TestSize.Level1)
      */
     lazyForEachBuilder->moveFromTo_.value().first = 0;
     lazyForEachBuilder->moveFromTo_.value().second = 2;
-    auto step5 = lazyForEachBuilder->ConvertFormToIndex(1);
+    auto step5 = lazyForEachBuilder->ConvertFromToIndex(1);
     EXPECT_EQ(step5, 2);
 
     /**
@@ -839,7 +839,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder02, TestSize.Level1)
      */
     lazyForEachBuilder->moveFromTo_.value().first = 2;
     lazyForEachBuilder->moveFromTo_.value().second = 0;
-    auto step6 = lazyForEachBuilder->ConvertFormToIndex(1);
+    auto step6 = lazyForEachBuilder->ConvertFromToIndex(1);
     EXPECT_EQ(step6, 0);
 }
 

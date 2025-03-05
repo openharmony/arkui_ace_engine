@@ -424,16 +424,13 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
         textPattern->DumpRecord("onDraw GetParagraphs empty:" + std::to_string(host->GetId()));
         return;
     }
-    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto contentRect = geometryNode->GetContentRect();
+    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
+        paintOffset_.GetY(), contentRect.ToString().c_str());
 
-    PropertyChangeFlag flag = 0;
-    if (NeedMeasureUpdate(flag)) {
-        host->MarkDirtyNode(flag);
-        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->OnPropertyChangeMeasure();
-    }
-
+    AnimationMeasureUpdate(host);
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);
@@ -449,7 +446,10 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            textPattern->DumpRecord(std::to_string(host->GetId()) + " ,paintOffset:" + paintOffset_.ToString().c_str());
+            auto logTag = "DrawText paintOffset:" + paintOffset_.ToString() +
+                          " ,IncludeIndent:" + std::to_string(pManager->GetTextWidthIncludeIndent());
+            textPattern->DumpRecord(logTag);
+            textPattern->LogForFormRender(logTag);
             DrawText(canvas, pManager);
         } else {
             // Racing
@@ -802,6 +802,17 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
         CheckNeedMeasure(lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastLineHeight_ = lineHeightFloat_->Get();
+    }
+}
+
+void TextContentModifier::AnimationMeasureUpdate(const RefPtr<FrameNode>& host)
+{
+    PropertyChangeFlag flag = 0;
+    if (NeedMeasureUpdate(flag)) {
+        host->MarkDirtyNode(flag);
+        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->OnPropertyChangeMeasure();
     }
 }
 

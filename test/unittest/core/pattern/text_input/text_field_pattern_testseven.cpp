@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/render/mock_paragraph.h"
 #include "text_input_base.h"
 
 namespace OHOS::Ace::NG {
@@ -122,5 +123,205 @@ HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityUnitAction002, TestSize.Leve
     pattern->responseArea_ = std::move(unitResponseArea);
     pattern->SetAccessibilityUnitAction();
     EXPECT_FALSE(accessibilityProperty->accessibilityLevel_.has_value());
+}
+
+/**
+ * @tc.name: AdjustSelectedBlankLineWidth001
+ * @tc.desc: Test TextFieldPattern AdjustSelectedBlankLineWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, AdjustSelectedBlankLineWidth001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+
+    ASSERT_NE(pattern, nullptr);
+    auto accessibilityProperty = textFieldNode->GetAccessibilityProperty<AccessibilityProperty>();
+
+    RectF rect;
+    pattern->AdjustSelectedBlankLineWidth(rect);
+    ASSERT_EQ(NearZero(rect.GetX()), true);
+    ASSERT_EQ(NearZero(rect.GetY()), true);
+}
+
+/**
+ * @tc.name: GetGlyphPositionAtCoordinate001
+ * @tc.desc: Test TextFieldPattern GetGlyphPositionAtCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, GetGlyphPositionAtCoordinate001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto positionWithAffinity = pattern->GetGlyphPositionAtCoordinate(1, 1);
+    EXPECT_EQ(positionWithAffinity.position_, 0);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility001
+ * @tc.desc: Test TextFieldPattern UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, UpdateSelectionAndHandleVisibility001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: CreateTextDragInfo001
+ * @tc.desc: Test TextFieldPattern CreateTextDragInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, CreateTextDragInfo001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dragInfo = pattern->CreateTextDragInfo();
+    ASSERT_EQ(NearZero(dragInfo.maxSelectedWidth), true);
+}
+
+/**
+ * @tc.name: UpdateTextFieldInfo001
+ * @tc.desc: Test TextFieldPattern UpdateTextFieldInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, UpdateTextFieldInfo001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->UpdateTextFieldInfo();
+    ASSERT_EQ(pattern->IsNeedProcessAutoFill(), true);
+}
+
+/**
+ * @tc.name: ConvertTouchOffsetToTextOffset001
+ * @tc.desc: Test TextFieldPattern ConvertTouchOffsetToTextOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, ConvertTouchOffsetToTextOffset001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Offset temp;
+    auto ret = pattern->ConvertTouchOffsetToTextOffset(temp);
+    ASSERT_EQ(NearZero(ret.GetX()), true);
+    ASSERT_EQ(NearZero(ret.GetY()), true);
+}
+
+/**
+ * @tc.name: ExpandDefaultResponseRegion001
+ * @tc.desc: Test TextFieldPattern ExpandDefaultResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, ExpandDefaultResponseRegion001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RectF rect;
+    auto ret = pattern->ExpandDefaultResponseRegion(rect);
+    ASSERT_EQ(NearZero(ret.GetX()), true);
+    ASSERT_EQ(NearZero(ret.GetY()), false);
+}
+
+/**
+ * @tc.name: CheckPreviewTextValidate001
+ * @tc.desc: Test TextFieldPattern CheckPreviewTextValidate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, CheckPreviewTextValidate001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    const std::string previewValue = "hhh";
+    PreviewRange range;
+    range.Set(0, 1);
+    auto ret = pattern->CheckPreviewTextValidate(previewValue, range);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: SetPreviewText001
+ * @tc.desc: Test TextFieldPattern SetPreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetPreviewText001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    const std::string previewValue = "hhh";
+    PreviewRange range;
+    range.Set(0, 1);
+    auto ret = pattern->SetPreviewText(previewValue, range);
+    ASSERT_EQ(ret, 0);
 }
 }

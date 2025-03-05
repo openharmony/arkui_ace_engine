@@ -69,7 +69,7 @@ public:
         supportedStates_ = state;
     }
 
-    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)> callback, bool isInner)
+    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner)
     {
         if (state == UI_STATE_NORMAL) {
             return;

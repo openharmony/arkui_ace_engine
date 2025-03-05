@@ -76,6 +76,7 @@ void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> o
         return;
     }
 
+    properties.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
     auto levelOrderValue = obj->GetProperty("levelOrder");
     if (!levelOrderValue->IsObject()) {
         return;
@@ -99,10 +100,19 @@ void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> o
     properties.levelOrder = std::make_optional(order);
 }
 
+void ParseCustomDialogFocusable(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto focusableValue = obj->GetProperty("focusable");
+    if (!focusableValue->IsBoolean()) {
+        return;
+    }
+    properties.focusable = focusableValue->ToBoolean();
+}
+
 static std::atomic<int32_t> controllerId = 0;
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 {
-    int argc = info.Length();
+    uint32_t argc = info.Length();
     if (argc > 1 && !info[0]->IsUndefined() && info[0]->IsObject() && !info[1]->IsUndefined() && info[1]->IsObject()) {
         JSRef<JSObject> constructorArg = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSObject> ownerObj = JSRef<JSObject>::Cast(info[1]);
@@ -152,6 +162,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismissFunc = nullptr;
         JSViewAbstract::ParseDialogCallback(constructorArg, onWillDismissFunc);
         instance->dialogProperties_.onWillDismiss = onWillDismissFunc;
+
+        JSViewAbstract::ParseAppearDialogCallback(info, instance->dialogProperties_);
 
         // Parses autoCancel.
         JSRef<JSVal> autoCancelValue = constructorArg->GetProperty("autoCancel");
@@ -311,6 +323,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 
         // Parse levelOrder.
         ParseCustomDialogLevelOrder(instance->dialogProperties_, constructorArg);
+        ParseCustomDialogFocusable(instance->dialogProperties_, constructorArg);
 
         instance->dialogProperties_.controllerId = controllerId.fetch_add(1, std::memory_order_relaxed);
         JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);

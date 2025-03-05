@@ -15,9 +15,6 @@
 
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 
-#include "ui_report_proxy.h"
-
-#include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
 std::mutex UiSessionManager::mutex_;
 std::shared_mutex UiSessionManager::reportObjectMutex_;
@@ -306,6 +303,31 @@ void UiSessionManagerOhos::GetWebViewLanguage()
         translateManager_->GetWebViewCurrentLanguage();
     } else {
         LOGE("translateManager is nullptr ,translate failed");
+    }
+}
+
+void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback)
+{
+    pipelineContextPageNameCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::GetCurrentPageName()
+{
+    if (pipelineContextPageNameCallback_) {
+        auto result = pipelineContextPageNameCallback_();
+        SendCurrentPageName(result);
+    }
+}
+
+void UiSessionManagerOhos::SendCurrentPageName(const std::string result)
+{
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->SendCurrentPageName(result);
+        } else {
+            LOGW("report send current page name failed,process id:%{public}d", pair.first);
+        }
     }
 }
 

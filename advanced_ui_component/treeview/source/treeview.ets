@@ -3057,6 +3057,17 @@ class ListNodeDataSource extends BasicDataSource {
       return accessibleTitleList.join(',');
     } else {
       let accessibleTitleList: string[] = [];
+      let currentNodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
+      if (currentNodeItem === undefined || insertNodeParentNodeId === undefined) {
+        return '';
+      }
+      let primaryTitle = this.getNodeInfoByNodeItem(currentNodeItem).getNodeInfoData()?.primaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(currentNodeItem).getNodeInfoData().primaryTitle;
+      let secondaryTitle = this.getNodeInfoByNodeItem(currentNodeItem).getNodeInfoData()?.secondaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(currentNodeItem).getNodeInfoData().secondaryTitle;
+      let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+      let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+      accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
       while (insertNodeCurrentNodeId !== -1) {
         if (insertNodeCurrentNodeId === undefined) {
           return '';
@@ -3233,13 +3244,8 @@ class ListNodeDataSource extends BasicDataSource {
         let delayHighLightTime: number = this.isInnerDrag ? 1000 : 0; // ms
         this.timeoutHighLightId = setTimeout(() => {
           this.delayHighLight(currentIndex);
-          if (insertNodeParentNodeId === -1) {
-            this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
-              this.getPlaceAccessibleTitle(currentNodeId), 1))
-          } else {
-            this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
-              this.getPlaceAccessibleTitle(insertNodeId), 1))
-          }
+          this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+            this.getPlaceAccessibleTitle(currentNodeId), 1))
         }, delayHighLightTime);
       }
       if (isOverBorder || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&

@@ -597,13 +597,13 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // preload js views
-    JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
+    JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime, global);
 
     // preload js enums
     PreloadJsEnums(arkRuntime);
 
     // preload requireNative
-    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     JSMock::PreloadWorkerRequireNative(arkRuntime, global);
 }
 
@@ -1038,7 +1038,7 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
 }
 
 void JsiDeclarativeEngineInstance::PostJsTask(
-    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name, PriorityType priority)
+    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name)
 {
     if (runtime == nullptr) {
         return;
@@ -1047,7 +1047,7 @@ void JsiDeclarativeEngineInstance::PostJsTask(
     if (engineInstance == nullptr) {
         return;
     }
-    engineInstance->GetDelegate()->PostJsTask(std::move(task), name, priority);
+    engineInstance->GetDelegate()->PostJsTask(std::move(task), name);
 }
 
 void JsiDeclarativeEngineInstance::TriggerPageUpdate(const shared_ptr<JsRuntime>& runtime)
@@ -1090,8 +1090,7 @@ void JsiDeclarativeEngineInstance::SetDebuggerPostTask()
         if (delegate == nullptr) {
             return;
         }
-        delegate->PostJsTask(
-            std::move(task), "ArkUIDebuggerTask", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        delegate->PostJsTask(std::move(task), "ArkUIDebuggerTask");
     };
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
@@ -1286,7 +1285,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
                 ContainerScope scope(id);
                 nativeEngine->Loop(LOOP_NOWAIT, needSync);
             },
-            "ArkUISetNativeEngineLoop", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }

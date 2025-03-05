@@ -912,11 +912,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
-    } else {
-        JSClass<JSImage>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
-    }
+    JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
     JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
@@ -934,7 +930,7 @@ void JSImage::JSBind(BindingTarget globalObj)
 
 void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 {
-    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         draggable = info[0]->ToBoolean();
     }
@@ -943,6 +939,10 @@ void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (!Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
     if (info.Length() != 1 || !info[0]->IsFunction()) {
         return;
     }

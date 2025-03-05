@@ -155,10 +155,6 @@ public:
     void StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue> allNavigationInfo);
     const std::vector<NavdestinationRecoveryInfo> GetNavigationRecoveryInfo(std::string navigationId);
 
-    void OnContainerModalButtonsRectChange();
-    void AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener);
-    void RemoveButtonsRectChangeListener(int32_t id);
-
     void AddNavigation(int32_t pageId, int32_t navigationId);
 
     void RemoveNavigation(int32_t pageId);
@@ -207,12 +203,10 @@ private:
     bool preNodeAnimationCached_ = false;
     bool isInAnimation_ = false;
     bool isNodeAddAnimation_ = false;
-    bool hasCacheNavigationNodeEnable_ = false;
+    bool hasCacheNavigationNodeEnable_ = true;
     int32_t interactiveAnimationId_ = -1;
 
     WeakPtr<PipelineContext> pipeline_;
-    bool hasRegisterListener_ = false;
-    std::unordered_map<int32_t, std::function<void()>> buttonsRectChangeListeners_;
 };
 } // namespace OHOS::Ace::NG
 

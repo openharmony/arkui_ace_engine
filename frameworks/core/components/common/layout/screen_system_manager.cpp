@@ -15,6 +15,8 @@
 
 #include "core/components/common/layout/screen_system_manager.h"
 
+#include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace {
 namespace {
     constexpr Dimension MAX_SCREEN_WIDTH_SM = 320.0_vp;
@@ -60,5 +62,14 @@ ScreenSizeType ScreenSystemManager::GetSize(double width) const
         size = ScreenSizeType::XL;
     }
     return size;
+}
+
+double ScreenSystemManager::GetScreenWidth(const RefPtr<PipelineBase>& pipeline) const
+{
+    std::lock_guard<std::mutex> guard(lock);
+    if (pipeline) {
+        return pipeline->GetRootWidth();
+    }
+    return screenWidth_;
 }
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_TEXT_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_TEXT_THEME_H
 
+#include "ui/base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -56,6 +58,16 @@ public:
             theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
             theme->textStyle_.SetFontWeight(FontWeight::NORMAL);
             theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
+            InitThemeDefaultsClock(theme);
+        }
+
+        void InitThemeDefaultsClock(const RefPtr<TextTheme>& theme) const
+        {
+            CHECK_NULL_VOID(theme);
+            // Styles below do not need to get from ThemeConstants, directly set at here.
+            theme->textStyleClock_.SetFontStyle(FontStyle::NORMAL);
+            theme->textStyleClock_.SetFontWeight(FontWeight::NORMAL);
+            theme->textStyleClock_.SetTextDecoration(TextDecoration::NONE);
         }
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextTheme>& theme) const
@@ -68,7 +80,13 @@ public:
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
+            theme->textStyleClock_.SetTextColor(
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::GRAY)
+                    .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
+            theme->textStyleClock_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
             theme->caretColor_ = pattern->GetAttr<Color>("text_caret_color", Color(0xff006cde));
+            theme->SetTextParseFailedColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
+                                               .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetLineSpacing(pattern->GetAttr<Dimension>("text_line_spacing", 0.0_vp));
             theme->textStyle_.SetFontWeight(static_cast<FontWeight>(pattern->GetAttr<double>("text_font_weight", 0.0)));
             theme->textStyle_.SetTextAlign(static_cast<TextAlign>(pattern->GetAttr<double>("text_align", 0.0)));
@@ -76,7 +94,7 @@ public:
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
             auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
-            if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
                 dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
             }
             theme->dragBackgroundColor_ = dragBackgroundColor;
@@ -110,6 +128,11 @@ public:
     const Color& GetCaretColor() const
     {
         return caretColor_;
+    }
+
+    const TextStyle& GetTextStyleClock() const
+    {
+        return textStyleClock_;
     }
 
     const Color& GetSelectedColor() const
@@ -181,9 +204,20 @@ public:
         return marqueeStartPolicy_;
     }
 
+    const Color& GetTextParseFailedColor() const
+    {
+        return textClockParseFailedColor_;
+    }
+
+    void SetTextParseFailedColor(const Color& textColor)
+    {
+        textClockParseFailedColor_ = textColor;
+    }
+
 protected:
     TextTheme() = default;
     TextStyle textStyle_;
+    TextStyle textStyleClock_;
 
 private:
     Color caretColor_;
@@ -201,6 +235,9 @@ private:
     Color urlDefaultColor_;
     Color urlHoverColor_;
     Color urlPressColor_;
+
+    // For Parse Failed
+    Color textClockParseFailedColor_;
 };
 
 } // namespace OHOS::Ace

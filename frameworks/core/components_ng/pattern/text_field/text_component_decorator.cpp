@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -263,6 +263,14 @@ void CounterDecorator::UpdateTextNodeAndMeasure(
     } else {
         UpdateCounterContentAndStyle(textLength, maxLength, false);
     }
+    // TextInput's counter is outside of it,
+    // hence need to check whether counter's width is longer than TextInput's constraint
+    if (!textFieldPattern->IsTextArea() && contentConstraint.selfIdealSize.Width().has_value()) {
+        textNode->Measure(LayoutConstraintF());
+        if (GetContentWidth() > contentConstraint.selfIdealSize.Width().value()) {
+            return;
+        }
+    }
     textNode->Measure(contentConstraint);
 }
 
@@ -360,6 +368,15 @@ float CounterDecorator::GetBoundHeight() const
     CHECK_NULL_RETURN(theme, 0.0);
     return theme->GetCounterTextTopMargin().ConvertToPx() + theme->GetCounterTextBottomMargin().ConvertToPx() +
         GetDecoratorHeight();
+}
+
+bool CounterDecorator::HasContent() const
+{
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_RETURN(textNode, false);
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    return textLayoutProperty->GetContent().has_value() && !textLayoutProperty->GetContent().value().empty();
 }
 
 void ErrorDecorator::UpdateTextFieldMargin()

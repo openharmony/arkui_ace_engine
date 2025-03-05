@@ -112,4 +112,8 @@ bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
 {
     return true;
 }
+
+void DynamicComponentRendererImpl::NotifyForeground() {}
+
+void DynamicComponentRendererImpl::NotifyBackground() {}
 } // namespace OHOS::Ace::NG

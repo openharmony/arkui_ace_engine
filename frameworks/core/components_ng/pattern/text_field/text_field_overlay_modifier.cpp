@@ -16,18 +16,15 @@
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/image_painter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LAND_DURATION = 100;
 const RefPtr<CubicCurve> LAND_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2, 0, 0.2, 1.0f);
+constexpr int32_t HALF_RECT = 2;
 } // namespace
 
 TextFieldOverlayModifier::TextFieldOverlayModifier(
@@ -62,6 +59,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     previewTextDecorationColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
     previewTextStyle_ = PreviewTextStyle::NORMAL;
     contentChange_ = AceType::MakeRefPtr<PropertyBool>(false);
+    hoverColor_ = AceType::MakeRefPtr<PropertyInt>(0);
     ModifierAttachProperty();
 }
 
@@ -127,6 +125,32 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
     PaintPreviewTextDecoration(context);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        brush.SetColor(hoverColor_->Get());
+        canvas.AttachBrush(brush);
+        for (const auto& hoverRects : hoverRects_) {
+            auto rect = hoverRects.GetRect();
+            RSRect rsRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+            canvas.DrawRoundRect(RSRoundRect(rsRect, rect.Width() / HALF_RECT, rect.Height() / HALF_RECT));
+        }
+        canvas.DetachBrush();
+        canvas.Restore();
+    }
+}
+
+void TextFieldOverlayModifier::SetHoverColorAndRects(
+    const std::vector<RoundRect>& hoverRects, uint32_t hoverColor)
+{
+    CHECK_NULL_VOID(hoverColor);
+    hoverRects_ = hoverRects;
+    hoverColor_->Set(static_cast<int32_t>(hoverColor));
+}
+
+void TextFieldOverlayModifier::ClearHoverColorAndRects()
+{
+    hoverRects_.clear();
 }
 
 void TextFieldOverlayModifier::GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius)

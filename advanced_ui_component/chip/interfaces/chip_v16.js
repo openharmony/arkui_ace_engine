@@ -23,559 +23,108 @@ const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const mediaquery = requireNapi('mediaquery');
 
 export var ChipSize;
-(function (r5) {
-    r5['NORMAL'] = 'NORMAL';
-    r5['SMALL'] = 'SMALL';
+(function (i4) {
+    i4['NORMAL'] = 'NORMAL';
+    i4['SMALL'] = 'SMALL';
 })(ChipSize || (ChipSize = {}));
 var IconType;
-(function (q5) {
-    q5['PREFIX_ICON'] = 'PREFIXICON';
-    q5['SUFFIX_ICON'] = 'SUFFIXICON';
-    q5['PREFIX_SYMBOL'] = 'PREFIXSYMBOL';
-    q5['SUFFIX_SYMBOL'] = 'SUFFIXSYMBOL';
+(function (h4) {
+    h4['PREFIX_ICON'] = 'PREFIXICON';
+    h4['SUFFIX_ICON'] = 'SUFFIXICON';
+    h4['PREFIX_SYMBOL'] = 'PREFIXSYMBOL';
+    h4['SUFFIX_SYMBOL'] = 'SUFFIXSYMBOL';
 })(IconType || (IconType = {}));
 var BreakPointsType;
-(function (p5) {
-    p5['SM'] = 'SM';
-    p5['MD'] = 'MD';
-    p5['LG'] = 'LG';
+(function (g4) {
+    g4['SM'] = 'SM';
+    g4['MD'] = 'MD';
+    g4['LG'] = 'LG';
 })(BreakPointsType || (BreakPointsType = {}));
 
 export var AccessibilitySelectedType;
-(function (o5) {
-    o5[o5['CLICKED'] = 0] = 'CLICKED';
-    o5[o5['CHECKED'] = 1] = 'CHECKED';
-    o5[o5['SELECTED'] = 2] = 'SELECTED';
+(function (f4) {
+    f4[f4['CLICKED'] = 0] = 'CLICKED';
+    f4[f4['CHECKED'] = 1] = 'CHECKED';
+    f4[f4['SELECTED'] = 2] = 'SELECTED';
 })(AccessibilitySelectedType || (AccessibilitySelectedType = {}));
-
-export const defaultTheme = {
-    prefixIcon: {
-        normalSize: {
-            width: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            },
-            height: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }
-        },
-        smallSize: {
-            width: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            },
-            height: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }
-        },
-        fillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedFillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusFillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_icon_focus_fill'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusActivatedColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_icon_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-    },
-    label: {
-        normalFontSize: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_normal_font_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        smallFontSize: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_small_font_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusFontColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_focus_text'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusActiveFontColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_activated_focus_font_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        fontColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_font_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedFontColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_activated_fontcolor'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        fontFamily: 'HarmonyOS Sans',
-        fontWeight: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_text_font_weight'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        normalMargin: {
-            left: 6,
-            right: 6,
-            top: 0,
-            bottom: 0
-        },
-        smallMargin: {
-            left: 4,
-            right: 4,
-            top: 0,
-            bottom: 0
-        },
-        defaultFontSize: 14,
-        localizedNormalMargin: {
-            start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            top: LengthMetrics.vp(0),
-            bottom: LengthMetrics.vp(0)
-        },
-        localizedSmallMargin: {
-            start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            top: LengthMetrics.vp(0),
-            bottom: LengthMetrics.vp(0),
-        }
-    },
-    suffixIcon: {
-        normalSize: {
-            width: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            },
-            height: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }
-        },
-        smallSize: {
-            width: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            },
-            height: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }
-        },
-        fillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedFillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusFillColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_icon_focus_fill'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusActivatedColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_icon_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        defaultDeleteIcon: {
-            'id': -1,
-            'type': 20000,
-            params: ['sys.media.ohos_ic_public_cancel', 16, 16],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusable: false,
-        isShowMargin: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_show_close_icon_margin'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-    },
-    defaultSymbol: {
-        normalFontColor: [{
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }],
-        activatedFontColor: [{
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }],
-        normalSymbolFontSize: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_normal_icon_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
-        smallSymbolFontSize: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_small_icon_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
-        defaultEffect: -1,
-    },
-    chipNode: {
-        suitAgeScale: 1.75,
-        minLabelWidth: 12,
-        normalHeight: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_normal_height'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        smallHeight: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_small_height'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        enabled: true,
-        activated: false,
-        backgroundColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_background_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedBackgroundColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_container_activated_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusOutlineColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.ohos_id_color_focused_outline'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusOutlineMargin: 2,
-        borderColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_border_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        defaultBorderWidth: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_border_width'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        activatedBorderColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_activated_border_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        normalBorderRadius: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_border_radius_normal'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        smallBorderRadius: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_border_radius_small'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        borderWidth: 2,
-        focusBtnScaleX: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_focused_btn_scale'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusBtnScaleY: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_focused_btn_scale'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        localizedNormalPadding: {
-            start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_normal_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            top: LengthMetrics.vp(4),
-            bottom: LengthMetrics.vp(4)
-        },
-        localizedSmallPadding: {
-            start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.chip_small_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            }),
-            top: LengthMetrics.vp(4),
-            bottom: LengthMetrics.vp(4)
-        },
-        hoverBlendColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_hover_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        pressedBlendColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_press_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusBgColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        focusActivatedBgColor: {
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.chip_container_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
-        normalShadowStyle: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_normal_shadow_style'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        smallShadowStyle: {
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_small_shadow_style'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        },
-        breakPointConstraintWidth: {
-            breakPointMinWidth: 128,
-            breakPointSmMaxWidth: 156,
-            breakPointMdMaxWidth: 280,
-            breakPointLgMaxWidth: 400
-        }
-    }
-};
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
 
-export function Chip(d5, e5 = null) {
-    const f5 = d5;
+export function Chip(x3, y3 = null) {
+    const z3 = x3;
     {
-        (e5 ? e5 : this).observeComponentCreation2((h5, i5, j5 = f5) => {
-            if (i5) {
-                let k5 = new ChipComponent(e5 ? e5 : this, {
-                    chipSize: j5.size,
-                    prefixIcon: j5.prefixIcon,
-                    prefixSymbol: j5.prefixSymbol,
-                    label: j5.label,
-                    suffixIcon: j5.suffixIcon,
-                    suffixSymbol: j5.suffixSymbol,
-                    suffixSymbolOptions: j5.suffixSymbolOptions,
-                    allowClose: j5.allowClose,
-                    closeOptions: j5.closeOptions,
-                    chipEnabled: j5.enabled,
-                    chipActivated: j5.activated,
-                    chipNodeBackgroundColor: j5.backgroundColor,
-                    chipNodeActivatedBackgroundColor: j5.activatedBackgroundColor,
-                    chipNodeRadius: j5.borderRadius,
-                    chipDirection: j5.direction,
-                    chipAccessibilitySelectedType: j5.accessibilitySelectedType,
-                    chipAccessibilityDescription: j5.accessibilityDescription,
-                    chipAccessibilityLevel: j5.accessibilityLevel,
-                    onClose: j5.onClose,
-                    onClicked: j5.onClicked,
-                }, undefined, h5, () => {
-                }, { page: 'library/src/main/ets/components/chip_v16.ets', line: 345, col: 3 });
-                ViewPU.create(k5);
-                let g3 = () => {
+        (y3 ? y3 : this).observeComponentCreation2((a4, b4, c4 = z3) => {
+            if (b4) {
+                let d4 = new ChipComponent(y3 ? y3 : this, {
+                    chipSize: c4.size,
+                    prefixIcon: c4.prefixIcon,
+                    prefixSymbol: c4.prefixSymbol,
+                    label: c4.label,
+                    suffixIcon: c4.suffixIcon,
+                    suffixSymbol: c4.suffixSymbol,
+                    suffixSymbolOptions: c4.suffixSymbolOptions,
+                    allowClose: c4.allowClose,
+                    closeOptions: c4.closeOptions,
+                    chipEnabled: c4.enabled,
+                    chipActivated: c4.activated,
+                    chipNodeBackgroundColor: c4.backgroundColor,
+                    chipNodeActivatedBackgroundColor: c4.activatedBackgroundColor,
+                    chipNodeRadius: c4.borderRadius,
+                    chipDirection: c4.direction,
+                    chipAccessibilitySelectedType: c4.accessibilitySelectedType,
+                    chipAccessibilityDescription: c4.accessibilityDescription,
+                    chipAccessibilityLevel: c4.accessibilityLevel,
+                    onClose: c4.onClose,
+                    onClicked: c4.onClicked,
+                }, undefined, a4, () => {
+                }, { page: 'library/src/main/ets/components/chip_v16.ets', line: 224, col: 3 });
+                ViewPU.create(d4);
+                let e4 = () => {
                     return {
-                        chipSize: j5.size,
-                        prefixIcon: j5.prefixIcon,
-                        prefixSymbol: j5.prefixSymbol,
-                        label: j5.label,
-                        suffixIcon: j5.suffixIcon,
-                        suffixSymbol: j5.suffixSymbol,
-                        suffixSymbolOptions: j5.suffixSymbolOptions,
-                        allowClose: j5.allowClose,
-                        closeOptions: j5.closeOptions,
-                        chipEnabled: j5.enabled,
-                        chipActivated: j5.activated,
-                        chipNodeBackgroundColor: j5.backgroundColor,
-                        chipNodeActivatedBackgroundColor: j5.activatedBackgroundColor,
-                        chipNodeRadius: j5.borderRadius,
-                        chipDirection: j5.direction,
-                        chipAccessibilitySelectedType: j5.accessibilitySelectedType,
-                        chipAccessibilityDescription: j5.accessibilityDescription,
-                        chipAccessibilityLevel: j5.accessibilityLevel,
-                        onClose: j5.onClose,
-                        onClicked: j5.onClicked
+                        chipSize: c4.size,
+                        prefixIcon: c4.prefixIcon,
+                        prefixSymbol: c4.prefixSymbol,
+                        label: c4.label,
+                        suffixIcon: c4.suffixIcon,
+                        suffixSymbol: c4.suffixSymbol,
+                        suffixSymbolOptions: c4.suffixSymbolOptions,
+                        allowClose: c4.allowClose,
+                        closeOptions: c4.closeOptions,
+                        chipEnabled: c4.enabled,
+                        chipActivated: c4.activated,
+                        chipNodeBackgroundColor: c4.backgroundColor,
+                        chipNodeActivatedBackgroundColor: c4.activatedBackgroundColor,
+                        chipNodeRadius: c4.borderRadius,
+                        chipDirection: c4.direction,
+                        chipAccessibilitySelectedType: c4.accessibilitySelectedType,
+                        chipAccessibilityDescription: c4.accessibilityDescription,
+                        chipAccessibilityLevel: c4.accessibilityLevel,
+                        onClose: c4.onClose,
+                        onClicked: c4.onClicked
                     };
                 };
-                k5.paramsGenerator_ = g3;
+                d4.paramsGenerator_ = e4;
             } else {
-                (e5 ? e5 : this).updateStateVarsOfChildByElmtId(h5, {
-                    chipSize: j5.size,
-                    prefixIcon: j5.prefixIcon,
-                    prefixSymbol: j5.prefixSymbol,
-                    label: j5.label,
-                    suffixIcon: j5.suffixIcon,
-                    suffixSymbol: j5.suffixSymbol,
-                    suffixSymbolOptions: j5.suffixSymbolOptions,
-                    allowClose: j5.allowClose,
-                    closeOptions: j5.closeOptions,
-                    chipEnabled: j5.enabled,
-                    chipActivated: j5.activated,
-                    chipNodeBackgroundColor: j5.backgroundColor,
-                    chipNodeActivatedBackgroundColor: j5.activatedBackgroundColor,
-                    chipNodeRadius: j5.borderRadius,
-                    chipDirection: j5.direction,
-                    chipAccessibilitySelectedType: j5.accessibilitySelectedType,
-                    chipAccessibilityDescription: j5.accessibilityDescription,
-                    chipAccessibilityLevel: j5.accessibilityLevel
+                (y3 ? y3 : this).updateStateVarsOfChildByElmtId(a4, {
+                    chipSize: c4.size,
+                    prefixIcon: c4.prefixIcon,
+                    prefixSymbol: c4.prefixSymbol,
+                    label: c4.label,
+                    suffixIcon: c4.suffixIcon,
+                    suffixSymbol: c4.suffixSymbol,
+                    suffixSymbolOptions: c4.suffixSymbolOptions,
+                    allowClose: c4.allowClose,
+                    closeOptions: c4.closeOptions,
+                    chipEnabled: c4.enabled,
+                    chipActivated: c4.activated,
+                    chipNodeBackgroundColor: c4.backgroundColor,
+                    chipNodeActivatedBackgroundColor: c4.activatedBackgroundColor,
+                    chipNodeRadius: c4.borderRadius,
+                    chipDirection: c4.direction,
+                    chipAccessibilitySelectedType: c4.accessibilitySelectedType,
+                    chipAccessibilityDescription: c4.accessibilityDescription,
+                    chipAccessibilityLevel: c4.accessibilityLevel
                 });
             }
         }, { name: 'ChipComponent' });
@@ -583,37 +132,486 @@ export function Chip(d5, e5 = null) {
 }
 
 export class ChipComponent extends ViewPU {
-    constructor(w4, x4, y4, z4 = -1, a5 = undefined, b5) {
-        super(w4, y4, z4, b5);
-        if (typeof a5 === 'function') {
-            this.paramsGenerator_ = a5;
+    constructor(q3, r3, s3, t3 = -1, u3 = undefined, v3) {
+        super(q3, s3, t3, v3);
+        if (typeof u3 === 'function') {
+            this.paramsGenerator_ = u3;
         }
-        this.theme = defaultTheme;
-        this.__chipSize = new SynchedPropertyObjectOneWayPU(x4.chipSize, this, 'chipSize');
-        this.__allowClose = new SynchedPropertySimpleOneWayPU(x4.allowClose, this, 'allowClose');
-        this.__closeOptions = new SynchedPropertyObjectOneWayPU(x4.closeOptions, this, 'closeOptions');
-        this.__chipDirection = new SynchedPropertySimpleOneWayPU(x4.chipDirection, this, 'chipDirection');
-        this.__prefixIcon = new SynchedPropertyObjectOneWayPU(x4.prefixIcon, this, 'prefixIcon');
-        this.__prefixSymbol = new SynchedPropertyObjectOneWayPU(x4.prefixSymbol, this, 'prefixSymbol');
-        this.__label = new SynchedPropertyObjectOneWayPU(x4.label, this, 'label');
-        this.__suffixIcon = new SynchedPropertyObjectOneWayPU(x4.suffixIcon, this, 'suffixIcon');
-        this.__suffixSymbol = new SynchedPropertyObjectOneWayPU(x4.suffixSymbol, this, 'suffixSymbol');
+        this.theme = {
+            prefixIcon: {
+                normalSize: {
+                    width: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    },
+                    height: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                },
+                smallSize: {
+                    width: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    },
+                    height: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                },
+                fillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_usually_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedFillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_active_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusFillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_icon_focus_fill'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusActivatedColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_icon_activated_focus_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            },
+            label: {
+                normalFontSize: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_normal_font_size'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                smallFontSize: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_small_font_size'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusFontColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_focus_text'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusActiveFontColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_activated_focus_font_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                fontColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_font_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedFontColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_activated_fontcolor'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                fontFamily: 'HarmonyOS Sans',
+                fontWeight: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_text_font_weight'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                normalMargin: {
+                    left: 6,
+                    right: 6,
+                    top: 0,
+                    bottom: 0
+                },
+                smallMargin: {
+                    left: 4,
+                    right: 4,
+                    top: 0,
+                    bottom: 0
+                },
+                defaultFontSize: 14,
+                localizedNormalMargin: {
+                    start: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_text_margin'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    end: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_text_margin'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    top: LengthMetrics.vp(0),
+                    bottom: LengthMetrics.vp(0)
+                },
+                localizedSmallMargin: {
+                    start: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_text_margin'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    end: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_text_margin'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    top: LengthMetrics.vp(0),
+                    bottom: LengthMetrics.vp(0),
+                }
+            },
+            suffixIcon: {
+                normalSize: {
+                    width: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    },
+                    height: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                },
+                smallSize: {
+                    width: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    },
+                    height: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_icon_size'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                },
+                fillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_usually_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedFillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_active_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusFillColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_icon_focus_fill'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusActivatedColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_icon_activated_focus_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                defaultDeleteIcon: {
+                    'id': -1,
+                    'type': 20000,
+                    params: ['sys.media.ohos_ic_public_cancel', 16, 16],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusable: false,
+                isShowMargin: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_show_close_icon_margin'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            },
+            defaultSymbol: {
+                normalFontColor: [{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_usually_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }],
+                activatedFontColor: [{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_active_icon_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }],
+                normalSymbolFontSize: LengthMetrics.resource({
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_normal_icon_size'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }).value,
+                smallSymbolFontSize: LengthMetrics.resource({
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_small_icon_size'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }).value,
+                defaultEffect: -1,
+            },
+            chipNode: {
+                suitAgeScale: 1.75,
+                minLabelWidth: 12,
+                normalHeight: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_normal_height'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                smallHeight: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_small_height'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                enabled: true,
+                activated: false,
+                backgroundColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_background_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedBackgroundColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_container_activated_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusOutlineColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.ohos_id_color_focused_outline'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusOutlineMargin: 2,
+                borderColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_border_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                defaultBorderWidth: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_border_width'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                activatedBorderColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_activated_border_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                normalBorderRadius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_border_radius_normal'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                smallBorderRadius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_border_radius_small'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                borderWidth: 2,
+                focusBtnScaleX: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_focused_btn_scale'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusBtnScaleY: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_focused_btn_scale'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                localizedNormalPadding: {
+                    start: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_text_padding'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    end: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_normal_text_padding'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    top: LengthMetrics.vp(4),
+                    bottom: LengthMetrics.vp(4)
+                },
+                localizedSmallPadding: {
+                    start: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_text_padding'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    end: LengthMetrics.resource({
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.chip_small_text_padding'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }),
+                    top: LengthMetrics.vp(4),
+                    bottom: LengthMetrics.vp(4)
+                },
+                hoverBlendColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_hover_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                pressedBlendColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_press_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusBgColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_focus_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                focusActivatedBgColor: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.chip_container_activated_focus_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
+                normalShadowStyle: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_normal_shadow_style'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                smallShadowStyle: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.chip_small_shadow_style'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                breakPointConstraintWidth: {
+                    breakPointMinWidth: 128,
+                    breakPointSmMaxWidth: 156,
+                    breakPointMdMaxWidth: 280,
+                    breakPointLgMaxWidth: 400
+                }
+            }
+        };
+        this.__chipSize = new SynchedPropertyObjectOneWayPU(r3.chipSize, this, 'chipSize');
+        this.__allowClose = new SynchedPropertySimpleOneWayPU(r3.allowClose, this, 'allowClose');
+        this.__closeOptions = new SynchedPropertyObjectOneWayPU(r3.closeOptions, this, 'closeOptions');
+        this.__chipDirection = new SynchedPropertySimpleOneWayPU(r3.chipDirection, this, 'chipDirection');
+        this.__prefixIcon = new SynchedPropertyObjectOneWayPU(r3.prefixIcon, this, 'prefixIcon');
+        this.__prefixSymbol = new SynchedPropertyObjectOneWayPU(r3.prefixSymbol, this, 'prefixSymbol');
+        this.__label = new SynchedPropertyObjectOneWayPU(r3.label, this, 'label');
+        this.__suffixIcon = new SynchedPropertyObjectOneWayPU(r3.suffixIcon, this, 'suffixIcon');
+        this.__suffixSymbol = new SynchedPropertyObjectOneWayPU(r3.suffixSymbol, this, 'suffixSymbol');
         this.__suffixSymbolOptions =
-            new SynchedPropertyObjectOneWayPU(x4.suffixSymbolOptions, this, 'suffixSymbolOptions');
+            new SynchedPropertyObjectOneWayPU(r3.suffixSymbolOptions, this, 'suffixSymbolOptions');
         this.__chipNodeBackgroundColor =
-            new SynchedPropertyObjectOneWayPU(x4.chipNodeBackgroundColor, this, 'chipNodeBackgroundColor');
+            new SynchedPropertyObjectOneWayPU(r3.chipNodeBackgroundColor, this, 'chipNodeBackgroundColor');
         this.__chipNodeActivatedBackgroundColor =
-            new SynchedPropertyObjectOneWayPU(x4.chipNodeActivatedBackgroundColor, this,
+            new SynchedPropertyObjectOneWayPU(r3.chipNodeActivatedBackgroundColor, this,
                 'chipNodeActivatedBackgroundColor');
-        this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(x4.chipNodeRadius, this, 'chipNodeRadius');
-        this.__chipEnabled = new SynchedPropertySimpleOneWayPU(x4.chipEnabled, this, 'chipEnabled');
-        this.__chipActivated = new SynchedPropertySimpleOneWayPU(x4.chipActivated, this, 'chipActivated');
+        this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(r3.chipNodeRadius, this, 'chipNodeRadius');
+        this.__chipEnabled = new SynchedPropertySimpleOneWayPU(r3.chipEnabled, this, 'chipEnabled');
+        this.__chipActivated = new SynchedPropertySimpleOneWayPU(r3.chipActivated, this, 'chipActivated');
         this.__chipAccessibilitySelectedType =
-            new SynchedPropertySimpleOneWayPU(x4.chipAccessibilitySelectedType, this, 'chipAccessibilitySelectedType');
+            new SynchedPropertySimpleOneWayPU(r3.chipAccessibilitySelectedType, this, 'chipAccessibilitySelectedType');
         this.__chipAccessibilityDescription =
-            new SynchedPropertyObjectOneWayPU(x4.chipAccessibilityDescription, this, 'chipAccessibilityDescription');
+            new SynchedPropertyObjectOneWayPU(r3.chipAccessibilityDescription, this, 'chipAccessibilityDescription');
         this.__chipAccessibilityLevel =
-            new SynchedPropertySimpleOneWayPU(x4.chipAccessibilityLevel, this, 'chipAccessibilityLevel');
+            new SynchedPropertySimpleOneWayPU(r3.chipAccessibilityLevel, this, 'chipAccessibilityLevel');
         this.__isChipExist = new ObservedPropertySimplePU(true, this, 'isChipExist');
         this.__chipScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, 'chipScale');
         this.__chipOpacity = new ObservedPropertySimplePU(1, this, 'chipOpacity');
@@ -632,133 +630,133 @@ export class ChipComponent extends ViewPU {
         this.symbolEffect = new SymbolEffect();
         this.environmentCallbackID = undefined;
         this.environmentCallback = {
-            onConfigurationUpdated: (b2) => {
-                this.fontSizeScale = b2.fontSizeScale ?? 1;
+            onConfigurationUpdated: (w3) => {
+                this.fontSizeScale = w3.fontSizeScale ?? 1;
             },
             onMemoryLevel() {
             }
         };
-        this.setInitiallyProvidedValue(x4);
+        this.setInitiallyProvidedValue(r3);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(v4) {
-        if (v4.theme !== undefined) {
-            this.theme = v4.theme;
+    setInitiallyProvidedValue(p3) {
+        if (p3.theme !== undefined) {
+            this.theme = p3.theme;
         }
-        if (v4.chipSize === undefined) {
+        if (p3.chipSize === undefined) {
             this.__chipSize.set(ChipSize.NORMAL);
         }
-        if (v4.chipDirection === undefined) {
+        if (p3.chipDirection === undefined) {
             this.__chipDirection.set(Direction.Auto);
         }
-        if (v4.chipEnabled === undefined) {
+        if (p3.chipEnabled === undefined) {
             this.__chipEnabled.set(true);
         }
-        if (v4.isChipExist !== undefined) {
-            this.isChipExist = v4.isChipExist;
+        if (p3.isChipExist !== undefined) {
+            this.isChipExist = p3.isChipExist;
         }
-        if (v4.chipScale !== undefined) {
-            this.chipScale = v4.chipScale;
+        if (p3.chipScale !== undefined) {
+            this.chipScale = p3.chipScale;
         }
-        if (v4.chipOpacity !== undefined) {
-            this.chipOpacity = v4.chipOpacity;
+        if (p3.chipOpacity !== undefined) {
+            this.chipOpacity = p3.chipOpacity;
         }
-        if (v4.suffixSymbolHeight !== undefined) {
-            this.suffixSymbolHeight = v4.suffixSymbolHeight;
+        if (p3.suffixSymbolHeight !== undefined) {
+            this.suffixSymbolHeight = p3.suffixSymbolHeight;
         }
-        if (v4.suffixSymbolWidth !== undefined) {
-            this.suffixSymbolWidth = v4.suffixSymbolWidth;
+        if (p3.suffixSymbolWidth !== undefined) {
+            this.suffixSymbolWidth = p3.suffixSymbolWidth;
         }
-        if (v4.breakPoint !== undefined) {
-            this.breakPoint = v4.breakPoint;
+        if (p3.breakPoint !== undefined) {
+            this.breakPoint = p3.breakPoint;
         }
-        if (v4.fontSizeScale !== undefined) {
-            this.fontSizeScale = v4.fontSizeScale;
+        if (p3.fontSizeScale !== undefined) {
+            this.fontSizeScale = p3.fontSizeScale;
         }
-        if (v4.isSuffixIconFocusStyleCustomized !== undefined) {
-            this.isSuffixIconFocusStyleCustomized = v4.isSuffixIconFocusStyleCustomized;
+        if (p3.isSuffixIconFocusStyleCustomized !== undefined) {
+            this.isSuffixIconFocusStyleCustomized = p3.isSuffixIconFocusStyleCustomized;
         }
-        if (v4.isSuffixIconFocusable !== undefined) {
-            this.isSuffixIconFocusable = v4.isSuffixIconFocusable;
+        if (p3.isSuffixIconFocusable !== undefined) {
+            this.isSuffixIconFocusable = p3.isSuffixIconFocusable;
         }
-        if (v4.onClose !== undefined) {
-            this.onClose = v4.onClose;
+        if (p3.onClose !== undefined) {
+            this.onClose = p3.onClose;
         }
-        if (v4.onClicked !== undefined) {
-            this.onClicked = v4.onClicked;
+        if (p3.onClicked !== undefined) {
+            this.onClicked = p3.onClicked;
         }
-        if (v4.chipNodeInFocus !== undefined) {
-            this.chipNodeInFocus = v4.chipNodeInFocus;
+        if (p3.chipNodeInFocus !== undefined) {
+            this.chipNodeInFocus = p3.chipNodeInFocus;
         }
-        if (v4.smListener !== undefined) {
-            this.smListener = v4.smListener;
+        if (p3.smListener !== undefined) {
+            this.smListener = p3.smListener;
         }
-        if (v4.mdListener !== undefined) {
-            this.mdListener = v4.mdListener;
+        if (p3.mdListener !== undefined) {
+            this.mdListener = p3.mdListener;
         }
-        if (v4.lgListener !== undefined) {
-            this.lgListener = v4.lgListener;
+        if (p3.lgListener !== undefined) {
+            this.lgListener = p3.lgListener;
         }
-        if (v4.symbolEffect !== undefined) {
-            this.symbolEffect = v4.symbolEffect;
+        if (p3.symbolEffect !== undefined) {
+            this.symbolEffect = p3.symbolEffect;
         }
-        if (v4.environmentCallbackID !== undefined) {
-            this.environmentCallbackID = v4.environmentCallbackID;
+        if (p3.environmentCallbackID !== undefined) {
+            this.environmentCallbackID = p3.environmentCallbackID;
         }
-        if (v4.environmentCallback !== undefined) {
-            this.environmentCallback = v4.environmentCallback;
+        if (p3.environmentCallback !== undefined) {
+            this.environmentCallback = p3.environmentCallback;
         }
     }
 
-    updateStateVars(u4) {
-        this.__chipSize.reset(u4.chipSize);
-        this.__allowClose.reset(u4.allowClose);
-        this.__closeOptions.reset(u4.closeOptions);
-        this.__chipDirection.reset(u4.chipDirection);
-        this.__prefixIcon.reset(u4.prefixIcon);
-        this.__prefixSymbol.reset(u4.prefixSymbol);
-        this.__label.reset(u4.label);
-        this.__suffixIcon.reset(u4.suffixIcon);
-        this.__suffixSymbol.reset(u4.suffixSymbol);
-        this.__suffixSymbolOptions.reset(u4.suffixSymbolOptions);
-        this.__chipNodeBackgroundColor.reset(u4.chipNodeBackgroundColor);
-        this.__chipNodeActivatedBackgroundColor.reset(u4.chipNodeActivatedBackgroundColor);
-        this.__chipNodeRadius.reset(u4.chipNodeRadius);
-        this.__chipEnabled.reset(u4.chipEnabled);
-        this.__chipActivated.reset(u4.chipActivated);
-        this.__chipAccessibilitySelectedType.reset(u4.chipAccessibilitySelectedType);
-        this.__chipAccessibilityDescription.reset(u4.chipAccessibilityDescription);
-        this.__chipAccessibilityLevel.reset(u4.chipAccessibilityLevel);
+    updateStateVars(o3) {
+        this.__chipSize.reset(o3.chipSize);
+        this.__allowClose.reset(o3.allowClose);
+        this.__closeOptions.reset(o3.closeOptions);
+        this.__chipDirection.reset(o3.chipDirection);
+        this.__prefixIcon.reset(o3.prefixIcon);
+        this.__prefixSymbol.reset(o3.prefixSymbol);
+        this.__label.reset(o3.label);
+        this.__suffixIcon.reset(o3.suffixIcon);
+        this.__suffixSymbol.reset(o3.suffixSymbol);
+        this.__suffixSymbolOptions.reset(o3.suffixSymbolOptions);
+        this.__chipNodeBackgroundColor.reset(o3.chipNodeBackgroundColor);
+        this.__chipNodeActivatedBackgroundColor.reset(o3.chipNodeActivatedBackgroundColor);
+        this.__chipNodeRadius.reset(o3.chipNodeRadius);
+        this.__chipEnabled.reset(o3.chipEnabled);
+        this.__chipActivated.reset(o3.chipActivated);
+        this.__chipAccessibilitySelectedType.reset(o3.chipAccessibilitySelectedType);
+        this.__chipAccessibilityDescription.reset(o3.chipAccessibilityDescription);
+        this.__chipAccessibilityLevel.reset(o3.chipAccessibilityLevel);
     }
 
-    purgeVariableDependenciesOnElmtId(t4) {
-        this.__chipSize.purgeDependencyOnElmtId(t4);
-        this.__allowClose.purgeDependencyOnElmtId(t4);
-        this.__closeOptions.purgeDependencyOnElmtId(t4);
-        this.__chipDirection.purgeDependencyOnElmtId(t4);
-        this.__prefixIcon.purgeDependencyOnElmtId(t4);
-        this.__prefixSymbol.purgeDependencyOnElmtId(t4);
-        this.__label.purgeDependencyOnElmtId(t4);
-        this.__suffixIcon.purgeDependencyOnElmtId(t4);
-        this.__suffixSymbol.purgeDependencyOnElmtId(t4);
-        this.__suffixSymbolOptions.purgeDependencyOnElmtId(t4);
-        this.__chipNodeBackgroundColor.purgeDependencyOnElmtId(t4);
-        this.__chipNodeActivatedBackgroundColor.purgeDependencyOnElmtId(t4);
-        this.__chipNodeRadius.purgeDependencyOnElmtId(t4);
-        this.__chipEnabled.purgeDependencyOnElmtId(t4);
-        this.__chipActivated.purgeDependencyOnElmtId(t4);
-        this.__chipAccessibilitySelectedType.purgeDependencyOnElmtId(t4);
-        this.__chipAccessibilityDescription.purgeDependencyOnElmtId(t4);
-        this.__chipAccessibilityLevel.purgeDependencyOnElmtId(t4);
-        this.__isChipExist.purgeDependencyOnElmtId(t4);
-        this.__chipScale.purgeDependencyOnElmtId(t4);
-        this.__chipOpacity.purgeDependencyOnElmtId(t4);
-        this.__suffixSymbolHeight.purgeDependencyOnElmtId(t4);
-        this.__suffixSymbolWidth.purgeDependencyOnElmtId(t4);
-        this.__breakPoint.purgeDependencyOnElmtId(t4);
-        this.__fontSizeScale.purgeDependencyOnElmtId(t4);
-        this.__chipNodeInFocus.purgeDependencyOnElmtId(t4);
+    purgeVariableDependenciesOnElmtId(n3) {
+        this.__chipSize.purgeDependencyOnElmtId(n3);
+        this.__allowClose.purgeDependencyOnElmtId(n3);
+        this.__closeOptions.purgeDependencyOnElmtId(n3);
+        this.__chipDirection.purgeDependencyOnElmtId(n3);
+        this.__prefixIcon.purgeDependencyOnElmtId(n3);
+        this.__prefixSymbol.purgeDependencyOnElmtId(n3);
+        this.__label.purgeDependencyOnElmtId(n3);
+        this.__suffixIcon.purgeDependencyOnElmtId(n3);
+        this.__suffixSymbol.purgeDependencyOnElmtId(n3);
+        this.__suffixSymbolOptions.purgeDependencyOnElmtId(n3);
+        this.__chipNodeBackgroundColor.purgeDependencyOnElmtId(n3);
+        this.__chipNodeActivatedBackgroundColor.purgeDependencyOnElmtId(n3);
+        this.__chipNodeRadius.purgeDependencyOnElmtId(n3);
+        this.__chipEnabled.purgeDependencyOnElmtId(n3);
+        this.__chipActivated.purgeDependencyOnElmtId(n3);
+        this.__chipAccessibilitySelectedType.purgeDependencyOnElmtId(n3);
+        this.__chipAccessibilityDescription.purgeDependencyOnElmtId(n3);
+        this.__chipAccessibilityLevel.purgeDependencyOnElmtId(n3);
+        this.__isChipExist.purgeDependencyOnElmtId(n3);
+        this.__chipScale.purgeDependencyOnElmtId(n3);
+        this.__chipOpacity.purgeDependencyOnElmtId(n3);
+        this.__suffixSymbolHeight.purgeDependencyOnElmtId(n3);
+        this.__suffixSymbolWidth.purgeDependencyOnElmtId(n3);
+        this.__breakPoint.purgeDependencyOnElmtId(n3);
+        this.__fontSizeScale.purgeDependencyOnElmtId(n3);
+        this.__chipNodeInFocus.purgeDependencyOnElmtId(n3);
     }
 
     aboutToBeDeleted() {
@@ -796,230 +794,230 @@ export class ChipComponent extends ViewPU {
         return this.__chipSize.get();
     }
 
-    set chipSize(s4) {
-        this.__chipSize.set(s4);
+    set chipSize(m3) {
+        this.__chipSize.set(m3);
     }
 
     get allowClose() {
         return this.__allowClose.get();
     }
 
-    set allowClose(r4) {
-        this.__allowClose.set(r4);
+    set allowClose(l3) {
+        this.__allowClose.set(l3);
     }
 
     get closeOptions() {
         return this.__closeOptions.get();
     }
 
-    set closeOptions(q4) {
-        this.__closeOptions.set(q4);
+    set closeOptions(k3) {
+        this.__closeOptions.set(k3);
     }
 
     get chipDirection() {
         return this.__chipDirection.get();
     }
 
-    set chipDirection(p4) {
-        this.__chipDirection.set(p4);
+    set chipDirection(j3) {
+        this.__chipDirection.set(j3);
     }
 
     get prefixIcon() {
         return this.__prefixIcon.get();
     }
 
-    set prefixIcon(o4) {
-        this.__prefixIcon.set(o4);
+    set prefixIcon(i3) {
+        this.__prefixIcon.set(i3);
     }
 
     get prefixSymbol() {
         return this.__prefixSymbol.get();
     }
 
-    set prefixSymbol(n4) {
-        this.__prefixSymbol.set(n4);
+    set prefixSymbol(h3) {
+        this.__prefixSymbol.set(h3);
     }
 
     get label() {
         return this.__label.get();
     }
 
-    set label(m4) {
-        this.__label.set(m4);
+    set label(g3) {
+        this.__label.set(g3);
     }
 
     get suffixIcon() {
         return this.__suffixIcon.get();
     }
 
-    set suffixIcon(l4) {
-        this.__suffixIcon.set(l4);
+    set suffixIcon(f3) {
+        this.__suffixIcon.set(f3);
     }
 
     get suffixSymbol() {
         return this.__suffixSymbol.get();
     }
 
-    set suffixSymbol(k4) {
-        this.__suffixSymbol.set(k4);
+    set suffixSymbol(e3) {
+        this.__suffixSymbol.set(e3);
     }
 
     get suffixSymbolOptions() {
         return this.__suffixSymbolOptions.get();
     }
 
-    set suffixSymbolOptions(j4) {
-        this.__suffixSymbolOptions.set(j4);
+    set suffixSymbolOptions(d3) {
+        this.__suffixSymbolOptions.set(d3);
     }
 
     get chipNodeBackgroundColor() {
         return this.__chipNodeBackgroundColor.get();
     }
 
-    set chipNodeBackgroundColor(i4) {
-        this.__chipNodeBackgroundColor.set(i4);
+    set chipNodeBackgroundColor(c3) {
+        this.__chipNodeBackgroundColor.set(c3);
     }
 
     get chipNodeActivatedBackgroundColor() {
         return this.__chipNodeActivatedBackgroundColor.get();
     }
 
-    set chipNodeActivatedBackgroundColor(h4) {
-        this.__chipNodeActivatedBackgroundColor.set(h4);
+    set chipNodeActivatedBackgroundColor(b3) {
+        this.__chipNodeActivatedBackgroundColor.set(b3);
     }
 
     get chipNodeRadius() {
         return this.__chipNodeRadius.get();
     }
 
-    set chipNodeRadius(g4) {
-        this.__chipNodeRadius.set(g4);
+    set chipNodeRadius(a3) {
+        this.__chipNodeRadius.set(a3);
     }
 
     get chipEnabled() {
         return this.__chipEnabled.get();
     }
 
-    set chipEnabled(f4) {
-        this.__chipEnabled.set(f4);
+    set chipEnabled(z2) {
+        this.__chipEnabled.set(z2);
     }
 
     get chipActivated() {
         return this.__chipActivated.get();
     }
 
-    set chipActivated(e4) {
-        this.__chipActivated.set(e4);
+    set chipActivated(y2) {
+        this.__chipActivated.set(y2);
     }
 
     get chipAccessibilitySelectedType() {
         return this.__chipAccessibilitySelectedType.get();
     }
 
-    set chipAccessibilitySelectedType(d4) {
-        this.__chipAccessibilitySelectedType.set(d4);
+    set chipAccessibilitySelectedType(x2) {
+        this.__chipAccessibilitySelectedType.set(x2);
     }
 
     get chipAccessibilityDescription() {
         return this.__chipAccessibilityDescription.get();
     }
 
-    set chipAccessibilityDescription(c4) {
-        this.__chipAccessibilityDescription.set(c4);
+    set chipAccessibilityDescription(w2) {
+        this.__chipAccessibilityDescription.set(w2);
     }
 
     get chipAccessibilityLevel() {
         return this.__chipAccessibilityLevel.get();
     }
 
-    set chipAccessibilityLevel(b4) {
-        this.__chipAccessibilityLevel.set(b4);
+    set chipAccessibilityLevel(v2) {
+        this.__chipAccessibilityLevel.set(v2);
     }
 
     get isChipExist() {
         return this.__isChipExist.get();
     }
 
-    set isChipExist(a4) {
-        this.__isChipExist.set(a4);
+    set isChipExist(u2) {
+        this.__isChipExist.set(u2);
     }
 
     get chipScale() {
         return this.__chipScale.get();
     }
 
-    set chipScale(z3) {
-        this.__chipScale.set(z3);
+    set chipScale(t2) {
+        this.__chipScale.set(t2);
     }
 
     get chipOpacity() {
         return this.__chipOpacity.get();
     }
 
-    set chipOpacity(y3) {
-        this.__chipOpacity.set(y3);
+    set chipOpacity(s2) {
+        this.__chipOpacity.set(s2);
     }
 
     get suffixSymbolHeight() {
         return this.__suffixSymbolHeight.get();
     }
 
-    set suffixSymbolHeight(x3) {
-        this.__suffixSymbolHeight.set(x3);
+    set suffixSymbolHeight(r2) {
+        this.__suffixSymbolHeight.set(r2);
     }
 
     get suffixSymbolWidth() {
         return this.__suffixSymbolWidth.get();
     }
 
-    set suffixSymbolWidth(w3) {
-        this.__suffixSymbolWidth.set(w3);
+    set suffixSymbolWidth(q2) {
+        this.__suffixSymbolWidth.set(q2);
     }
 
     get breakPoint() {
         return this.__breakPoint.get();
     }
 
-    set breakPoint(v3) {
-        this.__breakPoint.set(v3);
+    set breakPoint(p2) {
+        this.__breakPoint.set(p2);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(u3) {
-        this.__fontSizeScale.set(u3);
+    set fontSizeScale(o2) {
+        this.__fontSizeScale.set(o2);
     }
 
     get chipNodeInFocus() {
         return this.__chipNodeInFocus.get();
     }
 
-    set chipNodeInFocus(q3) {
-        this.__chipNodeInFocus.set(q3);
+    set chipNodeInFocus(n2) {
+        this.__chipNodeInFocus.set(n2);
     }
 
     aboutToAppear() {
-        this.smListener.on('change', (p3) => {
-            if (p3.matches) {
+        this.smListener.on('change', (m2) => {
+            if (m2.matches) {
                 this.breakPoint = BreakPointsType.SM;
             }
         });
-        this.mdListener.on('change', (o3) => {
-            if (o3.matches) {
+        this.mdListener.on('change', (l2) => {
+            if (l2.matches) {
                 this.breakPoint = BreakPointsType.MD;
             }
         });
-        this.lgListener.on('change', (n3) => {
-            if (n3.matches) {
+        this.lgListener.on('change', (k2) => {
+            if (k2.matches) {
                 this.breakPoint = BreakPointsType.LG;
             }
         });
-        let j3 = this.getUIContext().getHostContext();
-        if (j3) {
-            this.fontSizeScale = j3.config?.fontSizeScale ?? 1;
-            this.environmentCallbackID = j3.getApplicationContext().on('environment', this.environmentCallback);
+        let j2 = this.getUIContext().getHostContext();
+        if (j2) {
+            this.fontSizeScale = j2.config?.fontSizeScale ?? 1;
+            this.environmentCallbackID = j2.getApplicationContext().on('environment', this.environmentCallback);
         }
     }
 
@@ -1041,7 +1039,7 @@ export class ChipComponent extends ViewPU {
         try {
             return ColorMetrics.resourceColor(this.chipNodeActivatedBackgroundColor).color !==
             ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
-        } catch (f3) {
+        } catch (i2) {
             console.error(`[Chip] failed to get ColorMetrics.resourceColor`);
             return false;
         }
@@ -1054,7 +1052,7 @@ export class ChipComponent extends ViewPU {
         try {
             return ColorMetrics.resourceColor(this.chipNodeBackgroundColor).color !==
             ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
-        } catch (i2) {
+        } catch (h2) {
             console.error(`[Chip] failed to get resourceColor`);
             return false;
         }
@@ -1068,8 +1066,8 @@ export class ChipComponent extends ViewPU {
         this.theme.chipNode.normalShadowStyle, -1);
     }
 
-    ChipBuilder(j1 = null) {
-        this.observeComponentCreation2((d3, e3) => {
+    ChipBuilder(d1 = null) {
+        this.observeComponentCreation2((c2, d2) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.clip(false);
             Button.shadow(this.getShadowStyles());
@@ -1090,14 +1088,14 @@ export class ChipComponent extends ViewPU {
             Button.accessibilityChecked(this.getAccessibilityChecked());
             Button.accessibilitySelected(this.getAccessibilitySelected());
             Button.onClick(this.getChipOnClicked());
-            Button.onKeyEvent((m1) => {
-                if (!m1 || m1.type === null || m1.type !== KeyType.Down) {
+            Button.onKeyEvent((e2) => {
+                if (!e2 || e2.type === null || e2.type !== KeyType.Down) {
                     return;
                 }
-                let k1 = m1.keyCode === KeyCode.KEYCODE_FORWARD_DEL;
-                let l1 = m1.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose && !this.suffixIcon?.src &&
-                this.isSuffixIconFocusStyleCustomized;
-                if (k1 || l1) {
+                let f2 = e2.keyCode === KeyCode.KEYCODE_FORWARD_DEL;
+                let g2 = e2.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose !== false && !this.suffixIcon?.src &&
+                    this.isSuffixIconFocusStyleCustomized;
+                if (f2 || g2) {
                     this.deleteChip();
                 }
             });
@@ -1119,18 +1117,18 @@ export class ChipComponent extends ViewPU {
                 }
             });
         }, Button);
-        this.observeComponentCreation2((b3, c3) => {
+        this.observeComponentCreation2((a2, b2) => {
             Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
             Flex.direction(this.chipDirection);
             Flex.padding(this.getChipPadding());
             Flex.size(this.getChipSize());
             Flex.constraintSize(this.getChipConstraintSize());
         }, Flex);
-        this.observeComponentCreation2((q2, r2) => {
+        this.observeComponentCreation2((u1, v1) => {
             If.create();
             if (this.hasPrefixSymbol()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((z2, a3) => {
+                    this.observeComponentCreation2((y1, z1) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontSize(this.defaultSymbolFontsize());
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.PREFIX_SYMBOL));
@@ -1143,7 +1141,7 @@ export class ChipComponent extends ViewPU {
                 });
             } else if (this.prefixIcon?.src) {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((v2, w2) => {
+                    this.observeComponentCreation2((w1, x1) => {
                         Image.create(this.prefixIcon.src);
                         Image.direction(this.chipDirection);
                         Image.size(this.getPrefixIconSize());
@@ -1160,7 +1158,7 @@ export class ChipComponent extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((o2, p2) => {
+        this.observeComponentCreation2((s1, t1) => {
             Text.create(this.getChipText());
             Text.draggable(false);
             Text.flexShrink(1);
@@ -1176,11 +1174,11 @@ export class ChipComponent extends ViewPU {
             Text.margin(this.getLabelMargin());
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((p1, q1) => {
+        this.observeComponentCreation2((e1, f1) => {
             If.create();
             if (this.hasSuffixSymbol()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((m2, n2) => {
+                    this.observeComponentCreation2((q1, r1) => {
                         Button.createWithChild({ type: ButtonType.Normal });
                         Button.onClick(this.getSuffixSymbolAction());
                         Button.accessibilityText(this.getSuffixSymbolAccessibilityText());
@@ -1194,7 +1192,7 @@ export class ChipComponent extends ViewPU {
                         Button.hoverEffect(HoverEffect.None);
                         Button.focusable(this.isSuffixIconFocusable);
                     }, Button);
-                    this.observeComponentCreation2((k2, l2) => {
+                    this.observeComponentCreation2((o1, p1) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontSize(this.defaultSymbolFontsize());
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_SYMBOL));
@@ -1207,7 +1205,7 @@ export class ChipComponent extends ViewPU {
                 });
             } else if (this.suffixIcon?.src) {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((f2, g2) => {
+                    this.observeComponentCreation2((m1, n1) => {
                         Button.createWithChild({ type: ButtonType.Normal });
                         Button.backgroundColor(Color.Transparent);
                         Button.borderRadius(0);
@@ -1222,7 +1220,7 @@ export class ChipComponent extends ViewPU {
                         Button.onClick(this.getSuffixIconAction());
                         Button.focusable(this.isSuffixIconFocusable);
                     }, Button);
-                    this.observeComponentCreation2((d2, e2) => {
+                    this.observeComponentCreation2((k1, l1) => {
                         Image.create(this.suffixIcon.src);
                         Image.direction(this.chipDirection);
                         Image.size(this.getSuffixIconSize());
@@ -1234,7 +1232,7 @@ export class ChipComponent extends ViewPU {
                 });
             } else if (this.isClosable()) {
                 this.ifElseBranchUpdateFunction(2, () => {
-                    this.observeComponentCreation2((x1, y1) => {
+                    this.observeComponentCreation2((i1, j1) => {
                         Button.createWithChild({ type: ButtonType.Normal });
                         Button.backgroundColor(Color.Transparent);
                         Button.borderRadius(0);
@@ -1254,7 +1252,7 @@ export class ChipComponent extends ViewPU {
                         });
                         Button.focusable(this.isSuffixIconFocusable);
                     }, Button);
-                    this.observeComponentCreation2((v1, w1) => {
+                    this.observeComponentCreation2((g1, h1) => {
                         SymbolGlyph.create({
                             'id': -1,
                             'type': 40000,
@@ -1327,21 +1325,21 @@ export class ChipComponent extends ViewPU {
     }
 
     getSuffixIconSize() {
-        let h1 = { width: 0, height: 0 };
+        let c1 = { width: 0, height: 0 };
         if (typeof this.suffixIcon?.size?.width !== 'undefined' && this.isValidLength(this.suffixIcon.size.width)) {
-            h1.width = this.suffixIcon.size.width;
+            c1.width = this.suffixIcon.size.width;
         } else {
-            h1.width =
+            c1.width =
                 this.isSmallChipSize() ? this.theme.suffixIcon.smallSize.width : this.theme.suffixIcon.normalSize.width;
         }
         if (typeof this.suffixIcon?.size?.height !== 'undefined' && this.isValidLength(this.suffixIcon.size.height)) {
-            h1.height = this.suffixIcon.size.height;
+            c1.height = this.suffixIcon.size.height;
         } else {
-            h1.height =
+            c1.height =
                 this.isSmallChipSize() ? this.theme.suffixIcon.smallSize.height :
                 this.theme.suffixIcon.normalSize.height;
         }
-        return h1;
+        return c1;
     }
 
     getSuffixIconAccessibilityLevel() {
@@ -1442,21 +1440,21 @@ export class ChipComponent extends ViewPU {
     }
 
     getPrefixIconSize() {
-        let f1 = { width: 0, height: 0 };
+        let b1 = { width: 0, height: 0 };
         if (typeof this.prefixIcon?.size?.width !== 'undefined' && this.isValidLength(this.prefixIcon.size.width)) {
-            f1.width = this.prefixIcon.size.width;
+            b1.width = this.prefixIcon.size.width;
         } else {
-            f1.width =
+            b1.width =
                 this.isSmallChipSize() ? this.theme.prefixIcon.smallSize.width : this.theme.prefixIcon.normalSize.width;
         }
         if (typeof this.prefixIcon?.size?.height !== 'undefined' && this.isValidLength(this.prefixIcon.size.height)) {
-            f1.height = this.prefixIcon.size.height;
+            b1.height = this.prefixIcon.size.height;
         } else {
-            f1.height =
+            b1.height =
                 this.isSmallChipSize() ? this.theme.prefixIcon.smallSize.height :
                 this.theme.prefixIcon.normalSize.height;
         }
-        return f1;
+        return b1;
     }
 
     getPrefixSymbolModifier() {
@@ -1466,13 +1464,13 @@ export class ChipComponent extends ViewPU {
         return this.prefixSymbol?.normal;
     }
 
-    getDefaultSymbolColor(e1) {
-        return this.isChipActivated() ? this.getSymbolActiveColor(e1) :
-        this.getSymbolFillColor(e1);
+    getDefaultSymbolColor(a1) {
+        return this.isChipActivated() ? this.getSymbolActiveColor(a1) :
+        this.getSymbolFillColor(a1);
     }
 
-    getDefaultActiveIconColor(d1) {
-        if (d1 === IconType.PREFIX_ICON) {
+    getDefaultActiveIconColor(z) {
+        if (z === IconType.PREFIX_ICON) {
             return this.chipNodeInFocus ? this.theme.prefixIcon.focusActivatedColor :
             this.theme.prefixIcon.activatedFillColor;
         } else {
@@ -1481,35 +1479,35 @@ export class ChipComponent extends ViewPU {
         }
     }
 
-    getDefaultFillIconColor(c1) {
-        if (c1 === IconType.PREFIX_ICON) {
+    getDefaultFillIconColor(y) {
+        if (y === IconType.PREFIX_ICON) {
             return this.chipNodeInFocus ? this.theme.prefixIcon.focusFillColor : this.theme.prefixIcon.fillColor;
         } else {
             return this.chipNodeInFocus ? this.theme.suffixIcon.focusFillColor : this.theme.suffixIcon.fillColor;
         }
     }
 
-    getSymbolActiveColor(b1) {
+    getSymbolActiveColor(x) {
         if (!this.chipNodeInFocus) {
             return this.theme.defaultSymbol.activatedFontColor;
         }
-        if (b1 === IconType.PREFIX_SYMBOL) {
+        if (x === IconType.PREFIX_SYMBOL) {
             return [this.theme.prefixIcon.focusActivatedColor];
         }
-        if (b1 === IconType.SUFFIX_SYMBOL) {
+        if (x === IconType.SUFFIX_SYMBOL) {
             return [this.theme.suffixIcon.focusActivatedColor];
         }
         return this.theme.defaultSymbol.activatedFontColor;
     }
 
-    getSymbolFillColor(a1) {
+    getSymbolFillColor(w) {
         if (!this.chipNodeInFocus) {
             return this.theme.defaultSymbol.normalFontColor;
         }
-        if (a1 === IconType.PREFIX_SYMBOL) {
+        if (w === IconType.PREFIX_SYMBOL) {
             return [this.theme.prefixIcon.focusFillColor];
         }
-        if (a1 === IconType.SUFFIX_SYMBOL) {
+        if (w === IconType.SUFFIX_SYMBOL) {
             return [this.theme.suffixIcon.focusFillColor];
         }
         return this.theme.defaultSymbol.normalFontColor;
@@ -1520,20 +1518,20 @@ export class ChipComponent extends ViewPU {
     }
 
     getChipConstraintSize() {
-        const w = {};
+        const v = {};
         if (typeof this.chipSize === 'string') {
-            w.maxWidth = this.getChipMaxWidth();
-            w.minHeight =
+            v.maxWidth = this.getChipMaxWidth();
+            v.minHeight =
                 this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight;
         } else {
             if (typeof this.chipSize?.width === 'undefined' || !this.isValidLength(this.chipSize.width)) {
-                w.maxWidth = this.getChipMaxWidth();
+                v.maxWidth = this.getChipMaxWidth();
             }
             if (typeof this.chipSize?.height === 'undefined' || !this.isValidLength(this.chipSize.height)) {
-                w.minHeight = this.theme.chipNode.normalHeight;
+                v.minHeight = this.theme.chipNode.normalHeight;
             }
         }
-        return w;
+        return v;
     }
 
     getChipMaxWidth() {
@@ -1553,19 +1551,19 @@ export class ChipComponent extends ViewPU {
     }
 
     getChipSize() {
-        const v = {
+        const u = {
             width: 'auto',
             height: 'auto'
         };
         if (typeof this.chipSize !== 'string') {
             if (typeof this.chipSize?.width !== 'undefined' && this.isValidLength(this.chipSize.width)) {
-                v.width = this.chipSize.width;
+                u.width = this.chipSize.width;
             }
             if (typeof this.chipSize?.height !== 'undefined' && this.isValidLength(this.chipSize.height)) {
-                v.height = this.chipSize.height;
+                u.height = this.chipSize.height;
             }
         }
-        return v;
+        return u;
     }
 
     getChipPadding() {
@@ -1574,45 +1572,45 @@ export class ChipComponent extends ViewPU {
     }
 
     getLabelMargin() {
-        const r = {
+        const q = {
             start: LengthMetrics.vp(0),
             end: LengthMetrics.vp(0),
         };
-        const s =
+        const r =
             this.isSmallChipSize() ? this.theme.label.localizedSmallMargin : this.theme.label.localizedNormalMargin;
         if (typeof this.label?.localizedLabelMargin?.start !== 'undefined' &&
             this.label.localizedLabelMargin.start.value >= 0) {
-            r.start = this.label.localizedLabelMargin.start;
+            q.start = this.label.localizedLabelMargin.start;
         } else if (this.hasPrefix()) {
-            r.start = s.start;
+            q.start = r.start;
         }
         if (typeof this.label?.localizedLabelMargin?.end !== 'undefined' &&
             this.label.localizedLabelMargin.end.value >= 0) {
-            r.end = this.label.localizedLabelMargin.end;
+            q.end = this.label.localizedLabelMargin.end;
         } else if (this.hasSuffix()) {
-            r.end = s.end;
+            q.end = r.end;
         }
         if (typeof this.label?.localizedLabelMargin === 'object') {
-            return r;
+            return q;
         }
         if (typeof this.label.labelMargin === 'object') {
-            const t = { left: 0, right: 0 };
-            const u = this.isSmallChipSize() ? this.theme.label.smallMargin : this.theme.label.normalMargin;
+            const s = { left: 0, right: 0 };
+            const t = this.isSmallChipSize() ? this.theme.label.smallMargin : this.theme.label.normalMargin;
             if (typeof this.label?.labelMargin?.left !== 'undefined' &&
             this.isValidLength(this.label.labelMargin.left)) {
-                t.left = this.label.labelMargin.left;
+                s.left = this.label.labelMargin.left;
             } else if (this.hasPrefix()) {
-                t.left = u.left;
+                s.left = t.left;
             }
             if (typeof this.label?.labelMargin?.right !== 'undefined' &&
             this.isValidLength(this.label.labelMargin.right)) {
-                t.right = this.label.labelMargin.right;
+                s.right = this.label.labelMargin.right;
             } else if (this.hasSuffix()) {
-                t.right = u.right;
+                s.right = t.right;
             }
-            return t;
+            return s;
         }
-        return r;
+        return q;
     }
 
     hasSuffix() {
@@ -1654,8 +1652,8 @@ export class ChipComponent extends ViewPU {
     }
 
     getChipNodeBorderColor() {
-        let q = this.theme.chipNode;
-        return this.isChipActivated() ? q.activatedBorderColor : q.borderColor;
+        let p = this.theme.chipNode;
+        return this.isChipActivated() ? p.activatedBorderColor : p.borderColor;
     }
 
     getLabelFontColor() {
@@ -1749,23 +1747,23 @@ export class ChipComponent extends ViewPU {
     }
 
     getChipBackgroundColor() {
-        let n = this.theme.chipNode;
+        let o = this.theme.chipNode;
         if (this.isChipActivated()) {
-            return this.chipNodeInFocus && !this.isSetActiveChipBgColor() ? n.focusActivatedBgColor :
-            this.getColor(this.chipNodeActivatedBackgroundColor, n.activatedBackgroundColor);
+            return this.chipNodeInFocus && !this.isSetActiveChipBgColor() ? o.focusActivatedBgColor :
+            this.getColor(this.chipNodeActivatedBackgroundColor, o.activatedBackgroundColor);
         }
-        return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? n.focusBgColor :
+        return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? o.focusBgColor :
         this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
     }
 
-    getColor(k, l) {
-        if (!k) {
-            return l;
+    getColor(l, m) {
+        if (!l) {
+            return m;
         }
         try {
-            ColorMetrics.resourceColor(k).color;
-            return k;
-        } catch (m) {
+            ColorMetrics.resourceColor(l).color;
+            return l;
+        } catch (n) {
             console.error(`[Chip] failed to get color`);
             return Color.Transparent;
         }
@@ -1775,51 +1773,51 @@ export class ChipComponent extends ViewPU {
         return this.chipActivated ?? false;
     }
 
-    resourceToNumber(x, y) {
-        if (!x || !x.type) {
+    resourceToNumber(h, i) {
+        if (!h || !h.type) {
             console.error('[Chip] failed: resource get fail');
-            return y;
+            return i;
         }
-        const z = this.getUIContext().getHostContext()?.resourceManager;
-        if (!z) {
+        const j = this.getUIContext().getHostContext()?.resourceManager;
+        if (!j) {
             console.error('[Chip] failed to get resourceManager');
-            return y;
+            return i;
         }
-        switch (x.type) {
+        switch (h.type) {
             case RESOURCE_TYPE_FLOAT:
             case RESOURCE_TYPE_INTEGER:
                 try {
-                    if (x.id !== -1) {
-                        return z.getNumber(x);
+                    if (h.id !== -1) {
+                        return j.getNumber(h);
                     }
-                    return z.getNumberByName(x.params[0].split('.')[2]);
-                } catch (o) {
+                    return j.getNumberByName(h.params[0].split('.')[2]);
+                } catch (k) {
                     console.error(`[Chip] get resource error, return defaultValue`);
-                    return y;
+                    return i;
                 }
             default:
-                return y;
+                return i;
         }
     }
 
-    isValidLength(h) {
-        if (typeof h === 'number') {
-            return h >= 0;
-        } else if (typeof h === 'string') {
-            return this.isValidLengthString(h);
-        } else if (typeof h === 'object') {
-            const i = h;
-            const j = this.getUIContext().getHostContext()?.resourceManager;
-            if (!j) {
+    isValidLength(e) {
+        if (typeof e === 'number') {
+            return e >= 0;
+        } else if (typeof e === 'string') {
+            return this.isValidLengthString(e);
+        } else if (typeof e === 'object') {
+            const f = e;
+            const g = this.getUIContext().getHostContext()?.resourceManager;
+            if (!g) {
                 console.error('[Chip] failed to get resourceManager.');
                 return false;
             }
-            switch (i.type) {
+            switch (f.type) {
                 case RESOURCE_TYPE_FLOAT:
                 case RESOURCE_TYPE_INTEGER:
-                    return j.getNumber(i) >= 0;
+                    return g.getNumber(f) >= 0;
                 case RESOURCE_TYPE_STRING:
-                    return this.isValidLengthString(j.getStringSync(i));
+                    return this.isValidLengthString(g.getStringSync(f));
                 default:
                     return false;
             }
@@ -1827,16 +1825,16 @@ export class ChipComponent extends ViewPU {
         return false;
     }
 
-    isValidLengthString(f) {
-        const g = f.match(/(-?\d+(?:\.\d+)?)_?(fp|vp|px|lpx)?$/i);
-        if (!g || g.length < 3) {
+    isValidLengthString(c) {
+        const d = c.match(/(-?\d+(?:\.\d+)?)_?(fp|vp|px|lpx)?$/i);
+        if (!d || d.length < 3) {
             return false;
         }
-        return Number.parseInt(g[1], 10) >= 0;
+        return Number.parseInt(d[1], 10) >= 0;
     }
 
     initialRender() {
-        this.observeComponentCreation2((b, c) => {
+        this.observeComponentCreation2((a, b) => {
             If.create();
             if (this.isChipExist) {
                 this.ifElseBranchUpdateFunction(0, () => {

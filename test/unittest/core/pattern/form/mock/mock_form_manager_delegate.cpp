@@ -127,7 +127,12 @@ bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName
     return false;
 }
 
-bool FormManagerDelegate::IsFormBundleLocked(const std::string &bundleName, int64_t formId)
+bool FormManagerDelegate::IsFormBundleExempt(int64_t formId)
+{
+    return true;
+}
+
+bool FormManagerDelegate::IsFormBundleProtected(const std::string &bundleName, int64_t formId)
 {
     return false;
 }

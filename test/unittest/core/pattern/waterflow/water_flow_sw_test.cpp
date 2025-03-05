@@ -17,6 +17,8 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+#include "core/components_ng/syntax/if_else_model_ng.h"
+#include "core/components_ng/syntax/if_else_node.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowSWTest : public WaterFlowTestNg {
@@ -47,7 +49,7 @@ HWTEST_F(WaterFlowSWTest, LazyforeachReloaded01, TestSize.Level1)
 
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 7);
-    
+
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(1));
     EXPECT_EQ(mockLazy->GetHistoryTotalCount(), 50);
     EXPECT_EQ(lazyForEachNode->FrameCount(), 50);
@@ -74,5 +76,72 @@ HWTEST_F(WaterFlowSWTest, LazyforeachReloaded01, TestSize.Level1)
     EXPECT_EQ(lazyForEachNode->FrameCount(), 20);
     ASSERT_TRUE(GetItem(0, true));
     EXPECT_FALSE(GetItem(0, true)->IsActive());
+}
+
+/**
+ * @tc.name: Footer001
+ * @tc.desc: Put empty [if] to footer, test the NotifyDataChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Footer001, TestSize.Level1)
+{
+    std::list<int32_t> removedElmtIds;
+    std::list<int32_t> reservedElmtIds;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter([]() {
+        IfElseModelNG ifElse;
+        ifElse.Create();
+    });
+    CreateWaterFlowItems(1);
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(20, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 15);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), -1);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(2));
+    lazyForEachNode->OnDataAdded(0);
+    EXPECT_EQ(info_->newStartIndex_, -2);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 1);
+}
+
+/**
+ * @tc.name: NoConvert001
+ * @tc.desc: Test misalignment and shouldn't trigger ConvertDeltaToJump
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, NoConvert001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    vector<int> heights = { 183, 300, 244, 287, 100, 125, 160, 300, 129, 147, 118, 179, 137, 177, 169, 234, 179, 288,
+        208, 270, 184, 162, 237, 205, 141, 189, 276, 146, 105, 207, 234, 283, 183, 191, 212, 186, 128, 288, 139, 256,
+        260, 243, 294, 261, 162 }; // randomly generated
+    ASSERT_EQ(heights.size(), 45);
+    for (int i = 0; i < 45; ++i) {
+        CreateItemWithHeight(heights[i]);
+    }
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_16);
+    CreateDone();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+
+    EXPECT_EQ(info_->startIndex_, 33);
+    pattern_->isAnimationStop_ = false; // to block jumps
+    UpdateCurrentOffset(2000.0f);
+    EXPECT_EQ(info_->startIndex_, 5);
+    pattern_->isAnimationStop_ = true;
+    pattern_->OnScrollEndCallback();
+    // should mark misaligned
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 2800.000000 EndPos: 2800.000000 empty}");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 2800.000000 EndPos: 2800.000000 empty}");
+    info_->lanes_[0][0].startPos = -6000; // manually create scenario that can trigger ConvertDeltaToJump
+    EXPECT_EQ(info_->jumpIndex_, 5);
+    FlushUITasks();
+    EXPECT_EQ(info_->startIndex_, 5);
 }
 } // namespace OHOS::Ace::NG

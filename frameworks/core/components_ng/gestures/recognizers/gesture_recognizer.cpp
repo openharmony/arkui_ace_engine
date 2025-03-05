@@ -572,6 +572,7 @@ void NGGestureRecognizer::ResetStateVoluntarily()
     }
     group->ResetStateVoluntarily();
     auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(group);
+    CHECK_NULL_VOID(recognizerGroup);
     recognizerGroup->CheckAndSetRecognizerCleanFlag(Claim(this));
 }
 
@@ -598,6 +599,17 @@ void NGGestureRecognizer::UpdateCallbackState(const std::unique_ptr<GestureEvent
     }
     if (callback == onActionCancel_) {
         callbackState_ = CallbackState::CANCEL;
+    }
+}
+
+void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event)
+{
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
+        if ((refereeState_ == RefereeState::PENDING || refereeState_ == RefereeState::PENDING_BLOCKED) &&
+            AceType::InstanceOf<ClickRecognizer>(this)) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -28,6 +28,7 @@ constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 constexpr float MIN_SPEED_THRESHOLD = 500.0f;
+constexpr float TOUCHPAD_STILL_THRESHOLD = 0.1;
 
 } // namespace
 
@@ -181,6 +182,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
     auto revertAxisValue = event.ConvertToSummationAxisValue(lastAxisEvent_);
     pesudoTouchEvent.x = revertAxisValue.first;
     pesudoTouchEvent.y = revertAxisValue.second;
+    pesudoTouchEvent.sourceTool = event.sourceTool;
     panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, end);
     lastAxisEvent_ = event;
     if (!end) {
@@ -281,6 +283,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     auto revertAxisValue = event.ConvertToSummationAxisValue(lastAxisEvent_);
     pesudoTouchEvent.x = revertAxisValue.first;
     pesudoTouchEvent.y = revertAxisValue.second;
+    pesudoTouchEvent.sourceTool = event.sourceTool;
     panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, false);
     refereeState_ = RefereeState::DETECTING;
 }
@@ -651,8 +654,8 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
         judgeDistance = mouseDistance_;
     }
-    // when version >= 16, if distance_ = 0, panGesture will accept when receive Down event
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    // when version >= 20, if distance_ = 0, panGesture will accept when receive Down event
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) &&
         NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
         return GestureAcceptResult::ACCEPT;
     }
@@ -977,7 +980,8 @@ double PanRecognizer::PanVelocity::GetMainAxisVelocity()
 
 void PanRecognizer::PanVelocity::UpdateTouchPoint(int32_t id, const TouchEvent& event, bool end)
 {
-    trackerMap_[id].UpdateTouchPoint(event, end);
+    trackerMap_[id].UpdateTouchPoint(event, end,
+        event.sourceTool == SourceTool::TOUCHPAD ? TOUCHPAD_STILL_THRESHOLD : VelocityTracker::TOUCH_STILL_THRESHOLD);
 }
 
 void PanRecognizer::PanVelocity::Reset(int32_t id)

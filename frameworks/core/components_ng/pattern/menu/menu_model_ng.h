@@ -34,8 +34,8 @@ public:
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
     void SetExpandingMode(const SubMenuExpandingMode& expandingMode) override;
-    void SetItemDivider(const V2::ItemDivider& divider) override;
-    void SetItemGroupDivider(const V2::ItemDivider& divider) override;
+    void SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode) override;
+    void SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode) override;
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
@@ -47,8 +47,8 @@ public:
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
-    static void SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
-    static void SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    static void SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider, const DividerMode& mode);
+    static void SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider, const DividerMode& mode);
     static void SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode);
 };
 } // namespace OHOS::Ace::NG

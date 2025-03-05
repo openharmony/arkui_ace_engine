@@ -28,7 +28,15 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Container is null.");
         return;
     }
-    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
+    
+    auto isSubContainer = container->IsSubContainer();
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    if (!expandDisplay && isSubContainer && dialogProperties.isShowInSubWindow) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not open dialog in subwindow");
+        return;
+    }
+
+    if (isSubContainer && (!dialogProperties.isShowInSubWindow || expandDisplay)) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
         if (!container) {
@@ -146,6 +154,10 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
             Maskarg.isMask = true;
             Maskarg.autoCancel = dialogProperties.autoCancel;
             Maskarg.maskColor = dialogProperties.maskColor;
+            Maskarg.onWillAppear = dialogProperties.onWillAppear;
+            Maskarg.onDidAppear = dialogProperties.onDidAppear;
+            Maskarg.onWillDisappear = dialogProperties.onWillDisappear;
+            Maskarg.onDidDisappear = dialogProperties.onDidDisappear;
             auto mask = overlayManager->ShowDialogWithNode(Maskarg, nullptr, false);
             CHECK_NULL_RETURN(mask, dialog);
             overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());

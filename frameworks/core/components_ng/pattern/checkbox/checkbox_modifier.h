@@ -29,6 +29,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/token_theme/token_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -95,7 +96,7 @@ public:
         }
     }
 
-    void InitializeParam();
+    void InitializeParam(TokenThemeScopeId themeScopeId);
     void PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffset, const SizeF& paintSize) const;
     void DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;

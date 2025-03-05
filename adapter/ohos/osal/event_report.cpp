@@ -127,6 +127,7 @@ constexpr char EVENT_KEY_SCROLLABLE_ERROR[] = "SCROLLABLE_ERROR";
 constexpr char EVENT_KEY_NODE_TYPE[] = "NODE_TYPE";
 constexpr char EVENT_KEY_SUB_ERROR_TYPE[] = "SUB_ERROR_TYPE";
 constexpr char EVENT_KEY_TARGET_API_VERSION[] = "TARGET_API_VERSION";
+constexpr char EVENT_KEY_REUSED_NODE_SKIP_MEASURE[] = "REUSED_NODE_SKIP_MEASURE";
 
 void StrTrim(std::string& str)
 {
@@ -760,5 +761,12 @@ void EventReport::ReportClipboardFailEvent(const std::string& errorType)
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_CLIPBOARD_FAIL,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_CLIPBOARD_FAIL_TYPE, errorType);
+}
+
+void EventReport::ReportReusedNodeSkipMeasureApp()
+{
+    auto progressName = AceApplicationInfo::GetInstance().GetProcessName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_REUSED_NODE_SKIP_MEASURE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_PACKAGE_NAME, progressName);
 }
 } // namespace OHOS::Ace

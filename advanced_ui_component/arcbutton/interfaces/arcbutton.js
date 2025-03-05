@@ -120,53 +120,6 @@ Constants.EMPHASIZED_NORMAL_BTN_COLOR = {
     params: ['sys.color.comp_background_emphasize'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
-};
-const arcButtonTheme = {
-    BUTTON_HEIGHT: getArcButtonThemeVpValue({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.arc_button_height'],
-        bundleName: '__harDefaultBundleName__',
-        moduleName: '__harDefaultModuleName__',
-    }),
-    ARC_CIRCLE_DIAMETER: getArcButtonThemeVpValue({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.arc_button_auxiliary_circle_diameter'],
-        bundleName: '__harDefaultBundleName__',
-        moduleName: '__harDefaultModuleName__',
-    }),
-    DIAL_CIRCLE_DIAMETER: getArcButtonThemeVpValue({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.arc_button_dial_circle_diameter'],
-        bundleName: '__harDefaultBundleName__',
-        moduleName: '__harDefaultModuleName__',
-    }),
-    CHAMFER_CIRCLE_RADIUS: getArcButtonThemeVpValue({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.arc_button_chamfer_radius'],
-        bundleName: '__harDefaultBundleName__',
-        moduleName: '__harDefaultModuleName__',
-    }),
-};
-
-function getArcButtonThemeVpValue(res) {
-    if (!res) {
-        return 0;
-    }
-    let metrics = LengthMetrics.resource(res);
-    let value = metrics.value;
-    switch (metrics.unit) {
-        case LengthUnit.PX:
-            return px2vp(value);
-        case LengthUnit.LPX:
-            return px2vp(lpx2px(value));
-        case LengthUnit.FP:
-            return px2vp(fp2px(value));
-    }
-    return value;
 }
 
 let ArcButtonOptions = class ArcButtonOptions {
@@ -252,8 +205,38 @@ export class ArcButton extends ViewV2 {
         this.isUp = false;
         this.curves = Curves.interpolatingSpring(10, 1, 350, 35);
         this.scaleValue = 1;
-        this.dataProcessUtil = new DataProcessUtil();
         this.textPressColor = ColorMetrics.resourceColor(Color.White);
+        this.arcButtonTheme = {
+            BUTTON_HEIGHT: this.getArcButtonThemeVpValue({
+                id: -1,
+                type: 10002,
+                params: ['sys.float.arc_button_height'],
+                bundleName: '__harDefaultBundleName__',
+                moduleName: '__harDefaultModuleName__',
+            }),
+            ARC_CIRCLE_DIAMETER: this.getArcButtonThemeVpValue({
+                id: -1,
+                type: 10002,
+                params: ['sys.float.arc_button_auxiliary_circle_diameter'],
+                bundleName: '__harDefaultBundleName__',
+                moduleName: '__harDefaultModuleName__',
+            }),
+            DIAL_CIRCLE_DIAMETER: this.getArcButtonThemeVpValue({
+                id: -1,
+                type: 10002,
+                params: ['sys.float.arc_button_dial_circle_diameter'],
+                bundleName: '__harDefaultBundleName__',
+                moduleName: '__harDefaultModuleName__',
+            }),
+            CHAMFER_CIRCLE_RADIUS: this.getArcButtonThemeVpValue({
+                id: -1,
+                type: 10002,
+                params: ['sys.float.arc_button_chamfer_radius'],
+                bundleName: '__harDefaultBundleName__',
+                moduleName: '__harDefaultModuleName__',
+            }),
+        };
+        this.dataProcessUtil = new DataProcessUtil(this.arcButtonTheme);
         this.finalizeConstruction();
     }
 
@@ -373,6 +356,23 @@ export class ArcButton extends ViewV2 {
         this.changeStatus();
     }
 
+    getArcButtonThemeVpValue(res) {
+        if (!res) {
+        return 0;
+        }
+        let metrics = LengthMetrics.resource(res);
+        let value = metrics.value;
+        switch (metrics.unit) {
+        case LengthUnit.PX:
+            return px2vp(value);
+        case LengthUnit.LPX:
+            return px2vp(lpx2px(value));
+        case LengthUnit.FP:
+            return px2vp(fp2px(value));
+        }
+        return value;
+    }
+
     /**
      * 判断是否超出文本框宽度
      */
@@ -390,7 +390,7 @@ export class ArcButton extends ViewV2 {
     }
 
     aboutToAppear() {
-        if (arcButtonTheme.BUTTON_HEIGHT === 0) {
+        if (this.arcButtonTheme.BUTTON_HEIGHT === 0) {
             console.error("arcbutton can't obtain sys float value.");
             return;
         }
@@ -428,21 +428,21 @@ export class ArcButton extends ViewV2 {
             canvasLeftTopPoint
         );
         const upperArcCircleR = this.getUIContext().vp2px(
-            arcButtonTheme.ARC_CIRCLE_DIAMETER / 2
+            this.arcButtonTheme.ARC_CIRCLE_DIAMETER / 2
         );
         const rightTopPoint = this.calculateActualPosition(
             data.rightTopPoint,
             canvasLeftTopPoint
         );
         const chamferCircleR = this.getUIContext().vp2px(
-            arcButtonTheme.CHAMFER_CIRCLE_RADIUS
+            this.arcButtonTheme.CHAMFER_CIRCLE_RADIUS
         );
         const rightBottomPoint = this.calculateActualPosition(
             data.rightBottomPoint,
             canvasLeftTopPoint
         );
         const lowerArcCircleR = this.getUIContext().vp2px(
-            arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2
+            this.arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2
         );
         const leftBottomPoint = this.calculateActualPosition(
             data.leftBottomPoint,
@@ -661,25 +661,27 @@ __decorate(
 );
 
 class DataProcessUtil {
-    constructor() {
+    constructor(theme) {
         this.dial = new ArcButtonCircle(0, 0, 0);
         this.arc = new ArcButtonCircle(0, 0, 0);
         this.height = 0;
         this.width = 0;
+        this.arcButtonTheme = undefined;
+        this.arcButtonTheme = theme;
     }
 
     initData() {
-        const dialRadius = arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2;
+        const dialRadius = this.arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2;
         this.dial = new ArcButtonCircle(dialRadius, dialRadius, dialRadius);
-        const arcRadius = arcButtonTheme.ARC_CIRCLE_DIAMETER / 2;
-        this.height = arcButtonTheme.BUTTON_HEIGHT;
+        const arcRadius = this.arcButtonTheme.ARC_CIRCLE_DIAMETER / 2;
+        this.height = this.arcButtonTheme.BUTTON_HEIGHT;
         const arcX = this.dial.center.x;
         const arcY = this.dial.center.y + dialRadius + arcRadius - this.height;
         this.arc = new ArcButtonCircle(arcRadius, arcX, arcY);
     }
 
     calculate() {
-        const chamferCircleR = arcButtonTheme.CHAMFER_CIRCLE_RADIUS;
+        const chamferCircleR = this.arcButtonTheme.CHAMFER_CIRCLE_RADIUS;
         const innerDial = new ArcButtonCircle(
             this.dial.radius - chamferCircleR,
             this.dial.center.x,

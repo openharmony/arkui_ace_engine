@@ -108,6 +108,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             SendShowingImage(result);
             break;
         }
+        case SEND_CURRENT_PAGE_NAME: {
+            std::string result = data.ReadString();
+            SendCurrentPageName(result);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -207,6 +212,11 @@ void UiReportStub::RegisterGetWebViewCurrentLanguage(const EventCallback& eventC
     getWebViewCurrentLanguageCallback_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterGetCurrentPageName(const EventCallback& eventCallback)
+{
+    getCurrentPageNameCallback_ = std::move(eventCallback);
+}
+
 void UiReportStub::RegisterGetTranslateTextCallback(const std::function<void(int32_t, std::string)>& eventCallback)
 {
     getTranslateTextCallback_ = std::move(eventCallback);
@@ -234,12 +244,23 @@ void UiReportStub::UnregisterComponentChangeEventCallback()
 
 void UiReportStub::SendCurrentLanguage(const std::string& data)
 {
-    getWebViewCurrentLanguageCallback_(data);
+    if (getWebViewCurrentLanguageCallback_) {
+        getWebViewCurrentLanguageCallback_(data);
+    }
+}
+
+void UiReportStub::SendCurrentPageName(const std::string& result)
+{
+    if (getCurrentPageNameCallback_) {
+        getCurrentPageNameCallback_(result);
+    }
 }
 
 void UiReportStub::SendWebText(int32_t nodeId, std::string res)
 {
-    getTranslateTextCallback_(nodeId, res);
+    if (getTranslateTextCallback_) {
+        getTranslateTextCallback_(nodeId, res);
+    }
 }
 
 void UiReportStub::RegisterGetShowingImageCallback(
@@ -250,7 +271,9 @@ void UiReportStub::RegisterGetShowingImageCallback(
 
 void UiReportStub::SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
 {
-    getShowingImageCallback_(maps);
+    if (getShowingImageCallback_) {
+        getShowingImageCallback_(maps);
+    }
 }
 
 void UiReportStub::ClearAshmem(sptr<Ashmem>& optMem)

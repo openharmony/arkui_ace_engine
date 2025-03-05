@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<ProgressTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -48,12 +48,15 @@ public:
                 return theme;
             }
             // Read style from system.
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ProgressTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ProgressTheme>& theme) const
         {
+            CHECK_NULL_VOID(themeConstants);
+            CHECK_NULL_VOID(theme);
+            auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return;
             }
@@ -140,6 +143,16 @@ public:
             theme->capsuleFocusScale_ = pattern->GetAttr<double>("capsule_progress_focused_scale", 1.0);
             theme->capsuleFocusedShadowStyle_ = static_cast<int32_t>(
                 pattern->GetAttr<double>("capsule_progress_focused_shadow_style", CAPSULE_NONE_SHADOW_VALUE));
+            theme->scaleTrackSelectedColor_ = pattern->GetAttr<Color>("fg_color", Color::RED);
+            theme->loadingParseFailedColor_ = pattern->GetAttr<Color>("fg_progress_color", Color::RED);
+            theme->capsuleParseFailedBgColor_ = pattern->GetAttr<Color>("capsule_progress_bg_color", Color::RED)
+                .BlendOpacity(pattern->GetAttr<double>("capsule_progress_bg_alpha", 1.0));
+            theme->ringProgressParseFailedBgColor_ = pattern->GetAttr<Color>("ring_progress_bg_color", Color::GRAY);
+            theme->trackParseFailedBgColor_ = pattern->GetAttr<Color>("bg_color", Color::RED);
+            theme->capsuleParseFailedSelectColor_ =
+                pattern->GetAttr<Color>("capsule_progress_select_color", Color::RED)
+                    .BlendOpacity(theme->selectColorAlpha_);
+            theme->trackParseFailedSelectedColor_ = pattern->GetAttr<Color>("fg_color", Color::RED);
 
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
                 theme->capsuleBgColor_ = theme->trackBgColor_;
@@ -425,10 +438,44 @@ public:
         return capsuleFocusScale_;
     }
 
+    const Color& GetScaleTrackSelectedColor() const
+    {
+        return scaleTrackSelectedColor_;
+    }
+
+    const Color& GetLoadingParseFailedColor() const
+    {
+        return loadingParseFailedColor_;
+    }
+
+    const Color& GetCapsuleParseFailedBgColor() const
+    {
+        return capsuleParseFailedBgColor_;
+    }
+
+    const Color& GetRingProgressParseFailedBgColor() const
+    {
+        return ringProgressParseFailedBgColor_;
+    }
+
+    const Color& GetTrackParseFailedBgColor() const
+    {
+        return trackParseFailedBgColor_;
+    }
+
+    const Color& GetCapsuleParseFailedSelectColor() const
+    {
+        return capsuleParseFailedSelectColor_;
+    }
+
+    const Color& GetTrackParseFailedSelectedColor() const
+    {
+        return trackParseFailedSelectedColor_;
+    }
+
 protected:
     ProgressTheme() = default;
 
-private:
     Dimension trackThickness_;
     Dimension trackWidth_;
     Color trackBgColor_;
@@ -493,6 +540,17 @@ private:
     Color ringProgressBackgroundColor_;
     float fontScale_ = 1.75f;
     Dimension fontScalePadding_;
+
+    // For scale progress.
+    Color scaleTrackSelectedColor_;
+
+    // For Parse Failed
+    Color loadingParseFailedColor_;
+    Color capsuleParseFailedBgColor_;
+    Color ringProgressParseFailedBgColor_;
+    Color trackParseFailedBgColor_;
+    Color capsuleParseFailedSelectColor_;
+    Color trackParseFailedSelectedColor_;
 };
 
 } // namespace OHOS::Ace

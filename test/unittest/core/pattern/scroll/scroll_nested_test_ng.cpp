@@ -844,7 +844,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest012, TestSize.Level1)
     GestureEvent info;
     auto dragDelta = -100.f;
     info.SetMainDelta(dragDelta);
-    auto velocity = -VERTICAL_SCROLLABLE_DISTANCE * FRICTION * -FRICTION_SCALE;
+    auto velocity = -VERTICAL_SCROLLABLE_DISTANCE * SLOW_FRICTION * -FRICTION_SCALE / SLOW_VELOCITY_SCALE;
     info.SetMainVelocity(velocity);
     auto nestScrollable = nestPattern_->GetScrollableEvent()->GetScrollable();
     nestScrollable->HandleDragStart(info);

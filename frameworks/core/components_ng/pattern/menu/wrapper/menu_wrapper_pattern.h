@@ -454,7 +454,7 @@ public:
         forceUpdateEmbeddedMenu_ = forceUpdate;
     }
 
-    bool GetForceUpdateEmbeddedMenu()
+    bool GetForceUpdateEmbeddedMenu() const
     {
         return forceUpdateEmbeddedMenu_;
     }
@@ -469,10 +469,6 @@ public:
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
     void StopPreviewMenuAnimation();
-    void GetPreviewRenderContexts(RefPtr<RenderContext>& previewPositionContext,
-        RefPtr<RenderContext>& previewScaleContext, RefPtr<RenderContext>& previewDisappearContext);
-    void AnimatePreviewMenu(RefPtr<RenderContext> previewPositionContext, RefPtr<RenderContext> previewScaleContext,
-        RefPtr<RenderContext> menuContext, RefPtr<RenderContext> previewDisappearContext);
 
     void SetAnimationPreviewScale(float scale)
     {
@@ -551,6 +547,16 @@ public:
 
     bool IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const;
 
+    void SetIsOpenMenu(bool isOpenMenu)
+    {
+        isOpenMenu_ = isOpenMenu;
+    }
+
+    bool GetIsOpenMenu() const
+    {
+        return isOpenMenu_;
+    }
+
     void SetHoverMode(bool enableFold)
     {
         enableFold_ = enableFold;
@@ -598,14 +604,15 @@ private:
     void ChangeTouchItem(const TouchEventInfo& info, TouchType touchType);
     void ChangeCurMenuItemBgColor();
     void ClearLastMenuItem();
-    RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
-    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
+    bool GetInnerMenu(RefPtr<UINode>& innerMenuNode, const PointF& position);
+    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const PointF& position);
     bool IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
-    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
+    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const PointF& position);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
+    bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
@@ -641,6 +648,7 @@ private:
     MenuParam menuParam_;
     bool isShowFromUser_ = false;
     int32_t fingerId_ = -1;
+    bool isOpenMenu_ = false;
     std::optional<bool> enableFold_;
     // Identify whether the menuWrapper is used by selectOverlay in the subwindow.
     bool isSelectOverlaySubWindowWrapper_ = false;

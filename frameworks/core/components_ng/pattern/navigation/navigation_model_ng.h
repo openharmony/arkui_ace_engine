@@ -54,7 +54,9 @@ public:
     void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetEnableToolBarAdaptation(bool enable) override;
+    void SetToolbarMorebuttonOptions(MoreButtonOptions&& opt) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
+    void SetMenuOptions(NG::NavigationMenuOptions&& opt) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) override;

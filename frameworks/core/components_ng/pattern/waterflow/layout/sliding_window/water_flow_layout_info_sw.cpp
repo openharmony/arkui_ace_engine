@@ -77,7 +77,6 @@ float WaterFlowLayoutInfoSW::CalibrateOffset()
         // can calibrate totalOffset when at top
         const float prev = totalOffset_;
         totalOffset_ = startPos_ - TopMargin();
-
         if (!NearEqual(totalOffset_, prev)) {
             maxHeight_ = endPos_;
             knowTotalHeight_ = false;

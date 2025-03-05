@@ -372,7 +372,7 @@ public:
 
     virtual float GetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex)
     {
-        return childrenSize_->GetChildSize(childIndex);
+        return childrenSize_->GetChildSize(childIndex, isStackFromEnd_);
     }
 
     virtual int32_t GetLanes() const
@@ -428,6 +428,15 @@ public:
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
+
+    bool GetStackFromEnd() const
+    {
+        return isStackFromEnd_;
+    }
+
+    void ReverseItemPosition(ListLayoutAlgorithm::PositionMap& itemPosition, int32_t totalItemCount, float mainSize);
+
+    void ProcessStackFromEnd();
 
     int32_t GetLaneIdx4Divider() const
     {
@@ -538,9 +547,15 @@ protected:
     void GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup);
     int32_t GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const;
 
-    inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
+    RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree = true) const
     {
-        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
+        index = !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
+        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_, addToRenderTree);
+    }
+    RefPtr<LayoutWrapper> GetChildByIndex(LayoutWrapper* layoutWrapper, uint32_t index, bool isCache = false) const
+    {
+        index =  !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
+        return layoutWrapper->GetChildByIndex(index, isCache);
     }
     virtual float GetLayoutFixOffset()
     {
@@ -598,6 +613,7 @@ protected:
     OffsetF paddingOffset_;
     bool isLayouted_ = true;
     std::function<float(int32_t)> chainOffsetFunc_;
+    bool isStackFromEnd_ = false;
 
     int32_t itemStartIndex_ = 0;
 

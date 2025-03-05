@@ -58,7 +58,7 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         return;
     }
     // api 16 trigger onActive and onInactive observer
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && (
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && (
         state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
         return;
     }

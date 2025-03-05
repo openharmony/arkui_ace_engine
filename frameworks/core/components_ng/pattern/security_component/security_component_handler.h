@@ -24,6 +24,7 @@
 #include "save_button.h"
 #include "sec_comp_err.h"
 #include "sec_comp_kit.h"
+#include "ui/base/geometry/dimension.h"
 
 namespace OHOS::Ace::NG {
 struct NodeMaps {
@@ -76,7 +77,8 @@ private:
     static bool CheckDiagonalLinearGradientBlur(const RectF& parentRect, const RectF& rect,
         const NG::GradientDirection direction, const float& ratio, const float& radius);
     static float GetBorderRadius(RefPtr<FrameNode>& node, const NG::GradientDirection direction);
-    static bool CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node);
+    static bool CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node,
+        bool& isBlured, double& blurRadius);
     static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
         std::string& message);
     static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,

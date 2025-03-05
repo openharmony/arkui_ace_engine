@@ -72,8 +72,10 @@ public:
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetToolbarOptions(NG::NavigationToolbarOptions&& opt) {}
+    virtual void SetToolbarMorebuttonOptions(NG::MoreButtonOptions&& opt) {}
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) = 0;
     virtual void GetMenuItems(std::list<RefPtr<AceType>>& items) {};
+    virtual void SetMenuOptions(NG::NavigationMenuOptions&& opt) {}
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) = 0;

@@ -76,12 +76,14 @@ struct MenuParam {
     std::optional<EffectOption> backgroundEffectOption;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> backgroundBlurStyleOption;
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<NG::BorderRadiusProperty> previewBorderRadius;
     std::optional<NG::MarginProperty> layoutRegionMargin;
     bool isPreviewContainScale = false;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
+    HapticFeedbackMode hapticFeedbackMode = HapticFeedbackMode::DISABLED;
 };
 
 } // namespace OHOS::Ace::NG

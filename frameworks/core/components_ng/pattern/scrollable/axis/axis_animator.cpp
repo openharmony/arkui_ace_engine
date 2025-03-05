@@ -79,4 +79,16 @@ void AxisAnimator::CreateAnimator()
     }
 }
 
+bool AxisAnimator::IsRunning()
+{
+    return axisScrollAnimator_ && axisScrollAnimator_->IsRunning();
+}
+
+void AxisAnimator::StopAxisAnimation()
+{
+    if (IsRunning()) {
+        axisScrollAnimator_->Stop();
+    }
+}
+
 } // namespace OHOS::Ace::NG

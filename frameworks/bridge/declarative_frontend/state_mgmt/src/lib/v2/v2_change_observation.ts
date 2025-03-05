@@ -27,7 +27,7 @@
 // stackOfRenderedComponentsItem[0] and stackOfRenderedComponentsItem[1] is faster than
 // the stackOfRenderedComponentsItem.id and the stackOfRenderedComponentsItem.cmp.
 // So use the array to keep id and cmp.
-type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | PersistenceV2Impl];
+type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase];
 
 // in the case of ForEach, Repeat, AND If, two or more UINodes / elementIds can render at the same time
 // e.g. ForEach -> ForEach child Text, Repeat -> Nested Repeat, child Text
@@ -36,7 +36,7 @@ type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | P
 class StackOfRenderedComponents {
   private stack_: Array<StackOfRenderedComponentsItem> = new Array<StackOfRenderedComponentsItem>();
 
-  public push(id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl): void {
+  public push(id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase): void {
     this.stack_.push([id, cmp]);
   }
 
@@ -100,6 +100,8 @@ class ObserveV2 {
 
   // flag to indicate change observation is disabled
   private disabled_: boolean = false;
+  // flag to indicate dependency recording is disabled
+  private disableRecording_: boolean = false;
 
   // flag to indicate ComputedV2 calculation is ongoing
   private calculatingComputedProp_: boolean = false;
@@ -138,7 +140,7 @@ class ObserveV2 {
 
   // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
-  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl, id: number, doClearBinding: boolean = true): void {
+  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase, id: number, doClearBinding: boolean = true): void {
     if (cmp != null) {
       doClearBinding && this.clearBinding(id);
       this.stackOfRenderedComponents_.push(id, cmp);
@@ -296,7 +298,7 @@ class ObserveV2 {
   // to current this.bindId
   public addRef(target: object, attrName: string): void {
     const bound = this.stackOfRenderedComponents_.top();
-    if (!bound) {
+    if (!bound || this.disableRecording_) {
       return;
     }
     if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
@@ -307,6 +309,27 @@ class ObserveV2 {
 
     stateMgmtConsole.propertyAccess(`ObserveV2.addRef '${attrName}' for id ${bound[0]}...`);
     this.addRef4IdInternal(bound[0], target, attrName);
+  }
+
+  // add dependency view model object 'target' property 'attrName' to current this.bindId
+  // this variation of the addRef function is only used to record read access to V1 observed object with enableV2Compatibility enabled
+  // e.g. only from within ObservedObject proxy handler implementations.
+  public addRefV2Compatibility(target: object, attrName: string): void {
+    const bound = this.stackOfRenderedComponents_.top();
+    if (bound && bound[1]) {
+      if (!(bound[1] instanceof ViewPU)) {
+        if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
+          const error = `${attrName}: ObserveV2.addRefV2Compatibility: trying to use V2 state '${attrName}' to init/update child V2 @Component. Application error`;
+          stateMgmtConsole.applicationError(error);
+          throw new TypeError(error);
+        }
+        stateMgmtConsole.propertyAccess(`ObserveV2.addRefV2Compatibility '${attrName}' for id ${bound[0]}...`);
+        this.addRef4IdInternal(bound[0], target, attrName);
+      } else {
+        // inside ViewPU
+        stateMgmtConsole.propertyAccess(`ObserveV2.addRefV2Compatibility '${attrName}' for id ${bound[0]} -- skip addRef because render/update is inside V1 ViewPU`);
+      }
+    }
   }
 
   public addRef4Id(id: number, target: object, attrName: string): void {
@@ -376,12 +399,35 @@ class ObserveV2 {
     return ret;
   }
 
+  /**
+   * Execute given task while state dependency recording is disabled
+   * Any property read during task execution will not be recorded as
+   * a dependency
+   * 
+   * !!! Use with Caution !!!
+   *
+   * @param task a function to execute without monitoring state changes
+   * @param unobserved flag to disable also change observation
+   * @returns task function return value
+   */
+  public executeUnrecorded<Z>(task: () => Z, unobserved: boolean = false): Z {
+    stateMgmtConsole.propertyAccess(`executeUnrecorded - start`);
+    this.disableRecording_ = true;
+    // store current value of disabled_ so that we can later restore it properly
+    const oldDisabledValue = this.disabled_;
+    unobserved && (this.disabled_ = true);
+    let ret: Z = task();
+    this.disableRecording_ = false;
+    unobserved && (this.disabled_ = oldDisabledValue);
+    stateMgmtConsole.propertyAccess(`executeUnrecorded - done`);
+    return ret;
+  }
 
 
 
   /**
   * mark view model object 'target' property 'attrName' as changed
-  * notify affected watchIds and elmtIds
+  * notify affected watchIds and elmtIds but exclude given elmtIds
   *
   * @param propName ObservedV2 or ViewV2 target
   * @param attrName attrName
@@ -389,7 +435,8 @@ class ObserveV2 {
   * If the fireChange is invoked before the data changed, it needs to be ignored on the profiler.
   * The default value is false.
   */
-  public fireChange(target: object, attrName: string, ignoreOnProfiler: boolean = false): void {
+  public fireChange(target: object, attrName: string, excludeElmtIds?: Set<number>,
+    ignoreOnProfiler: boolean = false): void {
     // enable to get more fine grained traces
     // including 2 (!) .end calls.
 
@@ -417,6 +464,12 @@ class ObserveV2 {
     for (const id of changedIdSet) {
       // Cannot fireChange the object that is being created.
       if (bound && id === bound[0]) {
+        continue;
+      }
+
+      // exclude given elementIds
+      if (excludeElmtIds?.has(id)) {
+        stateMgmtConsole.propertyAccess(`... exclude id ${id}`);
         continue;
       }
 
@@ -708,8 +761,13 @@ class ObserveV2 {
       return val;
     }
 
-    // Only collections require proxy observation, and if it has been observed, it does not need to be observed again.
-    if (!val[ObserveV2.SYMBOL_PROXY_GET_TARGET]) {
+    // Collections are the only type that require proxy observation. If they have already been observed, no further observation is needed.
+    // Prevents double-proxying: checks if the object is already proxied by either V1 or V2 (to avoid conflicts).
+    // Prevents V2 proxy creation if the developer uses makeV1Observed and also tries to wrap a V2 proxy with built-in types
+    // Handle the case where both V1 and V2 proxies exist (if V1 proxy doesn't trigger enableV2Compatibility).
+    // Currently not implemented to avoid compatibility issues with existing apps that may use both V1 and V2 proxies.
+    if (!val[ObserveV2.SYMBOL_PROXY_GET_TARGET] && !ObservedObject.isEnableV2CompatibleInternal(val) && !ObservedObject.isMakeV1Observed(val)) {
+
       if (Array.isArray(val)) {
         target[key] = new Proxy(val, ObserveV2.arrayProxy);
       } else if (val instanceof Set || val instanceof Map) {
@@ -721,11 +779,16 @@ class ObserveV2 {
     }
 
     // If the return value is an Array, Set, Map
+    // if (this.arr[0] !== undefined, and similar for Set and Map) will not update in response /
+    // to array length/set or map size changing function without addRef on OB_LENGH
     if (!(val instanceof Date)) {
-      ObserveV2.getObserve().addRef(ObserveV2.IsMakeObserved(val) ? RefInfo.get(UIUtilsImpl.instance().getTarget(val)) :
-        val, ObserveV2.OB_LENGTH);
+      if (ObservedObject.isEnableV2CompatibleInternal(val)) {
+        ObserveV2.getObserve().addRefV2Compatibility(val, ObserveV2.OB_LENGTH);
+      } else {
+        ObserveV2.getObserve().addRef(ObserveV2.IsMakeObserved(val) ? RefInfo.get(UIUtilsImpl.instance().getTarget(val)) :
+          val, ObserveV2.OB_LENGTH);
+      }
     }
-
     return val;
   }
 
@@ -788,7 +851,7 @@ class ObserveV2 {
    *                   The default value is false. 
    */
   public getElementInfoById(elmtId: number, isProfiler: boolean = false): string | ElementType {
-    let weak: WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
+    let weak: WeakRef<ViewBuildNodeBase> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
     let view;
     return (weak && (view = weak.deref()) && (view instanceof PUV2ViewBase)) ? view.debugInfoElmtId(elmtId, isProfiler) : `unknown component type[${elmtId}]`;
   }

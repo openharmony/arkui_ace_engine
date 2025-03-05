@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/ng/entry_page_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -366,7 +367,7 @@ bool PagePattern::OnBackPressed()
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
         return true;
     }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isPageInTransition_) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && isPageInTransition_) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
@@ -381,7 +382,9 @@ bool PagePattern::OnBackPressed()
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 #endif
     if (onBackPressed_) {
-        return onBackPressed_();
+        bool result = onBackPressed_();
+        CheckIsNeedForceExitWindow(result);
+        return result;
     }
     return false;
 }
@@ -392,6 +395,35 @@ void PagePattern::BuildSharedTransitionMap()
     CHECK_NULL_VOID(host);
     sharedTransitionMap_.clear();
     IterativeAddToSharedMap(host, sharedTransitionMap_);
+}
+
+void PagePattern::CheckIsNeedForceExitWindow(bool result)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    if (!context->GetInstallationFree() || !result) {
+        // if is not atommic service and result is false, don't process.
+        return;
+    }
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    int32_t pageSize =
+        stageManager->GetStageNode() ? static_cast<int32_t>(stageManager->GetStageNode()->GetChildren().size()) : 0;
+    if (pageSize != 1) {
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        container->TerminateUIExtension();
+    } else {
+        auto windowManager = context->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->WindowPerformBack();
+    }
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "page onbackpress intercepted, exit window.");
 }
 
 void PagePattern::ReloadPage()
@@ -517,7 +549,7 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
+    if (overlayManager_->IsCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto taskExecutor = pipeline->GetTaskExecutor();
@@ -530,7 +562,7 @@ bool PagePattern::RemoveOverlay()
 bool PagePattern::IsNeedCallbackBackPressed()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    return overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), true);
+    return overlayManager_->IsCurrentNodeProcessRemoveOverlay(GetHost(), true);
 }
 
 void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
@@ -858,7 +890,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         FocusViewHide();
     }
 
@@ -897,9 +929,9 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
         TAG_LOGI(AceLogTag::ACE_ROUTER, "inPage transition type is invalid");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish inPage transition.", GetPageUrl().c_str());
     isPageInTransition_ = false;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         FocusViewShow();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -969,7 +1001,7 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         CHECK_NULL_VOID(pipeline);
         auto appTheme = pipeline->GetTheme<AppTheme>();
         CHECK_NULL_VOID(appTheme);

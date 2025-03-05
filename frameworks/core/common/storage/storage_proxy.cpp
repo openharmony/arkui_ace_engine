@@ -18,14 +18,10 @@
 
 namespace OHOS::Ace {
 
-StorageProxy* StorageProxy::inst_ = nullptr;
-
 StorageProxy* StorageProxy::GetInstance()
 {
-    if (inst_ == nullptr) {
-        inst_ = new StorageProxy();
-    }
-    return (inst_);
+    static StorageProxy instance;
+    return &instance;
 }
 
 void StorageProxy::SetDelegate(std::unique_ptr<StorageInterface>&& delegate)

@@ -67,6 +67,20 @@ enum class ScreenShape : int32_t {
     SCREEN_SHAPE_UNDEFINED,
 };
 
+union DebugFlags {
+    DebugFlags(int64_t flag = 0) : flag_(flag) {}
+    int64_t flag_;
+    struct {
+        bool containerMultiThread_ : 1;
+        bool getHostOnDetach_ : 1;
+        bool claimDeathObj_ : 1;
+        bool aceObjTypeCvt_ : 1;
+        bool jsObjTypeCvt_ : 1;
+        bool objDestroyInUse_ : 1;
+        bool useInvalidIter_ : 1;
+    } bits_;
+};
+
 class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
@@ -252,6 +266,8 @@ public:
 
     static std::string GetLanguage();
 
+    static bool GetContainerDeleteFlag();
+
     static std::string GetRegion();
 
     static std::string GetNewPipePkg();
@@ -389,6 +405,41 @@ public:
     }
 
     static bool GetDebugEnabled();
+
+    static bool DetectContainerMultiThread()
+    {
+        return debugEnabled_ && debugFlags_.bits_.containerMultiThread_;
+    }
+
+    static bool DetectGetHostOnDetach()
+    {
+        return debugEnabled_ && debugFlags_.bits_.getHostOnDetach_;
+    }
+
+    static bool DetectClaimDeathObj()
+    {
+        return debugEnabled_ && debugFlags_.bits_.claimDeathObj_;
+    }
+
+    static bool DetectAceObjTypeConvertion()
+    {
+        return debugEnabled_ && debugFlags_.bits_.aceObjTypeCvt_;
+    }
+
+    static bool DetectJsObjTypeConvertion()
+    {
+        return debugEnabled_ && debugFlags_.bits_.jsObjTypeCvt_;
+    }
+
+    static bool DetectObjDestroyInUse()
+    {
+        return debugEnabled_ && debugFlags_.bits_.objDestroyInUse_;
+    }
+
+    static bool DetectUseInvalidIterator()
+    {
+        return debugEnabled_ && debugFlags_.bits_.useInvalidIter_;
+    }
 
     static bool GetMeasureDebugTraceEnabled()
     {
@@ -639,7 +690,14 @@ public:
 
     static double GetScrollableDistance();
 
+    static bool GetWebDebugMaximizeResizeOptimize();
+
     static bool IsNeedResampleTouchPoints();
+
+    static bool GetAsyncInitializeEnabled()
+    {
+        return asyncInitializeEnabled_.load();
+    }
 
     static bool IsNeedSymbol();
 
@@ -696,6 +754,8 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static DebugFlags debugFlags_;
+    static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
@@ -718,6 +778,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
+    static std::atomic<bool> asyncInitializeEnabled_;
     static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;

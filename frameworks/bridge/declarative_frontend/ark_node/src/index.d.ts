@@ -22,23 +22,11 @@ declare interface TouchEvent {
 
 declare interface Position { x?: number; y?: number; }
 
-declare type UpdateFunc = (elmtId: number, isFirstRender: boolean, param?: Object) => void;
-
 interface UpdateFuncRecord {
   updateFunc: UpdateFunc;
   componentName: string;
   node?: object;
-}
-
-declare class ObserveV2 {
-  static getObserve(): ObserveV2;
-  public stopRecordDependencies(): void;
-  public startRecordDependencies(cmp: BaseNode, id: number, doClearBinding: boolean): void;
-}
-
-declare class ConfigureStateMgmt {
-  public static get instance(): ConfigureStateMgmt;
-  public needsV2Observe(): boolean;
+  getUpdateFunc(): UpdateFunc | undefined;
 }
 
 declare function wrapBuilder<Args extends Object[]>(
@@ -71,40 +59,6 @@ declare interface BuildOptions {
   nestingBuilderSupported?: boolean;
   lazyBuildSupported?: boolean;
   bindedViewOfBuilderNode?:ViewPU;
-}
-declare abstract class ViewPU {
-  id__(): number;
-  aboutToUpdate?: (updateParams: Object) => void;
-  updateStateVars(params: {}): void;
-  aboutToReuseInternal(param?: Object): void;
-  aboutToRecycleInternal(): void;
-  updateDirtyElements(): void;
-  forceCompleteRerender(deep?: boolean): void
-}
-
-/**
- * WeakRef
- * ref to an Object that does not prevent the Object from getting GC'ed
- * current version of tsc does not know about WeakRef
- * but Ark runtime supports it
- *
- */
-declare class WeakRef<T extends Object> {
-  constructor(o: T);
-  deref(): T;
-}
-
-type RemovedElementInfo = { elmtId: number, tag: string };
-
-declare class UINodeRegisterProxy {
-  public static instance_: UINodeRegisterProxy;
-  public removeElementsInfo_: Array<number>;
-  public static ElementIdToOwningViewPU_: Map<number, WeakRef<JSBuilderNode>>;
-  public unregisterElmtIdsFromIViews(): void;
-  private obtainDeletedElmtIds(): void;
-  public static unregisterElmtIdsFromIViews(): void;
-  public static obtainDeletedElmtIds(): void;
-  public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void;
 }
 
 declare interface RegisterParams {

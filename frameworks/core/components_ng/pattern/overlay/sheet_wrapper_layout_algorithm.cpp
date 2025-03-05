@@ -17,6 +17,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
@@ -133,7 +134,11 @@ void SheetWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     InitParameter(layoutWrapper);
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
-    auto child = layoutWrapper->GetChildByIndex(0);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto child = sheetWrapperPattern->GetSheetPageNode();
     CHECK_NULL_VOID(child);
     auto sheetLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_VOID(sheetLayoutProperty);
@@ -143,6 +148,30 @@ void SheetWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childConstraint = layoutProp->CreateChildConstraint();
     child->Measure(childConstraint);
     GetSheetPageSize(layoutWrapper);
+    MeasureSheetMask(layoutWrapper);
+}
+
+void SheetWrapperLayoutAlgorithm::MeasureSheetMask(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+
+    if (!sheetWrapperPattern->ShowInUEC()) {
+        return;
+    }
+    auto maskNode = sheetWrapperPattern->GetSheetMaskNode();
+    CHECK_NULL_VOID(maskNode);
+    auto index = host->GetChildIndexById(maskNode->GetId());
+    auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(maskWrapper);
+    auto rect = sheetWrapperPattern->GetMainWindowRect();
+    auto layoutProp = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    auto constraint = layoutProp->CreateChildConstraint();
+    constraint.selfIdealSize = OptionalSizeF(rect.Width(), rect.Height());
+    maskWrapper->Measure(constraint);
 }
 
 void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
@@ -154,7 +183,9 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     
-    auto sheetPage = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto sheetPage = sheetWrapperPattern->GetSheetPageNode();
     CHECK_NULL_VOID(sheetPage);
     auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetPage->GetPattern());
     CHECK_NULL_VOID(sheetPattern);
@@ -168,7 +199,7 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     sheetPopupInfo_.placementOnTarget = sheetStyle.placementOnTarget.value_or(true);
     windowGlobalRect_ = pipeline->GetDisplayWindowRectInfo();
     windowEdgeWidth_ = WINDOW_EDGE_SPACE.ConvertToPx();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         // global rect need to reduce the top and bottom safe area
         windowGlobalRect_ = pipeline->GetCurrentWindowRect();
         auto safeArea = pipeline->GetSafeArea();
@@ -188,7 +219,9 @@ void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto sheetPage = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto sheetPage = sheetWrapperPattern->GetSheetPageNode();
     CHECK_NULL_VOID(sheetPage);
     auto sheetGeometryNode = sheetPage->GetGeometryNode();
     CHECK_NULL_VOID(sheetGeometryNode);
@@ -203,7 +236,7 @@ void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)
 
 void SheetWrapperLayoutAlgorithm::DecreaseArrowHeightWhenArrowIsShown(const RefPtr<FrameNode>& sheetNode)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
@@ -259,7 +292,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, OffsetF());
     auto targetSize = geometryNode->GetFrameSize();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         targetSize = targetNode->GetPaintRectWithTransform().GetSize();
     }
     auto targetOffset = targetNode->GetPaintRectOffset();
@@ -269,7 +302,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetInAvoidanceRule(
     LayoutWrapper* layoutWrapper, const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.finalPlacement = AvoidanceRuleOfPlacement(layoutWrapper, targetSize, targetOffset);
     } else {
         // before api 16, only placement bottom is used
@@ -533,7 +566,7 @@ SizeF SheetWrapperLayoutAlgorithm::GetLeftSpaceWithPlacement(
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottom(
     const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.arrowOffsetX = sheetWidth_ / DOUBLE_SIZE;
         return OffsetF(targetOffset.GetX() + (targetSize.Width() - sheetWidth_) / DOUBLE_SIZE,
             targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
@@ -559,7 +592,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottom(
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottomLeft(
     const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.arrowOffsetX = targetSize.Width() / DOUBLE_SIZE;
         auto sheetOffset =
             OffsetF(targetOffset.GetX(), targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
@@ -600,7 +633,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottomLeft(
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottomRight(
     const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.arrowOffsetX = sheetWidth_ - targetSize.Width() / DOUBLE_SIZE;
         auto sheetOffset = OffsetF(targetOffset.GetX() + targetSize.Width() - sheetWidth_,
             targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
@@ -964,9 +997,11 @@ void SheetWrapperLayoutAlgorithm::CheckIsArrowOverlapSheetRadius()
 void SheetWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
-    auto sheetPageWrapper = layoutWrapper->GetChildByIndex(0);
-    CHECK_NULL_VOID(sheetPageWrapper);
-    auto sheetPageNode = sheetPageWrapper->GetHostNode();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto sheetPageNode = sheetWrapperPattern->GetSheetPageNode();
     CHECK_NULL_VOID(sheetPageNode);
     auto sheetPagePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPagePattern);
@@ -984,9 +1019,46 @@ void SheetWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             sheetPopupInfo_.sheetOffsetX, sheetPopupInfo_.sheetOffsetY, sheetWidth_, sheetHeight_);
         RemeasureForPopup(layoutWrapper);
     }
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Layout();
+    auto index = host->GetChildIndexById(sheetPageNode->GetId());
+    auto sheetPageWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(sheetPageWrapper);
+    sheetPageWrapper->Layout();
+    LayoutMaskNode(layoutWrapper);
+}
+
+void SheetWrapperLayoutAlgorithm::LayoutMaskNode(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    if (!sheetWrapperPattern->ShowInUEC()) {
+        return;
     }
+    auto maskNode = sheetWrapperPattern->GetSheetMaskNode();
+    CHECK_NULL_VOID(maskNode);
+    auto maskPattern = maskNode->GetPattern<SheetMaskPattern>();
+    CHECK_NULL_VOID(maskPattern);
+    auto index = host->GetChildIndexById(maskNode->GetId());
+    auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(maskWrapper);
+    auto rect = sheetWrapperPattern->GetMainWindowRect();
+    auto contentOffset = OffsetF(rect.GetX(), rect.GetY());
+    auto geometryNode = maskWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetMarginFrameOffset(contentOffset);
+
+    auto currentId = Container::CurrentId();
+    SubwindowManager::GetInstance()->DeleteHotAreas(currentId, maskNode->GetId(), SubwindowType::TYPE_SHEET);
+    if (maskPattern->GetIsMaskInteractive()) {
+        std::vector<Rect> rects;
+        auto maskHotRect = Rect(rect.GetX(), rect.GetY(),
+            maskNode->GetGeometryNode()->GetFrameSize().Width(), maskNode->GetGeometryNode()->GetFrameSize().Height());
+        rects.emplace_back(maskHotRect);
+        auto subWindowMgr = SubwindowManager::GetInstance();
+        subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_SHEET, maskNode->GetId(), currentId);
+    }
+    maskWrapper->Layout();
 }
 
 void SheetWrapperLayoutAlgorithm::RemeasureForPopup(LayoutWrapper* layoutWrapper)
@@ -996,7 +1068,14 @@ void SheetWrapperLayoutAlgorithm::RemeasureForPopup(LayoutWrapper* layoutWrapper
 
 void SheetWrapperLayoutAlgorithm::UpdateSheetNodePopupInfo(LayoutWrapper* layoutWrapper)
 {
-    auto sheetPageWrapper = layoutWrapper->GetChildByIndex(0);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto sheetNode = sheetWrapperPattern->GetSheetPageNode();
+    CHECK_NULL_VOID(sheetNode);
+    auto index = host->GetChildIndexById(sheetNode->GetId());
+    auto sheetPageWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(sheetPageWrapper);
     auto sheetPageNode = sheetPageWrapper->GetHostNode();
     CHECK_NULL_VOID(sheetPageNode);

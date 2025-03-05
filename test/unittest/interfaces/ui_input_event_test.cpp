@@ -813,6 +813,7 @@ HWTEST_F(UIInputEventTest, MouseEventGetPressedButtons001, TestSize.Level1)
 {
     auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
     EXPECT_NE(uiInputEvent, nullptr);
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
     auto event = std::make_unique<ArkUIMouseEvent>();
     event->pressedButtonsLength = 0;
     EXPECT_NE(event, nullptr);
@@ -833,6 +834,7 @@ HWTEST_F(UIInputEventTest, MouseEventGetPressedButtons002, TestSize.Level1)
 {
     auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
     EXPECT_NE(uiInputEvent, nullptr);
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
     auto event = std::make_unique<ArkUIMouseEvent>();
     event->pressedButtonsLength = 6;
     EXPECT_NE(event, nullptr);
@@ -1078,6 +1080,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetPressedTimeByIndex005, TestS
     ArkUITouchPoint touchPoint;
     touchPoint.pressedTime = 20;
     touchEvent->touchPointes = &touchPoint;
+    touchEvent->touchPointSize = 2;
     event->inputEvent = touchEvent.get();
     auto result = OH_ArkUI_PointerEvent_GetPressedTimeByIndex(event.get(), 0);
     EXPECT_EQ(result, 20);

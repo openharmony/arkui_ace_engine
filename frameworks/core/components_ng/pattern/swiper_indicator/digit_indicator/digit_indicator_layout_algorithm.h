@@ -52,6 +52,9 @@ public:
     }
 
 private:
+    float CalcFrameHeight(const RefPtr<FrameNode>& frameNode, float indicatorHeight);
+    void SetBackTextOffset(const ChildrenListWithGuard& textWrapperList, const SizeF& frameSize, bool isHorizontal,
+        const std::optional<bool>& ignoreSize);
     bool isHoverOrPress_ = false;
     bool isSingle_ = false;
     PointF hoverPoint_;

@@ -39,10 +39,11 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/focus_box.h"
+#include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/menu_property.h"
@@ -50,7 +51,21 @@
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
 
+namespace OHOS::Rosen {
+class VisualEffect;
+class Filter;
+class BrightnessBlender;
+} // namespace OHOS::Rosen
+
+namespace OHOS::Ace {
+class ImageSourceInfo;
+class BasicShape;
+}
+
 namespace OHOS::Ace::NG {
+struct AttractionEffect;
+using TransitionFinishCallback = std::function<void(bool)>;
+
 struct OptionParam {
     std::string value;
     std::string icon;

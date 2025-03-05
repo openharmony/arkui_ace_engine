@@ -467,7 +467,7 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     if (uiTaskExecutor.IsRunOnCurrentThread()) {
         task();
     } else {
-        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly", PriorityType::VIP);
+        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly");
     }
 }
 
@@ -584,7 +584,7 @@ void RosenRenderSurface::DrawBufferForXComponent(
     ACE_SCOPED_TRACE("DrawXComponentBuffer[id:%u][sendTimes:%d][uid:%" PRIu64 "]", surfaceNode->bufferId_,
         surfaceNode->sendTimes_, uid);
     auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
-    auto transform = (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) ||
+    auto transform = (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ||
         surfaceNode->buffer_ == nullptr)
         ? GraphicTransformType::GRAPHIC_ROTATE_NONE
         : surfaceNode->buffer_->GetSurfaceBufferTransform();

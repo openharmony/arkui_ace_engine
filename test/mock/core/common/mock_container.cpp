@@ -24,6 +24,7 @@ int32_t g_id = 0;
 } // namespace
 
 RefPtr<MockContainer> MockContainer::container_;
+ColorMode MockContainer::mockColorMode_ = ColorMode::LIGHT;
 bool Frontend::MaybeRelease()
 {
     return AceType::MaybeRelease();
@@ -117,6 +118,21 @@ RefPtr<Container> Container::GetContainer(int32_t containerId)
     return MockContainer::Current();
 }
 
+ColorMode Container::CurrentColorMode()
+{
+    return MockContainer::mockColorMode_;
+}
+
+void MockContainer::SetMockColorMode(ColorMode mode)
+{
+    mockColorMode_ = mode;
+}
+
+ColorMode MockContainer::GetMockColorMode()
+{
+    return mockColorMode_;
+}
+
 int32_t MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
     bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
     const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
@@ -174,5 +190,43 @@ RefPtr<Container> Container::GetFoucsed()
 bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
 {
     return false;
+}
+
+NG::SafeAreaInsets Container::GetKeyboardSafeArea()
+{
+    return {};
+}
+
+bool Container::LessThanAPIVersion(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 15
+               ? PipelineBase::GetCurrentContext() &&
+                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
+               : LessThanAPITargetVersion(version);
+}
+bool Container::GreatOrEqualAPIVersion(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 15
+               ? PipelineBase::GetCurrentContext() &&
+                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
+               : GreatOrEqualAPITargetVersion(version);
+}
+
+bool Container::LessThanAPIVersionWithCheck(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 14
+               ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                     PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
+                         static_cast<int32_t>(version)
+               : LessThanAPITargetVersion(version);
+}
+
+bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 14
+               ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                     PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
+                         static_cast<int32_t>(version)
+               : GreatOrEqualAPITargetVersion(version);
 }
 } // namespace OHOS::Ace

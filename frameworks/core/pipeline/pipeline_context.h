@@ -47,6 +47,7 @@
 #include "core/components/page/page_component.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/event/visible_ratio_callback.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
@@ -90,13 +91,6 @@ struct WindowBlurInfo {
     WindowBlurStyle style_;
     RRect innerRect_;
     std::vector<RRect> coords_;
-};
-
-struct VisibleCallbackInfo {
-    VisibleRatioCallback callback;
-    double visibleRatio = 1.0;
-    bool isCurrentVisible = false;
-    uint32_t period = 0;
 };
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);

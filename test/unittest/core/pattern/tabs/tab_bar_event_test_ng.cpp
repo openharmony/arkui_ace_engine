@@ -529,7 +529,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarPattern_->swiperController_->SetRemoveSwiperEventCallback(nullptr);
+    swiperController_->SetRemoveSwiperEventCallback(nullptr);
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
     /**
@@ -539,7 +539,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
     int32_t index = 1;
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->HandleTouchDown(index);
-        tabBarPattern_->swiperController_->SetRemoveSwiperEventCallback([]() {});
+        swiperController_->SetRemoveSwiperEventCallback([]() {});
     }
     EXPECT_TRUE(tabBarPattern_);
 }
@@ -555,7 +555,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarPattern_->swiperController_->SetAddSwiperEventCallback(nullptr);
+    swiperController_->SetAddSwiperEventCallback(nullptr);
     tabBarPattern_->SetTouching(false);
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
 
@@ -566,7 +566,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
     int32_t index = 1;
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->HandleTouchUp(index);
-        tabBarPattern_->swiperController_->SetAddSwiperEventCallback([]() {});
+        swiperController_->SetAddSwiperEventCallback([]() {});
     }
     EXPECT_TRUE(tabBarPattern_);
 }
@@ -586,7 +586,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
 
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     int32_t index = 1;
-    tabBarPattern_->swiperController_->SetAddSwiperEventCallback(nullptr);
+    swiperController_->SetAddSwiperEventCallback(nullptr);
     tabBarPattern_->SetTouching(true);
     IndicatorStyle indicatorStyle1;
     IndicatorStyle indicatorStyle2;
@@ -609,7 +609,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
             for (int k = 0; k <= 1; k++) {
                 tabBarPattern_->HandleTouchUp(index);
                 tabBarPattern_->SetTouching(true);
-                tabBarPattern_->swiperController_->SetAddSwiperEventCallback([]() {});
+                swiperController_->SetAddSwiperEventCallback([]() {});
                 tabBarPattern_->hoverIndex_.reset();
                 EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
             }
@@ -1160,7 +1160,7 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest001, TestSize.Level1)
      * @tc.steps: step3. Swipe to page 1, then call onGetNextFocusNodeFunc_ use FocusReason::FOCUS_TRAVEL
      * @tc.expected: expect The function is run ok.
      */
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
     auto childFocusHub1 = childNode1->GetOrCreateFocusHub();
     nextFocusHub = tabBarFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB);

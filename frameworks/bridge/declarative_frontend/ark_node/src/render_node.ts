@@ -775,7 +775,7 @@ class RenderNode {
   }
 
   setBaseNode(baseNode: BaseNode | null) {
-    this.baseNode_ = baseNode;
+    this.baseNode_ = baseNode.builderBaseNode_;
   }
   resetNodePtr(): void {
     this.nodePtr = null;

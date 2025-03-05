@@ -48,6 +48,19 @@ namespace OHOS::Ace::NG {
 
 int onPopIndex_ = 0;
 
+namespace {
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == NavigationBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<NavigationBarTheme>();
+    } else if (type == AgingAdapationDialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+    } else {
+        return AceType::MakeRefPtr<DialogTheme>();
+    }
+}
+} // namespace
+
 class NavDestinationResultTest : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -73,14 +86,10 @@ void NavDestinationResultTest::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == NavigationBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<NavigationBarTheme>();
-        } else if (type == AgingAdapationDialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
-        } else {
-            return AceType::MakeRefPtr<DialogTheme>();
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 RefPtr<NavDestinationGroupNode> NavDestinationResultTest::CreateNavDestinationNode(const std::string& name)

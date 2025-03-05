@@ -53,6 +53,16 @@ void SymbolSpanModelNG::SetFontWeight(Ace::FontWeight value)
     ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontWeight, value);
 }
 
+void SymbolSpanModelNG::SetFontFamilies(std::vector<std::string>& value)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontFamily, value);
+}
+
+void SymbolSpanModelNG::SetSymbolType(SymbolType value)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolType, value);
+}
+
 void SymbolSpanModelNG::SetFontColor(std::vector<Color>& symbolColor)
 {
     ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor);
@@ -104,5 +114,17 @@ void SymbolSpanModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t&
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(Content, unicode, frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolType, SymbolType::SYSTEM, frameNode);
+}
+
+void SymbolSpanModelNG::InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode,
+    const char* fontFamilyName)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(Content, unicode, frameNode);
+    std::vector<std::string> fontFamilyNames;
+    fontFamilyNames.push_back(fontFamilyName);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(FontFamily, fontFamilyNames, frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolType, SymbolType::CUSTOM, frameNode);
 }
 } // namespace OHOS::Ace::NG

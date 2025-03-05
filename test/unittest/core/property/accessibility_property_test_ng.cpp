@@ -1244,4 +1244,20 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest040, TestSize.Lev
     EXPECT_EQ(accessibilityProperty.GetAccessibilitySamePage(), pageMode);
 }
 
+/**
+ * @tc.name: AccessibilityPropertyTest041
+ * @tc.desc: SetAccessibilitySamePage, HasAccessibilitySamePage and IsAccessibilityTextPreferred
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest041, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const std::string pageMode = "FULL_SILENT";
+    accessibilityProperty.SetAccessibilitySamePage(pageMode);
+    EXPECT_TRUE(accessibilityProperty.HasAccessibilitySamePage());
+    accessibilityProperty.SetAccessibilityTextPreferred(true);
+    EXPECT_TRUE(accessibilityProperty.IsAccessibilityTextPreferred());
+    accessibilityProperty.SetAccessibilityTextPreferred(false);
+    EXPECT_FALSE(accessibilityProperty.IsAccessibilityTextPreferred());
+}
 } // namespace OHOS::Ace::NG

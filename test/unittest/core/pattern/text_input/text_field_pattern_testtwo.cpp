@@ -20,7 +20,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/render/mock_paragraph.h"
-
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -690,6 +690,7 @@ HWTEST_F(TextFieldPatternTestTwo, SetSelectionFlag001, TestSize.Level0)
     pattern->SetSelectionFlag(start, end, options, true);
     EXPECT_EQ(pattern->IsShowHandle(), false);
     theme->textfieldShowHandle_ = false;
+    pattern->UpdateSelectionOffset();
 }
 
 /**

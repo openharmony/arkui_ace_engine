@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -104,7 +105,6 @@ const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
-constexpr int32_t POST_CLONED_EVENT_FAILED = 180004;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -1004,7 +1004,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = container->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }
@@ -3556,7 +3556,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         radius = CalcDimension(radiusArg, DimensionUnit::VP);
     } else {
         radius = CalcDimension(radiusArg, DimensionUnit::PX);
@@ -3901,6 +3901,20 @@ void ResetAccessibilityScrollTriggerable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, true, true);
+}
+
+void SetAccessibilityFocusDrawLevel(ArkUINodeHandle node, ArkUI_Int32 drawLevel)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
+}
+
+void ResetAccessibilityFocusDrawLevel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, 0);
 }
 
 void SetHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
@@ -6562,27 +6576,27 @@ ArkUI_Int32 PostTouchEventToFrameNode(ArkUINodeHandle node, TouchEvent& touchEve
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     if (!frameNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenode is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto frameNodePtr = AceType::Claim<FrameNode>(frameNode);
     if (!frameNodePtr) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenodeptr is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto pipelineContext = frameNodePtr->GetContext();
     if (!pipelineContext) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent pipeline context is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto postEventManager = pipelineContext->GetPostEventManager();
     if (!postEventManager) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event manager is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     bool res = postEventManager->PostEvent(frameNodePtr, touchEvent);
     if (!res) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event fail!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -6591,7 +6605,7 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
 {
     if (!arkUITouchEvent) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent touchevent is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     TouchEvent touchEvent;
     touchEvent.type = static_cast<TouchType>(arkUITouchEvent->action);
@@ -7122,6 +7136,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityUseSamePage = ResetAccessibilityUseSamePage,
         .setAccessibilityScrollTriggerable = SetAccessibilityScrollTriggerable,
         .resetAccessibilityScrollTriggerable = ResetAccessibilityScrollTriggerable,
+        .setAccessibilityFocusDrawLevel = SetAccessibilityFocusDrawLevel,
+        .resetAccessibilityFocusDrawLevel = ResetAccessibilityFocusDrawLevel,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
         .setClickEffect = SetClickEffect,

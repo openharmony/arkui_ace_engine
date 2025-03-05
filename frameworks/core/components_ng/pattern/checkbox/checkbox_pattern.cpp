@@ -15,14 +15,110 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
+#include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr int32_t DEFAULT_CHECKBOX_ANIMATION_DURATION = 100;
 } // namespace
+
+RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    paintProperty->SetHost(host);
+    if (!paintMethod_) {
+        paintMethod_ = MakeRefPtr<CheckBoxPaintMethod>();
+    }
+    CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+    } else {
+        checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
+    }
+    if (paintProperty->HasCheckBoxSelectedStyle()) {
+        checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+    }
+    paintMethod_->SetCheckboxStyle(checkboxStyle);
+    paintMethod_->SetUseContentModifier(UseContentModifier());
+    paintMethod_->SetHasBuilder(builder_.has_value());
+    host->SetCheckboxFlag(true);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    paintMethod_->SetEnabled(enabled);
+    paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
+    return paintMethod_;
+}
+
+bool CheckBoxPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/)
+{
+    auto geometryNode = dirty->GetGeometryNode();
+    offset_ = geometryNode->GetContentOffset();
+    size_ = geometryNode->GetContentSize();
+    if (!isUserSetResponseRegion_) {
+        AddHotZoneRect();
+    }
+    return true;
+}
+
+void CheckBoxPattern::SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
+{
+    if (makeFunc == nullptr) {
+        makeFunc_ = std::nullopt;
+        OnModifyDone();
+        return;
+    }
+    makeFunc_ = std::move(makeFunc);
+}
+
+void CheckBoxPattern::SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
+{
+    if (toggleMakeFunc == nullptr) {
+        toggleMakeFunc_ = std::nullopt;
+        OnModifyDone();
+        return;
+    }
+    toggleMakeFunc_ = std::move(toggleMakeFunc);
+}
+
+void CheckBoxPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
+    auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
+    auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
+    json->PutExtAttr("name", name.c_str(), filter);
+    json->PutExtAttr("group", group.c_str(), filter);
+    json->PutExtAttr("type", "ToggleType.Checkbox", filter);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    auto select = paintProperty->GetCheckBoxSelectValue(false);
+    json->PutExtAttr("select", select ? "true" : "false", filter);
+}
+
+void CheckBoxPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto select = paintProperty->GetCheckBoxSelectValue(false);
+    json->Put(TreeKey::CHECKED, select ? "true" : "false");
+}
 
 void CheckBoxPattern::OnAttachToFrameNode()
 {
@@ -72,7 +168,7 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(checkBoxTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -764,7 +860,7 @@ void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(host);
     auto* pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
-    auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
+    auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(checkBoxTheme);
     auto borderRadius = checkBoxTheme->GetFocusRadius().ConvertToPx();
     auto focusPaintPadding = checkBoxTheme->GetFocusPaintPadding().ConvertToPx();
@@ -791,7 +887,7 @@ FocusPattern CheckBoxPattern::GetFocusPattern() const
     CHECK_NULL_RETURN(host, FocusPattern());
     auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(checkBoxTheme, FocusPattern());
     auto activeColor = checkBoxTheme->GetFocusLineColor();
     FocusPaintParam focusPaintParam;
@@ -927,18 +1023,39 @@ void CheckBoxPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
     auto checkBoxPaintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(checkBoxPaintProperty);
-    checkBoxPaintProperty->UpdateCheckBoxSelectedColor(checkBoxTheme->GetActiveColor());
-    checkBoxPaintProperty->UpdateCheckBoxUnSelectedColor(checkBoxTheme->GetInactiveColor());
-    checkBoxPaintProperty->UpdateCheckBoxCheckMarkColor(checkBoxTheme->GetPointColor());
+    OnThemeScopeUpdate(host->GetThemeScopeId());
     UpdatePaintPropertyBySettingData(checkBoxPaintProperty);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool CheckBoxPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto* pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(themeScopeId);
+    CHECK_NULL_RETURN(checkBoxTheme, false);
+    auto result = false;
+    auto checkBoxPaintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_RETURN(checkBoxPaintProperty, false);
+    if (!checkBoxPaintProperty->HasCheckBoxSelectedColorFlagByUser()) {
+        checkBoxPaintProperty->UpdateCheckBoxSelectedColor(checkBoxTheme->GetActiveColor());
+        result = true;
+    }
+    if (!checkBoxPaintProperty->HasCheckBoxUnSelectedColorFlagByUser()) {
+        checkBoxPaintProperty->UpdateCheckBoxUnSelectedColor(checkBoxTheme->GetInactiveColor());
+        result = true;
+    }
+
+    if (!checkBoxPaintProperty->HasCheckBoxCheckMarkColorFlagByUser()) {
+        checkBoxPaintProperty->UpdateCheckBoxCheckMarkColor(checkBoxTheme->GetPointColor());
+        result = true;
+    }
+    return result;
 }
 
 void CheckBoxPattern::SetPrePageIdToLastPageId()

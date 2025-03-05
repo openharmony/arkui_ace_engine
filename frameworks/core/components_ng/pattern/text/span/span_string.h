@@ -65,7 +65,13 @@ public:
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
     bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff);
-    static void DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString);
+    static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff,
+        const std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)>&& unmarshallCallback,
+        int32_t instanceId = -1);
+    static void DecodeTlvOldExt(std::vector<uint8_t>& buff, SpanString* spanString, int32_t& cursor);
+    static void DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString,
+        const std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)>&& unmarshallCallback,
+        int32_t instanceId = -1);
     static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
     static void DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& cursor, SpanString* spanStr);
     void ClearSpans();

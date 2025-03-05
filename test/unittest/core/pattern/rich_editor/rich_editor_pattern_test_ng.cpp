@@ -118,6 +118,7 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestOnDragMove001, TestSize.L
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
 
     auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
@@ -967,7 +968,7 @@ HWTEST_F(RichEditorPatternTestNg, GetReplacedSpan001, TestSize.Level1)
     int32_t textIndex = 1;
     std::optional<TextStyle> textStyle = std::optional<TextStyle>(TextStyle());
     richEditorPattern->GetReplacedSpan(
-        changeValue, innerPosition, insertValue, textIndex, textStyle, spanParaStyle, false, false);
+        changeValue, innerPosition, insertValue, textIndex, textStyle, spanParaStyle, std::nullopt, false, false);
     auto uiNode = host->GetChildAtIndex(0);
     EXPECT_NE(uiNode, nullptr);
     EXPECT_EQ(uiNode->GetTag(), V2::TEXT_ETS_TAG);
@@ -998,8 +999,9 @@ HWTEST_F(RichEditorPatternTestNg, GetReplacedSpanFission001, TestSize.Level1)
     paragraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
     richEditorPattern->UpdateParagraphStyle(0, 6, paragraphStyle);
     std::optional<struct UpdateParagraphStyle> spanParaStyle = paragraphStyle;
+    std::optional<std::u16string> urlAddress = std::nullopt;
     richEditorPattern->GetReplacedSpanFission(
-        changeValue, innerPosition, content, startSpanIndex, offsetInSpan, textStyle, spanParaStyle);
+        changeValue, innerPosition, content, startSpanIndex, offsetInSpan, textStyle, spanParaStyle, urlAddress);
     EXPECT_NE(innerPosition, 0);
 }
 /**
