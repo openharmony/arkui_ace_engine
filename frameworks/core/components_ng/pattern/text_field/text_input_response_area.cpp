@@ -150,8 +150,6 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
         hoverRectHeight = hoverRectHeight - ICON_FOCUS_PADDING.ConvertToPx();
     }
 
-    rect = RectF(stackRect.GetX() - (hoverRectHeight - iconSize) / HALF_SPACE, stackRect.GetY() +
-        (stackRect.Height() - hoverRectHeight) / HALF_SPACE, hoverRectHeight, hoverRectHeight);
     auto iconHoverPadding = (hoverRectHeight - iconSize) / HALF_SPACE;
     auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
@@ -159,8 +157,8 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
         rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding,
             stackRect.GetY() - stackHoverPadding, hoverRectHeight, hoverRectHeight);
     } else {
-        rect = RectF(stackRect.GetX() - (hoverRectHeight - iconSize) / HALF_SPACE, stackRect.GetY() -
-            stackHoverPadding, hoverRectHeight, hoverRectHeight);
+        rect = RectF(stackRect.GetX() - iconHoverPadding, stackRect.GetY() - stackHoverPadding,
+            hoverRectHeight, hoverRectHeight);
     }
 }
 // TextInputResponseArea end
@@ -809,10 +807,15 @@ void CleanNodeResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
     CHECK_NULL_VOID(cleanNode_);
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(cleanNode_->GetFirstChild());
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageGeometryNode = imageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(imageGeometryNode);
+    auto imageRect = imageGeometryNode->GetFrameRect();
     auto textInputNode = cleanNode_->GetParentFrameNode();
     CHECK_NULL_VOID(textInputNode);
     auto textInputRect = textInputNode->GetGeometryNode()->GetFrameRect();
-    auto iconSize = GetIconSize();
+    auto iconSize = imageRect.Height();
     auto defaultRectHeight = DEFAULT_HOVER_SIZE.ConvertToPx();
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
