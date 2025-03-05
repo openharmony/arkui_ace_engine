@@ -269,7 +269,6 @@ public:
         const WeakPtr<NG::FrameNode>& hostNode,
         AccessibilityElementOperatorCallback& callback,
         const int32_t requestId);
-    bool IsScreenReaderEnabled() override;
     
     AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
 

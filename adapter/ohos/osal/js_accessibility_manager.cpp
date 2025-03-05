@@ -6406,9 +6406,4 @@ void JsAccessibilityManager::FireAccessibilityEventCallback(uint32_t eventId, in
             break;
     }
 }
-
-bool JsAccessibilityManager::IsScreenReaderEnabled()
-{
-    return true;
-}
 } // namespace OHOS::Ace::Framework
