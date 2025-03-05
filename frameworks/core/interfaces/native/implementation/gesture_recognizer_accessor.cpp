@@ -44,7 +44,6 @@ Ark_String GetTagImpl(Ark_GestureRecognizer peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
     auto resOpt = peer->GetRecognizer()->GetGestureInfo()->GetTag();
-    //std::string res = resOpt ? resOpt.value() : "";
     return Converter::ArkValue<Ark_String>(resOpt.value_or(""), Converter::FC);
 }
 Ark_GestureControl_GestureType GetTypeImpl(Ark_GestureRecognizer peer)
