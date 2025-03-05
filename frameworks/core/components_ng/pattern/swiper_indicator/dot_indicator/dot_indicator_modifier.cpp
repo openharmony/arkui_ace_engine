@@ -761,6 +761,7 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
             CHECK_NULL_VOID(modifier);
             modifier->longPointLeftAnimEnd_ = true;
             modifier->longPointRightAnimEnd_ = true;
+            modifier->isBottomAnimationFinished_ = true;
             modifier->animationState_ = TouchBottomAnimationStage::STAGE_NONE;
         });
     };
@@ -768,6 +769,7 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
         longPointLeftAnimEnd_ = false;
         longPointRightAnimEnd_ = false;
         ifNeedFinishCallback_ = true;
+        isBottomAnimationFinished_ = false;
         animationState_ = TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT;
         touchBottomPointColor_->Set(LinearColor(selectedColor_->Get()));
         AnimationUtils::StartAnimation(optionBottom, [weak, longPointCenterX]() {
@@ -775,6 +777,7 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
             CHECK_NULL_VOID(modifier);
             modifier->longPointLeftCenterX_->Set(longPointCenterX[0].first);
             modifier->longPointRightCenterX_->Set(longPointCenterX[0].second);
+            modifier->bottomCenterX_ = longPointCenterX[1];
         }, bottomFinishCallback);
     }
 }
@@ -899,6 +902,25 @@ void DotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vec
     animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     PlayBlackPointsAnimation(vectorBlackPointCenterX);
     PlayLongPointAnimation(longPointCenterX, gestureState, touchBottomTypeLoop, vectorBlackPointCenterX);
+}
+
+void DotIndicatorModifier::FinishAnimationToTargetImmediately(std::pair<float, float> centerX)
+{
+    AnimationOption option;
+    option.SetDuration(0);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::StartAnimation(option, [weak = WeakClaim(this), centerX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->isBottomAnimationFinished_ = true;
+        modifier->ifNeedFinishCallback_ = false;
+        modifier->longPointRightCenterX_->Set(centerX.second);
+        if (modifier->isCustomSize_) {
+            modifier->longPointLeftCenterX_->Set(centerX.second);
+        } else {
+            modifier->longPointLeftCenterX_->Set(centerX.first);
+        }
+    });
 }
 
 void DotIndicatorModifier::StopAnimation(bool ifImmediately)

@@ -364,7 +364,10 @@ void IndicatorPattern::ShowPrevious()
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
         }
     }
-
+    auto dotIndicatorModifier = GetDotIndicatorModifier();
+    if (dotIndicatorModifier && !dotIndicatorModifier->GetIsBottomAnimationFinished()) {
+        dotIndicatorModifier->FinishAnimationToTargetImmediately(dotIndicatorModifier->GetTargetCenter());
+    }
     lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() - 1);
 }
@@ -386,7 +389,10 @@ void IndicatorPattern::ShowNext()
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         }
     }
-
+    auto dotIndicatorModifier = GetDotIndicatorModifier();
+    if (dotIndicatorModifier && !dotIndicatorModifier->GetIsBottomAnimationFinished()) {
+        dotIndicatorModifier->FinishAnimationToTargetImmediately(dotIndicatorModifier->GetTargetCenter());
+    }
     lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() + 1);
 }
