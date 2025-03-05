@@ -1989,17 +1989,9 @@ int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackwar
             return targetIndex;
         }
         if (isForceBackward || currentIndex_ < targetIndex) {
-            if (IsHorizontalAndRightToLeft()) {
-                --targetIndex;
-            } else {
-                ++targetIndex;
-            }
+            ++targetIndex;
         } else {
-            if (IsHorizontalAndRightToLeft()) {
-                ++targetIndex;
-            } else {
-                --targetIndex;
-            }
+            --targetIndex;
         }
         if (!IsLoop() && (targetIndex < 0 || targetIndex >= TotalCount())) {
             return currentIndex_;
@@ -4491,7 +4483,8 @@ bool SwiperPattern::IsAtEnd() const
 
 bool SwiperPattern::AutoLinearIsOutOfBoundary(float mainOffset) const
 {
-    if (itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
+    // Check the scenario where all child nodes are within the window but isloop is true。
+    if (!IsLoop() || itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
         return false;
     }
 
