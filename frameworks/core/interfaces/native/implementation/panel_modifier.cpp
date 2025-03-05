@@ -195,8 +195,8 @@ void OnHeightChangeImpl(Ark_NativePointer node,
     };
     SlidingPanelModelNG::SetOnHeightChange(frameNode, std::move(onEvent));
 }
-void __onChangeEvent_modeImpl(Ark_NativePointer node,
-                              const Callback_PanelMode_Void* callback)
+void _onChangeEvent_modeImpl(Ark_NativePointer node,
+                             const Callback_PanelMode_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -229,7 +229,7 @@ const GENERATED_ArkUIPanelModifier* GetPanelModifier()
         PanelAttributeModifier::ShowCloseIconImpl,
         PanelAttributeModifier::OnChangeImpl,
         PanelAttributeModifier::OnHeightChangeImpl,
-        PanelAttributeModifier::__onChangeEvent_modeImpl,
+        PanelAttributeModifier::_onChangeEvent_modeImpl,
     };
     return &ArkUIPanelModifierImpl;
 }

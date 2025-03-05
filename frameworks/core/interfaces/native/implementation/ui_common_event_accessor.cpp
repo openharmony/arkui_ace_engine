@@ -23,11 +23,11 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 namespace UICommonEventAccessor {
-void DestroyPeerImpl(UICommonEventPeer* peer)
+void DestroyPeerImpl(Ark_UICommonEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_UICommonEvent CtorImpl()
 {
     return new UICommonEventPeer();
 }
@@ -35,7 +35,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetOnClickImpl(UICommonEventPeer* peer,
+void SetOnClickImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_ClickEvent_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -52,7 +52,7 @@ void SetOnClickImpl(UICommonEventPeer* peer,
         ViewAbstract::SetOnClick(rawPtr, std::move(onClick));
     }
 }
-void SetOnTouchImpl(UICommonEventPeer* peer,
+void SetOnTouchImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_TouchEvent_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -69,7 +69,7 @@ void SetOnTouchImpl(UICommonEventPeer* peer,
         ViewAbstract::SetOnTouch(rawPtr, std::move(onTouch));
     }
 }
-void SetOnAppearImpl(UICommonEventPeer* peer,
+void SetOnAppearImpl(Ark_UICommonEvent peer,
                      const Opt_Callback_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -85,7 +85,7 @@ void SetOnAppearImpl(UICommonEventPeer* peer,
         ViewAbstract::SetOnAppear(rawPtr, std::move(onAppear));
     }
 }
-void SetOnDisappearImpl(UICommonEventPeer* peer,
+void SetOnDisappearImpl(Ark_UICommonEvent peer,
                         const Opt_Callback_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -101,11 +101,11 @@ void SetOnDisappearImpl(UICommonEventPeer* peer,
         ViewAbstract::SetOnDisappear(rawPtr, std::move(onDisAppear));
     }
 }
-void SetOnKeyEventImpl(UICommonEventPeer* peer,
+void SetOnKeyEventImpl(Ark_UICommonEvent peer,
                        const Opt_Callback_KeyEvent_Void* callback_)
 {
 }
-void SetOnFocusImpl(UICommonEventPeer* peer,
+void SetOnFocusImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -121,7 +121,7 @@ void SetOnFocusImpl(UICommonEventPeer* peer,
         ViewAbstract::SetOnFocus(rawPtr, std::move(onFocus));
     }
 }
-void SetOnBlurImpl(UICommonEventPeer* peer,
+void SetOnBlurImpl(Ark_UICommonEvent peer,
                    const Opt_Callback_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -137,7 +137,7 @@ void SetOnBlurImpl(UICommonEventPeer* peer,
         ViewAbstract::SetOnBlur(rawPtr, std::move(onBlur));
     }
 }
-void SetOnHoverImpl(UICommonEventPeer* peer,
+void SetOnHoverImpl(Ark_UICommonEvent peer,
                     const Opt_HoverCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -155,7 +155,7 @@ void SetOnHoverImpl(UICommonEventPeer* peer,
         ViewAbstract::SetOnHover(rawPtr, std::move(onHover));
     }
 }
-void SetOnMouseImpl(UICommonEventPeer* peer,
+void SetOnMouseImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_MouseEvent_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -172,11 +172,11 @@ void SetOnMouseImpl(UICommonEventPeer* peer,
         ViewAbstract::SetOnMouse(rawPtr, std::move(onMouse));
     }
 }
-void SetOnSizeChangeImpl(UICommonEventPeer* peer,
+void SetOnSizeChangeImpl(Ark_UICommonEvent peer,
                          const Opt_SizeChangeCallback* callback_)
 {
 }
-void SetOnVisibleAreaApproximateChangeImpl(UICommonEventPeer* peer,
+void SetOnVisibleAreaApproximateChangeImpl(Ark_UICommonEvent peer,
                                            const Ark_VisibleAreaEventOptions* options,
                                            const Opt_VisibleAreaChangeCallback* event)
 {

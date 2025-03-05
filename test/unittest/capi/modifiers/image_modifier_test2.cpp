@@ -135,7 +135,7 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
     Ace::RefPtr<Ace::PixelMap> expectedPixelMapRefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
-    Ark_PixelMap expectedPixelMap{.ptr = reinterpret_cast<Ark_NativePointer>(&pixelMapPeer)};
+    Ark_PixelMap expectedPixelMap = &pixelMapPeer;
     auto inputArkPixelMap = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_PixelMap>(expectedPixelMap);
     modifier_->setAlt(frameNode, &inputArkPixelMap);
 

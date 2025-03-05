@@ -1999,7 +1999,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, 
  */
 HWTEST_F(DatePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->set__onChangeEvent_selected, nullptr);
+    ASSERT_NE(modifier_->set_onChangeEvent_selected, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -2019,7 +2019,7 @@ HWTEST_F(DatePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
         .call = onDateChange
     };
 
-    modifier_->set__onChangeEvent_selected(node_, &func);
+    modifier_->set_onChangeEvent_selected(node_, &func);
 
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
         DatePickerChangeEvent event(testValue.first.ToString(true));

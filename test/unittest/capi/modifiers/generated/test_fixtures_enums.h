@@ -27,6 +27,10 @@ extern std::vector<std::tuple<std::string, Ark_AccessibilityRoleType, std::strin
     testFixtureEnumAccessibilityRoleTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_AccessibilityRoleType>>
     testFixtureEnumAccessibilityRoleTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_AccessibilitySamePageMode, std::string>>
+    testFixtureEnumAccessibilitySamePageModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_AccessibilitySamePageMode>>
+    testFixtureEnumAccessibilitySamePageModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_AdaptiveColor, std::string>> testFixtureEnumAdaptiveColorValidValues;
 extern std::vector<std::tuple<std::string, Ark_AdaptiveColor>> testFixtureEnumAdaptiveColorInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_Alignment, std::string>> testFixtureEnumAlignmentValidValues;
@@ -108,6 +112,8 @@ extern std::vector<std::tuple<std::string, Ark_FinishCallbackType, std::string>>
 extern std::vector<std::tuple<std::string, Ark_FinishCallbackType>> testFixtureEnumFinishCallbackTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixtureEnumFlexDirectionValidValues;
 extern std::vector<std::tuple<std::string, Ark_FlexDirection>> testFixtureEnumFlexDirectionInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_FocusDrawLevel, std::string>> testFixtureEnumFocusDrawLevelValidValues;
+extern std::vector<std::tuple<std::string, Ark_FocusDrawLevel>> testFixtureEnumFocusDrawLevelInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FocusPriority, std::string>> testFixtureEnumFocusPriorityValidValues;
 extern std::vector<std::tuple<std::string, Ark_FocusPriority>> testFixtureEnumFocusPriorityInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FontStyle, std::string>> testFixtureEnumFontStyleValidValues;
@@ -149,6 +155,12 @@ extern std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixt
 extern std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixtureEnumItemAlignValidValues;
 extern std::vector<std::tuple<std::string, Ark_ItemAlign>> testFixtureEnumItemAlignInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_KeyboardAppearance, std::string>>
+    testFixtureEnumKeyboardAppearanceValidValues;
+extern std::vector<std::tuple<std::string, Ark_KeyboardAppearance>> testFixtureEnumKeyboardAppearanceInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_KeyboardAvoidMode, std::string>>
+    testFixtureEnumKeyboardAvoidModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_KeyboardAvoidMode>> testFixtureEnumKeyboardAvoidModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_MarqueeStartPolicy, std::string>>
     testFixtureEnumMarqueeStartPolicyValidValues;
 extern std::vector<std::tuple<std::string, Ark_MarqueeStartPolicy>> testFixtureEnumMarqueeStartPolicyInvalidValues;

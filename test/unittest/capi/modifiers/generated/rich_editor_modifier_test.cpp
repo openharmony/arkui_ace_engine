@@ -71,6 +71,10 @@ const auto ATTRIBUTE_MAX_LENGTH_NAME = "maxLength";
 const auto ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_MAX_LINES_NAME = "maxLines";
 const auto ATTRIBUTE_MAX_LINES_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_KEYBOARD_APPEARANCE_NAME = "keyboardAppearance";
+const auto ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_STOP_BACK_PRESS_NAME = "stopBackPress";
+const auto ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_PLACEHOLDER_I_VALUE_NAME = "value";
 const auto ATTRIBUTE_PLACEHOLDER_I_VALUE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_NAME = "size";
@@ -908,6 +912,153 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, 
 
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
+}
+
+/*
+ * @tc.name: setKeyboardAppearanceTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setKeyboardAppearanceTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE) <<
+        "Default value for attribute 'keyboardAppearance'";
+}
+
+/*
+ * @tc.name: setKeyboardAppearanceTestKeyboardAppearanceValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppearanceValidValues, TestSize.Level1)
+{
+    Opt_KeyboardAppearance initValueKeyboardAppearance;
+
+    // Initial setup
+    initValueKeyboardAppearance =
+        ArkValue<Opt_KeyboardAppearance>(std::get<1>(Fixtures::testFixtureEnumKeyboardAppearanceValidValues[0]));
+
+    auto checkValue = [this, &initValueKeyboardAppearance](const std::string& input, const std::string& expectedStr,
+                          const Opt_KeyboardAppearance& value) {
+        Opt_KeyboardAppearance inputValueKeyboardAppearance = initValueKeyboardAppearance;
+
+        inputValueKeyboardAppearance = value;
+        modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumKeyboardAppearanceValidValues) {
+        checkValue(input, expected, ArkValue<Opt_KeyboardAppearance>(value));
+    }
+}
+
+/*
+ * @tc.name: setKeyboardAppearanceTestKeyboardAppearanceInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppearanceInvalidValues, TestSize.Level1)
+{
+    Opt_KeyboardAppearance initValueKeyboardAppearance;
+
+    // Initial setup
+    initValueKeyboardAppearance =
+        ArkValue<Opt_KeyboardAppearance>(std::get<1>(Fixtures::testFixtureEnumKeyboardAppearanceValidValues[0]));
+
+    auto checkValue = [this, &initValueKeyboardAppearance](
+                          const std::string& input, const Opt_KeyboardAppearance& value) {
+        Opt_KeyboardAppearance inputValueKeyboardAppearance = initValueKeyboardAppearance;
+
+        modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
+        inputValueKeyboardAppearance = value;
+        modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumKeyboardAppearanceInvalidValues) {
+        checkValue(input, ArkValue<Opt_KeyboardAppearance>(value));
+    }
+}
+
+/*
+ * @tc.name: setStopBackPressTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE) << "Default value for attribute 'stopBackPress'";
+}
+
+/*
+ * @tc.name: setStopBackPressTestStopBackPressValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTestStopBackPressValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueStopBackPress;
+
+    // Initial setup
+    initValueStopBackPress = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueStopBackPress](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueStopBackPress = initValueStopBackPress;
+
+        inputValueStopBackPress = value;
+        modifier_->setStopBackPress(node_, &inputValueStopBackPress);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setStopBackPressTestStopBackPressInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTestStopBackPressInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueStopBackPress;
+
+    // Initial setup
+    initValueStopBackPress = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueStopBackPress](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueStopBackPress = initValueStopBackPress;
+
+        modifier_->setStopBackPress(node_, &inputValueStopBackPress);
+        inputValueStopBackPress = value;
+        modifier_->setStopBackPress(node_, &inputValueStopBackPress);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*

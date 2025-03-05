@@ -103,7 +103,7 @@ void SetTextInputOptionsImpl(Ark_NativePointer node,
         text = Converter::OptConvert<std::u16string>(textInputOptions.value().text);
         auto controller = Converter::OptConvert<Ark_TextInputController>(textInputOptions.value().controller);
         if (controller.has_value()) {
-            peerPtr = reinterpret_cast<TextInputControllerPeer*>(controller.value().ptr);
+            peerPtr = controller.value();
         }
     }
     auto controller = TextFieldModelNG::GetController(frameNode, placeholder, text);
@@ -223,8 +223,9 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onChange = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& info) {
         Converter::ConvContext ctx;
+        auto options = Converter::ArkValue<Opt_TextChangeOptions>();
         arkCallback.Invoke(Converter::ArkValue<Ark_String>(info.value, &ctx),
-            Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx));
+            Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx), options);
     };
     TextFieldModelNG::SetOnChange(frameNode, onChange);
 }
@@ -756,12 +757,12 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, onDidDelete);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextInputModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGE("TextInputInterfaceModifier::EditMenuOptionsImpl not implemented");
 }
@@ -802,6 +803,23 @@ void StopBackPressImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetStopBackPress(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
+}
+void OnWillChangeImpl(Ark_NativePointer node,
+                      const Callback_EditableTextChangeValue_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetOnWillChange(frameNode, convValue);
+}
+void KeyboardAppearanceImpl(Ark_NativePointer node,
+                            const Opt_KeyboardAppearance* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetKeyboardAppearance(frameNode, convValue);
 }
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,
@@ -856,8 +874,8 @@ void ShowCounterImpl(Ark_NativePointer node,
     TextFieldModelNG::SetCounterType(frameNode, counterOptions->thresholdPercentage);
     TextFieldModelNG::SetShowCounterBorder(frameNode, counterOptions->highlightBorder);
 }
-void __onChangeEvent_textImpl(Ark_NativePointer node,
-                              const Callback_ResourceStr_Void* callback)
+void _onChangeEvent_textImpl(Ark_NativePointer node,
+                             const Callback_ResourceStr_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -942,10 +960,12 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::HalfLeadingImpl,
         TextInputAttributeModifier::EllipsisModeImpl,
         TextInputAttributeModifier::StopBackPressImpl,
+        TextInputAttributeModifier::OnWillChangeImpl,
+        TextInputAttributeModifier::KeyboardAppearanceImpl,
         TextInputAttributeModifier::InputFilterImpl,
         TextInputAttributeModifier::CustomKeyboardImpl,
         TextInputAttributeModifier::ShowCounterImpl,
-        TextInputAttributeModifier::__onChangeEvent_textImpl,
+        TextInputAttributeModifier::_onChangeEvent_textImpl,
     };
     return &ArkUITextInputModifierImpl;
 }

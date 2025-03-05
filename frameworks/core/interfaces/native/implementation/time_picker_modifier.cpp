@@ -191,6 +191,15 @@ void OnChange1Impl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //TimePickerModelNG::SetOnChange1(frameNode, convValue);
 }
+void OnEnterSelectedAreaImpl(Ark_NativePointer node,
+                             const Callback_TimePickerResult_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TimePickerModelNG::SetOnEnterSelectedArea(frameNode, convValue);
+}
 void EnableHapticFeedback0Impl(Ark_NativePointer node,
                                Ark_Boolean value)
 {
@@ -222,8 +231,8 @@ void EnableCascadeImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //TimePickerModelNG::SetEnableCascade(frameNode, convValue);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Date_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Date_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -260,11 +269,12 @@ const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
         TimePickerAttributeModifier::DateTimeOptions1Impl,
         TimePickerAttributeModifier::OnChange0Impl,
         TimePickerAttributeModifier::OnChange1Impl,
+        TimePickerAttributeModifier::OnEnterSelectedAreaImpl,
         TimePickerAttributeModifier::EnableHapticFeedback0Impl,
         TimePickerAttributeModifier::EnableHapticFeedback1Impl,
         TimePickerAttributeModifier::DigitalCrownSensitivityImpl,
         TimePickerAttributeModifier::EnableCascadeImpl,
-        TimePickerAttributeModifier::__onChangeEvent_selectedImpl,
+        TimePickerAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUITimePickerModifierImpl;
 }

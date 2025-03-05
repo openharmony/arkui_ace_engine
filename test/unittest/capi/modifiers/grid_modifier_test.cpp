@@ -234,9 +234,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
     auto pattern = frameNode->GetPattern<GridPattern>();
     EXPECT_NE(pattern, nullptr);
 
-    Ark_Scroller arkScroller;
-    arkScroller.ptr = peerImplPtr;
-    Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(arkScroller);
+    Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(peerImplPtr);
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
 
@@ -270,8 +268,6 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Lev
     auto pattern = frameNode->GetPattern<GridPattern>();
     EXPECT_NE(pattern, nullptr);
 
-    Ark_Scroller arkScroller;
-    arkScroller.ptr = peerImplPtr;
     Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);

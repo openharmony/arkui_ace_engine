@@ -41,6 +41,7 @@ public:
         peer_->SetEventInfo(baseEvent_.get());
     }
     std::unique_ptr<BaseEventInfo> baseEvent_;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 const std::vector<std::pair<Ark_Number, int>> testFixtureInt32Values = {
@@ -73,7 +74,7 @@ HWTEST_F(BaseEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
         Converter::ArkArrayHolder<Array_String> stringHolder(param);
         Array_String stringArrayValues = stringHolder.ArkValue();
         baseEvent_->SetPressedKeyCodes(value);
-        auto result = accessor_->getModifierKeyState(peer_, &stringArrayValues);
+        auto result = accessor_->getModifierKeyState(vmContext_, peer_, &stringArrayValues);
         EXPECT_EQ(Converter::Convert<bool>(result), expected);
     }
 }

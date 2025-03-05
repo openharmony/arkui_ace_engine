@@ -132,8 +132,7 @@ template<>
 TextOptions Convert(const Ark_TextOptions& src)
 {
     TextOptions options;
-    auto nativePtr = Converter::Convert<Ark_NativePointer>(src.controller);
-    options.peer = reinterpret_cast<TextControllerPeer*>(nativePtr);
+    options.peer = src.controller;
     return options;
 }
 
@@ -163,6 +162,7 @@ TextSpanType Convert(const Ark_TextSpanType& src)
         case ARK_TEXT_SPAN_TYPE_TEXT: textSpanType = TextSpanType::TEXT; break;
         case ARK_TEXT_SPAN_TYPE_IMAGE: textSpanType = TextSpanType::IMAGE; break;
         case ARK_TEXT_SPAN_TYPE_MIXED: textSpanType = TextSpanType::MIXED; break;
+        case ARK_TEXT_SPAN_TYPE_DEFAULT: textSpanType = TextSpanType::NONE; break;
         default: LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src); break;
     }
     return textSpanType;
@@ -176,6 +176,7 @@ TextResponseType Convert(const Ark_TextResponseType& src)
         case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: responseType = TextResponseType::RIGHT_CLICK; break;
         case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: responseType = TextResponseType::LONG_PRESS; break;
         case ARK_TEXT_RESPONSE_TYPE_SELECT: responseType = TextResponseType::SELECTED_BY_MOUSE; break;
+        case ARK_TEXT_RESPONSE_TYPE_DEFAULT: responseType = TextResponseType::NONE; break;
         default: LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src); break;
     }
     return responseType;
@@ -369,12 +370,12 @@ void FontWeight1Impl(Ark_NativePointer node,
     TextModelNG::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
 }
 void LineSpacingImpl(Ark_NativePointer node,
-                     const Ark_LengthMetrics* value)
+                     Ark_LengthMetrics value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto lineSpacing = Converter::OptConvert<Dimension>(*value);
+    auto lineSpacing = Converter::OptConvert<Dimension>(value);
     Validator::ValidateNonNegative(lineSpacing);
     TextModelNG::SetLineSpacing(frameNode, lineSpacing);
 }
@@ -639,12 +640,12 @@ void TextSelectableImpl(Ark_NativePointer node,
     TextModelNG::SetTextSelectableMode(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TextModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGW("TextAttributeModifier::EditMenuOptionsImpl not implemented");
 }

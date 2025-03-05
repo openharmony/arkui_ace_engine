@@ -55,6 +55,14 @@ void HideTitleBar1Impl(Ark_NativePointer node,
     NavDestinationModelNG::SetHideTitleBar(
         frameNode, Converter::Convert<bool>(hide), Converter::Convert<bool>(animated));
 }
+void HideBackButtonImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavDestinationModelNG::SetHideBackButton(frameNode, convValue);
+}
 void OnShownImpl(Ark_NativePointer node,
                  const Callback_Void* value)
 {
@@ -88,6 +96,14 @@ void OnBackPressedImpl(Ark_NativePointer node,
     };
     NavDestinationModelNG::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
     LOGE("ARKOALA NavDestination.OnBackPressedImpl -> Method is not fully implemented.");
+}
+void OnResultImpl(Ark_NativePointer node,
+                  const Opt_Callback_Object_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavDestinationModelNG::SetOnResult(frameNode, convValue);
 }
 void ModeImpl(Ark_NativePointer node,
               Ark_NavDestinationMode value)
@@ -217,6 +233,39 @@ void BindToNestedScrollableImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //NavDestinationModelNG::SetBindToNestedScrollable(frameNode, convValue);
 }
+void OnActiveImpl(Ark_NativePointer node,
+                  const Opt_Callback_NavDestinationActiveReason_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavDestinationModelNG::SetOnActive(frameNode, convValue);
+}
+void OnInactiveImpl(Ark_NativePointer node,
+                    const Opt_Callback_NavDestinationActiveReason_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavDestinationModelNG::SetOnInactive(frameNode, convValue);
+}
+void CustomTransitionImpl(Ark_NativePointer node,
+                          const ::NavDestinationTransitionDelegate* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavDestinationModelNG::SetCustomTransition(frameNode, convValue);
+}
+void OnNewParamImpl(Ark_NativePointer node,
+                    const Opt_Callback_Object_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavDestinationModelNG::SetOnNewParam(frameNode, convValue);
+}
 void TitleImpl(Ark_NativePointer node,
                const Ark_Type_NavDestinationAttribute_title_value* value,
                const Opt_NavigationTitleOptions* options)
@@ -291,9 +340,11 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationInterfaceModifier::SetNavDestinationOptionsImpl,
         NavDestinationAttributeModifier::HideTitleBar0Impl,
         NavDestinationAttributeModifier::HideTitleBar1Impl,
+        NavDestinationAttributeModifier::HideBackButtonImpl,
         NavDestinationAttributeModifier::OnShownImpl,
         NavDestinationAttributeModifier::OnHiddenImpl,
         NavDestinationAttributeModifier::OnBackPressedImpl,
+        NavDestinationAttributeModifier::OnResultImpl,
         NavDestinationAttributeModifier::ModeImpl,
         NavDestinationAttributeModifier::BackButtonIconImpl,
         NavDestinationAttributeModifier::MenusImpl,
@@ -307,6 +358,10 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::SystemTransitionImpl,
         NavDestinationAttributeModifier::BindToScrollableImpl,
         NavDestinationAttributeModifier::BindToNestedScrollableImpl,
+        NavDestinationAttributeModifier::OnActiveImpl,
+        NavDestinationAttributeModifier::OnInactiveImpl,
+        NavDestinationAttributeModifier::CustomTransitionImpl,
+        NavDestinationAttributeModifier::OnNewParamImpl,
         NavDestinationAttributeModifier::TitleImpl,
         NavDestinationAttributeModifier::ToolbarConfigurationImpl,
         NavDestinationAttributeModifier::HideToolBarImpl,

@@ -80,7 +80,7 @@ void SetPasteButtonOptions1Impl(Ark_NativePointer node,
 } // PasteButtonInterfaceModifier
 namespace PasteButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 const Callback_ClickEvent_PasteButtonOnClickResult_Void* value)
+                 const PasteButtonCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -99,7 +99,8 @@ void OnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         auto arkResult = Converter::ArkValue<Ark_PasteButtonOnClickResult>(res);
-        arkCallback.InvokeSync(event.ArkValue(), arkResult);
+        auto error = Converter::ArkValue<Opt_BusinessError>();
+        arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
 }

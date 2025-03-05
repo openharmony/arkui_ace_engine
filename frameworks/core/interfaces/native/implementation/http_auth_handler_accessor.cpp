@@ -21,11 +21,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HttpAuthHandlerAccessor {
-void DestroyPeerImpl(HttpAuthHandlerPeer* peer)
+void DestroyPeerImpl(Ark_HttpAuthHandler peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_HttpAuthHandler CtorImpl()
 {
     return new HttpAuthHandlerPeer();
 }
@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer,
+Ark_Boolean ConfirmImpl(Ark_HttpAuthHandler peer,
                         const Ark_String* userName,
                         const Ark_String* password)
 {
@@ -44,12 +44,12 @@ Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer,
     std::string pass = Converter::Convert<std::string>(*password);
     return Converter::ArkValue<Ark_Boolean>(peer->handler->Confirm(name, pass));
 }
-void CancelImpl(HttpAuthHandlerPeer* peer)
+void CancelImpl(Ark_HttpAuthHandler peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Cancel();
 }
-Ark_Boolean IsHttpAuthInfoSavedImpl(HttpAuthHandlerPeer* peer)
+Ark_Boolean IsHttpAuthInfoSavedImpl(Ark_HttpAuthHandler peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_Boolean>(false));
     return Converter::ArkValue<Ark_Boolean>(peer->handler->IsHttpAuthInfoSaved());

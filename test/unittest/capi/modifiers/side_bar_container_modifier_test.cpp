@@ -847,7 +847,7 @@ HWTEST_F(SideBarContainerModifierTest, setOnChangeEventSelectImpl, TestSize.Leve
 
     Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_showSideBar(node_, &arkCallback);
+    modifier_->set_onChangeEvent_showSideBar(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(true);

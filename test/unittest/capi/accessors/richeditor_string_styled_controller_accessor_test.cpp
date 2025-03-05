@@ -12,16 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <gmock/gmock.h>
+
 #include "richeditor_accessor_test.h"
+
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
-#include "accessor_test_base.h"
-#include "node_api.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "gmock/gmock.h"
+
+#include "accessor_test_base.h"
 
 static constexpr auto TEST_TEXT = u"test text";
 static constexpr int TEST_RESOURCE_ID = 1000;
@@ -88,9 +91,8 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, setAndGetStyledStringTest
     const auto stringPeer = reinterpret_cast<MutableStyledStringPeer*>(stringAccessor->ctor());
     const auto refString = AceType::MakeRefPtr<MutableSpanString>(TEST_TEXT);
     stringPeer->spanString = refString;
-    Ark_StyledString arkStyledString {.ptr = stringPeer};
 
-    accessor_->setStyledString(peer_, &arkStyledString);
+    accessor_->setStyledString(peer_, stringPeer);
 
     const auto stringPeer2 = reinterpret_cast<MutableStyledStringPeer*>(accessor_->getStyledString(peer_));
 

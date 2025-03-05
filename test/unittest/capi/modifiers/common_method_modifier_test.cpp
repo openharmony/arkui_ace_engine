@@ -132,11 +132,11 @@ static const std::vector<ScaleTranslateTestStep> SCALE_TRANSLATE_TEST_PLAN = {
 
 using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
 static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = {
-    { {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(1)}, "1.00px" },
-    { {.unit = ARK_LENGTH_UNIT_PX, .value = Converter::ArkValue<Ark_Number>(0)}, "0.00px" },
-    { {.unit = ARK_LENGTH_UNIT_VP, .value = Converter::ArkValue<Ark_Number>(2.45f)}, "2.45vp" },
-    { {.unit = ARK_LENGTH_UNIT_VP, .value = Converter::ArkValue<Ark_Number>(-7.f)}, "-7.00vp" },
-    { {.unit = ARK_LENGTH_UNIT_FP, .value = Converter::ArkValue<Ark_Number>(-65.5f)}, "-65.50fp" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 1.f), "1.00px" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 0.f), "0.00px" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
+    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
 };
 } // namespace
 
@@ -193,7 +193,7 @@ HWTEST_F(CommonMethodModifierTest, setWidthTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setWidth0TestValidValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -210,7 +210,7 @@ HWTEST_F(CommonMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
 
     for (const auto &[arkLength, expected]: testPlan) {
         Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        modifier_->setWidth(node_, &inputValue);
+        modifier_->setWidth0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
         EXPECT_EQ(strResult, expected);
     }
@@ -221,7 +221,7 @@ HWTEST_F(CommonMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setWidthTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setWidth0TestInvalidValues, TestSize.Level1)
 {
     static const std::vector<Ark_Length> testPlan = {
         Converter::ArkValue<Ark_Length>(-2.45f),
@@ -235,12 +235,12 @@ HWTEST_F(CommonMethodModifierTest, setWidthTestInvalidValues, TestSize.Level1)
 
     for (const auto arkLength : testPlan) {
         Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        modifier_->setWidth(node_, &inputValue);
+        modifier_->setWidth0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
         EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
     }
 
-    modifier_->setWidth(node_, nullptr);
+    modifier_->setWidth0(node_, nullptr);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
 }
@@ -261,7 +261,7 @@ HWTEST_F(CommonMethodModifierTest, setHeightTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setHeight0TestValidValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -278,7 +278,7 @@ HWTEST_F(CommonMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
 
     for (const auto &[arkLength, expected]: testPlan) {
         Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        modifier_->setHeight(node_, &inputValue);
+        modifier_->setHeight0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
         EXPECT_EQ(strResult, expected);
     }
@@ -289,7 +289,7 @@ HWTEST_F(CommonMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setHeightTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setHeight0TestInvalidValues, TestSize.Level1)
 {
     static const std::vector<Ark_Length> testPlan = {
         Converter::ArkValue<Ark_Length>(-2.45f),
@@ -303,12 +303,12 @@ HWTEST_F(CommonMethodModifierTest, setHeightTestInvalidValues, TestSize.Level1)
 
     for (const auto &arkLength : testPlan) {
         Ark_Length inputValue = Converter::ArkValue<Ark_Length>(arkLength);
-        modifier_->setHeight(node_, &inputValue);
+        modifier_->setHeight0(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
         EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
     }
 
-    modifier_->setHeight(node_, nullptr);
+    modifier_->setHeight0(node_, nullptr);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
 }
@@ -1629,14 +1629,14 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundImageValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImage0TestValidValues, TestSize.Level1)
 {
     Ark_String str = Converter::ArkValue<Ark_String>("path");
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
     auto src = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
     Opt_ImageRepeat repeat = Converter::ArkValue<Opt_ImageRepeat>(Ark_Empty());
 
-    modifier_->setBackgroundImage(node_, &src, &repeat);
+    modifier_->setBackgroundImage0(node_, &src, &repeat);
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
 
@@ -1644,7 +1644,7 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageValidValues, TestSize.Level
     resStr = CreateResourceUnion<Ark_ResourceStr>(resName);
     src = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
 
-    modifier_->setBackgroundImage(node_, &src, nullptr);
+    modifier_->setBackgroundImage0(node_, &src, nullptr);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path_to_background_image, ImageRepeat.NoRepeat");
 }
@@ -1654,28 +1654,28 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageValidValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundImageRepeatValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImage0TestRepeatValidValues, TestSize.Level1)
 {
     Ark_String str = Converter::ArkValue<Ark_String>("path");
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
     auto src = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
     Opt_ImageRepeat repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_X);
-    modifier_->setBackgroundImage(node_, &src, &repeat);
+    modifier_->setBackgroundImage0(node_, &src, &repeat);
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.X");
 
     repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_Y);
-    modifier_->setBackgroundImage(node_, &src, &repeat);
+    modifier_->setBackgroundImage0(node_, &src, &repeat);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.Y");
 
     repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_XY);
-    modifier_->setBackgroundImage(node_, &src, &repeat);
+    modifier_->setBackgroundImage0(node_, &src, &repeat);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.XY");
 
     repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_NO_REPEAT);
-    modifier_->setBackgroundImage(node_, &src, &repeat);
+    modifier_->setBackgroundImage0(node_, &src, &repeat);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
 }
@@ -1685,7 +1685,7 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageRepeatValidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImagePixelmapValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage0TestPixelmapValues, TestSize.Level1)
 {
     // pixelmap attribute is not supported yet
 }
@@ -1943,22 +1943,15 @@ HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_CLIP_DEFAULT_VALUE);
 
-    modifier_->setClip0(node_, true);
+    auto inputVal = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setClip0(node_, &inputVal);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, "true");
 
-    modifier_->setClip0(node_, false);
+    inputVal = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setClip0(node_, &inputVal);
     strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
     EXPECT_EQ(strResult, "false");
-
-    Ark_Type_CommonMethod_clip_value arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(true));
-    modifier_->setClip2(node_, &arg);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
-    EXPECT_EQ(strResult, "true");
-
-    arg = ArkUnion<Ark_Type_CommonMethod_clip_value, Ark_Boolean>(ArkValue<Ark_Boolean>(false));
-    modifier_->setClip2(node_, &arg);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
 }
 
 /*

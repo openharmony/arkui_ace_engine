@@ -387,8 +387,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onHoverFunc = [](const Ark_Int32 resourceId, const Ark_Boolean isHover, const Ark_HoverEvent event) {
-        ASSERT_NE(event.ptr, nullptr);
-        auto peer = reinterpret_cast<HoverEventPeer*>(event.ptr);
+        ASSERT_NE(event, nullptr);
+        auto peer = event;
         auto hoverEventInfo = peer->GetEventInfo();
         ASSERT_NE(hoverEventInfo, nullptr);
         EXPECT_EQ(hoverEventInfo->GetType(), expectedType);
@@ -449,11 +449,10 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
     auto onAccessibilityHoverFunc = [](const Ark_Int32 resourceId,
                           const Ark_Boolean isHover,
                           const Ark_AccessibilityHoverEvent event) {
-        auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(event.ptr);
-        auto info = peer ? peer->GetEventInfo() : nullptr;
+        auto info = event ? event->GetEventInfo() : nullptr;
         ASSERT_NE(info, nullptr);
         checkEvent = { .nodeId = resourceId, .isHover = isHover, .type = info->GetActionType() };
-        GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(peer);
+        GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(event);
     };
     auto callBackValue = Converter::ArkValue<AccessibilityCallback>(onAccessibilityHoverFunc, frameNode->GetId());
 
@@ -556,11 +555,10 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
     auto onTouchInterceptFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
                                 const Ark_TouchEvent parameter,
                                 const Callback_HitTestMode_Void continuation) {
-        ASSERT_NE(parameter.ptr, nullptr);
-        auto peer = reinterpret_cast<TouchEventPeer*>(parameter.ptr);
-        auto touchEventInfo = peer->GetEventInfo();
+        ASSERT_NE(parameter, nullptr);
+        auto touchEventInfo = parameter->GetEventInfo();
         EXPECT_EQ(touchEventInfo->GetType(), expectedType);
-        GeneratedModifier::GetTouchEventAccessor()->destroyPeer(peer);
+        GeneratedModifier::GetTouchEventAccessor()->destroyPeer(parameter);
         checkEvent = { .resId = resourceId };
         Ark_HitTestMode retVal = Ark_HitTestMode::ARK_HIT_TEST_MODE_BLOCK;
         CallbackHelper(continuation).Invoke(retVal);
@@ -601,8 +599,8 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onTouchFunc = [](const Ark_Int32 resourceId, const Ark_TouchEvent parameter) {
-        ASSERT_NE(parameter.ptr, nullptr);
-        auto peer = reinterpret_cast<TouchEventPeer*>(parameter.ptr);
+        ASSERT_NE(parameter, nullptr);
+        auto peer = parameter;
         auto touchEventInfo = peer->GetEventInfo();
         ASSERT_NE(touchEventInfo, nullptr);
         EXPECT_EQ(touchEventInfo->GetType(), expectedType);

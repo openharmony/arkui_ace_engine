@@ -550,7 +550,7 @@ HWTEST_F(RatingModifierTest, setOnChangeEventRatingImpl, TestSize.Level1)
 
     Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_rating(node_, &arkCallback);
+    modifier_->set_onChangeEvent_rating(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent("55.5");

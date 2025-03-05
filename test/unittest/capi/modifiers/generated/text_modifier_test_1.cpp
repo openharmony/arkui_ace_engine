@@ -1508,61 +1508,13 @@ HWTEST_F(TextModifierTest, setLineSpacingTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLineSpacingTestLineSpacingValidValues
+ * @tc.name: setLineSpacingTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setLineSpacingTestLineSpacingValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setLineSpacingTestValidValues, TestSize.Level1)
 {
-    Ark_LengthMetrics initValueLineSpacing;
-
-    // Initial setup
-    initValueLineSpacing = std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]);
-
-    auto checkValue = [this, &initValueLineSpacing](
-                          const std::string& input, const std::string& expectedStr, const Ark_LengthMetrics& value) {
-        Ark_LengthMetrics inputValueLineSpacing = initValueLineSpacing;
-
-        inputValueLineSpacing = value;
-        modifier_->setLineSpacing(node_, &inputValueLineSpacing);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_SPACING_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setLineSpacing, attribute: lineSpacing";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthMetricsNonNegValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setLineSpacingTestLineSpacingInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, setLineSpacingTestLineSpacingInvalidValues, TestSize.Level1)
-{
-    Ark_LengthMetrics initValueLineSpacing;
-
-    // Initial setup
-    initValueLineSpacing = std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]);
-
-    auto checkValue = [this, &initValueLineSpacing](const std::string& input, const Ark_LengthMetrics& value) {
-        Ark_LengthMetrics inputValueLineSpacing = initValueLineSpacing;
-
-        modifier_->setLineSpacing(node_, &inputValueLineSpacing);
-        inputValueLineSpacing = value;
-        modifier_->setLineSpacing(node_, &inputValueLineSpacing);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_SPACING_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LINE_SPACING_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setLineSpacing, attribute: lineSpacing";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureLengthMetricsNonNegInvalidValues) {
-        checkValue(input, value);
-    }
+    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
 
 /*
@@ -2198,6 +2150,53 @@ HWTEST_F(TextModifierTest, setDecorationTestDecorationStyleInvalidValues, TestSi
 
     for (auto& [input, value] : Fixtures::testFixtureEnumTextDecorationStyleInvalidValues) {
         checkValue(input, ArkValue<Opt_TextDecorationStyle>(value));
+    }
+}
+
+/*
+ * @tc.name: setLetterSpacingTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setLetterSpacingTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE) << "Default value for attribute 'letterSpacing'";
+}
+
+/*
+ * @tc.name: setLetterSpacingTestLetterSpacingValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setLetterSpacingTestLetterSpacingValidValues, TestSize.Level1)
+{
+    Ark_Union_Number_String initValueLetterSpacing;
+
+    // Initial setup
+    initValueLetterSpacing =
+        ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+
+    auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_String& value) {
+        Ark_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
+
+        inputValueLetterSpacing = value;
+        modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonPercValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
     }
 }
 

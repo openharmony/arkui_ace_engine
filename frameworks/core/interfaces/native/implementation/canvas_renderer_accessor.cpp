@@ -23,6 +23,7 @@
 #include "canvas_gradient_peer.h"
 #include "matrix2d_peer.h"
 #include "image_bitmap_peer_impl.h"
+#include "image_data_peer.h"
 #include "base/utils/utils.h"
 #include "pixel_map_peer.h"
 
@@ -138,28 +139,6 @@ TextDirection Convert(const Ark_String& src)
     return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
 }
 template<>
-std::vector<uint32_t> Convert(const Ark_Buffer& src)
-{
-    std::vector<uint32_t> dst;
-    auto array = (src.data != nullptr) ? static_cast<uint32_t*>(src.data) : nullptr;
-    auto size = static_cast<int64_t>(src.length);
-    if (array && size > 0) {
-        for (int64_t i = 0; i < size; i++) {
-            dst.push_back(array[i]);
-        }
-    }
-    return dst;
-}
-template<>
-Ace::ImageData Convert(const Ark_ImageData& src)
-{
-    Ace::ImageData dst;
-    dst.dirtyWidth = Converter::Convert<uint32_t>(src.width);
-    dst.dirtyHeight = Converter::Convert<uint32_t>(src.height);
-    dst.data = Converter::Convert<std::vector<uint32_t>>(src.data);
-    return dst;
-}
-template<>
 void AssignCast(std::optional<CompositeOperation>& dst, const Ark_String& src)
 {
     auto str = Converter::Convert<std::string>(src);
@@ -192,14 +171,14 @@ const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor();
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
 
 namespace CanvasRendererAccessor {
-void DestroyPeerImpl(CanvasRendererPeer* peer)
+void DestroyPeerImpl(Ark_CanvasRenderer peer)
 {
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_CanvasRenderer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<CanvasRendererPeerImpl>();
     peerImpl->IncRefCount();
@@ -209,7 +188,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void DrawImage0Impl(CanvasRendererPeer* peer,
+void DrawImage0Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
                     const Ark_Number* dx,
                     const Ark_Number* dy)
@@ -217,7 +196,7 @@ void DrawImage0Impl(CanvasRendererPeer* peer,
     LOGE("ARKOALA CanvasRendererAccessor::DrawImage0Impl where Ark_Union_ImageBitmap_PixelMap "
         " includes Ark_PixelMap which is partially implemented.");
 }
-void DrawImage1Impl(CanvasRendererPeer* peer,
+void DrawImage1Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
                     const Ark_Number* dx,
                     const Ark_Number* dy,
@@ -227,7 +206,7 @@ void DrawImage1Impl(CanvasRendererPeer* peer,
     LOGE("ARKOALA CanvasRendererAccessor::DrawImage1Impl where Ark_Union_ImageBitmap_PixelMap "
         " includes Ark_PixelMap which is partially implemented.");
 }
-void DrawImage2Impl(CanvasRendererPeer* peer,
+void DrawImage2Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
                     const Ark_Number* sx,
                     const Ark_Number* sy,
@@ -241,14 +220,14 @@ void DrawImage2Impl(CanvasRendererPeer* peer,
     LOGE("ARKOALA CanvasRendererAccessor::DrawImage2Impl where Ark_Union_ImageBitmap_PixelMap "
         " includes Ark_PixelMap which is partially implemented.");
 }
-void BeginPathImpl(CanvasRendererPeer* peer)
+void BeginPathImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerBeginPathImpl();
 }
-void Clip0Impl(CanvasRendererPeer* peer,
+void Clip0Impl(Ark_CanvasRenderer peer,
                const Opt_String* fillRule)
 {
     CHECK_NULL_VOID(peer);
@@ -259,8 +238,8 @@ void Clip0Impl(CanvasRendererPeer* peer,
     auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
     peerImpl->Clip(rule);
 }
-void Clip1Impl(CanvasRendererPeer* peer,
-               const Ark_Path2D* path,
+void Clip1Impl(Ark_CanvasRenderer peer,
+               Ark_Path2D path,
                const Opt_String* fillRule)
 {
     CHECK_NULL_VOID(peer);
@@ -270,12 +249,12 @@ void Clip1Impl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(fillRule);
     auto opt = Converter::OptConvert<std::string>(*fillRule);
     auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
-    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
+    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
     CHECK_NULL_VOID(pathImpl);
     CHECK_NULL_VOID(pathImpl->path);
     peerImpl->Clip(rule, pathImpl->path);
 }
-void Fill0Impl(CanvasRendererPeer* peer,
+void Fill0Impl(Ark_CanvasRenderer peer,
                const Opt_String* fillRule)
 {
     CHECK_NULL_VOID(peer);
@@ -286,8 +265,8 @@ void Fill0Impl(CanvasRendererPeer* peer,
     auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
     peerImpl->Fill(rule);
 }
-void Fill1Impl(CanvasRendererPeer* peer,
-               const Ark_Path2D* path,
+void Fill1Impl(Ark_CanvasRenderer peer,
+               Ark_Path2D path,
                const Opt_String* fillRule)
 {
     CHECK_NULL_VOID(peer);
@@ -297,36 +276,36 @@ void Fill1Impl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(fillRule);
     auto opt = Converter::OptConvert<std::string>(*fillRule);
     auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
-    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
+    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
     CHECK_NULL_VOID(pathImpl);
     CHECK_NULL_VOID(pathImpl->path);
     peerImpl->Fill(rule, pathImpl->path);
 }
-void Stroke0Impl(CanvasRendererPeer* peer)
+void Stroke0Impl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStroke0Impl();
 }
-void Stroke1Impl(CanvasRendererPeer* peer,
-                 const Ark_Path2D* path)
+void Stroke1Impl(Ark_CanvasRenderer peer,
+                 Ark_Path2D path)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(path);
     CHECK_NULL_VOID(path);
-    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
+    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
     CHECK_NULL_VOID(pathImpl);
     CHECK_NULL_VOID(pathImpl->path);
     peerImpl->TriggerStroke1Impl(pathImpl->path);
 }
-Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
-                                           const Ark_Number* x0,
-                                           const Ark_Number* y0,
-                                           const Ark_Number* x1,
-                                           const Ark_Number* y1)
+Ark_CanvasGradient CreateLinearGradientImpl(Ark_CanvasRenderer peer,
+                                            const Ark_Number* x0,
+                                            const Ark_Number* y0,
+                                            const Ark_Number* x1,
+                                            const Ark_Number* y1)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -343,19 +322,20 @@ Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
     auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
     CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
     canvasGradientPeer->SetGradient(gradient);
-    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
+    return canvasGradientPeer;
 }
-Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
-                                    const Ark_ImageBitmap* image,
+Opt_CanvasPattern CreatePatternImpl(Ark_CanvasRenderer peer,
+                                    Ark_ImageBitmap image,
                                     const Opt_String* repetition)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    auto invalid = Converter::ArkValue<Opt_CanvasPattern>();
+    CHECK_NULL_RETURN(peer, invalid);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(image, nullptr);
-    CHECK_NULL_RETURN(repetition, nullptr);
-    auto bitmap = reinterpret_cast<ImageBitmapPeer*>(image->ptr);
-    CHECK_NULL_RETURN(bitmap, nullptr);
+    CHECK_NULL_RETURN(peerImpl, invalid);
+    CHECK_NULL_RETURN(image, invalid);
+    CHECK_NULL_RETURN(repetition, invalid);
+    auto bitmap = image;
+    CHECK_NULL_RETURN(bitmap, invalid);
     auto opt = Converter::OptConvert<std::string>(*repetition);
     std::string repeat = opt ? *opt : EMPTY_STRING;
     auto pattern = std::make_shared<OHOS::Ace::Pattern>();
@@ -368,21 +348,21 @@ Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
     pattern->SetPixelMap(pixelMap);
 #endif
     peerImpl->patterns[peerImpl->patternCount];
-    auto peerPattern = reinterpret_cast<CanvasPatternPeer*>(GetCanvasPatternAccessor()->ctor());
-    CHECK_NULL_RETURN(peerPattern, nullptr);
+    auto peerPattern = GetCanvasPatternAccessor()->ctor();
+    CHECK_NULL_RETURN(peerPattern, invalid);
     peerPattern->SetCanvasRenderer(AceType::WeakClaim(peerImpl));
     peerPattern->SetId(peerImpl->patternCount);
     peerPattern->SetUnit(peerImpl->GetUnit());
     peerImpl->patternCount++;
-    return reinterpret_cast<Ark_NativePointer>(peerPattern);
+    return Converter::ArkValue<Opt_CanvasPattern>(peerPattern);
 }
-Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
-                                           const Ark_Number* x0,
-                                           const Ark_Number* y0,
-                                           const Ark_Number* r0,
-                                           const Ark_Number* x1,
-                                           const Ark_Number* y1,
-                                           const Ark_Number* r1)
+Ark_CanvasGradient CreateRadialGradientImpl(Ark_CanvasRenderer peer,
+                                            const Ark_Number* x0,
+                                            const Ark_Number* y0,
+                                            const Ark_Number* r0,
+                                            const Ark_Number* x1,
+                                            const Ark_Number* y1,
+                                            const Ark_Number* r1)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -405,12 +385,12 @@ Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
     auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
     CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
     canvasGradientPeer->SetGradient(gradient);
-    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
+    return canvasGradientPeer;
 }
-Ark_NativePointer CreateConicGradientImpl(CanvasRendererPeer* peer,
-                                          const Ark_Number* startAngle,
-                                          const Ark_Number* x,
-                                          const Ark_Number* y)
+Ark_CanvasGradient CreateConicGradientImpl(Ark_CanvasRenderer peer,
+                                           const Ark_Number* startAngle,
+                                           const Ark_Number* x,
+                                           const Ark_Number* y)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -425,11 +405,11 @@ Ark_NativePointer CreateConicGradientImpl(CanvasRendererPeer* peer,
     auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
     CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
     canvasGradientPeer->SetGradient(gradient);
-    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
+    return canvasGradientPeer;
 }
-Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
-                                       const Ark_Number* sw,
-                                       const Ark_Number* sh)
+Ark_ImageData CreateImageData0Impl(Ark_CanvasRenderer peer,
+                                   const Ark_Number* sw,
+                                   const Ark_Number* sh)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -452,27 +432,23 @@ Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
             peerImpl->imageData.data.push_back(COLOR_WHITE);
         }
     }
-    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData0Impl return type Ark_NativePointer "
-        "should be replaced with a valid accessor for ImageData.");
-    return reinterpret_cast<Ark_NativePointer>(peerImpl);
+    return ImageDataPeer::Create(peerImpl->imageData);
 }
-Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
-                                       const Ark_ImageData* imagedata)
+Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
+                                   Ark_ImageData imagedata)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
     CHECK_NULL_RETURN(imagedata, nullptr);
-    peerImpl->imageData = Converter::Convert<Ace::ImageData>(*imagedata);
-    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData0Impl return type Ark_NativePointer "
-        "should be replaced with a valid accessor for ImageData.");
-    return reinterpret_cast<Ark_NativePointer>(peerImpl);
+    peerImpl->imageData = imagedata->value;
+    return ImageDataPeer::Create(peerImpl->imageData);
 }
-Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
-                                   const Ark_Number* sx,
-                                   const Ark_Number* sy,
-                                   const Ark_Number* sw,
-                                   const Ark_Number* sh)
+Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
+                               const Ark_Number* sx,
+                               const Ark_Number* sy,
+                               const Ark_Number* sw,
+                               const Ark_Number* sh)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -492,20 +468,20 @@ Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
         LOGE("ARKOALA CanvasRendererPeerImpl::GetImageDataImpl Integer Overflow!!! "
              "The product of finalHeight and finalWidth is too big.");
-        return reinterpret_cast<Ark_NativePointer>(peerImpl);
+        return ImageDataPeer::Create(peerImpl->imageData);
     }
     std::unique_ptr<Ace::ImageData> canvasData = peerImpl->GetImageData(imageSize);
     CHECK_NULL_RETURN(canvasData, nullptr);
     if (canvasData) {
         peerImpl->imageData = *canvasData;
     }
-    return reinterpret_cast<Ark_NativePointer>(peerImpl);
+    return ImageDataPeer::Create(peerImpl->imageData);
 }
-Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
-                                  const Ark_Number* sx,
-                                  const Ark_Number* sy,
-                                  const Ark_Number* sw,
-                                  const Ark_Number* sh)
+Ark_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
+                             const Ark_Number* sx,
+                             const Ark_Number* sy,
+                             const Ark_Number* sw,
+                             const Ark_Number* sh)
 {
 #ifdef PIXEL_MAP_SUPPORTED
     CHECK_NULL_RETURN(peer, nullptr);
@@ -522,14 +498,14 @@ Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
     ImageSize imageSize = peerImpl->GetImageSize(x, y, width, height);
     peerImpl->ClearImageData();
     peerImpl->GetPixelMap(imageSize);
-    return reinterpret_cast<Ark_NativePointer>(peerImpl);
+    return {};
 #else
     LOGE("ARKOALA CanvasRendererAccessor::GetPixelMapImpl PixelMap is not supported on current platform.");
-    return 0;
+    return {};
 #endif
 }
-void PutImageData0Impl(CanvasRendererPeer* peer,
-                       const Ark_ImageData* imagedata,
+void PutImageData0Impl(Ark_CanvasRenderer peer,
+                       Ark_ImageData imagedata,
                        const Ark_Union_Number_String* dx,
                        const Ark_Union_Number_String* dy)
 {
@@ -540,13 +516,13 @@ void PutImageData0Impl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(dx);
     CHECK_NULL_VOID(dy);
     ImageSizeExt ext;
-    auto src = Converter::Convert<Ace::ImageData>(*imagedata);
+    auto src = imagedata->value;
     ext.x = ConvertDimension(peerImpl, *dx);
     ext.y = ConvertDimension(peerImpl, *dy);
     peerImpl->PutImageData(src, ext);
 }
-void PutImageData1Impl(CanvasRendererPeer* peer,
-                       const Ark_ImageData* imagedata,
+void PutImageData1Impl(Ark_CanvasRenderer peer,
+                       Ark_ImageData imagedata,
                        const Ark_Union_Number_String* dx,
                        const Ark_Union_Number_String* dy,
                        const Ark_Union_Number_String* dirtyX,
@@ -565,7 +541,7 @@ void PutImageData1Impl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(dirtyWidth);
     CHECK_NULL_VOID(dirtyHeight);
     ImageSizeExt ext;
-    auto src = Converter::Convert<Ace::ImageData>(*imagedata);
+    auto src = imagedata->value;
     ext.x = ConvertDimension(peerImpl, *dx);
     ext.y = ConvertDimension(peerImpl, *dy);
     ext.dirtyX = ConvertDimension(peerImpl, *dirtyX);
@@ -574,15 +550,16 @@ void PutImageData1Impl(CanvasRendererPeer* peer,
     ext.dirtyHeight = ConvertDimension(peerImpl, *dirtyHeight);
     peerImpl->PutImageData(src, ext);
 }
-void GetLineDashImpl(CanvasRendererPeer* peer)
+Array_Number GetLineDashImpl(Ark_CanvasRenderer peer)
 {
-    CHECK_NULL_VOID(peer);
+    CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_RETURN(peerImpl, {});
     peerImpl->TriggerGetLineDashImpl();
     LOGE("ARKOALA CanvasRendererAccessor::GetLineDashImpl method should return object with specific type");
+    return {};
 }
-void SetLineDashImpl(CanvasRendererPeer* peer,
+void SetLineDashImpl(Ark_CanvasRenderer peer,
                      const Array_Number* segments)
 {
     CHECK_NULL_VOID(peer);
@@ -603,7 +580,7 @@ void SetLineDashImpl(CanvasRendererPeer* peer,
     std::transform(src.begin(), src.end(), std::back_inserter(dst), [](auto val) { return static_cast<double>(val); });
     peerImpl->TriggerSetLineDashImpl(dst);
 }
-void ClearRectImpl(CanvasRendererPeer* peer,
+void ClearRectImpl(Ark_CanvasRenderer peer,
                    const Ark_Number* x,
                    const Ark_Number* y,
                    const Ark_Number* w,
@@ -629,7 +606,7 @@ void ClearRectImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerClearRectImpl(rect);
 }
-void FillRectImpl(CanvasRendererPeer* peer,
+void FillRectImpl(Ark_CanvasRenderer peer,
                   const Ark_Number* x,
                   const Ark_Number* y,
                   const Ark_Number* w,
@@ -655,7 +632,7 @@ void FillRectImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerFillRectImpl(rect);
 }
-void StrokeRectImpl(CanvasRendererPeer* peer,
+void StrokeRectImpl(Ark_CanvasRenderer peer,
                     const Ark_Number* x,
                     const Ark_Number* y,
                     const Ark_Number* w,
@@ -681,21 +658,21 @@ void StrokeRectImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerStrokeRectImpl(rect);
 }
-void RestoreImpl(CanvasRendererPeer* peer)
+void RestoreImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerRestoreImpl();
 }
-void SaveImpl(CanvasRendererPeer* peer)
+void SaveImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerSaveImpl();
 }
-void FillTextImpl(CanvasRendererPeer* peer,
+void FillTextImpl(Ark_CanvasRenderer peer,
                   const Ark_String* text,
                   const Ark_Number* x,
                   const Ark_Number* y,
@@ -720,21 +697,21 @@ void FillTextImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerFillTextImpl(valueText, valueX, valueY, optMaxWidth);
 }
-Ark_NativePointer MeasureTextImpl(CanvasRendererPeer* peer,
-                                  const Ark_String* text)
+Ark_TextMetrics MeasureTextImpl(Ark_CanvasRenderer peer,
+                                const Ark_String* text)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(text, nullptr);
+    CHECK_NULL_RETURN(peerImpl, {});
+    CHECK_NULL_RETURN(text, {});
     auto content = Converter::Convert<std::string>(*text);
     auto opt = peerImpl->GetTextMetrics(content);
-    CHECK_NULL_RETURN(opt, nullptr);
+    CHECK_NULL_RETURN(opt, {});
     LOGE("ARKOALA CanvasRendererAccessor::MeasureTextImpl return type Ark_NativePointer "
          "should be replaced with an accessor type for TextMetrics.");
-    return nullptr;
+    return {};
 }
-void StrokeTextImpl(CanvasRendererPeer* peer,
+void StrokeTextImpl(Ark_CanvasRenderer peer,
                     const Ark_String* text,
                     const Ark_Number* x,
                     const Ark_Number* y,
@@ -759,7 +736,7 @@ void StrokeTextImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerStrokeTextImpl(valueText, valueX, valueY, optMaxWidth);
 }
-Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer)
+Ark_Matrix2D GetTransformImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -772,16 +749,16 @@ Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer)
             matrixPeer->transform = *opt;
         }
     }
-    return reinterpret_cast<Ark_NativePointer>(matrixPeer);
+    return matrixPeer;
 }
-void ResetTransformImpl(CanvasRendererPeer* peer)
+void ResetTransformImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerResetTransformImpl();
 }
-void RotateImpl(CanvasRendererPeer* peer,
+void RotateImpl(Ark_CanvasRenderer peer,
                 const Ark_Number* angle)
 {
     CHECK_NULL_VOID(peer);
@@ -792,7 +769,7 @@ void RotateImpl(CanvasRendererPeer* peer,
     auto rotateAngle = static_cast<double>(Converter::Convert<float>(*angle));
     peerImpl->TriggerRotateImpl(rotateAngle);
 }
-void ScaleImpl(CanvasRendererPeer* peer,
+void ScaleImpl(Ark_CanvasRenderer peer,
                const Ark_Number* x,
                const Ark_Number* y)
 {
@@ -809,7 +786,7 @@ void ScaleImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerScaleImpl(scaleX, scaleY);
 }
-void SetTransform0Impl(CanvasRendererPeer* peer,
+void SetTransform0Impl(Ark_CanvasRenderer peer,
                        const Ark_Number* a,
                        const Ark_Number* b,
                        const Ark_Number* c,
@@ -839,7 +816,7 @@ void SetTransform0Impl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerSetTransformImpl(param);
 }
-void SetTransform1Impl(CanvasRendererPeer* peer,
+void SetTransform1Impl(Ark_CanvasRenderer peer,
                        const Opt_Matrix2D* transform)
 {
     CHECK_NULL_VOID(peer);
@@ -848,7 +825,7 @@ void SetTransform1Impl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(transform);
     auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
     CHECK_NULL_VOID(opt);
-    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
+    auto matrixPeer = opt.value();
     CHECK_NULL_VOID(matrixPeer);
     auto param = matrixPeer->transform;
     if (LessNotEqual(param.scaleX, SCALE_LIMIT_MIN) || LessNotEqual(param.scaleY, SCALE_LIMIT_MIN)) {
@@ -856,7 +833,7 @@ void SetTransform1Impl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerSetTransformImpl(param);
 }
-void TransformImpl(CanvasRendererPeer* peer,
+void TransformImpl(Ark_CanvasRenderer peer,
                    const Ark_Number* a,
                    const Ark_Number* b,
                    const Ark_Number* c,
@@ -886,7 +863,7 @@ void TransformImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerTransformImpl(param);
 }
-void TranslateImpl(CanvasRendererPeer* peer,
+void TranslateImpl(Ark_CanvasRenderer peer,
                    const Ark_Number* x,
                    const Ark_Number* y)
 {
@@ -900,7 +877,7 @@ void TranslateImpl(CanvasRendererPeer* peer,
     auto transY = static_cast<double>(Converter::Convert<float>(*y));
     peerImpl->TriggerTranslateImpl(transX, transY);
 }
-void SetPixelMapImpl(CanvasRendererPeer* peer,
+void SetPixelMapImpl(Ark_CanvasRenderer peer,
                      const Opt_PixelMap* value)
 {
 #ifdef PIXEL_MAP_SUPPORTED
@@ -910,7 +887,7 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     auto opt = Converter::OptConvert<Ark_PixelMap>(*value);
     CHECK_NULL_VOID(opt);
-    auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(opt->ptr);
+    auto pixelMapPeer = opt.value();
     CHECK_NULL_VOID(pixelMapPeer);
     peerImpl->SetPixelMap(pixelMapPeer->pixelMap);
 #else
@@ -918,14 +895,14 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
          " is not supported on the current platform.");
 #endif
 }
-void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
-                                 const Ark_ImageBitmap* bitmap)
+void TransferFromImageBitmapImpl(Ark_CanvasRenderer peer,
+                                 Ark_ImageBitmap bitmap)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(bitmap);
-    auto bitmapPeer = reinterpret_cast<ImageBitmapPeer*>(bitmap->ptr);
+    auto bitmapPeer = bitmap;
     CHECK_NULL_VOID(bitmapPeer);
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = bitmapPeer->GetPixelMap();
@@ -940,38 +917,38 @@ void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
     peerImpl->TriggerTransferFromImageBitmapImpl(width, height);
 #endif
 }
-void SaveLayerImpl(CanvasRendererPeer* peer)
+void SaveLayerImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerSaveLayerImpl();
 }
-void RestoreLayerImpl(CanvasRendererPeer* peer)
+void RestoreLayerImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerRestoreLayerImpl();
 }
-void ResetImpl(CanvasRendererPeer* peer)
+void ResetImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerResetImpl();
 }
-void SetLetterSpacingImpl(CanvasRendererPeer* peer,
+void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
                           const Ark_Union_LengthMetrics_String* letterSpacing)
 {
 }
-Ark_Int32 GetGlobalAlphaImpl(CanvasRendererPeer* peer)
+Ark_Number GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetGlobalAlphaImpl there is no implementation in controller "
         "for getter method of GlobalAlpha.");
-    return 0;
+    return {};
 }
-void SetGlobalAlphaImpl(CanvasRendererPeer* peer,
+void SetGlobalAlphaImpl(Ark_CanvasRenderer peer,
                         const Ark_Number* globalAlpha)
 {
     CHECK_NULL_VOID(peer);
@@ -985,12 +962,13 @@ void SetGlobalAlphaImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerSetGlobalAlphaImpl(alpha);
 }
-void GetGlobalCompositeOperationImpl(CanvasRendererPeer* peer)
+Ark_String GetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetGlobalCompositeOperationImpl method should return "
         "object with specific type");
+    return {};
 }
-void SetGlobalCompositeOperationImpl(CanvasRendererPeer* peer,
+void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
                                      const Ark_String* globalCompositeOperation)
 {
     CHECK_NULL_VOID(peer);
@@ -1002,7 +980,7 @@ void SetGlobalCompositeOperationImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(opt);
     peerImpl->TriggerSetGlobalCompositeOperationImpl(*opt);
 }
-void SetFillStyleImpl(CanvasRendererPeer* peer,
+void SetFillStyleImpl(Ark_CanvasRenderer peer,
                       const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
 {
     CHECK_NULL_VOID(peer);
@@ -1011,7 +989,7 @@ void SetFillStyleImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(fillStyle);
     LOGE("ARKOALA CanvasRendererAccessor::SetStrokeStyleImpl input Union includes same type members");
 }
-void SetStrokeStyleImpl(CanvasRendererPeer* peer,
+void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
 {
     CHECK_NULL_VOID(peer);
@@ -1020,11 +998,12 @@ void SetStrokeStyleImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(strokeStyle);
     LOGE("ARKOALA CanvasRendererAccessor::SetStrokeStyleImpl input Union includes same type members");
 }
-void GetFilterImpl(CanvasRendererPeer* peer)
+Ark_String GetFilterImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetFilterImpl method should return object with specific type");
+    return {};
 }
-void SetFilterImpl(CanvasRendererPeer* peer,
+void SetFilterImpl(Ark_CanvasRenderer peer,
                    const Ark_String* filter)
 {
     CHECK_NULL_VOID(peer);
@@ -1038,13 +1017,13 @@ void SetFilterImpl(CanvasRendererPeer* peer,
     }
     peerImpl->TriggerSetFilterImpl(filterValue);
 }
-Ark_Boolean GetImageSmoothingEnabledImpl(CanvasRendererPeer* peer)
+Ark_Boolean GetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingEnabledImpl there is no implementation in controller "
         "for getter method of ImageSmoothingEnabled.");
-    return 0;
+    return {};
 }
-void SetImageSmoothingEnabledImpl(CanvasRendererPeer* peer,
+void SetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer,
                                   Ark_Boolean imageSmoothingEnabled)
 {
     CHECK_NULL_VOID(peer);
@@ -1054,13 +1033,13 @@ void SetImageSmoothingEnabledImpl(CanvasRendererPeer* peer,
     auto enabled = Converter::Convert<bool>(imageSmoothingEnabled);
     peerImpl->TriggerSetImageSmoothingEnabledImpl(enabled);
 }
-Ark_NativePointer GetImageSmoothingQualityImpl(CanvasRendererPeer* peer)
+Ark_String GetImageSmoothingQualityImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingQualityImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
-    return nullptr;
+    return {};
 }
-void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
+void SetImageSmoothingQualityImpl(Ark_CanvasRenderer peer,
                                   const Ark_String* imageSmoothingQuality)
 {
     CHECK_NULL_VOID(peer);
@@ -1070,15 +1049,15 @@ void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
     auto quality = Converter::Convert<std::string>(*imageSmoothingQuality);
     peerImpl->SetImageSmoothingQuality(quality);
 }
-Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
+Ark_String GetLineCapImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for CanvasLineCap type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl there is no implementation in controller "
         "for getter method of LineCap.");
-    return nullptr;
+    return {};
 }
-void SetLineCapImpl(CanvasRendererPeer* peer,
+void SetLineCapImpl(Ark_CanvasRenderer peer,
                     const Ark_String* lineCap)
 {
     CHECK_NULL_VOID(peer);
@@ -1088,18 +1067,18 @@ void SetLineCapImpl(CanvasRendererPeer* peer,
     auto capStr = Converter::Convert<std::string>(*lineCap);
     peerImpl->SetLineCap(capStr);
 }
-Ark_Int32 GetLineDashOffsetImpl(CanvasRendererPeer* peer)
+Ark_Number GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
 {
-    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
 
     double offset = peerImpl->TriggerGetLineDashOffsetImpl();
     LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl return type Ark_Int32 "
          "should be replaced with a valid Ark_Number for LineDashParam offset double type.");
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(offset));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(offset));
 }
-void SetLineDashOffsetImpl(CanvasRendererPeer* peer,
+void SetLineDashOffsetImpl(Ark_CanvasRenderer peer,
                            const Ark_Number* lineDashOffset)
 {
     CHECK_NULL_VOID(peer);
@@ -1110,15 +1089,15 @@ void SetLineDashOffsetImpl(CanvasRendererPeer* peer,
     auto offset = static_cast<double>(Converter::Convert<float>(*lineDashOffset));
     peerImpl->TriggerSetLineDashOffsetImpl(offset);
 }
-Ark_NativePointer GetLineJoinImpl(CanvasRendererPeer* peer)
+Ark_String GetLineJoinImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetLineJoinImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for CanvasLineJoin type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetLineJoinImpl there is no implementation in controller "
         "for getter method of LineJoin.");
-    return nullptr;
+    return {};
 }
-void SetLineJoinImpl(CanvasRendererPeer* peer,
+void SetLineJoinImpl(Ark_CanvasRenderer peer,
                      const Ark_String* lineJoin)
 {
     CHECK_NULL_VOID(peer);
@@ -1128,13 +1107,13 @@ void SetLineJoinImpl(CanvasRendererPeer* peer,
     auto joinStr = Converter::Convert<std::string>(*lineJoin);
     peerImpl->SetLineJoin(joinStr);
 }
-Ark_Int32 GetLineWidthImpl(CanvasRendererPeer* peer)
+Ark_Number GetLineWidthImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetLineWidthImpl there is no implementation in controller "
         "for getter method of LinewWidth.");
-    return 0;
+    return {};
 }
-void SetLineWidthImpl(CanvasRendererPeer* peer,
+void SetLineWidthImpl(Ark_CanvasRenderer peer,
                       const Ark_Number* lineWidth)
 {
     CHECK_NULL_VOID(peer);
@@ -1145,13 +1124,13 @@ void SetLineWidthImpl(CanvasRendererPeer* peer,
     auto width = static_cast<double>(Converter::Convert<float>(*lineWidth));
     peerImpl->TriggerSetLineWidthImpl(width);
 }
-Ark_Int32 GetMiterLimitImpl(CanvasRendererPeer* peer)
+Ark_Number GetMiterLimitImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetMiterLimitImpl there is no implementation in controller "
         "for getter method of MiterLimit.");
-    return 0;
+    return {};
 }
-void SetMiterLimitImpl(CanvasRendererPeer* peer,
+void SetMiterLimitImpl(Ark_CanvasRenderer peer,
                        const Ark_Number* miterLimit)
 {
     CHECK_NULL_VOID(peer);
@@ -1162,13 +1141,13 @@ void SetMiterLimitImpl(CanvasRendererPeer* peer,
     auto limit = static_cast<double>(Converter::Convert<float>(*miterLimit));
     peerImpl->TriggerSetMiterLimitImpl(limit);
 }
-Ark_Int32 GetShadowBlurImpl(CanvasRendererPeer* peer)
+Ark_Number GetShadowBlurImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowBlurImpl there is no implementation in controller "
         "for getter method of ShadowBlur.");
-    return 0;
+    return {};
 }
-void SetShadowBlurImpl(CanvasRendererPeer* peer,
+void SetShadowBlurImpl(Ark_CanvasRenderer peer,
                        const Ark_Number* shadowBlur)
 {
     CHECK_NULL_VOID(peer);
@@ -1179,11 +1158,12 @@ void SetShadowBlurImpl(CanvasRendererPeer* peer,
     auto blur = static_cast<double>(Converter::Convert<float>(*shadowBlur));
     peerImpl->TriggerSetShadowBlurImpl(blur);
 }
-void GetShadowColorImpl(CanvasRendererPeer* peer)
+Ark_String GetShadowColorImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowColorImpl method should return object with specific type");
+    return {};
 }
-void SetShadowColorImpl(CanvasRendererPeer* peer,
+void SetShadowColorImpl(Ark_CanvasRenderer peer,
                         const Ark_String* shadowColor)
 {
     CHECK_NULL_VOID(peer);
@@ -1195,13 +1175,13 @@ void SetShadowColorImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(opt);
     peerImpl->TriggerSetShadowColorImpl(*opt);
 }
-Ark_Int32 GetShadowOffsetXImpl(CanvasRendererPeer* peer)
+Ark_Number GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetXImpl there is no implementation in controller "
         "for getter method of ShadowOffsetXImpl.");
-    return 0;
+    return {};
 }
-void SetShadowOffsetXImpl(CanvasRendererPeer* peer,
+void SetShadowOffsetXImpl(Ark_CanvasRenderer peer,
                           const Ark_Number* shadowOffsetX)
 {
     CHECK_NULL_VOID(peer);
@@ -1212,13 +1192,13 @@ void SetShadowOffsetXImpl(CanvasRendererPeer* peer,
     auto offsetX = static_cast<double>(Converter::Convert<float>(*shadowOffsetX));
     peerImpl->TriggerSetShadowOffsetXImpl(offsetX);
 }
-Ark_Int32 GetShadowOffsetYImpl(CanvasRendererPeer* peer)
+Ark_Number GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetYImpl there is no implementation in controller "
         "for getter method of ShadowOffsetYImpl.");
-    return 0;
+    return {};
 }
-void SetShadowOffsetYImpl(CanvasRendererPeer* peer,
+void SetShadowOffsetYImpl(Ark_CanvasRenderer peer,
                           const Ark_Number* shadowOffsetY)
 {
     CHECK_NULL_VOID(peer);
@@ -1229,15 +1209,15 @@ void SetShadowOffsetYImpl(CanvasRendererPeer* peer,
     auto offsetY = static_cast<double>(Converter::Convert<float>(*shadowOffsetY));
     peerImpl->TriggerSetShadowOffsetYImpl(offsetY);
 }
-Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
+Ark_String GetDirectionImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetDirectionImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for CanvasDirection type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetDirectionImpl there is no implementation in controller "
         "for getter method of Direction.");
-    return nullptr;
+    return {};
 }
-void SetDirectionImpl(CanvasRendererPeer* peer,
+void SetDirectionImpl(Ark_CanvasRenderer peer,
                       const Ark_String* direction)
 {
     CHECK_NULL_VOID(peer);
@@ -1247,11 +1227,12 @@ void SetDirectionImpl(CanvasRendererPeer* peer,
     auto dir = Converter::Convert<TextDirection>(*direction);
     peerImpl->SetTextDirection(dir);
 }
-void GetFontImpl(CanvasRendererPeer* peer)
+Ark_String GetFontImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetFontImpl method should return object with specific type");
+    return {};
 }
-void SetFontImpl(CanvasRendererPeer* peer,
+void SetFontImpl(Ark_CanvasRenderer peer,
                  const Ark_String* font)
 {
     CHECK_NULL_VOID(peer);
@@ -1262,15 +1243,15 @@ void SetFontImpl(CanvasRendererPeer* peer,
 
     peerImpl->SetFont(fontStr);
 }
-Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
+Ark_String GetTextAlignImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetTextAlignImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for CanvasTextAlign type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetTextAlignImpl there is no implementation in controller "
         "for getter method of TextAlign.");
-    return nullptr;
+    return {};
 }
-void SetTextAlignImpl(CanvasRendererPeer* peer,
+void SetTextAlignImpl(Ark_CanvasRenderer peer,
                       const Ark_String* textAlign)
 {
     CHECK_NULL_VOID(peer);
@@ -1280,15 +1261,15 @@ void SetTextAlignImpl(CanvasRendererPeer* peer,
     auto align = Converter::Convert<TextAlign>(*textAlign);
     peerImpl->SetTextAlign(align);
 }
-Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
+Ark_String GetTextBaselineImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetTextBaselineImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for CanvasTextBaseline type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetTextBaselineImpl there is no implementation in controller "
         "for getter method of TextBaseline.");
-    return nullptr;
+    return {};
 }
-void SetTextBaselineImpl(CanvasRendererPeer* peer,
+void SetTextBaselineImpl(Ark_CanvasRenderer peer,
                          const Ark_String* textBaseline)
 {
     CHECK_NULL_VOID(peer);

@@ -73,19 +73,18 @@ void SetWaterFlowOptionsImpl(Ark_NativePointer node,
             };
             WaterFlowModelNG::SetFooter(frameNode, std::move(builder));
         }
-        auto optScroller = Converter::OptConvert<Ark_NativePointer>(convValue.value().scroller);
+        auto optScroller = Converter::OptConvert<Ark_Scroller>(convValue.value().scroller);
         if (optScroller) {
             RefPtr<ScrollControllerBase> positionController = WaterFlowModelNG::GetOrCreateController(frameNode);
             RefPtr<ScrollProxy> scrollBarProxy = WaterFlowModelNG::GetOrCreateScrollBarProxy(frameNode);
-            CHECK_NULL_VOID(optScroller.value());
-            auto peerImplPtr = reinterpret_cast<WaterflowScrollerPeer *>(optScroller.value());
+            auto peerImplPtr = optScroller.value();
             CHECK_NULL_VOID(peerImplPtr);
             peerImplPtr->SetController(positionController);
             peerImplPtr->SetScrollBarProxy(scrollBarProxy);
         }
-        auto optArkSections = Converter::OptConvert<Ark_NativePointer>(convValue.value().sections);
+        auto optArkSections = Converter::OptConvert<Ark_WaterFlowSections>(convValue.value().sections);
         if (optArkSections) {
-            auto peerImplPtr = reinterpret_cast<WaterFlowSectionsPeer *>(optArkSections.value());
+            auto peerImplPtr = optArkSections.value();
             CHECK_NULL_VOID(peerImplPtr);
             RefPtr<WaterFlowSections> sections = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);
             peerImplPtr->SetController(sections);

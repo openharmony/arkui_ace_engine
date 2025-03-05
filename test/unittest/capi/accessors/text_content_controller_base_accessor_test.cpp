@@ -73,7 +73,7 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetTextContentLinesNumTest, Test
 {
     ASSERT_NE(accessor_->getTextContentLineCount, nullptr);
     EXPECT_CALL(*mockTextContentControllerBase_, GetTextContentLinesNum()).Times(1).WillOnce(Return(LINES_NUM));
-    auto checkValue = accessor_->getTextContentLineCount(peer_);
+    auto checkValue = Converter::Convert<int32_t>(accessor_->getTextContentLineCount(peer_));
     EXPECT_EQ(checkValue, LINES_NUM);
 }
 
@@ -87,7 +87,7 @@ HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetCaretOffsetTest, Tes
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
     EXPECT_CALL(*mockTextContentControllerBase_, GetCaretPosition()).Times(1).WillOnce(Return(NG::OffsetF(1, 1)));
     auto checkValue = accessor_->getCaretOffset(peer_);
-    EXPECT_EQ(checkValue, nullptr); // fix after updating return value
+    EXPECT_EQ(&checkValue, nullptr); // fix after updating return value
 }
 
 /**
@@ -100,6 +100,6 @@ HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetTextContentRectTest,
     ASSERT_NE(accessor_->getTextContentRect, nullptr);
     EXPECT_CALL(*mockTextContentControllerBase_, GetTextContentRect()).Times(1).WillOnce(Return(Rect(0, 0, 1, 1)));
     auto checkValue = accessor_->getTextContentRect(peer_);
-    EXPECT_EQ(checkValue, nullptr); // fix after updating return value
+    EXPECT_EQ(&checkValue, nullptr); // fix after updating return value
 }
 } // namespace OHOS::Ace::NG

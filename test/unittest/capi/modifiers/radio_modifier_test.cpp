@@ -67,24 +67,6 @@ struct CheckEvent {
 };
 static std::optional<CheckEvent> checkEvent = std::nullopt;
 static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
-
-static bool g_isCheckedTest = true;
-static auto radioOnChange(Ark_Int32 nodeId, const Ark_Boolean isChecked)
-{
-    g_isCheckedTest = !g_isCheckedTest;
-};
-static GENERATED_ArkUIRadioEventsReceiver recv {
-    .onChange0 = radioOnChange
-};
-static const GENERATED_ArkUIRadioEventsReceiver* getRadioEventsReceiverTest()
-{
-    return &recv;
-};
-static const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-    static const GENERATED_ArkUIEventsAPI eventsImpl = { .getRadioEventsReceiver = getRadioEventsReceiverTest };
-    return &eventsImpl;
-};
 } // namespace
 class RadioModifierTest : public ModifierTestBase<GENERATED_ArkUIRadioModifier,
                               &GENERATED_ArkUINodeModifiers::getRadioModifier, GENERATED_ARKUI_RADIO> {
@@ -97,8 +79,6 @@ public:
 
         AddResource(RES_ID, COLOR_BY_NUMBER);
         AddResource(RES_NAME, COLOR_BY_STRING);
-
-        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 
     CustomNodeBuilder getBuilderCb()
@@ -557,7 +537,7 @@ HWTEST_F(RadioModifierTest, setOnChangeEventCheckedImpl, TestSize.Level1)
 
     Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_checked(node_, &arkCallback);
+    modifier_->set_onChangeEvent_checked(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     eventHub->UpdateChangeEvent(true);

@@ -1600,7 +1600,7 @@ HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+    modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     auto onChangeEvent = eventHub->GetCreatChangeEvent();

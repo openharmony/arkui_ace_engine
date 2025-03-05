@@ -617,7 +617,7 @@
             ],
         },
         {
-            "name": "LengthMetricsNonNeg",
+            "name": "LengthMetricsNonNeg_", // Disabled due to generator issues
             "type": "Ark_LengthMetrics",
             "validValues": [
                 ["123.0_vp", "123.00vp"],
@@ -1828,6 +1828,11 @@
                 "setFontFeatureTestFontFeatureValidValues",
                 "setTextOverflowTestTextOverflowValidValues", // due to issue #IB57XU can not be fixed
                 "setPlaceholderColorTestPlaceholderColorValidValues", // After upmerge 20250224
+
+                // New API 122
+                "setKeyboardAppearanceTestDefaultValues",
+                "setKeyboardAppearanceTestKeyboardAppearanceValidValues",
+                "setKeyboardAppearanceTestKeyboardAppearanceInvalidValues",
             ]
         },
         {
@@ -2212,6 +2217,11 @@
                 "setLineHeightTestLineHeightInvalidValues",
 
                 "setPlaceholderColorTestPlaceholderColorValidValues", // Disabled after upmerge 20250224
+
+                // New API 122
+                "setKeyboardAppearanceTestDefaultValues",
+                "setKeyboardAppearanceTestKeyboardAppearanceValidValues",
+                "setKeyboardAppearanceTestKeyboardAppearanceInvalidValues",
             ]
         },
         {
@@ -2534,6 +2544,14 @@
                 "setMaxLinesTestDefaultValues",
                 "setMaxLinesTestMaxLinesValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
+
+                // New API 122
+                "setKeyboardAppearanceTestDefaultValues",
+                "setKeyboardAppearanceTestKeyboardAppearanceValidValues",
+                "setKeyboardAppearanceTestKeyboardAppearanceInvalidValues",
+                "setStopBackPressTestDefaultValues",
+                "setStopBackPressTestStopBackPressValidValues",
+                "setStopBackPressTestStopBackPressInvalidValues",
             ],
             "attributes": [
                 {
@@ -2571,8 +2589,8 @@
             "name": "CommonMethod",
             "nodeTypes": ["Blank"],
             "disable":[
-                "setDragPreviewTestDragPreviewDragItemInfoExtraInfoInvalidValues",
-                "setDragPreviewTestDragPreviewDragItemInfoExtraInfoValidValues",
+                "setDragPreview0TestDragPreviewDragItemInfoExtraInfoInvalidValues",
+                "setDragPreview0TestDragPreviewDragItemInfoExtraInfoValidValues",
                 "setChainWeightTestDefaultValues",
                 "setChainWeightTestChainWeightHorizontalValidValues",
                 "setChainWeightTestChainWeightHorizontalInvalidValues",
@@ -2692,12 +2710,18 @@
                 "setAccessibilityCheckedTestAccessibilityCheckedValidValues",
                 "setAccessibilitySelectedTestDefaultValues",
                 "setAccessibilitySelectedTestAccessibilitySelectedValidValues",
-                "setWidthTestDefaultValues",
-                "setWidthTestWidthValidValues",
-                "setWidthTestWidthInvalidValues",
-                "setHeightTestDefaultValues",
-                "setHeightTestHeightValidValues",
-                "setHeightTestHeightInvalidValues",
+                "setWidth0TestDefaultValues",
+                "setWidth0TestWidthValidValues",
+                "setWidth0TestWidthInvalidValues",
+                "setWidth1TestDefaultValues",
+                "setWidth1TestWidthValidValues",
+                "setWidth1TestWidthInvalidValues",
+                "setHeight0TestDefaultValues",
+                "setHeight0TestHeightValidValues",
+                "setHeight0TestHeightInvalidValues",
+                "setHeight1TestDefaultValues",
+                "setHeight1TestHeightValidValues",
+                "setHeight1TestHeightInvalidValues",
                 "setDrawModifierTestDefaultValues",
                 "setDrawModifierTestValidValues",
                 "setResponseRegionTestDefaultValues",
@@ -2861,6 +2885,12 @@
                 "setDragPreviewOptionsTestDragPreviewOptionsOptionsIsMultiSelectionEnabledInvalidValues",
                 "setDragPreviewOptionsTestDragPreviewOptionsOptionsDefaultAnimationBeforeLiftingValidValues",
                 "setDragPreviewOptionsTestDragPreviewOptionsOptionsDefaultAnimationBeforeLiftingInvalidValues",
+                "setDragPreviewOptionsTestDragPreviewOptionsOptionsEnableEdgeAutoScrollValidValues",
+                "setDragPreviewOptionsTestDragPreviewOptionsOptionsEnableEdgeAutoScrollInvalidValues",
+                "setDragPreviewOptionsTestDragPreviewOptionsOptionsEnableHapticFeedbackValidValues",
+                "setDragPreviewOptionsTestDragPreviewOptionsOptionsEnableHapticFeedbackInvalidValues",
+                "setDragPreviewOptionsTestDragPreviewOptionsOptionsIsLiftingDisabledValidValues",
+                "setDragPreviewOptionsTestDragPreviewOptionsOptionsIsLiftingDisabledInvalidValues",
                 "setOverlayTestDefaultValues",
                 "setOverlayTestOverlayValueValidValues",
                 "setOverlayTestOverlayValueInvalidValues",
@@ -3290,8 +3320,15 @@
                 "setAllowDropTestValidValues",
                 "setDraggableTestDefaultValues",
                 "setDraggableTestDraggableValidValues",
-                "setDragPreviewTestDefaultValues",
-                "setDragPreviewTestValidValues",
+                "setDragPreview0TestDefaultValues",
+                "setDragPreview0TestValidValues",
+                "setDragPreview1TestDefaultValues",
+                "setDragPreview1TestDragPreviewPreviewDragItemInfoExtraInfoValidValues",
+                "setDragPreview1TestDragPreviewPreviewDragItemInfoExtraInfoInvalidValues",
+                "setDragPreview1TestDragPreviewConfigOnlyForLiftingValidValues",
+                "setDragPreview1TestDragPreviewConfigOnlyForLiftingInvalidValues",
+                "setDragPreview1TestDragPreviewConfigDelayCreatingValidValues",
+                "setDragPreview1TestDragPreviewConfigDelayCreatingInvalidValues",
                 "setLinearGradient0TestDefaultValues",
                 "setLinearGradient0TestValidValues",
                 "setLinearGradient1TestDefaultValues",
@@ -3423,11 +3460,43 @@
                 "setCustomPropertyTestValidValues",
                 "setExpandSafeAreaTestDefaultValues",
                 "setExpandSafeAreaTestValidValues",
-                "setBackgroundImageTestDefaultValues",
-                "setBackgroundImageTestBackgroundImageSrcValidValues",
-                "setBackgroundImageTestBackgroundImageSrcInvalidValues",
-                "setBackgroundImageTestBackgroundImageRepeatValidValues",
-                "setBackgroundImageTestBackgroundImageRepeatInvalidValues",
+                "setBackgroundImage0TestDefaultValues",
+                "setBackgroundImage0TestBackgroundImageSrcValidValues",
+                "setBackgroundImage0TestBackgroundImageSrcInvalidValues",
+                "setBackgroundImage0TestBackgroundImageRepeatValidValues",
+                "setBackgroundImage0TestBackgroundImageRepeatInvalidValues",
+                "setBackgroundImage1TestDefaultValues",
+                "setBackgroundImage1TestBackgroundImageSrcValidValues",
+                "setBackgroundImage1TestBackgroundImageSrcInvalidValues",
+                "setBackgroundImage1TestBackgroundImageOptionsSyncLoadValidValues",
+                "setBackgroundImage1TestBackgroundImageOptionsSyncLoadInvalidValues",
+                "setBackgroundImage1TestBackgroundImageOptionsRepeatValidValues",
+                "setBackgroundImage1TestBackgroundImageOptionsRepeatInvalidValues",
+                "setNextFocusTestDefaultValues",
+                "setNextFocusTestNextFocusForwardValidValues",
+                "setNextFocusTestNextFocusForwardInvalidValues",
+                "setNextFocusTestNextFocusBackwardValidValues",
+                "setNextFocusTestNextFocusBackwardInvalidValues",
+                "setNextFocusTestNextFocusUpValidValues",
+                "setNextFocusTestNextFocusUpInvalidValues",
+                "setNextFocusTestNextFocusDownValidValues",
+                "setNextFocusTestNextFocusDownInvalidValues",
+                "setNextFocusTestNextFocusLeftValidValues",
+                "setNextFocusTestNextFocusLeftInvalidValues",
+                "setNextFocusTestNextFocusRightValidValues",
+                "setNextFocusTestNextFocusRightInvalidValues",
+                "setAccessibilityNextFocusIdTestDefaultValues",
+                "setAccessibilityNextFocusIdTestAccessibilityNextFocusIdValidValues",
+                "setAccessibilityDefaultFocusTestDefaultValues",
+                "setAccessibilityDefaultFocusTestAccessibilityDefaultFocusValidValues",
+                "setAccessibilityUseSamePageTestDefaultValues",
+                "setAccessibilityUseSamePageTestAccessibilityUseSamePageValidValues",
+                "setAccessibilityUseSamePageTestAccessibilityUseSamePageInvalidValues",
+                "setAccessibilityScrollTriggerableTestDefaultValues",
+                "setAccessibilityScrollTriggerableTestAccessibilityScrollTriggerableValidValues",
+                "setAccessibilityFocusDrawLevelTestDefaultValues",
+                "setAccessibilityFocusDrawLevelTestAccessibilityFocusDrawLevelValidValues",
+                "setAccessibilityFocusDrawLevelTestAccessibilityFocusDrawLevelInvalidValues",
             ],
             "attributes": [
                 {
@@ -4039,6 +4108,10 @@
                 "setResizableTestResizableSliceLeftValidValues", // No values in the JSON
                 "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
                 "setObjectFitTestObjectFitValidValues", // Changes in master
+
+                // New API 122
+                "setFillColor1TestFillColorValidValues",
+                "setFillColor1TestFillColorInvalidValues",
             ]
         },
         {
@@ -4071,11 +4144,15 @@
                 "setImagesTestValidValues",
                 "setIterationsTestDefaultValues",
                 "setIterationsTestIterationsValidValues",
-                "setIterationsTestIterationsInvalidValues"
+                "setIterationsTestIterationsInvalidValues",
+
+                // New API 122
+                "setMonitorInvisibleAreaTestDefaultValues",
+                "setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues",
             ],
             "remove": [
                 "setPreDecodeTestDefaultValues",
-                "setPreDecodeTestPreDecodeValidValues"
+                "setPreDecodeTestPreDecodeValidValues",
             ]
         },
         {
@@ -4160,6 +4237,7 @@
                 "setStyleTestStyleRingStyleOptionsStrokeWidthValidValues", // Incorrect json value
                 "setStyleTestStyleCapsuleStyleOptionsBorderRadiusValidValues",
                 "setStyleTestStyleCapsuleStyleOptionsBorderRadiusInvalidValues",
+                "setStyleTestValidValues",
 
                 "setColorTestColorInvalidValues", // broken LinearGradient
             ],
@@ -4298,6 +4376,12 @@
                 "setDigitalCrownSensitivityTestDigitalCrownSensitivityInvalidValues",
                 "setEdgeEffectTestEdgeEffectOptionsEffectEdgeValidValues",
                 "setEdgeEffectTestEdgeEffectOptionsEffectEdgeInvalidValues",
+
+                "setFadingEdgeTestValidValues", // LengthMetrics generator issue
+
+                // New API 122
+                "setBackToTopTestDefaultValues",
+                "setBackToTopTestBackToTopValidValues",
             ]
         },
         {
@@ -4344,6 +4428,15 @@
                 "setTrackColorTestDefaultValues", // broken LinearGradient
                 "setTrackColorTestTrackColorValidValues", // broken LinearGradient
                 "setTrackColorTestTrackColorInvalidValues", // broken LinearGradient
+
+                // New API 122
+                "setSelectedColor1TestDefaultValues",
+                "setSelectedColor1TestValidValues",
+                "setDigitalCrownSensitivityTestDefaultValues",
+                "setDigitalCrownSensitivityTestDigitalCrownSensitivityValidValues",
+                "setDigitalCrownSensitivityTestDigitalCrownSensitivityInvalidValues",
+                "setEnableHapticFeedbackTestDefaultValues",
+                "setEnableHapticFeedbackTestEnableHapticFeedbackValidValues",
             ],
             "attributes": [
                 {
@@ -4956,6 +5049,8 @@
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowShadowOptionsFillValidValues",
                 "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
+
+                "setLineSpacingTestValidValues", // LengthMetrics generator issue
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",
@@ -5105,6 +5200,18 @@
                 // Disabled after upmerge 20250224
                 "setEnableSmoothDragResizeTestDefaultValues",
                 "setEnableSmoothDragResizeTestEnableSmoothDragResizeValidValues",
+
+                "setCacheModeTestCacheModeValidValues", // Mixed new and onld enum
+
+                // New API 122
+                "setOptimizeParserBudgetTestDefaultValues",
+                "setOptimizeParserBudgetTestOptimizeParserBudgetValidValues",
+                "setRunJavaScriptOnDocumentStartTestDefaultValues",
+                "setRunJavaScriptOnDocumentStartTestValidValues",
+                "setRunJavaScriptOnDocumentEndTestDefaultValues",
+                "setRunJavaScriptOnDocumentEndTestValidValues",
+                "setRunJavaScriptOnHeadEndTestDefaultValues",
+                "setRunJavaScriptOnHeadEndTestValidValues",
             ],
             "attributes": [
                 {

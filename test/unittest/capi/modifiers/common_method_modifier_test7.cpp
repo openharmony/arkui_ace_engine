@@ -61,6 +61,9 @@ namespace Converter {
             case ARK_PRE_DRAG_STATUS_ACTION_CANCELED_BEFORE_DRAG:
                 dst = PreDragStatus::ACTION_CANCELED_BEFORE_DRAG;
                 break;
+            case ARK_PRE_DRAG_STATUS_PREPARING_FOR_DRAG_DETECTION:
+                dst = PreDragStatus::PREPARING_FOR_DRAG_DETECTION;
+                break;
             default:
                 break;
         }
@@ -83,8 +86,7 @@ namespace Converter {
     template<>
     RefPtr<OHOS::Ace::DragEvent> Convert(const Ark_DragEvent& dragEvent)
     {
-        auto dragEventPeer = reinterpret_cast<DragEventPeer*>(dragEvent.ptr);
-        return (dragEventPeer && dragEventPeer->dragInfo) ? dragEventPeer->dragInfo : nullptr;
+        return dragEvent ? dragEvent->dragInfo : nullptr;
     }
 }
 
@@ -162,6 +164,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnPreDragTest, TestSize.Level1)
     test(PreDragStatus::PREVIEW_LANDING_STARTED);
     test(PreDragStatus::PREVIEW_LANDING_FINISHED);
     test(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+    test(PreDragStatus::PREPARING_FOR_DRAG_DETECTION);
 }
 
 /*
@@ -190,8 +193,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragEnterTest, TestSize.Level1)
             .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
-        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
-        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
     auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
@@ -235,8 +237,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragMoveTest, TestSize.Level1)
             .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
-        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
-        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
     auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
@@ -280,8 +281,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragLeaveTest, TestSize.Level1)
             .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
-        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
-        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
     auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
@@ -304,7 +304,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragLeaveTest, TestSize.Level1)
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, SetOnDropTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, SetOnDrop0Test, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -325,14 +325,13 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDropTest, TestSize.Level1)
             .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
-        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
-        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
     auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
 
     checkEvent = std::nullopt;
-    modifier_->setOnDrop(node_, &callBackValue);
+    modifier_->setOnDrop0(node_, &callBackValue);
     EXPECT_FALSE(checkEvent.has_value());
 
     RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
@@ -369,8 +368,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragEndTest, TestSize.Level1)
             .dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event),
             .extraParams = Converter::OptConvert<std::string>(extraParams),
         };
-        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
-        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
     auto callBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(onDragFunc, frameNode->GetId());
@@ -426,8 +424,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTestCOPY, TestSize.Level1)
             TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
         }
         CallbackHelper(continuation).Invoke(arkResult);
-        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
-        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
     auto arkCallback = Converter::ArkValue<Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(nullptr,
@@ -486,8 +483,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTestMOVE, TestSize.Level1)
             TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
         }
         CallbackHelper(continuation).Invoke(arkResult);
-        auto deletePtr = reinterpret_cast<DragEventPeer*>(event.ptr);
-        GeneratedModifier::GetDragEventAccessor()->destroyPeer(deletePtr);
+        GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
     auto arkCallback = Converter::ArkValue<Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(nullptr,
@@ -615,10 +611,9 @@ HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin0Test, TestS
         const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
         const Callback_GestureJudgeResult_Void continuation)
     {
-        auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(event.ptr);
-        auto info = peer ? peer->GetBaseGestureInfo() : nullptr;
+        auto info = event ? event->GetBaseGestureInfo() : nullptr;
+        GeneratedModifier::GetBaseGestureEventAccessor()->destroyPeer(event);
         ASSERT_NE(info, nullptr);
-        GeneratedModifier::GetBaseGestureEventAccessor()->destroyPeer(peer);
         auto isOk = info->GetSourceDevice() != SourceType::NONE;
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
         CallbackHelper(continuation).Invoke(arkResult);
@@ -658,10 +653,9 @@ HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin1Test, TestS
         const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
         const Callback_GestureJudgeResult_Void continuation)
     {
-        auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(event.ptr);
-        auto info = peer ? peer->GetBaseGestureInfo() : nullptr;
+        auto info = event ? event->GetBaseGestureInfo() : nullptr;
+        GeneratedModifier::GetBaseGestureEventAccessor()->destroyPeer(event);
         ASSERT_NE(info, nullptr);
-        GeneratedModifier::GetBaseGestureEventAccessor()->destroyPeer(peer);
         auto isOk = info->GetSourceDevice() != SourceType::NONE;
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
         CallbackHelper(continuation).Invoke(arkResult);

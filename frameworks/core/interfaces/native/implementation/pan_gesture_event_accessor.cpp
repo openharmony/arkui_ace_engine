@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureEventAccessor {
-void DestroyPeerImpl(PanGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_PanGestureEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_PanGestureEvent CtorImpl()
 {
     return new PanGestureEventPeer();
 }
@@ -32,20 +32,20 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetOffsetXImpl(PanGestureEventPeer* peer)
+Ark_Number GetOffsetXImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetOffsetXImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetX());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetOffsetXImpl(PanGestureEventPeer* peer,
+void SetOffsetXImpl(Ark_PanGestureEvent peer,
                     const Ark_Number* offsetX)
 {
     CHECK_NULL_VOID(peer);
@@ -56,20 +56,20 @@ void SetOffsetXImpl(PanGestureEventPeer* peer,
     auto convValue = Converter::Convert<float>(*offsetX);
     event->SetOffsetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
 }
-Ark_Int32 GetOffsetYImpl(PanGestureEventPeer* peer)
+Ark_Number GetOffsetYImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetOffsetYImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetY());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetOffsetYImpl(PanGestureEventPeer* peer,
+void SetOffsetYImpl(Ark_PanGestureEvent peer,
                     const Ark_Number* offsetY)
 {
     CHECK_NULL_VOID(peer);
@@ -80,20 +80,20 @@ void SetOffsetYImpl(PanGestureEventPeer* peer,
     auto convValue = Converter::Convert<float>(*offsetY);
     event->SetOffsetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
 }
-Ark_Int32 GetVelocityXImpl(PanGestureEventPeer* peer)
+Ark_Number GetVelocityXImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetVelocityXImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityX());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetVelocityXImpl(PanGestureEventPeer* peer,
+void SetVelocityXImpl(Ark_PanGestureEvent peer,
                       const Ark_Number* velocityX)
 {
     CHECK_NULL_VOID(peer);
@@ -106,20 +106,20 @@ void SetVelocityXImpl(PanGestureEventPeer* peer,
     offsetPerSecond.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     event->SetVelocity(Velocity(offsetPerSecond));
 }
-Ark_Int32 GetVelocityYImpl(PanGestureEventPeer* peer)
+Ark_Number GetVelocityYImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetVelocityYImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityY());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetVelocityYImpl(PanGestureEventPeer* peer,
+void SetVelocityYImpl(Ark_PanGestureEvent peer,
                       const Ark_Number* velocityY)
 {
     CHECK_NULL_VOID(peer);
@@ -132,20 +132,20 @@ void SetVelocityYImpl(PanGestureEventPeer* peer,
     offsetPerSecond.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     event->SetVelocity(Velocity(offsetPerSecond));
 }
-Ark_Int32 GetVelocityImpl(PanGestureEventPeer* peer)
+Ark_Number GetVelocityImpl(Ark_PanGestureEvent peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     LOGW("ARKOALA PanGestureEventAccessor::GetVelocityImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     PanGestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityValue());
-    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
-void SetVelocityImpl(PanGestureEventPeer* peer,
+void SetVelocityImpl(Ark_PanGestureEvent peer,
                      const Ark_Number* velocity)
 {
     CHECK_NULL_VOID(peer);

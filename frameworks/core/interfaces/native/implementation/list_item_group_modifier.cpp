@@ -76,13 +76,12 @@ void DividerImpl(Ark_NativePointer node,
     ListItemGroupModelNG::SetDivider(frameNode, divider);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
-                          const Ark_ChildrenMainSize* value)
+                          Ark_ChildrenMainSize value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto peer = reinterpret_cast<ChildrenMainSizePeer *>(value->ptr);
-    CHECK_NULL_VOID(peer);
+    auto peer = value;
     RefPtr<ListChildrenMainSize> handler = ListItemGroupModelNG::GetOrCreateListChildrenMainSize(frameNode);
     peer->SetHandler(handler);
 }

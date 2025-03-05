@@ -21,11 +21,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceRequestAccessor {
-void DestroyPeerImpl(WebResourceRequestPeer* peer)
+void DestroyPeerImpl(Ark_WebResourceRequest peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_WebResourceRequest CtorImpl()
 {
     return new WebResourceRequestPeer();
 }
@@ -33,41 +33,44 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetRequestHeaderImpl(WebResourceRequestPeer* peer)
+Array_Header GetRequestHeaderImpl(Ark_WebResourceRequest peer)
 {
-    CHECK_NULL_VOID(peer && peer->webRequest);
+    CHECK_NULL_RETURN(peer && peer->webRequest, {});
     peer->webRequest->GetHeaders();
     // headers need to be returned
     LOGE("WebResourceRequestPeer::GetRequestHeaderImpl - return value need to be supported");
+    return {};
 }
-void GetRequestUrlImpl(WebResourceRequestPeer* peer)
+Ark_String GetRequestUrlImpl(Ark_WebResourceRequest peer)
 {
-    CHECK_NULL_VOID(peer && peer->webRequest);
+    CHECK_NULL_RETURN(peer && peer->webRequest, {});
     peer->webRequest->GetUrl();
     // url need to be returned
     LOGE("WebResourceRequestPeer::GetRequestUrlImpl - return value need to be supported");
+    return {};
 }
-Ark_Boolean IsRequestGestureImpl(WebResourceRequestPeer* peer)
+Ark_Boolean IsRequestGestureImpl(Ark_WebResourceRequest peer)
 {
     CHECK_NULL_RETURN(peer && peer->webRequest, false);
     return Converter::ArkValue<Ark_Boolean>(peer->webRequest->HasGesture());
 }
-Ark_Boolean IsMainFrameImpl(WebResourceRequestPeer* peer)
+Ark_Boolean IsMainFrameImpl(Ark_WebResourceRequest peer)
 {
     CHECK_NULL_RETURN(peer && peer->webRequest, false);
     return Converter::ArkValue<Ark_Boolean>(peer->webRequest->IsMainFrame());
 }
-Ark_Boolean IsRedirectImpl(WebResourceRequestPeer* peer)
+Ark_Boolean IsRedirectImpl(Ark_WebResourceRequest peer)
 {
     CHECK_NULL_RETURN(peer && peer->webRequest, false);
     return Converter::ArkValue<Ark_Boolean>(peer->webRequest->IsRedirect());
 }
-void GetRequestMethodImpl(WebResourceRequestPeer* peer)
+Ark_String GetRequestMethodImpl(Ark_WebResourceRequest peer)
 {
-    CHECK_NULL_VOID(peer && peer->webRequest);
+    CHECK_NULL_RETURN(peer && peer->webRequest, {});
     peer->webRequest->GetMethod();
     // method need to be returned
     LOGE("WebResourceRequestPeer::GetRequestMethodImpl - return value need to be supported");
+    return {};
 }
 } // WebResourceRequestAccessor
 const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor()

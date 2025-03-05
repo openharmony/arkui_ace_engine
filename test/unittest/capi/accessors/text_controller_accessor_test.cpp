@@ -19,6 +19,7 @@
 #include "node_api.h"
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
@@ -112,16 +113,15 @@ HWTEST_F(TextControllerAccessorTest, closeSelectionMenuTest, TestSize.Level1)
 HWTEST_F(TextControllerAccessorTest, setStyledStringTest, TestSize.Level1)
 {
     const std::string expectedStrValue = "String value";
-    Ark_StyledString styledString;
     auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_String>(expectedStrValue);
     auto styles = Converter::ArkValue<Opt_Array_StyleOptions>();
 
     auto styledStringAccessor = GeneratedModifier::GetStyledStringAccessor();
     ASSERT_NE(styledStringAccessor, nullptr);
-    styledString.ptr = styledStringAccessor->ctor(&value, &styles);
-    accessor_->setStyledString(peer_, &styledString);
+    Ark_StyledString styledString = styledStringAccessor->ctor(&value, &styles);
+    accessor_->setStyledString(peer_, styledString);
     EXPECT_EQ(g_actualSpanString, expectedStrValue);
-    styledStringAccessor->destroyPeer(reinterpret_cast<StyledStringPeer*>(styledString.ptr));
+    styledStringAccessor->destroyPeer(styledString);
 }
 
 /**
@@ -141,7 +141,7 @@ HWTEST_F(TextControllerAccessorTest, getLayoutManagerTest, TestSize.Level1)
     auto layoutManagerAccessor = GeneratedModifier::GetLayoutManagerAccessor();
     ASSERT_NE(layoutManagerAccessor, nullptr);
     auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(manager);
-    EXPECT_EQ(layoutManagerAccessor->getLineCount(layoutManagerPeer), expectedLineCount);
+    EXPECT_EQ(Converter::Convert<int32_t>(layoutManagerAccessor->getLineCount(layoutManagerPeer)), expectedLineCount);
     layoutManagerAccessor->destroyPeer(layoutManagerPeer); // Destroy LayoutManager peer
 }
 

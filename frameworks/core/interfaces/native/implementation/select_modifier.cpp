@@ -529,6 +529,22 @@ void ArrowModifierImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SelectModelNG::SetArrowModifier(frameNode, convValue);
 }
+void OptionTextModifierImpl(Ark_NativePointer node,
+                            const Opt_TextModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetOptionTextModifier(frameNode, convValue);
+}
+void SelectedOptionTextModifierImpl(Ark_NativePointer node,
+                                    const Opt_TextModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetSelectedOptionTextModifier(frameNode, convValue);
+}
 void MenuAlign0Impl(Ark_NativePointer node,
                     Ark_MenuAlignType alignType,
                     const Opt_Offset* offset)
@@ -557,8 +573,8 @@ void MenuAlign1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(alignType); // for enums
     //SelectModelNG::SetMenuAlign1(frameNode, convValue);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Union_Number_Resource_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Union_Number_Resource_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -570,8 +586,8 @@ void __onChangeEvent_selectedImpl(Ark_NativePointer node,
     };
     SelectModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_ResourceStr_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_ResourceStr_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -630,10 +646,12 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::DividerImpl,
         SelectAttributeModifier::TextModifierImpl,
         SelectAttributeModifier::ArrowModifierImpl,
+        SelectAttributeModifier::OptionTextModifierImpl,
+        SelectAttributeModifier::SelectedOptionTextModifierImpl,
         SelectAttributeModifier::MenuAlign0Impl,
         SelectAttributeModifier::MenuAlign1Impl,
-        SelectAttributeModifier::__onChangeEvent_selectedImpl,
-        SelectAttributeModifier::__onChangeEvent_valueImpl,
+        SelectAttributeModifier::_onChangeEvent_selectedImpl,
+        SelectAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISelectModifierImpl;
 }

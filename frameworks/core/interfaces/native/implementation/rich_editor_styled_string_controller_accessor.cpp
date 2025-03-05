@@ -14,18 +14,18 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/implementation/styled_string_peer.h"
-#include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
+
+#include "mutable_styled_string_peer.h"
+#include "rich_editor_styled_string_controller_peer_impl.h"
+#include "styled_string_peer.h"
 
 namespace OHOS::Ace::NG {
 void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
 {
-    dst.replacementString = { StyledStringPeer::Create(src.GetReplacementString()) };
+    dst.replacementString = StyledStringPeer::Create(src.GetReplacementString());
     dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().start);
     dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().end);
 }
@@ -34,11 +34,11 @@ void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeVa
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 namespace RichEditorStyledStringControllerAccessor {
-void DestroyPeerImpl(RichEditorStyledStringControllerPeer* peer)
+void DestroyPeerImpl(Ark_RichEditorStyledStringController peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_RichEditorStyledStringController CtorImpl()
 {
     return new RichEditorStyledStringControllerPeer();
 }
@@ -46,29 +46,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
-                         const Ark_StyledString* styledString)
+void SetStyledStringImpl(Ark_RichEditorStyledStringController peer,
+                         Ark_StyledString styledString)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(styledString);
-    CHECK_NULL_VOID(styledString->ptr);
-    auto styledStringPeer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
-    peer->SetStyledString(styledStringPeer->spanString);
+    peer->SetStyledString(styledString->spanString);
 }
-Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
+Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
 {
     auto mutableString = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
     CHECK_NULL_RETURN(peer && mutableString, mutableString);
     mutableString->spanString = AceType::DynamicCast<MutableSpanString>(peer->GetStyledString());
     return mutableString;
 }
-Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
+Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     LOGW("RichEditorStyledString Accessor:: GetSelectionImpl is not implemented");
-    return nullptr;
+    return {};
 }
-void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
+void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
                           const Ark_StyledStringChangedListener* listener)
 {
     CHECK_NULL_VOID(peer);

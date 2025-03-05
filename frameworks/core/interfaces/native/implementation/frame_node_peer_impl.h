@@ -20,8 +20,26 @@
 #include "base/memory/referenced.h"
 
 struct FrameNodePeer {
-    explicit FrameNodePeer(const Ark_UIContext* uiContext) {}
-    virtual ~FrameNodePeer() = default;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
+
+    static FrameNodePeer *Create(const Ark_UIContext* uiContext)
+    {
+        return new FrameNodePeer;
+    }
+
+    static FrameNodePeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
+    {
+        return new FrameNodePeer{src};
+    }
+
+    static FrameNodePeer *Create(OHOS::Ace::NG::FrameNode* src)
+    {
+        return new FrameNodePeer{OHOS::Ace::Referenced::Claim<OHOS::Ace::NG::FrameNode>(src)};
+    }
+
+    static void Destroy(FrameNodePeer *peer)
+    {
+        delete peer;
+    }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H

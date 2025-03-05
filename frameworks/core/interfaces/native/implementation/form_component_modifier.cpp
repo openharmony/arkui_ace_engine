@@ -148,7 +148,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
-    return nullptr;
+    return {};
 #endif
 }
 } // FormComponentModifier

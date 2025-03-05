@@ -64,16 +64,6 @@ namespace  {
     const auto ATTRIBUTE_MENUS_NAME = "menus";
     const auto ATTRIBUTE_MENUS_DEFAULT_VALUE = "";
     const auto MENU_ITEM_COUNT = 3.0;
-
-    struct EventsTracker {
-        static inline GENERATED_ArkUINavigationEventsReceiver navigationEventReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getNavigationEventsReceiver = [] () -> const GENERATED_ArkUINavigationEventsReceiver* {
-                return &navigationEventReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class NavigationModifierTest : public ModifierTestBase<GENERATED_ArkUINavigationModifier,
@@ -87,8 +77,6 @@ public:
         auto themeStyle = SetupThemeStyle(THEME_PATTERN_NAVIGATION_BAR);
         themeStyle->SetAttr("navigation_bar_most_menu_item_count_in_bar", { .value = MENU_ITEM_COUNT });
         SetupTheme<NavigationBarTheme>();
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -849,13 +837,6 @@ HWTEST_F(NavigationModifierTest, setOnNavBarStateChangeTest, TestSize.Level1)
         bool isVisible;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::navigationEventReceiver.onNavBarStateChange = [](Ark_Int32 nodeId, const Ark_Boolean isVisible)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .isVisible = Converter::ArkValue<Ark_Boolean>(isVisible)
-        };
-    };
 
     modifier_->setOnNavBarStateChange(node_, &func);
 
@@ -889,14 +870,6 @@ HWTEST_F(NavigationModifierTest, setOnNavigationModeChangeTest, TestSize.Level1)
         Ark_NavigationMode mode;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::navigationEventReceiver.onNavigationModeChange = [](
-        Ark_Int32 nodeId, const enum Ark_NavigationMode mode)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .mode = mode
-        };
-    };
 
     modifier_->setOnNavigationModeChange(node_, &func);
 

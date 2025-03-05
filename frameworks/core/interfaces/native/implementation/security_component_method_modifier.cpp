@@ -74,10 +74,10 @@ PaddingPropertyT<Dimension> Convert(const Ark_Length& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonMethodModifier {
-void WidthImpl(Ark_NativePointer node,
-               const Ark_Length* value);
-void HeightImpl(Ark_NativePointer node,
-                const Ark_Length* value);
+void Width0Impl(Ark_NativePointer node,
+    const Ark_Length* value);
+void Height0Impl(Ark_NativePointer node,
+    const Ark_Length* value);
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value);
 void ConstraintSizeImpl(Ark_NativePointer node,
@@ -89,7 +89,7 @@ namespace SecurityComponentMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    return {};
 }
 void IconSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
@@ -278,12 +278,12 @@ void KeyImpl(Ark_NativePointer node,
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
-    CommonMethodModifier::WidthImpl(node, value);
+    CommonMethodModifier::Width0Impl(node, value);
 }
 void HeightImpl(Ark_NativePointer node,
                 const Ark_Length* value)
 {
-    CommonMethodModifier::HeightImpl(node, value);
+    CommonMethodModifier::Height0Impl(node, value);
 }
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value)

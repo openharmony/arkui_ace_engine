@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
@@ -75,16 +76,16 @@ HWTEST_F(ICurveAccessorTest, interpolateValidTest, TestSize.Level1)
     Ark_Number arkFraction4 = Converter::ArkValue<Ark_Number>(fraction4);
 
     EXPECT_CALL(*mockHandler_, MoveInternal(fraction1)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, accessor_->interpolate(peer_, &arkFraction1));
+    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction1)));
 
     EXPECT_CALL(*mockHandler_, MoveInternal(fraction2)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, accessor_->interpolate(peer_, &arkFraction2));
+    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction2)));
 
     EXPECT_CALL(*mockHandler_, MoveInternal(fraction3)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, accessor_->interpolate(peer_, &arkFraction3));
+    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction3)));
 
     EXPECT_CALL(*mockHandler_, MoveInternal(fraction4)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, accessor_->interpolate(peer_, &arkFraction4));
+    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction4)));
 }
 
 /**
@@ -111,12 +112,12 @@ HWTEST_F(ICurveAccessorTest, interpolateInvalidTest, TestSize.Level1)
     Ark_Number arkFraction2 = Converter::ArkValue<Ark_Number>(fraction2);
 
     EXPECT_CALL(*mockHandler_, MoveInternal(expectedFraction1)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, accessor_->interpolate(peer_, &arkFraction1));
+    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction1)));
 
     EXPECT_CALL(*mockHandler_, MoveInternal(expectedFraction2)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, accessor_->interpolate(peer_, &arkFraction2));
+    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction2)));
 
-    EXPECT_EQ(arkResultInvalid, accessor_->interpolate(peer_, nullptr));
+    EXPECT_EQ(arkResultInvalid, Converter::Convert<int32_t>(accessor_->interpolate(peer_, nullptr)));
 }
 
 } // namespace OHOS::Ace::NG

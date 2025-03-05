@@ -69,9 +69,9 @@ VideoOptions Convert(const Ark_VideoOptions& src)
         .value_or(ImageSourceInfo("", "", ""));
 
     // controller
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_VideoController>(src.controller);
     CHECK_NULL_RETURN(abstPeerPtrOpt, options);
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::VideoControllerPeerImpl *>(*abstPeerPtrOpt);
+    auto peerImplPtr = abstPeerPtrOpt.value();
     CHECK_NULL_RETURN(peerImplPtr, options);
     options.videoController = peerImplPtr->GetController();
     return options;
@@ -295,12 +295,12 @@ void AnalyzerConfigImpl(Ark_NativePointer node,
     LOGE("ARKOALA VideoInterface::AnalyzerConfigImpl -> method is not implemented.");
 }
 void SurfaceBackgroundColorImpl(Ark_NativePointer node,
-                                const Ark_ColorMetrics* value)
+                                Ark_ColorMetrics value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //VideoModelNG::SetSurfaceBackgroundColor(frameNode, convValue);
 }
 void EnableShortcutKeyImpl(Ark_NativePointer node,

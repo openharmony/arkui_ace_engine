@@ -22,13 +22,13 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
 const auto SCALE_LIMIT_MIN = 0.0;
-void DestroyPeerImpl(CanvasPatternPeer* peer)
+void DestroyPeerImpl(Ark_CanvasPattern peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_CanvasPattern CtorImpl()
 {
     return new CanvasPatternPeer();
 }
@@ -36,13 +36,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetTransformImpl(CanvasPatternPeer* peer,
+void SetTransformImpl(Ark_CanvasPattern peer,
                       const Opt_Matrix2D* transform)
 {
     CHECK_NULL_VOID(peer);
     auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
     CHECK_NULL_VOID(opt);
-    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
+    auto matrixPeer = opt.value();
     CHECK_NULL_VOID(matrixPeer);
     auto param = matrixPeer->transform;
     if (LessNotEqual(param.scaleX, SCALE_LIMIT_MIN) || LessNotEqual(param.scaleY, SCALE_LIMIT_MIN)) {

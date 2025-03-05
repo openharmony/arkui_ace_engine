@@ -946,50 +946,6 @@ HWTEST_F(
 }
 
 /*
- * @tc.name: setEnableSmoothDragResizeTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, DISABLED_setEnableSmoothDragResizeTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SMOOTH_DRAG_RESIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SMOOTH_DRAG_RESIZE_DEFAULT_VALUE) <<
-        "Default value for attribute 'enableSmoothDragResize'";
-}
-
-/*
- * @tc.name: setEnableSmoothDragResizeTestEnableSmoothDragResizeValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, DISABLED_setEnableSmoothDragResizeTestEnableSmoothDragResizeValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueEnableSmoothDragResize;
-
-    // Initial setup
-    initValueEnableSmoothDragResize = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueEnableSmoothDragResize](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueEnableSmoothDragResize = initValueEnableSmoothDragResize;
-
-        inputValueEnableSmoothDragResize = value;
-        modifier_->setEnableSmoothDragResize(node_, inputValueEnableSmoothDragResize);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SMOOTH_DRAG_RESIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setEnableSmoothDragResize, attribute: enableSmoothDragResize";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
  * @tc.name: setSelectionMenuOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -1220,6 +1176,125 @@ HWTEST_F(WebModifierTest, DISABLED_setEnableWebAVSessionTestEnableWebAVSessionVa
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, expected, value);
     }
+}
+
+/*
+ * @tc.name: setOptimizeParserBudgetTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setOptimizeParserBudgetTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_DEFAULT_VALUE) <<
+        "Default value for attribute 'optimizeParserBudget'";
+}
+
+/*
+ * @tc.name: setOptimizeParserBudgetTestOptimizeParserBudgetValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setOptimizeParserBudgetTestOptimizeParserBudgetValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueOptimizeParserBudget;
+
+    // Initial setup
+    initValueOptimizeParserBudget = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueOptimizeParserBudget](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueOptimizeParserBudget = initValueOptimizeParserBudget;
+
+        inputValueOptimizeParserBudget = value;
+        modifier_->setOptimizeParserBudget(node_, inputValueOptimizeParserBudget);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setOptimizeParserBudget, attribute: optimizeParserBudget";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnDocumentStartTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnDocumentStartTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_START_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_START_DEFAULT_VALUE) <<
+        "Default value for attribute 'runJavaScriptOnDocumentStart'";
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnDocumentStartTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnDocumentStartTestValidValues, TestSize.Level1)
+{
+    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnDocumentEndTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnDocumentEndTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_END_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_END_DEFAULT_VALUE) <<
+        "Default value for attribute 'runJavaScriptOnDocumentEnd'";
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnDocumentEndTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnDocumentEndTestValidValues, TestSize.Level1)
+{
+    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnHeadEndTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnHeadEndTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_HEAD_END_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_HEAD_END_DEFAULT_VALUE) <<
+        "Default value for attribute 'runJavaScriptOnHeadEnd'";
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnHeadEndTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnHeadEndTestValidValues, TestSize.Level1)
+{
+    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
 
 /*

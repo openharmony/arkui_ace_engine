@@ -20,16 +20,16 @@
 #include "arkoala_api_generated.h"
 
 namespace {
-constexpr int32_t BAD_REQUEST = 400;
+const  Ark_Number BAD_REQUEST = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(400);
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceResponseAccessor {
-void DestroyPeerImpl(WebResourceResponsePeer* peer)
+void DestroyPeerImpl(Ark_WebResourceResponse peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_WebResourceResponse CtorImpl()
 {
     return new WebResourceResponsePeer();
 }
@@ -37,53 +37,58 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetResponseDataImpl(WebResourceResponsePeer* peer)
+Ark_String GetResponseDataImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetData();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseDataImpl - return value need to be supported");
+    return {};
 }
-Ark_NativePointer GetResponseDataExImpl(WebResourceResponsePeer* peer)
+Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
 {
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseDataExImpl - return value need to be supported");
-    return 0;
+    return {};
 }
-void GetResponseEncodingImpl(WebResourceResponsePeer* peer)
+Ark_String GetResponseEncodingImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetEncoding();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseEncodingImpl - return value need to be supported");
+    return {};
 }
-void GetResponseMimeTypeImpl(WebResourceResponsePeer* peer)
+Ark_String GetResponseMimeTypeImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetMimeType();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseMimeTypeImpl - return value need to be supported");
+    return {};
 }
-void GetReasonMessageImpl(WebResourceResponsePeer* peer)
+Ark_String GetReasonMessageImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetReason();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetReasonMessageImpl - return value need to be supported");
+    return {};
 }
-void GetResponseHeaderImpl(WebResourceResponsePeer* peer)
+Array_Header GetResponseHeaderImpl(Ark_WebResourceResponse peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetHeaders();
     // value need to be returned
     LOGE("WebResourceResponseAccessor::GetResponseHeaderImpl - return value need to be supported");
+    return {};
 }
-Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer)
+Ark_Number GetResponseCodeImpl(Ark_WebResourceResponse peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, BAD_REQUEST);
-    return static_cast<Ark_Int32>(peer->handler->GetStatusCode());
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetStatusCode());
 }
-void SetResponseDataImpl(WebResourceResponsePeer* peer,
+void SetResponseDataImpl(Ark_WebResourceResponse peer,
                          const Ark_Union_String_Number_Resource_Buffer* data)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -116,7 +121,7 @@ void SetResponseDataImpl(WebResourceResponsePeer* peer,
         []() {}
     );
 }
-void SetResponseEncodingImpl(WebResourceResponsePeer* peer,
+void SetResponseEncodingImpl(Ark_WebResourceResponse peer,
                              const Ark_String* encoding)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -124,7 +129,7 @@ void SetResponseEncodingImpl(WebResourceResponsePeer* peer,
     std::string str = Converter::Convert<std::string>(*encoding);
     peer->handler->SetEncoding(str);
 }
-void SetResponseMimeTypeImpl(WebResourceResponsePeer* peer,
+void SetResponseMimeTypeImpl(Ark_WebResourceResponse peer,
                              const Ark_String* mimeType)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -132,7 +137,7 @@ void SetResponseMimeTypeImpl(WebResourceResponsePeer* peer,
     std::string str = Converter::Convert<std::string>(*mimeType);
     peer->handler->SetMimeType(str);
 }
-void SetReasonMessageImpl(WebResourceResponsePeer* peer,
+void SetReasonMessageImpl(Ark_WebResourceResponse peer,
                           const Ark_String* reason)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -140,7 +145,7 @@ void SetReasonMessageImpl(WebResourceResponsePeer* peer,
     std::string str = Converter::Convert<std::string>(*reason);
     peer->handler->SetReason(str);
 }
-void SetResponseHeaderImpl(WebResourceResponsePeer* peer,
+void SetResponseHeaderImpl(Ark_WebResourceResponse peer,
                            const Array_Header* header)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -152,7 +157,7 @@ void SetResponseHeaderImpl(WebResourceResponsePeer* peer,
         }
     }
 }
-void SetResponseCodeImpl(WebResourceResponsePeer* peer,
+void SetResponseCodeImpl(Ark_WebResourceResponse peer,
                          const Ark_Number* code)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -160,14 +165,14 @@ void SetResponseCodeImpl(WebResourceResponsePeer* peer,
     int32_t statusCode = Converter::Convert<int32_t>(*code);
     peer->handler->SetStatusCode(statusCode);
 }
-void SetResponseIsReadyImpl(WebResourceResponsePeer* peer,
+void SetResponseIsReadyImpl(Ark_WebResourceResponse peer,
                             Ark_Boolean IsReady)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     bool isReady = Converter::Convert<bool>(IsReady);
     peer->handler->SetResponseStatus(isReady);
 }
-Ark_Boolean GetResponseIsReadyImpl(WebResourceResponsePeer* peer)
+Ark_Boolean GetResponseIsReadyImpl(Ark_WebResourceResponse peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, false);
     return Converter::ArkValue<Ark_Boolean>(peer->handler->GetResponseStatus());

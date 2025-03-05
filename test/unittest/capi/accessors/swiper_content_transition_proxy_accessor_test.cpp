@@ -44,10 +44,10 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, initialStateTest, TestSize.Le
     ASSERT_NE(accessor_->getPosition, nullptr);
     ASSERT_NE(accessor_->getMainAxisLength, nullptr);
 
-    EXPECT_EQ(accessor_->getSelectedIndex(peer_), 0);
-    EXPECT_EQ(accessor_->getIndex(peer_), 0);
-    EXPECT_EQ(accessor_->getPosition(peer_), 0);
-    EXPECT_EQ(accessor_->getMainAxisLength(peer_), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getSelectedIndex(peer_)), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getIndex(peer_)), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getPosition(peer_)), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getMainAxisLength(peer_)), 0);
 }
 
 /**
@@ -64,10 +64,10 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, nothingHandlerStateTest, Test
 
     peer_->SetHandler(nullptr);
 
-    EXPECT_EQ(accessor_->getSelectedIndex(peer_), 0);
-    EXPECT_EQ(accessor_->getIndex(peer_), 0);
-    EXPECT_EQ(accessor_->getPosition(peer_), 0);
-    EXPECT_EQ(accessor_->getMainAxisLength(peer_), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getSelectedIndex(peer_)), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getIndex(peer_)), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getPosition(peer_)), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getMainAxisLength(peer_)), 0);
 }
 
 /**
@@ -91,19 +91,19 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, settersGettersTest, TestSize.
 
     auto arkSelectedIndex = ArkValue<Ark_Number>(1);
     accessor_->setSelectedIndex(peer_, &arkSelectedIndex);
-    EXPECT_EQ(accessor_->getSelectedIndex(peer_), 1);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getSelectedIndex(peer_)), 1);
 
     auto arkIndex = ArkValue<Ark_Number>(2);
     accessor_->setIndex(peer_, &arkIndex);
-    EXPECT_EQ(accessor_->getIndex(peer_), 2);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getIndex(peer_)), 2);
 
     auto arkPosition = ArkValue<Ark_Number>(3);
     accessor_->setPosition(peer_, &arkPosition);
-    EXPECT_EQ(accessor_->getPosition(peer_), 3);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getPosition(peer_)), 3);
 
     auto arkMainAxisLength = ArkValue<Ark_Number>(4);
     accessor_->setMainAxisLength(peer_, &arkMainAxisLength);
-    EXPECT_EQ(accessor_->getMainAxisLength(peer_), 4);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getMainAxisLength(peer_)), 4);
 }
 
 /**

@@ -779,7 +779,7 @@ HWTEST_F(MenuItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 
     Callback_Boolean_Void arkCallback = Converter::ArkValue<Callback_Boolean_Void>(checkCallback, contextId);
 
-    modifier_->set__onChangeEvent_selected(node_, &arkCallback);
+    modifier_->set_onChangeEvent_selected(node_, &arkCallback);
 
     ASSERT_EQ(checkEvent.has_value(), false);
     auto changeEvent = eventHub->GetSelectedChangeEvent();

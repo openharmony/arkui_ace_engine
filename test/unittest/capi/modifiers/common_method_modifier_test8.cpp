@@ -638,7 +638,6 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = CreateCustomNodeBuilder(node);
-    Ark_TransitionEffect arkEffect;
     auto arkShow = Converter::ArkValue<Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actualC, expectedC] : arkUnionNumberTestPlan) {
@@ -652,9 +651,8 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, Te
             };
             const auto accessor = GeneratedModifier::GetFullAPI()->getAccessors()->getTransitionEffectAccessor();
             auto peer = accessor->scale(&arkScale);
-            arkEffect.ptr = peer;
             auto arkOptions = Ark_ContentCoverOptions {
-                .transition = Converter::ArkValue<Opt_TransitionEffect>(arkEffect)
+                .transition = Converter::ArkValue<Opt_TransitionEffect>(peer)
             };
             auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
             auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());

@@ -480,11 +480,11 @@ HWTEST_F(ImageModifierTest, setFitOriginalSizeTestFitOriginalSizeValidValues, Te
 }
 
 /*
- * @tc.name: setFillColorTestDefaultValues
+ * @tc.name: setFillColor0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setFillColor0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -494,11 +494,11 @@ HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFillColorTestFillColorValidValues
+ * @tc.name: setFillColor0TestFillColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setFillColor0TestFillColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueFillColor;
 
@@ -511,11 +511,11 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
         Ark_ResourceColor inputValueFillColor = initValueFillColor;
 
         inputValueFillColor = value;
-        modifier_->setFillColor(node_, &inputValueFillColor);
+        modifier_->setFillColor0(node_, &inputValueFillColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setFillColor, attribute: fillColor";
+            "Input value is: " << input << ", method: setFillColor0, attribute: fillColor";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -533,11 +533,11 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
 }
 
 /*
- * @tc.name: setFillColorTestFillColorInvalidValues
+ * @tc.name: setFillColor0TestFillColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setFillColor0TestFillColorInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueFillColor;
 
@@ -548,13 +548,13 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Lev
     auto checkValue = [this, &initValueFillColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueFillColor = initValueFillColor;
 
-        modifier_->setFillColor(node_, &inputValueFillColor);
+        modifier_->setFillColor0(node_, &inputValueFillColor);
         inputValueFillColor = value;
-        modifier_->setFillColor(node_, &inputValueFillColor);
+        modifier_->setFillColor0(node_, &inputValueFillColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setFillColor, attribute: fillColor";
+            "Input value is: " << input << ", method: setFillColor0, attribute: fillColor";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -565,6 +565,109 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Lev
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setFillColor1TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setFillColor1TestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE) << "Default value for attribute 'fillColor'";
+}
+
+/*
+ * @tc.name: setFillColor1TestFillColorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setFillColor1TestFillColorValidValues, TestSize.Level1)
+{
+    Ark_Union_ResourceColor_ColorContent initValueFillColor;
+
+    // Initial setup
+    initValueFillColor = ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+
+    auto checkValue = [this, &initValueFillColor](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_ResourceColor_ColorContent& value) {
+        Ark_Union_ResourceColor_ColorContent inputValueFillColor = initValueFillColor;
+
+        inputValueFillColor = value;
+        modifier_->setFillColor1(node_, &inputValueFillColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFillColor1, attribute: fillColor";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+                ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+                ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+    }
+    ADD_FAILURE() << "No fixture is defined for type Ark_ColorContent";
+}
+
+/*
+ * @tc.name: setFillColor1TestFillColorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setFillColor1TestFillColorInvalidValues, TestSize.Level1)
+{
+    Ark_Union_ResourceColor_ColorContent initValueFillColor;
+
+    // Initial setup
+    initValueFillColor = ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+
+    auto checkValue = [this, &initValueFillColor](
+                          const std::string& input, const Ark_Union_ResourceColor_ColorContent& value) {
+        Ark_Union_ResourceColor_ColorContent inputValueFillColor = initValueFillColor;
+
+        modifier_->setFillColor1(node_, &inputValueFillColor);
+        inputValueFillColor = value;
+        modifier_->setFillColor1(node_, &inputValueFillColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFillColor1, attribute: fillColor";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+                              ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_Empty>(nullptr));
+    ADD_FAILURE() << "No fixture is defined for type Ark_ColorContent";
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_ColorContent, Ark_Empty>(nullptr));
 }
 
 /*

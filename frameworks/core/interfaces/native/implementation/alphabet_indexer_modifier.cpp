@@ -326,8 +326,8 @@ void AlignStyleImpl(Ark_NativePointer node,
         IndexerModelNG::SetPopupHorizontalSpace(frameNode, offsetDimension.value());
     }
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Number_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -371,7 +371,7 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupTitleBackgroundImpl,
         AlphabetIndexerAttributeModifier::EnableHapticFeedbackImpl,
         AlphabetIndexerAttributeModifier::AlignStyleImpl,
-        AlphabetIndexerAttributeModifier::__onChangeEvent_selectedImpl,
+        AlphabetIndexerAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIAlphabetIndexerModifierImpl;
 }

@@ -96,10 +96,8 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestPixelMap, T
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
-    Ark_Materialized px { .ptr = &pixelMapPeer };
 
-    auto arkValue =
-        ArkUnion<imageOptions, Ark_PixelMap>(px);
+    auto arkValue = ArkUnion<imageOptions, Ark_PixelMap>(&pixelMapPeer);
     modifier_->setMediaCachedImageOptions(node_, &arkValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);

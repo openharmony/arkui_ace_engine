@@ -214,8 +214,8 @@ void ContentModifier1Impl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CheckboxModelNG::SetContentModifier1(frameNode, convValue);
 }
-void __onChangeEvent_selectImpl(Ark_NativePointer node,
-                                const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectImpl(Ark_NativePointer node,
+                               const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -247,7 +247,7 @@ const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
         CheckboxAttributeModifier::OnChange1Impl,
         CheckboxAttributeModifier::ContentModifier0Impl,
         CheckboxAttributeModifier::ContentModifier1Impl,
-        CheckboxAttributeModifier::__onChangeEvent_selectImpl,
+        CheckboxAttributeModifier::_onChangeEvent_selectImpl,
     };
     return &ArkUICheckboxModifierImpl;
 }

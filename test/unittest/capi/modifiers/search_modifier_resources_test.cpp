@@ -154,16 +154,6 @@ const std::vector<ResourceTest> FONT_FAMILY_TEST_PLAN_RESOURCES = {
     { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_ID)),
         FAMILY_BY_NUMBER },
 };
-
-struct EventsTracker {
-        static inline GENERATED_ArkUISearchEventsReceiver getSearchEventsReceiver {};
-
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getSearchEventsReceiver = [] () -> const GENERATED_ArkUISearchEventsReceiver* {
-                return &getSearchEventsReceiver;
-            }
-        };
-    }; // EventsTracker
 } // namespace
 
 class SearchModifierResourcesTest : public ModifierTestBase<GENERATED_ArkUISearchModifier,
@@ -188,8 +178,6 @@ public:
 
         AddResource(RES_FAMILY_ID, FAMILY_BY_NUMBER);
         AddResource(RES_FAMILY_NAME, FAMILY_BY_STRING);
-
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -421,13 +409,6 @@ HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
         std::string data;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::getSearchEventsReceiver.inputFilter =
-        [](Ark_Int32 nodeId, const Ark_String data) {
-            checkEvent = {
-            .nodeId = nodeId,
-            .data = Convert<std::string>(data),
-        };
-    };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Opt_Callback_String_Void func{};

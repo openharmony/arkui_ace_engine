@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
@@ -90,7 +91,7 @@ HWTEST_F(ConsoleMessageAccessorTest, DISABLED_getMessageLevelTest, TestSize.Leve
 HWTEST_F(ConsoleMessageAccessorTest, getLineNumberTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getLineNumber, nullptr);
-    EXPECT_EQ(g_lineNumber, accessor_->getLineNumber(peer_));
+    EXPECT_EQ(g_lineNumber, Converter::Convert<int>(accessor_->getLineNumber(peer_)));
 }
 
 } // namespace OHOS::Ace::NG

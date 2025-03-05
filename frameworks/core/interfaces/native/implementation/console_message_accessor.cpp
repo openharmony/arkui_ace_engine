@@ -15,22 +15,23 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 constexpr int MESSAGE_LEVEL_INFO = 2;
 namespace ConsoleMessageAccessor {
-void DestroyPeerImpl(ConsoleMessagePeer* peer)
+void DestroyPeerImpl(Ark_ConsoleMessage peer)
 {
     CHECK_NULL_VOID(peer);
     peer->webConsoleLog = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Ark_String* message,
-                           const Ark_String* sourceId,
-                           const Ark_Number* lineNumber,
-                           Ark_MessageLevel messageLevel)
+Ark_ConsoleMessage CtorImpl(const Ark_String* message,
+                            const Ark_String* sourceId,
+                            const Ark_Number* lineNumber,
+                            Ark_MessageLevel messageLevel)
 {
     CHECK_NULL_RETURN(message, nullptr);
     CHECK_NULL_RETURN(sourceId, nullptr);
@@ -50,32 +51,35 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetMessageImpl(ConsoleMessagePeer* peer)
+Ark_String GetMessageImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_VOID(peer && peer->webConsoleLog);
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
     peer->webConsoleLog->GetLog();
     // log message need to be returned
     LOGE("ConsoleMessageAccessor::GetMessageImpl - return value need to be supported");
+    return {};
 }
-void GetSourceIdImpl(ConsoleMessagePeer* peer)
+Ark_String GetSourceIdImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_VOID(peer && peer->webConsoleLog);
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
     peer->webConsoleLog->GetSourceId();
     // source id need to be returned
     LOGE("ConsoleMessageAccessor::GetSourceIdImpl - return value need to be supported");
+    return {};
 }
-Ark_Int32 GetLineNumberImpl(ConsoleMessagePeer* peer)
+Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webConsoleLog, 0);
-    return static_cast<Ark_Int32>(peer->webConsoleLog->GetLineNumber());
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->webConsoleLog->GetLineNumber());
 }
-Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
+Ark_MessageLevel GetMessageLevelImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webConsoleLog, 0);
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
     peer->webConsoleLog->GetLogLevel();
     // log level need to be returned
     LOGE("ConsoleMessageAccessor::GetMessageLevelImpl - return value need to be supported");
-    return nullptr;
+    return {};
 }
 } // ConsoleMessageAccessor
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()

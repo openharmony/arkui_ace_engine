@@ -166,6 +166,14 @@ void IterationsImpl(Ark_NativePointer node,
     Validator::ValidateGreatOrEqual(iterationOpt, -1);
     ImageAnimatorModelNG::SetIteration(frameNode, iterationOpt);
 }
+void MonitorInvisibleAreaImpl(Ark_NativePointer node,
+                              Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //ImageAnimatorModelNG::SetMonitorInvisibleArea(frameNode, convValue);
+}
 void OnStartImpl(Ark_NativePointer node,
                  const Callback_Void* value)
 {
@@ -235,6 +243,7 @@ const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
         ImageAnimatorAttributeModifier::PreDecodeImpl,
         ImageAnimatorAttributeModifier::FillModeImpl,
         ImageAnimatorAttributeModifier::IterationsImpl,
+        ImageAnimatorAttributeModifier::MonitorInvisibleAreaImpl,
         ImageAnimatorAttributeModifier::OnStartImpl,
         ImageAnimatorAttributeModifier::OnPauseImpl,
         ImageAnimatorAttributeModifier::OnRepeatImpl,

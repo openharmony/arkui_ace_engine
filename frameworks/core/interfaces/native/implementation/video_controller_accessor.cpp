@@ -36,7 +36,7 @@ inline void AssignCast(std::optional<SeekMode>& dst, const Ark_SeekMode& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace VideoControllerAccessor {
-void DestroyPeerImpl(VideoControllerPeer* peer)
+void DestroyPeerImpl(Ark_VideoController peer)
 {
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     if (peerImpl) {
@@ -47,7 +47,7 @@ void DestroyPeerImpl(VideoControllerPeer* peer)
         }
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_VideoController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<VideoControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -59,25 +59,25 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void StartImpl(VideoControllerPeer* peer)
+void StartImpl(Ark_VideoController peer)
 {
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStart();
 }
-void PauseImpl(VideoControllerPeer* peer)
+void PauseImpl(Ark_VideoController peer)
 {
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerPause();
 }
-void StopImpl(VideoControllerPeer* peer)
+void StopImpl(Ark_VideoController peer)
 {
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStop();
 }
-void SetCurrentTime0Impl(VideoControllerPeer* peer,
+void SetCurrentTime0Impl(Ark_VideoController peer,
                          const Ark_Number* value)
 {
     CHECK_NULL_VOID(value);
@@ -85,20 +85,20 @@ void SetCurrentTime0Impl(VideoControllerPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerSetCurrentTime(Converter::Convert<float>(*value));
 }
-void RequestFullscreenImpl(VideoControllerPeer* peer,
+void RequestFullscreenImpl(Ark_VideoController peer,
                            Ark_Boolean value)
 {
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerRequestFullscreen(Converter::Convert<bool>(value));
 }
-void ExitFullscreenImpl(VideoControllerPeer* peer)
+void ExitFullscreenImpl(Ark_VideoController peer)
 {
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerExitFullscreen();
 }
-void SetCurrentTime1Impl(VideoControllerPeer* peer,
+void SetCurrentTime1Impl(Ark_VideoController peer,
                          const Ark_Number* value,
                          Ark_SeekMode seekMode)
 {
@@ -108,7 +108,7 @@ void SetCurrentTime1Impl(VideoControllerPeer* peer,
     auto seekModeValue = Converter::OptConvert<SeekMode>(seekMode).value_or(SeekMode::SEEK_PREVIOUS_SYNC);
     peerImpl->TriggerSetCurrentTime(Converter::Convert<float>(*value), seekModeValue);
 }
-void ResetImpl(VideoControllerPeer* peer)
+void ResetImpl(Ark_VideoController peer)
 {
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);

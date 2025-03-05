@@ -16,13 +16,10 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_2D_ACCESSOR_PEER_IMPL_H
 
 #include "canvas_path_accessor_peer_impl.h"
-#include "matrix2d_peer.h"
+
+struct Path2DPeer : public CanvasPathPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-class Path2DPeerImpl : public CanvasPathPeerImpl {
-public:
-    Path2DPeerImpl() = default;
-    ~Path2DPeerImpl() override = default;
-};
+    using Path2DPeerImpl = ::Path2DPeer;
 } // namespace OHOS::Ace::NG::GeneratedModifier
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_2D_ACCESSOR_PEER_IMPL_H

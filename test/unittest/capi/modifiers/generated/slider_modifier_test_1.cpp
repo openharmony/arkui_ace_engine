@@ -13,111 +13,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
-#include "modifier_test_base.h"
-#include "modifiers_test_utils.h"
-#include "test_fixtures.h"
-#include "type_helpers.h"
-
-#include "core/components/slider/slider_theme.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
+#include "slider_modifier_test.h"
 
 namespace OHOS::Ace::NG {
-using namespace testing;
-using namespace testing::ext;
-using namespace Converter;
-using namespace TypeHelper;
-namespace {
-const auto ATTRIBUTE_TRACK_COLOR_NAME = "trackColor";
-const auto ATTRIBUTE_BLOCK_SIZE_NAME = "blockSize";
-const auto ATTRIBUTE_BLOCK_STYLE_NAME = "blockStyle";
-const auto ATTRIBUTE_SLIDE_RANGE_NAME = "slideRange";
-const auto ATTRIBUTE_VALUE_NAME = "value";
-const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "0";
-const auto ATTRIBUTE_MIN_NAME = "min";
-const auto ATTRIBUTE_MIN_DEFAULT_VALUE = "0";
-const auto ATTRIBUTE_MAX_NAME = "max";
-const auto ATTRIBUTE_MAX_DEFAULT_VALUE = "100";
-const auto ATTRIBUTE_STEP_NAME = "step";
-const auto ATTRIBUTE_STEP_DEFAULT_VALUE = "1";
-const auto ATTRIBUTE_STYLE_NAME = "style";
-const auto ATTRIBUTE_STYLE_DEFAULT_VALUE = "SliderStyle.OutSet";
-const auto ATTRIBUTE_DIRECTION_NAME = "direction";
-const auto ATTRIBUTE_DIRECTION_DEFAULT_VALUE = "Axis.Horizontal";
-const auto ATTRIBUTE_REVERSE_NAME = "reverse";
-const auto ATTRIBUTE_REVERSE_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_BLOCK_COLOR_NAME = "blockColor";
-const auto ATTRIBUTE_BLOCK_COLOR_DEFAULT_VALUE = "#FF000000";
-const auto ATTRIBUTE_TRACK_COLOR_I_ANGLE_NAME = "angle";
-const auto ATTRIBUTE_TRACK_COLOR_I_ANGLE_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_TRACK_COLOR_I_DIRECTION_NAME = "direction";
-const auto ATTRIBUTE_TRACK_COLOR_I_DIRECTION_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_TRACK_COLOR_I_COLORS_NAME = "colors";
-const auto ATTRIBUTE_TRACK_COLOR_I_COLORS_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_TRACK_COLOR_I_REPEATING_NAME = "repeating";
-const auto ATTRIBUTE_TRACK_COLOR_I_REPEATING_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
-const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
-const auto ATTRIBUTE_MIN_LABEL_NAME = "minLabel";
-const auto ATTRIBUTE_MIN_LABEL_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_MAX_LABEL_NAME = "maxLabel";
-const auto ATTRIBUTE_MAX_LABEL_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_SHOW_STEPS_NAME = "showSteps";
-const auto ATTRIBUTE_SHOW_STEPS_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_TRACK_THICKNESS_NAME = "trackThickness";
-const auto ATTRIBUTE_TRACK_THICKNESS_DEFAULT_VALUE = "0.00px";
-const auto ATTRIBUTE_BLOCK_BORDER_COLOR_NAME = "blockBorderColor";
-const auto ATTRIBUTE_BLOCK_BORDER_COLOR_DEFAULT_VALUE = "#00000000";
-const auto ATTRIBUTE_BLOCK_BORDER_WIDTH_NAME = "blockBorderWidth";
-const auto ATTRIBUTE_BLOCK_BORDER_WIDTH_DEFAULT_VALUE = "0.00px";
-const auto ATTRIBUTE_STEP_COLOR_NAME = "stepColor";
-const auto ATTRIBUTE_STEP_COLOR_DEFAULT_VALUE = "#FF000000";
-const auto ATTRIBUTE_TRACK_BORDER_RADIUS_NAME = "trackBorderRadius";
-const auto ATTRIBUTE_TRACK_BORDER_RADIUS_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME = "selectedBorderRadius";
-const auto ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_BLOCK_SIZE_I_WIDTH_NAME = "width";
-const auto ATTRIBUTE_BLOCK_SIZE_I_WIDTH_DEFAULT_VALUE = "0.00px";
-const auto ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_NAME = "height";
-const auto ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_DEFAULT_VALUE = "0.00px";
-const auto ATTRIBUTE_BLOCK_STYLE_I_TYPE_NAME = "type";
-const auto ATTRIBUTE_BLOCK_STYLE_I_TYPE_DEFAULT_VALUE = "SliderBlockType.DEFAULT";
-const auto ATTRIBUTE_BLOCK_STYLE_I_IMAGE_NAME = "image";
-const auto ATTRIBUTE_BLOCK_STYLE_I_IMAGE_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_BLOCK_STYLE_I_SHAPE_NAME = "shape";
-const auto ATTRIBUTE_BLOCK_STYLE_I_SHAPE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_STEP_SIZE_NAME = "stepSize";
-const auto ATTRIBUTE_STEP_SIZE_DEFAULT_VALUE = "0.00px";
-const auto ATTRIBUTE_SLIDER_INTERACTION_MODE_NAME = "sliderInteractionMode";
-const auto ATTRIBUTE_SLIDER_INTERACTION_MODE_DEFAULT_VALUE = "SliderInteraction.SLIDE_AND_CLICK";
-const auto ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME = "minResponsiveDistance";
-const auto ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_DEFAULT_VALUE = "0.000000";
-const auto ATTRIBUTE_SLIDE_RANGE_I_FROM_NAME = "from";
-const auto ATTRIBUTE_SLIDE_RANGE_I_FROM_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_SLIDE_RANGE_I_TO_NAME = "to";
-const auto ATTRIBUTE_SLIDE_RANGE_I_TO_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_SHOW_TIPS_NAME = "showTips";
-const auto ATTRIBUTE_SHOW_TIPS_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_CONTENT_NAME = "content";
-const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
-} // namespace
-
-class SliderModifierTest : public ModifierTestBase<GENERATED_ArkUISliderModifier,
-                               &GENERATED_ArkUINodeModifiers::getSliderModifier, GENERATED_ARKUI_SLIDER> {
-public:
-    static void SetUpTestCase()
-    {
-        ModifierTestBase::SetUpTestCase();
-
-        SetupTheme<SliderTheme>();
-
-        for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
-            AddResource(id, res);
-            AddResource(strid, res);
-        }
-    }
-};
+using namespace TestConst::Slider;
 
 /*
  * @tc.name: setSliderOptionsTestDefaultValues
@@ -869,11 +768,11 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestValidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: setSelectedColorTestDefaultValues
+ * @tc.name: setSelectedColor0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColor0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -883,11 +782,11 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorTestDefaultValues, TestSiz
 }
 
 /*
- * @tc.name: setSelectedColorTestSelectedColorValidValues
+ * @tc.name: setSelectedColor0TestSelectedColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueSelectedColor;
 
@@ -900,11 +799,11 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
         Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
 
         inputValueSelectedColor = value;
-        modifier_->setSelectedColor(node_, &inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setSelectedColor, attribute: selectedColor";
+            "Input value is: " << input << ", method: setSelectedColor0, attribute: selectedColor";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -922,11 +821,11 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
 }
 
 /*
- * @tc.name: setSelectedColorTestSelectedColorInvalidValues
+ * @tc.name: setSelectedColor0TestSelectedColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueSelectedColor;
 
@@ -937,13 +836,13 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, Tes
     auto checkValue = [this, &initValueSelectedColor](const std::string& input, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
 
-        modifier_->setSelectedColor(node_, &inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
         inputValueSelectedColor = value;
-        modifier_->setSelectedColor(node_, &inputValueSelectedColor);
+        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setSelectedColor, attribute: selectedColor";
+            "Input value is: " << input << ", method: setSelectedColor0, attribute: selectedColor";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -954,6 +853,45 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, Tes
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setSelectedColor1TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, DISABLED_setSelectedColor1TestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultSelectedColor =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(resultSelectedColor, ATTRIBUTE_SELECTED_COLOR_I_ANGLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_I_ANGLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'selectedColor.LinearGradient_common.angle'";
+
+    resultStr = GetAttrValue<std::string>(resultSelectedColor, ATTRIBUTE_SELECTED_COLOR_I_DIRECTION_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_I_DIRECTION_DEFAULT_VALUE) <<
+        "Default value for attribute 'selectedColor.LinearGradient_common.direction'";
+
+    resultStr = GetAttrValue<std::string>(resultSelectedColor, ATTRIBUTE_SELECTED_COLOR_I_COLORS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_I_COLORS_DEFAULT_VALUE) <<
+        "Default value for attribute 'selectedColor.LinearGradient_common.colors'";
+
+    resultStr = GetAttrValue<std::string>(resultSelectedColor, ATTRIBUTE_SELECTED_COLOR_I_REPEATING_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_I_REPEATING_DEFAULT_VALUE) <<
+        "Default value for attribute 'selectedColor.LinearGradient_common.repeating'";
+}
+
+/*
+ * @tc.name: setSelectedColor1TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, DISABLED_setSelectedColor1TestValidValues, TestSize.Level1)
+{
+    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
 
 /*
@@ -2106,6 +2044,128 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
 }
 
 /*
+ * @tc.name: setDigitalCrownSensitivityTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, DISABLED_setDigitalCrownSensitivityTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+        "Default value for attribute 'digitalCrownSensitivity'";
+}
+
+/*
+ * @tc.name: setDigitalCrownSensitivityTestDigitalCrownSensitivityValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, DISABLED_setDigitalCrownSensitivityTestDigitalCrownSensitivityValidValues, TestSize.Level1)
+{
+    Opt_CrownSensitivity initValueDigitalCrownSensitivity;
+
+    // Initial setup
+    initValueDigitalCrownSensitivity =
+        ArkValue<Opt_CrownSensitivity>(std::get<1>(Fixtures::testFixtureEnumCrownSensitivityValidValues[0]));
+
+    auto checkValue = [this, &initValueDigitalCrownSensitivity](
+                          const std::string& input, const std::string& expectedStr, const Opt_CrownSensitivity& value) {
+        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = initValueDigitalCrownSensitivity;
+
+        inputValueDigitalCrownSensitivity = value;
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumCrownSensitivityValidValues) {
+        checkValue(input, expected, ArkValue<Opt_CrownSensitivity>(value));
+    }
+}
+
+/*
+ * @tc.name: setDigitalCrownSensitivityTestDigitalCrownSensitivityInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    SliderModifierTest, DISABLED_setDigitalCrownSensitivityTestDigitalCrownSensitivityInvalidValues, TestSize.Level1)
+{
+    Opt_CrownSensitivity initValueDigitalCrownSensitivity;
+
+    // Initial setup
+    initValueDigitalCrownSensitivity =
+        ArkValue<Opt_CrownSensitivity>(std::get<1>(Fixtures::testFixtureEnumCrownSensitivityValidValues[0]));
+
+    auto checkValue = [this, &initValueDigitalCrownSensitivity](
+                          const std::string& input, const Opt_CrownSensitivity& value) {
+        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = initValueDigitalCrownSensitivity;
+
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        inputValueDigitalCrownSensitivity = value;
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumCrownSensitivityInvalidValues) {
+        checkValue(input, ArkValue<Opt_CrownSensitivity>(value));
+    }
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, DISABLED_setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableHapticFeedback'";
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestEnableHapticFeedbackValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, DISABLED_setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueEnableHapticFeedback;
+
+    // Initial setup
+    initValueEnableHapticFeedback = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueEnableHapticFeedback](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
+
+        inputValueEnableHapticFeedback = value;
+        modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
  * @tc.name: setShowTipsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -2154,71 +2214,4 @@ HWTEST_F(SliderModifierTest, setShowTipsTestShowTipsValidValues, TestSize.Level1
     }
 }
 
-/*
- * @tc.name: setShowTipsTestContentValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueShowTips;
-    Opt_ResourceStr initValueContent;
-
-    // Initial setup
-    initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-    initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
-
-    auto checkValue = [this, &initValueShowTips, &initValueContent](
-                          const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
-        Ark_Boolean inputValueShowTips = initValueShowTips;
-        Opt_ResourceStr inputValueContent = initValueContent;
-
-        inputValueContent = value;
-        modifier_->setShowTips(node_, inputValueShowTips, &inputValueContent);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setShowTips, attribute: content";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
-    }
-}
-
-/*
- * @tc.name: setShowTipsTestContentInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setShowTipsTestContentInvalidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueShowTips;
-    Opt_ResourceStr initValueContent;
-
-    // Initial setup
-    initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-    initValueContent = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
-
-    auto checkValue = [this, &initValueShowTips, &initValueContent](
-                          const std::string& input, const Opt_ResourceStr& value) {
-        Ark_Boolean inputValueShowTips = initValueShowTips;
-        Opt_ResourceStr inputValueContent = initValueContent;
-
-        modifier_->setShowTips(node_, inputValueShowTips, &inputValueContent);
-        inputValueContent = value;
-        modifier_->setShowTips(node_, inputValueShowTips, &inputValueContent);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setShowTips, attribute: content";
-    };
-
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_ResourceStr>());
-}
 } // namespace OHOS::Ace::NG

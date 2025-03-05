@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScreenCaptureHandlerAccessor {
-void DestroyPeerImpl(ScreenCaptureHandlerPeer* peer)
+void DestroyPeerImpl(Ark_ScreenCaptureHandler peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_ScreenCaptureHandler CtorImpl()
 {
     return new ScreenCaptureHandlerPeer();
 }
@@ -32,21 +32,22 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetOriginImpl(ScreenCaptureHandlerPeer* peer)
+Ark_String GetOriginImpl(Ark_ScreenCaptureHandler peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_RETURN(peer && peer->handler, {});
     peer->handler->GetOrigin();
     // value need to be returned
     LOGE("ScreenCaptureHandlerAccessor::GetOriginImpl - return value need to be supported");
+    return {};
 }
-void GrantImpl(ScreenCaptureHandlerPeer* peer,
+void GrantImpl(Ark_ScreenCaptureHandler peer,
                const Ark_ScreenCaptureConfig* config)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(config);
     peer->handler->Grant();
 }
-void DenyImpl(ScreenCaptureHandlerPeer* peer)
+void DenyImpl(Ark_ScreenCaptureHandler peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->Deny();

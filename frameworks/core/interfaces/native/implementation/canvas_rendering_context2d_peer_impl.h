@@ -45,8 +45,8 @@ public:
     void TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
         const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     void TriggerStopImageAnalyzer();
-    Ark_Int32 TriggerGetHeight();
-    Ark_Int32 TriggerGetWidth();
+    double TriggerGetHeight();
+    double TriggerGetWidth();
     void ToDataURL(const std::string& type, float& quality);
 
     void UpdateDensity()

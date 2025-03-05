@@ -203,7 +203,7 @@ HWTEST_F(Matrix2DAccessorTest, DISABLED_getScaleXTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         peer_->transform.scaleX = actual;
         auto expected = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(actual));
-        auto result = accessor_->getScaleX(peer_);
+        auto result = Converter::Convert<float>(accessor_->getScaleX(peer_));
         EXPECT_TRUE(LessOrEqualCustomPrecision(result, expected));
     }
 }
@@ -235,7 +235,7 @@ HWTEST_F(Matrix2DAccessorTest, DISABLED_getRotateYTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         peer_->transform.skewY = actual;
         auto expected = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(actual));
-        auto result = accessor_->getRotateY(peer_);
+        auto result = Converter::Convert<float>(accessor_->getRotateY(peer_));
         EXPECT_TRUE(LessOrEqualCustomPrecision(result, expected));
     }
 }
@@ -251,7 +251,7 @@ HWTEST_F(Matrix2DAccessorTest, DISABLED_getRotateXTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         peer_->transform.skewX = actual;
         auto expected = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(actual));
-        auto result = accessor_->getRotateX(peer_);
+        auto result = Converter::Convert<float>(accessor_->getRotateX(peer_));
         EXPECT_TRUE(LessOrEqualCustomPrecision(result, expected));
     }
 }
@@ -267,7 +267,7 @@ HWTEST_F(Matrix2DAccessorTest, DISABLED_getScaleYTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         peer_->transform.scaleY = actual;
         auto expected = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(actual));
-        auto result = accessor_->getScaleY(peer_);
+        auto result = Converter::Convert<float>(accessor_->getScaleY(peer_));
         EXPECT_TRUE(LessOrEqualCustomPrecision(result, expected));
     }
 }
@@ -283,7 +283,7 @@ HWTEST_F(Matrix2DAccessorTest, DISABLED_getTranslateXTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         peer_->transform.translateX = actual;
         auto expected = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(actual));
-        auto result = accessor_->getTranslateX(peer_);
+        auto result = Converter::Convert<float>(accessor_->getTranslateX(peer_));
         EXPECT_TRUE(LessOrEqualCustomPrecision(result, expected));
     }
 }
@@ -299,7 +299,7 @@ HWTEST_F(Matrix2DAccessorTest, DISABLED_getTranslateYTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         peer_->transform.translateY = actual;
         auto expected = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(actual));
-        auto result = accessor_->getTranslateY(peer_);
+        auto result = Converter::Convert<float>(accessor_->getTranslateY(peer_));
         EXPECT_TRUE(LessOrEqualCustomPrecision(result, expected));
     }
 }

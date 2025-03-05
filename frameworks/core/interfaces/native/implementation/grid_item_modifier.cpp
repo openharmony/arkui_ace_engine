@@ -128,8 +128,8 @@ void OnSelectImpl(Ark_NativePointer node,
     };
     GridItemModelNG::SetOnSelect(frameNode, onSelect);
 }
-void __onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                  const Callback_Boolean_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node,
+                                 const Callback_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -155,7 +155,7 @@ const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
         GridItemAttributeModifier::SelectableImpl,
         GridItemAttributeModifier::SelectedImpl,
         GridItemAttributeModifier::OnSelectImpl,
-        GridItemAttributeModifier::__onChangeEvent_selectedImpl,
+        GridItemAttributeModifier::_onChangeEvent_selectedImpl,
     };
     return &ArkUIGridItemModifierImpl;
 }

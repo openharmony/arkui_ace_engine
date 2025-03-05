@@ -118,11 +118,11 @@ HWTEST_F(SwiperControllerAccessorTest, showPreviousTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperControllerAccessor.ChangeIndex
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperControllerAccessorTest, changeIndexTest, TestSize.Level1)
+HWTEST_F(SwiperControllerAccessorTest, changeIndex0Test, TestSize.Level1)
 {
     constexpr int indexValidValue = 10;
 
-    ASSERT_NE(accessor_->changeIndex, nullptr);
+    ASSERT_NE(accessor_->changeIndex0, nullptr);
 
     auto arkNumValid = ArkValue<Ark_Number>(indexValidValue);
     auto arkNumInvalid = ArkValue<Ark_Number>(INT_MIN);
@@ -131,15 +131,15 @@ HWTEST_F(SwiperControllerAccessorTest, changeIndexTest, TestSize.Level1)
     auto optBoolUndef = ArkValue<Opt_Boolean>();
 
     EXPECT_CALL(*mockSwiperController_, ChangeIndex(indexValidValue, true)).Times(1);
-    accessor_->changeIndex(peer_, &arkNumValid, &optBoolTrue);
+    accessor_->changeIndex0(peer_, &arkNumValid, &optBoolTrue);
 
     EXPECT_CALL(*mockSwiperController_, ChangeIndex(indexValidValue, false)).Times(3);
-    accessor_->changeIndex(peer_, &arkNumValid, &optBoolFalse);
-    accessor_->changeIndex(peer_, &arkNumValid, &optBoolUndef);
-    accessor_->changeIndex(peer_, &arkNumValid, nullptr);
+    accessor_->changeIndex0(peer_, &arkNumValid, &optBoolFalse);
+    accessor_->changeIndex0(peer_, &arkNumValid, &optBoolUndef);
+    accessor_->changeIndex0(peer_, &arkNumValid, nullptr);
 
     EXPECT_CALL(*mockSwiperController_, ChangeIndex(0, false)).Times(1);
-    accessor_->changeIndex(peer_, &arkNumInvalid, nullptr);
+    accessor_->changeIndex0(peer_, &arkNumInvalid, nullptr);
 }
 
 /**

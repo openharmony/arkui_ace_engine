@@ -19,11 +19,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseGestureEventAccessor {
-void DestroyPeerImpl(BaseGestureEventPeer* peer)
+void DestroyPeerImpl(Ark_BaseGestureEvent peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_BaseGestureEvent CtorImpl()
 {
     return new BaseGestureEventPeerImpl();
 }
@@ -31,7 +31,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetFingerListImpl(BaseGestureEventPeer* peer,
+Array_FingerInfo GetFingerListImpl(Ark_BaseGestureEvent peer)
+{
+    return {};
+}
+void SetFingerListImpl(Ark_BaseGestureEvent peer,
                        const Array_FingerInfo* fingerList)
 {
     CHECK_NULL_VOID(peer);
@@ -48,6 +52,7 @@ const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
         BaseGestureEventAccessor::DestroyPeerImpl,
         BaseGestureEventAccessor::CtorImpl,
         BaseGestureEventAccessor::GetFinalizerImpl,
+        BaseGestureEventAccessor::GetFingerListImpl,
         BaseGestureEventAccessor::SetFingerListImpl,
     };
     return &BaseGestureEventAccessorImpl;

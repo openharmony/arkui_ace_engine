@@ -83,7 +83,7 @@ struct SliderBlockImageInfo {
 struct SliderBlockStyle {
     std::optional<SliderModel::BlockStyleType> type;
     std::optional<ImageSourceInfo> image;
-    std::optional<void*> shape;
+    std::optional<std::string> shape;
 };
 
 template<>
@@ -92,32 +92,8 @@ SliderBlockStyle Convert(const Ark_SliderBlockStyle& src)
     return {
         .type = Converter::OptConvert<SliderModel::BlockStyleType>(src.type),
         .image = Converter::OptConvert<ImageSourceInfo>(src.image),
-        .shape = Converter::OptConvert<void*>(src.shape)
+        .shape = Converter::OptConvert<std::string>(src.shape)
     };
-}
-
-template<>
-void* Convert(const Ark_CircleAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_EllipseAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_PathAttribute& src)
-{
-    return src.handle;
-}
-
-template<>
-void* Convert(const Ark_RectAttribute& src)
-{
-    return src.handle;
 }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -170,7 +146,7 @@ void BlockColorImpl(Ark_NativePointer node,
     SliderModelNG::SetBlockColor(frameNode, convValue);
 }
 void TrackColorImpl(Ark_NativePointer node,
-                    const Ark_Union_ResourceColor_LinearGradient_common* value)
+                    const Ark_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -178,14 +154,23 @@ void TrackColorImpl(Ark_NativePointer node,
     LOGE("SliderModifier::TrackColorImpl is not implemented, incorrect LinearGradient passed!");
     // LinearGradient issue https://gitee.com/nikolay-igotti/idlize/issues/IAW4DU
 }
-void SelectedColorImpl(Ark_NativePointer node,
-                       const Ark_ResourceColor* value)
+void SelectedColor0Impl(Ark_NativePointer node,
+                        const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
     SliderModelNG::SetSelectColor(frameNode, convValue);
+}
+void SelectedColor1Impl(Ark_NativePointer node,
+                        const Ark_Union_ResourceColor_LinearGradient* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SliderModelNG::SetSelectedColor1(frameNode, convValue);
 }
 void MinLabelImpl(Ark_NativePointer node,
                   const Ark_String* value)
@@ -359,6 +344,22 @@ void SlideRangeImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<Converter::SliderRange>(*value);
     SliderModelNG::SetValidSlideRange(frameNode, convValue.from, convValue.to);
 }
+void DigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                 const Opt_CrownSensitivity* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+}
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //SliderModelNG::SetEnableHapticFeedback(frameNode, convValue);
+}
 void ShowTipsImpl(Ark_NativePointer node,
                   Ark_Boolean value,
                   const Opt_ResourceStr* content)
@@ -369,8 +370,8 @@ void ShowTipsImpl(Ark_NativePointer node,
     auto convContent = content ? Converter::OptConvert<std::string>(*content) : std::nullopt;
     SliderModelNG::SetShowTips(frameNode, convValue, convContent);
 }
-void __onChangeEvent_valueImpl(Ark_NativePointer node,
-                               const Callback_Number_Void* callback)
+void _onChangeEvent_valueImpl(Ark_NativePointer node,
+                              const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -390,7 +391,8 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderInterfaceModifier::SetSliderOptionsImpl,
         SliderAttributeModifier::BlockColorImpl,
         SliderAttributeModifier::TrackColorImpl,
-        SliderAttributeModifier::SelectedColorImpl,
+        SliderAttributeModifier::SelectedColor0Impl,
+        SliderAttributeModifier::SelectedColor1Impl,
         SliderAttributeModifier::MinLabelImpl,
         SliderAttributeModifier::MaxLabelImpl,
         SliderAttributeModifier::ShowStepsImpl,
@@ -408,8 +410,10 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::MinResponsiveDistanceImpl,
         SliderAttributeModifier::ContentModifierImpl,
         SliderAttributeModifier::SlideRangeImpl,
+        SliderAttributeModifier::DigitalCrownSensitivityImpl,
+        SliderAttributeModifier::EnableHapticFeedbackImpl,
         SliderAttributeModifier::ShowTipsImpl,
-        SliderAttributeModifier::__onChangeEvent_valueImpl,
+        SliderAttributeModifier::_onChangeEvent_valueImpl,
     };
     return &ArkUISliderModifierImpl;
 }

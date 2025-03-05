@@ -370,21 +370,21 @@ struct CheckEvent {
 HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    void (*checkCallback)(const Ark_Int32, const Ark_ClickEvent, const Ark_SaveButtonOnClickResult) =
-        [](const Ark_Int32 resourceId, const Ark_ClickEvent event, const Ark_SaveButtonOnClickResult result) {
-            auto peer = reinterpret_cast<ClickEventPeer*>(event.ptr);
+    auto checkCallback = [](Ark_Int32 resourceId, Ark_ClickEvent event, Ark_SaveButtonOnClickResult result,
+        Opt_BusinessError error) {
+            auto peer = event;
             ASSERT_NE(peer, nullptr);
             auto accessor = GeneratedModifier::GetClickEventAccessor();
             checkEvent = {
                 .nodeId = resourceId,
-                .offsetX = accessor->getWindowX(peer),
-                .offsetY = accessor->getWindowY(peer),
+                .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+                .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
                 .result = result
             };
             accessor->destroyPeer(peer);
         };
     const int32_t contextId = 123;
-    auto func = Converter::ArkValue<Callback_ClickEvent_SaveButtonOnClickResult_Void>(checkCallback, contextId);
+    auto func = Converter::ArkValue<SaveButtonCallback>(checkCallback, contextId);
 
     modifier_->setOnClick(node_, &func);
 

@@ -59,7 +59,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ShapeModifier
 namespace ShapeInterfaceModifier {
 void SetShapeOptions0Impl(Ark_NativePointer node,
-                          const Ark_PixelMap* value)
+                          Ark_PixelMap value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -67,7 +67,7 @@ void SetShapeOptions0Impl(Ark_NativePointer node,
     ViewAbstract::SetFocusable(frameNode, true);
     RefPtr<PixelMap> pixelMap;
 #if !defined(PREVIEW) && defined(PIXEL_MAP_SUPPORTED)
-    pixelMap = Converter::Convert<RefPtr<PixelMap>>(*value);
+    pixelMap = Converter::Convert<RefPtr<PixelMap>>(value);
 #endif
     ShapeModelNG::InitBox(frameNode, pixelMap);
 }

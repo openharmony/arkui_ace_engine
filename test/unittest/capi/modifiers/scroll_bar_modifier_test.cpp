@@ -50,7 +50,7 @@ struct ScrollBarOptions {
         auto scrollerPeer = static_cast<ScrollerPeer *>(peer);
         scrollerPeer->SetScrollBarProxy(proxy);
         value = {
-            .scroller { .ptr = reinterpret_cast<Ark_NativePointer>(scrollerPeer) },
+            .scroller = scrollerPeer,
             .direction = direction
                 ? Converter::ArkValue<Opt_ScrollBarDirection>(direction.value())
                 : Converter::ArkValue<Opt_ScrollBarDirection>(Ark_Empty()),
@@ -65,7 +65,7 @@ struct ScrollBarOptions {
         auto destroy = reinterpret_cast<void (*)(Ark_NativePointer)>(
             GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer()
         );
-        destroy(value.scroller.ptr);
+        destroy(value.scroller);
     }
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarOptions);
 };
@@ -108,7 +108,7 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsScrollerTestValidValues, Test
 
     modifier_->setScrollBarOptions(node_, &options.value);
 
-    auto peer = reinterpret_cast<ScrollerPeer*>(options.value.scroller.ptr);
+    auto peer = options.value.scroller;
     ASSERT_NE(peer, nullptr);
     EXPECT_EQ(peer->GetScrollBarProxy(), proxy);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

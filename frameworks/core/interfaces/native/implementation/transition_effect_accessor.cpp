@@ -29,14 +29,14 @@ const auto OPACITY_TOKEN = "opacity";
 const auto MOVE_TOKEN = "move";
 const auto ASYMMETRIC_TOKEN = "asymmetric";
 
-void DestroyPeerImpl(TransitionEffectPeer* peer)
+void DestroyPeerImpl(Ark_TransitionEffect peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Ark_String* type,
-                           const Ark_TransitionEffects* effect)
+Ark_TransitionEffect CtorImpl(const Ark_String* type,
+                              const Ark_TransitionEffects* effect)
 {
     CHECK_NULL_RETURN(type && effect, nullptr);
     auto valueText = Converter::Convert<std::string>(*type);
@@ -77,11 +77,10 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto move = Converter::OptConvert<TransitionEdge>(effect->move);
         peer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(move.value_or(TransitionEdge::TOP));
     } else if (valueText == ASYMMETRIC_TOKEN) {
-        CHECK_NULL_RETURN(effect && effect->asymmetric.appear.ptr, nullptr);
-        auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
+        CHECK_NULL_RETURN(effect, nullptr);
+        auto app = effect->asymmetric.appear;
         CHECK_NULL_RETURN(app, nullptr);
-        CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);
-        auto disapp = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.disappear.ptr);
+        auto disapp = effect->asymmetric.disappear;
         CHECK_NULL_RETURN(disapp, nullptr);
         peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(app->handler, disapp->handler);
     }
@@ -91,7 +90,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
+Ark_TransitionEffect TranslateImpl(const Ark_TranslateOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(TRANSLATE_TOKEN);
@@ -100,7 +99,7 @@ Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
+Ark_TransitionEffect RotateImpl(const Ark_RotateOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(ROTATE_TOKEN);
@@ -109,7 +108,7 @@ Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
+Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(SCALE_TOKEN);
@@ -118,7 +117,7 @@ Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
+Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
 {
     CHECK_NULL_RETURN(alpha, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN);
@@ -127,7 +126,7 @@ Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
+Ark_TransitionEffect MoveImpl(Ark_TransitionEdge edge)
 {
     Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
     Ark_TransitionEffects effects {
@@ -135,23 +134,23 @@ Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
-                                 const Ark_TransitionEffect* disappear)
+Ark_TransitionEffect AsymmetricImpl(Ark_TransitionEffect appear,
+                                    Ark_TransitionEffect disappear)
 {
     CHECK_NULL_RETURN(appear, nullptr);
     CHECK_NULL_RETURN(disappear, nullptr);
 
     Ark_String type = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN);
     Ark_Literal_TransitionEffect_appear_disappear asymm;
-    asymm.appear = *appear;
-    asymm.disappear = *disappear;
+    asymm.appear = appear;
+    asymm.disappear = disappear;
     Ark_TransitionEffects effects {
         .asymmetric = asymm
     };
     return CtorImpl(&type, &effects);
 }
-Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
-                                const Ark_AnimateParam* value)
+Ark_TransitionEffect AnimationImpl(Ark_TransitionEffect peer,
+                                   const Ark_AnimateParam* value)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(value, nullptr);
@@ -160,8 +159,8 @@ Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
     peer->handler->SetAnimationOption(refOpt);
     return peer;
 }
-Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
-                              const Ark_TransitionEffect* transitionEffect)
+Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
+                                 Ark_TransitionEffect transitionEffect)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(transitionEffect, peer);
@@ -169,9 +168,25 @@ Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
     while (lastEffect->handler->GetNext() != nullptr) {
         lastEffect->handler = lastEffect->handler->GetNext();
     }
-    const auto nextPeer = reinterpret_cast<TransitionEffectPeer*>(transitionEffect->ptr);
+    const auto nextPeer = transitionEffect;
     lastEffect->handler->SetNext(nextPeer->handler);
     return peer;
+}
+Ark_TransitionEffect GetIDENTITYImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetOPACITYImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetSLIDEImpl()
+{
+    return {};
+}
+Ark_TransitionEffect GetSLIDE_SWITCHImpl()
+{
+    return {};
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
@@ -188,6 +203,10 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
         TransitionEffectAccessor::AsymmetricImpl,
         TransitionEffectAccessor::AnimationImpl,
         TransitionEffectAccessor::CombineImpl,
+        TransitionEffectAccessor::GetIDENTITYImpl,
+        TransitionEffectAccessor::GetOPACITYImpl,
+        TransitionEffectAccessor::GetSLIDEImpl,
+        TransitionEffectAccessor::GetSLIDE_SWITCHImpl,
     };
     return &TransitionEffectAccessorImpl;
 }

@@ -343,7 +343,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     Ark_ListOptions listOptions = {
         .initialIndex = Converter::ArkValue<Opt_Number>(1),
         .space = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(55.7f),
-        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{.ptr = nullptr}),
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{nullptr}),
     };
 
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
@@ -365,7 +365,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     listOptions = {
         .initialIndex = Converter::ArkValue<Opt_Number>(Ark_Empty()),
         .space = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty()),
-        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{.ptr = nullptr}),
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{nullptr}),
     };
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
@@ -378,7 +378,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     listOptions = {
         .initialIndex = Converter::ArkValue<Opt_Number>(3),
         .space = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("88.9px"),
-        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{.ptr = nullptr}),
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{nullptr}),
     };
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
@@ -399,7 +399,7 @@ HWTEST_F(ListModifierTest, setListOptionsNegativeTest, TestSize.Level1)
     Ark_ListOptions listOptions = {
         .initialIndex = Converter::ArkValue<Opt_Number>(-7),
         .space = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-9),
-        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{.ptr = nullptr}),
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{nullptr}),
     };
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
@@ -794,15 +794,6 @@ HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
         std::optional<ScrollState> scrollState;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::listEventsReceiver.onScroll = [](
-        Ark_Int32 nodeId, const Ark_Number scrollOffset, const Ark_ScrollState scrollState)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-            .scrollOffset = Converter::Convert<Dimension>(scrollOffset),
-            .scrollState = Converter::OptConvert<ScrollState>(scrollState)
-        };
-    };
 
     auto onScroll = eventHub->GetOnScroll();
     EXPECT_EQ(onScroll, nullptr);

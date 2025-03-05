@@ -105,9 +105,9 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
     RefPtr<ScrollControllerBase> positionController = ScrollModelNG::GetOrCreateController(frameNode);
     RefPtr<ScrollProxy> scrollBarProxy = ScrollModelNG::GetOrCreateScrollBarProxy(frameNode);
 
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*scroller);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
     CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = reinterpret_cast<ScrollerPeer *>(*abstPeerPtrOpt);
+    auto peerImplPtr = abstPeerPtrOpt.value();
     CHECK_NULL_VOID(peerImplPtr);
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);
@@ -182,7 +182,7 @@ void OnWillScrollImpl(Ark_NativePointer node,
     }
 }
 void OnDidScrollImpl(Ark_NativePointer node,
-                     const Opt_ScrollOnScrollCallback* value)
+                     const ScrollOnScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

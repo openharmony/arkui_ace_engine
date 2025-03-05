@@ -23,13 +23,13 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 namespace UIExtensionProxyAccessor {
-void DestroyPeerImpl(UIExtensionProxyPeer* peer)
+void DestroyPeerImpl(Ark_UIExtensionProxy peer)
 {
     if (peer) {
         delete peer;
     }
 }
-Ark_NativePointer CtorImpl()
+Ark_UIExtensionProxy CtorImpl()
 {
     return new UIExtensionProxyPeer();
 }
@@ -37,18 +37,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SendImpl(UIExtensionProxyPeer* peer,
+void SendImpl(Ark_UIExtensionProxy peer,
               const Map_String_CustomObject* data)
 {
     LOGE("UIExtensionProxyAccessor::SendImpl - is not supported");
 }
-Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
-                               const Map_String_CustomObject* data)
+Map_String_CustomObject SendSyncImpl(Ark_VMContext vmContext,
+                                     Ark_UIExtensionProxy peer,
+                                     const Map_String_CustomObject* data)
 {
     LOGE("UIExtensionProxyAccessor::SendSyncImpl - is not supported");
-    return nullptr;
+    return {};
 }
-void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+void OnAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
                                  const Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -61,7 +62,7 @@ void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
         CHECK_NULL_VOID(peer);
         auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
         uiExtensionProxyPeerPtr->SetProxy(proxy);
-        arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
+        arkCallback.Invoke(peer);
     };
 
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
@@ -72,7 +73,7 @@ void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
     pattern->SetAsyncCallbacks(std::move(funcList));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+void OnSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
                                 const Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -85,7 +86,7 @@ void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
         CHECK_NULL_VOID(peer);
         auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
         uiExtensionProxyPeerPtr->SetProxy(proxy);
-        arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
+        arkCallback.Invoke(peer);
     };
 
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
@@ -96,7 +97,7 @@ void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
     pattern->SetSyncCallbacks(std::move(funcList));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+void OffAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
                                   const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -115,7 +116,7 @@ void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
     pattern->SetAsyncCallbacks(std::move(funcList));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OffSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
+void OffSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
                                  const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED

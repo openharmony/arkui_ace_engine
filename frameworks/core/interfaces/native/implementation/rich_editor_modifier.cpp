@@ -183,7 +183,7 @@ void SetRichEditorOptions0Impl(Ark_NativePointer node,
     auto controller = AceType::DynamicCast<RichEditorController>(internalController);
     CHECK_NULL_VOID(controller);
 
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::RichEditorControllerPeerImpl *>(value->controller.ptr);
+    auto peerImplPtr = reinterpret_cast<RichEditorControllerPeerImpl *>(value->controller);
     CHECK_NULL_VOID(peerImplPtr);
 
     // pass the internal controller to external management
@@ -202,7 +202,7 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     auto controller = AceType::DynamicCast<RichEditorStyledStringController>(internalController);
     CHECK_NULL_VOID(controller);
 
-    auto peerImplPtr = reinterpret_cast<RichEditorStyledStringControllerPeer *>(options->controller.ptr);
+    auto peerImplPtr = options->controller;
     CHECK_NULL_VOID(peerImplPtr);
 
     // pass the internal controller to external management
@@ -484,12 +484,12 @@ void OnCopyImpl(Ark_NativePointer node,
     RichEditorModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_EditMenuOptions* value)
+                         Ark_EditMenuOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //RichEditorModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGW("RichEditor modifier :: EditMenuOptionsImpl() needs onCreateMenuCallback, onMenuItemClick input");
 }
@@ -532,6 +532,22 @@ void MaxLinesImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //RichEditorModelNG::SetMaxLines(frameNode, convValue);
+}
+void KeyboardAppearanceImpl(Ark_NativePointer node,
+                            const Opt_KeyboardAppearance* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue);
+}
+void StopBackPressImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RichEditorModelNG::SetStopBackPress(frameNode, convValue);
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_RichEditorSpanType spanType,
@@ -628,6 +644,8 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::BarStateImpl,
         RichEditorAttributeModifier::MaxLengthImpl,
         RichEditorAttributeModifier::MaxLinesImpl,
+        RichEditorAttributeModifier::KeyboardAppearanceImpl,
+        RichEditorAttributeModifier::StopBackPressImpl,
         RichEditorAttributeModifier::BindSelectionMenuImpl,
         RichEditorAttributeModifier::CustomKeyboardImpl,
         RichEditorAttributeModifier::PlaceholderImpl,

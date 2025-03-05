@@ -84,6 +84,9 @@ namespace OHOS::Ace::NG::Converter {
         (std::is_rvalue_reference_v<From> || !std::is_reference_v<From>), bool> = false>
     To ArkValue(From&& src) = delete; // Constructing Ark_ values from r-value is prohibited
 
+    template<typename To, std::enable_if_t<!IsOptional<To>::value, bool> = false, typename... Args>
+    To ArkCreate(Args... args) = delete;
+
     class ConvContext {
     public:
         Ark_String Store(const std::string_view& src);
@@ -259,6 +262,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
 
+    // SORTED_SECTION
+    template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);
+
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 
     // Passthrough version
@@ -296,6 +302,12 @@ namespace OHOS::Ace::NG::Converter {
         } else {
             dst.tag = INTEROP_TAG_UNDEFINED;
         }
+    }
+
+    template<typename To, std::enable_if_t<IsOptional<To>::value, bool> = true, typename... Args>
+    To ArkCreate(Args&&... args)
+    {
+        return ArkValue<To>(ArkCreate<decltype(To().value)>(std::forward<Args>(args)...));
     }
 
     // Array with context
@@ -642,9 +654,7 @@ namespace OHOS::Ace::NG::Converter {
 
         Ark_Type ArkValue() const
         {
-            return {
-                .ptr = peer_
-            };
+            return peer_;
         }
 
     private:

@@ -49,11 +49,11 @@ NavContentInfo Convert(const Ark_NavContentInfo& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationTransitionProxyAccessor {
-void DestroyPeerImpl(NavigationTransitionProxyPeer* peer)
+void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_NavigationTransitionProxy CtorImpl()
 {
     return new NavigationTransitionProxyPeer();
 }
@@ -61,17 +61,17 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void FinishTransitionImpl(NavigationTransitionProxyPeer* peer)
+void FinishTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->FireFinishCallback();
 }
-void CancelTransitionImpl(NavigationTransitionProxyPeer* peer)
+void CancelTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->CancelInteractiveAnimation();
 }
-void UpdateTransitionImpl(NavigationTransitionProxyPeer* peer,
+void UpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
                           const Ark_Number* progress)
 {
     CHECK_NULL_VOID(peer && progress && peer->handler);
@@ -81,26 +81,26 @@ void UpdateTransitionImpl(NavigationTransitionProxyPeer* peer,
         peer->handler->UpdateTransition(convProgress.value());
     }
 }
-void SetFromImpl(NavigationTransitionProxyPeer* peer,
+void SetFromImpl(Ark_NavigationTransitionProxy peer,
                  const Ark_NavContentInfo* from)
 {
     CHECK_NULL_VOID(peer && from && peer->handler);
     Converter::Convert<Converter::NavContentInfo>(*from);
     LOGE("NavigationTransitionProxyAccessor::SetFromImpl, modifying from attribute isn't supported");
 }
-void SetToImpl(NavigationTransitionProxyPeer* peer,
+void SetToImpl(Ark_NavigationTransitionProxy peer,
                const Ark_NavContentInfo* to)
 {
     CHECK_NULL_VOID(peer && to && peer->handler);
     Converter::Convert<Converter::NavContentInfo>(*to);
     LOGE("NavigationTransitionProxyAccessor::SetToImpl, modifying from attribute isn't supported");
 }
-Ark_Boolean GetIsInteractiveImpl(NavigationTransitionProxyPeer* peer)
+Ark_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, false);
     return Converter::ArkValue<Ark_Boolean>(peer->handler->GetInteractive());
 }
-void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer,
+void SetIsInteractiveImpl(Ark_NavigationTransitionProxy peer,
                           Ark_Boolean isInteractive)
 {
     CHECK_NULL_VOID(peer && peer->handler);

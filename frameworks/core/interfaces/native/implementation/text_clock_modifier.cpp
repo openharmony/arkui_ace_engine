@@ -40,10 +40,7 @@ namespace OHOS::Ace::NG::Converter {
         // valid hoursWest is within [-14, 12]
         Validator::ValidateByRange(value, -14.0f, 12.0f);
         dst.timeZoneOffset = value;
-        auto controller = OptConvert<Ark_NativePointer>(src.controller);
-        if (controller) {
-            dst.peerController = reinterpret_cast<TextClockControllerPeer*>(*controller);
-        }
+        dst.peerController = OptConvert<Ark_TextClockController>(src.controller).value_or(nullptr);
         return dst;
     }
 } // namespace OHOS::Ace::NG::Converter

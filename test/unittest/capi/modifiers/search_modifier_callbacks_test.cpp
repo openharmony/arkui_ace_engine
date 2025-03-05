@@ -124,9 +124,7 @@ HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestS
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     EXPECT_NE(frameNode, nullptr);
 
-    Ark_SearchController arkController;
-    arkController.ptr = controllerPtr;
-    options.controller = Converter::ArkValue<Opt_SearchController>(arkController);
+    options.controller = Converter::ArkValue<Opt_SearchController>(controllerPtr);
     auto optOptions = ArkValue<Opt_SearchOptions>(options);
 
     modifier_->setSearchOptions(node_, &optOptions);
@@ -156,10 +154,6 @@ HWTEST_F(SearchModifierCallbackTest, setInputFilterTest, TestSize.Level1)
     g_EventTestString = u"";
     g_EventErrorTestString = "";
     ASSERT_NE(modifier_->setInputFilter, nullptr);
-    EventsTracker::eventsReceiver.inputFilter = [](Ark_Int32 nodeId, const Ark_String data) {
-        g_EventErrorTestString = Convert<std::string>(data);
-        g_EventTestString = g_EventErrorTestString;
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Opt_Callback_String_Void func{};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -446,7 +440,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmit1Test, TestSize.Level1)
         auto value = Converter::Convert<std::u16string>(searchContent);
         auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
         ASSERT_TRUE(eventValue);
-        auto peer = reinterpret_cast<SubmitEventPeer*>(eventValue.value().ptr);
+        auto peer = eventValue.value();
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
         ASSERT_NE(submitEventInfo, nullptr);
@@ -481,7 +475,8 @@ HWTEST_F(SearchModifierCallbackTest, setOnChangeTest, TestSize.Level1)
     static int32_t eventTestOffset = 0;
     EditableTextOnChangeCallback onChangeCallback = {
         .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+        .call = [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText,
+            Opt_TextChangeOptions options) {
             auto convValue = Converter::Convert<std::u16string>(value);
             auto convPreviewText = Converter::OptConvert<PreviewText>(previewText).value_or(PREVIEW_TEXT);
             eventTestOffset = convPreviewText.offset;

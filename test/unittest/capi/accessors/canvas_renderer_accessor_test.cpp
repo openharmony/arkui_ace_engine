@@ -19,12 +19,13 @@
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
-#include "core/interfaces/native/implementation/canvas_path_accessor_peer_impl.h"
 #include "core/interfaces/native/implementation/canvas_pattern_peer.h"
 #include "core/interfaces/native/implementation/canvas_gradient_peer.h"
 #include "core/interfaces/native/implementation/matrix2d_peer.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
+#include "core/interfaces/native/implementation/image_data_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/path2d_accessor_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1199,9 +1200,8 @@ HWTEST_F(CanvasRendererAccessorTest, stroke1Test, TestSize.Level1)
 
     ASSERT_NE(accessor_->stroke1, nullptr);
 
-    Ark_Materialized arkPath;
-    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasPathPeerImpl>();
-    arkPath.ptr = reinterpret_cast<CanvasPathPeer*>(Referenced::RawPtr(peerImpl));
+    auto peerImpl = Referenced::MakeRefPtr<Path2DPeer>();
+    Ark_Path2D arkPath = Referenced::RawPtr(peerImpl);
 
     for (const auto& expected : PATH2D_TEST_PLAN) {
         holder->SetUp();
@@ -1217,7 +1217,7 @@ HWTEST_F(CanvasRendererAccessorTest, stroke1Test, TestSize.Level1)
         }
         peerImpl->path = path;
 
-        accessor_->stroke1(peer_, &arkPath);
+        accessor_->stroke1(peer_, arkPath);
 
         auto result = holder->path->GetCaches();
         auto rcmd = result[0].first;
@@ -1246,7 +1246,7 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1ScaleTest, TestSize.Level1)
 
     Ark_Matrix2D arkMatrix;
     auto peer = new Matrix2DPeer();
-    arkMatrix.ptr = peer;
+    arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
 
     auto valD = DEFAULT_DOUBLE_VALUE;
@@ -1289,7 +1289,7 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1SkewTest, TestSize.Level1)
 
     Ark_Matrix2D arkMatrix;
     auto peer = new Matrix2DPeer();
-    arkMatrix.ptr = peer;
+    arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
 
     auto valD = DEFAULT_DOUBLE_VALUE;
@@ -1329,7 +1329,7 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1TranslateTest, TestSize.Level1
 
     Ark_Matrix2D arkMatrix;
     auto peer = new Matrix2DPeer();
-    arkMatrix.ptr = peer;
+    arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
 
     auto valD = DEFAULT_DOUBLE_VALUE;
@@ -1376,9 +1376,9 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
 
     ASSERT_NE(accessor_->transferFromImageBitmap, nullptr);
 
-    Ark_Materialized arkBitmap;
+    Ark_ImageBitmap arkBitmap;
     auto peer = new MockImageBitmapPeer();
-    arkBitmap.ptr = peer;
+    arkBitmap = peer;
 
     for (const auto& expectedW : SIZE_TEST_PLAN) {
         for (const auto& expectedH : SIZE_TEST_PLAN) {
@@ -1386,7 +1386,7 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
             peer->SetHeight(expectedH);
 
             holder->SetUp();
-            accessor_->transferFromImageBitmap(peer_, &arkBitmap);
+            accessor_->transferFromImageBitmap(peer_, arkBitmap);
             if (expectedW <= 0 || expectedH <= 0) {
                 EXPECT_FALSE(holder->isCalled);
                 continue;
@@ -1589,9 +1589,7 @@ HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
             auto y0 = Converter::ArkValue<Ark_Number>(expectedY);
             auto x1 = Converter::ArkValue<Ark_Number>(valD);
             auto y1 = Converter::ArkValue<Ark_Number>(valD);
-            auto ptr = accessor_->createLinearGradient(peer_, &x0, &y0, &x1, &y1);
-            ASSERT_NE(ptr, nullptr);
-            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            auto peer = accessor_->createLinearGradient(peer_, &x0, &y0, &x1, &y1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1609,9 +1607,7 @@ HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
             auto y0 = Converter::ArkValue<Ark_Number>(valD);
             auto x1 = Converter::ArkValue<Ark_Number>(expectedX);
             auto y1 = Converter::ArkValue<Ark_Number>(expectedY);
-            auto ptr = accessor_->createLinearGradient(peer_, &x0, &y0, &x1, &y1);
-            ASSERT_NE(ptr, nullptr);
-            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            auto peer = accessor_->createLinearGradient(peer_, &x0, &y0, &x1, &y1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1643,9 +1639,7 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXRTest, TestSize.Level1
             auto x1 = Converter::ArkValue<Ark_Number>(valD);
             auto y1 = Converter::ArkValue<Ark_Number>(valD);
             auto r1 = Converter::ArkValue<Ark_Number>(valR);
-            auto ptr = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
-            ASSERT_NE(ptr, nullptr);
-            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            auto peer = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1681,9 +1675,7 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientYRTest, TestSize.Level1
             auto x1 = Converter::ArkValue<Ark_Number>(valD);
             auto y1 = Converter::ArkValue<Ark_Number>(expectedY);
             auto r1 = Converter::ArkValue<Ark_Number>(expectedR);
-            auto ptr = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
-            ASSERT_NE(ptr, nullptr);
-            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            auto peer = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1719,9 +1711,7 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXYTest, TestSize.Level1
             auto x1 = Converter::ArkValue<Ark_Number>(expectedX);
             auto y1 = Converter::ArkValue<Ark_Number>(valD);
             auto r1 = Converter::ArkValue<Ark_Number>(valR);
-            auto ptr = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
-            ASSERT_NE(ptr, nullptr);
-            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            auto peer = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1754,9 +1744,7 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
             auto x = Converter::ArkValue<Ark_Number>(expectedX);
             auto y = Converter::ArkValue<Ark_Number>(expectedY);
             auto startAngle = Converter::ArkValue<Ark_Number>(valR);
-            auto ptr = accessor_->createConicGradient(peer_, &startAngle, &x, &y);
-            ASSERT_NE(ptr, nullptr);
-            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            auto peer = accessor_->createConicGradient(peer_, &startAngle, &x, &y);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1777,9 +1765,7 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
             auto y = Converter::ArkValue<Ark_Number>(valD);
             auto startAngle = Converter::ArkValue<Ark_Number>(actualA);
             auto expectedA = fmod(actualA, (MATH_2_PI));
-            auto ptr = accessor_->createConicGradient(peer_, &startAngle, &x, &y);
-            ASSERT_NE(ptr, nullptr);
-            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            auto peer = accessor_->createConicGradient(peer_, &startAngle, &x, &y);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1808,15 +1794,12 @@ HWTEST_F(CanvasRendererAccessorTest, createImageData0Test, TestSize.Level1)
         for (const auto& actualH : NUMBER_TEST_PLAN) {
             auto sw = Converter::ArkValue<Ark_Number>(actualW);
             auto sh = Converter::ArkValue<Ark_Number>(actualH);
-            auto ptr = accessor_->createImageData0(peer_, &sw, &sh);
-            ASSERT_NE(ptr, nullptr);
-            auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(ptr);
-            ASSERT_NE(peerImpl, nullptr);
-            auto imageData = peerImpl->imageData;
+            auto imageData = accessor_->createImageData0(peer_, &sw, &sh);
+            ASSERT_NE(imageData, nullptr);
             auto expectedW = static_cast<uint32_t>(std::abs(actualW + DIFF));
             auto expectedH = static_cast<uint32_t>(std::abs(actualH + DIFF));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(imageData.dirtyWidth, expectedW));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(imageData.dirtyHeight, expectedH));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(imageData->value.dirtyWidth, expectedW));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(imageData->value.dirtyHeight, expectedH));
         }
     }
 }
@@ -1831,18 +1814,15 @@ HWTEST_F(CanvasRendererAccessorTest, createImageData1Test, TestSize.Level1)
     ASSERT_NE(accessor_->createImageData1, nullptr);
     for (const auto& actualW : NUMBER_TEST_PLAN) {
         for (const auto& actualH : NUMBER_TEST_PLAN) {
-            auto sw = Converter::ArkValue<Ark_Number>(actualW);
-            auto sh = Converter::ArkValue<Ark_Number>(actualH);
-            Ark_ImageData arkImage = { .width = sw, .height = sh };
-            auto ptr = accessor_->createImageData1(peer_, &arkImage);
-            ASSERT_NE(ptr, nullptr);
-            auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(ptr);
-            ASSERT_NE(peerImpl, nullptr);
-            auto imageData = peerImpl->imageData;
+            Ace::ImageData data{.dirtyWidth = actualW, .dirtyHeight = actualH};
+            Ark_ImageData arkImage = ImageDataPeer::Create(data);
+            auto imageData = accessor_->createImageData1(peer_, arkImage);
+            ImageDataPeer::Destroy(arkImage);
+            ASSERT_NE(imageData, nullptr);
             auto expectedW = static_cast<int32_t>(actualW);
             auto expectedH = static_cast<int32_t>(actualH);
-            EXPECT_EQ(imageData.dirtyWidth, expectedW);
-            EXPECT_EQ(imageData.dirtyHeight, expectedH);
+            EXPECT_EQ(imageData->value.dirtyWidth, expectedW);
+            EXPECT_EQ(imageData->value.dirtyHeight, expectedH);
         }
     }
 }
@@ -1864,16 +1844,13 @@ HWTEST_F(CanvasRendererAccessorTest, getImageDataTest, TestSize.Level1)
             auto sw = Converter::ArkValue<Ark_Number>(valD);
             auto sh = Converter::ArkValue<Ark_Number>(valD);
             holder->SetUp();
-            auto ptr = accessor_->getImageData(peer_, &sx, &sy, &sw, &sh);
-            ASSERT_NE(ptr, nullptr);
-            auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(ptr);
-            ASSERT_NE(peerImpl, nullptr);
+            auto imageData = accessor_->getImageData(peer_, &sx, &sy, &sw, &sh);
+            ASSERT_NE(imageData, nullptr);
             ASSERT_TRUE(holder->isCalled);
             ASSERT_NE(holder->imageData, nullptr);
-            auto imageData = peerImpl->imageData;
             auto expected = holder->imageData;
-            EXPECT_EQ(imageData.dirtyWidth, expected->dirtyWidth);
-            EXPECT_EQ(imageData.dirtyHeight, expected->dirtyHeight);
+            EXPECT_EQ(imageData->value.dirtyWidth, expected->dirtyWidth);
+            EXPECT_EQ(imageData->value.dirtyHeight, expected->dirtyHeight);
         }
     }
     holder->TearDown();
@@ -1912,27 +1889,24 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapTest, TestSize.Level1)
  */
 HWTEST_F(CanvasRendererAccessorTest, putImageData0Test, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->putImageData0, nullptr);
     auto holder = TestHolder::GetInstance();
     auto valD = DEFAULT_DOUBLE_VALUE;
     auto width = valD;
     auto height = valD;
     auto length = width * height;
     std::vector<uint32_t> vector(length);
-    auto arkWidth = Converter::ArkValue<Ark_Number>(width);
-    auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    auto arkLength = length;
-    auto arkBuffer = Ark_Buffer { .data = reinterpret_cast<void*>(vector.data()), .length = arkLength };
-    auto arkData = Ark_ImageData { .data = arkBuffer, .width = arkWidth, .height = arkHeight };
-    ASSERT_NE(accessor_->putImageData0, nullptr);
+    Ace::ImageData data{.dirtyWidth = width, .dirtyHeight = height, .data = std::move(vector)};
+    Ark_ImageData arkData = ImageDataPeer::Create(data);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
             auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
             holder->SetUp();
-            accessor_->putImageData0(peer_, &arkData, &dx, &dy);
+            accessor_->putImageData0(peer_, arkData, &dx, &dy);
             ASSERT_TRUE(holder->isCalled);
             ASSERT_NE(holder->imageData, nullptr);
-            Ace::ImageData imageData = *holder->imageData;
+            Ace::ImageData& imageData = *holder->imageData;
             auto expectedX = static_cast<uint32_t>(actualX + DIFF);
             auto expectedY = static_cast<uint32_t>(actualY + DIFF);
             auto expectedW = static_cast<uint32_t>(std::abs(width + DIFF));
@@ -1945,6 +1919,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData0Test, TestSize.Level1)
             EXPECT_EQ(imageData.dirtyHeight, expectedH);
         }
     }
+    ImageDataPeer::Destroy(arkData);
     holder->TearDown();
 }
 
@@ -1962,12 +1937,8 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1Test, TestSize.Level1)
     auto height = valD;
     auto length = width * height;
     std::vector<uint32_t> vector(length);
-    auto arkWidth = Converter::ArkValue<Ark_Number>(width);
-    auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    auto arkLength = length;
-    auto arkBuffer = Ark_Buffer { .data = reinterpret_cast<void*>(vector.data()), .length = arkLength };
-    auto arkData = Ark_ImageData { .data = arkBuffer, .width = arkWidth, .height = arkHeight };
-    ASSERT_NE(accessor_->putImageData1, nullptr);
+    Ace::ImageData data{.dirtyWidth = width, .dirtyHeight = height, .data = std::move(vector)};
+    Ark_ImageData arkData = ImageDataPeer::Create(data);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
@@ -1977,10 +1948,10 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1Test, TestSize.Level1)
             auto dirtyWidth = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(valD * valD);
             auto dirtyHeight = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(valD * valD);
             holder->SetUp();
-            accessor_->putImageData1(peer_, &arkData, &dx, &dy, &dirtyX, &dirtyY, &dirtyWidth, &dirtyHeight);
+            accessor_->putImageData1(peer_, arkData, &dx, &dy, &dirtyX, &dirtyY, &dirtyWidth, &dirtyHeight);
             ASSERT_TRUE(holder->isCalled);
             ASSERT_NE(holder->imageData, nullptr);
-            Ace::ImageData imageData = *holder->imageData;
+            Ace::ImageData& imageData = *holder->imageData;
             auto expectedX = static_cast<uint32_t>(actualX + DIFF);
             auto expectedY = static_cast<uint32_t>(actualY + DIFF);
             auto expectedDX = static_cast<uint32_t>(valD + DIFF);
@@ -1991,6 +1962,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1Test, TestSize.Level1)
             EXPECT_EQ(imageData.dirtyY, expectedDY);
         }
     }
+    ImageDataPeer::Destroy(arkData);
     holder->TearDown();
 }
 
@@ -2026,23 +1998,23 @@ HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->createPattern, nullptr);
     holder->SetUp();
-    Ark_Materialized arkBitmap;
+    Ark_ImageBitmap arkBitmap;
     auto bitmapPeer = new MockImageBitmapPeer();
-    arkBitmap.ptr = bitmapPeer;
+    arkBitmap = bitmapPeer;
     auto repetition = Converter::ArkValue<Opt_String>("repeat");
     bitmapPeer->SetWidth(NUMBER_TEST_PLAN[0]);
     bitmapPeer->SetHeight(NUMBER_TEST_PLAN[1]);
-    auto result = accessor_->createPattern(peer_, &arkBitmap, &repetition);
+    auto result = Converter::OptConvert<Ark_CanvasPattern>(accessor_->createPattern(peer_, arkBitmap, &repetition));
     ASSERT_NE(result, nullptr);
-    auto patternPeer = reinterpret_cast<CanvasPatternPeer*>(result);
+    auto patternPeer = result.value();
     ASSERT_NE(patternPeer, nullptr);
     auto rendererPeer = patternPeer->GetCanvasRenderer();
     ASSERT_NE(rendererPeer, nullptr);
     auto pattern = rendererPeer->patterns[rendererPeer->patternCount - 1];
-    ASSERT_NE(patternPeer, nullptr);
-    ASSERT_FALSE(holder->isCalled);
+    EXPECT_NE(patternPeer, nullptr);
+    EXPECT_FALSE(holder->isCalled);
     rendererPeer->TriggerRestoreImpl();
-    ASSERT_TRUE(holder->isCalled);
+    EXPECT_TRUE(holder->isCalled);
     holder->TearDown();
 }
 
@@ -2143,7 +2115,7 @@ HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
     ASSERT_NE(accessor_->setPixelMap, nullptr);
     Ark_PixelMap arkPixelMap;
     auto peer = new PixelMapPeer();
-    arkPixelMap.ptr = peer;
+    arkPixelMap = peer;
     auto optPixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
     for (const auto& width : NUMBER_TEST_PLAN) {
         for (const auto& height : NUMBER_TEST_PLAN) {
@@ -2197,10 +2169,8 @@ HWTEST_F(CanvasRendererAccessorTest, clip1Test, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->clip1, nullptr);
-    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasPathPeerImpl>();
-    Ark_Materialized arkPath = {
-        .ptr = reinterpret_cast<CanvasPathPeer*>(Referenced::RawPtr(peerImpl))
-    };
+    auto peerImpl = Referenced::MakeRefPtr<Path2DPeer>();
+    Ark_Path2D arkPath = Referenced::RawPtr(peerImpl);
     for (const auto& [arkRule, expected] : FILL_RULE_TEST_PLAN) {
         for (const auto& actual : PATH2D_TEST_PLAN) {
             holder->SetUp();
@@ -2214,7 +2184,7 @@ HWTEST_F(CanvasRendererAccessorTest, clip1Test, TestSize.Level1)
                 path->LineTo(x, y);
             }
             peerImpl->path = path;
-            accessor_->clip1(peer_, &arkPath, &arkRule);
+            accessor_->clip1(peer_, arkPath, &arkRule);
             auto result = holder->path->GetCaches();
             auto rcmd = result[0].first;
             auto rx = result[0].second.para1;
@@ -2260,10 +2230,8 @@ HWTEST_F(CanvasRendererAccessorTest, fill1Test, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->fill1, nullptr);
-    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasPathPeerImpl>();
-    Ark_Materialized arkPath = {
-        .ptr = reinterpret_cast<CanvasPathPeer*>(Referenced::RawPtr(peerImpl))
-    };
+    auto peerImpl = Referenced::MakeRefPtr<Path2DPeer>();
+    Ark_Path2D arkPath = Referenced::RawPtr(peerImpl);
     for (const auto& [arkRule, expected] : FILL_RULE_TEST_PLAN) {
         for (const auto& actual : PATH2D_TEST_PLAN) {
             holder->SetUp();
@@ -2277,7 +2245,7 @@ HWTEST_F(CanvasRendererAccessorTest, fill1Test, TestSize.Level1)
                 path->LineTo(x, y);
             }
             peerImpl->path = path;
-            accessor_->fill1(peer_, &arkPath, &arkRule);
+            accessor_->fill1(peer_, arkPath, &arkRule);
             auto result = holder->path->GetCaches();
             auto rcmd = result[0].first;
             auto rx = result[0].second.para1;

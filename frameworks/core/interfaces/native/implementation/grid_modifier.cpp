@@ -135,9 +135,11 @@ void SetGridOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(scroller);
     RefPtr<ScrollControllerBase> positionController = GridModelNG::GetOrCreateController(frameNode);
     RefPtr<ScrollProxy> scrollBarProxy = GridModelNG::GetOrCreateScrollBarProxy(frameNode);
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*scroller);
+
+     // obtain the external SwiperController peer
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
     CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = reinterpret_cast<ScrollerPeer *>(*abstPeerPtrOpt);
+    auto peerImplPtr = *abstPeerPtrOpt;
     CHECK_NULL_VOID(peerImplPtr);
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);

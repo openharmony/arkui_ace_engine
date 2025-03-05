@@ -114,7 +114,7 @@ void SetLocationButtonOptions1Impl(Ark_NativePointer node,
 } // LocationButtonInterfaceModifier
 namespace LocationButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 const Callback_ClickEvent_LocationButtonOnClickResult_Void* value)
+                 const LocationButtonCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -133,7 +133,8 @@ void OnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         Ark_LocationButtonOnClickResult arkResult = Converter::ArkValue<Ark_LocationButtonOnClickResult>(res);
-        arkCallback.Invoke(event.ArkValue(), arkResult);
+        auto error = Converter::ArkValue<Opt_BusinessError>();
+        arkCallback.Invoke(event.ArkValue(), arkResult, error);
     };
 
     ViewAbstract::SetOnClick(frameNode, std::move(onClick));

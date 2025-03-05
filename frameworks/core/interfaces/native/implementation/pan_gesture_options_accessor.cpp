@@ -57,11 +57,11 @@ void AssignCast(std::optional<PanGestureOptionsInfo>& dst,
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureOptionsAccessor {
-static void DestroyPeerImpl(PanGestureOptionsPeer *peer)
+void DestroyPeerImpl(Ark_PanGestureOptions peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
+Ark_PanGestureOptions CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
 {
     auto peer = new PanGestureOptionsPeer();
     peer->handler = Referenced::MakeRefPtr<PanGestureOption>();
@@ -85,7 +85,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<Ark_NativePointer>(&DestroyPeerImpl);
 }
-void SetDirectionImpl(PanGestureOptionsPeer* peer,
+void SetDirectionImpl(Ark_PanGestureOptions peer,
                       Ark_PanDirection value)
 {
     CHECK_NULL_VOID(peer);
@@ -95,7 +95,7 @@ void SetDirectionImpl(PanGestureOptionsPeer* peer,
         peer->handler->SetDirection(convDirection.value());
     }
 }
-void SetDistanceImpl(PanGestureOptionsPeer* peer,
+void SetDistanceImpl(Ark_PanGestureOptions peer,
                      const Ark_Number* value)
 {
     CHECK_NULL_VOID(peer);
@@ -106,7 +106,7 @@ void SetDistanceImpl(PanGestureOptionsPeer* peer,
         peer->handler->SetDistance(convDistance.value());
     }
 }
-void SetFingersImpl(PanGestureOptionsPeer* peer,
+void SetFingersImpl(Ark_PanGestureOptions peer,
                     const Ark_Number* value)
 {
     CHECK_NULL_VOID(peer);
@@ -117,13 +117,16 @@ void SetFingersImpl(PanGestureOptionsPeer* peer,
         peer->handler->SetFingers(convFingers.value());
     }
 }
-Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer)
+Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    CHECK_NULL_RETURN(peer->handler, nullptr);
-    Ark_NativePointer ret = nullptr;
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->handler, {});
     LOGE("PanGestureOptionsAccessor::GetDirectionImpl - return value need to be supported");
-    return ret;
+    return {};
+}
+Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
+{
+    return {};
 }
 } // PanGestureOptionsAccessor
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
@@ -136,6 +139,7 @@ const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
         PanGestureOptionsAccessor::SetDistanceImpl,
         PanGestureOptionsAccessor::SetFingersImpl,
         PanGestureOptionsAccessor::GetDirectionImpl,
+        PanGestureOptionsAccessor::GetDistanceImpl,
     };
     return &PanGestureOptionsAccessorImpl;
 }

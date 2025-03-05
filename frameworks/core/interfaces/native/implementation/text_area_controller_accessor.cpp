@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaControllerAccessor {
-void DestroyPeerImpl(TextAreaControllerPeer* peer)
+void DestroyPeerImpl(Ark_TextAreaController peer)
 {
     delete peer;
 }
-Ark_NativePointer CtorImpl()
+Ark_TextAreaController CtorImpl()
 {
     return new TextAreaControllerPeer();
 }
@@ -32,13 +32,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CaretPositionImpl(TextAreaControllerPeer* peer,
+void CaretPositionImpl(Ark_TextAreaController peer,
                        const Ark_Number* value)
 {
     CHECK_NULL_VOID(peer && value && peer->controller_);
     peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
 }
-void SetTextSelectionImpl(TextAreaControllerPeer* peer,
+void SetTextSelectionImpl(Ark_TextAreaController peer,
                           const Ark_Number* selectionStart,
                           const Ark_Number* selectionEnd,
                           const Opt_SelectionOptions* options)
@@ -50,7 +50,7 @@ void SetTextSelectionImpl(TextAreaControllerPeer* peer,
         Converter::Convert<int32_t>(*selectionEnd),
         selectionOptions);
 }
-void StopEditingImpl(TextAreaControllerPeer* peer)
+void StopEditingImpl(Ark_TextAreaController peer)
 {
     CHECK_NULL_VOID(peer && peer->controller_);
     peer->controller_->StopEditing();
