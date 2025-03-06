@@ -1014,8 +1014,7 @@ void IndexerPattern::UpdateBubbleList(std::vector<std::string>& currentListData)
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     CHECK_NULL_VOID(popListData);
     auto actualIndex = GetActualIndex(selected_);
-    auto actualChildIndex = GetActualIndex(childPressIndex_);
-    currentListData = popListData(actualChildIndex >= 0 ? actualChildIndex : actualIndex);
+    currentListData = popListData(actualIndex);
 }
 
 void IndexerPattern::UpdateBubbleView(std::vector<std::string>& currentListData)
