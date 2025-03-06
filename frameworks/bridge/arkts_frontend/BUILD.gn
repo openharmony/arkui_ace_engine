@@ -18,13 +18,61 @@ ohos_source_set("arkts_frontend") {
   part_name = ace_engine_part
   configs = [ "$ace_root:ace_config" ]
   deps = [
+    ":ArkoalaNative_ark",
     "arkoala:arkoala_prebuild",
-    "arkoala:arkoala_prebuild_lib",
   ]
+
+  if (build_ohos_sdk) {
+    deps -= [ ":ArkoalaNative_ark" ]
+  }
 
   sources = [ "arkts_frontend.cpp" ]
   external_deps = [
     "hilog:libhilog",
     "runtime_core:ani",
   ]
+}
+
+ohos_shared_library("ArkoalaNative_ark") {
+  include_dirs = [
+    "koala_projects/arkoala/framework/native/src",
+    "koala_projects/arkoala/framework/native/src/generated",
+    "koala_projects/interop/src",
+    "koala_projects/interop/src/cpp",
+    "koala_projects/interop/src/cpp/ets",
+    "koala_projects/interop/src/cpp/types",
+    "koala_projects/interop/src/cpp/ohos",
+  ]
+
+  defines = [
+    "KOALA_OHOS",
+    "__MUSL__",
+    "KOALA_ETS_NAPI",
+    "DKOALA_USE_PANDA_VM",
+  ]
+
+  sources = [
+    "koala_projects/arkoala/framework/native/src/events.cc",
+    "koala_projects/arkoala/framework/native/src/generated/all_events.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_deserialize_call.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_managed_caller.cc",
+    "koala_projects/arkoala/framework/native/src/generated/library.cc",
+    "koala_projects/arkoala/framework/native/src/vsync.cc",
+  ]
+
+  # interop source
+  sources += [
+    "koala_projects/interop/src/cpp/callback-resource.cc",
+    "koala_projects/interop/src/cpp/common-interop.cc",
+    "koala_projects/interop/src/cpp/ets/convertors-ets.cc",
+    "koala_projects/interop/src/cpp/interop-logging.cc",
+    "koala_projects/interop/src/cpp/types/signatures.cc",
+  ]
+
+  external_deps = [ "hilog:hilog_ndk" ]
+
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }

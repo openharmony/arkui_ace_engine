@@ -25,7 +25,7 @@ KOALA_INTEROP_V1(SetVsyncCallback, Ark_NativePointer)
 
 KVMObjectHandle impl_VSyncAwait(KVMContext vmContext, Ark_NativePointer pipelineContext)
 {
-    Ark_PipelineContext pipelineContextCast = (Ark_PipelineContext)pipelineContext;
+    [[maybe_unused]] Ark_PipelineContext pipelineContextCast = (Ark_PipelineContext)pipelineContext;
     KVMObjectHandle result = nullptr;
     KVMDeferred* deferred = CreateDeferred(vmContext, &result);
     if (currentVsyncDeferred) {

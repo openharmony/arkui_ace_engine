@@ -25,18 +25,3 @@ ohos_prebuilt_etc("arkoala_prebuild") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
-
-ohos_prebuilt_etc("arkoala_prebuild_lib") {
-  if (target_cpu == "arm") {
-    source = "arm32/libArkoalaNative_ark.so"
-    module_install_dir = "lib"
-  } else if (target_cpu == "arm64") {
-    source = "arm64/libArkoalaNative_ark.so"
-    module_install_dir = "lib64"
-  } else {
-    install_enable = false
-  }
-
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
