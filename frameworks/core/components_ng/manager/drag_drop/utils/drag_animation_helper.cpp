@@ -624,24 +624,24 @@ void DragAnimationHelper::InitGatherNodeAttr(const RefPtr<FrameNode>& gatherNode
     }
 }
 
-void DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode)
+bool DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode)
 {
     TAG_LOGI(AceLogTag::ACE_DRAG, "Show gather node animation");
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = frameNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto manager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
+    CHECK_NULL_RETURN(manager, false);
 
     if (manager->GetHasGatherNode()) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Not need create gather node, already have");
-        return;
+        return false;
     }
 
     //create gather node
     std::vector<GatherNodeChildInfo> gatherNodeInfo;
     auto gatherNode = CreateGatherNode(frameNode, gatherNodeInfo);
-    CHECK_NULL_VOID(gatherNode);
+    CHECK_NULL_RETURN(gatherNode, false);
     MountGatherNode(manager, frameNode, gatherNode, gatherNodeInfo);
     InitGatherNodeAttr(gatherNode, gatherNodeInfo);
     AddDragNodeCopy(manager, frameNode, gatherNode);
@@ -654,6 +654,7 @@ void DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frame
     PlayGatherNodeOpacityAnimation(manager);
     PlayGatherNodeTranslateAnimation(frameNode, manager);
     ShowDragNodeCopyAnimation(manager, frameNode);
+    return true;
 }
 
 void DragAnimationHelper::AddDragNodeCopy(const RefPtr<OverlayManager>& overlayManager,

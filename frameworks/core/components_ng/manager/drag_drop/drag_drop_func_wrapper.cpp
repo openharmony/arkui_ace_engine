@@ -364,7 +364,7 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     auto opacity = imageContext->GetOpacity();
-    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) >= MIN_OPACITY) {
+    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
         option.options.opacity = opacity.value();
     } else {
         option.options.opacity = DEFAULT_OPACITY;
