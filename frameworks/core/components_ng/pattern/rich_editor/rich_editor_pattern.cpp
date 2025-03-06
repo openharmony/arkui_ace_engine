@@ -2812,7 +2812,7 @@ bool RichEditorPattern::IsClickEventOnlyForMenuToggle(const OHOS::Ace::GestureEv
     bool hasHandledMenuToggleByClick =
         selectOverlay_->IsClickAtHandle(info) && (!isEditing_ || selectOverlay_->IsSingleHandleShow());
     CHECK_NULL_RETURN(!hasHandledMenuToggleByClick, true);
-    if (BetweenSelection(info.GetGlobalLocation())) {
+    if (showSelect_ && BetweenSelection(info.GetGlobalLocation())) {
         return HandleClickSelection(info);
     }
     return false;
@@ -7107,6 +7107,7 @@ void RichEditorPattern::HandleTouchMove(const TouchLocationInfo& info)
     if (previewLongPress_ || editingLongPress_) {
         if (!isTouchSelecting_) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch selecting start id= %{public}d", info.GetFingerId());
+            showSelect_ = true;
             isTouchSelecting_ = true;
             selectingFingerId_ = info.GetFingerId();
         }
