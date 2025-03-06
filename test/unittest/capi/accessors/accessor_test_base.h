@@ -195,22 +195,5 @@ template<typename AccessorType, auto GetAccessorFunc>
 class StaticAccessorTest : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, void> {
 };
 
-MATCHER_P2(CompareArkLength, first, second, "Ark_Length compare")
-{
-    return first->type == second->type &&
-        first->value == second->value &&
-        first->unit == second->unit &&
-        first->resource == second->resource;
-}
-
-MATCHER_P2(CompareOptLength, first, second, "Opt_Length compare")
-{
-    auto firstLength = Converter::OptConvert<Ark_Length>(first);
-    auto secondLength = Converter::OptConvert<Ark_Length>(second);
-    if (!firstLength && !secondLength) return false;
-    if (!firstLength) return false;
-    if (!secondLength) return false;
-    return CompareArkLength(firstLength, secondLength);
-}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
