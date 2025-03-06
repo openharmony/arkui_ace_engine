@@ -511,6 +511,17 @@ namespace OHOS::Ace::NG::Converter {
         };
     }
 
+    template<typename To, typename Which, typename From, std::enable_if_t<IsOptional<To>::value, bool> = true>
+    To ArkUnion(const std::optional<From>& src, ConvContext *ctx = nullptr)
+    {
+        To result {.tag = INTEROP_TAG_UNDEFINED};
+        if (src.has_value()) {
+            result.tag = INTEROP_TAG_OBJECT;
+            result.value = ArkUnion<decltype(To().value), Which>(*src, ctx);
+        }
+        return result;
+    }
+
     template<typename To, std::enable_if_t<IsOptional<To>::value, bool> = true>
     To ArkUnion(const Ark_Empty& src, ConvContext *ctx = nullptr)
     {
