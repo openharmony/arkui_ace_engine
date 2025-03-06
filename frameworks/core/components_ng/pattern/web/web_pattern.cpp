@@ -5232,6 +5232,11 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         return;
     }
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
+    if (type == WindowSizeChangeReason::ROTATION) {
+        if (delegate_) {
+            delegate_->MaximizeResize();
+        }
+    }
     if (!isSmoothDragResizeEnabled) {
                 return;
     }
@@ -6601,7 +6606,7 @@ void WebPattern::RemoveDataListNode()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DeleteMenu(dataListNode->GetId());
-    
+
     auto parent = dataListNode->GetParent();
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(dataListNode);
