@@ -2783,17 +2783,21 @@ void AceContainer::CheckAndSetFontFamily()
         }
     }
     path = path.append("/fonts/");
-    familyName = GetFontFamilyName(path);
-    if (familyName.empty()) {
+    auto fontFamilyNames = GetFontFamilyName(path);
+    if (fontFamilyNames.empty()) {
         return;
     }
-    path = path.append(familyName);
+    familyName = fontFamilyNames[0];
+    std::vector<std::string> fullPath;
+    for (const auto& fontFamilyName : fontFamilyNames) {
+        fullPath.push_back(path + fontFamilyName);
+    }
     if (isFormRender_) {
         // Resolve garbled characters caused by FRS multi-thread async
         std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
-        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+        fontManager->SetFontFamily(familyName.c_str(), fullPath);
     } else {
-        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+        fontManager->SetFontFamily(familyName.c_str(), fullPath);
     }
 }
 

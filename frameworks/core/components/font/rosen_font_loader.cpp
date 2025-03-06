@@ -34,6 +34,9 @@ constexpr uint32_t RAWFILE_RESOURCE_MATCH_SIZE = 2;
 RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::string& familySrc)
     : FontLoader(familyName, familySrc)
 {}
+RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::vector<std::string>& familySrcArray)
+    : FontLoader(familyName, familySrcArray)
+{}
 
 void RosenFontLoader::AddFont(
     const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
@@ -59,7 +62,7 @@ void RosenFontLoader::AddFont(
     }
 }
 
-void RosenFontLoader::SetDefaultFontFamily(const char* fontFamily, const char* familySrc)
+void RosenFontLoader::SetDefaultFontFamily(const char* fontFamily, const std::vector<std::string>& familySrc)
 {
     RosenFontCollection::GetInstance().LoadFontFamily(fontFamily, familySrc);
 }
