@@ -327,7 +327,6 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGE("Check constraint failed.");
         return;
     }
-
     CHECK_NULL_VOID(sessionWrapper_);
     UIEXT_LOGI("The current state is '%{public}s' when UpdateWant, needCheck: '%{public}d'.",
         ToString(state_), needCheckWindowSceneId_);
@@ -353,7 +352,6 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         // reset callback, in order to register childtree call back again when onConnect to new ability
         ResetAccessibilityChildTreeCallback();
     }
-
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
     UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
     usage_ = uIExtensionUsage;
@@ -1713,7 +1711,7 @@ bool UIExtensionPattern::IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag f
 
 void UIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeTransformChange(flag))) {
+    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeGeometryChange(flag))) {
         return;
     }
     if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
@@ -1728,9 +1726,9 @@ AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
     AccessibilityParentRectInfo rectInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, rectInfo);
-    auto rect = host->GetTransformRectRelativeToWindow();
+    auto rect = host->GetTransformRectRelativeToWindow(true);
     VectorF finalScale = host->GetTransformScaleRelativeToWindow();
-    
+
     rectInfo.left = static_cast<int32_t>(rect.Left());
     rectInfo.top = static_cast<int32_t>(rect.Top());
     rectInfo.scaleX = finalScale.x;

@@ -49,9 +49,9 @@ enum class BusinessDataSendType : uint32_t {
 
 enum class UIContentBusinessCode : uint32_t {
     UNDEFINED = 0,
-    // uiextension session business begin
+    SEND_STATAUSBAR_TYPE = 1,
     EVENT_PROXY = 1001,
-    // accessibility business begin
+    SEND_PAGE_MODE = 1002,
     TRANSFORM_PARAM = 2001,
 };
 } // namespace OHOS::Ace::NG

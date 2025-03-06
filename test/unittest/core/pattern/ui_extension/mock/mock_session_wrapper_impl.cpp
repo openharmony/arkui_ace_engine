@@ -217,6 +217,10 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
 {
 }
 
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
+{
+}
+
 void SessionWrapperImpl::NotifySizeChangeReason(
     WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -239,9 +243,6 @@ void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
 void SessionWrapperImpl::OnReleaseDone()
 {
 }
-
-void SessionWrapperImpl::OnExtensionDetachToDisplay()
-{}
 
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {

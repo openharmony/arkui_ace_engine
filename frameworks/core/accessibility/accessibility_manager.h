@@ -93,6 +93,10 @@ struct AccessibilityWindowInfo {
     float_t scaleY = 1.0f;
 };
 
+struct AccessibilityWorkMode {
+    bool isTouchExplorationEnabled = true;
+};
+
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
     ON_SHOW = 1,
@@ -308,6 +312,12 @@ public:
     }
 
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
+
+    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
+    {
+        return AccessibilityWorkMode();
+    }
+
 protected:
     int32_t treeId_ = 0;
 

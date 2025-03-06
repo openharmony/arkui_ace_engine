@@ -270,6 +270,8 @@ public:
         const WeakPtr<NG::FrameNode>& hostNode,
         AccessibilityElementOperatorCallback& callback,
         const int32_t requestId);
+    
+    AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override;
