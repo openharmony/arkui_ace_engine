@@ -10586,6 +10586,7 @@ void TextFieldPattern::ClearTextContent()
     if (contentController_->IsEmpty()) {
         return;
     }
+    showCountBorderStyle_ = false;
     InputCommandInfo inputCommandInfo;
     inputCommandInfo.deleteRange = { 0, contentController_->GetTextUtf16Value().length() };
     inputCommandInfo.insertOffset = 0;
