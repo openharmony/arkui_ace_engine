@@ -521,6 +521,7 @@ void WaterFlowPattern::ResetSections()
     }
     sections_.Reset();
     layoutInfo_->Reset();
+    sectionChangeStartPos_.clear();
     MarkDirtyNodeSelf();
 }
 
