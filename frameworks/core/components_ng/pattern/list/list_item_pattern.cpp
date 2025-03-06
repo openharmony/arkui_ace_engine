@@ -137,6 +137,10 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
         FireSwipeActionOffsetChange(curOffset_, newOffset);
         curOffset_ = newOffset;
     }
+    if (pendingSwipeFunc_) {
+        pendingSwipeFunc_();
+        pendingSwipeFunc_ = nullptr;
+    }
     return false;
 }
 
@@ -716,6 +720,7 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
     if (newSwiperIndex == swiperIndex_) {
         return;
     }
+    auto oldState = swipeActionState_;
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
 
@@ -736,6 +741,14 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
                 trigStart = false;
             }
             swipeActionState_ = SwipeActionState::COLLAPSED;
+    }
+    if (swipeActionState_ != oldState) {
+        if (swipeActionState_ == SwipeActionState::COLLAPSED) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+        if (swipeActionState_ == SwipeActionState::EXPANDED) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
     }
     swiperIndex_ = newSwiperIndex;
     listItemEventHub->FireStateChangeEvent(swipeActionState_, trigStart);
@@ -910,6 +923,53 @@ void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     json->PutExtAttr("selected", isSelected_, filter);
 }
 
+void ListItemPattern::SwipeForward()
+{
+    auto itemPosition = GetSwiperIndex();
+    if (itemPosition == ListItemSwipeIndex::SWIPER_END) {
+        return;
+    }
+
+    if (GetSwipeActionState() == SwipeActionState::COLLAPSED) {
+        curOffset_ = -1.0f;
+        MarkDirtyNode();
+        pendingSwipeFunc_ = [this]() {
+            FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_END);
+            StartSpringMotion(curOffset_, -endNodeSize_, 0.0f, true);
+        };
+    }
+    if (itemPosition == ListItemSwipeIndex::SWIPER_START) {
+        FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
+        StartSpringMotion(curOffset_, 0.0f, 0.0f, true);
+    }
+}
+
+void ListItemPattern::SwipeBackward()
+{
+    auto itemPosition = GetSwiperIndex();
+    if (itemPosition == ListItemSwipeIndex::SWIPER_START) {
+        return;
+    }
+
+    if (GetSwipeActionState() == SwipeActionState::COLLAPSED) {
+        curOffset_ = 1.0f;
+        MarkDirtyNode();
+        pendingSwipeFunc_ = [this]() {
+            FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_START);
+            StartSpringMotion(curOffset_, startNodeSize_, 0.0f, true);
+        };
+    }
+    if (itemPosition == ListItemSwipeIndex::SWIPER_END) {
+        FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
+        StartSpringMotion(curOffset_, 0.0f, 0.0f, true);
+    }
+}
+
+SwipeActionState ListItemPattern::GetSwipeActionState()
+{
+    return swipeActionState_;
+}
+
 void ListItemPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
@@ -943,6 +1003,20 @@ void ListItemPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(context);
         pattern->MarkIsSelected(false);
         context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    });
+    
+    listItemAccessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_EQUAL_VOID(pattern->Selectable(), false);
+        pattern->SwipeForward();
+    });
+
+    listItemAccessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_EQUAL_VOID(pattern->Selectable(), false);
+        pattern->SwipeBackward();
     });
 }
 
