@@ -1098,8 +1098,12 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
         OHOS::AppExecFwk::Constants::ACQUIRE_TYPE, OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
-    // if form component not new create, just reuse runningCompId_
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, runningCompId_);
+    if (runningCompId_.empty()) {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
+    } else {
+        // if form component not new create, just reuse runningCompId_
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, runningCompId_);
+    }
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
     auto pipelineContext = context_.Upgrade();
