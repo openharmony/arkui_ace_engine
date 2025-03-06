@@ -124,7 +124,7 @@ void ViewAbstractModelNG::BindMenu(FrameNode* frameNode,
 {
     auto targetNode = AceType::Claim(frameNode);
     CHECK_NULL_VOID(targetNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, frameNode);
     if (CheckMenuIsShow(menuParam, targetNode)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.",
             menuParam.isShowInSubWindow, targetNode->GetId());
