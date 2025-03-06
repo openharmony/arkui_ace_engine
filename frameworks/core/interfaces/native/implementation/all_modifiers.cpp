@@ -277,7 +277,14 @@ const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor();
 const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccessor();
 const GENERATED_ArkUISwipeGestureEventAccessor* GetSwipeGestureEventAccessor();
 const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
+const GENERATED_ArkUITapGestureInterfaceAccessor* GetTapGestureInterfaceAccessor();
+const GENERATED_ArkUILongPressGestureInterfaceAccessor* GetLongPressGestureInterfaceAccessor();
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
+const GENERATED_ArkUIPanGestureInterfaceAccessor* GetPanGestureInterfaceAccessor();
+const GENERATED_ArkUISwipeGestureInterfaceAccessor* GetSwipeGestureInterfaceAccessor();
+const GENERATED_ArkUIPinchGestureInterfaceAccessor* GetPinchGestureInterfaceAccessor();
+const GENERATED_ArkUIRotationGestureInterfaceAccessor* GetRotationGestureInterfaceAccessor();
+const GENERATED_ArkUIGestureGroupInterfaceAccessor* GetGestureGroupInterfaceAccessor();
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor();
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
@@ -567,7 +574,14 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetRotationGestureEventAccessor,
         GetSwipeGestureEventAccessor,
         GetGestureEventAccessor,
+        GetTapGestureInterfaceAccessor,
+        GetLongPressGestureInterfaceAccessor,
         GetPanGestureOptionsAccessor,
+        GetPanGestureInterfaceAccessor,
+        GetSwipeGestureInterfaceAccessor,
+        GetPinchGestureInterfaceAccessor,
+        GetRotationGestureInterfaceAccessor,
+        GetGestureGroupInterfaceAccessor,
         GetScrollableTargetInfoAccessor,
         GetEventTargetInfoAccessor,
         GetGestureRecognizerAccessor,

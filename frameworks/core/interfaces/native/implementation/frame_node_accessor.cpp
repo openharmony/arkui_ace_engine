@@ -86,6 +86,10 @@ Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {
     return {};
 }
+Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
+{
+    return {};
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -107,6 +111,7 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::DisposeImpl,
         FrameNodeAccessor::GetOpacityImpl,
         FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
+        FrameNodeAccessor::GetFrameNodeByKeyImpl,
     };
     return &FrameNodeAccessorImpl;
 }

@@ -42,6 +42,12 @@ void EndFrameImpl(Ark_NativePointer root)
     //auto convValue = Converter::OptConvert<type>(root); // for enums
     //undefinedModelNG::SetEndFrame(frameNode, convValue);
 }
+void SyncInstanceIdImpl(Ark_Int32 instanceId)
+{
+}
+void RestoreInstanceIdImpl()
+{
+}
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
@@ -51,6 +57,8 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::GetFinalizerImpl,
         SystemOpsAccessor::StartFrameImpl,
         SystemOpsAccessor::EndFrameImpl,
+        SystemOpsAccessor::SyncInstanceIdImpl,
+        SystemOpsAccessor::RestoreInstanceIdImpl,
     };
     return &SystemOpsAccessorImpl;
 }
