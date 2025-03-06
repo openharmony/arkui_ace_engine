@@ -384,6 +384,7 @@ public:
         const GestureEvent& event, const RefPtr<GestureEventHub>& gestureHub, PreparedInfoForDrag& data);
     void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
         const OffsetF& gatherNodeCenter, PreparedInfoForDrag& data, Point point = { 1, 1 });
+    void SetDragStartAnimationOption(AnimationOption& option, int32_t containerId);
     void DragAnimationCurve(RefPtr<Curve> curve);
     void DragStartTransitionAnimation(
         PreparedInfoForDrag& data, const Offset& newOffset, const DragPreviewInfo& info, AnimationOption option);
@@ -638,6 +639,13 @@ public:
         isReDragStart_ = isReDragStart;
     }
 
+    void SetDragStartAnimationRate(float rate)
+    {
+        dragStartAnimationRate_ = rate;
+    }
+    
+    bool CheckIsFolderSubwindowBoundary(float x, float y, int32_t instanceId);
+
     bool CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId);
 
 private:
@@ -744,6 +752,7 @@ private:
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
+    float dragStartAnimationRate_ = 0.0f;
     int32_t badgeNumber_ = -1;
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;
