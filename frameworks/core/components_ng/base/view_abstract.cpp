@@ -2016,8 +2016,8 @@ void ViewAbstract::BindPopup(
         }
         if (!showInSubWindow) {
             // erase popup when target node destroy
-            auto destructor = [id = targetNode->GetId()]() {
-                auto pipeline = NG::PipelineContext::GetCurrentContext();
+            auto destructor = [id = targetNode->GetId(), weak = AceType::WeakClaim(context)]() {
+                auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
