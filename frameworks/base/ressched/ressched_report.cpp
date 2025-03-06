@@ -183,7 +183,7 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
 void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     const std::unordered_map<std::string, std::string>& payload)
 {
-    if (reportDataFunc_ != nullptr) {
+    if (!reportDataFunc_) {
         LOGD("reportDataFunc_ is null!");
         return;
     }
