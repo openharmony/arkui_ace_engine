@@ -941,6 +941,8 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {
         JSTextTimerController::JSBind(globalObj);
+    } else if ((*func).first == "TextClock") {
+        JSTextClockController::JSBind(globalObj);
     } else if ((*func).first == "Canvas") {
         JSCanvasPattern::JSBind(globalObj);
         JSCanvasGradient::JSBind(globalObj);
