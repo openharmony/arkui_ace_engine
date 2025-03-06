@@ -43,7 +43,7 @@ public:
 
     ListItemGroupIndex GetItemIndexInGroup(double x, double y) const override
     {
-        ListItemGroupIndex itemGroupIndex = { x, y, -1 };
+        ListItemGroupIndex itemGroupIndex = { x, ListItemGroupArea::IN_FOOTER_AREA, y };
         return itemGroupIndex;
     }
 
@@ -59,8 +59,6 @@ public:
     ~MockListScrollController() override = default;
 
     MOCK_METHOD(void, JumpToItemInGroup, (int32_t, int32_t, bool, ScrollAlign, int32_t));
-    MOCK_METHOD(Rect, GetItemRectInGroup, (int32_t, int32_t), (const override));
-    MOCK_METHOD(ListItemGroupIndex, GetItemIndexInGroup, (double, double), (const override));
 };
 } // namespace
 
@@ -288,7 +286,7 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestAlignInvalidValuesTest, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestValidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, GetItemRectInGroupTestValidValuesTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getItemRectInGroup, nullptr);
 
@@ -302,13 +300,9 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestValidValuesTes
         index = std::get<0>(value);
         arkIndex = std::get<1>(value);
         expectedRect = Rect(index, index, indexInGroup, indexInGroup);
-        EXPECT_CALL(*mockListScrollerController_,
-            GetItemRectInGroup(index, indexInGroup)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
-        // wait for return value type change from Ark_NativePointer to another type
-        // which is acceptable to "rect" data
-        Rect rc;
-        EXPECT_TRUE(rc == expectedRect);
+        Ark_RectResult retVal = accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
+        Rect rc = Converter::Convert<Rect>(retVal);
+        EXPECT_EQ(rc, expectedRect);
     }
 
     index = std::get<0>(indexValues[0]);
@@ -319,13 +313,9 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestValidValuesTes
         indexInGroup = std::get<0>(value);
         arkIndexInGroup = std::get<1>(value);
         expectedRect = Rect(index, index, indexInGroup, indexInGroup);
-        EXPECT_CALL(*mockListScrollerController_,
-            GetItemRectInGroup(index, indexInGroup)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
-        // wait for return value type change from Ark_NativePointer to another type
-        // which is acceptable to "rect" data
-        Rect rc;
-        EXPECT_TRUE(rc == expectedRect);
+        Ark_RectResult retVal = accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
+        Rect rc = Converter::Convert<Rect>(retVal);
+        EXPECT_EQ(rc, expectedRect);
     }
 }
 
@@ -334,7 +324,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestValidValuesTes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, GetItemRectInGroupTestInvalidValuesTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getItemRectInGroup, nullptr);
 
@@ -347,13 +337,9 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestInvalidValuesT
     for (auto&& value: indexNegativeValues) {
         index = std::get<0>(value);
         arkIndex = std::get<1>(value);
-        EXPECT_CALL(*mockListScrollerController_,
-            GetItemRectInGroup(index, indexInGroup)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
-        // wait for return value type change from Ark_NativePointer to another type
-        // which is acceptable to "rect" data
-        Rect rc;
-        EXPECT_TRUE(rc == expectedRect);
+        Ark_RectResult retVal = accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
+        Rect rc = Converter::Convert<Rect>(retVal);
+        EXPECT_EQ(rc, expectedRect);
     }
 
     index = std::get<0>(indexValues[0]);
@@ -362,30 +348,20 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestInvalidValuesT
     for (auto&& value: indexNegativeValues) {
         indexInGroup = std::get<0>(value);
         arkIndexInGroup = std::get<1>(value);
-        EXPECT_CALL(*mockListScrollerController_,
-            GetItemRectInGroup(index, indexInGroup)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
-        // wait for return value type change from Ark_NativePointer to another type
-        // which is acceptable to "rect" data
-        Rect rc;
+        Ark_RectResult retVal = accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, &arkIndexInGroup);
+        Rect rc = Converter::Convert<Rect>(retVal);
         EXPECT_TRUE(rc == expectedRect);
     }
 
     indexInGroup = std::get<0>(indexInGroupValues[0]);
     arkIndexInGroup = std::get<1>(indexInGroupValues[0]);
+    Ark_RectResult retVal = accessor_->getItemRectInGroup(vmContext_, peer_, nullptr, &arkIndexInGroup);
+    Rect rc = Converter::Convert<Rect>(retVal);
+    EXPECT_EQ(rc, expectedRect);
 
-    EXPECT_CALL(*mockListScrollerController_, GetItemRectInGroup(index, indexInGroup)).Times(0);
-    accessor_->getItemRectInGroup(vmContext_, peer_, nullptr, &arkIndexInGroup);
-    // wait for return value type change from Ark_NativePointer to another type
-    // which is acceptable to "rect" data
-    Rect rc;
-    EXPECT_TRUE(rc == expectedRect);
-
-    EXPECT_CALL(*mockListScrollerController_, GetItemRectInGroup(index, indexInGroup)).Times(0);
-    accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, nullptr);
-    // wait for return value type change from Ark_NativePointer to another type
-    // which is acceptable to "rect" data
-    EXPECT_TRUE(rc == expectedRect);
+    retVal = accessor_->getItemRectInGroup(vmContext_, peer_, &arkIndex, nullptr);
+    rc = Converter::Convert<Rect>(retVal);
+    EXPECT_EQ(rc, expectedRect);
 }
 
 /**
@@ -393,7 +369,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestInvalidValuesT
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, GetItemIndexInGroupTestValidValuesTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getVisibleListContentInfo, nullptr);
 
@@ -401,20 +377,17 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
     int y = std::get<0>(indexInGroupValues[0]);
     Ark_Number arkX = std::get<1>(indexValues[0]);
     Ark_Number arkY = std::get<1>(indexInGroupValues[0]);
-    auto expectedRect = ListItemGroupIndex();
+    auto expectedRect = ListItemGroupIndex{x, ListItemGroupArea::IN_FOOTER_AREA, y};
 
     for (auto&& value: indexValues) {
         x = std::get<0>(value);
         arkX = std::get<1>(value);
-        expectedRect = ListItemGroupIndex {x, y, -1};
-        EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
-        // wait for return value type change from Ark_NativePointer to another type
-        // which is acceptable to "ListItemGroupIndex" data
-        ListItemGroupIndex rc;
-        EXPECT_TRUE(rc.area == expectedRect.area);
-        EXPECT_TRUE(rc.index == expectedRect.index);
-        EXPECT_TRUE(rc.indexInGroup == expectedRect.indexInGroup);
+        expectedRect = ListItemGroupIndex {x, ListItemGroupArea::IN_FOOTER_AREA, y};
+        Ark_VisibleListContentInfo retVal = accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
+        ListItemGroupIndex rc = Converter::Convert<ListItemGroupIndex>(retVal);
+        EXPECT_EQ(rc.area, expectedRect.area);
+        EXPECT_EQ(rc.index, expectedRect.index);
+        EXPECT_EQ(rc.indexInGroup, expectedRect.indexInGroup);
     }
 
     x = std::get<0>(indexValues[0]);
@@ -424,15 +397,12 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
     for (auto&& value: indexInGroupValues) {
         y = std::get<0>(value);
         arkY = std::get<1>(value);
-        expectedRect = ListItemGroupIndex {x, y, -1};
-        EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
-        // wait for return value type change from Ark_NativePointer to another type
-        // which is acceptable to "ListItemGroupIndex" data
-        ListItemGroupIndex rc;
-        EXPECT_TRUE(rc.area == expectedRect.area);
-        EXPECT_TRUE(rc.index == expectedRect.index);
-        EXPECT_TRUE(rc.indexInGroup == expectedRect.indexInGroup);
+        expectedRect = ListItemGroupIndex {x, ListItemGroupArea::IN_FOOTER_AREA, y};
+        Ark_VisibleListContentInfo retVal = accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
+        ListItemGroupIndex rc = Converter::Convert<ListItemGroupIndex>(retVal);
+        EXPECT_EQ(rc.area, expectedRect.area);
+        EXPECT_EQ(rc.index, expectedRect.index);
+        EXPECT_EQ(rc.indexInGroup, expectedRect.indexInGroup);
     }
 
     y = std::get<0>(indexValues[0]);
@@ -444,15 +414,12 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
         arkX = std::get<1>(value);
         y = std::get<0>(value);
         arkY = std::get<1>(value);
-        expectedRect = ListItemGroupIndex {x, y, -1};
-        EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(1).WillOnce(Return(expectedRect));
-        accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
-        // wait for return value type change from Ark_NativePointer to another type
-        // which is acceptable to "ListItemGroupIndex" data
-        ListItemGroupIndex rc;
-        EXPECT_TRUE(rc.area == expectedRect.area);
-        EXPECT_TRUE(rc.index == expectedRect.index);
-        EXPECT_TRUE(rc.indexInGroup == expectedRect.indexInGroup);
+        expectedRect = ListItemGroupIndex {x, ListItemGroupArea::IN_FOOTER_AREA, y};
+        Ark_VisibleListContentInfo retVal = accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, &arkY);
+        ListItemGroupIndex rc = Converter::Convert<ListItemGroupIndex>(retVal);
+        EXPECT_EQ(rc.area, expectedRect.area);
+        EXPECT_EQ(rc.index, expectedRect.index);
+        EXPECT_EQ(rc.indexInGroup, expectedRect.indexInGroup);
     }
 }
 
@@ -461,32 +428,24 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, GetItemIndexInGroupTestInvalidValuesTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getVisibleListContentInfo, nullptr);
-
-    int x = std::get<0>(indexValues[0]);
-    int y = std::get<0>(indexInGroupValues[0]);
     Ark_Number arkX = std::get<1>(indexValues[0]);
     Ark_Number arkY = std::get<1>(indexInGroupValues[0]);
     auto expectedRect = ListItemGroupIndex();
 
-    EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(0);
-    accessor_->getVisibleListContentInfo(vmContext_, peer_, nullptr, &arkY);
-    // wait for return value type change from Ark_NativePointer to another type
-    // which is acceptable to "ListItemGroupIndex" data
-    ListItemGroupIndex rc;
-    EXPECT_TRUE(rc.area == expectedRect.area);
-    EXPECT_TRUE(rc.index == expectedRect.index);
-    EXPECT_TRUE(rc.indexInGroup == expectedRect.indexInGroup);
+    Ark_VisibleListContentInfo retVal = accessor_->getVisibleListContentInfo(vmContext_, peer_, nullptr, &arkY);
+    ListItemGroupIndex rc = Converter::Convert<ListItemGroupIndex>(retVal);
+    EXPECT_EQ(rc.area, expectedRect.area);
+    EXPECT_EQ(rc.index, expectedRect.index);
+    EXPECT_EQ(rc.indexInGroup, expectedRect.indexInGroup);
 
-    EXPECT_CALL(*mockListScrollerController_, GetItemIndexInGroup(x, y)).Times(0);
-    accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, nullptr);
-    // wait for return value type change from Ark_NativePointer to another type
-    // which is acceptable to "ListItemGroupIndex" data
-    EXPECT_TRUE(rc.area == expectedRect.area);
-    EXPECT_TRUE(rc.index == expectedRect.index);
-    EXPECT_TRUE(rc.indexInGroup == expectedRect.indexInGroup);
+    retVal = accessor_->getVisibleListContentInfo(vmContext_, peer_, &arkX, nullptr);
+    rc = Converter::Convert<ListItemGroupIndex>(retVal);
+    EXPECT_EQ(rc.area, expectedRect.area);
+    EXPECT_EQ(rc.index, expectedRect.index);
+    EXPECT_EQ(rc.indexInGroup, expectedRect.indexInGroup);
 }
 
 /**
