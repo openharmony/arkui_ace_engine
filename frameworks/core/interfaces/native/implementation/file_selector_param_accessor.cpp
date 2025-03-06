@@ -36,27 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetTitleImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetTitle();
-    // title need to be returned
-    LOGE("FileSelectorParamAccessor::GetTitleImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetTitle();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_FileSelectorMode GetModeImpl(Ark_FileSelectorParam peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetMode();
-    // mode need to be returned
-    LOGE("FileSelectorParamAccessor::GetModeImpl - return value need to be supported");
-    return {};
+    return static_cast<Ark_FileSelectorMode>(peer->handler->GetMode());
 }
 Array_String GetAcceptTypeImpl(Ark_FileSelectorParam peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetAcceptType();
-    // accept type need to be returned
-    LOGE("FileSelectorParamAccessor::GetAcceptTypeImpl - return value need to be supported");
-    return {};
+    auto acceptType = peer->handler->GetAcceptType();
+    return Converter::ArkValue<Array_String>(acceptType, Converter::FC);
 }
 Ark_Boolean IsCaptureImpl(Ark_FileSelectorParam peer)
 {

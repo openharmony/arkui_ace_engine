@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
@@ -59,42 +60,44 @@ public:
 };
 
 /**
- * @tc.name: DISABLED_getTitleTest
+ * @tc.name: getTitleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FileSelectorParamAccessorTest, DISABLED_getTitleTest, TestSize.Level1)
+HWTEST_F(FileSelectorParamAccessorTest, getTitleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTitle, nullptr);
+    std::string title = "title";
 
-    EXPECT_CALL(*mockHandler_, GetTitle()).Times(1);
-    accessor_->getTitle(peer_);
+    EXPECT_CALL(*mockHandler_, GetTitle()).Times(1).WillOnce(Return("title"));
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getTitle(peer_)), title);
 }
 
 /**
- * @tc.name: DISABLED_getAcceptTypeTest
+ * @tc.name: getAcceptTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FileSelectorParamAccessorTest, DISABLED_getAcceptTypeTest, TestSize.Level1)
+HWTEST_F(FileSelectorParamAccessorTest, getAcceptTypeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getAcceptType, nullptr);
+    std::vector<std::string> acceptType { "item1", "item2" };
 
-    EXPECT_CALL(*mockHandler_, GetAcceptType()).Times(1);
-    accessor_->getAcceptType(peer_);
+    EXPECT_CALL(*mockHandler_, GetAcceptType()).Times(1).WillOnce(Return(acceptType));
+    EXPECT_EQ(Converter::Convert<std::vector<std::string>>(accessor_->getAcceptType(peer_)), acceptType);
 }
 
 /**
- * @tc.name: DISABLED_getModeTest
+ * @tc.name: getModeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FileSelectorParamAccessorTest, DISABLED_getModeTest, TestSize.Level1)
+HWTEST_F(FileSelectorParamAccessorTest, getModeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getMode, nullptr);
 
-    EXPECT_CALL(*mockHandler_, GetMode()).Times(1);
-    accessor_->getMode(peer_);
+    EXPECT_CALL(*mockHandler_, GetMode()).Times(1).WillOnce(Return(2));
+    EXPECT_EQ(accessor_->getMode(peer_), ARK_FILE_SELECTOR_MODE_FILE_OPEN_FOLDER_MODE);
 }
 
 /**
