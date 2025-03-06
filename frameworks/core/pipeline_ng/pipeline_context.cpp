@@ -139,7 +139,6 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
         uiExtensionManager_->SetInstanceId(instanceId);
     }
 #endif
-    GetCurrentPageNameCallback();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -160,7 +159,6 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
         uiExtensionManager_->SetInstanceId(instanceId);
     }
 #endif
-    GetCurrentPageNameCallback();
 }
 
 PipelineContext::PipelineContext()
@@ -176,45 +174,40 @@ PipelineContext::PipelineContext()
         uiExtensionManager_->SetPipelineContext(WeakClaim(this));
     }
 #endif
-    GetCurrentPageNameCallback();
 }
 
-void PipelineContext::GetCurrentPageNameCallback()
+std::string PipelineContext::GetCurrentPageNameCallback()
 {
-    auto pageNameCallback = [weak = WeakClaim(this)]() -> std::string {
-        auto pipeline = weak.Upgrade();
-        CHECK_NULL_RETURN(pipeline, "");
-        auto stageManager = pipeline->GetStageManager();
-        CHECK_NULL_RETURN(stageManager, "");
-        RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
-        CHECK_NULL_RETURN(pageNode, "");
-        auto pagePattern = pageNode->GetPattern<PagePattern>();
-        CHECK_NULL_RETURN(pagePattern, "");
-        CHECK_NULL_RETURN(pagePattern->GetPageInfo(), "");
-        int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
-        RefPtr<NavigationGroupNode> navigationNode = nullptr;
-        CHECK_RUN_ON(UI);
-        auto it = pipeline->pageToNavigationNodes_.find(pageId);
-        if (it == pipeline->pageToNavigationNodes_.end() || it->second.empty()) {
-            return "";
-        }
+    CHECK_NULL_RETURN(stageManager_, "");
+    RefPtr<FrameNode> pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(pageNode, "");
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, "");
+    CHECK_NULL_RETURN(pagePattern->GetPageInfo(), "");
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    RefPtr<NavigationGroupNode> navigationNode = nullptr;
+    CHECK_RUN_ON(UI);
+    auto it = pageToNavigationNodes_.find(pageId);
+    if (it == pageToNavigationNodes_.end() || it->second.empty()) {
+        return "";
+    }
 
-        for (auto iter = it->second.begin(); iter != it->second.end() && !navigationNode; ++iter) {
-            navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
-        }
+    for (auto iter = it->second.begin(); iter != it->second.end() && !navigationNode; ++iter) {
+        navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+    }
 
-        CHECK_NULL_RETURN(navigationNode, "");
-        CHECK_NULL_RETURN(navigationNode->GetPattern(), "");
-        auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
-        CHECK_NULL_RETURN(pattern, "");
-        const auto& navDestinationNodes = pattern->GetAllNavDestinationNodes();
-        auto pageNameObj = navDestinationNodes.back();
-        std::string pageName = std::get<0>(pageNameObj);
-        return pageName;
-    };
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(pageNameCallback);
-#endif
+    CHECK_NULL_RETURN(navigationNode, "");
+    CHECK_NULL_RETURN(navigationNode->GetPattern(), "");
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, "");
+    const auto& navDestinationNodes = pattern->GetAllNavDestinationNodes();
+    int32_t size = static_cast<int32_t>(navDestinationNodes.size());
+    if (size == 0) {
+        return "";
+    }
+    auto pageNameObj = navDestinationNodes.back();
+    std::string pageName = std::get<0>(pageNameObj);
+    return pageName;
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()

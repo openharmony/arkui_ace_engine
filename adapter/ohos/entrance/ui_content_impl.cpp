@@ -4752,6 +4752,17 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
+    RegisterGetCurrentPageName(pipeline);
+}
+
+void UIContentImpl::RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline)
+{
+    auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_RETURN(pipeline, "");
+        return pipeline->GetCurrentPageNameCallback();
+    };
+    UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
