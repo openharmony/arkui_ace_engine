@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import BindPopupBootcampTest from './BindPopupBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  BindPopupBootcampTest();
 }
