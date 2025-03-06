@@ -37,11 +37,10 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetErrorInfoImpl(Ark_WebResourceError peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetInfo();
-    // info need to be returned
-    LOGE("WebResourceErrorAccessor::GetErrorInfoImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetInfo();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
 {
