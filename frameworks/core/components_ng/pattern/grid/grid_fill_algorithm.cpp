@@ -70,10 +70,10 @@ void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* no
 {
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     filler.FillMatrixOnly(index);
-    if (!node->CheckNeedForceMeasureAndLayout()) {
+    const auto pos = info_.GetItemPos(index);
+    if (!node->CheckNeedForceMeasureAndLayout() && info_.lineHeightMap_.count(pos.second)) {
         return;
     }
-    const auto pos = info_.GetItemPos(index);
     filler.MeasureItem(params_, node, index, pos.first, pos.second);
 }
 
