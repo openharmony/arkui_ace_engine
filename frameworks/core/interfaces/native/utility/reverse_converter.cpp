@@ -53,6 +53,11 @@ Ark_String ConvContext::Store(const std::string_view& src)
     return result;
 }
 
+void ConvContext::Clear()
+{
+    storage_.clear();
+}
+
 void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx)
 {
     AssignArkValue(dst, StringUtils::Str16ToStr8(src), ctx);
