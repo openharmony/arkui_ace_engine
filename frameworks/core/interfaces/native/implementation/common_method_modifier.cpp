@@ -3889,7 +3889,6 @@ void ClipShape0Impl(Ark_NativePointer node,
     if (convValue.has_value() && convValue.value()) {
         ViewAbstract::SetClipShape(convValue.value());
     }
-
 }
 void ClipShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
