@@ -63,29 +63,35 @@ HWTEST_F(PermissionRequestAccessorTest, denyTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_getOriginTest
+ * @tc.name: getOriginTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PermissionRequestAccessorTest, DISABLED_getOriginTest, TestSize.Level1)
+HWTEST_F(PermissionRequestAccessorTest, getOriginTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getOrigin, nullptr);
 
-    EXPECT_CALL(*mockHandler_, GetOrigin()).Times(1);
-    accessor_->getOrigin(peer_);
+    std::string origin = "origin";
+    EXPECT_CALL(*mockHandler_, GetOrigin()).Times(1).WillOnce(Return(origin));
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getOrigin(peer_)), origin);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getOrigin(nullptr)), "");
 }
 
 /**
- * @tc.name: DISABLED_getAccessibleResourceTest
+ * @tc.name: getAccessibleResourceTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PermissionRequestAccessorTest, DISABLED_getAccessibleResourceTest, TestSize.Level1)
+HWTEST_F(PermissionRequestAccessorTest, getAccessibleResourceTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getAccessibleResource, nullptr);
 
-    EXPECT_CALL(*mockHandler_, GetResources()).Times(1);
-    accessor_->getAccessibleResource(peer_);
+    std::vector<std::string> resources { "item1", "item2" };
+    EXPECT_CALL(*mockHandler_, GetResources()).Times(1).WillOnce(Return(resources));
+    EXPECT_EQ(Converter::Convert<std::vector<std::string>>(accessor_->getAccessibleResource(peer_)), resources);
+
+    std::vector<std::string> empty;
+    EXPECT_EQ(Converter::Convert<std::vector<std::string>>(accessor_->getAccessibleResource(nullptr)), empty);
 }
 
 /**
