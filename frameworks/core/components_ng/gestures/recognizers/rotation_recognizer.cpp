@@ -372,6 +372,9 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         if (touchPoint.tiltY.has_value()) {
             info.SetTiltY(touchPoint.tiltY.value());
         }
+        if (touchPoint.rollAngle.has_value()) {
+            info.SetRollAngle(touchPoint.rollAngle.value());
+        }
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
@@ -427,6 +430,9 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
     }
     if (touchPoint.tiltY.has_value()) {
         info->SetTiltY(touchPoint.tiltY.value());
+    }
+    if (touchPoint.rollAngle.has_value()) {
+        info->SetRollAngle(touchPoint.rollAngle.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
     if (gestureRecognizerJudgeFunc) {

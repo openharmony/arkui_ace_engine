@@ -698,19 +698,24 @@ void PanRecognizer::OnSucceedCancel()
     SendCallbackMsg(onActionCancel_);
 }
 
+void PanRecognizer::GetGestureEventHalfInfo(GestureEvent* info)
+{
+    info->SetDeviceId(deviceId_);
+    info->SetFingerList(fingerList_);
+    info->SetSourceDevice(deviceType_);
+    info->SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
+    info->SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
+    info->SetDelta(delta_);
+    info->SetVelocity(panVelocity_.GetVelocity());
+    info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
+}
+
 GestureEvent PanRecognizer::GetGestureEventInfo()
 {
     GestureEvent info;
     info.SetTimeStamp(time_);
     UpdateFingerListInfo();
-    info.SetDeviceId(deviceId_);
-    info.SetFingerList(fingerList_);
-    info.SetSourceDevice(deviceType_);
-    info.SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
-    info.SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
-    info.SetDelta(delta_);
-    info.SetVelocity(panVelocity_.GetVelocity());
-    info.SetMainVelocity(panVelocity_.GetMainAxisVelocity());
+    GetGestureEventHalfInfo(&info);
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
@@ -744,6 +749,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetForce(lastTouchEvent_.force);
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
+    info.SetRollAngle(lastTouchEvent_.rollAngle.value_or(0.0));
     info.SetPointerEvent(lastPointEvent_);
     info.SetIsPostEventResult(isPostEventResult_);
     info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
@@ -803,6 +809,9 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     }
     if (lastTouchEvent_.tiltY.has_value()) {
         info->SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    if (lastTouchEvent_.rollAngle.has_value()) {
+        info->SetRollAngle(lastTouchEvent_.rollAngle.value());
     }
     if (gestureInfo_) {
         gestureInfo_->SetInputEventType(inputEventType_);

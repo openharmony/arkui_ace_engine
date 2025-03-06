@@ -431,6 +431,9 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
+        if (lastTouchEvent_.rollAngle.has_value()) {
+            info.SetRollAngle(lastTouchEvent_.rollAngle.value());
+        }
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
@@ -483,6 +486,9 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     }
     if (lastTouchEvent_.tiltY.has_value()) {
         info->SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    if (lastTouchEvent_.rollAngle.has_value()) {
+        info->SetRollAngle(lastTouchEvent_.rollAngle.value());
     }
     info->SetSourceTool(lastTouchEvent_.sourceTool);
     if (gestureRecognizerJudgeFunc) {
