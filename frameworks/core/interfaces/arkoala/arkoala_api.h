@@ -6120,7 +6120,6 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*setLevelUniqueId)(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);
     ArkUI_Int32 (*setImmersiveMode)(ArkUIDialogHandle handle, ArkUI_Int32 mode);
     ArkUI_Int32 (*setLevelOrder)(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder);
-    ArkUI_Int32 (*setFocusable)(ArkUIDialogHandle handle, ArkUI_Bool focusable);
     ArkUI_Int32 (*registerOnWillAppear)(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
     ArkUI_Int32 (*registerOnDidAppear)(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
     ArkUI_Int32 (*registerOnWillDisappear)(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
@@ -6139,6 +6138,7 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*setKeyboardAvoidMode)(ArkUIDialogHandle handle, ArkUI_Int32 keyboardAvoidMode);
     ArkUI_Int32 (*enableHoverMode)(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode);
     ArkUI_Int32 (*setHoverModeArea)(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType);
+    ArkUI_Int32 (*setFocusable)(ArkUIDialogHandle handle, ArkUI_Bool focusable);
     ArkUI_Int32 (*openCustomDialog)(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
     ArkUI_Int32 (*updateCustomDialog)(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
     ArkUI_Int32 (*closeCustomDialog)(ArkUI_Int32 dialogId);
