@@ -1032,7 +1032,7 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
     if (snapDirection == SnapDirection::FORWARD) {
         if (!lastSnapTargetIndex_.has_value()) {
             if (align == ScrollAlign::START) {
-                auto isAligned = NearEqual(itemPosition_[anchorIndex].startPos, contentStartOffset_);
+                auto isAligned = GreatOrEqual(itemPosition_[anchorIndex].startPos, contentStartOffset_);
                 lastSnapTargetIndex_ = isAligned ? anchorIndex - 1 : anchorIndex;
             } else if (align == ScrollAlign::END) {
                 lastSnapTargetIndex_ = anchorIndex - 1;
@@ -1050,7 +1050,7 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
             if (align == ScrollAlign::START) {
                 lastSnapTargetIndex_ = anchorIndex + 1;
             } else if (align == ScrollAlign::END) {
-                auto isAligned = NearEqual(itemPosition_[anchorIndex].endPos, contentMainSize_ - contentEndOffset_);
+                auto isAligned = LessOrEqual(itemPosition_[anchorIndex].endPos, contentMainSize_ - contentEndOffset_);
                 lastSnapTargetIndex_ = isAligned ? anchorIndex + 1 : anchorIndex;
             } else {
                 auto item = itemPosition_[anchorIndex];
