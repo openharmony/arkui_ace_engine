@@ -2112,4 +2112,18 @@ PathShapeOptions Convert(const Ark_PathShapeOptions& value)
         .commands = Converter::OptConvert<std::string>(value.commands),
     };
 };
+
+template<>
+std::vector<uint32_t> Convert(const Ark_Buffer& src)
+{
+    std::vector<uint32_t> dataArray;
+    auto array = (src.data != nullptr) ? static_cast<uint32_t*>(src.data) : nullptr;
+    auto size = src.length / sizeof(uint32_t);
+    if (array && size > 0) {
+        for (int64_t idx = 0; idx < size; idx++) {
+            dataArray.push_back(array[idx]);
+        }
+    }
+    return dataArray;
+}
 } // namespace OHOS::Ace::NG::Converter
