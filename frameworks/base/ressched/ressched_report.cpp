@@ -99,6 +99,12 @@ ResSchedReport& ResSchedReport::GetInstance()
     return instance;
 }
 
+ResSchedReport::ResSchedReport()
+{
+    reportDataFunc_ = LoadReportDataFunc();
+    reportSyncEventFunc_ = LoadReportSyncEventFunc();
+}
+
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
 {
     std::unordered_map<std::string, std::string> payload = param;
@@ -177,22 +183,18 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
 void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     const std::unordered_map<std::string, std::string>& payload)
 {
-    if (reportDataFunc_ == nullptr) {
-        reportDataFunc_ = LoadReportDataFunc();
+    if (!reportDataFunc_) {
+        LOGD("reportDataFunc_ is null!");
+        return;
     }
-    if (reportDataFunc_ != nullptr) {
-        reportDataFunc_(resType, value, payload);
-    }
+    reportDataFunc_(resType, value, payload);
 }
 
 void ResSchedReport::ResScheSyncEventReport(const uint32_t resType, const int64_t value,
-    const std::unordered_map<std::string, std::string>& payload,
-    std::unordered_map<std::string, std::string>& reply)
+    const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply)
 {
-    if (reportSyncEventFunc_ == nullptr) {
-        reportSyncEventFunc_ = LoadReportSyncEventFunc();
-    }
     if (!reportSyncEventFunc_) {
+        LOGD("reportSyncEventFunc_ is null!");
         return;
     }
     reportSyncEventFunc_(resType, value, payload, reply);
