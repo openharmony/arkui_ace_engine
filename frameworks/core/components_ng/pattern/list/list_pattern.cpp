@@ -602,27 +602,22 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (!posMap_) {
         posMap_ = MakeRefPtr<ListPositionMap>();
     }
+
+    SetLayoutAlgorithmParams(listLayoutAlgorithm, listLayoutProperty);
+
+    return listLayoutAlgorithm;
+}
+
+void ListPattern::SetLayoutAlgorithmParams(
+    const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty)
+{
+    CHECK_NULL_VOID(listLayoutAlgorithm);
+    CHECK_NULL_VOID(listLayoutProperty);
     if (childrenSize_) {
         listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
         listLayoutAlgorithm->SetListPositionMap(posMap_);
     }
-    bool needUseInitialIndex = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
-        !isInitialized_ && !jumpIndex_ : !isInitialized_;
-    if (needUseInitialIndex) {
-        isStackFromEnd_ = listLayoutProperty->GetStackFromEnd().value_or(false);
-        int32_t defaultInitialIndex = isStackFromEnd_ ? ListLayoutAlgorithm::LAST_ITEM : 0;
-        jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(defaultInitialIndex);
-        if (NeedScrollSnapAlignEffect()) {
-            scrollAlign_ = GetInitialScrollAlign();
-        } else if (isStackFromEnd_) {
-            scrollAlign_ = ScrollAlign::END;
-        }
-    }
-    if (jumpIndex_) {
-        listLayoutAlgorithm->SetIndex(jumpIndex_.value());
-        listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
-        jumpIndex_.reset();
-    }
+    SetLayoutAlgorithmJumpAlign(listLayoutAlgorithm, listLayoutProperty);
     if (targetIndex_) {
         listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
@@ -651,7 +646,6 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
-    return listLayoutAlgorithm;
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -683,6 +677,30 @@ void ListPattern::SetChainAnimationLayoutAlgorithm(
     }
     if (!listLayoutProperty->GetSpace().has_value() && chainAnimation_) {
         listLayoutAlgorithm->SetChainInterval(CHAIN_INTERVAL_DEFAULT.ConvertToPx());
+    }
+}
+
+void ListPattern::SetLayoutAlgorithmJumpAlign(
+    const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty)
+{
+    CHECK_NULL_VOID(listLayoutAlgorithm);
+    CHECK_NULL_VOID(listLayoutProperty);
+    bool needUseInitialIndex = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
+        !isInitialized_ && !jumpIndex_ : !isInitialized_;
+    if (needUseInitialIndex) {
+        isStackFromEnd_ = listLayoutProperty->GetStackFromEnd().value_or(false);
+        int32_t defaultInitialIndex = isStackFromEnd_ ? ListLayoutAlgorithm::LAST_ITEM : 0;
+        jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(defaultInitialIndex);
+        if (NeedScrollSnapAlignEffect()) {
+            scrollAlign_ = GetInitialScrollAlign();
+        } else if (isStackFromEnd_) {
+            scrollAlign_ = ScrollAlign::END;
+        }
+    }
+    if (jumpIndex_) {
+        listLayoutAlgorithm->SetIndex(jumpIndex_.value());
+        listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
+        jumpIndex_.reset();
     }
 }
 

@@ -117,6 +117,9 @@ bool ArcListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     startHeaderPos_ = listLayoutAlgorithm->GetStartHeaderPos();
     headerOffset_ = listLayoutAlgorithm->GetHeaderOffset();
+    oldHeaderSize_ = listLayoutAlgorithm->GetOldHeaderSize();
+    oldFirstItemSize_ = listLayoutAlgorithm->GetOldFirstItemSize();
+    headerStayNear_ = listLayoutAlgorithm->GetHeaderStayNear();
     return ListPattern::OnDirtyLayoutWrapperSwap(dirty, config);
 }
 
@@ -139,46 +142,14 @@ RefPtr<LayoutAlgorithm> ArcListPattern::CreateLayoutAlgorithm()
     if (!posMap_) {
         posMap_ = MakeRefPtr<ArcListPositionMap>(itemStartIndex_);
     }
-    if (childrenSize_) {
-        listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
-        listLayoutAlgorithm->SetListPositionMap(posMap_);
-    }
-    bool needUseInitialIndex = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
-        !isInitialized_ && !jumpIndex_ : !isInitialized_;
-    if (needUseInitialIndex) {
-        jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
-    }
-    if (jumpIndex_) {
-        listLayoutAlgorithm->SetIndex(jumpIndex_.value());
-        jumpIndex_.reset();
-    }
-    if (targetIndex_) {
-        listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
-    }
-    if (predictSnapOffset_.has_value()) {
-        listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
-        listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
-    }
-    listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
-    listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
-    listLayoutAlgorithm->SetIsNeedCheckOffset(isNeedCheckOffset_);
-    listLayoutAlgorithm->SetItemsPosition(itemPosition_);
-    listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
-    if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
-        listLayoutAlgorithm->SetOverScrollFeature();
-    }
-    listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
-    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom());
-    if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
-        SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
-        SetChainAnimationToPosMap();
-    }
-    if (predictSnapEndPos_.has_value()) {
-        listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
-    }
+
+    SetLayoutAlgorithmParams(listLayoutAlgorithm, listLayoutProperty);
+
     listLayoutAlgorithm->SetStartHeaderPos(startHeaderPos_);
     listLayoutAlgorithm->SetHeaderOffset(headerOffset_);
+    listLayoutAlgorithm->SetOldHeaderSize(oldHeaderSize_);
+    listLayoutAlgorithm->SetOldFirstItemSize(oldFirstItemSize_);
+    listLayoutAlgorithm->SetHeaderStayNear(headerStayNear_);
     return listLayoutAlgorithm;
 }
 

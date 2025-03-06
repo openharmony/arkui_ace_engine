@@ -117,6 +117,9 @@ private:
     int32_t scrollStartMidIndex_ = -1;
     float startHeaderPos_ = 0.0f;
     float headerOffset_ = -1.0f;
+    float oldHeaderSize_ = 0.0f;
+    float oldFirstItemSize_ = -1.0f;
+    bool headerStayNear_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
 #endif
