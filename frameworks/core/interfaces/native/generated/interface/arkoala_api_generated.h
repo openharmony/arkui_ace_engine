@@ -172,7 +172,7 @@ typedef const InteropAsyncWorker* InteropAsyncWorkerPtr;
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 122
+#define GENERATED_ARKUI_FULL_API_VERSION 123
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -674,19 +674,26 @@ typedef struct Ark_MotionPathOptions Ark_MotionPathOptions;
 typedef struct Opt_MotionPathOptions Opt_MotionPathOptions;
 typedef struct Array_FractionStop Array_FractionStop;
 typedef struct Opt_Array_FractionStop Opt_Array_FractionStop;
-typedef struct Ark_GestureGroupInterface Ark_GestureGroupInterface;
+typedef struct GestureGroupInterfacePeer GestureGroupInterfacePeer;
+typedef struct GestureGroupInterfacePeer* Ark_GestureGroupInterface;
 typedef struct Opt_GestureGroupInterface Opt_GestureGroupInterface;
-typedef struct Ark_RotationGestureInterface Ark_RotationGestureInterface;
+typedef struct RotationGestureInterfacePeer RotationGestureInterfacePeer;
+typedef struct RotationGestureInterfacePeer* Ark_RotationGestureInterface;
 typedef struct Opt_RotationGestureInterface Opt_RotationGestureInterface;
-typedef struct Ark_SwipeGestureInterface Ark_SwipeGestureInterface;
+typedef struct SwipeGestureInterfacePeer SwipeGestureInterfacePeer;
+typedef struct SwipeGestureInterfacePeer* Ark_SwipeGestureInterface;
 typedef struct Opt_SwipeGestureInterface Opt_SwipeGestureInterface;
-typedef struct Ark_PinchGestureInterface Ark_PinchGestureInterface;
+typedef struct PinchGestureInterfacePeer PinchGestureInterfacePeer;
+typedef struct PinchGestureInterfacePeer* Ark_PinchGestureInterface;
 typedef struct Opt_PinchGestureInterface Opt_PinchGestureInterface;
-typedef struct Ark_PanGestureInterface Ark_PanGestureInterface;
+typedef struct PanGestureInterfacePeer PanGestureInterfacePeer;
+typedef struct PanGestureInterfacePeer* Ark_PanGestureInterface;
 typedef struct Opt_PanGestureInterface Opt_PanGestureInterface;
-typedef struct Ark_LongPressGestureInterface Ark_LongPressGestureInterface;
+typedef struct LongPressGestureInterfacePeer LongPressGestureInterfacePeer;
+typedef struct LongPressGestureInterfacePeer* Ark_LongPressGestureInterface;
 typedef struct Opt_LongPressGestureInterface Opt_LongPressGestureInterface;
-typedef struct Ark_TapGestureInterface Ark_TapGestureInterface;
+typedef struct TapGestureInterfacePeer TapGestureInterfacePeer;
+typedef struct TapGestureInterfacePeer* Ark_TapGestureInterface;
 typedef struct Opt_TapGestureInterface Opt_TapGestureInterface;
 typedef struct Ark_Literal_Number_offset_span Ark_Literal_Number_offset_span;
 typedef struct Opt_Literal_Number_offset_span Opt_Literal_Number_offset_span;
@@ -1178,6 +1185,8 @@ typedef struct Opt_PanGestureOptions Opt_PanGestureOptions;
 typedef struct EventTargetInfoPeer EventTargetInfoPeer;
 typedef struct EventTargetInfoPeer* Ark_EventTargetInfo;
 typedef struct Opt_EventTargetInfo Opt_EventTargetInfo;
+typedef struct Ark_Literal_Number_distance_fingers_PanDirection_direction Ark_Literal_Number_distance_fingers_PanDirection_direction;
+typedef struct Opt_Literal_Number_distance_fingers_PanDirection_direction Opt_Literal_Number_distance_fingers_PanDirection_direction;
 typedef struct Array_FingerInfo Array_FingerInfo;
 typedef struct Opt_Array_FingerInfo Opt_Array_FingerInfo;
 typedef struct Ark_Union_ResourceColor_LinearGradient Ark_Union_ResourceColor_LinearGradient;
@@ -2271,8 +2280,8 @@ typedef struct Callback_ItemDragInfo_Void Callback_ItemDragInfo_Void;
 typedef struct Opt_Callback_ItemDragInfo_Void Opt_Callback_ItemDragInfo_Void;
 typedef struct Ark_ItemDragInfo Ark_ItemDragInfo;
 typedef struct Opt_ItemDragInfo Opt_ItemDragInfo;
-typedef struct Callback_ItemDragInfo_Number_CustomBuilder Callback_ItemDragInfo_Number_CustomBuilder;
-typedef struct Opt_Callback_ItemDragInfo_Number_CustomBuilder Opt_Callback_ItemDragInfo_Number_CustomBuilder;
+typedef struct onItemDragStart_event_type onItemDragStart_event_type;
+typedef struct Opt_onItemDragStart_event_type Opt_onItemDragStart_event_type;
 typedef struct Ark_ComputedBarAttribute Ark_ComputedBarAttribute;
 typedef struct Opt_ComputedBarAttribute Opt_ComputedBarAttribute;
 typedef struct Callback_Number_Number_ComputedBarAttribute Callback_Number_Number_ComputedBarAttribute;
@@ -2287,8 +2296,20 @@ typedef struct Opt_PanRecognizer Opt_PanRecognizer;
 typedef struct ScrollableTargetInfoPeer ScrollableTargetInfoPeer;
 typedef struct ScrollableTargetInfoPeer* Ark_ScrollableTargetInfo;
 typedef struct Opt_ScrollableTargetInfo Opt_ScrollableTargetInfo;
-typedef struct Ark_Literal_Number_distance_fingers_PanDirection_direction Ark_Literal_Number_distance_fingers_PanDirection_direction;
-typedef struct Opt_Literal_Number_distance_fingers_PanDirection_direction Opt_Literal_Number_distance_fingers_PanDirection_direction;
+typedef struct Array_GestureType Array_GestureType;
+typedef struct Opt_Array_GestureType Opt_Array_GestureType;
+typedef struct Ark_Literal_Number_angle_fingers Ark_Literal_Number_angle_fingers;
+typedef struct Opt_Literal_Number_angle_fingers Opt_Literal_Number_angle_fingers;
+typedef struct Ark_Literal_Number_distance_fingers Ark_Literal_Number_distance_fingers;
+typedef struct Opt_Literal_Number_distance_fingers Opt_Literal_Number_distance_fingers;
+typedef struct Ark_Literal_Number_fingers_speed_SwipeDirection_direction Ark_Literal_Number_fingers_speed_SwipeDirection_direction;
+typedef struct Opt_Literal_Number_fingers_speed_SwipeDirection_direction Opt_Literal_Number_fingers_speed_SwipeDirection_direction;
+typedef struct Ark_Type_PanGestureInterface_value Ark_Type_PanGestureInterface_value;
+typedef struct Opt_Type_PanGestureInterface_value Opt_Type_PanGestureInterface_value;
+typedef struct Ark_Literal_Number_duration_fingers_Boolean_repeat Ark_Literal_Number_duration_fingers_Boolean_repeat;
+typedef struct Opt_Literal_Number_duration_fingers_Boolean_repeat Opt_Literal_Number_duration_fingers_Boolean_repeat;
+typedef struct Ark_TapGestureParameters Ark_TapGestureParameters;
+typedef struct Opt_TapGestureParameters Opt_TapGestureParameters;
 typedef struct GestureEventPeer GestureEventPeer;
 typedef struct GestureEventPeer* Ark_GestureEvent;
 typedef struct Opt_GestureEvent Opt_GestureEvent;
@@ -3324,6 +3345,20 @@ typedef struct Opt_BreakpointsReference {
     Ark_Tag tag;
     Ark_BreakpointsReference value;
 } Opt_BreakpointsReference;
+typedef enum Ark_PanDirection {
+    ARK_PAN_DIRECTION_NONE = 0,
+    ARK_PAN_DIRECTION_HORIZONTAL = 1,
+    ARK_PAN_DIRECTION_LEFT = 2,
+    ARK_PAN_DIRECTION_RIGHT = 3,
+    ARK_PAN_DIRECTION_VERTICAL = 4,
+    ARK_PAN_DIRECTION_UP = 5,
+    ARK_PAN_DIRECTION_DOWN = 6,
+    ARK_PAN_DIRECTION_ALL = 7,
+} Ark_PanDirection;
+typedef struct Opt_PanDirection {
+    Ark_Tag tag;
+    Ark_PanDirection value;
+} Opt_PanDirection;
 typedef enum Ark_FinishCallbackType {
     ARK_FINISH_CALLBACK_TYPE_REMOVED = 0,
     ARK_FINISH_CALLBACK_TYPE_LOGICALLY = 1,
@@ -4170,20 +4205,16 @@ typedef struct Opt_GestureControl_GestureType {
     Ark_Tag tag;
     Ark_GestureControl_GestureType value;
 } Opt_GestureControl_GestureType;
-typedef enum Ark_PanDirection {
-    ARK_PAN_DIRECTION_NONE = 0,
-    ARK_PAN_DIRECTION_HORIZONTAL = 1,
-    ARK_PAN_DIRECTION_LEFT = 2,
-    ARK_PAN_DIRECTION_RIGHT = 3,
-    ARK_PAN_DIRECTION_VERTICAL = 4,
-    ARK_PAN_DIRECTION_UP = 5,
-    ARK_PAN_DIRECTION_DOWN = 6,
-    ARK_PAN_DIRECTION_ALL = 7,
-} Ark_PanDirection;
-typedef struct Opt_PanDirection {
+typedef enum Ark_SwipeDirection {
+    ARK_SWIPE_DIRECTION_NONE = 0,
+    ARK_SWIPE_DIRECTION_HORIZONTAL = 1,
+    ARK_SWIPE_DIRECTION_VERTICAL = 2,
+    ARK_SWIPE_DIRECTION_ALL = 3,
+} Ark_SwipeDirection;
+typedef struct Opt_SwipeDirection {
     Ark_Tag tag;
-    Ark_PanDirection value;
-} Opt_PanDirection;
+    Ark_SwipeDirection value;
+} Opt_SwipeDirection;
 typedef enum Ark_FormShape {
     ARK_FORM_SHAPE_RECT = 1,
     ARK_FORM_SHAPE_CIRCLE = 2,
@@ -5248,16 +5279,6 @@ typedef struct Opt_GestureMode {
     Ark_Tag tag;
     Ark_GestureMode value;
 } Opt_GestureMode;
-typedef enum Ark_SwipeDirection {
-    ARK_SWIPE_DIRECTION_NONE = 0,
-    ARK_SWIPE_DIRECTION_HORIZONTAL = 1,
-    ARK_SWIPE_DIRECTION_VERTICAL = 2,
-    ARK_SWIPE_DIRECTION_ALL = 3,
-} Ark_SwipeDirection;
-typedef struct Opt_SwipeDirection {
-    Ark_Tag tag;
-    Ark_SwipeDirection value;
-} Opt_SwipeDirection;
 typedef enum Ark_HeightBreakpoint {
     ARK_HEIGHT_BREAKPOINT_HEIGHT_SM = 0,
     ARK_HEIGHT_BREAKPOINT_HEIGHT_MD = 1,
@@ -7370,51 +7391,30 @@ typedef struct Opt_Array_FractionStop {
     Ark_Tag tag;
     Array_FractionStop value;
 } Opt_Array_FractionStop;
-typedef struct Ark_GestureGroupInterface {
-    void *handle;
-} Ark_GestureGroupInterface;
 typedef struct Opt_GestureGroupInterface {
     Ark_Tag tag;
     Ark_GestureGroupInterface value;
 } Opt_GestureGroupInterface;
-typedef struct Ark_RotationGestureInterface {
-    void *handle;
-} Ark_RotationGestureInterface;
 typedef struct Opt_RotationGestureInterface {
     Ark_Tag tag;
     Ark_RotationGestureInterface value;
 } Opt_RotationGestureInterface;
-typedef struct Ark_SwipeGestureInterface {
-    void *handle;
-} Ark_SwipeGestureInterface;
 typedef struct Opt_SwipeGestureInterface {
     Ark_Tag tag;
     Ark_SwipeGestureInterface value;
 } Opt_SwipeGestureInterface;
-typedef struct Ark_PinchGestureInterface {
-    void *handle;
-} Ark_PinchGestureInterface;
 typedef struct Opt_PinchGestureInterface {
     Ark_Tag tag;
     Ark_PinchGestureInterface value;
 } Opt_PinchGestureInterface;
-typedef struct Ark_PanGestureInterface {
-    void *handle;
-} Ark_PanGestureInterface;
 typedef struct Opt_PanGestureInterface {
     Ark_Tag tag;
     Ark_PanGestureInterface value;
 } Opt_PanGestureInterface;
-typedef struct Ark_LongPressGestureInterface {
-    void *handle;
-} Ark_LongPressGestureInterface;
 typedef struct Opt_LongPressGestureInterface {
     Ark_Tag tag;
     Ark_LongPressGestureInterface value;
 } Opt_LongPressGestureInterface;
-typedef struct Ark_TapGestureInterface {
-    void *handle;
-} Ark_TapGestureInterface;
 typedef struct Opt_TapGestureInterface {
     Ark_Tag tag;
     Ark_TapGestureInterface value;
@@ -9283,6 +9283,15 @@ typedef struct Opt_EventTargetInfo {
     Ark_Tag tag;
     Ark_EventTargetInfo value;
 } Opt_EventTargetInfo;
+typedef struct Ark_Literal_Number_distance_fingers_PanDirection_direction {
+    Opt_Number fingers;
+    Opt_PanDirection direction;
+    Opt_Number distance;
+} Ark_Literal_Number_distance_fingers_PanDirection_direction;
+typedef struct Opt_Literal_Number_distance_fingers_PanDirection_direction {
+    Ark_Tag tag;
+    Ark_Literal_Number_distance_fingers_PanDirection_direction value;
+} Opt_Literal_Number_distance_fingers_PanDirection_direction;
 typedef struct Array_FingerInfo {
     Ark_FingerInfo* array;
     Ark_Int32 length;
@@ -14152,15 +14161,15 @@ typedef struct Opt_ItemDragInfo {
     Ark_Tag tag;
     Ark_ItemDragInfo value;
 } Opt_ItemDragInfo;
-typedef struct Callback_ItemDragInfo_Number_CustomBuilder {
+typedef struct onItemDragStart_event_type {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Callback_CustomBuilder_Void continuation);
     void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Callback_CustomBuilder_Void continuation);
-} Callback_ItemDragInfo_Number_CustomBuilder;
-typedef struct Opt_Callback_ItemDragInfo_Number_CustomBuilder {
+} onItemDragStart_event_type;
+typedef struct Opt_onItemDragStart_event_type {
     Ark_Tag tag;
-    Callback_ItemDragInfo_Number_CustomBuilder value;
-} Opt_Callback_ItemDragInfo_Number_CustomBuilder;
+    onItemDragStart_event_type value;
+} Opt_onItemDragStart_event_type;
 typedef struct Ark_ComputedBarAttribute {
     Ark_Number totalOffset;
     Ark_Number totalLength;
@@ -14206,15 +14215,68 @@ typedef struct Opt_ScrollableTargetInfo {
     Ark_Tag tag;
     Ark_ScrollableTargetInfo value;
 } Opt_ScrollableTargetInfo;
-typedef struct Ark_Literal_Number_distance_fingers_PanDirection_direction {
-    Opt_Number fingers;
-    Opt_PanDirection direction;
-    Opt_Number distance;
-} Ark_Literal_Number_distance_fingers_PanDirection_direction;
-typedef struct Opt_Literal_Number_distance_fingers_PanDirection_direction {
+typedef struct Array_GestureType {
+    Ark_GestureType* array;
+    Ark_Int32 length;
+} Array_GestureType;
+typedef struct Opt_Array_GestureType {
     Ark_Tag tag;
-    Ark_Literal_Number_distance_fingers_PanDirection_direction value;
-} Opt_Literal_Number_distance_fingers_PanDirection_direction;
+    Array_GestureType value;
+} Opt_Array_GestureType;
+typedef struct Ark_Literal_Number_angle_fingers {
+    Opt_Number fingers;
+    Opt_Number angle;
+} Ark_Literal_Number_angle_fingers;
+typedef struct Opt_Literal_Number_angle_fingers {
+    Ark_Tag tag;
+    Ark_Literal_Number_angle_fingers value;
+} Opt_Literal_Number_angle_fingers;
+typedef struct Ark_Literal_Number_distance_fingers {
+    Opt_Number fingers;
+    Opt_Number distance;
+} Ark_Literal_Number_distance_fingers;
+typedef struct Opt_Literal_Number_distance_fingers {
+    Ark_Tag tag;
+    Ark_Literal_Number_distance_fingers value;
+} Opt_Literal_Number_distance_fingers;
+typedef struct Ark_Literal_Number_fingers_speed_SwipeDirection_direction {
+    Opt_Number fingers;
+    Opt_SwipeDirection direction;
+    Opt_Number speed;
+} Ark_Literal_Number_fingers_speed_SwipeDirection_direction;
+typedef struct Opt_Literal_Number_fingers_speed_SwipeDirection_direction {
+    Ark_Tag tag;
+    Ark_Literal_Number_fingers_speed_SwipeDirection_direction value;
+} Opt_Literal_Number_fingers_speed_SwipeDirection_direction;
+typedef struct Ark_Type_PanGestureInterface_value {
+    Ark_Int32 selector;
+    union {
+        Ark_Literal_Number_distance_fingers_PanDirection_direction value0;
+        Ark_PanGestureOptions value1;
+    };
+} Ark_Type_PanGestureInterface_value;
+typedef struct Opt_Type_PanGestureInterface_value {
+    Ark_Tag tag;
+    Ark_Type_PanGestureInterface_value value;
+} Opt_Type_PanGestureInterface_value;
+typedef struct Ark_Literal_Number_duration_fingers_Boolean_repeat {
+    Opt_Number fingers;
+    Opt_Boolean repeat;
+    Opt_Number duration;
+} Ark_Literal_Number_duration_fingers_Boolean_repeat;
+typedef struct Opt_Literal_Number_duration_fingers_Boolean_repeat {
+    Ark_Tag tag;
+    Ark_Literal_Number_duration_fingers_Boolean_repeat value;
+} Opt_Literal_Number_duration_fingers_Boolean_repeat;
+typedef struct Ark_TapGestureParameters {
+    Opt_Number count;
+    Opt_Number fingers;
+    Opt_Number distanceThreshold;
+} Ark_TapGestureParameters;
+typedef struct Opt_TapGestureParameters {
+    Ark_Tag tag;
+    Ark_TapGestureParameters value;
+} Opt_TapGestureParameters;
 typedef struct Opt_GestureEvent {
     Ark_Tag tag;
     Ark_GestureEvent value;
@@ -14415,6 +14477,9 @@ typedef struct Opt_FlexOptions {
     Ark_FlexOptions value;
 } Opt_FlexOptions;
 typedef struct Ark_BusinessError {
+    Ark_String name;
+    Ark_String message;
+    Opt_String stack;
     Ark_Number code;
 } Ark_BusinessError;
 typedef struct Opt_BusinessError {
@@ -16983,7 +17048,7 @@ typedef struct GENERATED_ArkUIGridModifier {
     void (*setSupportAnimation)(Ark_NativePointer node,
                                 Ark_Boolean value);
     void (*setOnItemDragStart)(Ark_NativePointer node,
-                               const Callback_ItemDragInfo_Number_CustomBuilder* value);
+                               const onItemDragStart_event_type* value);
     void (*setOnItemDragEnter)(Ark_NativePointer node,
                                const Callback_ItemDragInfo_Void* value);
     void (*setOnItemDragMove)(Ark_NativePointer node,
@@ -17270,7 +17335,7 @@ typedef struct GENERATED_ArkUIListModifier {
     void (*setOnItemMove)(Ark_NativePointer node,
                           const Callback_Number_Number_Boolean* value);
     void (*setOnItemDragStart)(Ark_NativePointer node,
-                               const Callback_ItemDragInfo_Number_CustomBuilder* value);
+                               const onItemDragStart_event_type* value);
     void (*setOnItemDragEnter)(Ark_NativePointer node,
                                const Callback_ItemDragInfo_Void* value);
     void (*setOnItemDragMove)(Ark_NativePointer node,
@@ -20728,6 +20793,26 @@ typedef struct GENERATED_ArkUIGestureEventAccessor {
                         const Ark_Number* velocity);
 } GENERATED_ArkUIGestureEventAccessor;
 
+typedef struct GENERATED_ArkUITapGestureInterfaceAccessor {
+    void (*destroyPeer)(Ark_TapGestureInterface peer);
+    Ark_TapGestureInterface (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_TapGestureInterface (*onAction)(Ark_TapGestureInterface peer,
+                                        const Callback_GestureEvent_Void* event);
+} GENERATED_ArkUITapGestureInterfaceAccessor;
+
+typedef struct GENERATED_ArkUILongPressGestureInterfaceAccessor {
+    void (*destroyPeer)(Ark_LongPressGestureInterface peer);
+    Ark_LongPressGestureInterface (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_LongPressGestureInterface (*onAction)(Ark_LongPressGestureInterface peer,
+                                              const Callback_GestureEvent_Void* event);
+    Ark_LongPressGestureInterface (*onActionEnd)(Ark_LongPressGestureInterface peer,
+                                                 const Callback_GestureEvent_Void* event);
+    Ark_LongPressGestureInterface (*onActionCancel)(Ark_LongPressGestureInterface peer,
+                                                    const Callback_Void* event);
+} GENERATED_ArkUILongPressGestureInterfaceAccessor;
+
 typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
     void (*destroyPeer)(Ark_PanGestureOptions peer);
     Ark_PanGestureOptions (*ctor)(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value);
@@ -20740,6 +20825,64 @@ typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
                        const Ark_Number* value);
     Ark_PanDirection (*getDirection)(Ark_PanGestureOptions peer);
 } GENERATED_ArkUIPanGestureOptionsAccessor;
+
+typedef struct GENERATED_ArkUIPanGestureInterfaceAccessor {
+    void (*destroyPeer)(Ark_PanGestureInterface peer);
+    Ark_PanGestureInterface (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_PanGestureInterface (*onActionStart)(Ark_PanGestureInterface peer,
+                                             const Callback_GestureEvent_Void* event);
+    Ark_PanGestureInterface (*onActionUpdate)(Ark_PanGestureInterface peer,
+                                              const Callback_GestureEvent_Void* event);
+    Ark_PanGestureInterface (*onActionEnd)(Ark_PanGestureInterface peer,
+                                           const Callback_GestureEvent_Void* event);
+    Ark_PanGestureInterface (*onActionCancel)(Ark_PanGestureInterface peer,
+                                              const Callback_Void* event);
+} GENERATED_ArkUIPanGestureInterfaceAccessor;
+
+typedef struct GENERATED_ArkUISwipeGestureInterfaceAccessor {
+    void (*destroyPeer)(Ark_SwipeGestureInterface peer);
+    Ark_SwipeGestureInterface (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_SwipeGestureInterface (*onAction)(Ark_SwipeGestureInterface peer,
+                                          const Callback_GestureEvent_Void* event);
+} GENERATED_ArkUISwipeGestureInterfaceAccessor;
+
+typedef struct GENERATED_ArkUIPinchGestureInterfaceAccessor {
+    void (*destroyPeer)(Ark_PinchGestureInterface peer);
+    Ark_PinchGestureInterface (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_PinchGestureInterface (*onActionStart)(Ark_PinchGestureInterface peer,
+                                               const Callback_GestureEvent_Void* event);
+    Ark_PinchGestureInterface (*onActionUpdate)(Ark_PinchGestureInterface peer,
+                                                const Callback_GestureEvent_Void* event);
+    Ark_PinchGestureInterface (*onActionEnd)(Ark_PinchGestureInterface peer,
+                                             const Callback_GestureEvent_Void* event);
+    Ark_PinchGestureInterface (*onActionCancel)(Ark_PinchGestureInterface peer,
+                                                const Callback_Void* event);
+} GENERATED_ArkUIPinchGestureInterfaceAccessor;
+
+typedef struct GENERATED_ArkUIRotationGestureInterfaceAccessor {
+    void (*destroyPeer)(Ark_RotationGestureInterface peer);
+    Ark_RotationGestureInterface (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_RotationGestureInterface (*onActionStart)(Ark_RotationGestureInterface peer,
+                                                  const Callback_GestureEvent_Void* event);
+    Ark_RotationGestureInterface (*onActionUpdate)(Ark_RotationGestureInterface peer,
+                                                   const Callback_GestureEvent_Void* event);
+    Ark_RotationGestureInterface (*onActionEnd)(Ark_RotationGestureInterface peer,
+                                                const Callback_GestureEvent_Void* event);
+    Ark_RotationGestureInterface (*onActionCancel)(Ark_RotationGestureInterface peer,
+                                                   const Callback_Void* event);
+} GENERATED_ArkUIRotationGestureInterfaceAccessor;
+
+typedef struct GENERATED_ArkUIGestureGroupInterfaceAccessor {
+    void (*destroyPeer)(Ark_GestureGroupInterface peer);
+    Ark_GestureGroupInterface (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_GestureGroupInterface (*onCancel)(Ark_GestureGroupInterface peer,
+                                          const Callback_Void* event);
+} GENERATED_ArkUIGestureGroupInterfaceAccessor;
 
 typedef struct GENERATED_ArkUIScrollableTargetInfoAccessor {
     void (*destroyPeer)(Ark_ScrollableTargetInfo peer);
@@ -22175,7 +22318,14 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIRotationGestureEventAccessor* (*getRotationGestureEventAccessor)();
     const GENERATED_ArkUISwipeGestureEventAccessor* (*getSwipeGestureEventAccessor)();
     const GENERATED_ArkUIGestureEventAccessor* (*getGestureEventAccessor)();
+    const GENERATED_ArkUITapGestureInterfaceAccessor* (*getTapGestureInterfaceAccessor)();
+    const GENERATED_ArkUILongPressGestureInterfaceAccessor* (*getLongPressGestureInterfaceAccessor)();
     const GENERATED_ArkUIPanGestureOptionsAccessor* (*getPanGestureOptionsAccessor)();
+    const GENERATED_ArkUIPanGestureInterfaceAccessor* (*getPanGestureInterfaceAccessor)();
+    const GENERATED_ArkUISwipeGestureInterfaceAccessor* (*getSwipeGestureInterfaceAccessor)();
+    const GENERATED_ArkUIPinchGestureInterfaceAccessor* (*getPinchGestureInterfaceAccessor)();
+    const GENERATED_ArkUIRotationGestureInterfaceAccessor* (*getRotationGestureInterfaceAccessor)();
+    const GENERATED_ArkUIGestureGroupInterfaceAccessor* (*getGestureGroupInterfaceAccessor)();
     const GENERATED_ArkUIScrollableTargetInfoAccessor* (*getScrollableTargetInfoAccessor)();
     const GENERATED_ArkUIEventTargetInfoAccessor* (*getEventTargetInfoAccessor)();
     const GENERATED_ArkUIGestureRecognizerAccessor* (*getGestureRecognizerAccessor)();
