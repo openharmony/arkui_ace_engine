@@ -4309,7 +4309,6 @@ void BindContextMenu0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(content);
     MenuParam menuParam;
-    menuParam.isShow = false;
     auto type = Converter::OptConvert<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     auto builder = [callback = CallbackHelper(*content), node]() {
         auto uiNode = callback.BuildSync(node);
@@ -4318,6 +4317,7 @@ void BindContextMenu0Impl(Ark_NativePointer node,
     menuParam.previewMode = MenuPreviewMode::NONE;
     std::function<void()> previewBuildFunc = nullptr;
     g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::NORMAL_TYPE;
     if (type != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
@@ -4345,11 +4345,6 @@ void BindContextMenu1Impl(Ark_NativePointer node,
     menuParam.previewMode = MenuPreviewMode::NONE;
     std::function<void()> previewBuildFunc = nullptr;
     g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
-    if (type != ResponseType::LONG_PRESS) {
-        menuParam.previewMode = MenuPreviewMode::NONE;
-        menuParam.isShowHoverImage = false;
-        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
-    }
     ViewAbstractModelNG::BindContextMenuStatic(
         AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
     ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
