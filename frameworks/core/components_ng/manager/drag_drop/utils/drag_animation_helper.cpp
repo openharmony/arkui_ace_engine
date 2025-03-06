@@ -679,9 +679,9 @@ void DragAnimationHelper::AddDragNodeCopy(const RefPtr<OverlayManager>& overlayM
     int32_t height = pixelMap->GetHeight();
     auto offset = DragDropFuncWrapper::GetPaintRectCenter(frameNode) -
         OffsetF(width / HALF_DIVIDE, height / HALF_DIVIDE);
+    DragDropFuncWrapper::UpdateNodePositionToWindow(dragNodeCopy, offset);
     auto copyNodeRenderContext = dragNodeCopy->GetRenderContext();
     CHECK_NULL_VOID(copyNodeRenderContext);
-    copyNodeRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
     copyNodeRenderContext->UpdateTransformScale({ 1.0f, 1.0f });
 }
 
