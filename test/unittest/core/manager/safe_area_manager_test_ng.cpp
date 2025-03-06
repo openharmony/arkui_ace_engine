@@ -282,8 +282,8 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level1)
     ret = safeAreaManager_->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT);
     EXPECT_EQ(ret, false);
     auto retKbi = safeAreaManager_->GetKeyboardInset();
-    EXPECT_EQ(retKbi.start, systemArea.bottom_.start-KEYBOARD_HEIGHT);
-    EXPECT_EQ(retKbi.end, systemArea.bottom_.start);
+    EXPECT_EQ(retKbi.start, DISPLAY_HEIGHT - KEYBOARD_HEIGHT);
+    EXPECT_EQ(retKbi.end, DISPLAY_HEIGHT);
     /**
      * @tc.steps: step2 call UpdateKeyboardSafeAreaTest systemArea not valid
      */
