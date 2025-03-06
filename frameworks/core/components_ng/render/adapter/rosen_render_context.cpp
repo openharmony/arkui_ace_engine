@@ -6332,12 +6332,12 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
     if (!SystemProperties::GetPixelRoundEnabled()) {
-        //isRound is the switch of pixelRound of lower version
+        // isRound is the switch of pixelRound of lower version
         isRound = false;
-        //flag is the switch of pixelRound of upper version
+        // flag is the switch of pixelRound of upper version
         flag = NO_FORCE_ROUND;
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         OnePixelRounding(flag);
     } else {
         if (isRound && flag == 0) {
