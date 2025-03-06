@@ -128,6 +128,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
+    std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -728,9 +729,12 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
     OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, width, height, borderWidth);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, borderWidth);
+    {
+        std::lock_guard<std::mutex> lock(wantCacheMutex_);
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, borderWidth);
+    }
     {
         std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
         if (formRendererDispatcher_ == nullptr) {
@@ -874,6 +878,7 @@ void FormManagerDelegate::HandleLockFormCallback(bool lock)
 
 void FormManagerDelegate::ReAddForm()
 {
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     if (wantCache_.HasParameter(PARAM_FORM_MIGRATE_FORM_KEY)) {
         TAG_LOGW(AceLogTag::ACE_FORM, "Remove migrate form key.");
@@ -1030,6 +1035,7 @@ void FormManagerDelegate::ProcessFormUninstall(const int64_t formId)
 void FormManagerDelegate::OnDeathReceived()
 {
     AppExecFwk::FormJsInfo formJsInfo;
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
     OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(
         runningCardId_, wantCache_, OHOS::AppExecFwk::FormHostClient::GetInstance(), formJsInfo);
 }
@@ -1084,6 +1090,7 @@ void FormManagerDelegate::ProcessEnableForm(bool enable)
 
 void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
 {
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
     wantCache_.SetElementName(info.bundleName, info.abilityName);
 
     if (info.wantWrap) {
@@ -1116,6 +1123,7 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
 void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo)
 {
     this->SetParamForWant(info);
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
     if (formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
         CHECK_NULL_VOID(renderDelegate_);
         wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
