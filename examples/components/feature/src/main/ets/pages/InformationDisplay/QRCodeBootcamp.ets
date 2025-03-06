@@ -1816,7 +1816,7 @@ export struct QRCodeBootcamp {
             this.compFocusBoxStrokeWidth)) : null,
         })
         .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : "QRCode")
+        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'QRCode')
         .focusScopePriority(
           useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
           useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
