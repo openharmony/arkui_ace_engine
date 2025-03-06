@@ -19,6 +19,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "base/log/dump_log.h"
 #include "core/common/container_scope.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -73,6 +74,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     arrowWidth_ = bubbleLayoutAlgorithm->GetArrowWidth();
     arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
     border_ = bubbleLayoutAlgorithm->GetBorder();
+    dumpInfo_ = bubbleLayoutAlgorithm->GetDumpInfo();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -119,8 +121,8 @@ void BubblePattern::OnAttachToFrameNode()
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
-                                              const OffsetF& oldOrigin, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(popupNode);
@@ -186,6 +188,7 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
     }
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
     if (autoCancel) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "handle popup touch down event");
         if (!GetInteractiveDismiss()) {
             return;
         }
@@ -751,6 +754,23 @@ void BubblePattern::UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupThe
             UpdateText(childNode, popupTheme);
         }
     }
+}
+
+void BubblePattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("enableArrow: " + std::to_string(dumpInfo_.enableArrow));
+    DumpLog::GetInstance().AddDesc("mask: " + std::to_string(dumpInfo_.mask));
+    DumpLog::GetInstance().AddDesc("targetTag: " + dumpInfo_.targetNode + ", targetID: "
+        + std::to_string(dumpInfo_.targetID));
+    DumpLog::GetInstance().AddDesc("targetOffset: " + dumpInfo_.targetOffset.ToString());
+    DumpLog::GetInstance().AddDesc("targetSize: " + dumpInfo_.targetOffset.ToString());
+    DumpLog::GetInstance().AddDesc("touchRegion: " + dumpInfo_.touchRegion.ToString());
+    DumpLog::GetInstance().AddDesc("avoid top: " + std::to_string(dumpInfo_.top)
+        + ", bottom: " + std::to_string(dumpInfo_.bottom));
+    DumpLog::GetInstance().AddDesc("userOffset: " + dumpInfo_.userOffset.ToString());
+    DumpLog::GetInstance().AddDesc("targetSpace: " + dumpInfo_.targetSpace.ToString());
+    DumpLog::GetInstance().AddDesc("originPlacement: " + dumpInfo_.originPlacement);
+    DumpLog::GetInstance().AddDesc("finalPlacement: " + dumpInfo_.finalPlacement);
 }
 
 void BubblePattern::UpdateBubbleText()

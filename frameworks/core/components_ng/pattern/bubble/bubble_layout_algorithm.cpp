@@ -433,6 +433,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         UpdateMarginByWidth();
         childOffset_ = GetChildPositionNew(childSize_, bubbleProp); // bubble's offset
         childOffset_ = AddOffset(childOffset_);
+        dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
     }
 }
 
@@ -483,6 +484,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childOffsetForPaint_ = childOffset_;
     arrowPositionForPaint_ = arrowPosition_;
     auto isBlock = bubbleProp->GetBlockEventValue(true);
+    dumpInfo_.mask = isBlock;
     UpdateHostWindowRect();
     SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
     UpdateClipOffset(frameNode);
@@ -573,6 +575,18 @@ bool BubbleLayoutAlgorithm::GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& b
     return false;
 }
 
+void BubbleLayoutAlgorithm::UpdateDumpInfo()
+{
+    dumpInfo_.targetSpace = targetSpace_;
+    dumpInfo_.originPlacement = PlacementUtils::ConvertPlacementToString(placement_);
+    dumpInfo_.userOffset = positionOffset_;
+    dumpInfo_.enableArrow = enableArrow_;
+    dumpInfo_.top = top_;
+    dumpInfo_.bottom = bottom_;
+    dumpInfo_.targetNode = targetTag_;
+    dumpInfo_.targetID = targetNodeId_;
+}
+
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow,
     LayoutWrapper* layoutWrapper)
 {
@@ -608,6 +622,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     CHECK_NULL_VOID(safeAreaManager);
     top_ = safeAreaManager->GetSafeAreaWithoutProcess().top_.Length();
     bottom_ = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    UpdateDumpInfo();
     marginStart_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
     marginEnd_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
     marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
@@ -1142,7 +1157,7 @@ void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, f
         }
     } else if (simplePlacement == Placement::TOP) {
         xMin = position.GetX() + cornerDistance;
-        xMax = position.GetX() + height - cornerDistance;
+        xMax = position.GetX() + width - cornerDistance;
         if (GreatNotEqual(xMin, targetOffset_.GetX() + targetSize_.Width()) ||
             LessNotEqual(xMax, targetOffset_.GetX())) {
             showArrow_ = false;
@@ -1150,7 +1165,7 @@ void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, f
         }
     } else if (simplePlacement == Placement::BOTTOM) {
         xMin = position.GetX() + cornerDistance;
-        xMax = position.GetX() + height - cornerDistance;
+        xMax = position.GetX() + width - cornerDistance;
         if (GreatNotEqual(xMin, targetOffset_.GetX() + targetSize_.Width()) ||
             LessNotEqual(xMax, targetOffset_.GetX())) {
             showArrow_ = false;
@@ -1313,6 +1328,7 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
             break;
     }
     touchRegion_ = RectF(topLeft, topLeft + bottomRight);
+    dumpInfo_.touchRegion = touchRegion_;
 }
 
 void BubbleLayoutAlgorithm::InitCaretTargetSizeAndPosition()
@@ -1346,7 +1362,6 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
     }
     if (followTransformOfTarget_) {
         auto rect = targetNode->GetPaintRectToWindowWithTransform();
-
         targetSize_ = rect.GetSize();
         targetOffset_ = rect.GetOffset();
     } else {
@@ -1370,6 +1385,8 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
             targetOffset_ -= subwindowRect.GetOffset();
         }
     }
+    dumpInfo_.targetOffset = targetOffset_;
+    dumpInfo_.targetSize = targetSize_;
 }
 
 bool BubbleLayoutAlgorithm::CheckPositionInPlacementRect(
@@ -1377,8 +1394,8 @@ bool BubbleLayoutAlgorithm::CheckPositionInPlacementRect(
 {
     auto x = position.GetX();
     auto y = position.GetY();
-    if (x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
-        (y + childSize.Height()) > rect.Bottom()) {
+    if (LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
+        LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom())) {
         return false;
     }
     return true;

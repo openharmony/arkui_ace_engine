@@ -32,6 +32,22 @@ enum class ArrowOfTargetOffset {
     END,
     NONE,
 };
+struct BubbleDumpInfo {
+    bool enableArrow = false;
+    bool mask = true;
+    std::string targetNode;
+    int32_t targetID;
+    OffsetF targetOffset;
+    SizeF targetSize;
+    RectF touchRegion;
+    float top = 0.0f;
+    float bottom = 0.0f;
+    OffsetF userOffset;
+    Dimension targetSpace;
+    std::string originPlacement;
+    std::string finalPlacement = "NONE";
+};
+
 // BubbleLayoutAlgorithm uses for Popup Node.
 class ACE_EXPORT BubbleLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(BubbleLayoutAlgorithm, LayoutAlgorithm);
@@ -127,6 +143,11 @@ public:
 
     void UpdateMarginByWidth();
 
+    BubbleDumpInfo GetDumpInfo() const
+    {
+        return dumpInfo_;
+    }
+
 protected:
     OffsetF positionOffset_;
     SizeF wrapperSize_;
@@ -216,6 +237,7 @@ private:
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
     SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const float& width);
+    void UpdateDumpInfo();
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;
 
@@ -224,6 +246,7 @@ private:
     bool bCaretMode_ = false;
     bool useCustom_ = false;
 
+    BubbleDumpInfo dumpInfo_;
     SizeF targetSize_;
     OffsetF targetOffset_;
     OffsetF targetOffsetForPaint_;
