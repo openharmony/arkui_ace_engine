@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import TextPickerDialogBootcampTest from './TextPickerDialogBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  TextPickerDialogBootcampTest();
 }
