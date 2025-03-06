@@ -1158,7 +1158,7 @@ void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }
-    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphotoview SetAutoPlayPeriod start.");
+    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphotoview setAutoPlayPeriod start.");
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
