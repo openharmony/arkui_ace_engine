@@ -140,6 +140,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
     imagePainter.canvasImage_->paintConfig_->obscuredReasons_ = reasons;
     imagePainter.DrawImage(canvas, OFFSETF, SIZE);
     EXPECT_NE(imagePainter.canvasImage_, nullptr);
+    testing::Mock::AllowLeak(canvasPtr);
 }
 
 /**
