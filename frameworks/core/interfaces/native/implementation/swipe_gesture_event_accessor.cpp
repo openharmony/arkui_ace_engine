@@ -39,7 +39,7 @@ Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& angle = info->GetAngle();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(angle));
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(angle));
 }
 void SetAngleImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* angle)
@@ -57,7 +57,7 @@ Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
     auto event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
     double value = event->GetSpeed();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(value));
 }
 void SetSpeedImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* speed)

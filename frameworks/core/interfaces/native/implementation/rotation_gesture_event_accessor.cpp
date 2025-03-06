@@ -39,7 +39,7 @@ Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
     const auto& angle = info->GetAngle();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(angle));
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(angle));
 }
 void SetAngleImpl(Ark_RotationGestureEvent peer,
                   const Ark_Number* angle)
