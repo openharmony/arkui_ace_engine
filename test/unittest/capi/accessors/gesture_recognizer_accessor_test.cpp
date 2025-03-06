@@ -36,11 +36,21 @@ class MockGestureRecognizer : public ClickRecognizer {
 public:
     MockGestureRecognizer() = default;
     ~MockGestureRecognizer() override = default;
-    MOCK_METHOD(GestureTypeName, GetRecognizerType, (), (const));
     MOCK_METHOD(void, SetEnabled, (bool));
     MOCK_METHOD(bool, IsEnabled, (), (const));
     MOCK_METHOD(bool, IsInResponseLinkRecognizers, ());
     MOCK_METHOD(RefereeState, GetGestureState, (), (const));
+};
+
+const std::vector<std::pair<GestureTypeName, Ark_GestureControl_GestureType>> getTypeTestPlan = {
+    { GestureTypeName::TAP_GESTURE, ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE },
+    { GestureTypeName::LONG_PRESS_GESTURE, ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE },
+    { GestureTypeName::PAN_GESTURE, ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE },
+    { GestureTypeName::PINCH_GESTURE, ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE },
+    { GestureTypeName::SWIPE_GESTURE, ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE },
+    { GestureTypeName::ROTATION_GESTURE, ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE },
+    { GestureTypeName::DRAG, ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG },
+    { GestureTypeName::CLICK, ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK },
 };
 } // namespace
 
@@ -127,11 +137,11 @@ HWTEST_F(GestureRecognizerAccessorTest, GetStateTest, TestSize.Level1)
  */
 HWTEST_F(GestureRecognizerAccessorTest, GetTypeTest, TestSize.Level1)
 {
-    EXPECT_CALL(*mockGestureRecognizer_, GetRecognizerType()).Times(3);
-    accessor_->getType(peer_);
-    accessor_->getType(peer_);
-    accessor_->getType(nullptr);
-    accessor_->getType(peer_);
+    for (auto& [value, expected]: getTypeTestPlan) {
+        mockGestureRecognizer_->SetRecognizerType(value);
+        auto result = accessor_->getType(peer_);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**

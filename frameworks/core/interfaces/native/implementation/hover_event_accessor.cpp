@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/hover_event_peer.h"
 
@@ -81,12 +82,18 @@ void SetDisplayYImpl(Ark_HoverEvent peer,
 }
 Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        HoverInfo* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetStopPropagation(true);
+    });
+    return callback;
 }
 void SetStopPropagationImpl(Ark_HoverEvent peer,
                             const Callback_Void* stopPropagation)
 {
-    LOGE("HoverEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
+    LOGE("HoverEventAccessor::SetStopPropagationImpl we can only GET stopPropagation callback");
 }
 } // HoverEventAccessor
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -45,13 +46,11 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
 }
 Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    const auto errValue = static_cast<Ark_KeyType>(-1);
+    CHECK_NULL_RETURN(peer, errValue);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, {});
-    const auto keyType = info->GetKeyType();
-    LOGE("ARKOALA KeyEventAccessor::GetTypeImpl is not implemented "
-        "-> incorrect return Converter::ArkValue<Ark_KeyType>(keyType): %d", keyType);
-    return {};
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Ark_KeyType>(info->GetKeyType());
 }
 void SetTypeImpl(Ark_KeyEvent peer,
                  Ark_KeyType type)
@@ -88,13 +87,11 @@ void SetKeyTextImpl(Ark_KeyEvent peer,
 }
 Ark_KeySource GetKeySourceImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    const auto errValue = static_cast<Ark_KeySource>(-1);
+    CHECK_NULL_RETURN(peer, errValue);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, {});
-    const auto keySource = info->GetKeySource();
-    LOGE("ARKOALA KeyEventAccessor::GetKeySourceImpl is not implemented "
-        "-> incorrect return Converter::ArkValue<Ark_KeySource>(keySource): %d", keySource);
-    return {};
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Ark_KeySource>(info->GetKeySource());
 }
 void SetKeySourceImpl(Ark_KeyEvent peer,
                       Ark_KeySource keySource)
@@ -139,7 +136,13 @@ void SetTimestampImpl(Ark_KeyEvent peer,
 }
 Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+        KeyEventInfo* info = peer->GetEventInfo();
+        CHECK_NULL_VOID(info);
+        info->SetStopPropagation(true);
+    });
+    return callback;
 }
 void SetStopPropagationImpl(Ark_KeyEvent peer,
                             const Callback_Void* stopPropagation)

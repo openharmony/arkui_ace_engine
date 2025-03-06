@@ -207,6 +207,14 @@ void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& 
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 }
 
+void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
+{
+    AssignArkValue(dst.touchObject, src);
+    dst.size = ArkValue<Ark_Number>(src.GetSize());
+    dst.force = ArkValue<Ark_Number>(src.GetForce());
+    dst.timestamp = ArkValue<Ark_Number>(src.GetTimeStamp().time_since_epoch().count());
+}
+
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 {
     dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
@@ -1177,6 +1185,34 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
     if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
         dst = val;
     }
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_CircleShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->shape;
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_EllipseShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->shape;
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_PathShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->shape;
+}
+
+template<>
+RefPtr<BasicShape> Convert(const Ark_RectShape& src)
+{
+    CHECK_NULL_RETURN(src, nullptr);
+    return src->shape;
 }
 
 template<>

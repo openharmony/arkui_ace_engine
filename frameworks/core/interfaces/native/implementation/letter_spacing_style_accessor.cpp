@@ -13,18 +13,27 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LetterSpacingStyleAccessor {
 void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
+    delete peer;
 }
 Ark_LetterSpacingStyle CtorImpl(Ark_LengthMetrics value)
 {
-    return {};
+    RefPtr<LetterSpacingSpan> span;
+    if (value) {
+        auto spacing = Converter::Convert<Dimension>(value);
+        span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing);
+    } else {
+        span = AceType::MakeRefPtr<LetterSpacingSpan>();
+    }
+    return new LetterSpacingStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +41,10 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->span, {});
+    auto value = Converter::ArkValue<Ark_Number>(peer->span->GetLetterSpacing().ConvertToVp());
+    return value;
 }
 } // LetterSpacingStyleAccessor
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()

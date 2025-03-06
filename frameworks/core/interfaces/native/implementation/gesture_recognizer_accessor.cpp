@@ -47,11 +47,9 @@ Ark_String GetTagImpl(Ark_GestureRecognizer peer)
 }
 Ark_GestureControl_GestureType GetTypeImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
-    Ark_NativePointer ret = nullptr;
+    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), static_cast<Ark_GestureControl_GestureType>(-1));
     auto typeName = peer->GetRecognizer()->GetRecognizerType();
-    LOGE("ARKOALA GestureRecognizerAccessor.GetTypeImpl not implemented -> incorrect return value!");
-    return {};
+    return Converter::ArkValue<Ark_GestureControl_GestureType>(typeName);
 }
 Ark_Boolean IsBuiltInImpl(Ark_GestureRecognizer peer)
 {

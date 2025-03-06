@@ -19,6 +19,7 @@
 #endif //XCOMPONENT_SUPPORTED
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -43,12 +44,13 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
 {
+    Ark_String arkSurfaceId = {};
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer && peer->controller, {});
     auto surfaceId = peer->controller->GetSurfaceId();
-    LOGE("XComponentControllerAccessor::GetXComponentSurfaceIdImpl - return surfaceId need to be supported");
+    arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId, Converter::FC);
 #endif //XCOMPONENT_SUPPORTED
-    return {};
+    return arkSurfaceId;
 }
 Ark_CustomObject GetXComponentContextImpl(Ark_XComponentController peer)
 {
@@ -97,6 +99,7 @@ void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
 }
 Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentController peer)
 {
+    Ark_SurfaceRect rect;
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer && peer->controller, {});
     float offsetX = 0.0f;
@@ -105,9 +108,12 @@ Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentController peer)
     float height = 0.0f;
     peer->controller->GetSurfaceOffset(offsetX, offsetY);
     peer->controller->GetSurfaceSize(width, height);
-    LOGE("XComponentControllerAccessor::GetXComponentSurfaceRectImpl - return value need to be supported");
+    rect.offsetX = Converter::ArkValue<Opt_Number>(offsetX);
+    rect.offsetY = Converter::ArkValue<Opt_Number>(offsetY);
+    rect.surfaceWidth = Converter::ArkValue<Ark_Number>(width);
+    rect.surfaceHeight = Converter::ArkValue<Ark_Number>(height);
 #endif //XCOMPONENT_SUPPORTED
-    return {};
+    return rect;
 }
 void SetXComponentSurfaceRotationImpl(Ark_XComponentController peer,
                                       const Ark_SurfaceRotationOptions* rotationOptions)
@@ -121,12 +127,13 @@ void SetXComponentSurfaceRotationImpl(Ark_XComponentController peer,
 }
 Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentController peer)
 {
+    Ark_SurfaceRotationOptions rotationOptions;
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer && peer->controller, {});
     bool lock = peer->controller->GetSurfaceRotation();
-    LOGE("XComponentControllerAccessor::GetXComponentSurfaceRotationImpl - return value need to be supported");
+    rotationOptions.lock = Converter::ArkValue<Opt_Boolean>(lock);
 #endif //XCOMPONENT_SUPPORTED
-    return {};
+    return rotationOptions;
 }
 void OnSurfaceCreatedImpl(Ark_XComponentController peer,
                           const Ark_String* surfaceId)

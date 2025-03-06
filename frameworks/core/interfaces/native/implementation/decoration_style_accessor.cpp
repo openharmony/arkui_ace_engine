@@ -13,18 +13,30 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/decoration_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DecorationStyleAccessor {
 void DestroyPeerImpl(Ark_DecorationStyle peer)
 {
+    delete peer;
 }
 Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
 {
-    return {};
+    RefPtr<DecorationSpan> span;
+    if (value) {
+        auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
+        auto aceColorOpt = Converter::OptConvert<Color>(value->color);
+        auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
+        span = AceType::MakeRefPtr<DecorationSpan>(aceTypeOpt.value_or(TextDecoration::NONE),
+            aceColorOpt, aceStyleOpt);
+    } else {
+        span = AceType::MakeRefPtr<DecorationSpan>();
+    }
+    return new DecorationStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,11 +44,19 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->span, {});
+    auto value = Converter::ArkValue<Ark_TextDecorationType>(peer->span->GetTextDecorationType());
+    return value;
 }
 Ark_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->span, {});
+    auto optValue = peer->span->GetTextDecorationStyle();
+    CHECK_NULL_RETURN(optValue.has_value(), {});
+    auto value = Converter::ArkValue<Ark_TextDecorationStyle>(optValue.value());
+    return value;
 }
 } // DecorationStyleAccessor
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()

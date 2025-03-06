@@ -17,6 +17,7 @@
 
 #include "accessor_test_base.h"
 #include "test/unittest/capi/accessors/accessor_test_fixtures.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
@@ -71,14 +72,13 @@ HWTEST_F(ClickEventAccessorTest, getDisplayXTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getDisplayX, nullptr);
 
-    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
         Offset offset = eventInfo_->GetScreenLocation();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
         offset.SetX(newValue);
         eventInfo_->SetScreenLocation(offset);
-        auto result = Converter::Convert<int>(accessor_->getDisplayX(peer_));
-        result = static_cast<double>(result);
+        auto result = Converter::Convert<double>(accessor_->getDisplayX(peer_));
         EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
@@ -109,14 +109,13 @@ HWTEST_F(ClickEventAccessorTest, getDisplayYTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getDisplayY, nullptr);
 
-    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
         Offset offset = eventInfo_->GetScreenLocation();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
         offset.SetY(newValue);
         eventInfo_->SetScreenLocation(offset);
-        auto result = Converter::Convert<int>(accessor_->getDisplayY(peer_));
-        result = static_cast<double>(result);
+        auto result = Converter::Convert<double>(accessor_->getDisplayY(peer_));
         EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
@@ -147,14 +146,13 @@ HWTEST_F(ClickEventAccessorTest, getWindowXTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getWindowX, nullptr);
 
-    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
         Offset offset = eventInfo_->GetGlobalLocation();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
         offset.SetX(newValue);
         eventInfo_->SetGlobalLocation(offset);
-        auto result = Converter::Convert<int>(accessor_->getWindowX(peer_));
-        result = static_cast<double>(result);
+        auto result = Converter::Convert<double>(accessor_->getWindowX(peer_));
         EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
@@ -185,14 +183,13 @@ HWTEST_F(ClickEventAccessorTest, getWindowYTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getWindowY, nullptr);
 
-    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
         Offset offset = eventInfo_->GetGlobalLocation();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
         offset.SetY(newValue);
         eventInfo_->SetGlobalLocation(offset);
-        auto result = Converter::Convert<int>(accessor_->getWindowY(peer_));
-        result = static_cast<double>(result);
+        auto result = Converter::Convert<double>(accessor_->getWindowY(peer_));
         EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
@@ -223,14 +220,13 @@ HWTEST_F(ClickEventAccessorTest, getXTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getX, nullptr);
 
-    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
         Offset offset = eventInfo_->GetLocalLocation();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
         offset.SetX(newValue);
         eventInfo_->SetLocalLocation(offset);
-        auto result = Converter::Convert<int>(accessor_->getX(peer_));
-        result = static_cast<double>(result);
+        auto result = Converter::Convert<double>(accessor_->getX(peer_));
         EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
 }
@@ -261,15 +257,42 @@ HWTEST_F(ClickEventAccessorTest, getYTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getY, nullptr);
 
-    for (auto& [input, value, expecte] : testFixtureNumberDoubleRoundValues) {
+    for (auto& [input, value, expecte] : testFixtureNumberDoubleValues) {
         Offset offset = eventInfo_->GetLocalLocation();
         const auto convValue = Converter::Convert<double>(value);
         const auto newValue = PipelineBase::Vp2PxWithCurrentDensity(convValue);
         offset.SetY(newValue);
         eventInfo_->SetLocalLocation(offset);
-        auto result = Converter::Convert<int>(accessor_->getY(peer_));
-        result = static_cast<double>(result);
+        auto result = Converter::Convert<double>(accessor_->getY(peer_));
         EXPECT_NEAR(result, expecte, EPSILON) << "Input value is: " << input;
     }
+}
+
+/**
+ * @tc.name: GetPreventDefaultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, GetPreventDefaultTest, TestSize.Level1)
+{
+    GestureEvent* eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    Callback_Void callback = accessor_->getPreventDefault(peer_);
+    auto callbackHelper = CallbackHelper(callback);
+
+    auto checkWithName = [eventInfo, &callbackHelper](const std::string& patternName, bool expected) {
+        eventInfo->SetPatternName(patternName);
+        eventInfo->SetPreventDefault(false);
+        EXPECT_FALSE(eventInfo->IsPreventDefault());
+        callbackHelper.Invoke();
+        EXPECT_EQ(eventInfo->IsPreventDefault(), expected);
+    };
+
+    checkWithName("Checkbox", true);
+    checkWithName("RichEditor", true);
+    checkWithName("Grid", false);
+    checkWithName("Hyperlink", true);
+
+    CallbackKeeper::ReleaseReverseCallback<Callback_Void>(callback);
 }
 }
