@@ -121,7 +121,7 @@ const splitItemFillColor: Resource = {
   type: 10001
 }
 
-//锁定深色或者浅色模式，锁定颜色时，深浅色资源切换的时候，取固定值
+// 11
 class ColorGroup {
   public light: string = '#000000';
   public dark: string = '#FFFFFF';
@@ -209,13 +209,13 @@ struct custombutton {
   @State rightSplitBackgroundColor: ResourceColor = Color.Transparent
   @State rowOpacity: number = 1.0
   @State menuWidth: string = '224vp';
-  //按鍵热区间的间距 12-28vp
+  //按鍵热区间的间距 12-28vp11
   @State buttonSpacing: number = 12;
-  //底板大小 20-28vp
+  //底板大小 20-28vp22
   @State buttonSize: number = 28;
-  //最后一个按钮离右侧的间距
+  //最后一个按钮离右侧的间距22
   @State buttonRightOffset: number = 20;
-  //锁定当前的颜色模式
+  //锁定当前的颜色模式22
   colorConfigurationLocked: boolean = false;
 
   isFocused: boolean = true;
@@ -270,29 +270,29 @@ struct custombutton {
     }
   }
 
-  //设置底板的间距
+  //设置底板的间距22
   setButtonSpacing(param: string) {
     this.buttonSpacing = parseInt(param);
   }
 
-  //设置底板的大小
+  //设置底板的大小22
   setButtonButtonSize(param: string) {
     this.buttonSize = parseInt(param);
   }
 
-  // 最后一个按键离右侧的距离
+  // 最后一个按键离右侧的距离22
   setButtonRightOffset(param: string) {
     this.buttonRightOffset = parseInt(param);
   }
 
-  // 锁定当前三键的颜色
+  // 锁定当前三键的颜色22
   setColorModeLocked(param: string) {
     const colorMode = parseInt(param);
     if (colorMode === -1) {
       this.colorConfigurationLocked = false;
       return;
     }
-    // 是否锁定深色模式
+    // 是否锁定深色模式22
     this.isDark = (colorMode === 0);
     this.colorConfigurationLocked = true;
     this.maximizeFillColor = this.getResourceColor(buttonNormalIconFillColor)
@@ -300,7 +300,7 @@ struct custombutton {
     this.closeFillColor = this.getResourceColor(buttonNormalIconFillColor)
   }
 
-  // 适配三键相关的颜色资源锁定深色模式
+  // 适配三键相关的颜色资源锁定深色模式22
   getResourceColor(resource: Resource): Resource | string {
     if (this.colorConfigurationLocked && colorMap.has(resource)) {
       const colorGroup = colorMap.get(resource);
@@ -564,7 +564,6 @@ struct custombutton {
         }
         .id('EnhanceMaximizeBtn')
         .backgroundColor(this.maximizeBackgroundColor)
-        // 底板可修改
         .width(this.buttonSize + 'vp')
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
@@ -661,8 +660,6 @@ struct custombutton {
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        //右间距在父组件中体现
-        // .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
         .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
