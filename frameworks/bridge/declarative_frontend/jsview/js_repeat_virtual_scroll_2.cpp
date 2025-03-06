@@ -249,6 +249,7 @@ void JSRepeatVirtualScroll2::OnMove(const JSCallbackInfo& info)
     enum OnMoveParam {
         ELMTID = 0,
         ON_MOVE = 1,
+        ITEM_DRAG_HANDLER = 2,
     };
     if (!info[OnMoveParam::ELMTID]->IsNumber()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::OnMove - invalid parameters ERROR");
@@ -257,14 +258,64 @@ void JSRepeatVirtualScroll2::OnMove(const JSCallbackInfo& info)
     auto repeatElmtId = info[OnMoveParam::ELMTID]->ToNumber<int32_t>();
     if (!info[OnMoveParam::ON_MOVE]->IsFunction()) {
         RepeatVirtualScroll2Model::GetInstance()->OnMove(repeatElmtId, nullptr);
+        RepeatVirtualScroll2Model::GetInstance()->SetItemDragHandler(repeatElmtId, nullptr, nullptr, nullptr, nullptr);
         return;
     }
-    auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[OnMoveParam::ON_MOVE])](
+    auto context = info.GetExecutionContext();
+    auto onMove = [execCtx = context, func = JSRef<JSFunc>::Cast(info[OnMoveParam::ON_MOVE])](
                       int32_t from, int32_t to) {
         auto params = ConvertToJSValues(from, to);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
     RepeatVirtualScroll2Model::GetInstance()->OnMove(repeatElmtId, std::move(onMove));
+    if ((info.Length() > 2) && info[ITEM_DRAG_HANDLER]->IsObject()) { // 2: Array length
+        JsParseItemDragEventHandler(context, info[ITEM_DRAG_HANDLER], repeatElmtId);
+    } else {
+        RepeatVirtualScroll2Model::GetInstance()->SetItemDragHandler(repeatElmtId, nullptr, nullptr, nullptr, nullptr);
+    }
+}
+
+void JSRepeatVirtualScroll2::JsParseItemDragEventHandler(
+    const JsiExecutionContext& context, const JSRef<JSVal>& jsValue, int32_t repeatElmtId)
+{
+    auto itemDragEventObj = JSRef<JSObject>::Cast(jsValue);
+
+    auto onLongPress = itemDragEventObj->GetProperty("onLongPress");
+    std::function<void(int32_t)> onLongPressCallback;
+    if (onLongPress->IsFunction()) {
+        onLongPressCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onLongPress)](int32_t index) {
+            auto params = ConvertToJSValues(index);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+    }
+
+    auto onDragStart = itemDragEventObj->GetProperty("onDragStart");
+    std::function<void(int32_t)> onDragStartCallback;
+    if (onDragStart->IsFunction()) {
+        onDragStartCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onDragStart)](int32_t index) {
+            auto params = ConvertToJSValues(index);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+    }
+    auto onMoveThrough = itemDragEventObj->GetProperty("onMoveThrough");
+    std::function<void(int32_t, int32_t)> onMoveThroughCallback;
+    if (onMoveThrough->IsFunction()) {
+        onMoveThroughCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onMoveThrough)](
+                                    int32_t from, int32_t to) {
+            auto params = ConvertToJSValues(from, to);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+    }
+    auto onDrop = itemDragEventObj->GetProperty("onDrop");
+    std::function<void(int32_t)> onDropCallback;
+    if (onDrop->IsFunction()) {
+        onDropCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onDrop)](int32_t index) {
+            auto params = ConvertToJSValues(index);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+    }
+    RepeatVirtualScroll2Model::GetInstance()->SetItemDragHandler(repeatElmtId, std::move(onLongPressCallback),
+        std::move(onDragStartCallback), std::move(onMoveThroughCallback), std::move(onDropCallback));
 }
 
 void JSRepeatVirtualScroll2::JSBind(BindingTarget globalObj)
