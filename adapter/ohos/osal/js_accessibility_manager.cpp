@@ -1388,7 +1388,7 @@ void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& 
 {
     int32_t pageId = info.GetPageId();
     if ((pageId >= MAX_PAGE_ID_WITH_SUB_TREE) || (pageId < 0)) {
-        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "pageId %{public}d cannot set tree id", pageId);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "pageId %{public}d cannot set tree id", pageId);
     } else {
         uint32_t unsignedPageId = static_cast<uint32_t>(pageId);
         uint32_t unsignedTreeId = static_cast<uint32_t>(treeId);
