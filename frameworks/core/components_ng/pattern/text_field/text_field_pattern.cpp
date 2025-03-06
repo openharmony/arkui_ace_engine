@@ -4264,7 +4264,14 @@ int32_t TextFieldPattern::InsertValueByController(const std::string& insertValue
     }
     int32_t newCaretIndex = offset + caretMoveLength;
     selectController_->UpdateCaretIndex(newCaretIndex);
-    selectController_->MoveCaretToContentRect(newCaretIndex);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, offset);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(Referenced::RawPtr(selectController_))]() {
+        auto selectController = weak.Upgrade();
+        CHECK_NULL_VOID(selectController);
+        int32_t index = selectController->GetCaretIndex();
+        selectController->MoveCaretToContentRect(index);
+    });
     UpdateObscure(insertValue, hasInsertValue);
     UpdateEditingValueToRecord();
     TwinklingByFocus();
