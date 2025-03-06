@@ -1484,6 +1484,7 @@ private:
     void CloseSystemMenu();
     void SetAccessibilityAction() override;
     void SetAccessibilityEditAction();
+    bool IsAccessibilityClick();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     bool CheckTripClickEvent(GestureEvent& info);

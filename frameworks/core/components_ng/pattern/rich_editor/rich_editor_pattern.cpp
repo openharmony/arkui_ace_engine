@@ -2554,6 +2554,15 @@ void RichEditorPattern::SetAccessibilityEditAction()
     });
 }
 
+bool RichEditorPattern::IsAccessibilityClick()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->GetAccessibilityFocusState();
+}
+
 std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, int32_t end)
 {
     std::vector<ParagraphInfo> res;
@@ -2892,7 +2901,12 @@ Offset RichEditorPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffs
 bool RichEditorPattern::IsShowSingleHandleByClick(
     const OHOS::Ace::GestureEvent& info, int32_t lastCaretPosition, const RectF& lastCaretRect, bool isCaretTwinkling)
 {
-    CHECK_NULL_RETURN(isCaretTwinkling && (info.GetSourceDevice() != SourceType::MOUSE), false);
+    auto isAccessibilityClick = IsAccessibilityClick();
+    if (!isCaretTwinkling || (info.GetSourceDevice() == SourceType::MOUSE) || isAccessibilityClick) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "isCaretTwinkling=%{public}d,sourceType=%{public}d,"
+            "isAccessibilityClick=%{public}d", isCaretTwinkling, info.GetSourceDevice(), isAccessibilityClick);
+        return false;
+    }
     auto offset = info.GetLocalLocation();
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto position = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
