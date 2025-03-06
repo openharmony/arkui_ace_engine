@@ -70,6 +70,8 @@ struct AccessibilityEvent {
     double currentItemIndex = 0.0;
     double itemCount = 0.0;
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
+    int32_t startIndex = 0;
+    int32_t endIndex = 0;
 };
 
 enum class OperatorType {

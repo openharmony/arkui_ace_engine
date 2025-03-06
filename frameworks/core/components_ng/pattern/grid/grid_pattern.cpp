@@ -558,6 +558,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     }
     auto onScrollIndex = gridEventHub->GetOnScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    if (indexChanged) {
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, info_.startIndex_, info_.endIndex_);
+    }
     auto onReachStart = gridEventHub->GetOnReachStart();
     FireOnReachStart(onReachStart);
     auto onReachEnd = gridEventHub->GetOnReachEnd();
