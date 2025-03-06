@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import QRCodeBootcampTest from './InformationDisplay/QRCodeBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  QRCodeBootcampTest();
 }
