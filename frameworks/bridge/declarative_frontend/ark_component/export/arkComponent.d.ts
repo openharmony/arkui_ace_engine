@@ -369,6 +369,7 @@ declare class ArkImageComponent extends ArkComponent implements ImageAttribute {
     border(value: BorderOptions): this;
     opacity(value: number | Resource): this;
     transition(value: TransitionOptions | TransitionEffect): this;
+    resizable(value: ResizableOptions): this;
 }
 declare class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>> {
     constructor(value: Array<ImageFrameInfo>);

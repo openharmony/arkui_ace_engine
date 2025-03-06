@@ -6878,6 +6878,20 @@ void SetNodeBackdropBlur(
     ViewAbstract::SetNodeBackdropBlur(frameNode, dimensionRadius, blurOption);
 }
 
+void SetPrivacySensitve(ArkUINodeHandle node, ArkUI_Int32 sensitive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPrivacySensitive(frameNode, static_cast<bool>(sensitive));
+}
+
+void ResetPrivacySensitve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPrivacySensitive(frameNode, false);
+}
+
 ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
 {
     ArkUIBackdropBlur backdropBlur;
@@ -7349,6 +7363,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .getNodeBackdropBlur = GetNodeBackdropBlur,
         .setDisableDataPrefetch = SetDisableDataPrefetch,
         .setOnVisibleAreaApproximateChange = SetOnVisibleAreaApproximateChange,
+        .setPrivacySensitive = SetPrivacySensitve,
+        .resetPrivacySensitive = ResetPrivacySensitve,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

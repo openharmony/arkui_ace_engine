@@ -7673,7 +7673,7 @@ class ImagePointLightModifier extends ModifierWithKey {
   }
 }
 ImagePointLightModifier.identity = Symbol('imagePointLight');
-class ImageeResizableModifier extends ModifierWithKey {
+class ImageResizableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -7681,14 +7681,14 @@ class ImageeResizableModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().image.resetResizable(node);
     } else {
-      if (!isUndefined(this.value.lattice)) {
+      if (!isUndefined(this.value.lattice) && !isNull(this.value.lattice)) {
         getUINativeModule().image.setResizableLattice(node, this.value.lattice);
       }
       let sliceTop;
       let sliceRight;
       let sliceBottom;
       let sliceLeft;
-      if (!isUndefined(this.value.slice)) {
+      if (!isUndefined(this.value.slice) && !isNull(this.value.slice)) {
         let tmpSlice = this.value.slice;
         sliceTop = tmpSlice.top;
         sliceRight = tmpSlice.right;
@@ -7699,7 +7699,7 @@ class ImageeResizableModifier extends ModifierWithKey {
     }
   }
 }
-ImageeResizableModifier.identity = Symbol('resizable');
+ImageResizableModifier.identity = Symbol('resizable');
 class ImageDynamicRangeModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7873,7 +7873,7 @@ class ArkImageComponent extends ArkComponent {
     return this;
   }
   resizable(value) {
-    modifierWithKey(this._modifiersWithKeys, ImageeResizableModifier.identity, ImageeResizableModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ImageResizableModifier.identity, ImageResizableModifier, value);
     return this;
   }
   alt(value) {
@@ -8188,6 +8188,76 @@ class ImageAnimatorIterationsModeModifier extends ModifierWithKey {
 }
 ImageAnimatorIterationsModeModifier.identity = Symbol('imageAnimatorIterationsMode');
 
+class ImageAnimatorOnStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnStart(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnStart(node, this.value);
+    }
+  }
+}
+ImageAnimatorOnStartModifier.identity = Symbol('imageAnimatorOnStart');
+
+class ImageAnimatorOnPauseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnPause(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnPause(node, this.value);
+    }
+  }
+}
+ImageAnimatorOnPauseModifier.identity = Symbol('imageAnimatorOnPause');
+
+class ImageAnimatorOnRepeatModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnRepeat(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnRepeat(node, this.value);
+    }
+  }
+}
+ImageAnimatorOnRepeatModifier.identity = Symbol('imageAnimatorOnRepeat');
+
+class ImageAnimatorOnCancelModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnCancel(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnCancel(node, this.value);
+    }
+  }
+}
+ImageAnimatorOnCancelModifier.identity = Symbol('imageAnimatorOnCancel');
+
+class ImageAnimatorOnFinishModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnFinish(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnFinish(node, this.value);
+    }
+  }
+}
+ImageAnimatorOnFinishModifier.identity = Symbol('imageAnimatorOnFinish');
+
 class ImageAnimatorAutoMonitorInvisibleAreaModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8246,19 +8316,24 @@ class ArkImageAnimatorComponent extends ArkComponent {
     return this;
   }
   onStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnStartModifier.identity, ImageAnimatorOnStartModifier, event);
+    return this;
   }
   onPause(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnPauseModifier.identity, ImageAnimatorOnPauseModifier, event);
+    return this;
   }
   onRepeat(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnRepeatModifier.identity, ImageAnimatorOnRepeatModifier, event);
+    return this;
   }
   onCancel(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnCancelModifier.identity, ImageAnimatorOnCancelModifier, event);
+    return this;
   }
   onFinish(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnFinishModifier.identity, ImageAnimatorOnFinishModifier, event);
+    return this;
   }
 }
 // @ts-ignore
@@ -8674,6 +8749,52 @@ class PatternLockSkipUnselectedPointModifier extends ModifierWithKey {
   }
 }
 PatternLockSkipUnselectedPointModifier.identity = Symbol('patternlockSkipUnselectedPoint');
+class PatternLockBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().common.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockBackgroundColorModifier.identity = Symbol('patternLockBackgroundColor');
+
+class PatternLockOnPatternCompleteModifer extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetPatternLockOnPatternComplete(node);
+    } else {
+      getUINativeModule().patternLock.setPatternLockOnPatternComplete(node, this.value);
+    }
+  }
+}
+PatternLockOnPatternCompleteModifer.identity = Symbol('patternLockOnPatternComplete');
+
+class PatternLockOnDotConnectModifer extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetPatternLockOnDotConnect(node);
+    } else {
+      getUINativeModule().patternLock.setPatternLockOnDotConnect(node, this.value);
+    }
+  }
+}
+PatternLockOnDotConnectModifer.identityl = Symbol('patternLockOnDotConnect');
+
 class ArkPatternLockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8718,11 +8839,18 @@ class ArkPatternLockComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, PatternLockSkipUnselectedPointModifier.identity, PatternLockSkipUnselectedPointModifier, value);
     return this;
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockBackgroundColorModifier.identity,
+        PatternLockBackgroundColorModifier, value);
+    return this;
+  }
   onPatternComplete(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, PatternLockOnPatternCompleteModifer.identity, PatternLockOnPatternCompleteModifer, callback);
+    return this;
   }
   onDotConnect(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, PatternLockOnDotConnectModifer.identity, PatternLockOnDotConnectModifer, callback);
+    return this;
   }
 }
 // @ts-ignore
@@ -22809,10 +22937,12 @@ class ArkCounterComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onInc(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CounterOnIncModifier.identity, CounterOnIncModifier, event);
+    return this;
   }
   onDec(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CounterOnDecModifier.identity, CounterOnDecModifier, event);
+    return this;
   }
   enableDec(value) {
     modifierWithKey(this._modifiersWithKeys, EnableDecModifier.identity, EnableDecModifier, value);
@@ -22839,6 +22969,35 @@ class ArkCounterComponent extends ArkComponent {
     return this;
   }
 }
+
+class CounterOnIncModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterOnInc(node);
+    } else {
+      getUINativeModule().counter.setCounterOnInc(node, this.value);
+    }
+  }
+}
+CounterOnIncModifier.identity = Symbol('counterOnInc');
+
+class CounterOnDecModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterOnDec(node);
+    } else {
+      getUINativeModule().counter.setCounterOnDec(node, this.value);
+    }
+  }
+}
+CounterOnDecModifier.identity = Symbol('counterOnDec');
+
 class CounterHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -25638,6 +25797,10 @@ class ArkGaugeComponent extends ArkComponent {
     }
     return this.gaugeNode.getFrameNode();
   }
+  privacySensitive(value) {
+    modifierWithKey(this._modifiersWithKeys, GaugePrivacySensitiveModifier.identity, GaugePrivacySensitiveModifier, value);
+    return this;
+  }
 }
 class GaugeIndicatorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -25748,6 +25911,19 @@ class GaugeTrackShadowModifier extends ModifierWithKey {
   }
 }
 GaugeTrackShadowModifier.identity = Symbol('gaugeTrackShadow');
+class GaugePrivacySensitiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gauge.resetGaugePrivacySensitive(node);
+    } else {
+      getUINativeModule().gauge.setGaugePrivacySensitive(node, this.value);
+    }
+  }
+}
+GaugePrivacySensitiveModifier.identity = Symbol('gaugePrivacySensitive');
 // @ts-ignore
 if (globalThis.Gauge !== undefined) {
   globalThis.Gauge.attributeModifier = function (modifier) {
@@ -26549,7 +26725,24 @@ class ArkProgressComponent extends ArkComponent {
     }
     return this.progressNode.getFrameNode();
   }
+  privacySensitive(value) {
+    modifierWithKey(this._modifiersWithKeys, ProgressPrivacySensitiveModifier.identity, ProgressPrivacySensitiveModifier, value);
+    return this;
+  }
 }
+class ProgressPrivacySensitiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().progress.resetProgressPrivacySensitive(node);
+    } else {
+      getUINativeModule().progress.setProgressPrivacySensitive(node, this.value);
+    }
+  }
+}
+ProgressPrivacySensitiveModifier.identity = Symbol('progressPrivacySensitive');
 class ProgressInitializeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -26972,7 +27165,8 @@ class ArkTextClockComponent extends ArkComponent {
     return this;
   }
   onDateChange(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockOnDateChangeModifier.identity, TextClockOnDateChangeModifier, event);
+    return this;
   }
   fontColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextClockFontColorModifier.identity, TextClockFontColorModifier, value);
@@ -27036,6 +27230,19 @@ class ArkTextClockComponent extends ArkComponent {
     return this;
   }
 }
+class TextClockOnDateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textClock.resetTextClockOnDateChange(node);
+    } else {
+      getUINativeModule().textClock.setTextClockOnDateChange(node, this.value);
+    }
+  }
+}
+TextClockOnDateChangeModifier.identity = Symbol('textClockOnDateChange');
 class TextClockTimeZoneOffsetModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -27339,9 +27546,23 @@ class ArkTextTimerComponent extends ArkComponent {
     return this.textTimerNode.getFrameNode();
   }
   onTimer(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextTimerOnTimerModifier.identity, TextTimerOnTimerModifier, event);
+    return this;
   }
 }
+class TextTimerOnTimerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textTimer.resetTextTimerOnTimer(node);
+    } else {
+      getUINativeModule().textTimer.setTextTimerOnTimer(node, this.value);
+    }
+  }
+}
+TextTimerOnTimerModifier.identity = Symbol('textTimerOnTimer');
 class TextTimerOptionsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
