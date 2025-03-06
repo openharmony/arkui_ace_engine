@@ -3362,6 +3362,7 @@ NG::MenuParam GetSelectionMenuParam(
     paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
     menuParam.layoutRegionMargin = paddings;
     menuParam.disappearScaleToTarget = true;
+    menuParam.isPreviewContainScale = true;
     menuParam.isShow = true;
     return menuParam;
 }
