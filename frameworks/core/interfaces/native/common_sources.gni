@@ -22,6 +22,7 @@ common_sources = [
   "implementation/drawing_rendering_context_peer_impl.cpp",
   "implementation/global_scope_animation_helper.cpp",
   "implementation/image_bitmap_peer_impl.cpp",
+  "implementation/image_common_methods.cpp",
   "implementation/navigation_context.cpp",
   "implementation/scroller_peer_impl.cpp",
   "implementation/video_controller_peer_impl.cpp",

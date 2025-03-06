@@ -13,16 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/image/image_source_info.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "pixel_map_peer.h"
-#include "arkoala_api_generated.h"
-
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageSpanModifier {
@@ -60,11 +56,7 @@ void VerticalAlignImpl(Ark_NativePointer node,
 void ColorFilterImpl(Ark_NativePointer node,
                      const Ark_Union_ColorFilter_DrawingColorFilter* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageSpanModelNG::SetColorFilter(frameNode, convValue);
+    ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    Ark_ImageFit value)

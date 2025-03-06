@@ -32,8 +32,6 @@ const auto ATTRIBUTE_VALUE_NAME = "value";
 const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_VERTICAL_ALIGN_NAME = "verticalAlign";
 const auto ATTRIBUTE_VERTICAL_ALIGN_DEFAULT_VALUE = "VerticalAlign.BOTTOM";
-const auto ATTRIBUTE_COLOR_FILTER_NAME = "colorFilter";
-const auto ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_OBJECT_FIT_NAME = "objectFit";
 const auto ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE = "ImageFit.Cover";
 } // namespace
@@ -207,30 +205,6 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignInvalidValues, 
     for (auto& [input, value] : Fixtures::testFixtureImageSpanVerticalAlignInvalidValues) {
         checkValue(input, value);
     }
-}
-
-/*
- * @tc.name: setColorFilterTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageSpanModifierTest, DISABLED_setColorFilterTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_FILTER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE) << "Default value for attribute 'colorFilter'";
-}
-
-/*
- * @tc.name: setColorFilterTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageSpanModifierTest, DISABLED_setColorFilterTestValidValues, TestSize.Level1)
-{
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
 
 /*
