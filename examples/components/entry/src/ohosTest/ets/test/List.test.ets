@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import AlertDialogBootcampTest from './DialogBoxes/AlertDialogBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  AlertDialogBootcampTest();
 }
