@@ -1101,7 +1101,6 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(newSelectedPros);
     newSelectedPros->UpdateNeedDivider(false);
-    newSelectedNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SelectPattern::UpdateText(int32_t index)
