@@ -216,6 +216,16 @@ HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
 
     optUnionResult = Converter::ArkUnion<Opt_Union_Number_String>(Ark_Empty());
     EXPECT_EQ(optUnionResult.tag, INTEROP_TAG_UNDEFINED);
+
+    auto optString = std::make_optional(testStr);
+    optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(optString);
+    EXPECT_NE(optUnionResult.tag, INTEROP_TAG_UNDEFINED);
+    EXPECT_EQ(optUnionResult.value.selector, 1);
+    EXPECT_EQ(optUnionResult.value.value1.chars, optString->data());
+
+    optString = std::nullopt;
+    optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(optString);
+    EXPECT_EQ(optUnionResult.tag, INTEROP_TAG_UNDEFINED);
 }
 
 /**
