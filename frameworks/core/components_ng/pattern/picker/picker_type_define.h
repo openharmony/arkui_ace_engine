@@ -50,6 +50,7 @@ constexpr int32_t DEFAULT_CROWNSENSITIVITY = 1;
 constexpr int32_t INVALID_SELECTED_COLUMN_INDEX = -1;
 constexpr int32_t CROWN_SENSITIVITY_MIN = 0;
 constexpr int32_t CROWN_SENSITIVITY_MAX = 2;
+constexpr uint32_t DEFAULT_SELECTED_FOCUS_TEXT_COLOR = 0xff5EA1FF;
 
 struct PickerTextStyle {
     std::optional<Color> textColor;
