@@ -991,6 +991,843 @@ export default function AlertDialogBootcampTest() {
       done();
     })
 
+    /**
+     * 测试组件maskRect.width支持设置弹窗遮蔽层区域的宽度为50%
+     */
+    it('ArkUI_AlertDialog_066', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'maskRect.width')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'maskRect.width'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件maskRect.width支持设置弹窗遮蔽层区域的宽度为80%
+     */
+    it('ArkUI_AlertDialog_067', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'maskRect.width')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'maskRect.width'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件maskRect.width支持设置弹窗遮蔽层区域的宽度为100%
+     */
+    it('ArkUI_AlertDialog_068', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'maskRect.width')
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'maskRect.width',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件maskRect.height支持设置弹窗遮蔽层区域的高度为50%
+     */
+    it('ArkUI_AlertDialog_069', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'maskRect.height')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'maskRect.height'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件maskRect.height支持设置弹窗遮蔽层区域的高度为80%
+     */
+    it('ArkUI_AlertDialog_070', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'maskRect.height')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'maskRect.height'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件maskRect.height支持设置弹窗遮蔽层区域的高度为100%
+     */
+    it('ArkUI_AlertDialog_071', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'maskRect.height')
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'maskRect.height',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+
+    /**
+     * 测试组件oneButton的confirm.enabled设置点击Button是否响应为可以响应
+     */
+    it('ArkUI_AlertDialog_072', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.enabled')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'confirm.enabled'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.enabled设置点击Button是否响应为可以不响应
+     */
+    it('ArkUI_AlertDialog_073', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.enabled')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'confirm.enabled',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.defaultFocus设置Button是否是默认焦点为是默认焦点
+     */
+    it('ArkUI_AlertDialog_074', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.defaultFocus')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'confirm.defaultFocus'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.defaultFocus设置Button是否是默认焦点为不是默认焦点
+     */
+    it('ArkUI_AlertDialog_075', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.defaultFocus')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'confirm.defaultFocus',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.style设置Button的风格样式为DEFAULT
+     */
+    it('ArkUI_AlertDialog_076', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.style')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'confirm.style'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.style设置Button的风格样式为HIGHLIGHT
+     */
+    it('ArkUI_AlertDialog_077', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.style')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'confirm.style',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.fontColor支持设置Button文本颜色为1号色
+     */
+    it('ArkUI_AlertDialog_078', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.fontColor')
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'confirm.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.fontColor支持设置Button文本颜色为2号色
+     */
+    it('ArkUI_AlertDialog_079', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.fontColor')
+      await buttonClick({
+        buttonClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'confirm.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.fontColor支持设置Button文本颜色为3号色
+     */
+    it('ArkUI_AlertDialog_080', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.fontColor')
+      await buttonClick({
+        buttonClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'confirm.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.fontColor支持设置Button文本颜色为4号色
+     */
+    it('ArkUI_AlertDialog_081', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.fontColor')
+      await buttonClick({
+        buttonClickObj: 3,
+        toggleClick: {
+          toggleClickObj: 'confirm.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.fontColor支持设置Button文本颜色为5号色
+     */
+    it('ArkUI_AlertDialog_082', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.fontColor')
+      await buttonClick({
+        buttonClickObj: 4,
+        toggleClick: {
+          toggleClickObj: 'confirm.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.fontColor支持设置Button文本颜色为6号色
+     */
+    it('ArkUI_AlertDialog_083', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.fontColor')
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickObj: 'confirm.fontColor',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.backgroundColor支持设置Button背景颜色为1号色
+     */
+    it('ArkUI_AlertDialog_084', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'confirm.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.backgroundColor支持设置Button背景颜色为2号色
+     */
+    it('ArkUI_AlertDialog_085', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'confirm.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.backgroundColor支持设置Button背景颜色为3号色
+     */
+    it('ArkUI_AlertDialog_086', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'confirm.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.backgroundColor支持设置Button背景颜色为4号色
+     */
+    it('ArkUI_AlertDialog_087', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 3,
+        toggleClick: {
+          toggleClickObj: 'confirm.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.backgroundColor支持设置Button背景颜色为5号色
+     */
+    it('ArkUI_AlertDialog_088', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 4,
+        toggleClick: {
+          toggleClickObj: 'confirm.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件oneButton的confirm.backgroundColor支持设置Button背景颜色为6号色
+     */
+    it('ArkUI_AlertDialog_089', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'confirm.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickObj: 'confirm.backgroundColor',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    //oneButton的相关属性测试完毕，关闭oneButton Toggle,无需断言
+    it('ArkUI_AlertDialog_090', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await searchParentBlock('oneButton', false, '参数列表')
+      done()
+    })
+
+
+    /**
+     * 测试组件twoButton的primaryButton.enabled设置点击Button是否响应为可以响应
+     */
+    it('ArkUI_AlertDialog_091', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await searchParentBlock('twoButton', true, '参数列表')
+      await Search('参数列表', 'primaryButton.enabled')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.enabled'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.enabled设置点击Button是否响应为可以不响应
+     */
+    it('ArkUI_AlertDialog_092', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.enabled')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.enabled',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.defaultFocus设置Button是否是默认焦点为是默认焦点
+     */
+    it('ArkUI_AlertDialog_093', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.defaultFocus')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.defaultFocus'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.defaultFocus设置Button是否是默认焦点为不是默认焦点
+     */
+    it('ArkUI_AlertDialog_094', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.defaultFocus')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.defaultFocus',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.style设置Button的风格样式为DEFAULT
+     */
+    it('ArkUI_AlertDialog_095', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.style')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.style'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.style设置Button的风格样式为HIGHLIGHT
+     */
+    it('ArkUI_AlertDialog_096', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.style')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.style',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.fontColor支持设置Button文本颜色为1号色
+     */
+    it('ArkUI_AlertDialog_097', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.fontColor支持设置Button文本颜色为2号色
+     */
+    it('ArkUI_AlertDialog_098', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.fontColor支持设置Button文本颜色为3号色
+     */
+    it('ArkUI_AlertDialog_099', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.fontColor支持设置Button文本颜色为4号色
+     */
+    it('ArkUI_AlertDialog_100', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 3,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.fontColor支持设置Button文本颜色为5号色
+     */
+    it('ArkUI_AlertDialog_101', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 4,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.fontColor支持设置Button文本颜色为6号色
+     */
+    it('ArkUI_AlertDialog_102', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.fontColor',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.backgroundColor支持设置Button背景颜色为1号色
+     */
+    it('ArkUI_AlertDialog_103', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.backgroundColor支持设置Button背景颜色为2号色
+     */
+    it('ArkUI_AlertDialog_104', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.backgroundColor支持设置Button背景颜色为3号色
+     */
+    it('ArkUI_AlertDialog_105', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.backgroundColor支持设置Button背景颜色为4号色
+     */
+    it('ArkUI_AlertDialog_106', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 3,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.backgroundColor支持设置Button背景颜色为5号色
+     */
+    it('ArkUI_AlertDialog_107', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 4,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.backgroundColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的primaryButton.backgroundColor支持设置Button背景颜色为6号色
+     */
+    it('ArkUI_AlertDialog_108', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'primaryButton.backgroundColor')
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickObj: 'primaryButton.backgroundColor',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.enabled设置点击Button是否响应为可以响应
+     */
+    it('ArkUI_AlertDialog_109', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.enabled')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.enabled'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.enabled设置点击Button是否响应为可以不响应
+     */
+    it('ArkUI_AlertDialog_110', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.enabled')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.enabled',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.defaultFocus设置Button是否是默认焦点为是默认焦点
+     */
+    it('ArkUI_AlertDialog_111', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.defaultFocus')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.defaultFocus'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.defaultFocus设置Button是否是默认焦点为不是默认焦点
+     */
+    it('ArkUI_AlertDialog_112', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.defaultFocus')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.defaultFocus',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.style设置Button的风格样式为DEFAULT
+     */
+    it('ArkUI_AlertDialog_113', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.style')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.style'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.style设置Button的风格样式为HIGHLIGHT
+     */
+    it('ArkUI_AlertDialog_114', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.style')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.style',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.fontColor支持设置Button文本颜色为1号色
+     */
+    it('ArkUI_AlertDialog_115', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.fontColor支持设置Button文本颜色为2号色
+     */
+    it('ArkUI_AlertDialog_116', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.fontColor支持设置Button文本颜色为3号色
+     */
+    it('ArkUI_AlertDialog_117', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.fontColor支持设置Button文本颜色为4号色
+     */
+    it('ArkUI_AlertDialog_118', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 3,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.fontColor支持设置Button文本颜色为5号色
+     */
+    it('ArkUI_AlertDialog_119', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 4,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.fontColor'
+        }
+      })
+      done();
+    })
+
+    /**
+     * 测试组件twoButton的secondaryButton.fontColor支持设置Button文本颜色为6号色
+     */
+    it('ArkUI_AlertDialog_120', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await Search('参数列表', 'secondaryButton.fontColor')
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickObj: 'secondaryButton.fontColor',
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+
+
 
   })
 }
