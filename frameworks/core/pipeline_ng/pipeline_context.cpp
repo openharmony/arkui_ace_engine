@@ -3249,8 +3249,7 @@ void PipelineContext::OnDumpRecorderStart(const std::vector<std::string>& params
     recordTime = std::min(recordTime, MAX_RECORD_SECOND);
     int64_t startTime = GetCurrentTimestamp();
     auto taskExecutor = GetTaskExecutor();
-    std::function<bool()> dumpFunc = [startTime, recordTime, weakRoot = WeakClaim(RawPtr(rootNode_)),
-                                         executor = WeakClaim(RawPtr(taskExecutor))]() {
+    std::function<bool()> dumpFunc = [startTime, recordTime, weakRoot = WeakClaim(RawPtr(rootNode_))]() {
         int64_t currentTime = GetCurrentTimestamp();
         if ((currentTime - startTime) >= recordTime * SECOND_TO_MILLISEC) {
             return false;
@@ -3259,7 +3258,7 @@ void PipelineContext::OnDumpRecorderStart(const std::vector<std::string>& params
         CHECK_NULL_RETURN(root, false);
         auto jsonRoot = JsonUtil::Create(true);
         root->DumpTreeJsonForDiff(jsonRoot);
-        DumpRecorder::GetInstance().Record(currentTime, std::move(jsonRoot), executor);
+        DumpRecorder::GetInstance().Record(currentTime, std::move(jsonRoot));
         return true;
     };
     DumpRecorder::GetInstance().Start(std::move(dumpFunc));

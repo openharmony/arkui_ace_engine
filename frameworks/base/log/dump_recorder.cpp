@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 
@@ -33,10 +34,16 @@ DumpRecorder::~DumpRecorder() = default;
 
 void DumpRecorder::Init()
 {
-    recordTree_.reset();
+    Clear();
     recordTree_ = JsonUtil::Create(true);
     auto jsonNodeArray = JsonUtil::CreateArray(true);
     recordTree_->PutRef("infos", std::move(jsonNodeArray));
+}
+
+void DumpRecorder::Clear()
+{
+    records_.clear();
+    recordTree_.reset();
 }
 
 void DumpRecorder::Start(std::function<bool()>&& func)
@@ -53,19 +60,27 @@ void DumpRecorder::Stop()
     if (!frameDumpFunc_) {
         return;
     }
-    CHECK_NULL_VOID(recordTree_);
-    Output(recordTree_->ToString());
     frameDumpFunc_ = nullptr;
-    recordTree_.reset();
+    auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        []() -> void { DumpRecorder::GetInstance().StopInner(); }, TaskExecutor::TaskType::BACKGROUND, "ArkUIDumpStop");
 }
 
-void DumpRecorder::Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json, WeakPtr<TaskExecutor> taskExecutor)
+void DumpRecorder::StopInner()
+{
+    CHECK_NULL_VOID(recordTree_);
+    Output(recordTree_->ToString());
+    Clear();
+}
+
+void DumpRecorder::Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json)
 {
     records_[timestamp] = std::move(json);
     if (static_cast<int32_t>(records_.size()) > 1) {
-        auto executor = taskExecutor.Upgrade();
-        CHECK_NULL_VOID(executor);
-        executor->PostTask([timestamp]() -> void { DumpRecorder::GetInstance().Diff(timestamp); },
+        auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([timestamp]() -> void { DumpRecorder::GetInstance().Diff(timestamp); },
             TaskExecutor::TaskType::BACKGROUND, "ArkUIDumpDiff");
     } else {
         auto info = JsonUtil::Create();
