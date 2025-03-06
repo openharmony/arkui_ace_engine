@@ -1295,6 +1295,12 @@ public:
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
+    void BindTips(const RefPtr<PopupParam>& param) override
+    {
+        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ViewAbstract::BindTips(param, AceType::Claim(targetNode));
+    }
+
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
     {
         return ViewAbstract::OpenPopup(param, customNode);
