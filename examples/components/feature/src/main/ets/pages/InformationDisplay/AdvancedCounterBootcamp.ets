@@ -39,13 +39,20 @@ export struct AdvancedCounterBootcamp {
   @State counterValue: number = 0;
   @State counterStep: number = 1;
   @State counterTextWidth: number = 0;
-  @State counterType: CounterType = 0;
+  @State counterType: CounterType = CounterType.LIST;
   @State counterYear: number = 1;
   @State counterMonth: number = 1;
   @State counterDay: number = 1;
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+
+  @State selection: string | null = null;
+  scroller: Scroller = new Scroller()
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   //compEvent
   compEventTriggeredLog(value: string) {
@@ -79,6 +86,9 @@ export struct AdvancedCounterBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -209,7 +219,7 @@ export struct AdvancedCounterBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'type',
@@ -222,6 +232,7 @@ export struct AdvancedCounterBootcamp {
             { label: 'INLINE_DATE', value: 3 },
           ]
         })
+
         RadioBlock({
           title: 'direction',
           isEnabled: $enabledDirection,
@@ -232,6 +243,7 @@ export struct AdvancedCounterBootcamp {
             { label: 'Auto', value: Direction.Auto },
           ]
         })
+
         RadioBlock({
           title: 'focusable',
           isEnabled: $enabledFocusable,
@@ -241,6 +253,7 @@ export struct AdvancedCounterBootcamp {
             { label: 'false', value: false },
           ]
         })
+
         SliderBlock({
           title: 'value',
           isEnabled: $enabledValue,
@@ -248,6 +261,7 @@ export struct AdvancedCounterBootcamp {
           min: 0,
           max: 999
         })
+
         SliderBlock({
           title: 'min',
           isEnabled: $enabledMin,
@@ -255,6 +269,7 @@ export struct AdvancedCounterBootcamp {
           min: 0,
           max: 999
         })
+
         SliderBlock({
           title: 'max',
           isEnabled: $enabledMax,
@@ -262,6 +277,7 @@ export struct AdvancedCounterBootcamp {
           min: 1,
           max: 999
         })
+
         SliderBlock({
           title: 'step',
           isEnabled: $enabledStep,
@@ -269,6 +285,7 @@ export struct AdvancedCounterBootcamp {
           min: 1,
           max: 100
         })
+
         SliderBlock({
           title: 'textWidth',
           isEnabled: $enabledTextWidth,
@@ -276,6 +293,7 @@ export struct AdvancedCounterBootcamp {
           min: 1,
           max: 999
         })
+
         SliderBlock({
           title: 'year',
           isEnabled: $enabledYear,
@@ -283,6 +301,7 @@ export struct AdvancedCounterBootcamp {
           min: 1,
           max: 9999
         })
+
         SliderBlock({
           title: 'month',
           isEnabled: $enabledMonth,
@@ -290,6 +309,7 @@ export struct AdvancedCounterBootcamp {
           min: 1,
           max: 12
         })
+
         SliderBlock({
           title: 'day',
           isEnabled: $enabledDay,
@@ -297,9 +317,20 @@ export struct AdvancedCounterBootcamp {
           min: 1,
           max: 31
         })
+
       }
     }
     .height('52%')
+    .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+    Scroll(this.scroller) {
+
+    }
+    .height('52%')
+    .id('scroll')
   }
 }
 
