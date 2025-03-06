@@ -414,7 +414,8 @@ void SubwindowOhos::ResizeWindowForMenu()
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     Rosen::WMError ret;
-    if (!(theme->GetExpandDisplay()) && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+    if (!(theme->GetExpandDisplay() || container->IsFreeMultiWindow()) &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         if (container->IsUIExtensionWindow()) {
             auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
             CHECK_NULL_VOID(subwindow);
