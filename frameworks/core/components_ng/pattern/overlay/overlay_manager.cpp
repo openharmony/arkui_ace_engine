@@ -599,6 +599,7 @@ OverlayManager::~OverlayManager()
     popupMap_.clear();
     tipsInfoList_.clear();
     tipsEnterAndLeaveInfoMap_.clear();
+    tipsStatusList_.clear();
 }
 
 void OverlayManager::UpdateContextMenuDisappearPosition(
@@ -1640,11 +1641,12 @@ void OverlayManager::ShowTips(
     int32_t targetId, const PopupInfo& popupInfo, int32_t appearingTime, int32_t appearingTimeWithContinuousOperation)
 {
     UpdateTipsEnterAndLeaveInfoBool(targetId);
-
     auto duration = appearingTime;
     if (tipsInfoList_.empty()) {
+        UpdateTipsStatus(targetId, false);
         duration = appearingTime;
     } else {
+        UpdateTipsStatus(targetId, true);
         UpdatePreviousDisappearingTime(targetId);
         duration = appearingTimeWithContinuousOperation;
     }
@@ -1675,6 +1677,10 @@ void OverlayManager::ShowTips(
 void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int32_t disappearingTime)
 {
     auto duration = disappearingTime;
+    auto isInContinus = GetTipsStatus(targetId);
+    if (isInContinus) {
+        duration = popupInfo.disappearingTimeWithContinuousOperation;
+    }
     UpdateTipsEnterAndLeaveInfoBool(targetId);
     auto tipsId = targetId;
     UpdateTipsEnterAndLeaveInfo(tipsId);
@@ -1689,6 +1695,7 @@ void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int3
             return;
         }
         overlayManager->EraseTipsInfo(tipsId);
+        overlayManager->EraseTipsStatus(tipsId);
         overlayManager->HidePopup(tipsId, popupInfo);
         overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
     };
@@ -1771,10 +1778,12 @@ void OverlayManager::EraseTipsEnterAndLeaveInfo(int32_t targetId, int32_t times)
 void OverlayManager::UpdatePreviousDisappearingTime(int32_t targetId)
 {
     auto previousTargetId = tipsInfoList_.back().first;
-    if (previousTargetId != targetId) {
+    auto previousIsInContinus = GetTipsStatus(previousTargetId);
+    if (previousTargetId != targetId && !previousIsInContinus) {
         auto previousTipsInfo = GetTipsInfo(previousTargetId);
         auto previousDisappearingTime = previousTipsInfo.disappearingTimeWithContinuousOperation;
         UpdateTipsEnterAndLeaveInfoBool(previousTargetId);
+        UpdateTipsStatus(previousTargetId, true);
         HideTips(previousTargetId, previousTipsInfo, previousDisappearingTime);
     }
 }
@@ -1815,6 +1824,44 @@ PopupInfo OverlayManager::GetTipsInfo(int32_t targetId)
         }
     }
     return {};
+}
+
+void OverlayManager::UpdateTipsStatus(int32_t targetId, bool isInContinus)
+{
+    auto it = tipsStatusList_.begin();
+    while (it != tipsStatusList_.end()) {
+        if (it->first == targetId) {
+            it = tipsStatusList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    tipsStatusList_.emplace_back(targetId, isInContinus);
+}
+
+void OverlayManager::EraseTipsStatus(int32_t targetId)
+{
+    auto it = tipsStatusList_.begin();
+    while (it != tipsStatusList_.end()) {
+        if (it->first == targetId) {
+            it = tipsStatusList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+bool OverlayManager::GetTipsStatus(int32_t targetId)
+{
+    auto it = tipsStatusList_.begin();
+    while (it != tipsStatusList_.end()) {
+        if (it->first == targetId) {
+            return it->second;
+        } else {
+            ++it;
+        }
+    }
+    return false;
 }
 
 bool OverlayManager::UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo)

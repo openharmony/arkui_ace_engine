@@ -1190,8 +1190,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
 {
-    if (info.Length() < PARAMETER_LENGTH_SECOND || (!info[NUM_ZERO]->IsString() && !info[NUM_ZERO]->IsObject()) ||
-        !info[NUM_FIRST]->IsObject()) {
+    if (info.Length() < PARAMETER_LENGTH_FIRST || (!info[NUM_ZERO]->IsString() && !info[NUM_ZERO]->IsObject())) {
         return;
     }
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
@@ -1199,11 +1198,18 @@ void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
     // Set message to tipsParam
     tipsParam->SetMessage(info[0]->ToString());
     // Set bindTipsOptions to tipsParam
-    auto tipsObj = JSRef<JSObject>::Cast(info[1]);
+    JSRef<JSObject> tipsObj;
+    if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
+        tipsObj = JSRef<JSObject>::Cast(info[1]);
+    } else {
+        tipsObj = JSRef<JSObject>::New();
+    }
     // Parse bindTipsOptions param
     ParseTipsParam(tipsObj, tipsParam);
-    ParseTipsArrowPositionParam(tipsObj, tipsParam);
-    ParseTipsArrowSizeParam(tipsObj, tipsParam);
+    if (tipsParam->EnableArrow()) {
+        ParseTipsArrowPositionParam(tipsObj, tipsParam);
+        ParseTipsArrowSizeParam(tipsObj, tipsParam);
+    }
     ViewAbstractModel::GetInstance()->BindTips(tipsParam);
 }
 
