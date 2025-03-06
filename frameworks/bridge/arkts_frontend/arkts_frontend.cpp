@@ -96,8 +96,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     }
 
     ani_static_method create;
-    if (env_->Class_FindStaticMethod(appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig, &create) !=
-        ANI_OK) {
+    if (env_->Class_FindStaticMethod(
+            appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig, &create) != ANI_OK) {
         LOGE("Cannot find create method %{public}s", KOALA_APP_INFO.createMethodName);
         // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
