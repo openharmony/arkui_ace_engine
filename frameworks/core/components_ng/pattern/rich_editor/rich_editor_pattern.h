@@ -1197,7 +1197,10 @@ public:
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
-        return pipelineContext->GetTheme<T>(GetThemeScopeId());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            return pipelineContext->GetTheme<T>(GetThemeScopeId());
+        }
+        return pipelineContext->GetTheme<T>();
     }
 
 protected:

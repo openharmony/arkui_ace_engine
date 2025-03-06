@@ -2610,6 +2610,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
     if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
         updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
         style.SetTextDecorationColor(style.GetTextColor());
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
         updateSpanStyle.useThemeDecorationColor = false;
     }
 }
