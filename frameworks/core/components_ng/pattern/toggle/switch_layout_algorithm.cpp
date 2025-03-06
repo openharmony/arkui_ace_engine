@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
