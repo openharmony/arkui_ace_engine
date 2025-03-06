@@ -271,25 +271,31 @@ export struct CounterComponent {
     }
   }
 
-  getDateYear() {
+  getDate(value: string | undefined): string {
+    return `[n2] ${value} [n0]`
+  }
+
+  getDateYear(value: number): string {
     let locale = new intl.Locale();
     let localeID = locale.toString();
     let date = new Date(this.year, this.month - 1, this.day);
+    date.setFullYear(this.year);
     let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
     let formattedDateYear = dateFormatYear.format(date);
-    return formattedDateYear;
+    return this.getDate(formattedDateYear);
   }
 
-  getDateMonth() {
+  getDateMonth(value: number): string {
     let locale = new intl.Locale();
     let localeID = locale.toString();
     let date = new Date(this.year, this.month - 1, this.day);
+    date.setFullYear(this.year);
     let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
     let formattedDateMonth = dateFormatMonth.format(date);
-    return formattedDateMonth;
+    return this.getDate(formattedDateMonth);
   }
 
-  getDateDay() {
+  getDateDay(value: number) : string {
     let dateDayMap = new Map([
       [1, getContext().resourceManager.getStringByNameSync('First_counter_accessibility_text')],
       [2, getContext().resourceManager.getStringByNameSync('Second_counter_accessibility_text')],
@@ -323,7 +329,7 @@ export struct CounterComponent {
       [30, getContext().resourceManager.getStringByNameSync('Thirtieth_counter_accessibility_text')],
       [31, getContext().resourceManager.getStringByNameSync('ThirtyFirst_counter_accessibility_text')],
     ]);
-    return dateDayMap.get(this.day);
+    return this.getDate(dateDayMap.get(this.day));
   }
 
   convertNumberToString(value: number) {
@@ -689,20 +695,13 @@ export struct CounterComponent {
         }
       }
       try {
-        let locale = new intl.Locale();
-        let localeID = locale.toString();
-        let date = new Date(this.year, this.month - 1, this.day);
-        let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
-        let formattedDateYear = dateFormatYear.format(date);
-        let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
-        let formattedDateMonth = dateFormatMonth.format(date);
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'click',
-          textAnnouncedForAccessibility: (formattedDateYear + ',' + formattedDateYear +
+          textAnnouncedForAccessibility: (this.getDateYear(this.year) + ',' + this.getDateYear(this.year) +
             '/' +
-            formattedDateMonth + '/' + this.getDateDay())
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility subYear click send event');
@@ -721,20 +720,13 @@ export struct CounterComponent {
         this.hasFocusText2 = true;
       }
       try {
-        let locale = new intl.Locale();
-        let localeID = locale.toString();
-        let date = new Date(this.year, this.month - 1, this.day);
-        let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
-        let formattedDateYear = dateFormatYear.format(date);
-        let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
-        let formattedDateMonth = dateFormatMonth.format(date);
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'click',
-          textAnnouncedForAccessibility: (formattedDateMonth + ',' + formattedDateYear +
+          textAnnouncedForAccessibility: (this.getDateMonth(this.month) + ',' + this.getDateYear(this.year) +
             '/' +
-            formattedDateMonth + '/' + this.getDateDay())
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility subMonth click send event');
@@ -753,20 +745,13 @@ export struct CounterComponent {
         this.hasFocusText3 = true;
       }
       try {
-        let locale = new intl.Locale();
-        let localeID = locale.toString();
-        let date = new Date(this.year, this.month - 1, this.day);
-        let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
-        let formattedDateYear = dateFormatYear.format(date);
-        let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
-        let formattedDateMonth = dateFormatMonth.format(date);
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'click',
-          textAnnouncedForAccessibility: (this.getDateDay() + ',' + formattedDateYear +
+          textAnnouncedForAccessibility: (this.getDateDay(this.day) + ',' + this.getDateYear(this.year) +
             '/' +
-            formattedDateMonth + '/' + this.getDateDay())
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility subDay click send event');
@@ -871,20 +856,13 @@ export struct CounterComponent {
         }
       }
       try {
-        let locale = new intl.Locale();
-        let localeID = locale.toString();
-        let date = new Date(this.year, this.month - 1, this.day);
-        let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
-        let formattedDateYear = dateFormatYear.format(date);
-        let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
-        let formattedDateMonth = dateFormatMonth.format(date);
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'click',
-          textAnnouncedForAccessibility: (formattedDateYear + ',' + formattedDateYear +
+          textAnnouncedForAccessibility: (this.getDateYear(this.year) + ',' + this.getDateYear(this.year) +
             '/' +
-            formattedDateMonth + '/' + this.getDateDay())
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility addYear click send event');
@@ -903,20 +881,13 @@ export struct CounterComponent {
         this.hasFocusText2 = true;
       }
       try {
-        let locale = new intl.Locale();
-        let localeID = locale.toString();
-        let date = new Date(this.year, this.month - 1, this.day);
-        let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
-        let formattedDateYear = dateFormatYear.format(date);
-        let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
-        let formattedDateMonth = dateFormatMonth.format(date);
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'click',
-          textAnnouncedForAccessibility: (formattedDateMonth + ',' + formattedDateYear +
+          textAnnouncedForAccessibility: (this.getDateMonth(this.month) + ',' + this.getDateYear(this.year) +
             '/' +
-            formattedDateMonth + '/' + this.getDateDay())
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility addMonth click send event');
@@ -935,20 +906,13 @@ export struct CounterComponent {
         this.hasFocusText3 = true;
       }
       try {
-        let locale = new intl.Locale();
-        let localeID = locale.toString();
-        let date = new Date(this.year, this.month - 1, this.day);
-        let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
-        let formattedDateYear = dateFormatYear.format(date);
-        let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
-        let formattedDateMonth = dateFormatMonth.format(date);
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'click',
-          textAnnouncedForAccessibility: (this.getDateDay() + ',' + formattedDateYear +
+          textAnnouncedForAccessibility: (this.getDateDay(this.day) + ',' + this.getDateYear(this.year) +
             '/' +
-            formattedDateMonth + '/' + this.getDateDay())
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility addDay click send event');
@@ -2353,7 +2317,7 @@ export struct CounterComponent {
             text: this.hasInputText1 ? this.inputYear.toString() : this.getYear(),
             controller: this.controller1
           })
-            .accessibilityText(this.getDateYear())
+            .accessibilityText(this.getDateYear(this.year))
             .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
             .direction(this.counterDirection)
             .type(InputType.Number)
@@ -2485,7 +2449,7 @@ export struct CounterComponent {
             text: this.hasInputText2 ? this.inputMoon.toString() : this.convertNumberToString(this.month),
             controller: this.controller2
           })
-            .accessibilityText(this.getDateMonth())
+            .accessibilityText(this.getDateMonth(this.month))
             .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
             .direction(this.counterDirection)
             .type(InputType.Number)
@@ -2625,7 +2589,7 @@ export struct CounterComponent {
             text: this.hasInputText3 ? this.inputDay.toString() : this.convertNumberToString(this.day),
             controller: this.controller3
           })
-            .accessibilityText(this.getDateDay())
+            .accessibilityText(this.getDateDay(this.day))
             .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
             .direction(this.counterDirection)
             .type(InputType.Number)
@@ -2908,7 +2872,6 @@ export struct CounterComponent {
       .borderRadius(CounterResource.COUNTER_INLINE_RADIUS)
       .clip(true)
     } else {
-
     }
   }
 }
