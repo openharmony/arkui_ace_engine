@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import CalendarPickerDialogBootcampTest from './CalendarPickerDialogBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  CalendarPickerDialogBootcampTest();
 }
