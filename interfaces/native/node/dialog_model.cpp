@@ -329,18 +329,6 @@ int32_t RegisterOnDidDisappear(ArkUI_NativeDialogHandle handle, void* userData, 
     return result;
 }
 
-int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable)
-{
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
-    }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    return impl->getDialogAPI()->setFocusable(handle->controller, focusable);
-}
-
 int32_t SetBorderWidth(
     ArkUI_NativeDialogHandle handle, float top, float right, float bottom, float left, ArkUI_LengthMetricUnit unit)
 {
@@ -527,6 +515,18 @@ int32_t SetHoverModeArea(ArkUI_NativeDialogHandle handle, ArkUI_HoverModeAreaTyp
     }
     int result = impl->getDialogAPI()->setHoverModeArea(handle->controller, hoverModeAreaType);
     return result;
+}
+
+int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+    }
+    if (!handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setFocusable(handle->controller, focusable);
 }
 } // namespace OHOS::Ace::NG::DialogModel
 
