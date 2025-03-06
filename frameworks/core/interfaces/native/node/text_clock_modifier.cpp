@@ -17,6 +17,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -53,7 +54,7 @@ void ResetFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = pipelineContext->GetTheme<TextClockTheme>();
     CHECK_NULL_VOID(theme);
     TextClockModelNG::SetFontColor(frameNode, theme->GetTextParseFailedColor());
 }

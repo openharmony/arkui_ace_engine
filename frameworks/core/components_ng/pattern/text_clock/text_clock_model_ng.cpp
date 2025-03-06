@@ -160,7 +160,7 @@ RefPtr<FrameNode> TextClockModelNG::CreateFrameNode(int32_t nodeId)
     }
     auto pipeline = textClockNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto textTheme = pipeline->GetTheme<TextTheme>(textClockNode->GetThemeScopeId());
+    auto textTheme = pipeline->GetTheme<TextClockTheme>(textClockNode->GetThemeScopeId());
     if (textTheme) {
         InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyleClock());
     }
