@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
- * Copyright (c) 2024 Huawei Device Co., Ltd.
-=======
  * Copyright (c) 2025 Huawei Device Co., Ltd.
->>>>>>> 3189dbc59de (MouseEventAccessor - update implementation and ut)
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +14,9 @@
  */
 #include "accessor_test_base.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
-<<<<<<< HEAD
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-=======
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/converter.h"
->>>>>>> 3189dbc59de (MouseEventAccessor - update implementation and ut)
 #include "test/unittest/capi/accessors/accessor_test_fixtures.h"
 
 namespace OHOS::Ace::NG {
