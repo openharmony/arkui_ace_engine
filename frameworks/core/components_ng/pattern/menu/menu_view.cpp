@@ -905,17 +905,19 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
             isAllowedDrag = false;
         }
     }
-    if (menuParam.previewMode != MenuPreviewMode::NONE || (isAllowedDrag && !isLiftingDisabled)) {
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE ||
+        (isAllowedDrag && !isLiftingDisabled)) {
         DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
         SetFilter(targetNode, wrapperNode);
     }
-    if (menuParam.previewMode == MenuPreviewMode::IMAGE ||
-        (menuParam.previewMode == MenuPreviewMode::NONE && menuParam.menuBindType == MenuBindingType::LONG_PRESS &&
-            isAllowedDrag && !isLiftingDisabled) ||
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE ||
+        (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::NONE &&
+            menuParam.menuBindType == MenuBindingType::LONG_PRESS && isAllowedDrag && !isLiftingDisabled) ||
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag && !isLiftingDisabled) {
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::NONE && isAllowedDrag &&
+        !isLiftingDisabled) {
         CHECK_NULL_VOID(wrapperNode);
         auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
         CHECK_NULL_VOID(pixelMapNode);
@@ -1200,7 +1202,7 @@ void SetPreviewScaleAndHoverImageScale(const RefPtr<FrameNode>& menuNode, const 
 {
     auto pattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetPreviewMode(menuParam.previewMode);
+    pattern->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
     pattern->SetPreviewBeforeAnimationScale(menuParam.previewAnimationOptions.scaleFrom);
     pattern->SetPreviewAfterAnimationScale(menuParam.previewAnimationOptions.scaleTo);
     pattern->SetIsShowHoverImage(menuParam.isShowHoverImage);
@@ -1259,8 +1261,7 @@ void MenuView::ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, co
     if (menuNode) {
         SetPreviewInfoToMenu(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    
-    if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::CUSTOM) {
         previewNode->MountToParent(menuParam.isShowHoverImage ? hoverImageStackNode : wrapperNode);
         previewNode->MarkModifyDone();
     }
@@ -1339,6 +1340,18 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
+}
+
+void MenuView::UpdatePreviewInfo(const RefPtr<FrameNode>& targetNode, MenuParam& menuParam)
+{
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto isAllowedDrag = gestureEventHub->IsAllowedDrag(eventHub);
+    if (isAllowedDrag && !menuParam.previewMode.has_value()) {
+        menuParam.previewMode = MenuPreviewMode::IMAGE;
+    }
 }
 
 void MenuView::UpdateMenuPaintProperty(
