@@ -140,7 +140,7 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
-static bool g_isDynamicVsync = false;
+static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
@@ -1708,7 +1708,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             std::unordered_map<std::string, std::string> reply;
             payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
             payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
-            dynamicVsync = g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            dynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            g_isDynamicVsync = dynamicVsync;
             ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
             OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
         };
