@@ -47,27 +47,24 @@ Ark_Number YImpl(Ark_WebContextMenuParam peer)
 }
 Ark_String GetLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetLinkUrl();
-    // value need to be returned
-    LOGE("WebContextMenuParamAccessor::GetLinkUrlImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetLinkUrl();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetUnfilteredLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetUnfilteredLinkUrl();
-    // value need to be returned
-    LOGE("WebContextMenuParamAccessor::GetUnfilteredLinkUrlImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetUnfilteredLinkUrl();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetSourceUrlImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetSourceUrl();
-    // value need to be returned
-    LOGE("WebContextMenuParamAccessor::GetSourceUrlImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetSourceUrl();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_Boolean ExistsImageContentsImpl(Ark_WebContextMenuParam peer)
 {
@@ -77,34 +74,24 @@ Ark_Boolean ExistsImageContentsImpl(Ark_WebContextMenuParam peer)
 Ark_ContextMenuMediaType GetMediaTypeImpl(Ark_WebContextMenuParam peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetMediaType();
-    // correct value type need to be returned
-    LOGE("WebContextMenuParamAccessor::GetMediaTypeImpl - return value need to be supported");
-    return {};
+    return static_cast<Ark_ContextMenuMediaType>(peer->handler->GetMediaType());
 }
 Ark_String GetSelectionTextImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetSelectionText();
-    // value need to be returned
-    LOGE("WebContextMenuParamAccessor::GetSelectionTextImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetSelectionText();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_ContextMenuSourceType GetSourceTypeImpl(Ark_WebContextMenuParam peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetSourceType();
-    // correct value type need to be returned
-    LOGE("WebContextMenuParamAccessor::GetSourceTypeImpl - return value need to be supported");
-    return {};
+    return static_cast<Ark_ContextMenuSourceType>(peer->handler->GetSourceType());
 }
 Ark_ContextMenuInputFieldType GetInputFieldTypeImpl(Ark_WebContextMenuParam peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetInputFieldType();
-    // correct value type need to be returned
-    LOGE("WebContextMenuParamAccessor::GetInputFieldTypeImpl - return value need to be supported");
-    return {};
+    return static_cast<Ark_ContextMenuInputFieldType>(peer->handler->GetInputFieldType());
 }
 Ark_Boolean IsEditableImpl(Ark_WebContextMenuParam peer)
 {
