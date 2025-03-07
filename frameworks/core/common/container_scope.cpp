@@ -24,6 +24,13 @@ std::atomic<int32_t> recentActiveId_(ContainerScope::DEFAULT_ID);
 std::atomic<int32_t> recentForegroundId_(ContainerScope::DEFAULT_ID);
 }
 
+// preview not support multi-instance, always using default instance id 0.
+#if defined(PREVIEW)
+const int32_t ContainerScope::DEFAULT_ID = 0;
+#else
+const int32_t ContainerScope::DEFAULT_ID = INSTANCE_ID_UNDEFINED;
+#endif
+
 int32_t ContainerScope::CurrentId()
 {
     return currentId_;
