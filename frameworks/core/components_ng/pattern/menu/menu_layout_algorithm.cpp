@@ -22,8 +22,6 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-
 namespace OHOS::Ace::NG {
 
 namespace {

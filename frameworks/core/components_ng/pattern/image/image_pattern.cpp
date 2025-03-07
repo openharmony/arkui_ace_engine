@@ -912,7 +912,7 @@ void ImagePattern::OnAnimatedModifyDone()
     }
     GenerateCachedImages();
     auto index = nowImageIndex_;
-    if ((status_ == AnimatorStatus::IDLE || status_ == AnimatorStatus::STOPPED) && !firstUpdateEvent_) {
+    if ((status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) && !firstUpdateEvent_) {
         index = 0;
     }
 
@@ -948,16 +948,16 @@ void ImagePattern::ControlAnimation(int32_t index)
         }
     }
     switch (status_) {
-        case AnimatorStatus::IDLE:
+        case Animator::Status::IDLE:
             animator_->Cancel();
             ResetFormAnimationFlag();
             SetShowingIndex(index);
             break;
-        case AnimatorStatus::PAUSED:
+        case Animator::Status::PAUSED:
             animator_->Pause();
             ResetFormAnimationFlag();
             break;
-        case AnimatorStatus::STOPPED:
+        case Animator::Status::STOPPED:
             animator_->Finish();
             ResetFormAnimationFlag();
             break;
@@ -2745,7 +2745,7 @@ FocusPattern ImagePattern::GetFocusPattern() const
 
 void ImagePattern::OnActive()
 {
-    if (status_ == AnimatorStatus::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+    if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (!animator_->HasScheduler()) {
@@ -2757,13 +2757,6 @@ void ImagePattern::OnActive()
             }
         }
         animator_->Forward();
-    }
-}
-
-void ImagePattern::OnInActive()
-{
-    if (status_ == AnimatorStatus::RUNNING) {
-        animator_->Pause();
     }
 }
 } // namespace OHOS::Ace::NG

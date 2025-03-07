@@ -68,9 +68,6 @@ class PointerEvent;
 
 namespace OHOS::Ace {
 class ModalUIExtensionProxy;
-class AccessibilityChildTreeCallback;
-class AccessibilitySAObserverCallback;
-struct AccessibilityParentRectInfo;
 } // namespace OHOS::Ace
 
 namespace OHOS::Rosen {

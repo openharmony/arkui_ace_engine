@@ -18,7 +18,6 @@
 
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT StackLayoutProperty : public LayoutProperty {
