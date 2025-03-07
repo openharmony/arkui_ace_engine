@@ -72,8 +72,8 @@ struct TouchPoint final {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
     int32_t originalId = 0;
-    int32_t width;
-    int32_t height;
+    int32_t width = 0;
+    int32_t height = 0;
     int32_t operatingHand = 0;
 };
 
@@ -124,8 +124,8 @@ struct TouchEvent final : public PointerEvent {
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
     TimeStamp pressedTime;
-    int32_t width;
-    int32_t height;
+    int32_t width = 0;
+    int32_t height = 0;
 
     TouchEvent()
     {
@@ -735,8 +735,8 @@ private:
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;
     TimeStamp pressedTime_;
-    int32_t width_;
-    int32_t height_;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
 };
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
