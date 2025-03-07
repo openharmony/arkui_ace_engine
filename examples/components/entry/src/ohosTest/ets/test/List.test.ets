@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import MenuBootcampTest from './Menus/MenuBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  MenuBootcampTest();
 }
