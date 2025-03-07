@@ -706,7 +706,6 @@ export default function AlphabetIndexerBootcampTest() {
      */
     it('ArkUI_AlphabetIndexer_0031', 0, async (done: Function) => {
       await Search('参数列表', 'usingPopup')
-
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
@@ -725,7 +724,6 @@ export default function AlphabetIndexerBootcampTest() {
     })
 
     it('ArkUI_AlphabetIndexer_0032', 0, async (done: Function) => {
-      //无法取到子组件状态
       await Search('参数列表', 'usingPopup')
 
       await radioClick({
@@ -763,7 +761,6 @@ export default function AlphabetIndexerBootcampTest() {
         ],
         assertEqual: '16.00fp'
 
-        //'{"fontFamily":"HarmonyOS Sans","fontSize":"16.00fp","fontStyle":"FontStyle::NORMAL","fontWeight":"FontWeight.Medium"}'
       })
 
       await sliderDrag({
@@ -779,7 +776,7 @@ export default function AlphabetIndexerBootcampTest() {
           new KeyStruct('fontSize', JsonType.value),
         ],
         assertEqual: '4.00fp'
-        // '{"fontFamily":"HarmonyOS Sans","fontSize":"4.00fp","fontStyle":"FontStyle::NORMAL","fontWeight":"FontWeight.Medium"}'
+
       })
 
 
