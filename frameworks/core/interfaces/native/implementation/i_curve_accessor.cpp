@@ -48,7 +48,6 @@ Ark_Number InterpolateImpl(Ark_ICurve peer,
     if (time < 0.0f) {
         time = 0.0f;
     }
-    LOGE("ICurveAccessor::InterpolateImpl - return value can be incorrect");
     return Converter::ArkValue<Ark_Number>(peer->handler->Move(time));
 }
 } // ICurveAccessor
@@ -62,8 +61,4 @@ const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
     };
     return &ICurveAccessorImpl;
 }
-
-struct ICurvePeer {
-    virtual ~ICurvePeer() = default;
-};
 }

@@ -66,25 +66,27 @@ HWTEST_F(ICurveAccessorTest, interpolateValidTest, TestSize.Level1)
     float fraction3 = 0.854f;
     float fraction4 = 1.0f;
 
-    float result = 0.5f;
-    Ark_Int32 arkResult = result;
+    float result1 = 0.5f;
+    float result2 = 2.36f;
+    float result3 = 5.654f;
+    float result4 = 0.3456f;
 
     Ark_Number arkFraction1 = Converter::ArkValue<Ark_Number>(fraction1);
     Ark_Number arkFraction2 = Converter::ArkValue<Ark_Number>(fraction2);
     Ark_Number arkFraction3 = Converter::ArkValue<Ark_Number>(fraction3);
     Ark_Number arkFraction4 = Converter::ArkValue<Ark_Number>(fraction4);
 
-    EXPECT_CALL(*mockHandler_, MoveInternal(fraction1)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction1)));
+    EXPECT_CALL(*mockHandler_, MoveInternal(fraction1)).Times(1).WillOnce(Return(result1));
+    EXPECT_NEAR(Converter::Convert<float>(accessor_->interpolate(peer_, &arkFraction1)), result1, FLT_EPSILON);
 
-    EXPECT_CALL(*mockHandler_, MoveInternal(fraction2)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction2)));
+    EXPECT_CALL(*mockHandler_, MoveInternal(fraction2)).Times(1).WillOnce(Return(result2));
+    EXPECT_NEAR(Converter::Convert<float>(accessor_->interpolate(peer_, &arkFraction2)), result2, FLT_EPSILON);
 
-    EXPECT_CALL(*mockHandler_, MoveInternal(fraction3)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction3)));
+    EXPECT_CALL(*mockHandler_, MoveInternal(fraction3)).Times(1).WillOnce(Return(result3));
+    EXPECT_NEAR(Converter::Convert<float>(accessor_->interpolate(peer_, &arkFraction3)), result3, FLT_EPSILON);
 
-    EXPECT_CALL(*mockHandler_, MoveInternal(fraction4)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction4)));
+    EXPECT_CALL(*mockHandler_, MoveInternal(fraction4)).Times(1).WillOnce(Return(result4));
+    EXPECT_NEAR(Converter::Convert<float>(accessor_->interpolate(peer_, &arkFraction4)), result4, FLT_EPSILON);
 }
 
 /**
@@ -103,20 +105,18 @@ HWTEST_F(ICurveAccessorTest, interpolateInvalidTest, TestSize.Level1)
     float expectedFraction2 = 1.0f;
 
     float result = 0.5f;
-    Ark_Int32 arkResult = result;
-
-    Ark_Int32 arkResultInvalid = 0.0f;
+    float resultInvalid = 0.0f;
 
     Ark_Number arkFraction1 = Converter::ArkValue<Ark_Number>(fraction1);
     Ark_Number arkFraction2 = Converter::ArkValue<Ark_Number>(fraction2);
 
     EXPECT_CALL(*mockHandler_, MoveInternal(expectedFraction1)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction1)));
+    EXPECT_NEAR(Converter::Convert<float>(accessor_->interpolate(peer_, &arkFraction1)), result, FLT_EPSILON);
 
     EXPECT_CALL(*mockHandler_, MoveInternal(expectedFraction2)).Times(1).WillOnce(Return(result));
-    EXPECT_EQ(arkResult, Converter::Convert<int32_t>(accessor_->interpolate(peer_, &arkFraction2)));
+    EXPECT_NEAR(Converter::Convert<float>(accessor_->interpolate(peer_, &arkFraction2)), result, FLT_EPSILON);
 
-    EXPECT_EQ(arkResultInvalid, Converter::Convert<int32_t>(accessor_->interpolate(peer_, nullptr)));
+    EXPECT_NEAR(Converter::Convert<float>(accessor_->interpolate(peer_, nullptr)), resultInvalid, FLT_EPSILON);
 }
 
 } // namespace OHOS::Ace::NG
