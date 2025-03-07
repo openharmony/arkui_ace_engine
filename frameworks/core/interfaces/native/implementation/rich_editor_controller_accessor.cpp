@@ -361,8 +361,7 @@ Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
             auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
             auto customNode = CallbackHelper(*value).BuildSync(Referenced::RawPtr(frameNodeWeakPtr));
             if (customNode) {
-                FrameNode* customFrameNode = static_cast<FrameNode*>(Referenced::RawPtr(customNode));
-                result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());
+                result = peerImpl->AddBuilderSpanImpl(customNode, locOptions.value());
             }
         }
     }

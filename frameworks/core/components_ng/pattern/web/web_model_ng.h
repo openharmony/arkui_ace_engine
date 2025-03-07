@@ -363,6 +363,7 @@ public:
         FrameNode* frameNode, std::function<WebKeyboardOption(const BaseEventInfo* info)>&& callback);
     static void SetAdsBlockedEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void NotifyPopupWindowResultStatic(int32_t webId, bool result);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
