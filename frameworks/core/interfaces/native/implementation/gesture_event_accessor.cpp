@@ -78,7 +78,7 @@ Ark_Number GetOffsetXImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetOffsetXImpl(Ark_GestureEvent peer,
                     const Ark_Number* offsetX)
@@ -99,7 +99,7 @@ Ark_Number GetOffsetYImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetOffsetYImpl(Ark_GestureEvent peer,
                     const Ark_Number* offsetY)
@@ -120,7 +120,7 @@ Ark_Number GetAngleImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = event->GetAngle();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetAngleImpl(Ark_GestureEvent peer,
                   const Ark_Number* angle)
@@ -141,7 +141,7 @@ Ark_Number GetSpeedImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = event->GetSpeed();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetSpeedImpl(Ark_GestureEvent peer,
                   const Ark_Number* speed)
@@ -162,7 +162,7 @@ Ark_Number GetScaleImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = event->GetScale();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetScaleImpl(Ark_GestureEvent peer,
                   const Ark_Number* scale)
@@ -183,7 +183,7 @@ Ark_Number GetPinchCenterXImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetPinchCenterXImpl(Ark_GestureEvent peer,
                          const Ark_Number* pinchCenterX)
@@ -207,7 +207,7 @@ Ark_Number GetPinchCenterYImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetPinchCenterYImpl(Ark_GestureEvent peer,
                          const Ark_Number* pinchCenterY)
@@ -231,7 +231,7 @@ Ark_Number GetVelocityXImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetVelocityXImpl(Ark_GestureEvent peer,
                       const Ark_Number* velocityX)
@@ -254,7 +254,7 @@ Ark_Number GetVelocityYImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetVelocityYImpl(Ark_GestureEvent peer,
                       const Ark_Number* velocityY)
@@ -277,7 +277,7 @@ Ark_Number GetVelocityImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityValue());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Number>(value);
 }
 void SetVelocityImpl(Ark_GestureEvent peer,
                      const Ark_Number* velocity)
