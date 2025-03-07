@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/panel/close_icon_layout_property.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 

@@ -15,7 +15,6 @@
 
 #include "napi_utils.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;

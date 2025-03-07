@@ -20,7 +20,6 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
-#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
