@@ -56,6 +56,10 @@ template("ace_core_interfaces_native") {
     if (defined(config.web_components_support) &&
         config.web_components_support && !is_arkui_x) {
       defines += [ "WEB_SUPPORTED" ]
+      external_deps += [
+        "ability_runtime:app_context",
+        "webview:libnweb",
+      ]
     }
     if (include_generated_sources) {
       sources += rebased_generated_sources
