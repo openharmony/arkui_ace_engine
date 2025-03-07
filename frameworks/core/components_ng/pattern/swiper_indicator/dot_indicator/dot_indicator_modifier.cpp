@@ -61,6 +61,9 @@ const auto LONG_POINT_STEP_TWO_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(
 const auto LONG_POINT_STEP_THREE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18);
 const auto LONG_POINT_STEP_FOUR_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 20);
 const auto LONG_POINT_STEP_FIVE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 148, 28);
+constexpr float SMALLEST_POINT_RATIO = 1.0f / 3.0f;
+constexpr float SECOND_SMALLEST_POINT_RATIO = 2.0f / 3.0f;
+constexpr int32_t OVERLONG_SMALL_COUNT = 2;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -104,7 +107,8 @@ void DotIndicatorModifier::SetFocusedAndSelectedColor(ContentProperty& contentPr
     }
 }
 
-void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
+void DotIndicatorModifier::PaintBackground(
+    DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount, bool isBindIndicator)
 {
     CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
     auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * 2;
@@ -118,6 +122,12 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     }
     float allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (pointNumber - 1);
 
+    if (maxDisplayCount > 0 && isBindIndicator) {
+        allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (maxDisplayCount - 1);
+        allPointDiameterSum = itemWidth * (maxDisplayCount - OVERLONG_SMALL_COUNT - 1) + selectedItemWidth +
+                              itemWidth * SECOND_SMALLEST_POINT_RATIO + itemWidth * SMALLEST_POINT_RATIO;
+    }
+
     // Background necessary property
     float rectWidth =
         contentProperty.indicatorPadding + allPointDiameterSum + allPointSpaceSum + contentProperty.indicatorPadding;
@@ -129,6 +139,22 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
         rectHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
     }
 
+    auto [rectLeft, rectRight, rectTop, rectBottom] =
+        CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    // Paint background
+    RSCanvas& canvas = context.canvas;
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor(contentProperty.backgroundColor));
+    canvas.AttachBrush(brush);
+    auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
+    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
+    canvas.DetachBrush();
+}
+
+std::tuple<float, float, float, float> DotIndicatorModifier::CalcAndAdjustIndicatorPaintRect(
+    const ContentProperty& contentProperty, float& rectWidth, float& rectHeight)
+{
     auto widthChangeValue = (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
     auto heightChangeValue = (1.0f - backgroundHeightDilateRatio_->Get()) * rectHeight;
     if (axis_ == Axis::VERTICAL) {
@@ -164,15 +190,8 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
         rectRight = rectRight - widthChangeValue * 0.5f;
         rectWidth -= widthChangeValue;
     }
-    // Paint background
-    RSCanvas& canvas = context.canvas;
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(contentProperty.backgroundColor));
-    canvas.AttachBrush(brush);
-    auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
-    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
-    canvas.DetachBrush();
+
+    return { rectLeft, rectRight, rectTop, rectBottom };
 }
 
 std::pair<float, float> DotIndicatorModifier::GetTouchBottomCenterX(ContentProperty& contentProperty)
