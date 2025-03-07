@@ -53,19 +53,17 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetMessageImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
-    peer->webConsoleLog->GetLog();
-    // log message need to be returned
-    LOGE("ConsoleMessageAccessor::GetMessageImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->webConsoleLog->GetLog();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetSourceIdImpl(Ark_ConsoleMessage peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
-    peer->webConsoleLog->GetSourceId();
-    // source id need to be returned
-    LOGE("ConsoleMessageAccessor::GetSourceIdImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->webConsoleLog->GetSourceId();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
 {
@@ -76,10 +74,8 @@ Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
 Ark_MessageLevel GetMessageLevelImpl(Ark_ConsoleMessage peer)
 {
     CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
-    peer->webConsoleLog->GetLogLevel();
-    // log level need to be returned
-    LOGE("ConsoleMessageAccessor::GetMessageLevelImpl - return value need to be supported");
-    return {};
+    return Converter::ArkValue<Ark_MessageLevel>(
+        static_cast<Converter::MessageLevel>(peer->webConsoleLog->GetLogLevel()));
 }
 } // ConsoleMessageAccessor
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()
