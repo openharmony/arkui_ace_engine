@@ -192,18 +192,14 @@ Ark_Number GetOpacityImpl(Ark_FrameNode peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(1);
     CHECK_NULL_RETURN(peer && peer->node, errValue);
-    LOGE("ARKOALA FrameNodeAccessor::GetOpacityImpl is not implemented.");
     auto opacity = ViewAbstract::GetOpacity(Referenced::RawPtr(peer->node));
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(opacity));
+    return Converter::ArkValue<Ark_Number>(opacity);
 }
 Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {
-    CHECK_NULL_RETURN(peer && peer->node, {});
-    LOGE("ARKOALA FrameNodeAccessor::GetPositionToWindowWithTransformImpl is not implemented.");
-    // return the result of method invokation
-    // wait for Ark_NativePointer change to a correct type which is acceptable to "offset" data
-    peer->node->GetPositionToWindowWithTransform();
-    return {};
+    CHECK_NULL_RETURN(peer && peer->node,  Converter::ArkValue<Ark_Position>(OffsetF()));
+    auto offset = peer->node->GetPositionToWindowWithTransform();
+    return Converter::ArkValue<Ark_Position>(offset);
 }
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()

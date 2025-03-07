@@ -2049,4 +2049,12 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     }
     return selectMenuParam;
 }
+
+template<>
+std::pair<Dimension, Dimension> Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    return std::make_pair(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
+}
 } // namespace OHOS::Ace::NG::Converter
