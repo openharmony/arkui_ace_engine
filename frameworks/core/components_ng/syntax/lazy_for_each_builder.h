@@ -375,8 +375,13 @@ public:
         int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         if (GetSysTimestamp() > deadline) {
-            if (!DeleteExpiringItemImmediately()) {
-                cache.merge(expiringItem_);
+            if (DeleteExpiringItemImmediately()) {
+                return false;
+            }
+            for (const auto& [key, node] : expiringItem_) {
+                if (node.first == -1) {
+                    cache.try_emplace(key, node);
+                }
             }
             return false;
         }
