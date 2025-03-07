@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import CounterBootcampTest from './InformationDisplay/CounterBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  CounterBootcampTest();
 }
