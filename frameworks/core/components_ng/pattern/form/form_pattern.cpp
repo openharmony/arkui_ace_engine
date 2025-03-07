@@ -716,7 +716,8 @@ void FormPattern::HandleFormComponent(RequestFormInfo& info)
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
         info.obscuredMode = isFormObscured_;
-        info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleProtected(info.bundleName, info.id));
+        info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) ||
+            IsFormBundleProtected(info.bundleName, info.id));
         AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
@@ -823,16 +824,21 @@ void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFo
         }, "ArkUIAddFormComponentUI");
 }
 
+void FormPattern::SetParamForWantTask(const RequestFormInfo& info)
+{
+    PostBgTask([weak = WeakClaim(this), info] {
+        ACE_SCOPED_TRACE("ArkUISetParamForWant");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formManagerBridge_->SetParamForWant(info);
+        }, "ArkUISetParamForWant");
+}
+
 void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 {
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
-        PostBgTask([weak = WeakClaim(this), info] {
-            ACE_SCOPED_TRACE("ArkUISetParamForWant");
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->formManagerBridge_->SetParamForWant(info);
-        }, "ArkUISetParamForWant");
+        SetParamForWantTask(info);
 #endif
     }
     auto host = GetHost();
