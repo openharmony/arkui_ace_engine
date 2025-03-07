@@ -980,5 +980,271 @@ export default function MenuBootcampTest() {
 
       done();
     })
+    /**
+     * 测试组件constraintSize.maxHeight且获取属性正确
+     */
+    it('ArkUI_Menu_Comp_0009', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await titleSearch('基础属性', 'constraintSize');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'constraintSize.maxHeight');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+    })
+    /**
+     * 测试关闭constraintSize,无断言
+     */
+    it('ArkUI_Menu_Comp_0010', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'constraintSize');
+      let toggle: Array<Component> =
+        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')));
+      if (await toggle[0].isChecked() === true) {
+        await toggle[0].click()
+      }
+      await driver.delayMs(1000);
+
+      done();
+    })
+    /**
+     * 测试开启position
+     */
+    it('ArkUI_Menu_Comp_0011', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'position');
+      let toggle: Array<Component> =
+        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
+      await toggle[0].click()
+      await driver.delayMs(1000);
+      done();
+    })
+    /**
+     * 测试组件position.top且获取属性正确
+     */
+    it('ArkUI_Menu_Comp_0012', 0, async (done: Function) => {
+      //无值，只有xy的值
+      await titleSearch('基础属性', 'position');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'position.top');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+    })
+    /**
+     * 测试组件position.bottom且获取属性正确
+     */
+    it('ArkUI_Menu_Comp_0013', 0, async (done: Function) => {
+      //无值，只有xy的值
+      await titleSearch('基础属性', 'position');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'position.bottom');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+    })
+    /**
+     * 测试组件position.left且获取属性正确
+     */
+    it('ArkUI_Menu_Comp_0014', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await titleSearch('基础属性', 'position');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'position.left');
+      //无值，只有xy的值
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+    })
+    /**
+     * 测试组件position.right且获取属性正确
+     */
+    it('ArkUI_Menu_Comp_0015', 0, async (done: Function) => {
+      //无值，只有xy的值
+      await titleSearch('基础属性', 'position');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'position.right');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+    })
+    /**
+     * 测试关闭position
+     */
+    it('ArkUI_Menu_Comp_0016', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'position');
+      let toggle: Array<Component> =
+        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')));
+      if (await toggle[0].isChecked() === true) {
+        await toggle[0].click()
+      }
+      await driver.delayMs(1000);
+
+      done();
+    })
+    /**
+     * 测试开启markAnchor
+     */
+    it('ArkUI_Menu_Comp_0017', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'markAnchor');
+      let toggle: Array<Component> =
+        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
+      await toggle[0].click()
+      await driver.delayMs(1000);
+      done();
+    })
+    /**
+     * 测试组件markAnchor.x且获取属性正确
+     */
+    it('ArkUI_Menu_Comp_0018', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await titleSearch('基础属性', 'position');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'markAnchor.x');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+    })
+    /**
+     * 测试组件markAnchor.y且获取属性正确
+     */
+    it('ArkUI_Menu_Comp_0019', 0, async (done: Function) => {
+      // 无法取到属性值进行断言
+      await titleSearch('基础属性', 'position');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'markAnchor.y');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+    })
+    /**
+     * 测试关闭markAnchor
+     */
+    it('ArkUI_Menu_Comp_0020', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'markAnchor');
+      let toggle: Array<Component> =
+        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')));
+      if (await toggle[0].isChecked() === true) {
+        await toggle[0].click()
+      }
+      await driver.delayMs(1000);
+
+      done();
+    })
   })
 }
