@@ -953,6 +953,13 @@ void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelNG::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
 void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
