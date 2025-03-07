@@ -2692,6 +2692,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.lineBreakStrategy = static_cast<int32_t>(node->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
     textStyle.textShadows = node->GetTextShadowValue({});
     textStyle.textBackgroundStyle = node->GetTextBackgroundStyle();
+    textStyle.paragraphSpacing = node->GetParagraphSpacing();
     return textStyle;
 }
 
