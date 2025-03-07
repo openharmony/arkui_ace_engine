@@ -1537,10 +1537,6 @@ std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
 
 void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId)
 {
-    if (container->IsKeyboard()) {
-        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "Keyboard does not adjust font");
-        return;
-    }
     float fontScale = SystemProperties::GetFontScale();
     float fontWeightScale = SystemProperties::GetFontWeightScale();
     if (isFormRender_ && !fontScaleFollowSystem_) {
