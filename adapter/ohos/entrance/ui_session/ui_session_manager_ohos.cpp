@@ -313,6 +313,7 @@ void UiSessionManagerOhos::GetWebViewLanguage()
 
 void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     pipelineContextPageNameCallback_ = std::move(callback);
 }
 
