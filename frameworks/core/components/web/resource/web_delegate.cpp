@@ -4116,6 +4116,25 @@ void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetNativeEmbedMode");
 }
 
+void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isIntrinsicSizeEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetIntrinsicSizeEnable(isIntrinsicSizeEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetIntrinsicSizeEnable");
+}
+
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag)
 {
     auto context = context_.Upgrade();
