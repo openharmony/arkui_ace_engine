@@ -29,20 +29,20 @@ public:
     virtual ~RadioModel() = default;
 
     virtual void Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
-        const std::optional<int32_t>& indicator);
-    virtual void SetChecked(bool isChecked);
-    virtual void SetOnChange(NG::ChangeEvent&& onChange);
-    virtual void SetBuilder(std::function<void()>&& buildFunc) {};
-    virtual void SetWidth(const Dimension& width);
-    virtual void SetHeight(const Dimension& height);
-    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
+        const std::optional<int32_t>& indicator) = 0;
+    virtual void SetChecked(bool isChecked) = 0;
+    virtual void SetOnChange(NG::ChangeEvent&& onChange) = 0;
+    virtual void SetBuilder(std::function<void()>&& buildFunc) {}
+    virtual void SetWidth(const Dimension& width) = 0;
+    virtual void SetHeight(const Dimension& height) = 0;
+    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) = 0;
     virtual void SetCheckedBackgroundColor(const Color& color) {}
     virtual void SetUncheckedBorderColor(const Color& color) {}
     virtual void SetIndicatorColor(const Color& color) {}
-    virtual void SetOnChangeEvent(NG::ChangeEvent&& onChangeEvent) {};
-    virtual void SetOnClickEvent(std::function<void()>&& onClick) {};
-    virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
-    virtual void SetHoverEffect(HoverEffectType hoverEffect) {};
+    virtual void SetOnChangeEvent(NG::ChangeEvent&& onChangeEvent) {}
+    virtual void SetOnClickEvent(std::function<void()>&& onClick) {}
+    virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
+    virtual void SetHoverEffect(HoverEffectType hoverEffect) {}
 
 private:
     static std::unique_ptr<RadioModel> instance_;

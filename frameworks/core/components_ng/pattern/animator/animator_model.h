@@ -31,10 +31,10 @@ public:
     static AnimatorModel* GetInstance();
     virtual ~AnimatorModel() = default;
 
-    virtual void Create(const std::string& animatorId);
-    virtual RefPtr<Framework::AnimatorInfo> GetAnimatorInfo(const std::string& animatorId);
+    virtual void Create(const std::string& animatorId) = 0;
+    virtual RefPtr<Framework::AnimatorInfo> GetAnimatorInfo(const std::string& animatorId) = 0;
     virtual void AddEventListener(
-        std::function<void()>&& event, Framework::EventOperation operation, const std::string& animatorId);
+        std::function<void()>&& event, Framework::EventOperation operation, const std::string& animatorId) = 0;
 
 private:
     static std::unique_ptr<AnimatorModel> instance_;

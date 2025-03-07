@@ -27,18 +27,18 @@ public:
     static IndicatorModel* GetInstance();
     virtual ~IndicatorModel() = default;
 
-    virtual RefPtr<NG::IndicatorController> Create();
-    virtual void SetIndex(uint32_t index);
-    virtual void SetCount(uint32_t count);
-    virtual void SetLoop(bool loop);
-    virtual void SetDirection(Axis axis);
-    virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
-    virtual void SetIndicatorStyle(const SwiperParameters& swiperParameters);
+    virtual RefPtr<NG::IndicatorController> Create() = 0;
+    virtual void SetIndex(uint32_t index) = 0;
+    virtual void SetCount(uint32_t count) = 0;
+    virtual void SetLoop(bool loop) = 0;
+    virtual void SetDirection(Axis axis) = 0;
+    virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) = 0;
+    virtual void SetIndicatorStyle(const SwiperParameters& swiperParameters) = 0;
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
     virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
-    virtual void SetShowIndicator(bool showIndicator);
+    virtual void SetShowIndicator(bool showIndicator) = 0;
 private:
     static std::unique_ptr<IndicatorModel> instance_;
     static std::mutex mutex_;

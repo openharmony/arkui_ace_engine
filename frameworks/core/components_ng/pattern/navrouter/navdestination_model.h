@@ -53,7 +53,7 @@ public:
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void SetToolBarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
-    virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
+    virtual void SetNavDestinationMode(NG::NavDestinationMode mode) = 0;
     virtual void SetRecoverable(bool recoverable) {}
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;

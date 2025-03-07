@@ -27,17 +27,17 @@ public:
     static CheckBoxGroupModel* GetInstance();
     virtual ~CheckBoxGroupModel() = default;
 
-    virtual void Create(const std::optional<std::string>& groupName);
-    virtual void SetSelectAll(bool isSelected);
-    virtual void SetSelectedColor(const Color& color);
+    virtual void Create(const std::optional<std::string>& groupName) = 0;
+    virtual void SetSelectAll(bool isSelected) = 0;
+    virtual void SetSelectedColor(const Color& color) = 0;
     virtual void SetUnSelectedColor(const Color& color) {}
     virtual void SetCheckMarkColor(const Color& color) {}
     virtual void SetCheckMarkSize(const Dimension& size) {}
     virtual void SetCheckMarkWidth(const Dimension& width) {}
-    virtual void SetOnChange(NG::GroupChangeEvent&& onChange);
-    virtual void SetWidth(const Dimension& width);
-    virtual void SetHeight(const Dimension& height);
-    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag);
+    virtual void SetOnChange(NG::GroupChangeEvent&& onChange) = 0;
+    virtual void SetWidth(const Dimension& width) = 0;
+    virtual void SetHeight(const Dimension& height) = 0;
+    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) = 0;
     virtual void SetChangeEvent(NG::GroupChangeEvent&& changeEvent) {};
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
     virtual void SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyle) {};

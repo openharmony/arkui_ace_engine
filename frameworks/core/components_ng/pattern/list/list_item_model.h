@@ -35,7 +35,7 @@ public:
 
     virtual void Create() = 0;
     virtual void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle) = 0;
-    virtual void OnDidPop();
+    virtual void OnDidPop() = 0;
     virtual void SetBorderRadius(const Dimension& borderRadius) = 0;
     virtual void SetType(const std::string& type) = 0;
     virtual void SetIsLazyCreating(bool isLazy) = 0;

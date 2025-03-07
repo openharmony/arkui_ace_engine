@@ -279,13 +279,13 @@ public:
      * @description: Set parent ability token.
      * @param token ability token.
      */
-    virtual void SetParentToken(sptr<IRemoteObject> token);
+    virtual void SetParentToken(sptr<IRemoteObject> token) = 0;
 
     /**
      * @description: Get parent ability token.
      * @return return parent ability token.
      */
-    virtual sptr<IRemoteObject> GetParentToken();
+    virtual sptr<IRemoteObject> GetParentToken() = 0;
 
     virtual bool DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type)
     {

@@ -28,20 +28,20 @@ public:
     static PatternLockModel* GetInstance();
     virtual ~PatternLockModel() = default;
 
-    virtual RefPtr<V2::PatternLockController> Create();
-    virtual void SetPatternComplete(std::function<void(const BaseEventInfo* info)>&& onComplete);
-    virtual void SetDotConnect(std::function<void(int32_t)>&& onDotConnect);
-    virtual void SetSelectedColor(const Color& selectedColor);
-    virtual void SetAutoReset(bool isAutoReset);
-    virtual void SetPathColor(const Color& pathColor);
-    virtual void SetActiveColor(const Color& activeColor);
-    virtual void SetRegularColor(const Color& regularColor);
-    virtual void SetCircleRadius(const Dimension& radius);
-    virtual void SetSideLength(const Dimension& sideLength);
-    virtual void SetStrokeWidth(const Dimension& lineWidth);
-    virtual void SetActiveCircleColor(const Color& activeCircleColor);
-    virtual void SetActiveCircleRadius(const Dimension& activeCircleRadius);
-    virtual void SetEnableWaveEffect(bool enableWaveEffect);
+    virtual RefPtr<V2::PatternLockController> Create() = 0;
+    virtual void SetPatternComplete(std::function<void(const BaseEventInfo* info)>&& onComplete) = 0;
+    virtual void SetDotConnect(std::function<void(int32_t)>&& onDotConnect) = 0;
+    virtual void SetSelectedColor(const Color& selectedColor) = 0;
+    virtual void SetAutoReset(bool isAutoReset) = 0;
+    virtual void SetPathColor(const Color& pathColor) = 0;
+    virtual void SetActiveColor(const Color& activeColor) = 0;
+    virtual void SetRegularColor(const Color& regularColor) = 0;
+    virtual void SetCircleRadius(const Dimension& radius) = 0;
+    virtual void SetSideLength(const Dimension& sideLength) = 0;
+    virtual void SetStrokeWidth(const Dimension& lineWidth) = 0;
+    virtual void SetActiveCircleColor(const Color& activeCircleColor) = 0;
+    virtual void SetActiveCircleRadius(const Dimension& activeCircleRadius) = 0;
+    virtual void SetEnableWaveEffect(bool enableWaveEffect) = 0;
 
 private:
     static std::unique_ptr<PatternLockModel> instance_;

@@ -49,7 +49,7 @@ public:
     JsEngineInstance() = default;
     virtual ~JsEngineInstance() = default;
 
-    virtual void FlushCommandBuffer(void* context, const std::string& command);
+    virtual void FlushCommandBuffer(void* context, const std::string& command) = 0;
     NativeEngine* GetNativeEngine()
     {
         return nativeEngine_;

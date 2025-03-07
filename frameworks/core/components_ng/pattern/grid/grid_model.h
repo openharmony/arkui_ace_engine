@@ -72,8 +72,8 @@ public:
     virtual void SetOnItemDragMove(std::function<void(const ItemDragInfo&, int32_t, int32_t)>&& value) = 0;
     virtual void SetOnItemDragLeave(std::function<void(const ItemDragInfo&, int32_t)>&& value) = 0;
     virtual void SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>&& value) = 0;
-    virtual RefPtr<ScrollControllerBase> CreatePositionController();
-    virtual RefPtr<ScrollProxy> CreateScrollBarProxy();
+    virtual RefPtr<ScrollControllerBase> CreatePositionController() = 0;
+    virtual RefPtr<ScrollProxy> CreateScrollBarProxy() = 0;
     virtual void SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll) = 0;
     virtual void SetOnScrollFrameBegin(
         std::function<ScrollFrameResult(Dimension, ScrollState)>&& onScrollFrameBegin) = 0;
