@@ -45,6 +45,8 @@ class ACE_EXPORT ListItemPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemPattern, Pattern);
 
 public:
+    void SwipeCommon(ListItemSwipeIndex targetState);
+
     void SwipeForward();
 
     void SwipeBackward();
