@@ -116,6 +116,8 @@ public:
     RefPtr<FrameNode> menuItemFrameNode_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
+    int32_t targetId_ = 0;
+    std::string targetTag_ = "";
 };
 
 void MenuItemPatternBasicTestNg::SetUpTestCase() {}
@@ -1210,5 +1212,127 @@ HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg029, TestSize.Lev
     menuItemPattern->OnClick();
     ASSERT_TRUE(menuItemPattern->IsSelected());
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: MenuItemPatternBasicTestNg030
+ * @tc.desc: Verify UpdateFontColorByThemeScope SetLabelActiveSetting SetContentActiveSetting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg030, TestSize.Level1)
+{
+    MenuModelNG menuModelInstance;
+    MenuItemModelNG menuItemModelInstance;
+    menuModelInstance.Create();
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    itemOption.startIcon = ImageSourceInfo(IMAGE_SRC_URL);
+    menuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto menuItemLayoutProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuItemLayoutProperty, nullptr);
+    itemPattern->OnModifyDone();
+    itemNode->MountToParent(menuNode);
+    itemNode->OnMountToParentDone();
+
+    // Verify SetLabelActiveSetting SetContentActiveSetting
+    itemPattern->SetContentActiveSetting(true);
+    EXPECT_TRUE(itemPattern->contentActiveSetting_);
+    itemPattern->SetContentActiveSetting(false);
+    EXPECT_FALSE(itemPattern->contentActiveSetting_);
+    itemPattern->SetLabelActiveSetting(true);
+    EXPECT_TRUE(itemPattern->labelActiveSetting_);
+    itemPattern->SetLabelActiveSetting(false);
+    EXPECT_FALSE(itemPattern->labelActiveSetting_);
+
+    // Verify UpdateFontColorByThemeScope
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    menuItemModelInstance.SetFontColor(Color::RED);
+    EXPECT_TRUE(itemPattern->UpdateFontColorByThemeScope(
+        contentNode, itemPattern->contentActiveSetting_, menuItemLayoutProperty->GetFontColor(), false));
+
+    std::optional<Color> color;
+    menuItemModelInstance.SetFontColor(color);
+    EXPECT_TRUE(itemPattern->UpdateFontColorByThemeScope(
+        contentNode, itemPattern->contentActiveSetting_, menuItemLayoutProperty->GetFontColor(), false));
+
+    auto labelNode = itemPattern->GetLabelNode();
+    ASSERT_NE(labelNode, nullptr);
+    menuItemModelInstance.SetLabelFontColor(Color::RED);
+    EXPECT_TRUE(itemPattern->UpdateFontColorByThemeScope(
+        labelNode, itemPattern->labelActiveSetting_, menuItemLayoutProperty->GetFontColor(), true));
+    menuItemModelInstance.SetLabelFontColor(color);
+    EXPECT_TRUE(itemPattern->UpdateFontColorByThemeScope(
+        labelNode, itemPattern->labelActiveSetting_, menuItemLayoutProperty->GetFontColor(), true));
+}
+
+/**
+ * @tc.name: MenuItemPatternBasicTestNg031
+ * @tc.desc: Verify OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg031, TestSize.Level1)
+{
+    MenuModelNG menuModelInstance;
+    MenuItemModelNG menuItemModelInstance;
+    menuModelInstance.Create();
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    itemOption.startIcon = ImageSourceInfo(IMAGE_SRC_URL);
+    menuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto menuItemLayoutProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuItemLayoutProperty, nullptr);
+    itemPattern->OnModifyDone();
+    itemNode->MountToParent(menuNode);
+    itemNode->OnMountToParentDone();
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+
+    auto labelNode = itemPattern->GetLabelNode();
+    ASSERT_NE(labelNode, nullptr);
+
+    // Verify OnThemeScopeUpdate.
+    EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
+
+    menuItemModelInstance.SetFontColor(Color::RED);
+    EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
+    std::optional<Color> color;
+    menuItemModelInstance.SetFontColor(color);
+    EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
+
+    menuItemModelInstance.SetLabelFontColor(Color::RED);
+    EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
+    menuItemModelInstance.SetLabelFontColor(color);
+    EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
+
+    menuItemModelInstance.SetFontColor(Color::RED);
+    menuItemModelInstance.SetLabelFontColor(Color::RED);
+    EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
 }
 } // namespace OHOS::Ace::NG

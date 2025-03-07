@@ -1965,4 +1965,26 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
     EXPECT_NE(icon, nullptr);
     EXPECT_EQ(icon->GetTag(), V2::SYMBOL_ETS_TAG);
 }
+
+/**
+ * @tc.name: SelectThemeTest001
+ * @tc.desc: Test Select Theme GetLabelColor SetLabelColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectThemeTest001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->optionApplyFocusedStyle_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+
+    selectTheme->SetLabelColor(TEXT_COLOR_VALUE);
+    EXPECT_EQ(selectTheme->GetLabelColor(), TEXT_COLOR_VALUE);
+    selectTheme->SetLabelColor(BG_COLOR_VALUE);
+    EXPECT_EQ(selectTheme->GetLabelColor(), BG_COLOR_VALUE);
+}
 } // namespace OHOS::Ace::NG
