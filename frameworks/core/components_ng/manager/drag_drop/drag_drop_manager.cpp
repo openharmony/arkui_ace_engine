@@ -990,6 +990,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_REFUSE_DATA);
+        ACE_SCOPED_TRACE("drag: stop drag, not allowed to drop");
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
@@ -1047,6 +1048,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
         TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
+        ACE_SCOPED_TRACE("drag: drag cancelled");
         DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
         ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
         FireOnDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE, extraInfo);
@@ -1062,6 +1064,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
             "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
+        ACE_SCOPED_TRACE("drag: drag stop, not find drop target");
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
@@ -1173,6 +1176,7 @@ RefPtr<UnifiedData> DragDropManager::RequestUDMFDataWithUDKey(const std::string&
         TAG_LOGI(AceLogTag::ACE_DRAG, "udKey is empty");
         return nullptr;
     }
+    ACE_SCOPED_TRACE("drag: get drag data from udmf");
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
