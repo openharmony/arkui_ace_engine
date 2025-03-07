@@ -21,7 +21,11 @@
 #include "arkoala_api_generated.h"
 
 namespace {
-const  Ark_Number BAD_REQUEST = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(400);
+const Ark_Number BAD_REQUEST = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(400);
+const int32_t RESPONSE_DATA_TYPE_STRING = 0;
+const int32_t RESPONSE_DATA_TYPE_NUMBER = 1;
+const int32_t RESPONSE_DATA_TYPE_RESOURCE = 2;
+const int32_t RESPONSE_DATA_TYPE_BUFFER = 3;
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -50,25 +54,27 @@ Ark_String GetResponseDataImpl(Ark_WebResourceResponse peer)
 Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
 {
     Opt_Union_String_Number_Buffer_Resource result {};
-    CHECK_NULL_RETURN(peer, result);
-    if (peer->responseDataEx) {
-        Converter::VisitUnion(peer->responseDataEx.value(),
-            [&result](const Ark_String& responseData) {
-                result = Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_String>(
-                    responseData, Converter::FC);
-            },
-            [&result](const Ark_Number& responseData) {
-                result = Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Number>(responseData);
-            },
-            [&result](const Ark_Resource& responseData) {
-                result = Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Resource>(responseData);
-            },
-            [&result](const Ark_Buffer& responseData) {
-                result = Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Buffer>(
-                    responseData, Converter::FC);
-            },
-            []() {}
-        );
+    CHECK_NULL_RETURN(peer && peer->handler, result);
+    if (peer->responseDataType) {
+        switch (peer->responseDataType.value()) {
+            case RESPONSE_DATA_TYPE_STRING:
+                return Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_String>(
+                    peer->handler->GetData(), Converter::FC);
+            case RESPONSE_DATA_TYPE_NUMBER:
+                return Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Number>(
+                    peer->handler->GetFileHandle());
+            case RESPONSE_DATA_TYPE_RESOURCE:
+                if (peer->responseDataResEx) {
+                    return Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Resource>(
+                        peer->responseDataResEx.value());
+                }
+                break;
+            case RESPONSE_DATA_TYPE_BUFFER:
+                return Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Buffer>(
+                    peer->handler->GetData(), Converter::FC);
+            default:
+                break;
+        }
     }
     return result;
 }
@@ -117,15 +123,16 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(data);
-    peer->responseDataEx = *data;
     Converter::VisitUnion(*data,
         [peer](const Ark_String& responseData) {
             std::string str = Converter::Convert<std::string>(responseData);
             peer->handler->SetData(str);
+            peer->responseDataType = RESPONSE_DATA_TYPE_STRING;
         },
         [peer](const Ark_Number& responseData) {
             int32_t fd = Converter::Convert<int32_t>(responseData);
             peer->handler->SetFileHandle(fd);
+            peer->responseDataType = RESPONSE_DATA_TYPE_NUMBER;
         },
         [peer](const Ark_Resource& responseData) {
             std::optional<std::string> resourceUrl = Converter::OptConvert<std::string>(responseData);
@@ -135,6 +142,8 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
                 url = (np == std::string::npos) ? resourceUrl.value() : resourceUrl.value().erase(np, 1);
             }
             peer->handler->SetResourceUrl(url);
+            peer->responseDataType = RESPONSE_DATA_TYPE_RESOURCE;
+            peer->responseDataResEx = responseData;
         },
         [peer](const Ark_Buffer& responseData) {
             int32_t bufferSize = static_cast<int32_t>(responseData.length);
@@ -142,8 +151,11 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
             std::string str = Converter::Convert<std::string>(responseData);
             peer->handler->SetData(str);
             peer->handler->SetBuffer(static_cast<char*>(buffer), bufferSize);
+            peer->responseDataType = RESPONSE_DATA_TYPE_BUFFER;
         },
-        []() {}
+        [peer]() {
+            peer->responseDataType.reset();
+        }
     );
 }
 void SetResponseEncodingImpl(Ark_WebResourceResponse peer,

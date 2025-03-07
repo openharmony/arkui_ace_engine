@@ -20,6 +20,7 @@
 
 struct WebResourceResponsePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::WebResponse> handler;
-    std::optional<Ark_Union_String_Number_Resource_Buffer> responseDataEx;
+    std::optional<int32_t> responseDataType;
+    std::optional<Ark_Resource> responseDataResEx;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_WEB_RESOURCE_RESPONSE_PEER_IMPL_H

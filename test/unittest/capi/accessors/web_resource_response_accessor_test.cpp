@@ -84,11 +84,11 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getResponseDataExTest
+ * @tc.name: getResponseDataEx1Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, getResponseDataExTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx1Test, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getResponseDataEx, nullptr);
 
@@ -118,6 +118,50 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataExTest, TestSize.Level1
         []() {}
     );
     EXPECT_EQ(intResult, 5);
+}
+
+/**
+ * @tc.name: getResponseDataEx2Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx2Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getResponseDataEx, nullptr);
+    Ark_Resource resource {
+        .bundleName = Converter::ArkValue<Ark_String>("bundleName"),
+        .moduleName = Converter::ArkValue<Ark_String>("moduleName"),
+        .id = Converter::ArkValue<Ark_Number>(8)
+    };
+
+    auto dataBuffer = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Buffer>("buffer");
+    auto dataRes = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Resource>(resource);
+
+    accessor_->setResponseData(peer_, &dataBuffer);
+    auto data = accessor_->getResponseDataEx(peer_);
+    std::string bufResult = "";
+    Converter::VisitUnion(data,
+        [&bufResult](const Ark_Buffer& responseData) {
+            bufResult = Converter::Convert<std::string>(responseData);
+        },
+        [](const auto& value) {},
+        []() {}
+    );
+    EXPECT_EQ(bufResult, "buffer");
+
+    accessor_->setResponseData(peer_, &dataRes);
+    data = accessor_->getResponseDataEx(peer_);
+    Ark_Resource resResult;
+    Converter::VisitUnion(data,
+        [&resResult](const Ark_Resource& responseData) {
+            resResult = responseData;
+        },
+        [](const auto& value) {},
+        []() {}
+    );
+    EXPECT_EQ(Converter::Convert<std::string>(resResult.bundleName), "bundleName");
+    EXPECT_EQ(Converter::Convert<std::string>(resResult.moduleName), "moduleName");
+    EXPECT_EQ(Converter::Convert<int32_t>(resResult.id), 8);
 }
 
 /**
