@@ -167,32 +167,25 @@ void CreateGesture(FrameNode *frameNode,
 
     Converter::VisitUnion(*gesture,
         [](const Ark_TapGestureInterface& value) {
-            auto peer = reinterpret_cast<TapGestureEventPeer*>(value.handle);
-            CreateTapGesture(peer);
+            CreateTapGesture(nullptr);
         },
         [](const Ark_LongPressGestureInterface& value) {
-            auto peer = reinterpret_cast<LongPressGestureEventPeer*>(value.handle);
-            CreateLongPressGesture(peer);
+            CreateLongPressGesture(nullptr);
         },
         [](const Ark_PanGestureInterface& value) {
-            auto peer = reinterpret_cast<PanGestureEventPeer*>(value.handle);
-            CreatePanGesture(peer);
+            CreatePanGesture(nullptr);
         },
         [](const Ark_PinchGestureInterface& value) {
-            auto peer = reinterpret_cast<PinchGestureEventPeer*>(value.handle);
-            CreatePinchGesture(peer);
+            CreatePinchGesture(nullptr);
         },
         [](const Ark_SwipeGestureInterface& value) {
-            auto peer = reinterpret_cast<SwipeGestureEventPeer*>(value.handle);
-            CreateSwipeGesture(peer);
+            CreateSwipeGesture(nullptr);
         },
         [](const Ark_RotationGestureInterface& value) {
-            auto peer = reinterpret_cast<RotationGestureEventPeer*>(value.handle);
-            CreateRotationGesture(peer);
+            CreateRotationGesture(nullptr);
         },
         [](const Ark_GestureGroupInterface& value) {
-            auto peer = reinterpret_cast<BaseGestureEventPeer*>(value.handle);
-            CreateGroupGesture(peer);
+            CreateGroupGesture(nullptr);
         },
         []() {});
 

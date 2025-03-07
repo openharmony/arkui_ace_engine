@@ -15,49 +15,36 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace SystemOpsAccessor {
-void DestroyPeerImpl(Ark_SystemOps peer)
+namespace SwipeGestureInterfaceAccessor {
+void DestroyPeerImpl(Ark_SwipeGestureInterface peer)
 {
 }
-Ark_SystemOps CtorImpl()
+Ark_SwipeGestureInterface CtorImpl()
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer StartFrameImpl()
+Ark_SwipeGestureInterface OnActionImpl(Ark_SwipeGestureInterface peer,
+                                       const Callback_GestureEvent_Void* event)
 {
     return {};
 }
-void EndFrameImpl(Ark_NativePointer root)
+} // SwipeGestureInterfaceAccessor
+const GENERATED_ArkUISwipeGestureInterfaceAccessor* GetSwipeGestureInterfaceAccessor()
 {
-    Converter::FC->Clear();
-}
-void SyncInstanceIdImpl(Ark_Int32 instanceId)
-{
-}
-void RestoreInstanceIdImpl()
-{
-}
-} // SystemOpsAccessor
-const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
-{
-    static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
-        SystemOpsAccessor::DestroyPeerImpl,
-        SystemOpsAccessor::CtorImpl,
-        SystemOpsAccessor::GetFinalizerImpl,
-        SystemOpsAccessor::StartFrameImpl,
-        SystemOpsAccessor::EndFrameImpl,
-        SystemOpsAccessor::SyncInstanceIdImpl,
-        SystemOpsAccessor::RestoreInstanceIdImpl,
+    static const GENERATED_ArkUISwipeGestureInterfaceAccessor SwipeGestureInterfaceAccessorImpl {
+        SwipeGestureInterfaceAccessor::DestroyPeerImpl,
+        SwipeGestureInterfaceAccessor::CtorImpl,
+        SwipeGestureInterfaceAccessor::GetFinalizerImpl,
+        SwipeGestureInterfaceAccessor::OnActionImpl,
     };
-    return &SystemOpsAccessorImpl;
+    return &SwipeGestureInterfaceAccessorImpl;
 }
 
 }
