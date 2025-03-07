@@ -53,10 +53,10 @@
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/common": "1.5.7+devel",
-        "@koalaui/compat": "1.5.7+devel",
-        "@koalaui/runtime": "1.5.7+devel",
-        "@koalaui/ets-tsc": "4.9.5-r4",
-        "@koalaui/fast-arktsc": "next"
+        "@koalaui/common": "file:../../incremental/common",
+        "@koalaui/compat": "file:../../incremental/compat",
+        "@koalaui/runtime": "file:../../incremental/runtime",
+        "@koalaui/ets-tsc": "file:../../incremental/tools/ets-tsc",
+        "@koalaui/fast-arktsc": "file:../../incremental/tools/ets-tsc"
     }
 }

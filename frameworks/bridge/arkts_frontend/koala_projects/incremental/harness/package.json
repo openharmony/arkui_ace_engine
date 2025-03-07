@@ -37,8 +37,8 @@
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/common": "1.5.7+devel",
-        "@koalaui/compat": "1.5.7+devel"
+        "@koalaui/common": "file:../common",
+        "@koalaui/compat": "file:../compat"
     },
     "devDependencies": {
         "@ohos/hypium": "1.0.6",

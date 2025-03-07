@@ -44,7 +44,7 @@
         "@koalaui/harness": "1.5.7+devel"
     },
     "devDependencies": {
-        "@koalaui/ets-tsc": "4.9.5-r4",
+        "@koalaui/ets-tsc": "file:../../incremental/tools/ets-tsc",
         "@typescript-eslint/eslint-plugin": "^5.20.0",
         "@typescript-eslint/parser": "^5.20.0",
         "eslint": "^8.13.0",

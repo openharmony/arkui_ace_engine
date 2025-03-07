@@ -23,9 +23,9 @@
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/common": "1.5.7+devel",
-        "@koalaui/compat": "1.5.7+devel",
-        "@koalaui/harness": "1.5.7+devel"
+        "@koalaui/common": "file:../../incremental/common",
+        "@koalaui/compat": "file:../../incremental/compat",
+        "@koalaui/harness": "file:../../incremental/harness"
     },
     "devDependencies": {
         "@types/chai": "^4.3.1",
