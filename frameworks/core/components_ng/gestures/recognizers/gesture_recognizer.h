@@ -37,8 +37,6 @@ struct DelayedTask {
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
-enum class CallbackState { READY, START, UPDATE, END, CANCEL};
-
 inline std::string TransRefereeState(RefereeState state)
 {
     const char *str[] = { "READY", "DETECTING", "PENDING", "PENDING_BLOCKED", "SUCCEED_BLOCKED", "SUCCEED", "FAIL" };
@@ -431,7 +429,6 @@ protected:
 
     virtual void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) {}
     virtual void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) {}
-    virtual void CheckCallbackState() {}
 
     virtual void HandleTouchDownEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
@@ -457,8 +454,6 @@ protected:
     void HandleTouchUp(const TouchEvent& point);
     void HandleTouchCancel(const TouchEvent& point);
 
-    void UpdateCallbackState(const std::unique_ptr<GestureEventFunc>& callback);
-
     RefereeState refereeState_ = RefereeState::READY;
 
     GestureDisposal disposal_ = GestureDisposal::NONE;
@@ -466,8 +461,6 @@ protected:
     GesturePriority priority_ = GesturePriority::Low;
 
     GestureMask priorityMask_ = GestureMask::Normal;
-
-    CallbackState callbackState_ = CallbackState::READY;
 
     bool isExternalGesture_ = false;
     bool fromCardOrUIExtension_ = false;
