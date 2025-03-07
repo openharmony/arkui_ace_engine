@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import DataPanelBootcampTest from './InformationDisplay/DataPanelBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  DataPanelBootcampTest();
 }
