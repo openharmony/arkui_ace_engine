@@ -51,12 +51,6 @@ export default function AlphabetIndexerBootcampTest() {
         await atomDisplays.click();
         await driver.delayMs(1000);
 
-        // let ListItems1: Component[] = await driver.findComponents(ON.type('ListItemGroup'))
-        // let width3: Point = await ListItems1[0].getBoundsCenter()
-        // let width4: Point = await ListItems1[5].getBoundsCenter()
-        // await driver.swipe(width3.x, width4.y, width3.x, width3.y, 500)
-        // await driver.delayMs(1000);
-
         let scrollSearch: Component = await driver.findComponent(ON.text('索引条/AlphabetIndexer'))
         await scrollSearch.click()
         await driver.delayMs(1000);
@@ -99,7 +93,6 @@ export default function AlphabetIndexerBootcampTest() {
 
     it('ArkUI_AlphabetIndexer_0002', 0, async (done: Function) => {
       await Search('参数列表', 'color')
-
       await buttonClick({
         buttonClickObj: 1,
         toggleClick: {
