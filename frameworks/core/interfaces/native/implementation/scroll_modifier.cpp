@@ -176,7 +176,8 @@ void OnWillScrollImpl(Ark_NativePointer node,
                 Converter::ArkValue<Ark_ScrollState>(scrollState),
                 Converter::ArkValue<Ark_ScrollSource>(scrollSource)
             );
-            return retVal.value_or(TwoDimensionScrollResult());
+            TwoDimensionScrollResult retDefault = {xOffset, yOffset};
+            return retVal.value_or(retDefault);
         };
         ScrollModelNG::SetOnWillScroll(frameNode, call);
     }
