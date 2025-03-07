@@ -932,6 +932,7 @@ void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, 
         if (!focusCanBeActive) {
             auto container = reinterpret_cast<Platform::AceContainer*>(context);
             CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
             container->SetIsFocusActive(focusCanBeActive);
         }
         LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
