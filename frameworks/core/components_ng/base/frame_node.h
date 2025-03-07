@@ -90,10 +90,10 @@ struct CacheMatrixInfo {
 
 struct FRCSceneFpsInfo {
     std::string scene;
-    int32_t duration_120;
-    int32_t duration_90;
-    int32_t duration_72;
-    int32_t duration_60;
+    int32_t duration_120 = 0;
+    int32_t duration_90 = 0;
+    int32_t duration_72 = 0;
+    int32_t duration_60 = 0;
 };
 
 // FrameNode will display rendering region in the screen.
@@ -1581,8 +1581,8 @@ private:
 
     RefPtr<Kit::FrameNode> kitNode_;
     FRCSceneFpsInfo curFRCSceneFpsInfo_;
-    int64_t calTime_;
-    int32_t calFrameRate_;
+    int64_t calTime_ = 0;
+    int32_t calFrameRate_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG
