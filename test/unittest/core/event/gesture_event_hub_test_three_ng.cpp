@@ -13,39 +13,39 @@
  * limitations under the License.
  */
 
- #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
+#include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 
- #include "test/mock/base/mock_subwindow.h"
- #include "test/mock/core/common/mock_container.h"
- #include "test/mock/core/common/mock_interaction_interface.h"
- 
- #include "core/components_ng/base/view_abstract.h"
- #include "core/components_ng/pattern/grid/grid_item_pattern.h"
- #include "core/components_ng/pattern/grid/grid_pattern.h"
- #include "core/components_ng/pattern/image/image_pattern.h"
- #include "core/components_ng/pattern/stage/page_pattern.h"
- 
- using namespace testing;
- using namespace testing::ext;
- 
- namespace OHOS::Ace::NG {
- 
- /**
-  * @tc.name: CalcFrameNodeOffsetAndSize_001
-  * @tc.desc: Test CalcFrameNodeOffsetAndSize
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_001, TestSize.Level1)
- {
+#include "test/mock/base/mock_subwindow.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_interaction_interface.h"
+
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
+
+using namespace testing;
+using namespace testing::ext;
+
+namespace OHOS::Ace::NG {
+
+/**
+ * @tc.name: CalcFrameNodeOffsetAndSize_001
+ * @tc.desc: Test CalcFrameNodeOffsetAndSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_001, TestSize.Level1)
+{
     /**
-     * @tc.steps: step1. Create GestureEventHub.
-     * @tc.expected: gestureEventHub is not null.
-     */
+    * @tc.steps: step1. Create GestureEventHub.
+    * @tc.expected: gestureEventHub is not null.
+    */
     auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
 
-    /**
+   /**
      * @tc.steps: step2. updates event and pipeline attributes.
      */
     auto event = guestureEventHub->eventHub_.Upgrade();
@@ -61,15 +61,15 @@
     EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
     guestureEventHub->CalcFrameNodeOffsetAndSize(frameNode, false);
     EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
- }
+}
 
- /**
-  * @tc.name: GetDefaultPixelMapScale_001
-  * @tc.desc: Test GetDefaultPixelMapScale
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScale_001, TestSize.Level1)
- {
+/**
+ * @tc.name: GetDefaultPixelMapScale_001
+ * @tc.desc: Test GetDefaultPixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScale_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -97,15 +97,15 @@
 
     guestureEventHub->GetDefaultPixelMapScale(frameNode, info, false, pixelMap);
     EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
- }
+}
 
-  /**
-  * @tc.name: GetPixelMapOffset_001
-  * @tc.desc: Test GetPixelMapOffset
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, GetPixelMapOffset_001, TestSize.Level1)
- {
+/**
+ * @tc.name: GetPixelMapOffset_001
+ * @tc.desc: Test GetPixelMapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetPixelMapOffset_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -157,15 +157,15 @@
     dragInfoData.isNeedCreateTiled = true;
     guestureEventHub->GetPixelMapOffset(info, size, dragInfoData, scale, innerRect);
     EXPECT_EQ(innerRect.Width(), 0);
- }
+}
  
- /**
-  * @tc.name: ProcessMenuPreviewScale_001
-  * @tc.desc: Test ProcessMenuPreviewScale
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, ProcessMenuPreviewScale_001, TestSize.Level1)
- {
+/**
+ * @tc.name: ProcessMenuPreviewScale_001
+ * @tc.desc: Test ProcessMenuPreviewScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, ProcessMenuPreviewScale_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -192,15 +192,15 @@
     float defaultMenuPreviewScale = 0.0f;
     guestureEventHub->ProcessMenuPreviewScale(frameNode, scale, previewScale, windowScale, defaultMenuPreviewScale);
     EXPECT_EQ(frameNode->GetOrCreateGestureEventHub()->GetMenuPreviewScale(), scale);
- }
+}
 
-  /**
-  * @tc.name: GetPreScaledPixelMapIfExist_001
-  * @tc.desc: Test GetPreScaledPixelMapIfExist
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, GetPreScaledPixelMapIfExist_001, TestSize.Level1)
- {
+ /**
+ * @tc.name: GetPreScaledPixelMapIfExist_001
+ * @tc.desc: Test GetPreScaledPixelMapIfExist
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetPreScaledPixelMapIfExist_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -234,15 +234,15 @@
      */
     EXPECT_NE(guestureEventHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     EXPECT_NE(guestureEventHub->GetPreScaledPixelMapIfExist(2.0f, pixelMap), nullptr);
- }
+}
 
- /**
-  * @tc.name: GetPixelMapScale_001
-  * @tc.desc: Test GetPixelMapScale
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, GetPixelMapScale_001, TestSize.Level1)
- {
+/**
+ * @tc.name: GetPixelMapScale_001
+ * @tc.desc: Test GetPixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetPixelMapScale_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -268,15 +268,15 @@
 
     ret = guestureEventHub->GetPixelMapScale(1.0f, 1.0f);
     EXPECT_EQ(ret, 1);
- }
+}
 
- /**
-  * @tc.name: GetPixelMapScale_002
-  * @tc.desc: Test GetPixelMapScale
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, GetPixelMapScale_002, TestSize.Level1)
- {
+/**
+ * @tc.name: GetPixelMapScale_002
+ * @tc.desc: Test GetPixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetPixelMapScale_002, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -320,15 +320,15 @@
     guestureEventHub->SetTextDraggable(false);
     ret = guestureEventHub->GetPixelMapScale(250.0f, 250.0f);
     EXPECT_NE(ret, 1);
- }
+}
 
- /**
-  * @tc.name: GenerateMousePixelMap_001
-  * @tc.desc: Test GenerateMousePixelMap
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, GenerateMousePixelMap_001, TestSize.Level1)
- {
+/**
+ * @tc.name: GenerateMousePixelMap_001
+ * @tc.desc: Test GenerateMousePixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GenerateMousePixelMap_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -357,15 +357,15 @@
     guestureEventHub->SetTextDraggable(false);
     guestureEventHub->GenerateMousePixelMap(info);
     EXPECT_FALSE(guestureEventHub->GetTextDraggable());
- }
+}
 
-  /**
-  * @tc.name: HandleNotAllowDrag_001
-  * @tc.desc: Test HandleNotAllowDrag
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, HandleNotAllowDrag_001, TestSize.Level1)
- {
+ /**
+ * @tc.name: HandleNotAllowDrag_001
+ * @tc.desc: Test HandleNotAllowDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, HandleNotAllowDrag_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -389,15 +389,15 @@
     GestureEvent info;
     guestureEventHub->HandleNotAllowDrag(info);
     EXPECT_TRUE(guestureEventHub->isReceivedDragGestureInfo_);
- }
+}
 
- /**
-  * @tc.name: HandleNotAllowDrag_002
-  * @tc.desc: Test HandleNotAllowDrag
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, HandleNotAllowDrag_002, TestSize.Level1)
- {
+/**
+ * @tc.name: HandleNotAllowDrag_002
+ * @tc.desc: Test HandleNotAllowDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, HandleNotAllowDrag_002, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -422,15 +422,15 @@
     guestureEventHub->isReceivedDragGestureInfo_ = false;
     guestureEventHub->HandleNotAllowDrag(info);
     EXPECT_FALSE(guestureEventHub->isReceivedDragGestureInfo_);
- }
+}
 
- /**
-  * @tc.name: HandleDragThroughTouch_001
-  * @tc.desc: Test HandleDragThroughTouch
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, HandleDragThroughTouch_001, TestSize.Level1)
- {
+/**
+ * @tc.name: HandleDragThroughTouch_001
+ * @tc.desc: Test HandleDragThroughTouch
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, HandleDragThroughTouch_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -469,15 +469,15 @@
     overlayManager->MountGatherNodeToRootNode(frameNode, gatherNodeChildrenInfo);
     guestureEventHub->HandleDragThroughTouch(frameNode);
     EXPECT_TRUE(dragDropManager->GetGrayedState());
- }
+}
 
- /**
-  * @tc.name: HandleDragThroughMouse_001
-  * @tc.desc: Test HandleDragThroughMouse
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, HandleDragThroughMouse_001, TestSize.Level1)
- {
+/**
+ * @tc.name: HandleDragThroughMouse_001
+ * @tc.desc: Test HandleDragThroughMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, HandleDragThroughMouse_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -515,15 +515,15 @@
     guestureEventHub->dragEventActuator_->isSelectedItemNode_ = true;
     guestureEventHub->HandleDragThroughMouse(frameNode);
     EXPECT_TRUE(dragDropManager->GetGrayedState());
- }
+}
 
-  /**
-  * @tc.name: IsNeedSwitchToSubWindow_001
-  * @tc.desc: Test IsNeedSwitchToSubWindow
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, IsNeedSwitchToSubWindow_001, TestSize.Level1)
- {
+ /**
+ * @tc.name: IsNeedSwitchToSubWindow_001
+ * @tc.desc: Test IsNeedSwitchToSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, IsNeedSwitchToSubWindow_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -565,15 +565,15 @@
     dragInfoData.isNeedCreateTiled = false;
     guestureEventHub->IsNeedSwitchToSubWindow(dragInfoData);
     EXPECT_FALSE(guestureEventHub->IsPixelMapNeedScale());
- }
+}
 
-  /**
-  * @tc.name: ParsePixelMapAsync_001
-  * @tc.desc: Test ParsePixelMapAsync
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, ParsePixelMapAsync_001, TestSize.Level1)
- {
+ /**
+ * @tc.name: ParsePixelMapAsync_001
+ * @tc.desc: Test ParsePixelMapAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, ParsePixelMapAsync_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -633,15 +633,15 @@
     guestureEventHub->dragPreviewPixelMap_ = pixelMap;
     ret = guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info);
     EXPECT_TRUE(ret);
- }
+}
 
- /**
-  * @tc.name: DoOnDragStartHandling_001
-  * @tc.desc: Test DoOnDragStartHandling
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, DoOnDragStartHandling_001, TestSize.Level1)
- {
+/**
+ * @tc.name: DoOnDragStartHandling_001
+ * @tc.desc: Test DoOnDragStartHandling
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, DoOnDragStartHandling_001, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -676,13 +676,13 @@
     EXPECT_TRUE(guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info));
  }
 
- /**
-  * @tc.name: DoOnDragStartHandling_002
-  * @tc.desc: Test DoOnDragStartHandling
-  * @tc.type: FUNC
-  */
- HWTEST_F(GestureEventHubTestNg, DoOnDragStartHandling_002, TestSize.Level1)
- {
+/**
+ * @tc.name: DoOnDragStartHandling_002
+ * @tc.desc: Test DoOnDragStartHandling
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, DoOnDragStartHandling_002, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
@@ -721,5 +721,5 @@
     guestureEventHub->pixelMap_ = nullptr;
     guestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event1, dragPreviewInfo, pipeline);
     EXPECT_EQ(dragDropInfo.pixelMap, 0);
- }
- } // namespace OHOS::Ace::NG
+}
+} // namespace OHOS::Ace::NG
