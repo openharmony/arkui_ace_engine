@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
@@ -26,7 +27,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-std::map<std::string, std::string> g_headers = {};
+std::map<std::string, std::string> g_headers = {
+    {"key1", "value1"},
+    {"key2", "value2"},
+    {"key3", "value3"}
+};
 std::string g_method = "method";
 std::string g_url = "url";
 bool g_hasGesture = true;
@@ -56,42 +61,56 @@ public:
 };
 
 /**
- * @tc.name: DISABLED_getRequestHeaderTest
+ * @tc.name: getRequestHeaderTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceRequestAccessorTest, DISABLED_getRequestHeaderTest, TestSize.Level1)
+HWTEST_F(WebResourceRequestAccessorTest, getRequestHeaderTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getRequestHeader, nullptr);
-
-    // should return value
-    accessor_->getRequestHeader(peer_);
+    Array_Header headers = accessor_->getRequestHeader(peer_);
+    std::vector<Converter::Header> headerVect = Converter::Convert<std::vector<Converter::Header>>(headers);
+    std::vector<Converter::Header> expected;
+    for (const auto& pair : g_headers) {
+        Converter::Header header {
+            .headerKey = pair.first,
+            .headerValue = pair.second
+        };
+        expected.push_back(header);
+    }
+    EXPECT_EQ(headerVect, expected);
+    headers = accessor_->getRequestHeader(nullptr);
+    headerVect = Converter::Convert<std::vector<Converter::Header>>(headers);
+    std::vector<Converter::Header> empty;
+    EXPECT_EQ(headerVect, empty);
 }
 
 /**
- * @tc.name: DISABLED_getRequestUrlTest
+ * @tc.name: getRequestUrlTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceRequestAccessorTest, DISABLED_getRequestUrlTest, TestSize.Level1)
+HWTEST_F(WebResourceRequestAccessorTest, getRequestUrlTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getRequestUrl, nullptr);
-
-    // should return value
-    accessor_->getRequestUrl(peer_);
+    Ark_String url = accessor_->getRequestUrl(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(url), g_url);
+    url = accessor_->getRequestUrl(nullptr);
+    EXPECT_EQ(Converter::Convert<std::string>(url), "");
 }
 
 /**
- * @tc.name: DISABLED_getRequestMethodTest
+ * @tc.name: getRequestMethodTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceRequestAccessorTest, DISABLED_getRequestMethodTest, TestSize.Level1)
+HWTEST_F(WebResourceRequestAccessorTest, getRequestMethodTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getRequestMethod, nullptr);
-
-    // should return value
-    accessor_->getRequestMethod(peer_);
+    Ark_String method = accessor_->getRequestMethod(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(method), g_method);
+    method = accessor_->getRequestMethod(nullptr);
+    EXPECT_EQ(Converter::Convert<std::string>(method), "");
 }
 
 /**

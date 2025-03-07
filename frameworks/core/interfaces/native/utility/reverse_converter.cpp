@@ -313,6 +313,12 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     dst.area = area;
 }
 
+void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)
+{
+    dst.headerKey = Converter::ArkValue<Ark_String>(src.headerKey, ctx);
+    dst.headerValue = Converter::ArkValue<Ark_String>(src.headerValue, ctx);
+}
+
 void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx)
 {
     dst.supportAvoidance = Converter::ArkValue<Opt_Boolean>(src.supportAvoidance);
