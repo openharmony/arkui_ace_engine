@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import TimePickerBootcampTest from './ButtonsAndSelections/TimePickerBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  TimePickerBootcampTest()
 }
