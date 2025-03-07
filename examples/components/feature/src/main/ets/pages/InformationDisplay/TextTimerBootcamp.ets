@@ -1821,7 +1821,7 @@ export struct TextTimerBootcamp {
             this.compFocusBoxStrokeWidth)) : null,
         })
         .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : "TextTimer")
+        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'TextTimer')
         .focusScopePriority(
           useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
           useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
