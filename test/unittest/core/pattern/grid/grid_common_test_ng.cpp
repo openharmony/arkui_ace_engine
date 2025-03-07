@@ -470,14 +470,14 @@ HWTEST_F(GridCommonTestNg, FireDrag001, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Drag 1st item to out of Grid.
-     * @tc.expected: GetOriginalIndex return number of GridItem.
+     * @tc.expected: GetOriginalIndex unchange.
      */
     ItemDragInfo dragInfo;
     dragInfo.SetX(0);
     dragInfo.SetY(0);
     eventHub_->FireOnItemDragEnter(dragInfo);
-    eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
-    EXPECT_EQ(pattern_->GetOriginalIndex(), 11);
+    eventHub_->FireOnItemDragLeave(dragInfo, 0);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
     FlushUITasks();
 
     /**
@@ -549,14 +549,14 @@ HWTEST_F(GridCommonTestNg, FireDrag002, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Drag 1st item to out of Grid.
-     * @tc.expected: GetOriginalIndex return number of GridItem.
+     * @tc.expected: GetOriginalIndex unchange.
      */
     ItemDragInfo dragInfo;
     dragInfo.SetX(0);
     dragInfo.SetY(0);
     eventHub_->FireOnItemDragEnter(dragInfo);
-    eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
-    EXPECT_EQ(pattern_->GetOriginalIndex(), itemCount);
+    eventHub_->FireOnItemDragLeave(dragInfo, 0);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
     FlushUITasks();
 
     /**
