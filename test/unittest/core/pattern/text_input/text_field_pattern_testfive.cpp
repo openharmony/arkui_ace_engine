@@ -1046,4 +1046,29 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetSelectionTest, TestSize
 
     EXPECT_EQ(expected, result);
 }
+
+/**
+ * @tc.name: TextFieldControllerClearPreviewTextTest
+ * @tc.desc: test textfield controller ClearPreviewText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerClearPreviewTextTest, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    PreviewTextInfo info = {
+        .text = u"abc",
+        .range = {0, 2}
+    };
+    pattern_->SetPreviewTextOperation(info);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    pattern_->textFieldController_->ClearPreviewText();
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+}
 } // namespace OHOS::Ace::NG

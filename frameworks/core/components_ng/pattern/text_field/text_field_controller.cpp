@@ -187,7 +187,7 @@ void TextFieldController::ClearPreviewText()
         textFieldPattern->GetPreviewTextEnd(),
     };
     textFieldPattern->SetPreviewText(u"", range);
-    textFieldPattern->FinishTextPreview();
+    textFieldPattern->FinishTextPreviewOperation();
     textFieldPattern->NotifyImfFinishTextPreview();
 }
 
