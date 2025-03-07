@@ -3081,11 +3081,13 @@ export struct TimePickerBootcamp {
               })
 
               CompEventMonopolizationBlocks({
-                enableCompMonopolizeEvents: $enableCompMonopolizeEvents, compMonopolizeEvents: $enableCompMonopolizeEvents
+                enableCompMonopolizeEvents: $enableCompMonopolizeEvents,
+                compMonopolizeEvents: $enableCompMonopolizeEvents
               })
 
               CompCursorControlBlocks({
-                enableCompCursorControl: $enableCompCursorControl, compCursorControl: $compCursorControl
+                enableCompCursorControl: $enableCompCursorControl,
+                compCursorControl: $compCursorControl
               })
 
               RadioBlock({
