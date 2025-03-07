@@ -300,4 +300,10 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
     DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
     return LengthMetricsPeer::Create(Dimension(value, du));
 }
+
+void AssignArkValue(Ark_Position& dst, const OffsetF& src)
+{
+    dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
+    dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
+}
 } // namespace OHOS::Ace::NG::Converter
