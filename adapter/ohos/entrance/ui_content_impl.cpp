@@ -1703,15 +1703,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
         auto task = [] {
-            bool dynamicVsync = false;
             std::unordered_map<std::string, std::string> payload;
             std::unordered_map<std::string, std::string> reply;
             payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
             payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
-            dynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
-            g_isDynamicVsync = dynamicVsync;
-            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
-            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
+            g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", g_isDynamicVsync.load());
+            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(g_isDynamicVsync);
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
