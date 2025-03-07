@@ -594,7 +594,8 @@ bool ImageAnimatorPattern::IsFormRender()
 
     auto container = Container::Current();
     bool isDynamicComponent = container && container->IsDynamicRender() &&
-                              container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+                              (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT ||
+                              container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT);
     return pipeline->IsFormRender() && !isDynamicComponent;
 }
 

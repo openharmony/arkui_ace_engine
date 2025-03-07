@@ -262,7 +262,8 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
     if (context) {
         auto container = Container::Current();
         bool isDynamicComponent = container && container->IsDynamicRender() &&
-                                  container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+                                  (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT ||
+                                  container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT);
         isForm_ = context->IsFormRender() && !isDynamicComponent;
     }
     RegistVisibleAreaChangeCallback();

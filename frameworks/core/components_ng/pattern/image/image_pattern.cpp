@@ -2372,8 +2372,9 @@ bool ImagePattern::IsFormRender()
     CHECK_NULL_RETURN(pipeline, false);
 
     auto container = Container::Current();
-    bool isDynamicComponent =
-        container && container->IsDynamicRender() && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    bool isDynamicComponent = container && container->IsDynamicRender() &&
+                              (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT ||
+                               container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT);
     return pipeline->IsFormRender() && !isDynamicComponent;
 }
 

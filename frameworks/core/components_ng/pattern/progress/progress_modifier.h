@@ -143,7 +143,8 @@ private:
     {
         auto container = Container::Current();
         return container && container->IsDynamicRender() &&
-               container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+               (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT ||
+               container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT);
     }
     uint32_t GetThemeScopeId() const;
 
