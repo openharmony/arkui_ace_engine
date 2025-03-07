@@ -91,6 +91,14 @@ const std::vector<std::tuple<std::string, double, Ark_Int32>> testFixtureDoubleA
     { "-20.65", -20.65, ArkValue<Ark_Int32>(-10) },
 };
 
+const std::vector<std::tuple<std::string, float, float>> testFixtureFloatFloat_half_Values = {
+    { "100.", 100., 50. },
+    { "0.", 0., 0. },
+    { "-100.", -100., -50. },
+    { "12.34", 12.34, 6.17 },
+    { "-56.73", -56.73, -28.365 },
+};
+
 const std::vector<std::tuple<std::string, double, double, Ark_Int32>> testFixtureVelocity_half_Values = {
     { "[30., 40.]", 30., 40., ArkValue<Ark_Int32>(25) },
     { "[-30., 0.]", 30., 0., ArkValue<Ark_Int32>(15) },
@@ -98,10 +106,17 @@ const std::vector<std::tuple<std::string, double, double, Ark_Int32>> testFixtur
     { "[0., 0.]", 0., 0., ArkValue<Ark_Int32>(0) },
 };
 
+const std::vector<std::tuple<std::string, float, float, float>> testFixtureVelocityFloat_half_Values = {
+    { "[30., 40.]", 30., 40., 25. },
+    { "[-30., 0.]", 30., 0., 15. },
+    { "[0., 40.]", 0., 40., 20. },
+    { "[0., 0.]", 0., 0., 0. },
+};
+
 const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureNumberFloatAnythingValidValues = {
-    { "100", 100, ArkValue<Ark_Number>(100) },
-    { "0", 0, ArkValue<Ark_Number>(0) },
-    { "-100", -100, ArkValue<Ark_Number>(-100) },
+    { "100.", 100., ArkValue<Ark_Number>(100.) },
+    { "0.", 0., ArkValue<Ark_Number>(0.) },
+    { "-100.", -100., ArkValue<Ark_Number>(-100.) },
     { "12.34", 12.34, ArkValue<Ark_Number>(12.34) },
     { "-56.73", -56.73, ArkValue<Ark_Number>(-56.73) },
 };

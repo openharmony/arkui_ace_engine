@@ -195,13 +195,5 @@ template<typename AccessorType, auto GetAccessorFunc>
 class StaticAccessorTest : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, void> {
 };
 
-MATCHER_P2(CompareArkNumber, first, second, "Ark_Number compare")
-{
-    if (first.tag == second.tag) {
-        if (first.tag == 0 && first.f32 == second.f32) return true;
-        if (first.tag == 1 && first.i32 == second.i32) return true;
-    }
-    return false;
-}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
