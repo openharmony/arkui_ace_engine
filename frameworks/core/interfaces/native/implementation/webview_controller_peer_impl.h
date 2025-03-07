@@ -15,10 +15,12 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_WEBVIEW_CONTROLLER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_WEBVIEW_CONTROLLER_PEER_IMPL_H
 
+#include "base/memory/referenced.h"
 #include "core/components/web/web_event.h"
 
-struct WebviewControllerPeer {
+struct WebviewControllerPeer : public OHOS::Ace::Referenced {
     int nwebId;
     std::string hapPath;
 };
+
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_WEBVIEW_CONTROLLER_PEER_IMPL_H

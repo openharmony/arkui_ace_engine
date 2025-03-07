@@ -16,8 +16,15 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CONTROLLER_HANDLER_PEER_IMPL_H
 
 #include "core/components/web/web_event.h"
+#include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 
 struct ControllerHandlerPeer {
+    struct ChildWindowInfo {
+        int32_t parentWebId = -1;
+        OHOS::Ace::RefPtr<WebviewControllerPeer> controller;
+    };
+
     OHOS::Ace::RefPtr<OHOS::Ace::WebWindowNewHandler> handler;
+    inline static std::unordered_map<int32_t, ChildWindowInfo> controllerMap {};
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CONTROLLER_HANDLER_PEER_IMPL_H

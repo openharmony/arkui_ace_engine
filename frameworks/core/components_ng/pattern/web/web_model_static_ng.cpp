@@ -19,13 +19,15 @@
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #ifdef ARKUI_CAPI_UNITTEST
+#include "test/unittest/capi/stubs/mock_nweb_helper.h"
 #include "test/unittest/capi/stubs/mock_web_pattern.h"
 #else
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
-#endif
+#endif // !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#include "nweb_helper.h"
 #endif // ARKUI_CAPI_UNITTEST
 
 #include "core/components_ng/pattern/web/web_event_hub.h"
@@ -1204,5 +1206,17 @@ void WebModelNG::SetAdsBlockedEventId(
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::NotifyPopupWindowResultStatic(int32_t webId, bool result)
+{
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
+    if (webId != -1) {
+        std::shared_ptr<OHOS::NWeb::NWeb> nweb = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
+        if (nweb) {
+            nweb->NotifyPopupWindowResult(result);
+        }
+    }
+#endif
 }
 } // namespace OHOS::Ace::NG
