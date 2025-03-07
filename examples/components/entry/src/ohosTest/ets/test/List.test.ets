@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import AlphabetIndexerBootcampTest from './InformationDisplay/AlphabetIndexerBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  AlphabetIndexerBootcampTest();
 }
