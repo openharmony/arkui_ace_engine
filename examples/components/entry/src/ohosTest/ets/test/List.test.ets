@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import FolderStackBootcampTest from './RowsColumnsAndStacking/FolderStackBootcamp.test'
 
 export default function testsuite() {
   abilityTest();
+  FolderStackBootcampTest();
 }
