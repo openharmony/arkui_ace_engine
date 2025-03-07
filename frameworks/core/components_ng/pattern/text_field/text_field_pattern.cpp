@@ -2581,6 +2581,7 @@ void TextFieldPattern::InitDragDropCallBack()
         if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
             pattern->afterDragSelect_ = true;
         }
+        pattern->CloseKeyboard(true);
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 
