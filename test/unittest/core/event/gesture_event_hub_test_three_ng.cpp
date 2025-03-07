@@ -674,7 +674,7 @@ HWTEST_F(GestureEventHubTestNg, DoOnDragStartHandling_001, TestSize.Level1)
     dragPreviewInfo.pixelMap = pixelMap;
     guestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event1, dragPreviewInfo, pipeline);
     EXPECT_TRUE(guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info));
- }
+}
 
 /**
  * @tc.name: DoOnDragStartHandling_002
