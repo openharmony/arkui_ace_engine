@@ -1049,6 +1049,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
             container->GetWindowId(), pointerEvent.pointerEventId);
         DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
         ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
+        FireOnDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE, extraInfo);
         ClearVelocityInfo();
         return;
     }
