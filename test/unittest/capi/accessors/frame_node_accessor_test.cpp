@@ -634,10 +634,9 @@ HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, DISABLED_GetOpacityTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, GetOpacityTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getOpacity, nullptr);
-    // wait for a correct return type
     auto opacity = Converter::Convert<float>(accessor_->getOpacity(peer_));
     EXPECT_FLOAT_EQ(opacity, 1.00);
 
@@ -649,13 +648,24 @@ HWTEST_F(FrameNodeAccessorTest, DISABLED_GetOpacityTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetOpacityInvalidTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetOpacityInvalidTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getOpacity, nullptr);
+    auto opacity = Converter::Convert<float>(accessor_->getOpacity(nullptr));
+    EXPECT_FLOAT_EQ(opacity, 1.00);
+}
+
+/**
  * @tc.name: GetPositionToWindowWithTransformDefaultTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformDefaultTest, TestSize.Level1)
 {
-    // default value
     ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
     auto position =
         Converter::Convert<std::pair<Dimension, Dimension>>(accessor_->getPositionToWindowWithTransform(peer_));
@@ -668,9 +678,28 @@ HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformDefaultTest, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, DISABLED_GetPositionToWindowWithTransformTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformTest, TestSize.Level1)
 {
-    // set and get another return value
+    ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
+    auto renderCtx = peer_->node->GetRenderContext();
+    renderCtx->UpdatePaintRect(RectF(11.f, 22.f, 33.f, 44.f));
+    auto position =
+        Converter::Convert<std::pair<Dimension, Dimension>>(accessor_->getPositionToWindowWithTransform(peer_));
+    EXPECT_EQ(std::get<0>(position).Value(), 11.00);
+    EXPECT_EQ(std::get<1>(position).Value(), 22.00);
 }
 
+/**
+ * @tc.name: GetPositionToWindowWithTransformInvalidTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformInvalidTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
+    auto position =
+        Converter::Convert<std::pair<Dimension, Dimension>>(accessor_->getPositionToWindowWithTransform(nullptr));
+    EXPECT_EQ(std::get<0>(position).Value(), 0.00);
+    EXPECT_EQ(std::get<1>(position).Value(), 0.00);
+}
 } // namespace OHOS::Ace::NG
