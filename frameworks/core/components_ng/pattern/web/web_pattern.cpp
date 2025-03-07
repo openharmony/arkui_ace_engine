@@ -55,6 +55,7 @@
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -3719,6 +3720,14 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         touchPointX = touchPoint.x;
         touchPointY = touchPoint.y;
+        if (info.GetSourceTool() == SourceTool::PEN &&
+            delegate_->SetFocusByPosition(touchPointX, touchPointY) &&
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(touchPointX, touchPointY)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "stylus touch down is editable.");
+            isNeedInterceptedTouchEvent_ = true;
+            WebRequestFocus();
+            return;
+        }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
@@ -3733,6 +3742,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = true;
     UninitTouchEventListener();
+    if (isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN) {
+        isNeedInterceptedTouchEvent_ = false;
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -3930,6 +3943,7 @@ void WebPattern::OnSelectHandleMove(const RectF& handleRect, bool isFirst)
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 {
+    CHECK_EQUAL_VOID(isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN, true);
     if (isDragging_) {
         return;
     }
@@ -3987,6 +4001,10 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
     UninitTouchEventListener();
+    if (isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN) {
+        isNeedInterceptedTouchEvent_ = false;
+        return;
+    }
     if (IsRootNeedExportTexture()) {
         HandleTouchUp(info, false);
     }

@@ -1213,6 +1213,10 @@ bool WebDelegate::IsActivePolicyDisable()
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
+bool WebDelegate::SetFocusByPosition(float x, float y)
+{
+    return false;
+}
 std::string WebDelegate::GetCurrentLanguage()
 {
     return "";

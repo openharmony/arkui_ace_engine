@@ -1581,6 +1581,14 @@ int WebDelegate::GetHitTestResult()
     return static_cast<int>(WebHitTestType::UNKNOWN);
 }
 
+bool WebDelegate::SetFocusByPosition(float x, float y)
+{
+    if (nweb_) {
+        return nweb_->SetFocusByPosition(x, y);
+    }
+    return false;
+}
+
 void WebDelegate::GetHitTestValue(HitTestResult& result)
 {
     if (nweb_) {
