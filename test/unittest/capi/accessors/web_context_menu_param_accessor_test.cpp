@@ -78,67 +78,67 @@ HWTEST_F(WebContextMenuParamAccessorTest, yTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_getLinkUrlTest
+ * @tc.name: getLinkUrlTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebContextMenuParamAccessorTest, DISABLED_getLinkUrlTest, TestSize.Level1)
+HWTEST_F(WebContextMenuParamAccessorTest, getLinkUrlTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getLinkUrl, nullptr);
 
     std::string value = "value";
 
     EXPECT_CALL(*mockHandler_, GetLinkUrl()).Times(1).WillOnce(Return(value));
-    // should return value
-    accessor_->getLinkUrl(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getLinkUrl(peer_)), value);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getLinkUrl(nullptr)), "");
 }
 
 /**
- * @tc.name: DISABLED_getUnfilteredLinkUrlTest
+ * @tc.name: getUnfilteredLinkUrlTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebContextMenuParamAccessorTest, DISABLED_getUnfilteredLinkUrlTest, TestSize.Level1)
+HWTEST_F(WebContextMenuParamAccessorTest, getUnfilteredLinkUrlTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getUnfilteredLinkUrl, nullptr);
 
     std::string value = "value";
 
     EXPECT_CALL(*mockHandler_, GetUnfilteredLinkUrl()).Times(1).WillOnce(Return(value));
-    // should return value
-    accessor_->getUnfilteredLinkUrl(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getUnfilteredLinkUrl(peer_)), value);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getUnfilteredLinkUrl(nullptr)), "");
 }
 
 /**
- * @tc.name: DISABLED_getSourceUrlTest
+ * @tc.name: getSourceUrlTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebContextMenuParamAccessorTest, DISABLED_getSourceUrlTest, TestSize.Level1)
+HWTEST_F(WebContextMenuParamAccessorTest, getSourceUrlTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSourceUrl, nullptr);
 
     std::string value = "value";
 
     EXPECT_CALL(*mockHandler_, GetSourceUrl()).Times(1).WillOnce(Return(value));
-    // should return value
-    accessor_->getSourceUrl(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getSourceUrl(peer_)), value);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getSourceUrl(nullptr)), "");
 }
 
 /**
- * @tc.name: DISABLED_getSelectionTextTest
+ * @tc.name: getSelectionTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebContextMenuParamAccessorTest, DISABLED_getSelectionTextTest, TestSize.Level1)
+HWTEST_F(WebContextMenuParamAccessorTest, getSelectionTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSelectionText, nullptr);
 
     std::string value = "value";
 
     EXPECT_CALL(*mockHandler_, GetSelectionText()).Times(1).WillOnce(Return(value));
-    // should return value
-    accessor_->getSelectionText(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getSelectionText(peer_)), value);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getSelectionText(nullptr)), "");
 }
 
 /**
@@ -180,51 +180,48 @@ HWTEST_F(WebContextMenuParamAccessorTest, isEditableTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_getMediaTypeTest
+ * @tc.name: getMediaTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebContextMenuParamAccessorTest, DISABLED_getMediaTypeTest, TestSize.Level1)
+HWTEST_F(WebContextMenuParamAccessorTest, getMediaTypeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getMediaType, nullptr);
 
-    int value = 7;
+    int value = 1;
 
     EXPECT_CALL(*mockHandler_, GetMediaType()).Times(1).WillOnce(Return(value));
-    // should return value
-    accessor_->getMediaType(peer_);
+    EXPECT_EQ(accessor_->getMediaType(peer_), ARK_CONTEXT_MENU_MEDIA_TYPE_IMAGE);
 }
 
 /**
- * @tc.name: DISABLED_getSourceTypeTest
+ * @tc.name: getSourceTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebContextMenuParamAccessorTest, DISABLED_getSourceTypeTest, TestSize.Level1)
+HWTEST_F(WebContextMenuParamAccessorTest, getSourceTypeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSourceType, nullptr);
 
-    int value = 8;
+    int value = 2;
 
     EXPECT_CALL(*mockHandler_, GetSourceType()).Times(1).WillOnce(Return(value));
-    // should return value
-    accessor_->getSourceType(peer_);
+    EXPECT_EQ(accessor_->getSourceType(peer_), ARK_CONTEXT_MENU_SOURCE_TYPE_LONG_PRESS);
 }
 
 /**
- * @tc.name: DISABLED_getInputFieldTypeTest
+ * @tc.name: getInputFieldTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebContextMenuParamAccessorTest, DISABLED_getInputFieldTypeTest, TestSize.Level1)
+HWTEST_F(WebContextMenuParamAccessorTest, getInputFieldTypeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getInputFieldType, nullptr);
 
-    int value = 9;
+    int value = 5;
 
     EXPECT_CALL(*mockHandler_, GetInputFieldType()).Times(1).WillOnce(Return(value));
-    // should return value
-    accessor_->getInputFieldType(peer_);
+    EXPECT_EQ(accessor_->getInputFieldType(peer_), ARK_CONTEXT_MENU_INPUT_FIELD_TYPE_OTHER);
 }
 
 /**
