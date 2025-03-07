@@ -444,6 +444,7 @@ WebPattern::~WebPattern()
         pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
     }
     HideMagnifier();
+    OnTooltip("");
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
