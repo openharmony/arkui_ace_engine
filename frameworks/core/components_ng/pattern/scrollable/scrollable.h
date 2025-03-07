@@ -540,11 +540,6 @@ public:
     {
         isCrownEventDragging_ = draging;
     }
-
-    void SetReachBoundary(bool flag)
-    {
-        reachBoundary_ = flag;
-    }
 #endif
 
     void SetOverScrollOffsetCallback(std::function<double()> overScrollOffsetCallback)

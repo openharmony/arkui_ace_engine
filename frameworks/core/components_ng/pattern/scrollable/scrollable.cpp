@@ -79,9 +79,6 @@ constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.00025f;
 
-constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
-constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
 constexpr float CROWN_START_FRICTION_VELOCITY_THRESHOLD = 6.0f;
 #else
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
@@ -316,16 +313,13 @@ void Scrollable::HandleCrownEvent(const CrownEvent& event, const OffsetF& center
 
     switch (event.action) {
         case CrownAction::BEGIN:
-            reachBoundary_ = false;
             crownEventNum_ = 0;
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->BEGIN]");
             HandleCrownActionBegin(event.timeStamp, mainDelta, info);
-            StartVibrateFeedback();
             break;
         case CrownAction::UPDATE:
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->UPDATE]");
             HandleCrownActionUpdate(event.timeStamp, mainDelta, info);
-            StartVibrateFeedback();
             break;
         case CrownAction::END:
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->END]");
@@ -407,19 +401,6 @@ void Scrollable::HandleCrownActionCancel(GestureEvent& info)
         });
     isDragging_ = false;
     isCrownDragging_ = false;
-}
-
-void Scrollable::StartVibrateFeedback()
-{
-    if (!GetCrownEventDragging()) {
-        return;
-    }
-    crownEventNum_ = (reachBoundary_ ? 0 : (crownEventNum_ + 1));
-    if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
-    } else if (reachBoundary_) {
-        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-    }
 }
 #endif
 

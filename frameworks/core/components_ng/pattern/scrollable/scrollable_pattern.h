@@ -750,14 +750,6 @@ public:
         CHECK_NULL_RETURN(scrollable, false);
         return scrollable->GetCrownEventDragging();
     }
-
-    void SetReachBoundary(bool flag)
-    {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID(scrollable);
-        scrollable->SetReachBoundary(flag);
-    }
 #endif
 
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,

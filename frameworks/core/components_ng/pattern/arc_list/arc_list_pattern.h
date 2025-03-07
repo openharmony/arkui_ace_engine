@@ -108,10 +108,6 @@ private:
     {
         return ScrollAlign::CENTER;
     }
-    void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) override;
-#ifdef SUPPORT_DIGITAL_CROWN
-    void StartVibrator(bool bEdge);
-#endif
 
     RefPtr<FrameNode> header_ = nullptr;
     int32_t scrollStartMidIndex_ = -1;
