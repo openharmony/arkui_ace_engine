@@ -321,6 +321,12 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
     RefPtr<NG::NavDestinationGroupNode> desNode;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     int32_t errorCode = LoadDestination(name, param, customNode, targetNode, desNode);
+    if (errorCode == ERROR_CODE_NO_ERROR && desNode) {
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        if (navDestinationPattern) {
+            SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
+        }
+    }
     // isRemove true, set destination info, false, current destination create failed
     bool isRemove = RemoveDestinationIfNeeded(pathInfo, errorCode, index);
     if (!isRemove) {
