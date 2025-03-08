@@ -4026,6 +4026,7 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_003, TestSize.Level1
     endHandleone->GetViewPortX();
     endHandleone->GetViewPortY();
     endHandleone->GetEdgeHeight();
+    bool isNewAvoid = true;
     overlay.ComputeClippedSelectionBounds(paramsone, startHandleone, endHandleone, isNewAvoid);
     EXPECT_EQ(isNewAvoid, true);
     MockPipelineContext::TearDown();
@@ -4076,6 +4077,7 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_004, TestSize.Level1
     endHandletwo->GetViewPortY();
     startHandletwo->GetX();
     startHandletwo->GetY();
+    bool isNewAvoid = true;
     overlay.ComputeClippedSelectionBounds(paramstwo, startHandletwo, endHandletwo, isNewAvoid);
     EXPECT_EQ(isNewAvoid, true);
     MockPipelineContext::TearDown();
