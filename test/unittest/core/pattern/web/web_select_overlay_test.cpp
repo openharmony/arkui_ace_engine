@@ -3981,7 +3981,31 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_002, TestSize.Level1
     overlay.ComputeClippedSelectionBounds(params, startHandle, endHandle, isNewAvoid);
     EXPECT_EQ(isNewAvoid, true);
     MockPipelineContext::TearDown();
+#endif
+}
 
+/**
+ * @tc.name: ComputeClippedSelectionBound_003
+ * @tc.desc: Test ComputeClippedSelectionBounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    WebSelectOverlay overlay(webPattern);
     MockPipelineContext::SetUp();
     auto pipelineone = PipelineContext::GetCurrentContext();
     auto themeone = AceType::MakeRefPtr<MockThemeManager>();
@@ -4005,7 +4029,32 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_002, TestSize.Level1
     overlay.ComputeClippedSelectionBounds(paramsone, startHandleone, endHandleone, isNewAvoid);
     EXPECT_EQ(isNewAvoid, true);
     MockPipelineContext::TearDown();
+#endif
+}
 
+
+/**
+ * @tc.name: ComputeClippedSelectionBound_004
+ * @tc.desc: Test ComputeClippedSelectionBounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    WebSelectOverlay overlay(webPattern);
     MockPipelineContext::SetUp();
     auto pipelinetwo = PipelineContext::GetCurrentContext();
     auto themetwo = AceType::MakeRefPtr<MockThemeManager>();
@@ -4034,11 +4083,11 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_002, TestSize.Level1
 }
 
 /**
- * @tc.name: ComputeClippedSelectionBound_003
+ * @tc.name: ComputeClippedSelectionBound_005
  * @tc.desc: Test ComputeClippedSelectionBounds.
  * @tc.type: FUNC
  */
-HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_003, TestSize.Level1)
+HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -4086,11 +4135,11 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_003, TestSize.Level1
 }
 
 /**
- * @tc.name: ComputeClippedSelectionBounds004
+ * @tc.name: ComputeClippedSelectionBounds006
  * @tc.desc: ComputeClippedSelectionBounds.
  * @tc.type: FUNC
  */
-HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBounds004, TestSize.Level1)
+HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBounds006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -5024,4 +5073,4 @@ HWTEST_F(WebSelectOverlayTest, OnHandleGlobalTouchEvent_001, TestSize.Level1)
     touchType = TouchType::UNKNOWN;
     overlay.OnHandleGlobalTouchEvent(sourceType, touchType);
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG

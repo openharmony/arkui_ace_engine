@@ -646,7 +646,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_accessibility_property_test_ng.cpp",
     "web_content_modifier_test.cpp",
     "web_context_select_overlay_test.cpp",
-    "web_select_overlay_test.cpp",
     "web_layout_algorithm_test.cpp",
     "web_model_test_ng.cpp",
     "web_paint_method_test.cpp",
@@ -667,6 +666,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_pattern_touch_test_ng.cpp",
     "web_pattern_web_test_ng.cpp",
     "web_pattern_window_test_ng.cpp",
+    "web_select_overlay_test.cpp",
   ]
 
   deps = [
