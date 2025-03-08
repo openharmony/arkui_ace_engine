@@ -476,35 +476,19 @@ void MovingPhotoPattern::ResetMediaPlayer()
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (isRefreshMovingPhoto_ && isUsedMediaPlayerStatusChanged_) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "ArkUIMovingPhotoResetMediaPlayerAsync.");
-        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        bgTaskExecutor.PostTask(
-            [weak = WeakClaim(RawPtr(mediaPlayer_)), fd = fd_] {
-                auto mediaPlayer = weak.Upgrade();
-                CHECK_NULL_VOID(mediaPlayer);
-                mediaPlayer->ResetMediaPlayer();
-                if (!mediaPlayer->SetSourceByFd(fd)) {
-                    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer Async failed.");
-                }
+    mediaPlayer_->ResetMediaPlayer();
+    RegisterMediaPlayerEvent();
+    if (!mediaPlayer_->SetSourceByFd(fd_)) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->instanceId_);
+                pattern->FireMediaPlayerError();
             },
-            "ArkUIMovingPhotoResetMediaPlayerAsync");
-    } else {
-        mediaPlayer_->ResetMediaPlayer();
-        RegisterMediaPlayerEvent();
-        if (!mediaPlayer_->SetSourceByFd(fd_)) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
-            auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
-                [weak = WeakClaim(this)] {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    ContainerScope scope(pattern->instanceId_);
-                    pattern->FireMediaPlayerError();
-                },
-                "ArkUIMovingPhotoResetMediaPlayer");
-            return;
-        }
+            "ArkUIMovingPhotoResetMediaPlayer");
     }
 }
 
