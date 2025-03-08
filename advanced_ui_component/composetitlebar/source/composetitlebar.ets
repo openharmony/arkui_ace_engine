@@ -17,7 +17,7 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import window from '@ohos.window';
 import common from '@ohos.app.ability.common';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
+import hilog from '@ohos.hilog';
 
 export interface ComposeTitleBarMenuItem {
   value: ResourceStr;
@@ -473,7 +473,11 @@ struct ImageMenuItem {
     } else {
       let resourceString: string = '';
       try {
-        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+        if (resource.id === -1 ) {
+          resourceString = getContext()?.resourceManager?.getStringByNameSync(resource.params?.[0].split('.').pop());
+        } else {
+          resourceString = getContext()?.resourceManager?.getStringSync(resource);
+        }
       } catch (err) {
         let code: number = (err as BusinessError)?.code;
         let message: string = (err as BusinessError)?.message;
