@@ -1452,6 +1452,11 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
     return index < info_.startIndex_ - cacheCount || index > info_.endIndex_ + cacheCount;
 }
 
+bool GridPattern::IsPredictInRange(int32_t index) const
+{
+    return index >= info_.startIndex_ && index <= info_.endIndex_;
+}
+
 inline bool GridPattern::UseIrregularLayout() const
 {
     return irregular_ || (SystemProperties::GetGridIrregularLayoutEnabled() &&
@@ -1562,6 +1567,7 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ColumnsTemplate", property->GetColumnsTemplate()->c_str());
     json->Put("CachedCount",
         property->GetCachedCount().has_value() ? std::to_string(property->GetCachedCount().value()).c_str() : "null");
+    json->Put("ShowCache", std::to_string(property->GetShowCachedItemsValue(false)).c_str());
     json->Put("MaxCount",
         property->GetMaxCount().has_value() ? std::to_string(property->GetMaxCount().value()).c_str() : "null");
     json->Put("MinCount",
