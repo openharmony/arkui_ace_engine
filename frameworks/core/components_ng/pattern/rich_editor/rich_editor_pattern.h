@@ -805,7 +805,7 @@ public:
         if (!customKeyboardBuilder_ && keyboardBuilder) {
             // close system keyboard and request custom keyboard
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-            if (imeShown_) {
+            if (isEditing_) {
                 CloseKeyboard(true);
                 customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
                 RequestKeyboard(false, true, true);
