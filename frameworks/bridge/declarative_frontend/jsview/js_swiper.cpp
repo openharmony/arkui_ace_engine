@@ -533,6 +533,10 @@ std::optional<Dimension> JSSwiper::ParseIndicatorBottom(const JSRef<JSVal>& bott
     } else {
         CalcDimension dimBottom;
         bool parseOk = ParseLengthMetricsToDimension(bottomValue, dimBottom);
+        if (!parseOk) {
+            bottom = ParseIndicatorDimension(bottomValue);
+            return bottom;
+        }
         dimBottom = parseOk && dimBottom.ConvertToPx() >= 0.0f ? dimBottom : 0.0_vp;
         return dimBottom;
     }
@@ -583,7 +587,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
     swiperParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
  
-    auto parseSpaceOk = ParseLengthMetricsToDimension(spaceValue, dimSpace) &&
+    auto parseSpaceOk = ParseSpace(spaceValue, dimSpace) &&
         (dimSpace.Unit() !=  DimensionUnit::PERCENT) ;
     auto defalutSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     swiperParameters.dimSpace =  (parseSpaceOk && !(dimSpace < 0.0_vp)) ? dimSpace : defalutSpace;
@@ -658,6 +662,28 @@ bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDi
     return false;
 }
 
+bool JSSwiper::ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+
+    return false;
+}
+
 SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> dotLeftValue = obj->GetProperty("leftValue");
@@ -682,16 +708,19 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
 
     bool hasIgnoreSizeValue = setIgnoreSizeValue->IsBoolean() ? setIgnoreSizeValue->ToBoolean() : false;
-    digitalParameters.dimBottom = ParseIndicatorBottom(dotBottomValue, hasIgnoreSizeValue);
+    auto bottom = ParseIndicatorBottom(dotBottomValue, hasIgnoreSizeValue);
+    digitalParameters.dimBottom = bottom;
     std::optional<Dimension> indicatorDimension;
     CalcDimension dimStart;
     CalcDimension dimEnd;
     digitalParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
     digitalParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
-    
+
     if (ignoreSizeValue->IsBoolean()) {
         auto ignoreSize = ignoreSizeValue->ToBoolean();
         digitalParameters.ignoreSizeValue = ignoreSize;
+    } else {
+        digitalParameters.ignoreSizeValue = false;
     }
 
     Color fontColor;
