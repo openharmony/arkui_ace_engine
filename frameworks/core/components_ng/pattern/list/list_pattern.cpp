@@ -2510,7 +2510,7 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     }
     float overOffset = 0.0f;
     if (!itemPosition_.empty()) {
-        auto res = GetOutBoundaryOffset(-dragOffset, false);
+        auto res = GetOutBoundaryOffset(0.0f, true);
         overOffset = std::max(res.start, res.end);
         if (!NearZero(res.end)) {
             overOffset = -overOffset;
