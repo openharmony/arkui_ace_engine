@@ -2559,8 +2559,8 @@ frameworks/core/components_ng/property/property.cpp @arkuievent
 frameworks/core/components_ng/property/property.h @arkuievent
 frameworks/core/components_ng/property/safe_area_insets.cpp @arkuilayout
 frameworks/core/components_ng/property/safe_area_insets.h @arkuilayout
-frameworks/core/components_ng/property/templates_parser.cpp @arkuievent
-frameworks/core/components_ng/property/templates_parser.h @arkuievent
+frameworks/core/components_ng/property/templates_parser.cpp @arkuiscroll
+frameworks/core/components_ng/property/templates_parser.h @arkuiscroll
 frameworks/core/components_ng/property/transition_property.h @arkui_superman
 frameworks/core/components_ng/render/adapter/animated_image.cpp @arkui_image
 frameworks/core/components_ng/render/adapter/animated_image.h @arkui_image
