@@ -1217,16 +1217,15 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
         spanNode->MountToParent(host);
     }
-    UpdateSpanNode(spanNode, options);
     auto textStyle = options.style;
     if (options.urlAddress.has_value() && options.useThemeFontColor && textStyle.has_value()) {
         textStyle.value().SetTextColor(GetUrlSpanColor());
     }
     auto spanItem = spanNode->GetSpanItem();
-    spanItem->content = options.value;
     spanItem->SetTextStyle(textStyle);
     spanItem->useThemeFontColor = options.useThemeFontColor;
     spanItem->useThemeDecorationColor = options.useThemeDecorationColor;
+    UpdateSpanNode(spanNode, options);
     AddSpanItem(spanItem, offset);
     if (!options.style.has_value()) {
         SetDefaultColor(spanNode);
@@ -1250,24 +1249,24 @@ int32_t RichEditorPattern::AddTextSpanOperation(
 void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options)
 {
     spanNode->UpdateContent(options.value);
+    if (options.style.has_value()) {
+        const TextStyle& textStyle = options.style.value();
+        spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
+        spanNode->UpdateFontSize(textStyle.GetFontSize());
+        spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
+        spanNode->UpdateFontWeight(textStyle.GetFontWeight());
+        spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
+        spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
+        spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
+        spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
+        spanNode->UpdateTextShadow(textStyle.GetTextShadows());
+        spanNode->UpdateHalfLeading(textStyle.GetHalfLeading());
+        spanNode->UpdateLineHeight(textStyle.GetLineHeight());
+        spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
+        spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
+        UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
+    }
     UpdateUrlStyle(spanNode, options.urlAddress);
-
-    CHECK_NULL_VOID(options.style.has_value());
-    TextStyle textStyle = options.style.value();
-    spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
-    spanNode->UpdateFontSize(textStyle.GetFontSize());
-    spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
-    spanNode->UpdateFontWeight(textStyle.GetFontWeight());
-    spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
-    spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
-    spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
-    spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
-    spanNode->UpdateTextShadow(textStyle.GetTextShadows());
-    spanNode->UpdateHalfLeading(textStyle.GetHalfLeading());
-    spanNode->UpdateLineHeight(textStyle.GetLineHeight());
-    spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
-    spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
-    UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
 }
 
 void RichEditorPattern::UpdateTextBackgroundStyle(
