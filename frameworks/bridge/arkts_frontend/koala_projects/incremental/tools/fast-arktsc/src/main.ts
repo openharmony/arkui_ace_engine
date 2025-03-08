@@ -177,7 +177,7 @@ function mainAot(abc: string) {
     let sdk = options.sdk ?? path.resolve(path.join(__dirname, '..', '..', 'panda', 'node_modules', '@panda', 'sdk'))
     let aot = path.join(sdk, archDir(), 'bin', 'ark_aot')
     let stdlib = path.resolve(path.join(sdk, "ets", "etsstdlib.abc"))
-    const aotLibs = abc.indexOf("etsstdlib") == -1 ? [stdlib] : []
+    const aotLibs = [stdlib]
     if (options.aotLibs) aotLibs.push(... options.aotLibs.split(","))
     let args: string[] = []
     if (process.platform == "darwin") {
@@ -185,17 +185,15 @@ function mainAot(abc: string) {
         args.push(aot)
         aot = "echo"
     }
-    let dir = options.outputDir ?? path.dirname(abc)
-    let result = path.join(dir, path.basename(abc).replace('.abc', '.an'))
+    let result = abc.replace('.abc', '.an')
     args.push(... options.aotTarget ? [`--compiler-cross-arch=${options.aotTarget}`] : [])
     args.push(... [
         `--load-runtimes=ets`,
-        `--boot-panda-files=${aotLibs.map(it => path.resolve(it)).concat(abc).join(':')}`,
+        `--boot-panda-files=${aotLibs.join(':')}:${abc}`,
         `--paoc-panda-files=${abc}`,
         `--paoc-output=${result}`
     ])
-    console.log(`AOT compile ${abc} to ${result}...`)
-    console.log(`Launch ${aot} ${args.join(" ")}`)
+    console.log(`AOT compile ${abc}...`)
     const child = child_process.spawn(aot, args)
     child.stdout.on('data', (data) => {
         process.stdout.write(data);

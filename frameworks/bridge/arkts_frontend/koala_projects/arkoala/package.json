@@ -23,7 +23,7 @@
         "../arkoala-arkts/arkui"
     ],
     "devDependencies": {
-        "@koalaui/ets-tsc": "4.9.5-r4",
+        "@koalaui/ets-tsc": "file:../incremental/tools/ets-tsc",
         "typescript": "4.9.5",
         "bin-links": "^4.0.4",
         "read-package-json-fast": "^3.0.2",

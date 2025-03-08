@@ -441,8 +441,8 @@ KVMDeferred* CreateDeferred(KVMContext vmContext, KVMObjectHandle* promiseHandle
 
 class KoalaWork {
 private:
-    InteropVMContext vmContext;
-    void* vmWork;
+    [[maybe_unused]] InteropVMContext vmContext;
+    [[maybe_unused]] void* vmWork;
     void* handle;
     void (*execute)(void* handle);
     void (*complete)(void* handle);

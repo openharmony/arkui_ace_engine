@@ -102,11 +102,8 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_hour.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_minute.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_second.png" desc="自研的二进制图片"/>
-                <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/arkoala/arm32/arkoala.abc" desc="自研的前端框架资源，临时测试使用"/>
-                <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/arkoala/arm32/libArkoalaNative_ark.so" desc="自研的前端框架资源，临时测试使用"/>
-                <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/arkoala/arm64/arkoala.abc" desc="自研的前端框架资源，临时测试使用"/>
+                <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/arkoala/arkoala.abc" desc="自研的前端框架资源，临时测试使用"/>
                 <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/koala_projects/.*" desc="自研的前端框架资源，临时测试使用"/>
-                <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/arkoala/arm64/libArkoalaNative_ark.so" desc="自研的前端框架资源，临时测试使用"/>
                 <filteritem type="filepath" name="examples/components/entry/src/main/resources/base/media/startIcon.png" desc="检视应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/components/entry/src/main/resources/base/media/foreground.png" desc="检视应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/components/entry/src/main/resources/base/media/background.png" desc="检视应用工程自带的二进制图片"/>

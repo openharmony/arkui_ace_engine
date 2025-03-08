@@ -16,8 +16,8 @@
         "../interop"
     ],
     "devDependencies": {
-        "@koalaui/ets-tsc": "4.9.5-r4",
-        "@koalaui/fast-arktsc": "next",
+        "@koalaui/fast-arktsc": "file:../incremental/tools/fast-arktsc",
+        "@koalaui/ets-tsc": "file:../incremental/tools/ets-tsc",
         "@types/chai": "^4.3.1",
         "@types/mocha": "^9.1.0",
         "bin-links": "^4.0.4",

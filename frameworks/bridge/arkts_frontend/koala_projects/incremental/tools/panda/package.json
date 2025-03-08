@@ -3,12 +3,12 @@
     "private": true,
     "scripts": {
         "panda:sdk:check-install": "npm ls @panda/sdk || npm run panda:sdk:install",
-        "panda:sdk:install": "npm install --prefix . --no-save @panda/sdk@${PANDA_SDK_VERSION:-next}",
+        "panda:sdk:install": "npm install --prefix .",
         "panda:sdk:clean": "rimraf ./node_modules",
         "panda:sdk:build": "node ./build_panda_sdk.mjs --panda-sdk-dir=./node_modules/@panda/sdk/ --arkcompiler-build-dir=$HOME/arkcompiler --runtime-git-rev=a6704b6a --frontend-git-rev=c2166bf1 --frontend-git-patches=./fix_es2panda_1.patch:./fix_normalizing_source_paths.patch",
         "panda:sdk:sync": "node ./sync-panda-on-device.mjs"
     },
     "dependencies": {
-        "@panda/sdk": "^1.5.0-dev.17937"
+        "@panda/sdk": "file:./panda-sdk-1.5.0-dev.21851.tgz"
     }
 }

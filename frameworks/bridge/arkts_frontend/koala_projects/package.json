@@ -16,6 +16,7 @@
     "arkoala:plugin": "npm run plugins:compile && cd arkoala/tools/arkoala-transformer && npx rollup -c && cp -f arkoala-plugin.js ../../../arkoala/ohos-sdk/ohos-sdk/HarmonyOS-NEXT-DB1/openharmony/ets/build-tools/ets-loader/lib/fast_build/ets_ui",
     "arkoala:har": "npm run all --prefix arkoala/har",
     "arkoala:har-arm64": "npm run arkoala:har",
-    "arkoala:har-arm32": "npm run all-arm32 --prefix arkoala/har"
+    "arkoala:har-arm32": "npm run all-arm32 --prefix arkoala/har",
+    "arkoala:abc": "npm run build:arkoala --prefix arkoala-arkts"
   }
 }
