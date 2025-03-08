@@ -172,6 +172,7 @@ public:
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
     bool IsClickable() const;
+    bool IsComponentClickable() const;
     bool IsUserClickable() const;
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
